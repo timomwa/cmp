@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/SMS/!svn/ver/382/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans
+END
+Answer.java
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/Answer.java
+END
+RequestObject.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/SMS/!svn/ver/363/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/RequestObject.java
+END
+BroadcastType.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/BroadcastType.java
+END
+Language.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/Language.java
+END
+Subscriber.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/Subscriber.java
+END
+Question.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/Question.java
+END
+CelcomMessageLog.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/CelcomMessageLog.java
+END
+TriviaLogRecord.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/TriviaLogRecord.java
+END
+MessageType.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/SMS/!svn/ver/382/Celcom_SMS_Platform/src/com/inmobia/axiata/web/beans/MessageType.java
+END

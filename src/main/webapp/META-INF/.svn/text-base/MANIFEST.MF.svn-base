@@ -1,0 +1,3 @@
+META-INF/MANIFEST.MF:
+   Manifest-Version: 1.0
+   Class-Path: libs/saaj-api.jar libs/saaj-impl.jar

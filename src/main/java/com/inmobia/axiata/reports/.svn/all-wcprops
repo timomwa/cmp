@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/SMS/!svn/ver/382/Celcom_SMS_Platform/src/com/inmobia/axiata/reports
+END
+ReportGenerator.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/SMS/!svn/ver/382/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/ReportGenerator.java
+END
+DailyReport.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/SMS/!svn/ver/373/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/DailyReport.java
+END
+MailSender.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/SMS/!svn/ver/372/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/MailSender.java
+END
+ReportDTO.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/SMS/!svn/ver/380/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/ReportDTO.java
+END
+Emailer.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/Emailer.java
+END
+PropertyLoader.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/PropertyLoader.java
+END
+TriviaFullReport.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/SMS/!svn/ver/372/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/TriviaFullReport.java
+END
+Report.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/SMS/!svn/ver/382/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/Report.java
+END
+DAO.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/SMS/!svn/ver/380/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/DAO.java
+END
+Utils.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/SMS/!svn/ver/380/Celcom_SMS_Platform/src/com/inmobia/axiata/reports/Utils.java
+END
