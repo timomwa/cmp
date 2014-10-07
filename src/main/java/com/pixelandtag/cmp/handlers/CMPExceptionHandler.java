@@ -36,8 +36,7 @@ public class CMPExceptionHandler implements ExceptionHandler {
 	           throw new StripesServletException(throwable);
 	     }
 		 throwable.printStackTrace();
-		logger.info("throwable.getMessage(): "+throwable.getCause());
-		logger.info("bean.getContext().getSourcePage() : "+bean.getContext().getSourcePage());
+		
 			request.setAttribute("exception", throwable);
 			request.setAttribute("msg", "Problem occurred");
 			request.getRequestDispatcher("WEB-INF/jsp/error.jsp").forward(request, response);

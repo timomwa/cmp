@@ -10,6 +10,7 @@
 
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@taglib prefix="ss"uri="http://stripes.sourceforge.net/stripes-security.tld" %>
 
 <%-- START:this --%>
 <%@taglib prefix="d" uri="http://displaytag.sf.net"%>

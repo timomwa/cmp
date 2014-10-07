@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.action;
 
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
@@ -11,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.pixelandtag.cmp.handlers.AppProperties;
 import com.timothy.cmp.entities.User;
 import com.timothy.cmp.persistence.CMPDao;
 
@@ -27,7 +29,7 @@ public class LoginLogoutAction extends BaseActionBean {
 	private String loginPassword;
 	
     
-	
+	@PermitAll
 	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	public Resolution login() throws JSONException {
@@ -41,6 +43,7 @@ public class LoginLogoutAction extends BaseActionBean {
 		//String resp = "";
 		JSONObject resp = new JSONObject();
 		if(user!=null){
+			getContext().getRequest().getSession().setAttribute(AppProperties.CURR_USER_OBJ_NAME, user);
 			resp.put("success", true);
 			resp.put("message", "Successful Login");
 		}else{

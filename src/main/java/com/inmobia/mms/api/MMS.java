@@ -291,9 +291,4 @@ public class MMS extends GenericMessage {
 		
 	}
 
-	
-	
-	
-	
-
 }

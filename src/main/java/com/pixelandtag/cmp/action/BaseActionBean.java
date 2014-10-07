@@ -11,7 +11,7 @@ public class BaseActionBean implements ActionBean {
 
 	private ActionBeanContext ctx;
 
-	protected CMPDao cmp_dao = CMPDao.getInstance();
+	protected CMPDao cmp_dao = CMPDao.getInstance(); 
 
 	public ActionBeanContext getContext() {
 		return ctx;

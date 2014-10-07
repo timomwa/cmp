@@ -1,3 +1,8 @@
+var INIT_PARAMS = {
+		
+		mainAPP :'mainapp.jsp'
+}
+
 Ext.onReady(function(){
     Ext.QuickTips.init();
  
@@ -45,13 +50,37 @@ Ext.onReady(function(){
 			// and when they click "OK", they are redirected to whatever page
 			// you define as redirect. 
  
-                        success:function(){ 
-                        	Ext.Msg.alert('Status', 'Login Successful!', function(btn, text){
-				   if (btn == 'ok'){
-		                        var redirect = 'mainapp.jsp'; 
-		                        window.location = redirect;
-                                   }
-			        });
+                        success:function(form, action){ 
+                        	
+                        	 var resp = Ext.util.JSON.decode(action.response.responseText);
+                        	 
+                        	 if(resp.success==true){
+                        		 Ext.Msg.show({
+                     		        title   : 'Status',
+                     		        msg     : resp.message,
+                     		        buttons : Ext.Msg.OK,
+                     		        iconCls : 'warningMessage',
+                     		        icon : Ext.MessageBox.INFO,
+                     		        fn : function() {
+                     		        	setTimeout(function() {
+                    		 				window.location = INIT_PARAMS.mainAPP;
+                    		 			}, 1000);
+                     		        }
+                        		 });
+                        		 
+                        		
+                        	 }else{
+                        		 Ext.Msg.show({
+                        		        title   : 'Invalid Login',
+                        		        msg     : resp.message,
+                        		        buttons : Ext.Msg.OK,
+                        		        iconCls : 'warningMessage',
+                        		        icon : Ext.MessageBox.ERROR,
+                        		        fn : function() {
+                        		            
+                        		        }
+                        		 });
+                        	 }
                         },
  
 			// Failure function, see comment above re: success and failure. 
