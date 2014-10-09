@@ -1,7 +1,10 @@
 package com.pixelandtag.cmp.action;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
@@ -10,15 +13,18 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stripesstuff.plugin.security.SecurityHandler;
 
 import com.timothy.cmp.entities.User;
 import com.timothy.cmp.persistence.CMPDao;
 
+import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 
-public class LoginLogoutAction extends BaseActionBean {
+
+public class LoginLogoutAction extends BaseActionBean  {
 	
 	private static final String VIEW = "/WEB-INF/jsp/login.jsp";
 	private Logger logger = Logger.getLogger(LoginLogoutAction.class);
@@ -27,7 +33,17 @@ public class LoginLogoutAction extends BaseActionBean {
 	private String loginPassword;
 	
     
+	@RolesAllowed("administrator")
+	public Resolution testRoles() throws JSONException{
+		JSONObject resp = new JSONObject();
+		resp.put("success", true);
+		resp.put("message", "Succeeded");
+		return  sendResponse("{}");
+	}
 	
+	
+	
+	@PermitAll
 	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	public Resolution login() throws JSONException {
@@ -76,6 +92,11 @@ public class LoginLogoutAction extends BaseActionBean {
 	public void setLoginPassword(String loginPassword) {
 		this.loginPassword = loginPassword;
 	}
+
+
+
+	
+
 	
 	
 	

@@ -1,10 +1,13 @@
 package com.timothy.cmp.entities;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -14,6 +17,9 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	
+	@ManyToMany
+	private List<Role> roles;
 
 	@Column(name = "u_name")
 	private String username;
@@ -21,8 +27,15 @@ public class User {
 	@Column(name = "u_pwd")
 	private String password;
 	
-	@Column(name = "role")
-	private int role;
+	
+
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
 
 	public Long getId() {
 		return id;
@@ -48,14 +61,5 @@ public class User {
 		this.password = password;
 	}
 
-	public int getRole() {
-		return role;
-	}
-
-	public void setRole(int role) {
-		this.role = role;
-	}
-	
-	
 
 }
