@@ -15,4 +15,6 @@
 <%@taglib prefix="d" uri="http://displaytag.sf.net"%>
 <%-- END:this --%>
 
-<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+<%@taglib prefix="security" uri="http://www.stripes-stuff.org/security.tld"%>
+
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />

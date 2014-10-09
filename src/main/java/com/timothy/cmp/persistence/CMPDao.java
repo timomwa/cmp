@@ -11,7 +11,6 @@ import com.timothy.cmp.ejb.CMPResourceBeanRemote;
 
 public class CMPDao  extends BaseDao {
 	
-	
 	public static String FAIL_JSON = "{ \"response\" : \"{\"type\" : \"1\", \"message\" : \"Something went wrong :(\"}, \"}";
 	public  CMPResourceBeanRemote resource_bean = null;
 	private static CMPDao this_dao = null;

@@ -28,16 +28,24 @@
         <param-name>Extension.Packages</param-name>
         <param-value>org.stripesstuff.plugin, org.stripesstuff.plugin.security, com.samaxes.stripes.inject</param-value>
     </init-param>
+     <init-param>
+         <param-name>UnauthorizedResolutionURL</param-name>
+         <param-value>/unauthorized.jsp</param-value>
+     </init-param>
     <init-param>
         <param-name>SecurityManager.Class</param-name>
         <param-value>com.timothy.cmp.security.SecurityManagerCMP</param-value>
     </init-param>
     
     <init-param>
-    <param-name>ExceptionHandler.Class</param-name>
-    <param-value>com.pixelandtag.cmp.handlers.CMPExceptionHandler</param-value>
-</init-param>
-    
+   	 	<param-name>ExceptionHandler.Class</param-name>
+    	<param-value>com.pixelandtag.cmp.handlers.CMPExceptionHandler</param-value>
+	</init-param>
+	
+    <init-param> 
+ 		 <param-name>Interceptor.Classes</param-name> 
+  			<param-value> org.stripesstuff.plugin.security.SecurityInterceptor</param-value> 
+		</init-param> 
 	</filter>
 
 
@@ -47,12 +55,19 @@
 	<load-on-startup>1</load-on-startup>
 </servlet>
 
+
 <filter-mapping>
 	<filter-name>StripesFilter</filter-name>
 	<servlet-name>DispatcherServlet</servlet-name>
 	<dispatcher>REQUEST</dispatcher>
 	<dispatcher>FORWARD</dispatcher>
 </filter-mapping>
+
+<filter-mapping>
+     <filter-name>StripesFilter</filter-name>
+     <url-pattern>*.jsp</url-pattern>
+     <dispatcher>REQUEST</dispatcher>
+ </filter-mapping>
 
 <servlet-mapping>
 	<servlet-name>DispatcherServlet</servlet-name>
@@ -87,7 +102,7 @@
 	</servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>mainapp.jsp</welcome-file>
 	</welcome-file-list>
 
 

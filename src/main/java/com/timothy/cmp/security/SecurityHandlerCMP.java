@@ -16,7 +16,6 @@ public class SecurityHandlerCMP {//implements SecurityHandler
 	private String ACCESS_DENIED_PAGE = "/WEB-INF/jsp/access_denied.jsp";
 	//@Override
 	public Resolution handleAccessDenied(ActionBean bean, Method handler) {
-		bean.getContext().getRequest().getSession().getAttribute("user");
 		logger.info("bean.getClass() "+bean.getClass());
 		logger.info("handler.getName() "+handler.getName());
 		return new ForwardResolution(ACCESS_DENIED_PAGE);
