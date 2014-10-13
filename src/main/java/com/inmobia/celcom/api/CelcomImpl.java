@@ -2363,7 +2363,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 						
 						ticket_number_notf = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_number_notf;
 						
-						MechanicsS.insertIntoHttpToSend(mt.getSUB_C_Mobtel(), ticket_number_notf, MechanicsS.generateNextTxId(), mt.getServiceid(), 0d, mt.getSMS_SourceAddr(), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  getConn()), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword",  getConn()), false,getConn());
+						MechanicsS.insertIntoHttpToSend(mt.getSUB_C_Mobtel(), ticket_number_notf, MechanicsS.generateNextTxId(), mt.getServiceid(), 0d, mt.getShortcode(), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  getConn()), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword",  getConn()), false,getConn());
 						
 						UtilCelcom.queueIntoVoucherSystem(mt,getConn());
 					}else{
@@ -2374,7 +2374,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 						
 						ticket_number_notf = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_number_notf;
 						
-						MechanicsS.insertIntoHttpToSend(mt.getSUB_C_Mobtel(), ticket_number_notf, MechanicsS.generateNextTxId(), mt.getServiceid(), 0d, mt.getSMS_SourceAddr(), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  conn), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword", conn), false, conn);
+						MechanicsS.insertIntoHttpToSend(mt.getSUB_C_Mobtel(), ticket_number_notf, MechanicsS.generateNextTxId(), mt.getServiceid(), 0d, mt.getShortcode(), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  conn), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword", conn), false, conn);
 						
 						UtilCelcom.queueIntoVoucherSystem(mt,conn);
 					}

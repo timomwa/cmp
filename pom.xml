@@ -220,29 +220,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.timothy.loancalculator</groupId>
-			<artifactId>loan_calculator_shared</artifactId>
-			<version>1.0.0</version>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>com.timothy.loancalculator</groupId>
-			<artifactId>loan_calculator_war</artifactId>
-			<version>1.0.0</version>
-			<type>war</type>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.timothy.loancalculator</groupId>
-			<artifactId>loan_calculator_ejb</artifactId>
-			<version>1.0.0</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
 			<version>2.2.1.GA</version>
@@ -355,6 +332,30 @@
 
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<excludes>
+						<exclude>**/*.properties</exclude>
+						<exclude>**/*.xml</exclude>
+						<exclude>**/dao/*</exclude>
+						<exclude>**/action/*</exclude>
+						<exclude>**/initializers/*</exclude>
+						<exclude>**/local/*</exclude>
+						<exclude>**/ejb/*</exclude>
+					</excludes>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+				</configuration>
+				<version>2.4</version>
+
+			</plugin>
+			<plugin>
 				<groupId>org.jboss.as.plugins</groupId>
 				<artifactId>jboss-as-maven-plugin</artifactId>
 				<version>7.5.Final</version>
@@ -362,10 +363,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-
 				</configuration>
 			</plugin>
 			<plugin>

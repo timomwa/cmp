@@ -18,7 +18,7 @@ public class MTsms extends GenericMT {
 	//private String CMP_A_Keyword  = "";
 	//private String CMP_S_Keyword  = "";
 	private String SMS_Msgdata  = "";
-	private String SMS_SourceAddr;
+	private String shortcode;
 	private String SUB_DeviceType;
 	private String SUB_R_Mobtel;
 	private String SUB_C_Mobtel;
@@ -106,11 +106,11 @@ public class MTsms extends GenericMT {
 	public void setCMP_TxID(String cMP_TxID) {
 		CMP_TxID = cMP_TxID;
 	}*/
-	public String getSMS_SourceAddr() {
-		return SMS_SourceAddr;
+	public String getShortcode() {
+		return shortcode;
 	}
-	public void setSMS_SourceAddr(String sMS_SourceAddr) {
-		SMS_SourceAddr = sMS_SourceAddr;
+	public void setShortcode(String shortcode) {
+		this.shortcode = shortcode;
 	}
 	public String getSUB_DeviceType() {
 		return SUB_DeviceType;
@@ -198,7 +198,7 @@ public class MTsms extends GenericMT {
 		return "MTsms [type=" + type + ", sendFrom=" + sendFrom
 				+ ", timeStamp=" + timeStamp + ", fromAddr=" + fromAddr
 				+ ", charged=" + charged + ", SMS_Msgdata=" + SMS_Msgdata
-				+ ", SMS_SourceAddr=" + SMS_SourceAddr + ", SUB_DeviceType="
+				+ ", SMS_SourceAddr=" + shortcode + ", SUB_DeviceType="
 				+ SUB_DeviceType + ", SUB_R_Mobtel=" + SUB_R_Mobtel
 				+ ", SUB_C_Mobtel=" + SUB_C_Mobtel + ", APIType=" + APIType
 				+ ", CMP_Keyword=" + CMP_AKeyword + ", CMP_SKeyword="

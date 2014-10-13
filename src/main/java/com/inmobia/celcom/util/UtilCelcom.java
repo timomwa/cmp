@@ -1227,7 +1227,7 @@ public class UtilCelcom {
 		
 		try{
 		
-			pstmt = conn.prepareStatement("select meta_value from `celcom`.`sms_service_metadata` WHERE sms_service_id_fk=? AND meta_field=?");
+			pstmt = conn.prepareStatement("select meta_value from `"+DB+"`.`sms_service_metadata` WHERE sms_service_id_fk=? AND meta_field=?");
 			pstmt.setInt(1, serviceid);
 			pstmt.setString(2, meta_field);
 			rs = pstmt.executeQuery();
@@ -1279,7 +1279,7 @@ public class UtilCelcom {
 		
 		
 		try{
-			pstmt = conn.prepareStatement("SELECT service_name,subscriptionText,unsubscriptionText,tailText_subscribed,tailText_notsubscribed FROM `celcom`.`sms_service` WHERE id=?");
+			pstmt = conn.prepareStatement("SELECT service_name,subscriptionText,unsubscriptionText,tailText_subscribed,tailText_notsubscribed FROM `"+DB+"`.`sms_service` WHERE id=?");
 			pstmt.setInt(1, serviceid);
 			rs = pstmt.executeQuery();
 			
@@ -1366,7 +1366,7 @@ public class UtilCelcom {
 				try {
 					
 					
-						pstmt = conn.prepareStatement("insert into `celcom`.`httptosend`" +
+						pstmt = conn.prepareStatement("insert into `"+DB+"`.`httptosend`" +
 						"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,CMP_TxID) " +
 						"VALUES(?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 						////cmp_a_keyword,cmp_s_keyword
@@ -1435,7 +1435,7 @@ public class UtilCelcom {
 			ResultSet rs = null;
 			
 			try {
-				pstmt = con.prepareStatement("SELECT * FROM `celcom`.`zero_billing_list` WHERE msisdn=?", Statement.RETURN_GENERATED_KEYS);
+				pstmt = con.prepareStatement("SELECT * FROM `"+DB+"`.`zero_billing_list` WHERE msisdn=?", Statement.RETURN_GENERATED_KEYS);
 				pstmt.setString(1, msisdn);
 				rs = pstmt.executeQuery();
 				
@@ -1471,7 +1471,7 @@ public class UtilCelcom {
 			String configValue = null;
 			
 			try {
-				pstmt = conn.prepareStatement("SELECT `value` FROM `celcom`.`configuration` WHERE `key`=?", Statement.RETURN_GENERATED_KEYS);
+				pstmt = conn.prepareStatement("SELECT `value` FROM `"+DB+"`.`configuration` WHERE `key`=?", Statement.RETURN_GENERATED_KEYS);
 				pstmt.setString(1, key);
 				rs = pstmt.executeQuery();
 				
@@ -1542,7 +1542,7 @@ public class UtilCelcom {
 			int language_id = DEFAULT_LANGUAGE_ID;
 			
 			try {
-				pstmt = conn.prepareStatement("SELECT language_id FROM `celcom`.`subscriber_profile` WHERE msisdn=?", Statement.NO_GENERATED_KEYS);
+				pstmt = conn.prepareStatement("SELECT language_id FROM `"+DB+"`.`subscriber_profile` WHERE msisdn=?", Statement.NO_GENERATED_KEYS);
 				pstmt.setString(1, msisdn);
 				rs = pstmt.executeQuery();
 				
@@ -1581,7 +1581,7 @@ public class UtilCelcom {
 			PreparedStatement pstmt = null;
 			
 			try {
-				pstmt = conn.prepareStatement("INSERT INTO `celcom`.`subscriber_profile`(`msisdn`,`language_id`) VALUES(?,?) ON DUPLICATE KEY UPDATE `language_id`=?", Statement.NO_GENERATED_KEYS);
+				pstmt = conn.prepareStatement("INSERT INTO `"+DB+"`.`subscriber_profile`(`msisdn`,`language_id`) VALUES(?,?) ON DUPLICATE KEY UPDATE `language_id`=?", Statement.NO_GENERATED_KEYS);
 				pstmt.setString(1, msisdn);
 				pstmt.setInt(2, language_id);
 				pstmt.setInt(3, language_id);

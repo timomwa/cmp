@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -435,82 +437,13 @@ public class MTHttpSender implements Runnable{
 			
 			conn = getConn();
 			
-			if(mt.getCMP_Txid()!=null){
-				
-				if(!mt.getCMP_Txid().equals(MINUS_ONE)){
-					
-					if(mt.getNewCMP_Txid().equals(MINUS_ONE))
-						qparams.add(new BasicNameValuePair("CMP_Txid", mt.getCMP_Txid()));
-					else
-						qparams.add(new BasicNameValuePair("CMP_Txid", mt.getNewCMP_Txid()));
-					
-				}else{
-					
-					if(mt.getNewCMP_Txid().equals(MINUS_ONE)){
-						mt.setCMP_Txid(String.valueOf(MTProducer.generateNextTxId()));//Generate a new Transaction id instead of using the primary key of httptosend which could coflict if there are truncations.
-						qparams.add(new BasicNameValuePair("CMP_Txid", mt.getCMP_Txid()));
-						
-					}else{
-						qparams.add(new BasicNameValuePair("CMP_Txid", mt.getNewCMP_Txid()));
-					}
-				
-				}
-				
-			}else{
-				
-				qparams.add(new BasicNameValuePair("CMP_Txid",MTProducer.generateNextTxId()));//Generate a CMP_Txid from System Time
-			
-			}
-			
-			qparams.add(new BasicNameValuePair("CP_Id", urlp.getCP_Id()));
-			qparams.add(new BasicNameValuePair("CP_UserId", urlp.getCP_UserId()));
-			qparams.add(new BasicNameValuePair("CP_Password",urlp.getCP_Password()));	
-				
-			
-				if(mt.getSendFrom()!=null)
-					qparams.add(new BasicNameValuePair("SMS_SourceAddr",mt.getSendFrom()));
-				if(urlp.getSUB_DeviceType()!=null)
-					qparams.add(new BasicNameValuePair("SUB_DeviceType",urlp.getSUB_DeviceType()));
-				if(mt.getSUB_R_Mobtel()!=null)
-					qparams.add(new BasicNameValuePair("SUB_R_Mobtel",mt.getSUB_R_Mobtel()));
-				if(mt.getSUB_C_Mobtel()!=null)
-					qparams.add(new BasicNameValuePair("SUB_C_Mobtel",mt.getSUB_C_Mobtel()));
-				
-				if(mt.getType()!=null)
-					qparams.add(new BasicNameValuePair("CMP_ContentType",mt.getType().toString()));//urlp.getCMP_ContentType());
-				if(mt.getCMP_AKeyword()!=null)
-					qparams.add(new BasicNameValuePair("CMP_A_Keyword",mt.getCMP_AKeyword()));
-				
-				if(mt.getCMP_AKeyword()!=null){
-					if(UtilCelcom.isInZeroChargeList(mt.getMsisdn(),conn)){
-						mt.setCMP_SKeyword(UtilCelcom.getConfigValue(FREE_TARRIF_CODE_CMP_SKEYWORD,conn));
-						qparams.add(new BasicNameValuePair("CMP_S_Keyword",TarrifCode.RM0.getCode()));
-					}else{
-						qparams.add(new BasicNameValuePair("CMP_S_Keyword",mt.getCMP_SKeyword()));
-					}
-				}
 			
 			
-			//******************End of mandatory fields
-			
-			
-			//Not mandatory
-			if(mt.getAPIType()!=null)
-				qparams.add(new BasicNameValuePair("APIType",mt.getAPIType()));
-			
-			if(mt.getCMP_AKeyword()!=null)
-				qparams.add(new BasicNameValuePair("CMP_Keyword",mt.getCMP_AKeyword()));
-			
-			if(mt.getCMP_SKeyword()!=null){
-				if(UtilCelcom.isInZeroChargeList(mt.getMsisdn(),conn)){
-					qparams.add(new BasicNameValuePair("CMP_SKeyword",UtilCelcom.getConfigValue(FREE_TARRIF_CODE_CMP_SKEYWORD,conn)));//my msisdn  should get free content!
-				}else{
-					qparams.add(new BasicNameValuePair("CMP_SKeyword",mt.getCMP_SKeyword()));
-				}
-			}
-			
-			if(mt.getAction()!=null)
-				qparams.add(new BasicNameValuePair("ACTION",mt.getAction().toString()));
+			qparams.add(new BasicNameValuePair("login", urlp.getLogin()));
+			qparams.add(new BasicNameValuePair("pass",urlp.getPass()));	
+			qparams.add(new BasicNameValuePair("type",urlp.getType()));
+			qparams.add(new BasicNameValuePair("src",mt.getShortcode()));
+			qparams.add(new BasicNameValuePair("msisdn",mt.getMsisdn()));
 			
 			
 			watch.start();
@@ -524,31 +457,19 @@ public class MTHttpSender implements Runnable{
 				logger.debug("part msg: "+mt.getMsg_part());
 				
 				
-				//SMS_DataCodingId=8 it will be sent only for MO
-				//messages containing one or more Unicode characters
-				//if(celcomAPI.containsUnicode(mt.getSms())){
-				
-				if(mt.getSMS_DataCodingId()!=null)
-					qparams.add(new BasicNameValuePair("SMS_DataCodingId",mt.getSMS_DataCodingId()));
-				
-				//	mt.setSMS_DataCodingId(GenericMessage.NON_ASCII_SMS_ENCODING_ID);
-				//}else{
-				//	mt.setSMS_DataCodingId(GenericMessage.ASCII_SMS_ENCODING_ID);
-				//}
 				
 				if(mt.getNumber_of_sms()>1){//only on the last SMS do we actually send the whole sms...
 					
 					if(mt.getSMS_DataCodingId().equalsIgnoreCase(GenericMessage.NON_ASCII_SMS_ENCODING_ID))
-						qparams.add(new BasicNameValuePair("SMS_MsgTxt",celcomAPI.toUnicodeString(mt.getMsg_part())));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
+						qparams.add(new BasicNameValuePair("sms",celcomAPI.toUnicodeString(mt.getMsg_part())));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
 					else
-						qparams.add(new BasicNameValuePair("SMS_MsgTxt",mt.getMsg_part()));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
+						qparams.add(new BasicNameValuePair("sms",mt.getMsg_part()));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
 					
 				}else{
-					if(mt.getSMS_DataCodingId().equalsIgnoreCase(GenericMessage.NON_ASCII_SMS_ENCODING_ID))
-						qparams.add(new BasicNameValuePair("SMS_MsgTxt",celcomAPI.toUnicodeString(mt.getSms())));//URLEncoder.encode(mt.getSms(), "UTF8"));
+					if(mt.getSMS_DataCodingId()!=null && mt.getSMS_DataCodingId().equalsIgnoreCase(GenericMessage.NON_ASCII_SMS_ENCODING_ID))
+						qparams.add(new BasicNameValuePair("sms",celcomAPI.toUnicodeString(mt.getSms())));//URLEncoder.encode(mt.getSms(), "UTF8"));
 					else
-						qparams.add(new BasicNameValuePair("SMS_MsgTxt",mt.getSms()));//URLEncoder.encode(mt.getSms(), "UTF8"));
-					//qparams.add(new BasicNameValuePair("SMS_Msgdata",CelcomImpl.toHex(mt.getSms()));
+						qparams.add(new BasicNameValuePair("sms",mt.getSms()));
 				}
 				
 				
@@ -562,8 +483,8 @@ public class MTHttpSender implements Runnable{
 			
 			resEntity = response.getEntity();
 			
-	       
-	        
+			printHeader();
+			
 	        final int RESP_CODE = response.getStatusLine().getStatusCode();
 			
 			logger.debug("resp: :::::::::::::::::::::::::::::RESP_CODE["+RESP_CODE+"]:::::::::::::::::::::: resp:");
@@ -602,7 +523,7 @@ public class MTHttpSender implements Runnable{
 				
 				if(mt.getNewCMP_Txid()!=null)
 					if(!mt.getNewCMP_Txid().equals(MINUS_ONE)){
-						logger.info("mt.getSUB_R_Mobtel()="+mt.getSUB_R_Mobtel()+" ::::: MT_Sent="+mt.getSms()+":::: Shortcode="+mt.getSMS_SourceAddr()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to clear deliver SMS via HTTP");
+						logger.info("mt.getSUB_R_Mobtel()="+mt.getSUB_R_Mobtel()+" ::::: MT_Sent="+mt.getSms()+":::: Shortcode="+mt.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to clear deliver SMS via HTTP");
 					}else{
 						logger.debug("RETRY__ mt.getSUB_R_Mobtel()="+mt.getSUB_R_Mobtel()+" ::::: MT_Sent="+mt.getSms()+":::: Shortcode="+mt.getSendFrom()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to clear deliver SMS via HTTP");
 					}
@@ -788,10 +709,10 @@ public class MTHttpSender implements Runnable{
 	
 
 	private void printHeader() {
-		/*logger.debug("\n===================HEADER=========================\n");
+		logger.debug("\n===================HEADER=========================\n");
 	
 	try{
-			for(Header h : postMethod.getResponseHeaders()){
+			for(org.apache.http.Header h : httppost.getAllHeaders()){
 			
 			if(h!=null){
 				
@@ -799,7 +720,7 @@ public class MTHttpSender implements Runnable{
 				logger.debug("value: "+h.getValue());
 				
 				
-				for(HeaderElement hl : h.getElements()){
+				for(org.apache.http.HeaderElement hl : h.getElements()){
 					if(hl!=null){
 						logger.debug("\tname: "+hl.getName());
 						logger.debug("\tvalue: "+hl.getValue());
@@ -822,7 +743,7 @@ public class MTHttpSender implements Runnable{
 		logger.warn(e.getMessage(),e);
 	}
 	
-	logger.debug("\n===================HEADER END======================\n");*/
+	logger.debug("\n===================HEADER END======================\n");
 		
 	}
 

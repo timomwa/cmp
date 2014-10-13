@@ -854,7 +854,7 @@ public class MechanicsS{
 				mtsms.setId(rs.getInt("id"));
 				mtsms.setCMP_Txid(rs.getString("CMP_Txid"));
 				//mtsms.setSms(rs.getString("MO_Received"));
-				mtsms.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
+				mtsms.setShortcode(rs.getString("SMS_SourceAddr"));
 				mtsms.setSUB_R_Mobtel(rs.getString("SUB_Mobtel"));
 				mtsms.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
 				mtsms.setCMP_AKeyword(rs.getString("CMP_Keyword"));

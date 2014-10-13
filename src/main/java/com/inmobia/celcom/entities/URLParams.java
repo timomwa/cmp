@@ -21,6 +21,14 @@ public class URLParams {
 		
 		
 		
+		this.mturl=props.getProperty("mturl");
+		this.login=props.getProperty("login");
+		this.pass=props.getProperty("pass");
+		this.type=props.getProperty("type");
+		this.src=props.getProperty("src");
+		
+		
+		
 		if(props.getProperty("http_timeout")==null){
 			
 			this.http_timeout=6000;
@@ -84,12 +92,19 @@ public class URLParams {
 	private String SMS_MsgTxt;//the SMS
 	private String SUB_R_Mobtel;
 	private String SUB_C_Mobtel;
-	private String mturl;
+	
 	private int http_timeout;
 	private int retry_per_msg;
 	private int msg_part_wait;
 	private String SERVER_TZ;
 	private String CLIENT_TZ;
+	
+	/*post inmobia*/
+	private String mturl;
+	private String login;
+	private String pass;
+	private String type;
+	private String src;/*The shortcode*/
 	
 	
 	
@@ -208,17 +223,43 @@ public class URLParams {
 	public void setSUB_C_Mobtel(String sUB_C_Mobtel) {
 		SUB_C_Mobtel = sUB_C_Mobtel;
 	}
+
+	public String getLogin() {
+		return login;
+	}
+
+	public void setLogin(String login) {
+		this.login = login;
+	}
+
+	public String getPass() {
+		return pass;
+	}
+
+	public void setPass(String pass) {
+		this.pass = pass;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getSrc() {
+		return src;
+	}
+
+	public void setSrc(String src) {
+		this.src = src;
+	}
+
 	@Override
 	public String toString() {
-		return "URLParams [CMP_Txid=" + CMP_Txid + ", CP_Id=" + CP_Id
-				+ ", CP_UserId=" + CP_UserId + ", CP_Password=" + CP_Password
-				+ ", CMP_ContentType=" + CMP_ContentType + ", CMP_A_Keyword="
-				+ CMP_A_Keyword + ", CMP_S_Keyword=" + CMP_S_Keyword
-				+ ", SMS_Msgdata=" + SMS_Msgdata + ", SMS_SourceAddr="
-				+ SMS_SourceAddr + ", SUB_DeviceType=" + SUB_DeviceType
-				+ ", SMS_MsgTxt=" + SMS_MsgTxt + ", SUB_R_Mobtel="
-				+ SUB_R_Mobtel + ", SUB_C_Mobtel=" + SUB_C_Mobtel + ", mturl="
-				+ mturl + ", http_timeout=" + http_timeout + "]";
+		return "URLParams [mturl=" + mturl + ", login=" + login + ", pass="
+				+ pass + ", type=" + type + ", src=" + src + "]";
 	}
 	
 	
