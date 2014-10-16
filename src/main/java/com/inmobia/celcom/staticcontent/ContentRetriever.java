@@ -370,7 +370,7 @@ public class ContentRetriever {
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
 				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
-				mo.setSUB_Mobtel(msisdn);
+				mo.setMsisdn(msisdn);
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());

@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.commons.codec.binary.Hex;
@@ -18,6 +20,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
+
+
+
 
 
 
@@ -99,12 +104,18 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
 	   
-	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
+	    String dbName = "pixeland_content360";// HTTPMTSenderApp.props.getProperty("DATABASE");
 	   
-	    String host =  HTTPMTSenderApp.props.getProperty("db_host");
+	    String host =  "db";//HTTPMTSenderApp.props.getProperty("db_host");
 	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
+	    String username = "pixeland_content";//HTTPMTSenderApp.props.getProperty("db_username");
+	    String password = "D13@pixelTag";//HTTPMTSenderApp.props.getProperty("db_password");
+	    
+	    logger.info("********** db dbName : "+dbName);
+	    logger.info("********** db host : "+host);
+	    logger.info("********** db url : "+url);
+	    logger.info("********** db username : "+username);
+	    logger.info("********** db password : "+password);
 	    
 	    String msg = "";
 	    
@@ -126,7 +137,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			dbpds.setMaxSize(3);
 			dbpds.setIdleTimeout(3600);  // Specified in seconds.
 		    
-			dbpds.setValidationQuery("SELECT COUNT(*) FROM `celcom`.`sms_service`");
+			dbpds.setValidationQuery("SELECT COUNT(*) FROM `"+database+"`.`sms_service`");
 			
 			logger.info("Initialized db pool ok! celcom mimpl line 131");
 			
@@ -743,7 +754,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setSMS_Message_String(rs.getString("MO_received"));
 				mo.setMt_Sent(rs.getString("MT_Sent"));
 				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
-				mo.setSUB_Mobtel(rs.getString("SUB_Mobtel"));
+				mo.setMsisdn(rs.getString("SUB_Mobtel"));
 				mo.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
 				mo.setCMPResponse(rs.getString("CMPResponse"));
 				mo.setAPIType(rs.getString("APIType"));
@@ -802,6 +813,9 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 		PreparedStatement pstmt = null;
 		
+		if(mo.getCMP_Txid()==null)
+			mo.setCMP_Txid(generateNextTxId());
+		
 		
 		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()   ["+mo.getSMS_DataCodingId()+"]");
 		logger.debug("BEFORE_LOGGING_SMS : GenericMessage.NON_ASCII_SMS_ENCODING_ID   ["+mo.getSMS_DataCodingId()+"]");
@@ -838,7 +852,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setString(1, String.valueOf(mo.getCMP_Txid()));
 			pstmt.setString(2, mo.getSMS_Message_String());
 			pstmt.setString(3, mo.getSMS_SourceAddr());
-			pstmt.setString(4, mo.getSUB_Mobtel());
+			pstmt.setString(4, mo.getMsisdn());
 			pstmt.setString(5, mo.getSMS_DataCodingId());
 			pstmt.setString(6, mo.getCMPResponse());
 			pstmt.setString(7, mo.getAPIType());
@@ -1062,10 +1076,50 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	private Connection getConn() throws SQLException, InterruptedException{
 		
 		try{
+			
+			
 				
+			Connection conn_ = null;
 			if(ds!=null){
-				return ds.getConnection();
+				
+				logger.info("************TRYIG TO GET CONN from DS**********");
+				
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				try{
+					conn_ =  ds.getConnection();
+					pstmt  = conn_.prepareStatement("select now()");
+					rs = pstmt.executeQuery();
+					
+					if(rs.next())
+						logger.info(rs.getString(1));
+					
+				}catch(Exception e){
+					
+					logger.error(e.getMessage());
+					logger.info("************ FAILED TO GET connection from ds.. trying to get DS again.. **********");
+					
+					try {
+						InitialContext initContext = new InitialContext();
+						DataSource ds_ = (DataSource) initContext.lookup("java:/cmpDS");
+						conn_ =  ds_.getConnection();
+					} catch (NamingException e1) {
+						logger.error(e.getMessage());
+					}
+				}finally{
+					try{
+						rs.close();
+					}catch(Exception e){}
+					try{
+						pstmt.close();
+					}catch(Exception e){}
+					
+				}
+				
+				return conn_;
 			}else{
+				logger.info("************ TRYING TO GET DS from CONN POOL **********");
+				System.out.println("************ TRYING TO GET DS from CONN POOL **********");
 				return getConnection();
 			}
 			
@@ -1377,10 +1431,10 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				try {
 					
-					if(conn!=null)
-						conn.close();
+				//	if(conn!=null)
+					//	conn.close();
 				
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					
 					log(e);
 				
@@ -1419,7 +1473,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	 * @param conn
 	 */
 	public void closeConnectionIfNecessary(){
-		
+		/*
 		if(this.ds!=null){//If we're using a datasource, better close the connection
 			
 			try {
@@ -1439,7 +1493,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			//we are maintaining a connection object
 			//there is no need to close the connection object
 			//pool.release();
-		}
+		}*/
 		
 	}
 
@@ -1502,7 +1556,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setSMS_Message_String(rs.getString("MO_Received"));
 				mo.setMt_Sent(rs.getString("MT_Sent"));
 				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
-				mo.setSUB_Mobtel(rs.getString("SUB_Mobtel"));
+				mo.setMsisdn(rs.getString("SUB_Mobtel"));
 				mo.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
 				mo.setCMPResponse(rs.getString("CMP_Response"));
 				mo.setAPIType(rs.getString("APIType"));
@@ -1606,7 +1660,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setSMS_Message_String(rs.getString("MO_Received"));
 				mo.setMt_Sent(rs.getString("MT_Sent"));
 				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
-				mo.setSUB_Mobtel(rs.getString("SUB_Mobtel"));
+				mo.setMsisdn(rs.getString("SUB_Mobtel"));
 				mo.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
 				mo.setCMPResponse(rs.getString("CMPResponse"));
 				mo.setAPIType(rs.getString("APIType"));
@@ -1721,7 +1775,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setString(1, mo.getSMS_Message_String());
 			pstmt.setString(2, mo.getMt_Sent());
 			pstmt.setString(3, mo.getSMS_SourceAddr());
-			pstmt.setString(4, mo.getSUB_Mobtel());
+			pstmt.setString(4, mo.getMsisdn());
 			pstmt.setString(5, mo.getCMP_AKeyword());
 			pstmt.setString(6, mo.getCMP_SKeyword());
 			

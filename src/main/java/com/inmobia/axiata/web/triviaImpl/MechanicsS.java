@@ -4010,7 +4010,7 @@ public class MechanicsS{
 						"VALUES(?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
 			
 			pstmt.setInt(1, mo.getServiceid());
-			pstmt.setString(2, mo.getSUB_Mobtel());
+			pstmt.setString(2, mo.getMsisdn());
 			pstmt.setString(3, mo.getCMP_Txid());
 			pstmt.setString(4, mo.getCMP_AKeyword());
 			pstmt.setString(5, mo.getCMP_SKeyword());

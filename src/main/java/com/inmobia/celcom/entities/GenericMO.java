@@ -19,15 +19,17 @@ public abstract class GenericMO extends GenericMessage {
 	}
 	
 	public GenericMO(HttpServletRequest request) {
-		setCMP_Txid(request.getParameter("CMP_Txid"));
-		setSMS_Message_String(request.getParameter("SMS_Message_String"));
-		setSMS_SourceAddr(request.getParameter("SMS_SourceAddr"));
-		setSUB_Mobtel(request.getParameter("SUB_Mobtel"));
-		setSMS_DataCodingId(request.getParameter("SMS_DataCodingId"));
-		setCMPResponse(request.getParameter("PCMResponse"));
-		setAPIType(request.getParameter("APIType"));
-		setCMP_AKeyword(request.getParameter("PCM_Keyword"));
-		setCMP_SKeyword(request.getParameter("PCM_SKeyword"));
+		
+		
+		//setCMP_Txid(request.getParameter("CMP_Txid"));
+		setSMS_Message_String(request.getParameter("text"));
+		setSMS_SourceAddr("32329");
+		setMsisdn(request.getParameter("msisdn"));
+		//setSMS_DataCodingId(request.getParameter("SMS_DataCodingId"));
+		//setCMPResponse(request.getParameter("PCMResponse"));
+		//setAPIType(request.getParameter("APIType"));
+		setCMP_AKeyword(getfirstWord(request.getParameter("text")));
+		setCMP_SKeyword(getfirstWord(request.getParameter("text")));
 	}
 	
 	
@@ -40,6 +42,14 @@ public abstract class GenericMO extends GenericMessage {
 	//private String CMP_Txid;
 	
 	
+	private String getfirstWord(String parameter) {
+		if(parameter!=null)
+			return parameter.split("\\s")[0];
+		return null;
+	}
+
+
+
 	/*
 	 * The keyword string entered by the subscriber
 	 * modified or not before forwarding to the CP.
@@ -62,7 +72,7 @@ public abstract class GenericMO extends GenericMessage {
      * VAS. This field can contain Celcom prefix
      * 013,019,0148,0145 or any other ported-In number 
 	 */
-	private String SUB_Mobtel;
+	private String msisdn;
 	
 	
 	/*
@@ -135,13 +145,13 @@ public abstract class GenericMO extends GenericMessage {
 	}
 
 
-	public String getSUB_Mobtel() {
-		return SUB_Mobtel;
+	public String getMsisdn() {
+		return msisdn;
 	}
 
 
-	public void setSUB_Mobtel(String sUB_Mobtel) {
-		SUB_Mobtel = sUB_Mobtel;
+	public void setMsisdn(String sUB_Mobtel) {
+		msisdn = sUB_Mobtel;
 	}
 
 
@@ -201,7 +211,7 @@ public abstract class GenericMO extends GenericMessage {
 		
 		return "GenericMO [SMS_Message_String="
 				+ SMS_Message_String + ", SMS_SourceAddr=" + SMS_SourceAddr
-				+ ", SUB_Mobtel=" + SUB_Mobtel + ", SMS_DataCodingId="
+				+ ", SUB_Mobtel=" + msisdn + ", SMS_DataCodingId="
 				+ SMS_DataCodingId + ", CMPResponse=" + CMPResponse
 				+ ", APIType=" + APIType + ", CMP_AKeyword=" + CMP_AKeyword
 				+ ", CMP_SKeyword=" + CMP_SKeyword + "] "+super.toString();

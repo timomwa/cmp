@@ -198,7 +198,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				smsmenu_level_id_fk = sess.getSmsmenu_level_id_fk();
 				language_id = sess.getLanguage_id();
 			}else{
-				language_id = UtilCelcom.getSubscriberLanguage(mo.getSUB_Mobtel(), conn);//get from db
+				language_id = UtilCelcom.getSubscriberLanguage(mo.getMsisdn(), conn);//get from db
 			}
 			
 			
@@ -233,7 +233,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				language_id = KEYWORD.equalsIgnoreCase("GIFT") ?  ENG : MAL;
 				int menu_id = 1;
 				
-				UtilCelcom.updateProfile(mo.getSUB_Mobtel(),language_id,conn);
+				UtilCelcom.updateProfile(mo.getMsisdn(),language_id,conn);
 				
 				menu_controller.updateSession(language_id,MSISDN, -1, conn);//update session to upper menu.
 				current_menu = menu_controller.getTopMenu(menu_id, language_id, conn);
@@ -517,7 +517,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				}catch(Exception e){}
 				
 				
-				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = subscription.getAllSubscribedServices(mo.getSUB_Mobtel(),conn);
+				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = subscription.getAllSubscribedServices(mo.getMsisdn(),conn);
 				
 				if(allsubscribed!=null){
 				

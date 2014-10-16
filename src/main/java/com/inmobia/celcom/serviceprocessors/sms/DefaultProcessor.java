@@ -107,7 +107,7 @@ public class DefaultProcessor extends GenericServiceProcessor {
 
 		conn = getConnection();
 
-		Subscriber sub = MechanicsS.getSubscriber(mo.getSUB_Mobtel(), conn);
+		Subscriber sub = MechanicsS.getSubscriber(mo.getMsisdn(), conn);
 		
 		try{
 			if(Boolean.valueOf(MechanicsS.getSetting("trivia_available", conn))==false){
@@ -120,7 +120,7 @@ public class DefaultProcessor extends GenericServiceProcessor {
 				
 				if(sub==null){
 					Subscriber subsc = new Subscriber();
-					subsc.setMsisdn(mo.getSUB_Mobtel());
+					subsc.setMsisdn(mo.getMsisdn());
 					subsc.setLanguage_id_(2);
 					returnd = MechanicsS.perSonalizeMessage(returnd, subsc, 0, conn);
 				}else{
@@ -144,7 +144,7 @@ public class DefaultProcessor extends GenericServiceProcessor {
 		boolean hasGotSMSDues = false;
 		
 		if(sub==null){
-			hasGotSMSDues = MechanicsS.hasUnpaidDuesToday(mo.getSUB_Mobtel(),conn);//see if they have PSAInsufficientBalance or PSANumberBarred
+			hasGotSMSDues = MechanicsS.hasUnpaidDuesToday(mo.getMsisdn(),conn);//see if they have PSAInsufficientBalance or PSANumberBarred
 		}else{
 			hasGotSMSDues = MechanicsS.hasUnpaidDuesToday(sub,conn);//see if they have PSAInsufficientBalance or PSANumberBarred
 		}

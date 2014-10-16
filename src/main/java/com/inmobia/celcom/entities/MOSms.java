@@ -12,9 +12,7 @@ public class MOSms extends GenericMO{
 
 	private static final String U_SCR = "_";
 
-	private String msisdn;
-	
-	
+
 	
 	private String mt_Sent;
 	
@@ -138,36 +136,26 @@ public class MOSms extends GenericMO{
 	}
 	
 
-	public String getMsisdn() {
-		return msisdn;
-	}
-
-	public void setMsisdn(String msisdn) {
-		this.msisdn = msisdn;
-	}
-
-
 	@Override
 	public String toString() {
-		return "MOSms [msisdn=" + msisdn + ", mt_Sent=" + mt_Sent + ", id="
-				+ id + ", timeStamp=" + timeStamp + ", mo_ack=" + mo_ack
-				+ ", mt_ack=" + mt_ack + ", MT_STATUS=" + MT_STATUS
-				+ ", attribz=" + attribz + ", getSMS_Message_String()="
-				+ getSMS_Message_String() + ", getSMS_SourceAddr()="
-				+ getSMS_SourceAddr() + ", getSUB_Mobtel()=" + getSUB_Mobtel()
-				+ ", getSMS_DataCodingId()=" + getSMS_DataCodingId()
-				+ ", getCMPResponse()=" + getCMPResponse() + ", getAPIType()="
-				+ getAPIType() + ", getCMP_AKeyword()=" + getCMP_AKeyword()
+		return "MOSms [mt_Sent=" + mt_Sent + ", id=" + id + ", timeStamp="
+				+ timeStamp + ", mo_ack=" + mo_ack + ", mt_ack=" + mt_ack
+				+ ", MT_STATUS=" + MT_STATUS + ", isSubscriptionPush="
+				+ isSubscriptionPush + ", attribz=" + attribz
+				+ ", getSMS_Message_String()=" + getSMS_Message_String()
+				+ ", getSMS_SourceAddr()=" + getSMS_SourceAddr()
+				+ ", getMsisdn()=" + getMsisdn() + ", getSMS_DataCodingId()="
+				+ getSMS_DataCodingId() + ", getCMPResponse()="
+				+ getCMPResponse() + ", getAPIType()=" + getAPIType()
+				+ ", getCMP_AKeyword()=" + getCMP_AKeyword()
 				+ ", getCMP_SKeyword()=" + getCMP_SKeyword() + ", toString()="
 				+ super.toString() + ", getPrice()=" + getPrice()
 				+ ", getProcessor_id()=" + getProcessor_id()
 				+ ", getServiceid()=" + getServiceid() + ", isSplit_msg()="
 				+ isSplit_msg() + ", getNumber_of_sms()=" + getNumber_of_sms()
 				+ ", getPriority()=" + getPriority() + ", getCMP_Txid()="
-				+ getCMP_Txid() + ", getClass()=" + getClass()
-				+ ", hashCode()=" + hashCode() + "]";
+				+ getCMP_Txid() + "]";
 	}
-	
 
 	public static MOSms clone(MOSms mo) {
 		MOSms moC = new MOSms();
@@ -187,7 +175,7 @@ public class MOSms extends GenericMO{
 		moC.setSMS_Message_String(mo.getSMS_Message_String());
 		moC.setSMS_SourceAddr(mo.getSMS_SourceAddr());
 		moC.setSplit_msg(mo.isSplit_msg());
-		moC.setSUB_Mobtel(mo.getSUB_Mobtel());
+		moC.setMsisdn(mo.getMsisdn());
 		moC.setTimeStamp(mo.getTimeStamp());
 		moC.setServiceid(mo.getServiceid());
 		
@@ -213,7 +201,7 @@ public class MOSms extends GenericMO{
 		moC.setSMS_Message_String(getSMS_Message_String());
 		moC.setSMS_SourceAddr(getSMS_SourceAddr());
 		moC.setSplit_msg(isSplit_msg());
-		moC.setSUB_Mobtel(getSUB_Mobtel());
+		moC.setMsisdn(getMsisdn());
 		moC.setTimeStamp(getTimeStamp());
 		moC.setServiceid(getServiceid());
 		

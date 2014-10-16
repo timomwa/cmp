@@ -38,8 +38,8 @@ public class RequestObject {
 		serviceid = request.getServiceid();
 		
 		
-		if (request.getSUB_Mobtel() != null)
-			msisdn = request.getSUB_Mobtel();
+		if (request.getMsisdn() != null)
+			msisdn = request.getMsisdn();
 		
 		if (request.getSMS_Message_String() != null){
 			msg = request.getSMS_Message_String().trim();

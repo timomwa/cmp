@@ -557,7 +557,7 @@ public class MTHttpSender implements Runnable{
 				
 				logger.error("\nCMP_ContentType is Null or not defined as per CMP_ContentType in above table..");
 				
-			}else if(RESP_CODE == 404){
+			}else if(RESP_CODE == 404 || RESP_CODE == 403){
 				
 				
 				mt.setCMPResponse(ERROR.PCM404.toString()); 

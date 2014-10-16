@@ -192,6 +192,7 @@ public class MOReceiver extends HttpServlet {
 			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			try {
+//				//celcomAPI = new CelcomImpl("jdbc:mysql://db/pixeland_content360?user=pixeland_content&password=D13@pixel&Tag","tasdf");
 				celcomAPI = new CelcomImpl(ds);
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);

@@ -282,7 +282,7 @@ public class UtilCelcom {
 		try {
 			String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
 			pstmt = con
-					.prepareStatement("SELECT * FROM celcom_static_content.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1");
+					.prepareStatement("SELECT * FROM "+DB+".message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1");
 			pstmt.setInt(1, language_id);
 			pstmt.setString(2, key);
 

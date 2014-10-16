@@ -139,7 +139,7 @@ public class SubscriptionWorker implements Runnable{
 					MOSms mo = new MOSms();
 					
 					mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
-					mo.setSUB_Mobtel(rs.getString("msisdn"));
+					mo.setMsisdn(rs.getString("msisdn"));
 					mo.setMsisdn(rs.getString("msisdn"));
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());

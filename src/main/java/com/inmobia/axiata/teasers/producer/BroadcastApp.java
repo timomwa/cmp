@@ -452,7 +452,7 @@ public class BroadcastApp {
 		
 		
 			mo.setServiceid(2);
-			mo.setSUB_Mobtel(sub.getMsisdn());
+			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(MechanicsS.generateNextTxId());
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0100");
@@ -555,7 +555,7 @@ public class BroadcastApp {
 			
 			String txid = MechanicsS.generateNextTxId();
 			mo.setServiceid(2);
-			mo.setSUB_Mobtel(sub.getMsisdn());
+			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(txid);
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0000");
@@ -578,7 +578,7 @@ public class BroadcastApp {
 				
 				txid = MechanicsS.generateNextTxId();
 				mo.setServiceid(2);
-				mo.setSUB_Mobtel(sub.getMsisdn());
+				mo.setMsisdn(sub.getMsisdn());
 				mo.setCMP_Txid(txid);
 				mo.setCMP_AKeyword("TRIVIA");
 				mo.setCMP_SKeyword("IOD0000");
@@ -646,7 +646,7 @@ public class BroadcastApp {
 			
 			String txid = MechanicsS.generateNextTxId();
 			mo.setServiceid(2);
-			mo.setSUB_Mobtel(sub.getMsisdn());
+			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(txid);
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0000");
