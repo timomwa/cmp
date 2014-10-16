@@ -348,7 +348,7 @@
 					</excludes>
 					<archive>
 						<manifest>
-							<addClasspath>true</addClasspath>
+							<addClasspath>false</addClasspath>
 						</manifest>
 					</archive>
 				</configuration>

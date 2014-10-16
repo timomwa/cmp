@@ -26,7 +26,7 @@
 	
 	<init-param>
         <param-name>Extension.Packages</param-name>
-        <param-value>org.stripesstuff.plugin, org.stripesstuff.plugin.security, com.samaxes.stripes.inject</param-value>
+        <param-value>org.stripesstuff.plugin,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
     </init-param>
      <init-param>
          <param-name>UnauthorizedResolutionURL</param-name>
@@ -44,7 +44,7 @@
 	
     <init-param> 
  		 <param-name>Interceptor.Classes</param-name> 
-  			<param-value> org.stripesstuff.plugin.security.SecurityInterceptor</param-value> 
+  			<param-value>org.stripesstuff.plugin.security.SecurityInterceptor</param-value> 
 		</init-param> 
 	</filter>
 

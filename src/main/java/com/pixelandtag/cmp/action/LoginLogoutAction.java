@@ -16,7 +16,6 @@ import com.pixelandtag.cmp.handlers.AppProperties;
 import com.timothy.cmp.entities.Role;
 import com.timothy.cmp.entities.User;
 
-
 public class LoginLogoutAction extends BaseActionBean  {
 	
 	public static final String VIEW = "/WEB-INF/jsp/login.jsp";

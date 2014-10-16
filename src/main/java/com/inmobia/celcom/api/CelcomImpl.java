@@ -961,7 +961,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setInt(11, mt.getNumber_of_sms());//number_of_sms
 			pstmt.setInt(12, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
 			pstmt.setInt(13, mt.getServiceid());//serviceid
-			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+			if(mt.getCMP_SKeyword()!=null && mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
 				pstmt.setDouble(14, 1.0d);//price
 			else
 				pstmt.setDouble(14, mt.getPrice());//price

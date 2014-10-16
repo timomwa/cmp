@@ -34,14 +34,5 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/timothy/.m2/repository/com/stripes/stuff/stripesstuff/1.0/stripesstuff-1.0.jar">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="maven.groupId" value="com.stripes.stuff"/>
-			<attribute name="maven.artifactId" value="stripesstuff"/>
-			<attribute name="maven.version" value="1.0"/>
-			<attribute name="maven.scope" value="compile"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

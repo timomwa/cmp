@@ -25,5 +25,7 @@ public class BaseActionBean implements ActionBean {
 		//final String r = res.replaceAll(",\n]}", "]}").replaceAll(",}", "}");
 		return new StreamingResolution("application/json", res);
 	}
+	
+	
 
 }

@@ -1,10 +1,15 @@
 <%@include file="/WEB-INF/jsp/common/taglibs.jsp"%>
 
-<s:useActionBean  var="loginLogout" beanclass="com.pixelandtag.cmp.action.LoginLogoutAction"/>
+<%
+ //String site = new String("ShowLoginPage.action");
+ //response.setStatus(response.SC_MOVED_TEMPORARILY);
+// response.setHeader("Location", site); 
+%>
+<s:useActionBean  var="loginLogout" beanclass="com.pixelandtag.cmp.action.ShowLoginPageAction"/>
 
-<security:allowed  bean="loginLogout" event="testRoles">
+<security:NotAllowed  bean="loginLogout" event="showLoginPage">
 Secured content goes in here
-</security:allowed>
+</security:NotAllowed>
 
 
 <s:layout-render name="/WEB-INF/jsp/common/layout_main.jsp"

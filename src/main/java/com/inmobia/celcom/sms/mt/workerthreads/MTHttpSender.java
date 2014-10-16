@@ -448,8 +448,6 @@ public class MTHttpSender implements Runnable{
 			
 			watch.start();
 			
-			//postMethod.releaseConnection();
-			
 			
 			if(mt.getSms()!=null || mt.getMsg_part()!=null){
 				
