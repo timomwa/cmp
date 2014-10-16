@@ -9,6 +9,9 @@
 		<div>Navipanel_area</div>
 	</s:layout-component>
 
+<security:allowed>
+allowed?
+</security:allowed>
 
 	<s:layout-component name="content_area">
 		<div>Content area</div>

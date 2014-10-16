@@ -6,6 +6,14 @@
 	
 	
 	<filter>
+			<filter-name>DynamicMappingFilter</filter-name>
+			<filter-class>net.sourceforge.stripes.controller.DynamicMappingFilter
+	</filter-class>
+	</filter>
+	
+	<filter>
+	
+	
 
 	<filter-name>StripesFilter</filter-name>
 			<filter-class>net.sourceforge.stripes.controller.StripesFilter
@@ -26,7 +34,7 @@
 	
 	<init-param>
         <param-name>Extension.Packages</param-name>
-        <param-value>org.stripesstuff.plugin,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
+        <param-value>com.timothy.cmp,com.pixelandtag.ext,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
     </init-param>
      <init-param>
          <param-name>UnauthorizedResolutionURL</param-name>
@@ -34,7 +42,7 @@
      </init-param>
     <init-param>
         <param-name>SecurityManager.Class</param-name>
-        <param-value>com.timothy.cmp.security.SecurityManagerCMP</param-value>
+        <param-value>com.timothy.cmp.security.CMPSecurityManager</param-value>
     </init-param>
     
     <init-param>
@@ -44,7 +52,7 @@
 	
     <init-param> 
  		 <param-name>Interceptor.Classes</param-name> 
-  			<param-value>org.stripesstuff.plugin.security.SecurityInterceptor</param-value> 
+  			<param-value> org.stripesstuff.plugin.security.SecurityInterceptor</param-value> 
 		</init-param> 
 	</filter>
 

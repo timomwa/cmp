@@ -12,9 +12,7 @@ import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.config.Configuration;
 import net.sourceforge.stripes.controller.StripesConstants;
 import net.sourceforge.stripes.exception.ExceptionHandler;
-import net.sourceforge.stripes.exception.SourcePageNotFoundException;
 import net.sourceforge.stripes.exception.StripesServletException;
-import net.sourceforge.stripes.validation.SimpleError;
 
 public class CMPExceptionHandler implements ExceptionHandler {
 

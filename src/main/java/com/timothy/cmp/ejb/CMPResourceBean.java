@@ -20,7 +20,6 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	
 	@Override
 	public EntityManager getEM() {
-		logger.info(" em : "+em);
 		return em;
 	}
 

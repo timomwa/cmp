@@ -8,6 +8,7 @@ import javax.persistence.Query;
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.Resolution;
 
+import org.apache.commons.collections.SetUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +16,7 @@ import org.json.JSONObject;
 import com.pixelandtag.cmp.handlers.AppProperties;
 import com.timothy.cmp.entities.Role;
 import com.timothy.cmp.entities.User;
-
+@RolesAllowed("tester")
 public class LoginLogoutAction extends BaseActionBean  {
 	
 	public static final String VIEW = "/WEB-INF/jsp/login.jsp";
@@ -26,12 +27,20 @@ public class LoginLogoutAction extends BaseActionBean  {
 	
     
 	@DenyAll
-	//@RolesAllowed("tester")
+	@RolesAllowed("tester")
 	public Resolution testRoles() throws JSONException{
 		JSONObject resp = new JSONObject();
 		resp.put("success", true);
 		resp.put("message", "Succeeded");
-		return  sendResponse("{}");
+		return  sendResponse(resp.toString());
+	}
+	
+	@DenyAll
+	public Resolution logout() throws JSONException{
+		JSONObject resp = new JSONObject();
+		resp.put("success", true);
+		resp.put("message", "Sucessfully logged out!");
+		return  sendResponse(resp.toString());
 	}
 	
 	@PermitAll
@@ -51,7 +60,9 @@ public class LoginLogoutAction extends BaseActionBean  {
 			for(Role r : user.getRoles()){
 				logger.info(">>>>>>> role "+r.getName());
 			}
+			
 			getContext().getRequest().getSession().setAttribute(AppProperties.CURR_USER_OBJ_NAME, user);
+			//getContext().setUser(user);
 			resp.put("success", true);
 			resp.put("message", "Successful Login");
 		}else{
@@ -59,7 +70,6 @@ public class LoginLogoutAction extends BaseActionBean  {
 			resp.put("message", "Wrong username and password");
 		}
 		logger.info("user: "+user);
-		
 		
 		return sendResponse(resp.toString());
 	}

@@ -245,6 +245,24 @@
 		
 		
 		
+		
+		<dependency>
+			<groupId>org.stripesstuff</groupId>
+			<artifactId>stripesassist</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/stripersist-1.0.jar</systemPath>
+		</dependency>
+		
+		
+		<!--dependency>
+			<groupId>org.stripesstuff</groupId>
+			<artifactId>stripesstuff</artifactId>
+			<version>0.5.0-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/stripesstuff-0.5.0-SNAPSHOT.jar</systemPath>
+		</dependency-->
+		
 		<dependency>
 			<groupId>secureTag</groupId>
 			<artifactId>stripes-security</artifactId>
