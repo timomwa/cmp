@@ -215,7 +215,7 @@ public class MTHttpSender implements Runnable{
 			dbpds.setMaxPool(2);
 			dbpds.setMaxSize(3);
 			dbpds.setIdleTimeout(3600);  // Specified in seconds.
-		    
+			 dbpds.setValidatorClassName("snaq.db.Select1Validator");
 			dbpds.setValidationQuery("SELECT 'test'");
 			
 			logger.info("Initialized db pool ok!");

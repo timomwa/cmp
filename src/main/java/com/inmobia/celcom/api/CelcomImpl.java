@@ -1082,7 +1082,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			Connection conn_ = null;
 			if(ds!=null){
 				
-				logger.info("************TRYIG TO GET CONN from DS**********");
+				//logger.info("************TRYIG TO GET CONN from DS**********");
 				
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
@@ -1092,12 +1092,12 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					rs = pstmt.executeQuery();
 					
 					if(rs.next())
-						logger.info(rs.getString(1));
+						rs.getString(1);
 					
 				}catch(Exception e){
 					
 					logger.error(e.getMessage());
-					logger.info("************ FAILED TO GET connection from ds.. trying to get DS again.. **********");
+					//logger.info("************ FAILED TO GET connection from ds.. trying to get DS again.. **********");
 					
 					try {
 						InitialContext initContext = new InitialContext();
@@ -1118,8 +1118,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				return conn_;
 			}else{
-				logger.info("************ TRYING TO GET DS from CONN POOL **********");
-				System.out.println("************ TRYING TO GET DS from CONN POOL **********");
+				//logger.info("************ TRYING TO GET DS from CONN POOL **********");
+				//System.out.println("************ TRYING TO GET DS from CONN POOL **********");
 				return getConnection();
 			}
 			
@@ -1431,8 +1431,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				try {
 					
-				//	if(conn!=null)
-					//	conn.close();
+					if(conn!=null)
+						conn.close();
 				
 				} catch (Exception e) {
 					
@@ -1814,8 +1814,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		}
 		
 	}
-
-	public synchronized boolean postponeMT(long http_to_send_id) {
+    //removed synchronized keyword
+	public  boolean postponeMT(long http_to_send_id) {
 		
 		Connection conn = null;
 		

@@ -678,9 +678,9 @@ public class MTProducer extends Thread {
 	    ds.setUrl(url);
 	    ds.setUser(username);
 	    ds.setPassword(password);
-	    ds.setMinPool(workers+2);
-	    ds.setMaxPool(10);
-	    ds.setMaxSize(30);
+	    ds.setMinPool(workers);
+	    ds.setMaxPool(workers);
+	    ds.setMaxSize(workers);
 	    ds.setIdleTimeout(3600);  // Specified in seconds.
 	    
 	    ds.setValidationQuery("SELECT 'Test'");
