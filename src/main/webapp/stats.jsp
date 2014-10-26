@@ -1,5 +1,5 @@
 <%@ page
-	import="com.mysql.jdbc.Driver,javax.naming.Context,javax.sql.DataSource,java.util.GregorianCalendar,java.sql.Connection,javax.naming.InitialContext,org.json.JSONObject,com.inmobia.giant.web.UserSessionObject,java.sql.Statement,java.sql.ResultSet,java.sql.SQLException,java.io.BufferedReader,java.io.PrintWriter,org.apache.log4j.Logger,java.sql.PreparedStatement"%>
+	import="com.mysql.jdbc.Driver,javax.naming.Context,javax.sql.DataSource,java.util.GregorianCalendar,java.sql.Connection,javax.naming.InitialContext,org.json.JSONObject,com.pixelandtag.web.UserSessionObject,java.sql.Statement,java.sql.ResultSet,java.sql.SQLException,java.io.BufferedReader,java.io.PrintWriter,org.apache.log4j.Logger,java.sql.PreparedStatement"%>
 
 <%
 	 int SUPER_USER = 0;//CAN READ,EDIT,DELETE ANYTHING EDITABLE

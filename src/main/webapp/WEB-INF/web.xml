@@ -21,7 +21,7 @@
 	
 	<init-param>
 		<param-name>ActionResolver.Packages</param-name>
-		<param-value>com.pixelandtag.cmp.action</param-value>
+		<param-value>com.pixelandtag.action</param-value>
 	</init-param>
 	<init-param>
     	<param-name>LocalePicker.Locales</param-name>
@@ -34,7 +34,7 @@
 	
 	<init-param>
         <param-name>Extension.Packages</param-name>
-        <param-value>com.timothy.cmp,com.pixelandtag.ext,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
+        <param-value>com.pixelandtag.cmp,com.pixelandtag.ext,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
     </init-param>
      <init-param>
          <param-name>UnauthorizedResolutionURL</param-name>
@@ -42,7 +42,7 @@
      </init-param>
     <init-param>
         <param-name>SecurityManager.Class</param-name>
-        <param-value>com.timothy.cmp.security.CMPSecurityManager</param-value>
+        <param-value>com.pixelandtag.cmp.security.CMPSecurityManager</param-value>
     </init-param>
     
     <init-param>
@@ -88,7 +88,7 @@
 		</description>
 		<display-name>CMPHome</display-name>
 		<servlet-name>CMPHome</servlet-name>
-		<servlet-class>com.timothy.cmp.CMPHome</servlet-class>
+		<servlet-class>com.pixelandtag.cmp.CMPHome</servlet-class>
 	</servlet>
 	
 	<servlet-mapping>
@@ -100,7 +100,7 @@
 		</description>
 		<display-name>Trivia</display-name>
 		<servlet-name>Trivia</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.Trivia
+		<servlet-class>com.pixelandtag.web.Trivia
 		</servlet-class>
 	</servlet>
 
@@ -110,7 +110,7 @@
 	</servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>mainapp.jsp</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 
 
@@ -120,7 +120,7 @@
 		</description>
 		<display-name>MakeDraw</display-name>
 		<servlet-name>MakeDraw</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.draw.MakeDraw
+		<servlet-class>com.pixelandtag.web.draw.MakeDraw
 		</servlet-class>
 	</servlet>
 
@@ -140,7 +140,7 @@
 		</description>
 		<display-name>MakeTriviaDraw</display-name>
 		<servlet-name>MakeTriviaDraw</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.draw.MakeTriviaDraw
+		<servlet-class>com.pixelandtag.web.draw.MakeTriviaDraw
 		</servlet-class>
 	</servlet>
 
@@ -157,7 +157,7 @@
 		</description>
 		<display-name>Logout</display-name>
 		<servlet-name>Logout</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.draw.Logout
+		<servlet-class>com.pixelandtag.web.draw.Logout
 		</servlet-class>
 	</servlet>
 
@@ -174,7 +174,7 @@
 		</description>
 		<display-name>TriviaInteract</display-name>
 		<servlet-name>TriviaInteract</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.draw.TriviaInteract
+		<servlet-class>com.pixelandtag.web.draw.TriviaInteract
 		</servlet-class>
 	</servlet>
 
@@ -190,7 +190,7 @@
 		</description>
 		<display-name>MOReceiver</display-name>
 		<servlet-name>MOReceiver</servlet-name>
-		<servlet-class>com.inmobia.celcom.mo.sms.MOReceiver
+		<servlet-class>com.pixelandtag.mo.sms.MOReceiver
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -205,7 +205,7 @@
 		</description>
 		<display-name>DNReceiver</display-name>
 		<servlet-name>DNReceiver</servlet-name>
-		<servlet-class>com.inmobia.celcom.mo.sms.DNReceiver
+		<servlet-class>com.pixelandtag.mo.sms.DNReceiver
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -224,7 +224,7 @@
 		</description>
 		<display-name>MMSMO</display-name>
 		<servlet-name>MMSMO</servlet-name>
-		<servlet-class>com.inmobia.mms.mo.MMSMO
+		<servlet-class>com.pixelandtag.mms.mo.MMSMO
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -238,7 +238,7 @@
 		</description>
 		<display-name>MMSDN</display-name>
 		<servlet-name>MMSDN</servlet-name>
-		<servlet-class>com.inmobia.mms.mo.MMSDN
+		<servlet-class>com.pixelandtag.mms.mo.MMSDN
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -254,7 +254,7 @@
 		</description>
 		<display-name>mm7</display-name>
 		<servlet-name>mm7</servlet-name>
-		<servlet-class>com.inmobia.mms.api.SoapReceiver
+		<servlet-class>com.pixelandtag.mms.api.SoapReceiver
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -272,7 +272,7 @@
 		</description>
 		<display-name>triviasearch</display-name>
 		<servlet-name>triviasearch</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.draw.TriviaSearch
+		<servlet-class>com.pixelandtag.web.draw.TriviaSearch
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -289,7 +289,7 @@
 		</description>
 		<display-name>triviastats</display-name>
 		<servlet-name>triviastats</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.draw.TriviaStats
+		<servlet-class>com.pixelandtag.web.draw.TriviaStats
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -304,7 +304,7 @@
 		</description>
 		<display-name>respEditor</display-name>
 		<servlet-name>respEditor</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.ResponseTextEditor
+		<servlet-class>com.pixelandtag.web.ResponseTextEditor
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -319,7 +319,7 @@
 		</description>
 		<display-name>controller</display-name>
 		<servlet-name>controller</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.ResEditorControler
+		<servlet-class>com.pixelandtag.web.ResEditorControler
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -337,7 +337,7 @@
 		</description>
 		<display-name>msisdncontroller</display-name>
 		<servlet-name>msisdncontroller</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.MsisdnController
+		<servlet-class>com.pixelandtag.web.MsisdnController
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -353,7 +353,7 @@
 		</description>
 		<display-name>msisdncheck</display-name>
 		<servlet-name>msisdncheck</servlet-name>
-		<servlet-class>com.inmobia.axiata.web.MsisdnChecker
+		<servlet-class>com.pixelandtag.web.MsisdnChecker
 		</servlet-class>
 	</servlet>
 	<servlet-mapping>
@@ -368,7 +368,7 @@
 		</description>
 		<display-name>giant</display-name>
 		<servlet-name>giant</servlet-name>
-		<servlet-class>com.inmobia.giant.web.Giant</servlet-class>
+		<servlet-class>com.pixelandtag.web.Giant</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>giant</servlet-name>
@@ -383,7 +383,7 @@
 		</description>
 		<display-name>report</display-name>
 		<servlet-name>report</servlet-name>
-		<servlet-class>com.inmobia.axiata.reports.Report</servlet-class>
+		<servlet-class>com.pixelandtag.reports.Report</servlet-class>
 	</servlet>
 	
 	

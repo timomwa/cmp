@@ -1,8 +1,8 @@
 package com.pixelandtag.dao;
 
+import com.pixelandtag.cmp.entities.User;
 import com.pixelandtag.model.Folder;
 import com.pixelandtag.model.FolderDao;
-import com.timothy.cmp.entities.User;
 
 public class FolderDaoImpl extends BaseDaoImpl<Folder, Integer> implements
 		FolderDao {

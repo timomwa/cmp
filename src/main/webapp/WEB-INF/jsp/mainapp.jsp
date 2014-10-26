@@ -17,8 +17,7 @@
 	<s:layout-component name="navipanel_area">
 		<script type="text/javascript" src="js/examples.js"></script>
 		<div>Navipanel_area</div>
-<s:useActionBean var="loginLogout"
-	beanclass="com.pixelandtag.cmp.action.PageAction" />
+com.pixelandtag.action.PageAction loginLogout = (com.pixelandtag.action.PageAction) pageContext.getAttribute("loginLogout");
 		<c:forEach var="section" items="${loginLogout.sections}">
 			
 				<security:allowed bean="loginLogout">

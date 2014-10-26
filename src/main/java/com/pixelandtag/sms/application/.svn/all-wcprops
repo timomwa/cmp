@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/celcom/sms/application
+END
+HTTPMTSenderApp.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/celcom/sms/application/HTTPMTSenderApp.java
+END
+SenderAppShutdownHook.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/SMS/!svn/ver/323/Celcom_SMS_Platform/src/com/inmobia/celcom/sms/application/SenderAppShutdownHook.java
+END

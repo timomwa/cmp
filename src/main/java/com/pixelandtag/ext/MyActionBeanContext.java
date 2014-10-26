@@ -4,11 +4,11 @@ package com.pixelandtag.ext;
 import javax.servlet.http.HttpSession;
 
 import com.pixelandtag.cmp.dao.UserDaoImpl;
+import com.pixelandtag.cmp.entities.User;
 import com.pixelandtag.dao.FolderDaoImpl;
 import com.pixelandtag.model.Folder;
 import com.pixelandtag.model.FolderDao;
 import com.pixelandtag.model.Message;
-import com.timothy.cmp.entities.User;
 
 import net.sourceforge.stripes.action.ActionBeanContext;
 /*import stripesbook.dao.FolderDao;

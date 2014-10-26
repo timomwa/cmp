@@ -12,8 +12,8 @@ import javax.persistence.NonUniqueResultException;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import com.pixelandtag.cmp.entities.User;
 import com.pixelandtag.model.Dao;
-import com.timothy.cmp.entities.User;
 
 public abstract class BaseDaoImpl<T, ID extends Serializable> implements
 		Dao<T, ID> {

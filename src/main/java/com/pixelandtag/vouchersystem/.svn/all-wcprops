@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/SMS/!svn/ver/356/Celcom_SMS_Platform/src/com/inmobia/vouchersystem
+END
+Voucher.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/SMS/!svn/ver/350/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/Voucher.java
+END
+DrawApplication.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/SMS/!svn/ver/351/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/DrawApplication.java
+END
+Consumer.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/SMS/!svn/ver/356/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/Consumer.java
+END
+VoucherUtils.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/SMS/!svn/ver/350/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/VoucherUtils.java
+END
+Entry.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/SMS/!svn/ver/350/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/Entry.java
+END
+Producer.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/SMS/!svn/ver/351/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/Producer.java
+END
+Status.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/SMS/!svn/ver/350/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/Status.java
+END
+Prize.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/SMS/!svn/ver/350/Celcom_SMS_Platform/src/com/inmobia/vouchersystem/Prize.java
+END

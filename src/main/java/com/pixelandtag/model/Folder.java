@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import com.timothy.cmp.entities.User;
+import com.pixelandtag.cmp.entities.User;
 
 public class Folder extends ModelBase {
 
