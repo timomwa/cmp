@@ -1,11 +1,19 @@
 package com.pixelandtag.action;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import antlr.collections.List;
 
 import com.pixelandtag.cmp.entities.Keyword;
 
 import net.sourceforge.stripes.action.Before;
+import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.controller.LifecycleStage;
 
@@ -28,6 +36,22 @@ public class ContentManagementAction extends BaseActionBean {
 			log.info("Got an member from the session :");
 		}
 	}
+	
+	@DefaultHandler
+	public Resolution listKeywords() throws JSONException{
+		Collection<Keyword> test = cmp_dao.lists(Keyword.class, 0, 100);
+		Iterator<Keyword> kws = test.iterator();
+		JSONObject resp = new JSONObject();
+		resp.put("size", test.size());
+		while(kws.hasNext()){
+			Keyword kw = kws.next();
+			System.out.println(kw);
+			log.info("kw : "+kw);
+			resp.append("keywords", kw.toJson());
+		}
+		return sendResponse(resp.toString());
+	}
+	
 	public Resolution saveOrUpdateKeyword(){
 		return null;
 	}
