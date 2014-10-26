@@ -6,6 +6,7 @@ import java.text.DecimalFormatSymbols;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.Keyword;
 
 
 
@@ -38,6 +39,10 @@ public class CMPDao  extends BaseDao {
 			logger.error(e.getMessage(),e);
 		}
 		
+	}
+
+	public <T> T find(Class<T> entityClass, Object primaryKey) {
+		return resource_bean.getEM().find(entityClass, primaryKey);
 	}
 	
 

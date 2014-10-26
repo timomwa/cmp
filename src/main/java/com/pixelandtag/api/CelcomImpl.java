@@ -20,21 +20,29 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
-import com.inmobia.luckydip.api.LuckyDipFactory;
-import com.inmobia.luckydip.api.LuckyDipI;
-import com.pixelandtag.util.UtilCelcom;
+
+
+
+
+
+
+
+//import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
-import com.pixelandtag.entities.MTsms;
-import com.pixelandtag.entities.Notification;
-import com.pixelandtag.mms.api.TarrifCode;
-import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.web.beans.MessageType;
 import com.pixelandtag.web.beans.Subscriber;
 import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
+import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.entities.Notification;
+import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
+import com.pixelandtag.sms.application.HTTPMTSenderApp;
+import com.pixelandtag.util.UtilCelcom;
+import com.pixelandtag.mms.api.TarrifCode;
+import com.inmobia.luckydip.api.LuckyDipFactory;
+import com.inmobia.luckydip.api.LuckyDipI;
+import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 
@@ -226,7 +234,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#deleteMT(int)
+	 * @see com.pixelandtag.CelcomHTTPAPI#deleteMT(int)
 	 */
 	public boolean deleteMT(long id) {
 		
@@ -713,7 +721,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#retrieveMO(java.lang.String)
+	 * @see com.pixelandtag.CelcomHTTPAPI#retrieveMO(java.lang.String)
 	 */
 	public MOSms retrieveMO(String cMP_Txid) {
 		
@@ -796,7 +804,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#logMO(com.inmobia.celcom.MO)
+	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
 	public void logMO(MOSms mo) {
 		
@@ -898,7 +906,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#logMT(com.inmobia.celcom.MT)
+	 * @see com.pixelandtag.CelcomHTTPAPI#logMT(com.pixelandtag.MT)
 	 */
 	public void logMT(MTsms mt) {
 		
@@ -1034,7 +1042,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#acknowledgeReceipt(com.inmobia.celcom.MO)
+	 * @see com.pixelandtag.CelcomHTTPAPI#acknowledgeReceipt(com.pixelandtag.MO)
 	 */
 	public void acknowledgeReceipt(MOSms mo) {
 		PreparedStatement pstmt = null;
@@ -1043,7 +1051,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#findMO(java.lang.String)
+	 * @see com.pixelandtag.CelcomHTTPAPI#findMO(java.lang.String)
 	 */
 	public MOSms findMO(String cpm_txId) {
 		// TODO Auto-generated method stub
@@ -1052,7 +1060,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#findMT(java.lang.String)
+	 * @see com.pixelandtag.CelcomHTTPAPI#findMT(java.lang.String)
 	 */
 	public MTsms findMT(String cpm_txId) {
 		// TODO Auto-generated method stub
@@ -1075,7 +1083,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			Connection conn_ = null;
 			if(ds!=null){
 				
-				logger.info("************TRYIG TO GET CONN from DS**********");
+				//logger.info("************TRYIG TO GET CONN from DS**********");
 				
 				PreparedStatement pstmt = null;
 				ResultSet rs = null;
@@ -1085,12 +1093,12 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					rs = pstmt.executeQuery();
 					
 					if(rs.next())
-						logger.info(rs.getString(1));
+						rs.getString(1);
 					
 				}catch(Exception e){
 					
 					logger.error(e.getMessage());
-					logger.info("************ FAILED TO GET connection from ds.. trying to get DS again.. **********");
+					//logger.info("************ FAILED TO GET connection from ds.. trying to get DS again.. **********");
 					
 					try {
 						InitialContext initContext = new InitialContext();
@@ -1111,8 +1119,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				return conn_;
 			}else{
-				logger.info("************ TRYING TO GET DS from CONN POOL **********");
-				System.out.println("************ TRYING TO GET DS from CONN POOL **********");
+				//logger.info("************ TRYING TO GET DS from CONN POOL **********");
+				//System.out.println("************ TRYING TO GET DS from CONN POOL **********");
 				return getConnection();
 			}
 			
@@ -1162,7 +1170,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#markInQueue(int)
+	 * @see com.pixelandtag.CelcomHTTPAPI#markInQueue(int)
 	 */
 	public boolean markInQueue(long http_to_send_id) throws Exception {
 		
@@ -1230,7 +1238,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#changeQueueStatus(int, boolean)
+	 * @see com.pixelandtag.CelcomHTTPAPI#changeQueueStatus(int, boolean)
 	 */
 	public boolean changeQueueStatus(String http_to_send_id, boolean inQueue) {
 		
@@ -1424,8 +1432,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				try {
 					
-				//	if(conn!=null)
-					//	conn.close();
+					if(conn!=null)
+						conn.close();
 				
 				} catch (Exception e) {
 					
@@ -1611,7 +1619,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	
 	
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#getLatestMO(int)
+	 * @see com.pixelandtag.CelcomHTTPAPI#getLatestMO(int)
 	 */
 	public synchronized Queue<MOSms> getLatestMO(int limit) {
 		
@@ -1807,8 +1815,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		}
 		
 	}
-
-	public synchronized boolean postponeMT(long http_to_send_id) {
+    //removed synchronized keyword
+	public  boolean postponeMT(long http_to_send_id) {
 		
 		Connection conn = null;
 		
@@ -1866,7 +1874,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#getServiceProcessors()
+	 * @see com.pixelandtag.CelcomHTTPAPI#getServiceProcessors()
 	 */
 	public Queue<ServiceProcessorDTO> getServiceProcessors() {
 
@@ -2105,7 +2113,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	
 	
 	/* (non-Javadoc)
-	 * @see com.inmobia.celcom.CelcomHTTPAPI#beingProcessedd(long, boolean)
+	 * @see com.pixelandtag.CelcomHTTPAPI#beingProcessedd(long, boolean)
 	 */
 	public boolean  beingProcessedd(long http_to_send_id, boolean processing) {
 		

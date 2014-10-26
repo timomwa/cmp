@@ -32,20 +32,21 @@ import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
+import com.pixelandtag.connections.DriverUtilities;
+import com.pixelandtag.web.triviaI.MechanicsI;
+import com.pixelandtag.web.triviaImpl.MechanicsS;
 import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.autodraw.Alarm;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.URLParams;
-import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
+import com.pixelandtag.util.UtilCelcom;
+import com.pixelandtag.mms.api.TarrifCode;
+import com.inmobia.util.StopWatch;
+import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.sms.producerthreads.MTProducer;
-import com.pixelandtag.util.StopWatch;
-import com.pixelandtag.web.triviaI.MechanicsI;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
 
 
 
@@ -214,7 +215,7 @@ public class MTHttpSender implements Runnable{
 			dbpds.setMaxPool(2);
 			dbpds.setMaxSize(3);
 			dbpds.setIdleTimeout(3600);  // Specified in seconds.
-		    
+			 dbpds.setValidatorClassName("snaq.db.Select1Validator");
 			dbpds.setValidationQuery("SELECT 'test'");
 			
 			logger.info("Initialized db pool ok!");
@@ -412,7 +413,7 @@ public class MTHttpSender implements Runnable{
 
 	/**
 	 * Sends the MT message
-	 * @param mt - com.inmobia.celcom.MTsms
+	 * @param mt - com.pixelandtag.MTsms
 	 */
 	private void sendMT(MTsms mt){
 		

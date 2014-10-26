@@ -17,7 +17,11 @@ MyDesktop = new Ext.app.App({
             new MyDesktop.TabWindow(),
             new MyDesktop.AccordionWindow(),
             new MyDesktop.BogusMenuModule(),
-            new MyDesktop.BogusModule()
+            new MyDesktop.BogusModule(), 
+            new MyDesktop.ContentManagementModule(),
+            new MyDesktop.CustomerCareModule(),
+            new MyDesktop.SubscriptionManagementModule(),
+            new MyDesktop.StatisticsModule()
 		];
 	},
 
@@ -350,6 +354,11 @@ MyDesktop.BogusModule = Ext.extend(Ext.app.Module, {
         win.show();
     }
 });
+
+
+
+
+
 
 
 MyDesktop.BogusMenuModule = Ext.extend(MyDesktop.BogusModule, {

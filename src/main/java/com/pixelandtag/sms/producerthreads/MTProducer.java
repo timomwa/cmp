@@ -31,14 +31,15 @@ import org.gjt.mm.mysql.Driver;
 import snaq.db.ConnectionPool;
 import snaq.db.DBPoolDataSource;
 
+import com.pixelandtag.connections.DriverUtilities;
+import com.pixelandtag.web.triviaI.MechanicsI;
+import com.pixelandtag.web.triviaImpl.MechanicsS;
 import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.api.Settings;
 import com.pixelandtag.api.UnicodeFormatter;
 import com.pixelandtag.autodraw.Alarm;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.URLParams;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -46,10 +47,9 @@ import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.sms.mo.MOProcessor;
 import com.pixelandtag.sms.mt.ACTION;
 import com.pixelandtag.sms.mt.CONTENTTYPE;
+import com.inmobia.util.StopWatch;
+import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.sms.mt.workerthreads.MTHttpSender;
-import com.pixelandtag.util.StopWatch;
-import com.pixelandtag.web.triviaI.MechanicsI;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
 
 /**
  * 
@@ -168,7 +168,7 @@ public class MTProducer extends Thread {
 	 * During tests, I experienced a situation where two threads got the same message
 	 * from one queue.. Its like before the message was removed from the queue, another thread
 	 * already took the given message...
-	 * @return  com.pixelandtag.celcom.entities.MTsms
+	 * @return  com.pixelandtag.entities.MTsms
 	 * @throws InterruptedException
 	 * @throws NullPointerException
 	 */
@@ -625,7 +625,7 @@ public class MTProducer extends Thread {
 	 * @param throttle_ - int the time in milliseconds to sleep before checking for new messages in the db.
 	 * @param initialConnections_ - int the initial connections to be created.
 	 * @param maxConnections_ int the maximum number of connections that can exist in the connection pool
-	 * @param urlparams - com.pixelandtag.celcom.entities.URLParams - a set of other runtime variables
+	 * @param urlparams - com.pixelandtag.entities.URLParams - a set of other runtime variables
 	 * @throws Exception 
 	 */
 	public MTProducer(String connStr_, int workers_, int throttle_, int initialConnections_, int maxConnections_, int queueSize_, int pollWait_, URLParams urlparams_) throws Exception{
@@ -678,9 +678,9 @@ public class MTProducer extends Thread {
 	    ds.setUrl(url);
 	    ds.setUser(username);
 	    ds.setPassword(password);
-	    ds.setMinPool(workers+2);
-	    ds.setMaxPool(10);
-	    ds.setMaxSize(30);
+	    ds.setMinPool(workers);
+	    ds.setMaxPool(workers);
+	    ds.setMaxSize(workers);
 	    ds.setIdleTimeout(3600);  // Specified in seconds.
 	    
 	    ds.setValidationQuery("SELECT 'Test'");

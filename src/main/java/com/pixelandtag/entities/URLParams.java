@@ -20,7 +20,6 @@ public class URLParams {
 		this.CLIENT_TZ = props.getProperty("CLIENT_TZ");
 		
 		
-		
 		this.mturl=props.getProperty("mturl");
 		this.login=props.getProperty("login");
 		this.pass=props.getProperty("pass");

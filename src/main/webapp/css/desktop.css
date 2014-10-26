@@ -227,6 +227,18 @@ html, body {
 .icon-grid {
     background-image:url( ../images/grid.png ) !important;
 }
+.content-man-win {
+    background-image:url( ../images/sms_email-y16x16.png ) !important;
+}
+.subscription-man-win {
+    background-image:url( ../images/subscription16x16.png ) !important;
+}
+.statistics-win {
+    background-image:url( ../images/statistics16x16.png ) !important;
+}
+.customer-care-win {
+    background-image:url( ../images/customer_care16x16.png ) !important;
+}
 .add {
     background-image:url(../../shared/icons/fam/add.gif) !important;
 }
@@ -657,4 +669,29 @@ td.ux-taskButtons-edge {
     height:48px;
     background-image: url(../images/im48x48.png);
     filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/im48x48.png', sizingMethod='scale');
+}
+#content-win-shortcut img {
+    width:48px;
+    height:48px;
+    background-image: url(../images/sms_email-y48x48.png);
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/sms_email-y48x48.png', sizingMethod='scale');
+}
+#subscription-win-shortcut img {
+    width:48px;
+    height:48px;
+    background-image: url(../images/subscription48x48.png);
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/subscription48x48.png', sizingMethod='scale');
+}
+#statistics-win-shortcut img {
+    width:48px;
+    height:48px;
+    background-image: url(../images/statistics.png);
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/statistics.png', sizingMethod='scale');
+}
+#customer_care-win-shortcut img{
+	width:48px;
+    height:48px;
+    background-image: url(../images/customer_care.png);
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/customer_care.png', sizingMethod='scale');
+	
 }
