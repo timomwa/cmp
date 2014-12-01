@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:bo="http://ChargingProcess/com/ibm/sdp/services/charging/vo" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/vo">
+  <xsd:annotation>
+    <xsd:appinfo source="wid.federated.schema"/>
+  </xsd:annotation>
+  <xsd:include schemaLocation="../com/ibm/sdp/services/charging/vo/ChargingResponse.xsd"/>
+  <xsd:include schemaLocation="../com/ibm/sdp/services/charging/vo/ChargingRequest.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/services/charging/vo/SubscriberInformation.xsd"/>
+</xsd:schema>

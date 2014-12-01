@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="ApplicationProvider.xsd"/>
+    <xsd:include schemaLocation="EnumValues.xsd"/>
+    <xsd:complexType name="ApplicationDetails">
+    <xsd:sequence>
+    	<xsd:element minOccurs="0" name="id" type="xsd:int"/>
+        <xsd:element minOccurs="0" name="name" type="xsd:string"/>
+        <xsd:element minOccurs="0" name="description" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="status" type="bons0:EnumValues"/>
+            <xsd:element minOccurs="0" name="sourceSystem" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="appProvider" type="bons0:ApplicationProvider"/>
+            <xsd:element minOccurs="0" name="parentApp" type="bons0:ApplicationDetails"/>
+            <xsd:element minOccurs="0" name="appType" type="bons0:EnumValues"/>
+        </xsd:sequence>          
+  </xsd:complexType>
+</xsd:schema>

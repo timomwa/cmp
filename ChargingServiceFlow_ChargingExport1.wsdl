@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:Port_0="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:this="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging/Binding" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="ChargingExport1_ChargingHttp_Service" targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging/Binding">
+  <wsdl:import location="com/ibm/sdp/services/charging/abstraction/Charging.wsdl" namespace="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging"/>
+  <wsdl:binding name="ChargingExport1_ChargingHttpBinding" type="Port_0:Charging">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="charge">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="chargeRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="chargeResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="serviceException">
+        <soap:fault name="serviceException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ChargingExport1_ChargingHttpService">
+    <wsdl:port binding="this:ChargingExport1_ChargingHttpBinding" name="ChargingHttpService_ChargingHttpPort">
+      <soap:address location="http://MDSPOWER68.in.ibm.com:9081/ChargingStub/ChargingExport1_ChargingHttpService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

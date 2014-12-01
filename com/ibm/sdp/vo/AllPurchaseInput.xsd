@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="UsageDataRecord.xsd"/>
+    <xsd:complexType name="AllPurchaseInput">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="usageDataRecord" type="bons0:UsageDataRecord"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

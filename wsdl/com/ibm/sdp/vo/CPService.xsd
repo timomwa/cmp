@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="CPServiceDetails.xsd"/>
+    <xsd:include schemaLocation="EnumValues.xsd"/>
+    <xsd:complexType name="CPService">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="serviceId" type="xsd:int"/>
+      <xsd:element minOccurs="0" name="serviceName" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="description" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="netShare" type="xsd:float"/>
+      <xsd:element minOccurs="0" name="revenuePercentage" type="xsd:float"/>
+      <xsd:element minOccurs="0" name="operation" type="xsd:string"/>
+	  <xsd:element minOccurs="0" name="status" type="bons0:EnumValues"/>
+	  <xsd:element minOccurs="0" name="cpId" type="xsd:int"/>
+	  <xsd:element minOccurs="0" name="otherDetails" type="bons0:CPServiceDetails" maxOccurs="unbounded"/>
+     </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

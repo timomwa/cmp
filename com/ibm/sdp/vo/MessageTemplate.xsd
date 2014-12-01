@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="EnumValues.xsd"/>
+    <xsd:include schemaLocation="ErrorDetails.xsd"/>
+    <xsd:include schemaLocation="MessageTemplateDetails.xsd"/>
+    <xsd:complexType name="MessageTemplate">
+    <xsd:sequence>
+		<xsd:element minOccurs="0" name="externalId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="id" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="messageTemplateDetails" type="bons0:MessageTemplateDetails" maxOccurs="unbounded"/>
+            <xsd:element minOccurs="0" name="templateType" type="bons0:EnumValues"/>
+        </xsd:sequence>		
+  </xsd:complexType>
+</xsd:schema>

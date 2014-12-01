@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="AuditAction.xsd"/>
+    <xsd:include schemaLocation="AuditEntity.xsd"/>
+    <xsd:include schemaLocation="AuditModules.xsd"/>
+    <xsd:complexType name="AuditLog">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="logId" type="xsd:int"/>
+      <xsd:element minOccurs="0" name="module" type="bons0:AuditModules"/>
+      <xsd:element minOccurs="0" name="entity" type="bons0:AuditEntity"/>
+      <xsd:element minOccurs="0" name="action" type="bons0:AuditAction"/>
+      <xsd:element minOccurs="0" name="newValue" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="oldValue" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="userId" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="reason" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="createdOn" type="xsd:date"/>
+      <xsd:element minOccurs="0" name="miscProperties" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

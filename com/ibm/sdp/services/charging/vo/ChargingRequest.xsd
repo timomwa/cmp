@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/vo">
+  <xsd:complexType name="ChargingRequest">
+    <xsd:sequence>
+                <xsd:element maxOccurs="1" minOccurs="0" name="operation">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="debit"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+    	 	<xsd:element maxOccurs="1" minOccurs="1" name="userId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="contentId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="itemName" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="contentDescription" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="circleId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="lineOfBusiness" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="customerSegment" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="contentMediaType" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="serviceId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="parentId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="actualPrice" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="basePrice" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="discountApplied" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="paymentMethod" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="revenuePercent" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="netShare" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="cpId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="customerClass" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="eventType">
+        <xsd:simpleType>
+          <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="Content Purchase"/>
+            <xsd:enumeration value="CSR Move To Purchased"/>
+            <xsd:enumeration value="CSR Purchase"/>
+            <xsd:enumeration value="CSR Subscription Purchase"/>
+            <xsd:enumeration value="Event Based Purchase"/>
+            <xsd:enumeration value="Gifting"/>
+            <xsd:enumeration value="Licence Renewal"/>
+            <xsd:enumeration value="Purchase Refund"/>
+            <xsd:enumeration value="Subscription Purchase"/>
+            <xsd:enumeration value="ReSubscription"/>
+          </xsd:restriction>
+        </xsd:simpleType>
+      </xsd:element>
+            <xsd:element maxOccurs="1" minOccurs="0" name="localTimeStamp" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="transactionId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="subscriptionTypeCode" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="subscriptionName" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="parentType" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="deliveryChannel" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="subscriptionExternalId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="0" name="contentSize" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="currency" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="copyrightId" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="sMSkeyword" type="xsd:string"/>
+            <xsd:element maxOccurs="1" minOccurs="1" name="srcCode" type="xsd:string"/>
+            <xsd:element minOccurs="1" name="contentUrl" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="subscriptiondays" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="cpTransactionId" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="copyrightDescription" type="xsd:string"/>
+        </xsd:sequence>            
+  </xsd:complexType>
+</xsd:schema>

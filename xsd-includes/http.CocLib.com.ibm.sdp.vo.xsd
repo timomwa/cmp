@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:bo="http://CocLib/com/ibm/sdp/vo" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+  <xsd:annotation>
+    <xsd:appinfo source="wid.federated.schema"/>
+  </xsd:annotation>
+  <xsd:include schemaLocation="../com/ibm/sdp/vo/EnumValues.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/EnumType.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ApplicationProvider.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ApplicationDetails.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ApplicationDetailsList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AttributeDetails.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AttributeDetailsList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/CDRConfiguration.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/CDRConfigurationList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ServiceException.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/UsageDataRecord.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/UpdateObject.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/Attachment.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ErrorDetails.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/MessageTemplateDetails.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/MessageTemplate.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/MessageTemplateList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ResponseObject.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/UsageDataRecordList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AllPurchaseInput.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PurchaseByDateInput.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PurchaseForSubscriberInput.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PurchaseForXDaysInput.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PurchaseInput.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/MessageList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PricePoint.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/CPService.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ContentProvider.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/ContentProviderList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PricePointsList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/CacheKeys.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/CDRAttribute.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/MessageBo.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AuditModules.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AuditEntity.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AuditAction.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AuditLog.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/AuditLogList.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/CPServiceDetails.xsd"/>
+    <xsd:include schemaLocation="../com/ibm/sdp/vo/PriceAndMessaging.xsd"/>
+</xsd:schema>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="PriceAndMessaging.xsd"/>
+    <xsd:include schemaLocation="EnumValues.xsd"/>
+    <xsd:complexType name="CPServiceDetails">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="eventType" type="bons0:EnumValues"/>
+            <xsd:element minOccurs="0" name="pricePoints" type="bons0:PriceAndMessaging" maxOccurs="unbounded"/>
+            <xsd:element minOccurs="0" name="id" type="xsd:int"/>
+        </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

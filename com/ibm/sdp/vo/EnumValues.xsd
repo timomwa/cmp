@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+  <xsd:complexType name="EnumValues">
+    <xsd:sequence>
+    	<xsd:element minOccurs="0" name="enumValueId" type="xsd:int"/>
+      <xsd:element minOccurs="0" name="enumValue" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="enumType" type="xsd:int"/>
+        </xsd:sequence>      
+  </xsd:complexType>
+</xsd:schema>

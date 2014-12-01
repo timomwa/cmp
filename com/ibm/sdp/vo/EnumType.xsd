@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:Q1="http://CocLib/com/ibm/sdp/vo" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="EnumValues.xsd"/>
+    <xsd:complexType name="EnumType">
+    <xsd:sequence>
+    	<xsd:element minOccurs="0" name="enumId" type="xsd:int"/>
+        <xsd:element minOccurs="0" name="enumType" type="xsd:string"/>
+        <xsd:element minOccurs="0" name="description" type="xsd:string"/>
+        <xsd:element minOccurs="0" name="dataType" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="enumValues" type="Q1:EnumValues" maxOccurs="unbounded"/>
+        </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

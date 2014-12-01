@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+  <xsd:complexType name="UsageDataRecord">
+    <xsd:sequence>
+        	<xsd:element minOccurs="0" name="operation" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="transactionId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="userId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="targetSubscriberId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="browsingSessionId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="subscriberClassId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="subscriberGroupId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="customerSegment" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="customerClass" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="circleId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="lineOfBusiness" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="serviceId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="parentId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="parentType" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="actualPrice" type="xsd:float"/>
+	    <xsd:element minOccurs="0" name="basePrice" type="xsd:float"/>
+	    <xsd:element minOccurs="0" name="discountApplied" type="xsd:float"/>
+	    <xsd:element minOccurs="0" name="discountId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="paymentMethod" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="revenuePercent" type="xsd:float"/>
+	    <xsd:element minOccurs="0" name="netShare" type="xsd:float"/>
+	    <xsd:element minOccurs="0" name="creditPoints" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="pricePlanId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="cpId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="eventType" type="xsd:string"/>
+	   	<xsd:element minOccurs="0" name="campaignId" type="xsd:string"/>             
+	   	<xsd:element minOccurs="0" name="contentMediaType" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="mediaFormat" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="contentId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="itemName" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="contentDescription" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="description" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="subscriptionExternalId" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="subscriptionTypeCode" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="subscriptionName" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="subscriptionId" type="xsd:string"/>		
+		<xsd:element minOccurs="0" name="subscriptionEntityName" type="xsd:string"/> 
+	    <xsd:element minOccurs="0" name="deliveryChannel" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="contentSize" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="fileSize" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="currency" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="copyrightId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="sMSkeyword" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="sMSMessageID" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="sMSCId" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="srcCode" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="location" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="deviceName" type="xsd:string"/>
+	   	<xsd:element minOccurs="0" name="status" type="xsd:string"/>                 
+	    <xsd:element minOccurs="0" name="externalStatus" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="state" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="startTime" type="xsd:dateTime"/>
+	    <xsd:element minOccurs="0" name="endTime" type="xsd:dateTime"/>
+	    <xsd:element minOccurs="0" name="timeOfTransaction" type="xsd:dateTime"/>
+	    <xsd:element minOccurs="0" name="uRL" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="accessChannel" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="deliveryMethod" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="deliverySystem" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="deliveryType" type="xsd:string"/>
+	    <xsd:element minOccurs="0" name="INIndentifior" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="csrId" type="xsd:string"/>                  
+		<xsd:element minOccurs="0" name="ipAddress" type="xsd:string"/>              
+		<xsd:element minOccurs="0" name="port" type="xsd:string"/>                   
+		<xsd:element minOccurs="0" name="failureReason" type="xsd:string"/>          
+		<xsd:element minOccurs="0" name="IMEI" type="xsd:string"/>                   
+		<xsd:element minOccurs="0" name="imsi" type="xsd:string"/>		
+		<xsd:element minOccurs="0" name="contentUrl" type="xsd:string"/>		
+		<xsd:element minOccurs="0" name="regApplicationName" type="xsd:string"/>						
+        <xsd:element minOccurs="0" name="wapPushCounter" type="xsd:int"/>
+        <xsd:element minOccurs="0" name="subscriptionDays" type="xsd:int"/>
+        <xsd:element minOccurs="0" name="cpTransactionId" type="xsd:string"/>
+        <xsd:element minOccurs="0" name="copyrightDescription" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

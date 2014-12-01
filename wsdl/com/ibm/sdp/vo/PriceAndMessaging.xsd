@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="PricePoint.xsd"/>
+    <xsd:complexType name="PriceAndMessaging">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="pricePoint" type="bons0:PricePoint"/>
+      <xsd:element minOccurs="0" name="messagingAllowed" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="partialBillingAllowed" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

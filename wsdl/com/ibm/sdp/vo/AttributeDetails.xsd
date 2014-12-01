@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="EnumType.xsd"/>
+    <xsd:include schemaLocation="EnumValues.xsd"/>
+    <xsd:complexType name="AttributeDetails">
+    <xsd:sequence>
+		<xsd:element minOccurs="0" name="attributeId" type="xsd:int"/>
+		<xsd:element minOccurs="0" name="attributeName" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="attributeCode" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="attributeType" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="attributeLength" type="xsd:int"/>
+		<xsd:element minOccurs="0" name="attributeDefaultValue" type="xsd:string"/>
+		<xsd:element minOccurs="0" name="attributeDescription" type="xsd:string"/>
+        <xsd:element minOccurs="0" name="isMandatory" type="xsd:boolean"/>
+            <xsd:element minOccurs="0" name="attributeEnums" type="bons0:EnumType"/>
+            <xsd:element minOccurs="0" name="attributeStatus" type="bons0:EnumValues"/>
+            <xsd:element minOccurs="0" name="attributeValueSource" type="bons0:EnumValues"/>
+            <xsd:element minOccurs="0" name="attributeValueKey" type="bons0:EnumValues"/>
+        </xsd:sequence>       
+  </xsd:complexType>
+</xsd:schema>

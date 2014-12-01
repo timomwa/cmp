@@ -1,5 +1,15 @@
 eclipse.preferences.version=1
 encoding//src/main/java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging/Binding/ChargingExport1_ChargingHttpBindingStub.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging/Binding/ChargingExport1_ChargingHttpService.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging/Binding/ChargingExport1_ChargingHttpServiceLocator.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging/Charging.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/vo/ChargingRequest.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/vo/ChargingRequestEventType.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/vo/ChargingRequestOperation.java=UTF-8
+encoding//src/main/java/ChargingProcess/com/ibm/sdp/services/charging/vo/ChargingResponse.java=UTF-8
+encoding//src/main/java/CocLib/com/ibm/sdp/vo/ErrorDetails.java=UTF-8
+encoding//src/main/java/CocLib/com/ibm/sdp/vo/ServiceException.java=UTF-8
 encoding//src/main/resources=UTF-8
 encoding//src/test/java=UTF-8
 encoding//src/test/resources=UTF-8

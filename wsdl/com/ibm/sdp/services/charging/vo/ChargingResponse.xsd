@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bons0="http://CocLib/com/ibm/sdp/vo" targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/vo">
+    <xsd:import schemaLocation="../../../../../../xsd-includes/http.CocLib.com.ibm.sdp.vo.xsd" namespace="http://CocLib/com/ibm/sdp/vo"/>
+    <xsd:complexType name="ChargingResponse">
+    <xsd:sequence>
+     	<xsd:element maxOccurs="1" minOccurs="1" name="status" type="xsd:string"/>
+	 	<xsd:element maxOccurs="1" minOccurs="0" name="transactionId" type="xsd:string"/>
+        <xsd:element minOccurs="0" name="error" type="bons0:ErrorDetails"/>
+            <xsd:element minOccurs="0" name="cpTransactionId" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

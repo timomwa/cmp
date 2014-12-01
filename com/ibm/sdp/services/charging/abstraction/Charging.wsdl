@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="Charging" targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging" xmlns:bons2="http://ChargingProcess/com/ibm/sdp/services/charging/vo" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging" xmlns:bons1="http://CocLib/com/ibm/sdp/vo">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging" xmlns:bons1="http://CocLib/com/ibm/sdp/vo" xmlns:bons2="http://ChargingProcess/com/ibm/sdp/services/charging/vo" xmlns:tns="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://CocLib/com/ibm/sdp/vo" schemaLocation="../../../../../../xsd-includes/http.CocLib.com.ibm.sdp.vo.xsd"/>
+      <xsd:import namespace="http://ChargingProcess/com/ibm/sdp/services/charging/vo" schemaLocation="../../../../../../xsd-includes/http.ChargingProcess.com.ibm.sdp.services.charging.vo.xsd"/>
+      <xsd:element name="charge">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="inputMsg" nillable="true" type="bons2:ChargingRequest"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="chargeResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="outputMsg" nillable="true" type="bons2:ChargingResponse"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="charge_serviceException" type="bons1:ServiceException"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="chargeRequestMsg">
+    <wsdl:part name="chargeParameters" element="tns:charge">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="charge_serviceExceptionMsg">
+    <wsdl:part name="serviceException" element="tns:charge_serviceException">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="chargeResponseMsg">
+    <wsdl:part name="chargeResult" element="tns:chargeResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="Charging">
+    <wsdl:operation name="charge">
+      <wsdl:input name="chargeRequest" message="tns:chargeRequestMsg">
+    </wsdl:input>
+      <wsdl:output name="chargeResponse" message="tns:chargeResponseMsg">
+    </wsdl:output>
+      <wsdl:fault name="serviceException" message="tns:charge_serviceExceptionMsg">
+    </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:portType>
+</wsdl:definitions>

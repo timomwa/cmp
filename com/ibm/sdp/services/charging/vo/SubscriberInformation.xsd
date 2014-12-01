@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ChargingProcess/com/ibm/sdp/services/charging/vo">
+  <xsd:complexType name="SubscriberInformation">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="circle" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="status" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

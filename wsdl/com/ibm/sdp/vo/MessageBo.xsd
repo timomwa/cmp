@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+  <xsd:complexType name="MessageBo">
+     <xsd:sequence>
+      <xsd:element minOccurs="0" name="to" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="from" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="bcc" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="subject" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="body" type="xsd:hexBinary"/>
+      <xsd:element minOccurs="0" name="channelName" type="xsd:string"/>
+            <xsd:element minOccurs="0" name="url" type="xsd:string"/>
+        </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

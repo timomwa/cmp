@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+  <xsd:complexType name="PurchaseInput">
+    <xsd:sequence>
+      <xsd:element minOccurs="1" name="transactionId" type="xsd:string"/>
+      <xsd:element minOccurs="1" name="targetSubscriberId" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

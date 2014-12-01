@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:bons0="http://CocLib/com/ibm/sdp/vo" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+    <xsd:include schemaLocation="MessageBo.xsd"/>
+    <xsd:complexType name="MessageList">
+    <xsd:sequence>
+      <xsd:element maxOccurs="unbounded" minOccurs="0" name="messages" type="bons0:MessageBo"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

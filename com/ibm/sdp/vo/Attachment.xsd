@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://CocLib/com/ibm/sdp/vo">
+  <xsd:complexType name="Attachment">
+   <xsd:sequence>
+      <xsd:element minOccurs="0" name="id" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="fileName" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="fileDir" type="xsd:string"/>
+      <xsd:element minOccurs="0" name="fileDisplayName" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>
