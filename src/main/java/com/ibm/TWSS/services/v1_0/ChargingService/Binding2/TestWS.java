@@ -19,10 +19,10 @@ public class TestWS {
 		javax.wsdl.OperationType t;
 		
 		
-		String endpoint = "http://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
+		String endpoint = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
 		ChargingProxy cp  = new ChargingProxy(endpoint);
 		ChargingRequest chargingRequest = new ChargingRequest();
-		chargingRequest.setUserId("100");
+		chargingRequest.setUserId("254734252504");
 		chargingRequest.setContentId("32329_JOBS");
 		chargingRequest.setItemName("32329_JOBS");
 		chargingRequest.setContentMediaType("SMS");
