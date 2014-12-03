@@ -2,6 +2,7 @@ package com.pixelandtag.subscription;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -144,7 +145,7 @@ public class SubscriptionWorker implements Runnable{
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
 					mo.setSMS_SourceAddr(dto.getShortcode());
-					mo.setPrice(dto.getPrice());
+					mo.setPrice(BigDecimal.valueOf(dto.getPrice()));
 					mo.setPriority(1);
 					mo.setServiceid(dto.getServiceid());
 					mo.setSMS_Message_String(dto.getCmd());

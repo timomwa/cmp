@@ -1,5 +1,6 @@
 package com.pixelandtag.sms.producerthreads;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -34,6 +35,7 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
@@ -827,7 +829,7 @@ public class MTProducer extends Thread {
 			
 			stmt = conn.createStatement();
 			
-			rs  = stmt.executeQuery("SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE in_outgoing_queue = 0 AND sent=0 order by `Priority` asc"+limitStr);
+			rs  = stmt.executeQuery("SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE in_outgoing_queue = 0 AND sent=0 AND (billing_status='"+BillingStatus.NO_BILLING_REQUIRED+"' OR billing_status='"+BillingStatus.INSUFFICIENT_FUNDS+"') order by `Priority` asc"+limitStr);
 			
 			while(rs.next()){
 			
@@ -841,7 +843,7 @@ public class MTProducer extends Thread {
 				mtsms.setMsisdn(rs.getString("MSISDN"));
 				mtsms.setType(CONTENTTYPE.get(rs.getString("Type")));
 				mtsms.setSendFrom(rs.getString("SendFrom"));
-				mtsms.setPrice(rs.getDouble("price"));
+				mtsms.setPrice(BigDecimal.valueOf(rs.getDouble("price")));
 				mtsms.setPriority(rs.getInt("Priority"));
 				mtsms.setServiceid(rs.getInt("serviceid"));
 				mtsms.setTimeStamp(rs.getString("TimeStamp"));

@@ -1,5 +1,7 @@
 package com.pixelandtag.api;
 
+import java.math.BigDecimal;
+
 public abstract class GenericMessage {
 	
 	public final static String SUBSCRIPTION_BASED_CONTENT = "1";
@@ -25,14 +27,37 @@ public abstract class GenericMessage {
 	
 	
 	private int serviceid;
-	private double price;
+	private BigDecimal price;
 	private String CMP_Txid;
 	private int priority = 1;
 	private int number_of_sms = 1;
 	private boolean split_msg;
 	private int processor_id;
+	
+	
+	private BillingStatus billingStatus;
+	
+	private boolean charged;
+	
+	public boolean isCharged() {
+		return charged;
+	}
 
-	public double getPrice() {
+
+	public void setCharged(boolean charged) {
+		this.charged = charged;
+	}
+	public BillingStatus getBillingStatus() {
+		return billingStatus;
+	}
+
+
+	public void setBillingStatus(BillingStatus billingStatus) {
+		this.billingStatus = billingStatus;
+	}
+
+
+	public BigDecimal getPrice() {
 		return price;
 	}
 
@@ -44,7 +69,7 @@ public abstract class GenericMessage {
 		this.processor_id = processor_id;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 

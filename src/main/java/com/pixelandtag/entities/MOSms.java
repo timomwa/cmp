@@ -6,14 +6,15 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.pixelandtag.api.BillingStatus;
+
 public class MOSms extends GenericMO{
 	
 	public static StringBuilder sb = new StringBuilder();
 
 	private static final String U_SCR = "_";
 
-
-	
+    
 	private String mt_Sent;
 	
 	private long id;
@@ -36,6 +37,7 @@ public class MOSms extends GenericMO{
 		return attribz;
 	}
 	
+
 	public MOSms(HttpServletRequest request) {
 		
 		super(request);

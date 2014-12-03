@@ -1,5 +1,6 @@
 package com.pixelandtag.api;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -9,10 +10,15 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
+import org.hibernate.property.Getter;
 
 import com.pixelandtag.api.Settings;
+import com.pixelandtag.cmp.persistence.CMPDao;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.sms.producerthreads.Operation;
 
 /**
  * @author Timothy Mwangi Gikonyo.
@@ -42,12 +48,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	private static final String ACK_SQL = "UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?";
 
 	private static final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE re_tries=re_tries+1";
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
 
 	private static final String SEND_MT_2 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE re_tries=re_tries+1";
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?,  re_tries=re_tries+1";
 
 	private static final String TO_STATS_LOG = "INSERT INTO `celcom`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword, price, subscription) " +
 						"VALUES(?,?,?,?,?,?,?)";
@@ -87,6 +93,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public boolean submit(MOSms mo_){
 		boolean success = false;
 		try{
+			mo_  = bill(mo_);
 			success =  this.moMsgs.offerLast(mo_);
 		}catch(Exception e){
 			this.logger.error(e.getMessage(),e);
@@ -95,6 +102,36 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	}
 	
 	
+	private MOSms bill(MOSms mo_) {
+		if(mo_.getPrice().compareTo(BigDecimal.ZERO)==0){//if price is zero
+			mo_.setCharged(true);
+			mo_.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+			return mo_;
+		}
+		
+		Billable billable = new Billable();
+		billable.setMessage_id(mo_.getId());
+		billable.setEvent_type(EventType.CONTENT_PURCHASE);
+		billable.setCp_id("CONTENT360_KE");
+		billable.setCp_tx_id(System.currentTimeMillis());
+		billable.setDiscount_applied("0");
+		billable.setInqueue(false);
+		billable.setKeyword(mo_.getCMP_AKeyword());
+		billable.setMsisdn(mo_.getMsisdn());
+		billable.setOperation(mo_.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+		billable.setPrice(String.valueOf(mo_.getPrice().doubleValue()));
+		billable.setShortcode(mo_.getSMS_SourceAddr());
+		billable.setPriority(0);
+		billable = CMPDao.getInstance().saveOrUpdate(billable);
+		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
+		mo_.setPriority(0);
+		
+		return mo_;
+		
+		
+	}
+
+
 	/**
 	 * Gets the internal queue size.
 	 */
@@ -220,7 +257,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
 				pstmt.setDouble(6, 1d);
 			else
-				pstmt.setDouble(6, mo.getPrice());
+				pstmt.setDouble(6, mo.getPrice().doubleValue());
 			
 			pstmt.setBoolean(7, mo.isSubscriptionPush());
 			pstmt.executeUpdate();
@@ -260,6 +297,8 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
 		
 	}
+	
+	
 	
 	
 	
@@ -442,6 +481,8 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setString(11, String.valueOf(mo.getPrice()));
 			pstmt.setString(12, mo.getSMS_DataCodingId());
 			pstmt.setInt(13, mo.getProcessor_id());
+			pstmt.setString(14, mo.getBillingStatus().toString());
+			pstmt.setString(15, mo.getBillingStatus().toString());
 			
 			pstmt.executeUpdate();
 		

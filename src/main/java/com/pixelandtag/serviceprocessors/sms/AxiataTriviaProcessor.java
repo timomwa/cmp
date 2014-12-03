@@ -4,6 +4,7 @@ package com.pixelandtag.serviceprocessors.sms;
 /**
  *Author 			
  */
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -183,13 +184,13 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 			
 			if(mo.getMt_Sent().trim().startsWith(RM1)){
 				mo.setCMP_SKeyword(TarrifCode.RM1.getCode());//1 ringgit
-				mo.setPrice(1.0d);
+				mo.setPrice(BigDecimal.valueOf(1d));
 			}else if(mo.getMt_Sent().trim().startsWith(RM0)){
 				mo.setCMP_SKeyword(TarrifCode.RM0.getCode());//1 ringgit
-				mo.setPrice(0.0d);
+				mo.setPrice(BigDecimal.ZERO);
 			}else if(!mo.getMt_Sent().trim().startsWith(RM1.trim()) && !mo.getMt_Sent().trim().startsWith(RM0.trim())){
 				mo.setMt_Sent(RM0+mo.getMt_Sent());
-				mo.setPrice(0.0d);
+				mo.setPrice(BigDecimal.valueOf(1d));
 			}
 			
 			Connection conn = getCon();
@@ -982,7 +983,7 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 								this.mocopyWithin.setCMP_Txid(generateNextTxId());
 								regS.setMt_Sent(reply1);
 								regS.setCMP_SKeyword(TarrifCode.RM1.getCode());
-								regS.setPrice(1);
+								regS .setPrice(BigDecimal.valueOf(1d));
 								toStatsLog(regS, conn);
 								sendMT(regS);
 								

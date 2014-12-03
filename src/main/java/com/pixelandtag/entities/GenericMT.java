@@ -1,5 +1,7 @@
 package com.pixelandtag.entities;
 
+import java.math.BigDecimal;
+
 import com.pixelandtag.api.GenericMessage;
 
 public class GenericMT extends GenericMessage{
@@ -8,23 +10,24 @@ public class GenericMT extends GenericMessage{
 	protected String sms = "",id_str =  "";
 	protected String msisdn = "";
 	
-	
-	
-	public void setPrice(double price) {
+
+	public void setPrice(BigDecimal price) {
 		super.setPrice(price);
 	}
 	public void setServiceid(int serviceid) {
 		super.setServiceid(serviceid);
 	}
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return super.getPrice();
 	}
 	public int getServiceid() {
 		return super.getServiceid();
 	}
+	
 	public long getId() {
 		return id;
-	}
+	} 
+	
 	public String getIdStr() {
 		return id_str;
 	}

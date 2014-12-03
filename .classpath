@@ -34,32 +34,5 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="C:/Users/timothy/.m2/repository/org/apache/axis/axis/1.4/axis-1.4.jar">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="maven.groupId" value="org.apache.axis"/>
-			<attribute name="maven.artifactId" value="axis"/>
-			<attribute name="maven.version" value="1.4"/>
-			<attribute name="maven.scope" value="compile"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/timothy/.m2/repository/commons-discovery/commons-discovery/0.5/commons-discovery-0.5.jar">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="maven.groupId" value="commons-discovery"/>
-			<attribute name="maven.artifactId" value="commons-discovery"/>
-			<attribute name="maven.version" value="0.5"/>
-			<attribute name="maven.scope" value="compile"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/timothy/.m2/repository/org/eclipse/birt/runtime/3_7_1/javax.wsdl/1.5.1/javax.wsdl-1.5.1.jar">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="maven.groupId" value="org.eclipse.birt.runtime.3_7_1"/>
-			<attribute name="maven.artifactId" value="javax.wsdl"/>
-			<attribute name="maven.version" value="1.5.1"/>
-			<attribute name="maven.scope" value="compile"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

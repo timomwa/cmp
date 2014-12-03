@@ -2,6 +2,7 @@ package com.pixelandtag.axiata.teasers.producer;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,6 +16,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
+
 
 
 
@@ -463,7 +465,7 @@ public class BroadcastApp {
 			mo.setCMP_Txid(MechanicsS.generateNextTxId());
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0100");
-			mo.setPrice(1.0);
+			mo.setPrice(BigDecimal.valueOf(1.0d));
 			
 			MechanicsS.toStatsLog(mo, conn);
 		
@@ -566,7 +568,7 @@ public class BroadcastApp {
 			mo.setCMP_Txid(txid);
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0000");
-			mo.setPrice(0);
+			mo.setPrice(BigDecimal.valueOf(0d));
 			
 			MechanicsS.toStatsLog(mo, conn);
 			
@@ -589,7 +591,7 @@ public class BroadcastApp {
 				mo.setCMP_Txid(txid);
 				mo.setCMP_AKeyword("TRIVIA");
 				mo.setCMP_SKeyword("IOD0000");
-				mo.setPrice(0);
+				mo.setPrice(BigDecimal.valueOf(0d));
 				
 				MechanicsS.toStatsLog(mo, conn);
 				mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg, txid);
@@ -657,7 +659,7 @@ public class BroadcastApp {
 			mo.setCMP_Txid(txid);
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0000");
-			mo.setPrice(0);
+			mo.setPrice(BigDecimal.valueOf(0d));
 			
 			MechanicsS.toStatsLog(mo, conn);
 			

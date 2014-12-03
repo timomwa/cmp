@@ -2,6 +2,8 @@ package com.pixelandtag.api;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,6 +22,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
+
+
 
 
 
@@ -860,7 +864,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setString(8, mo.getCMP_AKeyword());
 			pstmt.setString(9, mo.getCMP_SKeyword());
 			
-			pstmt.setDouble(10, mo.getPrice());
+			pstmt.setDouble(10, mo.getPrice().doubleValue());
 			pstmt.setInt(11, mo.getServiceid());
 			pstmt.setInt(12, mo.getProcessor_id());
 			pstmt.setBoolean(13, mo.isSplit_msg());
@@ -979,7 +983,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			if(mt.getCMP_SKeyword()!=null && mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
 				pstmt.setDouble(14, 1.0d);//price
 			else
-				pstmt.setDouble(14, mt.getPrice());//price
+				pstmt.setDouble(14, mt.getPrice().doubleValue());//price
 			pstmt.setString(15, mt.getNewCMP_Txid());//new CMPTxid
 			pstmt.setInt(16, mt.getProcessor_id());//processor id
 			pstmt.setString(17, mt.getSms());//SMS
@@ -996,7 +1000,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
 				pstmt.setDouble(22, 1.0d);//price
 			else
-				pstmt.setDouble(22, mt.getPrice());//price
+				pstmt.setDouble(22, mt.getPrice().doubleValue());//price
 			
 			pstmt.setString(23, mt.getSMS_DataCodingId());//SMS_DataCodingId
 			pstmt.setString(24, mt.getCMPResponse());//CMPResponse
@@ -1672,7 +1676,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setMt_ack(rs.getString("mt_ack"));
 				mo.setMT_STATUS(rs.getString("MT_STATUS"));
 				mo.setServiceid(rs.getInt("serviceid"));
-				mo.setPrice(rs.getDouble("price"));
+				mo.setPrice(BigDecimal.valueOf(rs.getDouble("price")));
 				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));//added by Tim since 2012-09-21 at 1.17pm
 				mo.setSplit_msg(rs.getBoolean("msg_was_split"));
 				
@@ -2039,7 +2043,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
 				mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 				mo.setServiceid(rs.getInt("serviceid"));
-				mo.setPrice(rs.getDouble("sms_price"));
+				mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
 				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
 				mo.setSplit_msg(rs.getBoolean("split_mt"));
 				
@@ -2064,7 +2068,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
 					mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 					mo.setServiceid(rs.getInt("serviceid"));
-					mo.setPrice(rs.getDouble("sms_price"));
+					mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
 					mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
 					mo.setSplit_msg(rs.getBoolean("split_mt"));
 					
@@ -2408,7 +2412,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				logger.debug("IN VOUCHER NOTIF BLOCK!!! >>> "+mt);
 				String ticket_number_notf = null;
 				
-				if(mt.getPrice()>0){
+				if(mt.getPrice().compareTo(BigDecimal.ZERO)>0){
 					if(connectionObjIsCached){
 						
 						ticket_number_notf = UtilCelcom.getMessage(MessageType.RANDOM_NUMBER_NOTIFICATION, getConn(), language_id);

@@ -1,5 +1,6 @@
 package com.pixelandtag.staticcontent;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -374,7 +375,7 @@ public class ContentRetriever {
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());
-				mo.setPrice(sm.getPrice());
+				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
 				mo.setSMS_SourceAddr(procDTO.getShortcode());
 				mo.setPriority(1);
 				mo.setServiceid(sm.getId());

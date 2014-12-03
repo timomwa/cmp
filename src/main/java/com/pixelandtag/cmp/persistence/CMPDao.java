@@ -44,6 +44,11 @@ public class CMPDao  extends BaseDao {
 		}
 		
 	}
+	
+	public <T> T saveOrUpdate(T t) {
+		t = resource_bean.getEM().merge(t);
+        return t;
+	} 
 
 	public <T> T find(Class<T> entityClass, Object primaryKey) {
 		return resource_bean.getEM().find(entityClass, primaryKey);

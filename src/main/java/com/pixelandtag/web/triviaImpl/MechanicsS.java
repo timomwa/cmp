@@ -3,6 +3,7 @@ package com.pixelandtag.web.triviaImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+
 
 
 
@@ -869,7 +871,7 @@ public class MechanicsS{
 				mtsms.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 				mtsms.setServiceid(rs.getInt("serviceid"));
 				mtsms.setMT_STATUS(rs.getString("MT_STATUS"));
-				mtsms.setPrice(rs.getDouble("price"));
+				mtsms.setPrice(BigDecimal.valueOf(rs.getDouble("price")));
 			}
 			
 			
@@ -4022,7 +4024,7 @@ public class MechanicsS{
 			pstmt.setString(3, mo.getCMP_Txid());
 			pstmt.setString(4, mo.getCMP_AKeyword());
 			pstmt.setString(5, mo.getCMP_SKeyword());
-			pstmt.setDouble(6, mo.getPrice());
+			pstmt.setDouble(6, mo.getPrice().doubleValue());
 			
 			pstmt.executeUpdate();
 			

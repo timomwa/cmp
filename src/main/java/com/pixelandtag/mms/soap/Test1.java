@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -65,6 +66,14 @@ public class Test1 {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+		
+		
+		double value = 0.58;
+		System.out.println(new BigDecimal(value));
+		System.out.println(BigDecimal.valueOf(value));
+		
+			if(true)
+				return;
 		 	FileReader fr = null;  
 	        BufferedReader br = null;  
 	        String line = "";  
