@@ -35,7 +35,7 @@ public class TestWS {
 		chargingRequest.setSubscriptionName("32329_JOBS");
 		chargingRequest.setDeliveryChannel("SMS");
 		chargingRequest.setSubscriptionExternalId("32329_JOBS");
-		chargingRequest.setCurrency("KES");
+		chargingRequest.setCurrency("Kshs");
 		chargingRequest.setCopyrightId("content360");
 		chargingRequest.setSMSkeyword("JOBS");
 		chargingRequest.setSrcCode("32329_JOBS");

@@ -41,31 +41,31 @@ public class WebServiceClient {
 		 			     "<circleId></circleId>\r\n" +
 		 			      "<lineOfBusiness></lineOfBusiness>\r\n" + 
 		 			     "<customerSegment></customerSegment>\r\n" +
-		 			      "<contentMediaType>text</contentMediaType>\r\n" + 
-		 			     "<serviceId>32329_JOBS</serviceId>\r\n" + 
+		 			      "<contentMediaType>32329_JOBS</contentMediaType>\r\n" + 
+		 			     "<serviceId>JOBS</serviceId>\r\n" + 
 		 			    "<parentId></parentId>\r\n" +
 		 			      "<actualPrice>5</actualPrice>\r\n" + 
-		 			      "<basePrice>1</basePrice>\r\n" +
+		 			      "<basePrice>5</basePrice>\r\n" +
 		 			      "<discountApplied>0</discountApplied>\r\n" +
 		 			     "<paymentMethod></paymentMethod>\r\n" +
 		 			    "<revenuePercent></revenuePercent>\r\n" +
 		 			   "<netShare>0</netShare>\r\n" +
 		 			      "<cpId>CONTENT360_KE</cpId>\r\n" +
 		 			     "<customerClass></customerClass>\r\n" +
-		 			      "<eventType>Content Purchase</eventType>\r\n" +
+		 			      "<eventType>Subscription Purchase</eventType>\r\n" +//very important
 		 			     "<localTimeStamp></localTimeStamp>\r\n" +
-		 			    "<transactionId></transactionId>\r\n" +
+		 			    "<transactionId>32329</transactionId>\r\n" +
 		 			   "<subscriptionTypeCode>abcd</subscriptionTypeCode>\r\n" +
 		 			  "<subscriptionName>0</subscriptionName>\r\n" +
 		 			 "<parentType></parentType>\r\n" +
 		 			      "<deliveryChannel>SMS</deliveryChannel>\r\n" +
 		 			     "<subscriptionExternalId>0</subscriptionExternalId>\r\n" +
 		 			     "<contentSize></contentSize>\r\n" +
-		 			      "<currency>0</currency>\r\n" + 
+		 			      "<currency>Kshs</currency>\r\n" + 
 		 			      "<copyrightId>mauj</copyrightId>\r\n" + 
-		 			     "<cpTransactionId>12345678777</cpTransactionId>\r\n" + 
+		 			     "<cpTransactionId>123456787785</cpTransactionId>\r\n" + 
 		 			    "<copyrightDescription>copyright</copyrightDescription>\r\n" + 
-		 			      "<sMSkeyword>sms</sMSkeyword>\r\n" + 
+		 			      "<sMSkeyword>JOBS</sMSkeyword>\r\n" + 
 		 			      "<srcCode>32329</srcCode>\r\n" + 
 		 			     "<contentUrl>www.content360.co.ke</contentUrl>\r\n" + 
 		 			    "<subscriptiondays>2</subscriptiondays>\r\n" +

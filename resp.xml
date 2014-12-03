@@ -1,21 +1,2 @@
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-	xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Header />
-	<soapenv:Body>
-		<p:chargeResponse xsi:type="p:chargeResponse_._type"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vo="http://ChargingProcess/com/ibm/sdp/services/charging/vo"
-			xmlns:p="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging">
-			<outputMsg xsi:type="vo:ChargingResponse">
-				<status>Failure</status>
-				<transactionId>twss_3093fd9a9db0b6d</transactionId>
-				<error>
-					<errorCode>TWSS_101</errorCode>
-					<errorMessage>Currency value 0 is(are) missing or wrong. If error
-						persist check the lenght of value</errorMessage>
-				</error>
-				<cpTransactionId>12345678777</cpTransactionId>
-			</outputMsg>
-		</p:chargeResponse>
-	</soapenv:Body>
-</soapenv:Envelope>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Header/><soapenv:Body><p:chargeResponse xsi:type="p:chargeResponse_._type" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vo="http://ChargingProcess/com/ibm/sdp/services/charging/vo" xmlns:p="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging"><outputMsg xsi:type="vo:ChargingResponse"><status>Success</status><transactionId>twss_574290fcf6df39d</transactionId><error/><cpTransactionId>123456787785</cpTransactionId></outputMsg></p:chargeResponse>
+</soapenv:Body></soapenv:Envelope>
