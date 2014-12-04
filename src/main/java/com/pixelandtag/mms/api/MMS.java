@@ -45,7 +45,7 @@ public class MMS extends GenericMessage {
 	private String mms_text = "MMS First Text";
 	private String password_username = "inmobia:inmobia123";//HTTP authentication - should not be hardcoded!!!!!
 	private boolean paidFor = false;
-	private ERROR billingStatus;
+	private ERROR billingStatus_;
 	/**
 	 * The txId to wait for to succeed before sending the SMS.
 	 */
@@ -53,12 +53,11 @@ public class MMS extends GenericMessage {
 	
 	
 	
-	
-	public ERROR getBillingStatus() {
-		return billingStatus;
-	}
+	/*public ERROR getBillingStatus() {
+		return billingStatus_;
+	}*/
 	public void setBillingStatus(ERROR billingStatus) {
-		this.billingStatus = billingStatus;
+		this.billingStatus_ = billingStatus;
 	}
 	public String getWait_for_txId() {
 		return wait_for_txId;

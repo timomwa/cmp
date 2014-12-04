@@ -197,11 +197,8 @@ public class MTHttpSender implements Runnable{
 	    String password = HTTPMTSenderApp.props.getProperty("db_password");
 	    
 	    
-  try {
-			
-			
-		    
-		    
+	    try {
+	    	
 			dbpds = new DBPoolDataSource();
 			dbpds.setName(this.name+"-DS");
 			dbpds.setValidatorClassName("snaq.db.Select1Validator");
@@ -215,7 +212,7 @@ public class MTHttpSender implements Runnable{
 			dbpds.setMaxPool(2);
 			dbpds.setMaxSize(3);
 			dbpds.setIdleTimeout(3600);  // Specified in seconds.
-			 dbpds.setValidatorClassName("snaq.db.Select1Validator");
+			dbpds.setValidatorClassName("snaq.db.Select1Validator");
 			dbpds.setValidationQuery("SELECT 'test'");
 			
 			logger.info("Initialized db pool ok!");
@@ -485,7 +482,7 @@ public class MTHttpSender implements Runnable{
 			
 	        final int RESP_CODE = response.getStatusLine().getStatusCode();
 			
-			logger.debug("resp: :::::::::::::::::::::::::::::RESP_CODE["+RESP_CODE+"]:::::::::::::::::::::: resp:");
+			logger.info("resp: :::::::::::::::::::::::::::::RESP_CODE["+RESP_CODE+"]:::::::::::::::::::::: resp:");
 			
 			mt.setCMPResponse("PCM"+RESP_CODE);
 			

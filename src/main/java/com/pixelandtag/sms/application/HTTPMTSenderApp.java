@@ -42,8 +42,6 @@ public class HTTPMTSenderApp extends Thread {
 		//Settings.database = props.getProperty("DATABASE");
 		
 		
-		System.out.println();
-		
 		urlparams = new URLParams(props);
 		
 		this.constr = props.getProperty("constr");
@@ -86,13 +84,9 @@ public class HTTPMTSenderApp extends Thread {
 		
 		logger.info("::>>>????::CONFIG::::\n"+sb.toString());
 		
-		setDaemon(true);//we've all other threads waiting for this
-		
+		setDaemon(true);//we've all other threads waiting for this		
 	
 	}
-	
-	
-	
 	
 	public static void main(String[] args) throws Exception{
 		

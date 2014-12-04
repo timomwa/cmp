@@ -10,13 +10,12 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
-import org.hibernate.property.Getter;
 
 import com.pixelandtag.api.Settings;
-import com.pixelandtag.cmp.persistence.CMPDao;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
 
@@ -109,20 +108,34 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			return mo_;
 		}
 		
-		Billable billable = new Billable();
+	
+		Billable billable = BillingService.find(Billable.class, "cp_tx_id", (Long.parseLong(mo_.getCMP_Txid())));
+		if(billable==null)
+			billable  = new Billable();
+		else
+			return mo_;
+		
+		
 		billable.setMessage_id(mo_.getId());
 		billable.setEvent_type(EventType.CONTENT_PURCHASE);
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(System.currentTimeMillis());
+		billable.setCp_tx_id(Long.valueOf(mo_.getCMP_Txid()));
+		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
 		billable.setDiscount_applied("0");
-		billable.setInqueue(false);
-		billable.setKeyword(mo_.getCMP_AKeyword());
+		billable.setKeyword(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setMsisdn(mo_.getMsisdn());
+		billable.setIn_outgoing_queue(0l);
+		billable.setMaxRetriesAllowed(1L);
+		billable.setProcessed(0L);
+		billable.setRetry_count(0L);
 		billable.setOperation(mo_.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
-		billable.setPrice(String.valueOf(mo_.getPrice().doubleValue()));
+		billable.setPrice(mo_.getPrice());
 		billable.setShortcode(mo_.getSMS_SourceAddr());
-		billable.setPriority(0);
-		billable = CMPDao.getInstance().saveOrUpdate(billable);
+		billable.setPriority(0l);
+		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		
+		
+		BillingService.saveOrUpdate(billable);
 		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
 		mo_.setPriority(0);
 		

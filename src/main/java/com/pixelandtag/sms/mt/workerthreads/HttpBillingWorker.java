@@ -27,11 +27,13 @@ import org.apache.log4j.Logger;
 import snaq.db.DBPoolDataSource;
 
 import com.inmobia.util.StopWatch;
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.autodraw.Alarm;
+import com.pixelandtag.cmp.persistence.CMPDao;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.URLParams;
@@ -42,23 +44,21 @@ import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
 
-public class HttpBillingWorker {
+public class HttpBillingWorker implements Runnable {
 	
 private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 	
-	private int http_timeout;
+	private int http_timeout = 30000;
 	private HttpClient httpsclient;
 	private int retry_per_msg;
 	private int pollWait;
-	private DBPoolDataSource dbpds = null;
-	private CelcomHTTPAPI celcomAPI;
+	//private DBPoolDataSource dbpds = null;
 	private StopWatch watch;
 	private boolean run = true;
 	private boolean finished = false;
 	private String name;
 	private boolean busy = false;
 	private List<NameValuePair> qparams = null;
-	private String connStr;
 	private volatile boolean success = true;
 	private volatile String message = "";
 	private volatile int sms_idx = 0;
@@ -89,7 +89,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 
 
 
-	private String mtUrl;
+	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
 
 
 
@@ -133,7 +133,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 		}
 	}
 
-	public HttpBillingWorker(int pollWait_, String name_,URLParams urlp_, String constr, HttpClient httpclient_) throws Exception{
+	public HttpBillingWorker( String name_,HttpClient httpclient_) throws Exception{
 		
 		this.watch = new StopWatch();
 		
@@ -141,47 +141,23 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 		
 		watch.start();
 		
-		this.connStr = constr;
-		
-		this.http_timeout = urlp_.getHttp_timeout();
-		
-		this.retry_per_msg = urlp_.getRetry_per_msg();
-		
-		this.mtUrl = urlp_.getMturl();
-		
-		this.urlp = urlp_;
-		
-		this.pollWait = pollWait_;
-		
-		this.msg_part_wait = urlp_.getMsg_part_wait();
-		
-		this.celcomAPI = new CelcomImpl(this.connStr,"THRD_"+name);
-		
 		this.httpsclient = httpclient_;
 		
 		qparams = new LinkedList<NameValuePair>();
 		
-		this.celcomAPI.setFr_tz(urlp.getSERVER_TZ());
-		this.celcomAPI.setTo_tz(urlp.getCLIENT_TZ());
-		
-		
-		
-		
-		int vendor = DriverUtilities.MYSQL;
+		/*int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
 	    String host = HTTPMTSenderApp.props.getProperty("db_host");
 	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
 	    String url = DriverUtilities.makeURL(host, dbName, vendor);
 	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
+	    String password = HTTPMTSenderApp.props.getProperty("db_password");*/
 	    
 	    
-  try {
-			
+	    try {
 			
 		    
-		    
-			dbpds = new DBPoolDataSource();
+			/*dbpds = new DBPoolDataSource();
 			dbpds.setName(this.name+"-DS-BBL");
 			dbpds.setValidatorClassName("snaq.db.Select1Validator");
 			dbpds.setName("celcom-impl");
@@ -194,8 +170,8 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 			dbpds.setMaxPool(2);
 			dbpds.setMaxSize(3);
 			dbpds.setIdleTimeout(3600);  // Specified in seconds.
-			 dbpds.setValidatorClassName("snaq.db.Select1Validator");
-			dbpds.setValidationQuery("SELECT 'test'");
+			dbpds.setValidatorClassName("snaq.db.Select1Validator");
+			dbpds.setValidationQuery("SELECT 'test'");*/
 			
 			logger.info("Initialized db pool ok!");
 			
@@ -205,15 +181,13 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 		
 		}finally{}
   
-		logger.info("this.celcomAPI.getFr_tz():::::: "+this.celcomAPI.getFr_tz());
-		logger.info("this.celcomAPI.getTo_tz():::::: "+this.celcomAPI.getTo_tz());
 		
 	
 	}
 	
 	
 	
-	public Connection getConn() {
+	/*public Connection getConn() {
 		
 		try {
 			
@@ -228,7 +202,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 		}finally{
 		
 		}
-	}
+	}*/
 	
 
 	public void run() {
@@ -237,8 +211,6 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 			
 			pauze();//wait while producer gets ready
 			
-			celcomAPI.setFr_tz(urlp.getSERVER_TZ());//set timezones
-			celcomAPI.setTo_tz(urlp.getCLIENT_TZ());//set timezones
 			
 			watch.stop();
 			
@@ -272,8 +244,6 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 				
 			}
 			
-			celcomAPI.myfinalize();
-			
 			setFinished(true);
 			
 			setBusy(false);
@@ -286,7 +256,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 			//Hasn't happened so far during testing. Not expected to happen during runtime
 			//please send alarm
 			
-			Connection conn = null;
+			/*Connection conn = null;
 			try{
 				conn = getConn();
 				alarm.send(MechanicsS.getSetting("alarm_emails", conn), "Malaysia Trivia: SEVERE:", "Hi,\n\n We encountered a fatal exception. Please check Malaysia HTTP Sender app.\n\n  Regards");
@@ -296,7 +266,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 				try{
 					conn.close();
 				}catch(Exception e4){}
-			}
+			}*/
 			
 		}finally{
 			
@@ -354,7 +324,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 	private void charge(Billable  billable){
 		
 		
-		Connection conn = null;
+		//Connection conn = null;
 		this.success  = true;
 		
 		setBusy(true);
@@ -366,7 +336,7 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 		
 		try {
 			
-			conn = getConn();
+			//conn = getConn();
 			
 			watch.start();
 			
@@ -394,17 +364,32 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 
 			 System.out.println("RESP CODE : "+RESP_CODE);
 			 System.out.println("RESP XML : "+resp);
+			 
+			 billable.setResp_status_code(String.valueOf(RESP_CODE));
 			
 			logger.debug("resp: :::::::::::::::::::::::::::::RESP_CODE["+RESP_CODE+"]:::::::::::::::::::::: resp:");
 			
+			billable.setProcessed(1L);
 			
 			if (RESP_CODE == HttpStatus.SC_OK) {
 				
-				//mark as billing successful
+				
+				billable.setRetry_count(billable.getRetry_count()+1);
 				//remove from billing queue
 				
 				this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
+				billable.setSuccess(this.success );
 				
+				
+				if(!this.success){
+					String err = getErrorCode(resp);
+					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
+					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+getErrorMessage(resp)+"]:::::::::::::::::::::: resp:");
+					billable.setResp_status_code(err);
+					
+				}
+				
+								
 			}else if(RESP_CODE == 400){
 				
 				//log error
@@ -472,13 +457,20 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 				
 			} finally{
 				
+				billable.setProcessed(1L);
+				billable.setIn_outgoing_queue(0L);
+				BillingService.saveOrUpdate(billable);
 				
-				
-				
+				if(billable.isSuccess())
+					BillingService.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+				if("TWSS_101".equals(billable.getResp_status_code()))
+					BillingService.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 				//postMethod.;
 				//client.executeMethod(postMethod);
 				
 				if(!this.success){//return back to queue if we did not succeed
+					
+					
 					
 					
 					//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
@@ -517,9 +509,9 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 				
 				
 				
-				try{
+			/*	try{
 					conn.close();
-				}catch(Exception ex){}
+				}catch(Exception ex){}*/
 	            
 	            
 			}
@@ -529,6 +521,18 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 	
 	
 	
+
+	
+	private  String getErrorMessage(String resp) {
+		int start = resp.indexOf("<errorMessage>")+"<errorMessage>".length();
+		int end  = resp.indexOf("</errorMessage>");
+		return resp.substring(start, end);
+	}
+	private String getErrorCode(String resp) {
+		int start = resp.indexOf("<errorCode>")+"<errorCode>".length();
+		int end  = resp.indexOf("</errorCode>");
+		return resp.substring(start, end);
+	}
 
 	private void printHeader() {
 		logger.debug("\n===================HEADER=========================\n");

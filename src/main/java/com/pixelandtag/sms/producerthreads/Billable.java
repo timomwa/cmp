@@ -1,6 +1,8 @@
 package com.pixelandtag.sms.producerthreads;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,9 +11,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 import com.pixelandtag.entities.MTsms;
@@ -24,7 +30,8 @@ public class Billable implements Serializable {
 	
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GenericGenerator(name="gen",strategy="increment")
+	@GeneratedValue(generator="gen")
 	private Long id;
 	
 	/**
@@ -36,13 +43,20 @@ public class Billable implements Serializable {
 	 * HTTP status code
 	 */
 	@Column(name = "resp_status_code")
-	private int resp_status_code;
+	private String resp_status_code;
+	
+	
+	/**
+	 * HTTP status code
+	 */
+	@Column(name = "success")
+	private Boolean success;
 	
 	/**
 	 * the message id
 	 */
-	@Column(name = "resp_status_code")
-	private long message_id;
+	@Column(name = "message_id")
+	private Long message_id;
 	
 	
 	/**
@@ -51,12 +65,17 @@ public class Billable implements Serializable {
 	 */
 	@Column(name = "in_outgoing_queue")
 	@Index(name="outq_idx")
-	private int in_outgoing_queue;
+	private Long in_outgoing_queue;
 	
 	@PrePersist
 	@PreUpdate
 	public void setDefaults(){
-		
+		if(timeStamp==null)
+			timeStamp = new Date();
+		if(success==null)
+			success = new Boolean(false);
+		if(processed==null)
+			processed = new Long(0);
 	}
 	
 	/**
@@ -64,13 +83,18 @@ public class Billable implements Serializable {
 	 */
 	@Column(name = "priority")
 	@Index(name="priority_idx")
-	private int priority;
+	private Long priority;
 	
-	@Column(name = "ttl")
-	private int ttl;
+	@Column(name = "timeStamp", insertable = false, updatable = false)
+	@Index(name="timeStamp_idx")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date timeStamp;
+	
+	@Column(name = "maxRetriesAllowed")
+	private Long maxRetriesAllowed;
 	
 	@Column(name = "retry_count")
-	private int retry_count;
+	private Long retry_count;
 	
 	@Column(name = "operation")
 	private String operation;
@@ -87,7 +111,7 @@ public class Billable implements Serializable {
 	private String keyword;
 	
 	@Column(name = "price")
-	private String price;
+	private BigDecimal price;
 	
 	@Column(name = "cp_id")
 	private String cp_id;
@@ -101,58 +125,59 @@ public class Billable implements Serializable {
 	@Column(name = "discount_applied")
 	private String discount_applied;
 	
-	@Column(name = "cp_tx_id")
-	private long cp_tx_id;
+	@Column(name = "cp_tx_id", unique=true)
+	@Index(name="cp_idtxid_idx")
+	private Long cp_tx_id;
 	
 	@Column(name = "tx_id")
-	private long tx_id;
-	
-	@Column(name = "inqueue")
-	private boolean inqueue;
+	private Long tx_id;
 	
 	@Column(name = "processed")
-	private boolean processed;
+	@Index(name="processed_idx")
+	private Long processed;
 	
 	
 	
 	
-	public int getResp_status_code() {
+	public String getResp_status_code() {
 		return resp_status_code;
 	}
 
-	public void setResp_status_code(int resp_status_code) {
+	public void setResp_status_code(String resp_status_code) {
 		this.resp_status_code = resp_status_code;
 	}
 
-	public int getIn_outgoing_queue() {
+	public Long getIn_outgoing_queue() {
 		return in_outgoing_queue;
 	}
 
-	public void setIn_outgoing_queue(int in_outgoing_queue) {
+	public void setIn_outgoing_queue(Long in_outgoing_queue) {
 		this.in_outgoing_queue = in_outgoing_queue;
 	}
 
-	public int getPriority() {
+	public Long getPriority() {
 		return priority;
 	}
 
-	public void setPriority(int priority) {
+	public void setPriority(Long priority) {
 		this.priority = priority;
 	}
 
-	public int getTtl() {
-		return ttl;
+	
+
+	public Long getMaxRetriesAllowed() {
+		return maxRetriesAllowed;
 	}
 
-	public void setTtl(int ttl) {
-		this.ttl = ttl;
+	public void setMaxRetriesAllowed(Long maxRetriesAllowed) {
+		this.maxRetriesAllowed = maxRetriesAllowed;
 	}
 
-	public int getRetry_count() {
+	public Long getRetry_count() {
 		return retry_count;
 	}
 
-	public void setRetry_count(int retry_count) {
+	public void setRetry_count(Long retry_count) {
 		this.retry_count = retry_count;
 	}
 
@@ -167,6 +192,14 @@ public class Billable implements Serializable {
 
 	
 	
+
+	public Date getTimeStamp() {
+		return timeStamp;
+	}
+
+	public void setTimeStamp(Date timeStamp) {
+		this.timeStamp = timeStamp;
+	}
 
 	public String getOperation() {
 		return operation;
@@ -200,11 +233,11 @@ public class Billable implements Serializable {
 		this.keyword = keyword;
 	}
 
-	public String getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(String price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -248,7 +281,7 @@ public class Billable implements Serializable {
 		this.cp_tx_id = cp_tx_id;
 	}
 
-	public long getTx_id() {
+	public Long getTx_id() {
 		return tx_id;
 	}
 
@@ -256,23 +289,23 @@ public class Billable implements Serializable {
 		this.tx_id = tx_id;
 	}
 
-	public boolean isInqueue() {
-		return inqueue;
-	}
-
-	public void setInqueue(boolean inqueue) {
-		this.inqueue = inqueue;
-	}
-
-	public boolean isProcessed() {
+	public Long isProcessed() {
 		return processed;
 	}
 
-	public void setProcessed(boolean processed) {
+	public void setProcessed(Long processed) {
 		this.processed = processed;
 	}
 	
 	
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
 
 	public long getMessage_id() {
 		return message_id;
@@ -284,16 +317,16 @@ public class Billable implements Serializable {
 
 	public String getChargeXML(String base_charge_xml) {
 		return base_charge_xml
-				.replaceAll("{OPERATION}", getOperation())
-				.replaceAll("{MSISDN}", getMsisdn())
-				.replaceAll("{SHORTCODE}", getShortcode())
-				.replaceAll("{KEYWORD}", getKeyword())
-				.replaceAll("{SERVICE_ID}", getService_id())
-				.replaceAll("{PRICE}", getPrice())
-				.replaceAll("{CP_ID}", getCp_id())
-				.replaceAll("{EVENT_TYPE}", getEvent_type().toString())
-				.replaceAll("{TX_ID}", String.valueOf(getTx_id()))
-				.replaceAll("{CP_TX_ID}", String.valueOf(getCp_tx_id()));
+				.replaceAll("\\{OPERATION\\}", getOperation())
+				.replaceAll("\\{MSISDN\\}", getMsisdn())
+				.replaceAll("\\{SHORTCODE\\}", getShortcode())
+				.replaceAll("\\{KEYWORD\\}", getKeyword())
+				.replaceAll("\\{SERVICE_ID\\}", getService_id())
+				.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()))
+				.replaceAll("\\{CP_ID\\}", getCp_id())
+				.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().toString())
+				.replaceAll("\\{TX_ID\\}", String.valueOf(getTx_id()))
+				.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
 	}
 
 	public String toString() {

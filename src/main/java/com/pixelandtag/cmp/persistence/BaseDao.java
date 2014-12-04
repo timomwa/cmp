@@ -3,6 +3,8 @@ package com.pixelandtag.cmp.persistence;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -32,5 +34,6 @@ public class BaseDao {
 		}
 		brConsoleReader = new BufferedReader(new InputStreamReader(System.in));
 	}
+	
 
 }

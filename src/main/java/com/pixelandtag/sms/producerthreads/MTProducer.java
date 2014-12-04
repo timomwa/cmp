@@ -829,7 +829,7 @@ public class MTProducer extends Thread {
 			
 			stmt = conn.createStatement();
 			
-			rs  = stmt.executeQuery("SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE in_outgoing_queue = 0 AND sent=0 AND (billing_status='"+BillingStatus.NO_BILLING_REQUIRED+"' OR billing_status='"+BillingStatus.INSUFFICIENT_FUNDS+"') order by `Priority` asc"+limitStr);
+			rs  = stmt.executeQuery("SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE in_outgoing_queue = 0 AND sent=0 AND billing_status in ('"+BillingStatus.NO_BILLING_REQUIRED+"' , '"+BillingStatus.INSUFFICIENT_FUNDS+"', '"+BillingStatus.SUCCESSFULLY_BILLED+"') order by `Priority` asc"+limitStr);
 			
 			while(rs.next()){
 			
