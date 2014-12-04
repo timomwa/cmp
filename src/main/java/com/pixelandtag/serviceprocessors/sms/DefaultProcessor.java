@@ -295,8 +295,8 @@ public class DefaultProcessor extends GenericServiceProcessor {
 									if(mms!=null){
 										
 										mms.setPaidFor(false);
-										mms.setLinked_id(mo.getCMP_Txid());
-										mms.setWait_for_txId(mo.getCMP_Txid());
+										mms.setLinked_id(""+mo.getCMP_Txid());
+										mms.setWait_for_txId(""+mo.getCMP_Txid());
 										
 										if(mm7API.queueMMSForSending(mms)){
 											logger.debug("queued mms to be sent : "+mms.toString());

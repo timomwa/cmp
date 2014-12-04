@@ -2,6 +2,8 @@ package com.pixelandtag.api;
 
 import java.math.BigDecimal;
 
+import com.pixelandtag.sms.producerthreads.EventType;
+
 public abstract class GenericMessage {
 	
 	public final static String SUBSCRIPTION_BASED_CONTENT = "1";
@@ -28,11 +30,13 @@ public abstract class GenericMessage {
 	
 	private int serviceid;
 	private BigDecimal price;
-	private String CMP_Txid;
+	private long CMP_Txid;
 	private int priority = 1;
 	private int number_of_sms = 1;
 	private boolean split_msg;
 	private int processor_id;
+	
+	private EventType eventType;
 	
 	
 	private BillingStatus billingStatus;
@@ -41,6 +45,16 @@ public abstract class GenericMessage {
 	
 	public boolean isCharged() {
 		return charged;
+	}
+
+
+	public EventType getEventType() {
+		return eventType;
+	}
+
+
+	public void setEventType(EventType eventType) {
+		this.eventType = eventType;
 	}
 
 
@@ -105,11 +119,11 @@ public abstract class GenericMessage {
 		this.priority = priority;
 	}
 
-	public void setCMP_Txid(String CMP_Txid_) {
+	public void setCMP_Txid(long CMP_Txid_) {
 		this.CMP_Txid = CMP_Txid_;
 	}
 	
-	public String getCMP_Txid() {
+	public long getCMP_Txid() {
 		return CMP_Txid;
 	}
 

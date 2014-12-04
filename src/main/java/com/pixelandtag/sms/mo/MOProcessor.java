@@ -168,7 +168,7 @@ public class MOProcessor implements Runnable {
 						watch.start();
 
 						for (MOSms moSms : moSMSSes) {
-								
+							
 							logger.debug(">>>>>>>>>>> moSms.getProcessor_id() : "+moSms.getProcessor_id());
 							
 							final ServiceProcessorI servp = MTProducer.getFreeProcessor(moSms.getProcessor_id());

@@ -890,7 +890,7 @@ public class MTProducer extends Thread {
 				
 				
 				if(rs.getString("CMP_Txid")!=null){// && !rs.getString("CMP_TxID").equalsIgnoreCase("NULL") )
-					mtsms.setCMP_Txid(rs.getString("CMP_Txid"));
+					mtsms.setCMP_Txid(rs.getLong("CMP_Txid"));
 					logger.debug(">>>>>>>>>>>>>>>>>>>>>>: CMP_Txid "+rs.getString("CMP_Txid"));
 				}
 				

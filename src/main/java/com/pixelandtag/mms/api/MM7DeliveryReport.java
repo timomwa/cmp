@@ -43,7 +43,7 @@ public class MM7DeliveryReport extends GenericMessage implements Serializable {
 		}else{
 			
 			String transactionID = header.getTextContent();
-			this.setCMP_Txid(header.getTextContent());
+			this.setCMP_Txid(Long.valueOf(header.getTextContent()));
 			//System.out.println("header.getTextContent(): "+header.getTextContent());
 			
 			

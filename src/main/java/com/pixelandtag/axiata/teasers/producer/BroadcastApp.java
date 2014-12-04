@@ -506,8 +506,8 @@ public class BroadcastApp {
 					if(mms!=null){
 						
 						mms.setPaidFor(false);
-						mms.setLinked_id(mo.getCMP_Txid());
-						mms.setWait_for_txId(mo.getCMP_Txid());
+						mms.setLinked_id(String.valueOf(mo.getCMP_Txid()));
+						mms.setWait_for_txId(String.valueOf(mo.getCMP_Txid()));
 						
 						if(queueMMSForSending(mms,  getConnection(this.conStr))){
 							logger.info("mo.getCMP_Txid():::::::::::::: "+mo.getCMP_Txid()+" queued mms to be sent : "+mms.toString());
@@ -562,7 +562,7 @@ public class BroadcastApp {
 			
 			MOSms mo = new MOSms();
 			
-			String txid = MechanicsS.generateNextTxId();
+			long txid = MechanicsS.generateNextTxId();
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(txid);
@@ -653,7 +653,7 @@ public class BroadcastApp {
 			
 			MOSms mo = new MOSms();
 			
-			String txid = MechanicsS.generateNextTxId();
+			long txid = MechanicsS.generateNextTxId();
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(txid);

@@ -31,6 +31,8 @@ import snaq.db.DBPoolDataSource;
 
 
 
+
+
 //import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.beans.MessageType;
@@ -46,6 +48,7 @@ import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.inmobia.luckydip.api.LuckyDipFactory;
 import com.inmobia.luckydip.api.LuckyDipI;
+import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class CelcomImpl implements CelcomHTTPAPI, Serializable{
@@ -312,16 +315,16 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 		try {
 			
-			String cmpTxid = notif.getCMP_Txid();
+			long cmpTxid = notif.getCMP_Txid();
 			
 			if(connectionObjIsCached){
 				
 				pstmt = getConn().prepareStatement("SELECT CMP_Txid FROM `celcom`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-				pstmt.setString(1, notif.getCMP_Txid());
-				pstmt.setString(2, notif.getCMP_Txid());
+				pstmt.setLong(1, notif.getCMP_Txid());
+				pstmt.setLong(2, notif.getCMP_Txid());
 				rs = pstmt.executeQuery();
 				if(rs.next()){
-					cmpTxid = rs.getString("CMP_Txid");
+					cmpTxid = rs.getLong("CMP_Txid");
 				}
 				
 				if(rs!=null)
@@ -336,11 +339,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				conn = getConn();
 				
 				pstmt = conn.prepareStatement("SELECT CMP_Txid FROM `celcom`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-				pstmt.setString(1, notif.getCMP_Txid());
-				pstmt.setString(2, notif.getCMP_Txid());
+				pstmt.setLong(1, notif.getCMP_Txid());
+				pstmt.setLong(2, notif.getCMP_Txid());
 				rs = pstmt.executeQuery();
 				if(rs.next()){
-					cmpTxid = rs.getString("CMP_Txid");
+					cmpTxid = rs.getLong("CMP_Txid");
 				}
 				
 				if(rs!=null)
@@ -352,7 +355,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			}
 			
-			pstmt.setString(1, cmpTxid);
+			pstmt.setLong(1, cmpTxid);
 			
 			rs = pstmt.executeQuery();
 			
@@ -380,8 +383,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 						pstmt = conn.prepareStatement("SELECT SUB_Mobtel,CMP_Keyword,CMP_SKeyword,serviceid,price from celcom.messagelog WHERE (CMP_Txid = ?)  OR (newCMP_Txid = ?)");
 					}
 					
-					pstmt.setString(1, cmpTxid);
-					pstmt.setString(2, cmpTxid);
+					pstmt.setLong(1, cmpTxid);
+					pstmt.setLong(2, cmpTxid);
 					
 					rs = pstmt.executeQuery();
 					
@@ -413,7 +416,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					
 					pstmt.setInt(1, serviceid);
 					pstmt.setString(2, msisdn);
-					pstmt.setString(3, cmpTxid);
+					pstmt.setLong(3, cmpTxid);
 					pstmt.setString(4, CMP_Keyword);
 					pstmt.setString(5, CMP_SKeyword);
 					pstmt.setDouble(6, priceTbc);
@@ -477,7 +480,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				pstmt.setString(1, notif.getErrorCode().toString());
 				pstmt.setInt(2, (((priceTbc>0.0) && notif.getErrorCode().equals(ERROR.Success)) ? 1: 0 )   );
-				pstmt.setString(3, cmpTxid);
+				pstmt.setLong(3, cmpTxid);
 				
 				success = pstmt.executeUpdate()>0;
 				
@@ -550,8 +553,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			int mt_ack = -1;
 			
 			String msisdn  = null;
-			String cMP_Txid = notif.getCMP_Txid();
-			String newCMP_Txid = null; 
+			long cMP_Txid = notif.getCMP_Txid();
+			long newCMP_Txid; 
 			
 			boolean isRetry = false;
 			
@@ -571,11 +574,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				price = rs.getDouble("price");
 				
-				cMP_Txid = rs.getString("CMP_Txid");
+				cMP_Txid = rs.getLong("CMP_Txid");
 				
-				newCMP_Txid = rs.getString("newCMP_Txid");
+				newCMP_Txid = rs.getLong("newCMP_Txid");
 				
-				isRetry = newCMP_Txid.trim().equals(notif.getCMP_Txid().trim());
+				isRetry = newCMP_Txid==notif.getCMP_Txid();
 				
 				logger.debug("SMS FOUND: CMP_Txid = "+cMP_Txid+" re-try CMP_Txid = "+notif.getCMP_Txid());
 			
@@ -605,7 +608,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				}
 				
 				pstmt.setString(1, notif.getErrorCode().toString());
-				pstmt.setString(2, cMP_Txid);
+				pstmt.setLong(2, cMP_Txid);
 				
 				success = pstmt.executeUpdate()>0;
 				
@@ -727,7 +730,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#retrieveMO(java.lang.String)
 	 */
-	public MOSms retrieveMO(String cMP_Txid) {
+	public MOSms retrieveMO(long cMP_Txid) {
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -818,7 +821,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 		PreparedStatement pstmt = null;
 		
-		if(mo.getCMP_Txid()==null)
+		if(mo.getCMP_Txid()<1)
 			mo.setCMP_Txid(generateNextTxId());
 		
 		
@@ -839,8 +842,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				mo = resolveKeywords(mo, getConn());//First resolve the keyword..
 				
-				pstmt = getConn().prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
+				pstmt = getConn().prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type) " +
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
 				
 			}else{
 				
@@ -848,13 +851,13 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				mo = resolveKeywords(mo, conn);//First resolve the keyword..
 				
-				pstmt = conn.prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
+				pstmt = conn.prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type) " +
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
 			}
 			
 			
 			
-			pstmt.setString(1, String.valueOf(mo.getCMP_Txid()));
+			pstmt.setLong(1, mo.getCMP_Txid());
 			pstmt.setString(2, mo.getSMS_Message_String());
 			pstmt.setString(3, mo.getSMS_SourceAddr());
 			pstmt.setString(4, mo.getMsisdn());
@@ -868,6 +871,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setInt(11, mo.getServiceid());
 			pstmt.setInt(12, mo.getProcessor_id());
 			pstmt.setBoolean(13, mo.isSplit_msg());
+			pstmt.setString(14, mo.getEventType().toString());
 			//pstmt.setString(12, String.valueOf(mo.getCMP_Txid()));
 			
 			logger.info(":::::::::::::::::::mo.getCMP_Keyword(): "+mo.getCMP_AKeyword());
@@ -936,9 +940,9 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			String txid = mt.getIdStr();
 			//logger.debug("sending message: "+mt.toString());
-			if(mt.getCMP_Txid()!=null){
+			if(mt.getCMP_Txid()>0){
 				
-				if(!mt.getCMP_Txid().equals("-1")){
+				if(!(mt.getCMP_Txid()==-1)){
 					txid = String.valueOf(mt.getCMP_Txid());
 					
 					//if(mt.getNewCMP_Txid().equals(MINUS_ONE))
@@ -1557,7 +1561,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				mo = new MOSms();
 				mo.setId(rs.getInt("id"));
-				mo.setCMP_Txid(rs.getString("CMP_Txid"));
+				mo.setCMP_Txid(rs.getLong("CMP_Txid"));
 				mo.setSMS_Message_String(rs.getString("MO_Received"));
 				mo.setMt_Sent(rs.getString("MT_Sent"));
 				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
@@ -1661,7 +1665,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				mo = new MOSms();
 				mo.setId(rs.getInt("id"));
-				mo.setCMP_Txid(rs.getString("CMP_Txid"));
+				mo.setCMP_Txid(rs.getLong("CMP_Txid"));
 				mo.setSMS_Message_String(rs.getString("MO_Received"));
 				mo.setMt_Sent(rs.getString("MT_Sent"));
 				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
@@ -1679,7 +1683,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setPrice(BigDecimal.valueOf(rs.getDouble("price")));
 				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));//added by Tim since 2012-09-21 at 1.17pm
 				mo.setSplit_msg(rs.getBoolean("msg_was_split"));
-				
+				mo.setEventType(EventType.get(rs.getString("event_type").toString()));
 				
 				moSMS.add(mo);
 				
@@ -1766,7 +1770,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			
 			
-			if(!mo.getCMP_Txid().equals("-1"))
+			if(!(mo.getCMP_Txid()==-1))
 				pstmt = getConn().prepareStatement("INSERT INTO `"+CelcomImpl.database+"`.`messagelog`" +
 						"(MO_Received, MT_Sent,SMS_SourceAddr,SUB_Mobtel,CMP_Keyword,CMP_SKeyword,CMP_Txid,MT_SendTime,mo_ack) " +
 						"VALUES(?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"')",Statement.RETURN_GENERATED_KEYS);
@@ -1784,8 +1788,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setString(5, mo.getCMP_AKeyword());
 			pstmt.setString(6, mo.getCMP_SKeyword());
 			
-			if(!mo.getCMP_Txid().equals("-1")){
-				pstmt.setString(7, mo.getCMP_Txid());
+			if(!(mo.getCMP_Txid()==-1)){
+				pstmt.setLong(7, mo.getCMP_Txid());
 				pstmt.setString(8, mo.getMt_Sent());
 			}else{
 				pstmt.setString(7, mo.getMt_Sent());
@@ -2027,7 +2031,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		try {
 			
 			
-			pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', `sms`.id as 'serviceid', `sms`.`split_mt` as 'split_mt' FROM `"+database+"`.`sms_service` `sms` LEFT JOIN `"+database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?",Statement.RETURN_GENERATED_KEYS);
+			pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', `sms`.id as 'serviceid', `sms`.`split_mt` as 'split_mt', `sms`.`event_type` as 'event_type' FROM `"+database+"`.`sms_service` `sms` LEFT JOIN `"+database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?",Statement.RETURN_GENERATED_KEYS);
 			
 			mo.setSMS_Message_String(replaceAllIllegalCharacters(mo.getSMS_Message_String()));
 			
@@ -2046,6 +2050,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
 				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
 				mo.setSplit_msg(rs.getBoolean("split_mt"));
+				mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
 				
 			}else{
 				
@@ -2231,11 +2236,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		}
 	
 	
-	public String generateNextTxId(){
+	public long generateNextTxId(){
+		return System.currentTimeMillis();
+		//String timestamp = String.valueOf(System.currentTimeMillis());
 		
-		String timestamp = String.valueOf(System.currentTimeMillis());
-		
-		return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
+		//return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
 		
 	}
 
@@ -2248,16 +2253,16 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 		try{
 			
-			String cmpTxid = notification.getCMP_Txid();
+			long cmpTxid = notification.getCMP_Txid();
 			
 			if(connectionObjIsCached){
 				
 				ps = getConn().prepareStatement("SELECT CMP_Txid FROM `celcom`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-				ps.setString(1, notification.getCMP_Txid());
-				ps.setString(2, notification.getCMP_Txid());
+				ps.setLong(1, notification.getCMP_Txid());
+				ps.setLong(2, notification.getCMP_Txid());
 				rs = ps.executeQuery();
 				if(rs.next()){
-					cmpTxid = rs.getString("CMP_Txid");
+					cmpTxid = rs.getLong("CMP_Txid");
 				}
 				
 				if(rs!=null)
@@ -2274,11 +2279,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				conn = getConn();
 				
 				ps = conn.prepareStatement("SELECT CMP_Txid FROM `celcom`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-				ps.setString(1, notification.getCMP_Txid());
-				ps.setString(2, notification.getCMP_Txid());
+				ps.setLong(1, notification.getCMP_Txid());
+				ps.setLong(2, notification.getCMP_Txid());
 				rs = ps.executeQuery();
 				if(rs.next()){
-					cmpTxid = rs.getString("CMP_Txid");
+					cmpTxid = rs.getLong("CMP_Txid");
 				}
 				
 				if(rs!=null)
@@ -2291,7 +2296,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 			}
 			
-			ps.setString(1, cmpTxid);
+			ps.setLong(1, cmpTxid);
 			
 			rs = ps.executeQuery();
 			
@@ -2322,7 +2327,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				ps.setInt(1, (notification.getErrorCode().equals(ERROR.Success) ? 1 : 0) );
 				ps.setString(2, notification.getErrorCode().toString());
-				ps.setString(3, cmpTxid);
+				ps.setLong(3, cmpTxid);
 				ps.setInt(4, mms_log_id);
 				
 				ps.executeUpdate();
@@ -2369,7 +2374,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	@Override
 	public void processLuckyDip(Notification notification) {
 		String msg = "";
-		String tx_id = notification.getCMP_Txid();
+		long tx_id = notification.getCMP_Txid();
 		
 		Connection conn = null;
 		
@@ -2417,7 +2422,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 						
 						ticket_number_notf = UtilCelcom.getMessage(MessageType.RANDOM_NUMBER_NOTIFICATION, getConn(), language_id);
 						
-						ticket_number_notf = ticket_number_notf.replaceAll(VOUCHER_TAG , mt.getCMP_Txid());
+						ticket_number_notf = ticket_number_notf.replaceAll(VOUCHER_TAG , String.valueOf(mt.getCMP_Txid()));
 						
 						
 						ticket_number_notf = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_number_notf;
@@ -2429,7 +2434,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 						
 						ticket_number_notf = UtilCelcom.getMessage(MessageType.RANDOM_NUMBER_NOTIFICATION, getConn(), language_id);
 						
-						ticket_number_notf = ticket_number_notf.replaceAll(VOUCHER_TAG, mt.getCMP_Txid());
+						ticket_number_notf = ticket_number_notf.replaceAll(VOUCHER_TAG, String.valueOf(mt.getCMP_Txid()));
 						
 						ticket_number_notf = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_number_notf;
 						
@@ -2473,7 +2478,9 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 		
 		
-	}	
+	}
+
+	
 		
 	
 	

@@ -193,16 +193,17 @@ public class SubscriptionMain{
 	
 	
 	
-	public static String generateNextTxId() throws InterruptedException{
+	public static long generateNextTxId() throws InterruptedException{
 		
 		try{
 			
 			uniq.acquire();
 			
-			String timestamp = String.valueOf(System.currentTimeMillis());
+			/*String timestamp = String.valueOf(System.currentTimeMillis());
 			
 			return Settings.INMOBIA_SUB.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
-		
+*/		
+			return System.currentTimeMillis();
 		}finally{
 			
 			uniq.release();
@@ -322,7 +323,7 @@ public class SubscriptionMain{
 				
 				try{
 					MOSms mo = new MOSms();
-					mo.setCMP_Txid("-1");
+					mo.setCMP_Txid(-1l); 
 					dto.getProcessor().submit(mo);
 				}catch(Exception e){
 					log(e);

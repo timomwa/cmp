@@ -9,7 +9,7 @@ public abstract class GenericNotification extends GenericMessage {
 	
 	
 	public GenericNotification(HttpServletRequest request){
-		setCMP_Txid(request.getParameter("CMP_Txid"));
+		setCMP_Txid(Long.valueOf(request.getParameter("CMP_Txid")));
 		setErrorCode(ERROR.get(request.getParameter("ERRORCODE")));
 	}
 	

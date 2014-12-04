@@ -58,7 +58,7 @@ public interface CelcomHTTPAPI extends Settings {
 	 * Retrieves an mo message from the database.
 	 * @return
 	 */
-	public MOSms retrieveMO(String cMP_Txid);
+	public MOSms retrieveMO(long cMP_Txid);
 	
 	
 	/**
@@ -182,7 +182,7 @@ public interface CelcomHTTPAPI extends Settings {
 	
 	public void myfinalize();
 	
-	public String generateNextTxId();
+	public long generateNextTxId();
 	
 	public String toUnicodeString(String sms);
 	

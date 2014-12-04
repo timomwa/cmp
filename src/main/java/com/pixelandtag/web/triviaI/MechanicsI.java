@@ -115,7 +115,7 @@ public interface MechanicsI {
 	 * @param txid - attached transaction id
 	 * @return boolean - true if the transaction was successful, else returns false
 	 */
-	public boolean insertIntoHTTPToSend(String msisdn, String message, String txid);
+	public boolean insertIntoHTTPToSend(String msisdn, String message, long txid);
 	
 	/**
 	 * 

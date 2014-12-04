@@ -804,7 +804,7 @@ public class MechanicsImpl implements MechanicsI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.web.triviaI.MechanicsI#insertIntoVasSMPPToSend(java.lang.String, java.lang.String)
 	 */
-	public boolean insertIntoHTTPToSend(String msisdn, String message, String txId) {
+	public boolean insertIntoHTTPToSend(String msisdn, String message, long txId) {
 		
 		
 			/*if(mo.getMt_Sent().trim().startsWith(RM1)){
@@ -846,7 +846,7 @@ public class MechanicsImpl implements MechanicsI {
 				
 				//pstmt.setString(10, String.valueOf(mo.getCMP_Txid()));
 				pstmt.setInt(8, 1);
-				pstmt.setString(9, txId);
+				pstmt.setLong(9, txId);
 				
 				pstmt.executeUpdate();
 				
@@ -3400,5 +3400,8 @@ public class MechanicsImpl implements MechanicsI {
 		
 		return hour_now;
 	}
+
+
+	
 
 }

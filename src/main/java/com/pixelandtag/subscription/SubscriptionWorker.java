@@ -214,7 +214,7 @@ public class SubscriptionWorker implements Runnable{
 			
 			try{
 				MOSms mo = new MOSms();
-				mo.setCMP_Txid("-1");
+				mo.setCMP_Txid(-1);
 				dto.getProcessor().submit(mo);
 			}catch(Exception e){
 				log(e);

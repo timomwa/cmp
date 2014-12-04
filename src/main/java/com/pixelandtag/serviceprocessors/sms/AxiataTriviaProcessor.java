@@ -654,8 +654,8 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 									for(MMS mms :  mmss){
 										if(mms!=null){
 											mms.setPaidFor(false);
-											mms.setLinked_id(mo.getCMP_Txid());
-											mms.setWait_for_txId(mo.getCMP_Txid());
+											mms.setLinked_id(""+mo.getCMP_Txid());
+											mms.setWait_for_txId(""+mo.getCMP_Txid());
 											
 											if(mm7API.queueMMSForSending(mms)){
 												if(verbose_logging)
@@ -830,8 +830,8 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 										if(mms!=null){
 											
 											mms.setPaidFor(false);
-											mms.setLinked_id(mo.getCMP_Txid());
-											mms.setWait_for_txId(mo.getCMP_Txid());
+											mms.setLinked_id(""+mo.getCMP_Txid());
+											mms.setWait_for_txId(""+mo.getCMP_Txid());
 											
 											if(mm7API.queueMMSForSending(mms)){
 												
@@ -980,7 +980,7 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 								final String reply1 = RM1+MechanicsS.perSonalizeMessage(reply, sub, 5, conn);
 								
 								MOSms regS = MOSms.clone(mo);
-								this.mocopyWithin.setCMP_Txid(generateNextTxId());
+								this.mocopyWithin.setCMP_Txid(Long.valueOf(generateNextTxId()));
 								regS.setMt_Sent(reply1);
 								regS.setCMP_SKeyword(TarrifCode.RM1.getCode());
 								regS .setPrice(BigDecimal.valueOf(1d));
@@ -1014,8 +1014,8 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 										if(mms!=null){
 											
 											mms.setPaidFor(false);
-											mms.setLinked_id(mo.getCMP_Txid());
-											mms.setWait_for_txId(mo.getCMP_Txid());
+											mms.setLinked_id(""+mo.getCMP_Txid());
+											mms.setWait_for_txId(""+mo.getCMP_Txid());
 											
 											if(mm7API.queueMMSForSending(mms)){
 												if(verbose_logging)
@@ -1238,7 +1238,7 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 										final String reply1 = RM0+MechanicsS.perSonalizeMessage(reply, sub, points, conn);
 										
 										MOSms mosms = MOSms.clone(mo);
-										mosms.setCMP_Txid(generateNextTxId());
+										mosms.setCMP_Txid(Long.valueOf(generateNextTxId()));
 										mosms.setMt_Sent(reply1);
 										mosms.setPriority(0);//give it a higher priority
 										mosms.setCMP_SKeyword(TarrifCode.RM0.getCode());

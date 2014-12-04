@@ -121,7 +121,7 @@ public class MMSApiImpl implements MM7Api {
 			if(rs.next()){
 				mms = new MMS();
 				mms.setId(rs.getString("id"));
-				mms.setCMP_Txid(rs.getString("txID"));
+				mms.setCMP_Txid(Long.valueOf(rs.getString("txID")));
 				mms.setMsisdn(rs.getString("msisdn"));
 				mms.setSubject(rs.getString("subject"));
 				mms.setMms_text(rs.getString("mms_text"));
@@ -574,7 +574,7 @@ public class MMSApiImpl implements MM7Api {
 				
 				pstmt.setString(1, report.getStatusText()+"_"+report.getStatusCode());
 				
-				pstmt.setString(2, report.getCMP_Txid());
+				pstmt.setLong(2, report.getCMP_Txid());
 				
 				success = pstmt.executeUpdate()>0;
 				
@@ -976,7 +976,7 @@ public class MMSApiImpl implements MM7Api {
 			}
 			
 			
-			pstmt.setString(1,mms.getCMP_Txid());
+			pstmt.setString(1,String.valueOf(mms.getCMP_Txid()));
 			pstmt.setString(2,mms.getMsisdn());
 			pstmt.setString(3,mms.getSubject());
 			pstmt.setString(4,mms.getMms_text());

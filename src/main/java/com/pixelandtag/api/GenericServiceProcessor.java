@@ -109,7 +109,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		}
 		
 	
-		Billable billable = BillingService.find(Billable.class, "cp_tx_id", (Long.parseLong(mo_.getCMP_Txid())));
+		Billable billable = BillingService.find(Billable.class, "cp_tx_id",mo_.getCMP_Txid());
 		if(billable==null)
 			billable  = new Billable();
 		else
@@ -117,7 +117,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		
 		billable.setMessage_id(mo_.getId());
-		billable.setEvent_type(EventType.CONTENT_PURCHASE);
+		billable.setEvent_type(mo_.getEventType());
 		billable.setCp_id("CONTENT360_KE");
 		billable.setCp_tx_id(Long.valueOf(mo_.getCMP_Txid()));
 		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
@@ -264,7 +264,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			pstmt.setInt(1, mo.getServiceid());
 			pstmt.setString(2, mo.getMsisdn());
-			pstmt.setString(3, mo.getCMP_Txid());
+			pstmt.setLong(3, mo.getCMP_Txid());
 			pstmt.setString(4, mo.getCMP_AKeyword());
 			pstmt.setString(5, mo.getCMP_SKeyword());
 			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
@@ -303,12 +303,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.error(e.getMessage(),e);
 	}
 
-	public String generateNextTxId(){
+	public long generateNextTxId(){
 		
-		String timestamp = String.valueOf(System.currentTimeMillis());
+		/*String timestamp = String.valueOf(System.currentTimeMillis());
 		
 		return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
-		
+*/		
+		return System.currentTimeMillis();
 	}
 	
 	
@@ -330,7 +331,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 					
 					acknowledge(mo.getId());
 					
-					if(!mo.getCMP_Txid().equals("-1")){
+					if(!(mo.getCMP_Txid()==-1)){
 						
 						setBusy(true);//set to busy so that it's not picked from the pool.
 					
@@ -466,7 +467,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			if(conn==null)
 				logger.error("Connection object is null!");
 			
-			if(!mo.getCMP_Txid().equals("-1")){
+			if(!(mo.getCMP_Txid()==-1)){
 			
 				pstmt = conn.prepareStatement(SEND_MT_1, Statement.RETURN_GENERATED_KEYS);
 			
@@ -485,7 +486,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setString(6, mo.getCMP_SKeyword());
 			pstmt.setInt(7, mo.getPriority());
 			
-			if(!mo.getCMP_Txid().equals("-1")){
+			if(!(mo.getCMP_Txid()==-1)){
 				pstmt.setString(8, String.valueOf(mo.getCMP_Txid()));
 				//logger.debug("mo.getCMP_Txid():::: "+mo.getCMP_Txid()+" >>>>>>>>>MO OBJ: "+mo.toString());
 			}

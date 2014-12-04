@@ -1,12 +1,12 @@
 package com.pixelandtag.sms.mt.workerthreads;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
-import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -17,40 +17,32 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-
-import snaq.db.DBPoolDataSource;
+import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AnnotationConfiguration;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
-import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
-import com.pixelandtag.api.ERROR;
-import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.autodraw.Alarm;
-import com.pixelandtag.cmp.persistence.CMPDao;
-import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.URLParams;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.MTProducer;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
 
 public class HttpBillingWorker implements Runnable {
 	
-private Logger logger = Logger.getLogger(HttpBillingWorker.class);
+	private static Logger logger = Logger.getLogger(HttpBillingWorker.class);
 	
-	private int http_timeout = 30000;
 	private HttpClient httpsclient;
-	private int retry_per_msg;
+	private int retry_per_msg = 1;
 	private int pollWait;
 	//private DBPoolDataSource dbpds = null;
 	private StopWatch watch;
@@ -86,9 +78,109 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 	}
 
 	private URLParams urlp;
+	private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
+	private static String cannonicalPath = "";
+	private static File ft = new File(".");
+	static{
+		try {
+			cannonicalPath = ft.getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
+	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
+	
+	public static Session getSession() {
+		Session session = (Session) HttpBillingWorker.session.get();
+		if (session == null) {
+			session = sessionFactory.openSession();
+			HttpBillingWorker.session.set(session);
+			getSession().setFlushMode(FlushMode.AUTO);
+		}
+		return session;
+	}
 
 
 
+	/**
+	 * saves and commits
+	 * @param t
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T find(Class<T> entityClass, Long id) {
+		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE id =:id ").setParameter("id", id);
+		if(query.list().size()>0)
+			return (T) query.list().get(0);
+		return null;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T find(Class<T> entityClass, String param_name, Object value) {
+		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
+		if(query.list().size()>0)
+			return (T) query.list().get(0);
+		return null;
+	}
+	
+	/**
+	 * saves and commits
+	 * @param t
+	 * @return
+	 */
+	public static  <T> T saveOrUpdate(T t) {
+		try {
+			getSession().beginTransaction();
+			getSession().saveOrUpdate(t);
+			getSession().getTransaction().commit();
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+			try{
+				getSession().getTransaction().rollback();
+			}catch(Exception e1){}
+		}finally{
+			
+		}
+		
+		return t;
+	}
+	
+	protected void begin() {
+		getSession().beginTransaction();
+	}
+
+	
+	public void commitMe(){
+		this.commit();
+	}
+	protected void commit() {
+		getSession().getTransaction().commit();
+	}
+
+	protected void rollback() {
+
+		try {
+			getSession().getTransaction().rollback();
+		} catch (HibernateException e) {
+			logger.warn("Cannot rollback", e);
+		}
+		try {
+			getSession().close();
+		} catch (HibernateException e) {
+			logger.warn("Cannot close", e);
+		}
+		HttpBillingWorker.session.set(null);
+	}
+
+	public static void close() {
+		getSession().close();
+		HttpBillingWorker.session.set(null);
+	}
+	
+	
+	
 	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
 
 
@@ -381,12 +473,15 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 				billable.setSuccess(this.success );
 				
 				
+				
 				if(!this.success){
 					String err = getErrorCode(resp);
 					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
 					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+getErrorMessage(resp)+"]:::::::::::::::::::::: resp:");
-					billable.setResp_status_code(err);
 					
+				}else{
+					
+					billable.setResp_status_code("Success");
 				}
 				
 								
@@ -461,10 +556,10 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 				billable.setIn_outgoing_queue(0L);
 				BillingService.saveOrUpdate(billable);
 				
-				if(billable.isSuccess())
-					BillingService.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-				if("TWSS_101".equals(billable.getResp_status_code()))
-					BillingService.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+				if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) )
+					updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+				if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) )
+					updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 				//postMethod.;
 				//client.executeMethod(postMethod);
 				
@@ -590,6 +685,19 @@ private Logger logger = Logger.getLogger(HttpBillingWorker.class);
 		}
 		
 		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + MTProducer.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
+	}
+	
+	
+	
+	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) {
+		getSession().beginTransaction();
+		Query qry = getSession().createSQLQuery("UPDATE httptosend set priority=:priority, charged=:charged, billing_status=:billing_status WHERE CMP_TxID=:CMP_TxID ")
+		.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
+		.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 1 :  0)
+		.setParameter("billing_status", billstatus.toString())
+		.setParameter("CMP_TxID", cp_tx_id);
+		int success = qry.executeUpdate();
+		getSession().getTransaction().commit();
 	}
 
 	/**

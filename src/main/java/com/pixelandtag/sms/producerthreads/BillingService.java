@@ -47,6 +47,7 @@ public class BillingService extends Thread{
 	
 	public static Logger logger = Logger.getLogger(BillingService.class);
 	private static Semaphore semaphore = new Semaphore(1, true);;
+	private static Semaphore save_Sem = new Semaphore(1, true);
 	private static Semaphore uniq;
 	private boolean run = true;
 	public static CelcomHTTPAPI celcomAPI;
@@ -111,9 +112,20 @@ public class BillingService extends Thread{
 	 * @return
 	 */
 	public static  <T> T saveOrUpdate(T t) {
-		getSession().beginTransaction();
-		getSession().saveOrUpdate(t);
-		getSession().getTransaction().commit();
+		try {
+			save_Sem.acquire();
+			getSession().beginTransaction();
+			getSession().saveOrUpdate(t);
+			getSession().getTransaction().commit();
+		} catch (InterruptedException e) {
+			logger.error(e.getMessage(),e);
+			try{
+				getSession().getTransaction().rollback();
+			}catch(Exception e1){}
+		}finally{
+			save_Sem.release();
+		}
+		
 		return t;
 	}
 	
@@ -148,6 +160,9 @@ public class BillingService extends Thread{
 		getSession().close();
 		BillingService.session.set(null);
 	}
+	
+	
+	
 	static{
 		uniq = new Semaphore(1, true);
 	}
@@ -291,7 +306,11 @@ public class BillingService extends Thread{
 			
 			x = 0;
 			
+			begin();
+			
 			List<Billable> billables = getBillable(100);
+			
+			System.out.println("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
 			
 			for(Billable billable : billables){
 			
@@ -369,14 +388,23 @@ public class BillingService extends Thread{
 		} catch (NullPointerException e) {
 			
 			log(e);
+			try{
+				rollback();
+			}catch(Exception e3){}
 		
 		} catch (Exception e) {
 			
 			log(e);
+			
+			try{
+			rollback();
+			}catch(Exception e3){}
 		
 		}finally{
 			
-			
+			try{
+				commit();
+			}catch(Exception e3){}
 						
 		}
 		
