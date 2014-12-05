@@ -18,6 +18,52 @@ public class ServiceProcessorDTO {
 	private String servKey;
 	private double price;
 	
+	protected String subscriptionText;
+	protected String unsubscriptionText;
+	protected String tailTextSubscribed;
+	protected String tailTextNotSubecribed;
+	
+	
+	
+	public String getSubscriptionText() {
+		return subscriptionText;
+	}
+
+
+	public void setSubscriptionText(String subscriptionText) {
+		this.subscriptionText = subscriptionText;
+	}
+
+
+	public String getUnsubscriptionText() {
+		return unsubscriptionText;
+	}
+
+
+	public void setUnsubscriptionText(String unsubscriptionText) {
+		this.unsubscriptionText = unsubscriptionText;
+	}
+
+
+	public String getTailTextSubscribed() {
+		return tailTextSubscribed;
+	}
+
+
+	public void setTailTextSubscribed(String tailTextSubscribed) {
+		this.tailTextSubscribed = tailTextSubscribed;
+	}
+
+
+	public String getTailTextNotSubecribed() {
+		return tailTextNotSubecribed;
+	}
+
+
+	public void setTailTextNotSubecribed(String tailTextNotSubecribed) {
+		this.tailTextNotSubecribed = tailTextNotSubecribed;
+	}
+	
 	
 	public String getProcessorClass() {
 		return processorClass;

@@ -1,4 +1,4 @@
-2014-12-04 20:24:03,327 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+2014-12-05 02:51:28,674 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
 
 mturl: null
 mt_username: null
@@ -10,529 +10,645 @@ maxDBConnections: 12
 queueSize: 100
 pollWait: 100
 urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
-2014-12-04 20:24:03,824 497  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
-2014-12-04 20:24:03,831 504  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.015 seconds to create the connection pool
-2014-12-04 20:24:03,881 554  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
-2014-12-04 20:24:03,881 554  [main] INFO  api.CelcomImpl  - ********** db host : db
-2014-12-04 20:24:03,881 554  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
-2014-12-04 20:24:03,881 554  [main] INFO  api.CelcomImpl  - ********** db username : root
-2014-12-04 20:24:03,881 554  [main] INFO  api.CelcomImpl  - ********** db password : 
-2014-12-04 20:24:03,881 554  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
-2014-12-04 20:24:03,881 554  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
-2014-12-04 20:24:03,882 555  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
-2014-12-04 20:24:03,882 555  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
-2014-12-04 20:24:03,882 555  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
-2014-12-04 20:24:03,882 555  [main] INFO  api.CelcomImpl  - ********** db host : db
-2014-12-04 20:24:03,882 555  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
-2014-12-04 20:24:03,882 555  [main] INFO  api.CelcomImpl  - ********** db username : root
-2014-12-04 20:24:03,882 555  [main] INFO  api.CelcomImpl  - ********** db password : 
-2014-12-04 20:24:03,882 555  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
-2014-12-04 20:24:03,882 555  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
-2014-12-04 20:24:03,882 555  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
-2014-12-04 20:24:03,883 556  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
-2014-12-04 20:24:03,883 556  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
-2014-12-04 20:24:04,193 866  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
-2014-12-04 20:24:04,193 866  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
-2014-12-04 20:24:04,195 868  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
-2014-12-04 20:24:04,196 869  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
-2014-12-04 20:24:04,209 882  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
-2014-12-04 20:24:04,212 885  [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 330.0 mili-seconds
-2014-12-04 20:24:04,212 885  [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 328.0 mili-seconds
-2014-12-04 20:24:04,212 885  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
-2014-12-04 20:24:04,212 885  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
-2014-12-04 20:24:04,212 885  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
-2014-12-04 20:24:04,212 885  [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
-2014-12-04 20:24:04,213 886  [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
-2014-12-04 20:24:04,220 893  [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
-2014-12-04 20:24:04,220 893  [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@6e233c17, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@4b3e427e]}
-2014-12-04 20:24:04,220 893  [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
-2014-12-04 20:24:04,220 893  [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@6e233c17, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@4b3e427e]} gugamuga_processor : 
+2014-12-05 02:51:29,318 644  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:51:29,327 653  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.017 seconds to create the connection pool
+2014-12-05 02:51:29,351 677  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:51:29,352 678  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:51:29,352 678  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:51:29,352 678  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:51:29,352 678  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:51:29,352 678  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:51:29,352 678  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:51:29,352 678  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:51:29,352 678  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:51:29,353 679  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:51:29,353 679  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:51:29,353 679  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:51:29,353 679  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:51:29,353 679  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:51:29,353 679  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:51:29,353 679  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:51:29,353 679  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:51:29,353 679  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:51:29,354 680  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:51:29,733 1059 [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:51:29,734 1060 [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:51:29,736 1062 [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:51:29,737 1063 [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:51:29,750 1076 [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-05 02:51:29,754 1080 [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 402.0 mili-seconds
+2014-12-05 02:51:29,754 1080 [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 400.0 mili-seconds
+2014-12-05 02:51:29,754 1080 [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:51:29,754 1080 [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:51:29,754 1080 [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-05 02:51:29,754 1080 [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-05 02:51:29,755 1081 [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-05 02:51:39,297 10623 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:51:39,297 10623 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@667dcb61, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@4cb381d8]}
+2014-12-05 02:51:39,297 10623 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:51:39,297 10623 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@667dcb61, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@4cb381d8]} gugamuga_processor : 
 
-com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@6e233c17
-2014-12-04 20:24:04,278 951  [Thread-13] DEBUG jboss.logging  - Logging Provider: org.jboss.logging.Log4jLoggerProvider
-2014-12-04 20:24:04,297 970  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration boolean -> org.hibernate.type.BooleanType@5e5e5273
-2014-12-04 20:24:04,297 970  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration boolean -> org.hibernate.type.BooleanType@5e5e5273
-2014-12-04 20:24:04,297 970  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Boolean -> org.hibernate.type.BooleanType@5e5e5273
-2014-12-04 20:24:04,299 972  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration numeric_boolean -> org.hibernate.type.NumericBooleanType@1d92e760
-2014-12-04 20:24:04,300 973  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration true_false -> org.hibernate.type.TrueFalseType@63b05a0
-2014-12-04 20:24:04,300 973  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration yes_no -> org.hibernate.type.YesNoType@5b568885
-2014-12-04 20:24:04,303 976  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration byte -> org.hibernate.type.ByteType@7287812
-2014-12-04 20:24:04,303 976  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration byte -> org.hibernate.type.ByteType@7287812
-2014-12-04 20:24:04,304 977  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Byte -> org.hibernate.type.ByteType@7287812
-2014-12-04 20:24:04,304 977  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration character -> org.hibernate.type.CharacterType@39157c90
-2014-12-04 20:24:04,305 978  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration char -> org.hibernate.type.CharacterType@39157c90
-2014-12-04 20:24:04,305 978  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Character -> org.hibernate.type.CharacterType@39157c90
-2014-12-04 20:24:04,306 979  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration short -> org.hibernate.type.ShortType@5f804ff5
-2014-12-04 20:24:04,307 980  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration short -> org.hibernate.type.ShortType@5f804ff5
-2014-12-04 20:24:04,307 980  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Short -> org.hibernate.type.ShortType@5f804ff5
-2014-12-04 20:24:04,308 981  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration integer -> org.hibernate.type.IntegerType@69e3f60e
-2014-12-04 20:24:04,308 981  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration int -> org.hibernate.type.IntegerType@69e3f60e
-2014-12-04 20:24:04,308 981  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Integer -> org.hibernate.type.IntegerType@69e3f60e
-2014-12-04 20:24:04,310 983  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration long -> org.hibernate.type.LongType@2d7eae9e
-2014-12-04 20:24:04,310 983  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration long -> org.hibernate.type.LongType@2d7eae9e
-2014-12-04 20:24:04,311 984  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Long -> org.hibernate.type.LongType@2d7eae9e
-2014-12-04 20:24:04,312 985  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration float -> org.hibernate.type.FloatType@73f43791
-2014-12-04 20:24:04,312 985  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration float -> org.hibernate.type.FloatType@73f43791
-2014-12-04 20:24:04,313 986  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Float -> org.hibernate.type.FloatType@73f43791
-2014-12-04 20:24:04,314 987  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration double -> org.hibernate.type.DoubleType@666c1838
-2014-12-04 20:24:04,315 988  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration double -> org.hibernate.type.DoubleType@666c1838
-2014-12-04 20:24:04,315 988  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Double -> org.hibernate.type.DoubleType@666c1838
-2014-12-04 20:24:04,317 990  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration big_decimal -> org.hibernate.type.BigDecimalType@1a04a2a
-2014-12-04 20:24:04,317 990  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.math.BigDecimal -> org.hibernate.type.BigDecimalType@1a04a2a
-2014-12-04 20:24:04,318 991  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration big_integer -> org.hibernate.type.BigIntegerType@4fd4cb2f
-2014-12-04 20:24:04,318 991  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.math.BigInteger -> org.hibernate.type.BigIntegerType@4fd4cb2f
-2014-12-04 20:24:04,319 992  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration string -> org.hibernate.type.StringType@3ea70c8f
-2014-12-04 20:24:04,319 992  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.String -> org.hibernate.type.StringType@3ea70c8f
-2014-12-04 20:24:04,320 993  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration url -> org.hibernate.type.UrlType@70879d38
-2014-12-04 20:24:04,321 994  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.net.URL -> org.hibernate.type.UrlType@70879d38
-2014-12-04 20:24:04,323 996  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration date -> org.hibernate.type.DateType@efe319c
-2014-12-04 20:24:04,323 996  [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.sql.Date -> org.hibernate.type.DateType@efe319c
-2014-12-04 20:24:04,328 1001 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration time -> org.hibernate.type.TimeType@3d52315f
-2014-12-04 20:24:04,329 1002 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.sql.Time -> org.hibernate.type.TimeType@3d52315f
-2014-12-04 20:24:04,330 1003 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration timestamp -> org.hibernate.type.TimestampType@2619d129
-2014-12-04 20:24:04,330 1003 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.sql.Timestamp -> org.hibernate.type.TimestampType@2619d129
-2014-12-04 20:24:04,330 1003 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.Date -> org.hibernate.type.TimestampType@2619d129
-2014-12-04 20:24:04,331 1004 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration dbtimestamp -> org.hibernate.type.DbTimestampType@1ff50057
-2014-12-04 20:24:04,333 1006 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration calendar -> org.hibernate.type.CalendarType@402c99f9
-2014-12-04 20:24:04,333 1006 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.Calendar -> org.hibernate.type.CalendarType@402c99f9
-2014-12-04 20:24:04,333 1006 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.GregorianCalendar -> org.hibernate.type.CalendarType@402c99f9
-2014-12-04 20:24:04,334 1007 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration calendar_date -> org.hibernate.type.CalendarDateType@304e9ca
-2014-12-04 20:24:04,335 1008 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration locale -> org.hibernate.type.LocaleType@b8be647
-2014-12-04 20:24:04,335 1008 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.Locale -> org.hibernate.type.LocaleType@b8be647
-2014-12-04 20:24:04,336 1009 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration currency -> org.hibernate.type.CurrencyType@5411cd7
-2014-12-04 20:24:04,336 1009 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.Currency -> org.hibernate.type.CurrencyType@5411cd7
-2014-12-04 20:24:04,338 1011 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration timezone -> org.hibernate.type.TimeZoneType@4d647e48
-2014-12-04 20:24:04,338 1011 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.TimeZone -> org.hibernate.type.TimeZoneType@4d647e48
-2014-12-04 20:24:04,339 1012 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration class -> org.hibernate.type.ClassType@2ea72c70
-2014-12-04 20:24:04,339 1012 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Class -> org.hibernate.type.ClassType@2ea72c70
-2014-12-04 20:24:04,341 1014 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration uuid-binary -> org.hibernate.type.UUIDBinaryType@34a84a4f
-2014-12-04 20:24:04,341 1014 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.util.UUID -> org.hibernate.type.UUIDBinaryType@34a84a4f
-2014-12-04 20:24:04,341 1014 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration uuid-char -> org.hibernate.type.UUIDCharType@173bb17a
-2014-12-04 20:24:04,342 1015 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration pg-uuid -> org.hibernate.type.PostgresUUIDType@77bff66d
-2014-12-04 20:24:04,343 1016 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration binary -> org.hibernate.type.BinaryType@15150ef8
-2014-12-04 20:24:04,343 1016 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration byte[] -> org.hibernate.type.BinaryType@15150ef8
-2014-12-04 20:24:04,343 1016 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration [B -> org.hibernate.type.BinaryType@15150ef8
-2014-12-04 20:24:04,344 1017 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration wrapper-binary -> org.hibernate.type.WrapperBinaryType@9cbaf63
-2014-12-04 20:24:04,344 1017 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration Byte[] -> org.hibernate.type.WrapperBinaryType@9cbaf63
-2014-12-04 20:24:04,344 1017 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration [Ljava.lang.Byte; -> org.hibernate.type.WrapperBinaryType@9cbaf63
-2014-12-04 20:24:04,345 1018 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration image -> org.hibernate.type.ImageType@4a569e9b
-2014-12-04 20:24:04,346 1019 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration characters -> org.hibernate.type.CharArrayType@f2c639d
-2014-12-04 20:24:04,346 1019 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration char[] -> org.hibernate.type.CharArrayType@f2c639d
-2014-12-04 20:24:04,347 1020 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration [C -> org.hibernate.type.CharArrayType@f2c639d
-2014-12-04 20:24:04,348 1021 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration wrapper-characters -> org.hibernate.type.CharacterArrayType@6900bf61
-2014-12-04 20:24:04,348 1021 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration [Ljava.lang.Character; -> org.hibernate.type.CharacterArrayType@6900bf61
-2014-12-04 20:24:04,348 1021 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration Character[] -> org.hibernate.type.CharacterArrayType@6900bf61
-2014-12-04 20:24:04,349 1022 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration text -> org.hibernate.type.TextType@2b805296
-2014-12-04 20:24:04,354 1027 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration blob -> org.hibernate.type.BlobType@6fc2895
-2014-12-04 20:24:04,354 1027 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.sql.Blob -> org.hibernate.type.BlobType@6fc2895
-2014-12-04 20:24:04,354 1027 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration materialized_blob -> org.hibernate.type.MaterializedBlobType@294ccac4
-2014-12-04 20:24:04,358 1031 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration clob -> org.hibernate.type.ClobType@4ba7cde3
-2014-12-04 20:24:04,359 1032 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.sql.Clob -> org.hibernate.type.ClobType@4ba7cde3
-2014-12-04 20:24:04,359 1032 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration materialized_clob -> org.hibernate.type.MaterializedClobType@3c255a5a
-2014-12-04 20:24:04,360 1033 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration serializable -> org.hibernate.type.SerializableType@7920afc0
-2014-12-04 20:24:04,363 1036 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration object -> org.hibernate.type.ObjectType@55672f52
-2014-12-04 20:24:04,363 1036 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration java.lang.Object -> org.hibernate.type.ObjectType@55672f52
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_date -> org.hibernate.type.AdaptedImmutableType@b21e0bc
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_time -> org.hibernate.type.AdaptedImmutableType@5d295c59
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_timestamp -> org.hibernate.type.AdaptedImmutableType@466e06d7
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_dbtimestamp -> org.hibernate.type.AdaptedImmutableType@61833160
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_calendar -> org.hibernate.type.AdaptedImmutableType@6c1ec7a3
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_calendar_date -> org.hibernate.type.AdaptedImmutableType@58c4d5c9
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_binary -> org.hibernate.type.AdaptedImmutableType@62afaca6
-2014-12-04 20:24:04,364 1037 [Thread-13] DEBUG type.BasicTypeRegistry  - Adding type registration imm_serializable -> org.hibernate.type.AdaptedImmutableType@7b6ff8e7
-2014-12-04 20:24:04,387 1060 [Thread-13] INFO  common.Version  - HCANN000001: Hibernate Commons Annotations {4.0.1.Final}
-2014-12-04 20:24:04,394 1067 [Thread-13] INFO  hibernate.Version  - HHH000412: Hibernate Core {4.1.7.Final}
-2014-12-04 20:24:04,396 1069 [Thread-13] INFO  cfg.Environment  - HHH000206: hibernate.properties not found
-2014-12-04 20:24:04,397 1070 [Thread-13] INFO  cfg.Environment  - HHH000021: Bytecode provider name : javassist
-2014-12-04 20:24:04,410 1083 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [uuid2] -> [org.hibernate.id.UUIDGenerator]
-2014-12-04 20:24:04,411 1084 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [guid] -> [org.hibernate.id.GUIDGenerator]
-2014-12-04 20:24:04,411 1084 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [uuid] -> [org.hibernate.id.UUIDHexGenerator]
-2014-12-04 20:24:04,411 1084 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [uuid.hex] -> [org.hibernate.id.UUIDHexGenerator]
-2014-12-04 20:24:04,412 1085 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [hilo] -> [org.hibernate.id.TableHiLoGenerator]
-2014-12-04 20:24:04,413 1086 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [assigned] -> [org.hibernate.id.Assigned]
-2014-12-04 20:24:04,414 1087 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [identity] -> [org.hibernate.id.IdentityGenerator]
-2014-12-04 20:24:04,415 1088 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [select] -> [org.hibernate.id.SelectGenerator]
-2014-12-04 20:24:04,415 1088 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [sequence] -> [org.hibernate.id.SequenceGenerator]
-2014-12-04 20:24:04,416 1089 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [seqhilo] -> [org.hibernate.id.SequenceHiLoGenerator]
-2014-12-04 20:24:04,417 1090 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [increment] -> [org.hibernate.id.IncrementGenerator]
-2014-12-04 20:24:04,417 1090 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [foreign] -> [org.hibernate.id.ForeignGenerator]
-2014-12-04 20:24:04,418 1091 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [sequence-identity] -> [org.hibernate.id.SequenceIdentityGenerator]
-2014-12-04 20:24:04,420 1093 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [enhanced-sequence] -> [org.hibernate.id.enhanced.SequenceStyleGenerator]
-2014-12-04 20:24:04,421 1094 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Registering IdentifierGenerator strategy [enhanced-table] -> [org.hibernate.id.enhanced.TableGenerator]
-2014-12-04 20:24:04,423 1096 [Thread-13] INFO  cfg.Configuration  - HHH000042: Configuring from file: hibernate.cfg.xml
-2014-12-04 20:24:04,555 1228 [Thread-13] DEBUG xml.DTDEntityResolver  - Trying to resolve system-id [http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd]
-2014-12-04 20:24:04,556 1229 [Thread-13] WARN  xml.DTDEntityResolver  - HHH000223: Recognized obsolete hibernate namespace http://hibernate.sourceforge.net/. Use namespace http://www.hibernate.org/dtd/ instead. Refer to Hibernate 3.6 Migration Guide!
-2014-12-04 20:24:04,556 1229 [Thread-13] DEBUG xml.DTDEntityResolver  - Attempting to resolve on classpath under org/hibernate/
-2014-12-04 20:24:04,556 1229 [Thread-13] DEBUG xml.DTDEntityResolver  - Located [http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd] in classpath
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - hibernate.connection.driver_class=com.mysql.jdbc.Driver
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - connection.url=jdbc:mysql://localhost:3306/pixeland_content360
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - connection.username=root
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - connection.password=
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - hibernate.jdbc.batch_size=10
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - connection.pool_size=10
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - dialect=org.hibernate.dialect.MySQLDialect
-2014-12-04 20:24:04,582 1255 [Thread-13] DEBUG cfg.Configuration  - current_session_context_class=thread
-2014-12-04 20:24:04,583 1256 [Thread-13] DEBUG cfg.Configuration  - cache.provider_class=org.hibernate.cache.NoCacheProvider
-2014-12-04 20:24:04,583 1256 [Thread-13] DEBUG cfg.Configuration  - use_sql_comments=false
-2014-12-04 20:24:04,583 1256 [Thread-13] DEBUG cfg.Configuration  - generate_statistics=false
-2014-12-04 20:24:04,583 1256 [Thread-13] DEBUG cfg.Configuration  - show_sql=false
-2014-12-04 20:24:04,583 1256 [Thread-13] DEBUG cfg.Configuration  - Session-factory config [null] named class [com.pixelandtag.sms.producerthreads.Billable] for mapping
-2014-12-04 20:24:04,591 1264 [Thread-13] INFO  cfg.Configuration  - HHH000041: Configured SessionFactory: null
-2014-12-04 20:24:04,591 1264 [Thread-13] DEBUG cfg.Configuration  - Properties: {show_sql=false, java.vendor=Oracle Corporation, sun.java.launcher=SUN_STANDARD, hibernate.connection.url=jdbc:mysql://localhost:3306/pixeland_content360, sun.management.compiler=HotSpot 64-Bit Tiered Compilers, use_sql_comments=false, os.name=Windows 8.1, sun.boot.class.path=C:\Program Files\Java\jdk1.7.0_67\jre\lib\resources.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\rt.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\sunrsasign.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\jsse.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\jce.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\charsets.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\jfr.jar;C:\Program Files\Java\jdk1.7.0_67\jre\classes, hibernate.current_session_context_class=thread, generate_statistics=false, sun.desktop=windows, java.vm.specification.vendor=Oracle Corporation, hibernate.generate_statistics=false, java.runtime.version=1.7.0_67-b01, hibernate.cache.provider_class=org.hibernate.cache.NoCacheProvider, user.name=timothy, current_session_context_class=thread, user.language=en, sun.boot.library.path=C:\Program Files\Java\jdk1.7.0_67\jre\bin, dialect=org.hibernate.dialect.MySQLDialect, java.version=1.7.0_67, user.timezone=Africa/Nairobi, sun.arch.data.model=64, java.endorsed.dirs=C:\Program Files\Java\jdk1.7.0_67\jre\lib\endorsed, sun.cpu.isalist=amd64, sun.jnu.encoding=Cp1252, file.encoding.pkg=sun.io, file.separator=\, java.specification.name=Java Platform API Specification, java.class.version=51.0, user.country=US, connection.url=jdbc:mysql://localhost:3306/pixeland_content360, java.home=C:\Program Files\Java\jdk1.7.0_67\jre, java.vm.info=mixed mode, os.version=6.3, path.separator=;, connection.password=, java.vm.version=24.65-b04, hibernate.connection.password=, user.variant=, hibernate.jdbc.batch_size=10, java.awt.printerjob=sun.awt.windows.WPrinterJob, sun.io.unicode.encoding=UnicodeLittle, awt.toolkit=sun.awt.windows.WToolkit, hibernate.connection.username=root, user.script=, user.home=C:\Users\timothy, java.specification.vendor=Oracle Corporation, java.library.path=C:\Program Files\Java\jdk1.7.0_67\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:/Program Files/Java/jre8/bin/server;C:/Program Files/Java/jre8/bin;C:/Program Files/Java/jre8/lib/amd64;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;H:\Software\oracle\INSTALLATION_FOLDER\app\oracle\product\11.2.0\server\bin;;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Windows Live\Shared;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x64;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Diskeeper Corporation\ExpressCache\;C:\Program Files\Java\jdk1.7.0_67\bin;C:\Program Files\MySQL\MySQL Server 5.5\bin;H:\Software\SOFTWARE\software_64\apache-ant-1.8.2-bin\apache-ant-1.8.2\bin;H:\Software\Adempiere_370LTS\Adempiere\bin;C:\Program Files\PostgreSQL\9.3\bin;C:\Program Files (x86)\Subversion\bin;H:\INSTALLED_SOFTWARE\jboss-7.2.0.Final\bin;H:\INSTALLED_SOFTWARE\apache-maven-3.2.1-bin\bin;C:\Program Files (x86)\Git\cmd;H:\Software\jd-gui-0.3.3.windows\jd-gui.exe;C:\Program Files (x86)\SecuGen\FDx SDK Pro for Windows\bin\x64;F:\Projects\Systech\systechBiometrics\secugen\x64\;C:\Program Files\Microsoft SQL Server\110\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\ManagementStudio\;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\;C:\Program Files (x86)\Microsoft SQL Server\110\DTS\Binn\;C:\Program Files (x86)\IBM\TeamConcertBuild\buildsystem\buildengine\eclipse\;C:\Program Files (x86)\Nmap;;H:\INSTALLED_SOFTWARE\eclipse-jee-luna-R-win32-x86_64;;., java.vendor.url=http://java.oracle.com/, hibernate.connection.driver_class=com.mysql.jdbc.Driver, connection.username=root, java.vm.vendor=Oracle Corporation, hibernate.dialect=org.hibernate.dialect.MySQLDialect, java.runtime.name=Java(TM) SE Runtime Environment, sun.java.command=com.pixelandtag.sms.application.HTTPMTSenderApp, java.class.path=F:\Projects\Systech\cmp\target\classes;C:\Users\timothy\.m2\repository\com\google\code\gson\gson\2.2.4\gson-2.2.4.jar;C:\Users\timothy\.m2\repository\commons-lang\commons-lang\2.3\commons-lang-2.3.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate-core\4.1.7.Final\hibernate-core-4.1.7.Final.jar;C:\Users\timothy\.m2\repository\org\jboss\logging\jboss-logging\3.1.0.GA\jboss-logging-3.1.0.GA.jar;C:\Users\timothy\.m2\repository\org\jboss\spec\javax\transaction\jboss-transaction-api_1.1_spec\1.0.0.Final\jboss-transaction-api_1.1_spec-1.0.0.Final.jar;C:\Users\timothy\.m2\repository\org\javassist\javassist\3.15.0-GA\javassist-3.15.0-GA.jar;C:\Users\timothy\.m2\repository\org\hibernate\common\hibernate-commons-annotations\4.0.1.Final\hibernate-commons-annotations-4.0.1.Final.jar;C:\Users\timothy\.m2\repository\mysql\mysql-connector-java\5.1.14\mysql-connector-java-5.1.14.jar;C:\Users\timothy\.m2\repository\log4j\log4j\1.2.16\log4j-1.2.16.jar;C:\Users\timothy\.m2\repository\org\slf4j\jcl-over-slf4j\1.5.11\jcl-over-slf4j-1.5.11.jar;C:\Users\timothy\.m2\repository\org\slf4j\slf4j-api\1.5.11\slf4j-api-1.5.11.jar;C:\Users\timothy\.m2\repository\commons-beanutils\commons-beanutils\1.8.0\commons-beanutils-1.8.0.jar;C:\Users\timothy\.m2\repository\antlr\antlr\2.7.6\antlr-2.7.6.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate-tools\3.2.0.ga\hibernate-tools-3.2.0.ga.jar;C:\Users\timothy\.m2\repository\org\beanshell\bsh\2.0b4\bsh-2.0b4.jar;C:\Users\timothy\.m2\repository\freemarker\freemarker\2.3.8\freemarker-2.3.8.jar;C:\Users\timothy\.m2\repository\org\hibernate\jtidy\r8-20060801\jtidy-r8-20060801.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate-annotations\3.2.0.ga\hibernate-annotations-3.2.0.ga.jar;C:\Users\timothy\.m2\repository\javax\persistence\persistence-api\1.0\persistence-api-1.0.jar;C:\Users\timothy\.m2\repository\dom4j\dom4j\1.5.1\dom4j-1.5.1.jar;C:\Users\timothy\.m2\repository\jaxme\jaxme-api\0.3\jaxme-api-0.3.jar;C:\Users\timothy\.m2\repository\jaxen\jaxen\1.1-beta-4\jaxen-1.1-beta-4.jar;C:\Users\timothy\.m2\repository\jdom\jdom\b10\jdom-b10.jar;C:\Users\timothy\.m2\repository\xerces\xmlParserAPIs\2.6.2\xmlParserAPIs-2.6.2.jar;C:\Users\timothy\.m2\repository\xerces\xercesImpl\2.6.2\xercesImpl-2.6.2.jar;C:\Users\timothy\.m2\repository\xom\xom\1.0b3\xom-1.0b3.jar;C:\Users\timothy\.m2\repository\com\ibm\icu\icu4j\2.6.1\icu4j-2.6.1.jar;C:\Users\timothy\.m2\repository\xalan\xalan\2.6.0\xalan-2.6.0.jar;C:\Users\timothy\.m2\repository\org\ccil\cowan\tagsoup\tagsoup\0.9.7\tagsoup-0.9.7.jar;C:\Users\timothy\.m2\repository\msv\xsdlib\20030807\xsdlib-20030807.jar;C:\Users\timothy\.m2\repository\msv\relaxngDatatype\20030807\relaxngDatatype-20030807.jar;C:\Users\timothy\.m2\repository\pull-parser\pull-parser\2\pull-parser-2.jar;C:\Users\timothy\.m2\repository\xpp3\xpp3\1.1.3.3\xpp3-1.1.3.3.jar;C:\Users\timothy\.m2\repository\stax\stax\1.0\stax-1.0.jar;C:\Users\timothy\.m2\repository\xml-apis\xml-apis\1.0.b2\xml-apis-1.0.b2.jar;C:\Users\timothy\.m2\repository\org\hibernate\javax\persistence\hibernate-jpa-2.0-api\1.0.0.Final\hibernate-jpa-2.0-api-1.0.0.Final.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate\3.2.4.sp1\hibernate-3.2.4.sp1.jar;C:\Users\timothy\.m2\repository\net\sf\ehcache\ehcache\1.2.3\ehcache-1.2.3.jar;C:\Users\timothy\.m2\repository\asm\asm-attrs\1.5.3\asm-attrs-1.5.3.jar;C:\Users\timothy\.m2\repository\cglib\cglib\2.1_3\cglib-2.1_3.jar;C:\Users\timothy\.m2\repository\asm\asm\1.5.3\asm-1.5.3.jar;C:\Users\timothy\.m2\repository\commons-collections\commons-collections\2.1.1\commons-collections-2.1.1.jar;C:\Users\timothy\.m2\repository\commons-logging\commons-logging\1.1.1\commons-logging-1.1.1.jar;C:\Users\timothy\.m2\repository\org\freemarker\freemarker\2.3.16\freemarker-2.3.16.jar;C:\Users\timothy\.m2\repository\displaytag\displaytag\1.2\displaytag-1.2.jar;C:\Users\timothy\.m2\repository\com\lowagie\itext\1.3\itext-1.3.jar;C:\Users\timothy\.m2\repository\org\slf4j\slf4j-log4j12\1.4.2\slf4j-log4j12-1.4.2.jar;C:\Users\timothy\.m2\repository\taglibs\standard\1.1.2\standard-1.1.2.jar;C:\Users\timothy\.m2\repository\javax\ejb\ejb-api\3.0-alpha-1\ejb-api-3.0-alpha-1.jar;C:\Users\timothy\.m2\repository\javax\transaction\transaction-api\1.1\transaction-api-1.1.jar;C:\Users\timothy\.m2\repository\javax\xml\jaxrpc-api\1.1\jaxrpc-api-1.1.jar;C:\Users\timothy\.m2\repository\net\sourceforge\stripes\stripes\1.5.8\stripes-1.5.8.jar;C:\Users\timothy\.m2\repository\org\json\json\20090211\json-20090211.jar;C:\Users\timothy\.m2\repository\com\timothy\loancalculator\loan_calculator_shared\1.0.0\loan_calculator_shared-1.0.0.jar;C:\Users\timothy\.m2\repository\javax\transaction\jta\1.1\jta-1.1.jar;C:\Users\timothy\.m2\repository\javax\servlet\jstl\1.2\jstl-1.2.jar;C:\Users\timothy\.m2\repository\javax\mail\mail\1.4\mail-1.4.jar;C:\Users\timothy\.m2\repository\javax\activation\activation\1.1\activation-1.1.jar;C:\Users\timothy\.m2\repository\org\eclipse\persistence\javax.persistence\2.0.0\javax.persistence-2.0.0.jar;C:\Users\timothy\.m2\repository\org\jboss\resteasy\resteasy-jaxrs\2.2.1.GA\resteasy-jaxrs-2.2.1.GA.jar;C:\Users\timothy\.m2\repository\org\jboss\resteasy\jaxrs-api\2.2.1.GA\jaxrs-api-2.2.1.GA.jar;C:\Users\timothy\.m2\repository\org\scannotation\scannotation\1.0.3\scannotation-1.0.3.jar;C:\Users\timothy\.m2\repository\javassist\javassist\3.12.1.GA\javassist-3.12.1.GA.jar;C:\Users\timothy\.m2\repository\javax\annotation\jsr250-api\1.0\jsr250-api-1.0.jar;C:\Users\timothy\.m2\repository\commons-httpclient\commons-httpclient\3.1\commons-httpclient-3.1.jar;C:\Users\timothy\.m2\repository\net\jcip\jcip-annotations\1.0\jcip-annotations-1.0.jar;F:\Projects\Systech\cmp\lib\ibx.jar;F:\Projects\Systech\cmp\lib\stripes-security-1.4.2.jar;F:\Projects\Systech\cmp\lib\stripersist-1.0.jar;F:\Projects\Systech\cmp\lib\secureTag.jar;F:\Projects\Systech\cmp\lib\lucky_dip.jar;F:\Projects\Systech\cmp\lib\utillib.jar;C:\Users\timothy\.m2\repository\javax\servlet\servlet-api\2.5\servlet-api-2.5.jar;C:\Users\timothy\.m2\repository\org\apache\poi\poi\3.7\poi-3.7.jar;C:\Users\timothy\.m2\repository\net\snaq\dbpool\5.0\dbpool-5.0.jar;C:\Users\timothy\.m2\repository\org\apache\commons\commons-email\1.1\commons-email-1.1.jar;C:\Users\timothy\.m2\repository\commons-codec\commons-codec\1.4\commons-codec-1.4.jar;C:\Users\timothy\.m2\repository\org\apache\httpcomponents\httpmime\4.1.3\httpmime-4.1.3.jar;C:\Users\timothy\.m2\repository\org\apache\httpcomponents\httpcore\4.1.4\httpcore-4.1.4.jar;C:\Users\timothy\.m2\repository\org\apache\httpcomponents\httpclient\4.1.3\httpclient-4.1.3.jar;C:\Users\timothy\.m2\repository\org\stripesstuff\stripesstuff\0.4.0\stripesstuff-0.4.0.jar, hibernate.bytecode.use_reflection_optimizer=false, java.vm.specification.name=Java Virtual Machine Specification, java.vm.specification.version=1.7, sun.cpu.endian=little, sun.os.patch.level=, connection.pool_size=10, java.io.tmpdir=C:\Users\timothy\AppData\Local\Temp\, java.vendor.url.bug=http://bugreport.sun.com/bugreport/, os.arch=amd64, java.awt.graphicsenv=sun.awt.Win32GraphicsEnvironment, java.ext.dirs=C:\Program Files\Java\jdk1.7.0_67\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext, hibernate.use_sql_comments=false, user.dir=F:\Projects\Systech\cmp, line.separator=
-, java.vm.name=Java HotSpot(TM) 64-Bit Server VM, cache.provider_class=org.hibernate.cache.NoCacheProvider, file.encoding=UTF-8, java.specification.version=1.7, hibernate.show_sql=false, hibernate.connection.pool_size=10}
-2014-12-04 20:24:04,599 1272 [Thread-13] DEBUG internal.IntegratorServiceImpl  - Adding Integrator [org.hibernate.cfg.beanvalidation.BeanValidationIntegrator].
-2014-12-04 20:24:04,623 1296 [Thread-13] DEBUG cfg.Configuration  - Preparing to build session factory with filters : {}
-2014-12-04 20:24:04,670 1343 [Thread-13] DEBUG cfg.Configuration  - Processing hbm.xml files
-2014-12-04 20:24:04,670 1343 [Thread-13] DEBUG cfg.Configuration  - Process annotated classes
-2014-12-04 20:24:04,676 1349 [Thread-13] DEBUG cfg.AnnotationBinder  - Binding entity from annotated class: com.pixelandtag.sms.producerthreads.Billable
-2014-12-04 20:24:04,704 1377 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
-2014-12-04 20:24:04,726 1399 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3DiscriminatorColumn{logicalColumnName'DTYPE', discriminatorTypeName='string'}
-2014-12-04 20:24:04,728 1401 [Thread-13] DEBUG cfg.AnnotationBinder  - No value specified for 'javax.persistence.sharedCache.mode'; using UNSPECIFIED
-2014-12-04 20:24:04,736 1409 [Thread-13] DEBUG annotations.EntityBinder  - Import with entity name Billable
-2014-12-04 20:24:04,739 1412 [Thread-13] DEBUG annotations.EntityBinder  - Bind entity com.pixelandtag.sms.producerthreads.Billable on table billable_queue
-2014-12-04 20:24:04,790 1463 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=id, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,794 1467 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property id with lazy=false
-2014-12-04 20:24:04,797 1470 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for id
-2014-12-04 20:24:04,799 1472 [Thread-13] DEBUG annotations.PropertyBinder  - Building property id
-2014-12-04 20:24:04,803 1476 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=cp_id, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,803 1476 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property cp_id with lazy=false
-2014-12-04 20:24:04,803 1476 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for cp_id
-2014-12-04 20:24:04,804 1477 [Thread-13] DEBUG annotations.PropertyBinder  - Building property cp_id
-2014-12-04 20:24:04,804 1477 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=cp_tx_id, insertable=true, updatable=true, unique=true}
-2014-12-04 20:24:04,804 1477 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property cp_tx_id with lazy=false
-2014-12-04 20:24:04,804 1477 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for cp_tx_id
-2014-12-04 20:24:04,804 1477 [Thread-13] DEBUG annotations.PropertyBinder  - Building property cp_tx_id
-2014-12-04 20:24:04,805 1478 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=discount_applied, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,805 1478 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property discount_applied with lazy=false
-2014-12-04 20:24:04,805 1478 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for discount_applied
-2014-12-04 20:24:04,805 1478 [Thread-13] DEBUG annotations.PropertyBinder  - Building property discount_applied
-2014-12-04 20:24:04,805 1478 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=event_type, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,805 1478 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property event_type with lazy=false
-2014-12-04 20:24:04,807 1480 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for event_type
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.PropertyBinder  - Building property event_type
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=in_outgoing_queue, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property in_outgoing_queue with lazy=false
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for in_outgoing_queue
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.PropertyBinder  - Building property in_outgoing_queue
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=keyword, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property keyword with lazy=false
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for keyword
-2014-12-04 20:24:04,808 1481 [Thread-13] DEBUG annotations.PropertyBinder  - Building property keyword
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=maxRetriesAllowed, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property maxRetriesAllowed with lazy=false
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for maxRetriesAllowed
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG annotations.PropertyBinder  - Building property maxRetriesAllowed
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=message_id, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property message_id with lazy=false
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for message_id
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG annotations.PropertyBinder  - Building property message_id
-2014-12-04 20:24:04,809 1482 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=msisdn, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property msisdn with lazy=false
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for msisdn
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.PropertyBinder  - Building property msisdn
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=operation, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property operation with lazy=false
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for operation
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.PropertyBinder  - Building property operation
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=price, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property price with lazy=false
-2014-12-04 20:24:04,810 1483 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for price
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.PropertyBinder  - Building property price
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=priority, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property priority with lazy=false
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for priority
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.PropertyBinder  - Building property priority
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=processed, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property processed with lazy=false
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for processed
-2014-12-04 20:24:04,811 1484 [Thread-13] DEBUG annotations.PropertyBinder  - Building property processed
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=resp_status_code, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property resp_status_code with lazy=false
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for resp_status_code
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG annotations.PropertyBinder  - Building property resp_status_code
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=retry_count, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property retry_count with lazy=false
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for retry_count
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG annotations.PropertyBinder  - Building property retry_count
-2014-12-04 20:24:04,812 1485 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=service_id, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property service_id with lazy=false
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for service_id
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG annotations.PropertyBinder  - Building property service_id
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=shortcode, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property shortcode with lazy=false
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for shortcode
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG annotations.PropertyBinder  - Building property shortcode
-2014-12-04 20:24:04,813 1486 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=success, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,814 1487 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property success with lazy=false
-2014-12-04 20:24:04,814 1487 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for success
-2014-12-04 20:24:04,814 1487 [Thread-13] DEBUG annotations.PropertyBinder  - Building property success
-2014-12-04 20:24:04,814 1487 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=timeStamp, insertable=false, updatable=false, unique=false}
-2014-12-04 20:24:04,814 1487 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property timeStamp with lazy=false
-2014-12-04 20:24:04,815 1488 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for timeStamp
-2014-12-04 20:24:04,815 1488 [Thread-13] DEBUG annotations.PropertyBinder  - Building property timeStamp
-2014-12-04 20:24:04,815 1488 [Thread-13] DEBUG cfg.Ejb3Column  - Binding column: Ejb3Column{table=org.hibernate.mapping.Table(billable_queue), mappingColumn=tx_id, insertable=true, updatable=true, unique=false}
-2014-12-04 20:24:04,816 1489 [Thread-13] DEBUG annotations.PropertyBinder  - MetadataSourceProcessor property tx_id with lazy=false
-2014-12-04 20:24:04,816 1489 [Thread-13] DEBUG annotations.SimpleValueBinder  - building SimpleValue for tx_id
-2014-12-04 20:24:04,816 1489 [Thread-13] DEBUG annotations.PropertyBinder  - Building property tx_id
-2014-12-04 20:24:04,818 1491 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for id
-2014-12-04 20:24:04,818 1491 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for cp_id
-2014-12-04 20:24:04,818 1491 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for cp_tx_id
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for discount_applied
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for event_type
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for in_outgoing_queue
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for keyword
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for maxRetriesAllowed
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for message_id
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for msisdn
-2014-12-04 20:24:04,819 1492 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for operation
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for price
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for priority
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for processed
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for resp_status_code
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for retry_count
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for service_id
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for shortcode
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for success
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for timeStamp
-2014-12-04 20:24:04,820 1493 [Thread-13] DEBUG annotations.SimpleValueBinder  - Setting SimpleValue typeName for tx_id
-2014-12-04 20:24:04,821 1494 [Thread-13] DEBUG cfg.Configuration  - Processing fk mappings (*ToOne and JoinedSubclass)
-2014-12-04 20:24:04,823 1496 [Thread-13] DEBUG cfg.Configuration  - Processing extends queue
-2014-12-04 20:24:04,823 1496 [Thread-13] DEBUG cfg.Configuration  - Processing extends queue
-2014-12-04 20:24:04,823 1496 [Thread-13] DEBUG cfg.Configuration  - Processing collection mappings
-2014-12-04 20:24:04,824 1497 [Thread-13] DEBUG cfg.Configuration  - Processing native query and ResultSetMapping mappings
-2014-12-04 20:24:04,824 1497 [Thread-13] DEBUG cfg.Configuration  - Processing association property references
-2014-12-04 20:24:04,824 1497 [Thread-13] DEBUG cfg.Configuration  - Processing foreign key constraints
-2014-12-04 20:24:04,841 1514 [Thread-13] INFO  internal.DriverManagerConnectionProviderImpl  - HHH000402: Using Hibernate built-in connection pool (not for production use!)
-2014-12-04 20:24:04,841 1514 [Thread-13] INFO  internal.DriverManagerConnectionProviderImpl  - HHH000115: Hibernate connection pool size: 10
-2014-12-04 20:24:04,841 1514 [Thread-13] INFO  internal.DriverManagerConnectionProviderImpl  - HHH000006: Autocommit mode: false
-2014-12-04 20:24:04,842 1515 [Thread-13] INFO  internal.DriverManagerConnectionProviderImpl  - HHH000401: using driver [com.mysql.jdbc.Driver] at URL [jdbc:mysql://localhost:3306/pixeland_content360]
-2014-12-04 20:24:04,842 1515 [Thread-13] INFO  internal.DriverManagerConnectionProviderImpl  - HHH000046: Connection properties: {user=root, password=}
-2014-12-04 20:24:04,863 1536 [Thread-13] DEBUG internal.DriverManagerConnectionProviderImpl  - Opening new JDBC connection
-2014-12-04 20:24:04,877 1550 [Thread-13] DEBUG internal.DriverManagerConnectionProviderImpl  - Created connection to: jdbc:mysql://localhost:3306/pixeland_content360, Isolation Level: 4
-2014-12-04 20:24:04,878 1551 [Thread-13] DEBUG internal.JdbcServicesImpl  - Database ->
-       name : MySQL
-    version : 5.5.8
-      major : 5
-      minor : 5
-2014-12-04 20:24:04,878 1551 [Thread-13] DEBUG internal.JdbcServicesImpl  - Driver ->
-       name : MySQL-AB JDBC Driver
-    version : mysql-connector-java-5.1.14 ( Revision: ${bzr.revision-id} )
-      major : 5
-      minor : 1
-2014-12-04 20:24:04,878 1551 [Thread-13] DEBUG internal.JdbcServicesImpl  - JDBC version : 4.0
-2014-12-04 20:24:04,893 1566 [Thread-13] INFO  dialect.Dialect  - HHH000400: Using dialect: org.hibernate.dialect.MySQLDialect
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - Automatic flush during beforeCompletion(): disabled
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - Automatic session close at end of transaction: disabled
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - JDBC batch size: 10
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - JDBC batch updates for versioned data: disabled
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - Scrollable result sets: enabled
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - Wrap result sets: disabled
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - JDBC3 getGeneratedKeys(): enabled
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - multi-tenancy strategy : NONE
-2014-12-04 20:24:04,913 1586 [Thread-13] DEBUG cfg.SettingsFactory  - Connection release mode: auto
-2014-12-04 20:24:04,914 1587 [Thread-13] INFO  internal.TransactionFactoryInitiator  - HHH000399: Using default transaction strategy (direct JDBC transactions)
-2014-12-04 20:24:04,916 1589 [Thread-13] DEBUG cfg.SettingsFactory  - Maximum outer join fetch depth: 2
-2014-12-04 20:24:04,916 1589 [Thread-13] DEBUG cfg.SettingsFactory  - Default batch fetch size: 1
-2014-12-04 20:24:04,916 1589 [Thread-13] DEBUG cfg.SettingsFactory  - Generate SQL with comments: disabled
-2014-12-04 20:24:04,916 1589 [Thread-13] DEBUG cfg.SettingsFactory  - Order SQL updates by primary key: disabled
-2014-12-04 20:24:04,916 1589 [Thread-13] DEBUG cfg.SettingsFactory  - Order SQL inserts for batching: disabled
-2014-12-04 20:24:04,916 1589 [Thread-13] DEBUG cfg.SettingsFactory  - Query translator: org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory
-2014-12-04 20:24:04,918 1591 [Thread-13] INFO  ast.ASTQueryTranslatorFactory  - HHH000397: Using ASTQueryTranslatorFactory
-2014-12-04 20:24:04,918 1591 [Thread-13] DEBUG cfg.SettingsFactory  - Query language substitutions: {}
-2014-12-04 20:24:04,918 1591 [Thread-13] DEBUG cfg.SettingsFactory  - JPA-QL strict compliance: disabled
-2014-12-04 20:24:04,918 1591 [Thread-13] DEBUG cfg.SettingsFactory  - Second-level cache: enabled
-2014-12-04 20:24:04,919 1592 [Thread-13] DEBUG cfg.SettingsFactory  - Query cache: disabled
-2014-12-04 20:24:04,919 1592 [Thread-13] DEBUG cfg.SettingsFactory  - Cache region factory : org.hibernate.cache.internal.NoCachingRegionFactory
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - org.hibernate.cache.internal.NoCachingRegionFactory did not provide constructor accepting java.util.Properties; attempting no-arg constructor.
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Optimize cache for minimal puts: disabled
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Structured second-level cache entries: disabled
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Statistics: disabled
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Deleted entity synthetic identifier rollback: disabled
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Default entity-mode: pojo
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Named query checking : enabled
-2014-12-04 20:24:04,920 1593 [Thread-13] DEBUG cfg.SettingsFactory  - Check Nullability in Core (should be disabled when Bean Validation is on): enabled
-2014-12-04 20:24:04,933 1606 [Thread-13] DEBUG internal.SessionFactoryImpl  - Building session factory
-2014-12-04 20:24:04,947 1620 [Thread-13] DEBUG internal.SessionFactoryImpl  - Session factory constructed with filter configurations : {}
-2014-12-04 20:24:04,947 1620 [Thread-13] DEBUG internal.SessionFactoryImpl  - Instantiating session factory with properties: {java.vendor=Oracle Corporation, show_sql=false, sun.java.launcher=SUN_STANDARD, hibernate.connection.url=jdbc:mysql://localhost:3306/pixeland_content360, sun.management.compiler=HotSpot 64-Bit Tiered Compilers, use_sql_comments=false, os.name=Windows 8.1, sun.boot.class.path=C:\Program Files\Java\jdk1.7.0_67\jre\lib\resources.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\rt.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\sunrsasign.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\jsse.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\jce.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\charsets.jar;C:\Program Files\Java\jdk1.7.0_67\jre\lib\jfr.jar;C:\Program Files\Java\jdk1.7.0_67\jre\classes, hibernate.current_session_context_class=thread, generate_statistics=false, sun.desktop=windows, java.vm.specification.vendor=Oracle Corporation, hibernate.generate_statistics=false, java.runtime.version=1.7.0_67-b01, hibernate.cache.provider_class=org.hibernate.cache.NoCacheProvider, user.name=timothy, current_session_context_class=thread, user.language=en, sun.boot.library.path=C:\Program Files\Java\jdk1.7.0_67\jre\bin, dialect=org.hibernate.dialect.MySQLDialect, java.version=1.7.0_67, user.timezone=Africa/Nairobi, sun.arch.data.model=64, java.endorsed.dirs=C:\Program Files\Java\jdk1.7.0_67\jre\lib\endorsed, sun.cpu.isalist=amd64, sun.jnu.encoding=Cp1252, file.encoding.pkg=sun.io, file.separator=\, java.specification.name=Java Platform API Specification, java.class.version=51.0, user.country=US, connection.url=jdbc:mysql://localhost:3306/pixeland_content360, java.home=C:\Program Files\Java\jdk1.7.0_67\jre, java.vm.info=mixed mode, os.version=6.3, path.separator=;, connection.password=, java.vm.version=24.65-b04, hibernate.connection.password=, user.variant=, hibernate.jdbc.batch_size=10, java.awt.printerjob=sun.awt.windows.WPrinterJob, sun.io.unicode.encoding=UnicodeLittle, awt.toolkit=sun.awt.windows.WToolkit, hibernate.connection.username=root, user.script=, user.home=C:\Users\timothy, java.specification.vendor=Oracle Corporation, java.library.path=C:\Program Files\Java\jdk1.7.0_67\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:/Program Files/Java/jre8/bin/server;C:/Program Files/Java/jre8/bin;C:/Program Files/Java/jre8/lib/amd64;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;H:\Software\oracle\INSTALLATION_FOLDER\app\oracle\product\11.2.0\server\bin;;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Windows Live\Shared;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x86;C:\Program Files (x86)\Intel\OpenCL SDK\2.0\bin\x64;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Diskeeper Corporation\ExpressCache\;C:\Program Files\Java\jdk1.7.0_67\bin;C:\Program Files\MySQL\MySQL Server 5.5\bin;H:\Software\SOFTWARE\software_64\apache-ant-1.8.2-bin\apache-ant-1.8.2\bin;H:\Software\Adempiere_370LTS\Adempiere\bin;C:\Program Files\PostgreSQL\9.3\bin;C:\Program Files (x86)\Subversion\bin;H:\INSTALLED_SOFTWARE\jboss-7.2.0.Final\bin;H:\INSTALLED_SOFTWARE\apache-maven-3.2.1-bin\bin;C:\Program Files (x86)\Git\cmd;H:\Software\jd-gui-0.3.3.windows\jd-gui.exe;C:\Program Files (x86)\SecuGen\FDx SDK Pro for Windows\bin\x64;F:\Projects\Systech\systechBiometrics\secugen\x64\;C:\Program Files\Microsoft SQL Server\110\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SQL Server\110\Tools\Binn\ManagementStudio\;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\;C:\Program Files (x86)\Microsoft SQL Server\110\DTS\Binn\;C:\Program Files (x86)\IBM\TeamConcertBuild\buildsystem\buildengine\eclipse\;C:\Program Files (x86)\Nmap;;H:\INSTALLED_SOFTWARE\eclipse-jee-luna-R-win32-x86_64;;., java.vendor.url=http://java.oracle.com/, hibernate.connection.driver_class=com.mysql.jdbc.Driver, connection.username=root, java.vm.vendor=Oracle Corporation, hibernate.dialect=org.hibernate.dialect.MySQLDialect, java.runtime.name=Java(TM) SE Runtime Environment, sun.java.command=com.pixelandtag.sms.application.HTTPMTSenderApp, java.class.path=F:\Projects\Systech\cmp\target\classes;C:\Users\timothy\.m2\repository\com\google\code\gson\gson\2.2.4\gson-2.2.4.jar;C:\Users\timothy\.m2\repository\commons-lang\commons-lang\2.3\commons-lang-2.3.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate-core\4.1.7.Final\hibernate-core-4.1.7.Final.jar;C:\Users\timothy\.m2\repository\org\jboss\logging\jboss-logging\3.1.0.GA\jboss-logging-3.1.0.GA.jar;C:\Users\timothy\.m2\repository\org\jboss\spec\javax\transaction\jboss-transaction-api_1.1_spec\1.0.0.Final\jboss-transaction-api_1.1_spec-1.0.0.Final.jar;C:\Users\timothy\.m2\repository\org\javassist\javassist\3.15.0-GA\javassist-3.15.0-GA.jar;C:\Users\timothy\.m2\repository\org\hibernate\common\hibernate-commons-annotations\4.0.1.Final\hibernate-commons-annotations-4.0.1.Final.jar;C:\Users\timothy\.m2\repository\mysql\mysql-connector-java\5.1.14\mysql-connector-java-5.1.14.jar;C:\Users\timothy\.m2\repository\log4j\log4j\1.2.16\log4j-1.2.16.jar;C:\Users\timothy\.m2\repository\org\slf4j\jcl-over-slf4j\1.5.11\jcl-over-slf4j-1.5.11.jar;C:\Users\timothy\.m2\repository\org\slf4j\slf4j-api\1.5.11\slf4j-api-1.5.11.jar;C:\Users\timothy\.m2\repository\commons-beanutils\commons-beanutils\1.8.0\commons-beanutils-1.8.0.jar;C:\Users\timothy\.m2\repository\antlr\antlr\2.7.6\antlr-2.7.6.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate-tools\3.2.0.ga\hibernate-tools-3.2.0.ga.jar;C:\Users\timothy\.m2\repository\org\beanshell\bsh\2.0b4\bsh-2.0b4.jar;C:\Users\timothy\.m2\repository\freemarker\freemarker\2.3.8\freemarker-2.3.8.jar;C:\Users\timothy\.m2\repository\org\hibernate\jtidy\r8-20060801\jtidy-r8-20060801.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate-annotations\3.2.0.ga\hibernate-annotations-3.2.0.ga.jar;C:\Users\timothy\.m2\repository\javax\persistence\persistence-api\1.0\persistence-api-1.0.jar;C:\Users\timothy\.m2\repository\dom4j\dom4j\1.5.1\dom4j-1.5.1.jar;C:\Users\timothy\.m2\repository\jaxme\jaxme-api\0.3\jaxme-api-0.3.jar;C:\Users\timothy\.m2\repository\jaxen\jaxen\1.1-beta-4\jaxen-1.1-beta-4.jar;C:\Users\timothy\.m2\repository\jdom\jdom\b10\jdom-b10.jar;C:\Users\timothy\.m2\repository\xerces\xmlParserAPIs\2.6.2\xmlParserAPIs-2.6.2.jar;C:\Users\timothy\.m2\repository\xerces\xercesImpl\2.6.2\xercesImpl-2.6.2.jar;C:\Users\timothy\.m2\repository\xom\xom\1.0b3\xom-1.0b3.jar;C:\Users\timothy\.m2\repository\com\ibm\icu\icu4j\2.6.1\icu4j-2.6.1.jar;C:\Users\timothy\.m2\repository\xalan\xalan\2.6.0\xalan-2.6.0.jar;C:\Users\timothy\.m2\repository\org\ccil\cowan\tagsoup\tagsoup\0.9.7\tagsoup-0.9.7.jar;C:\Users\timothy\.m2\repository\msv\xsdlib\20030807\xsdlib-20030807.jar;C:\Users\timothy\.m2\repository\msv\relaxngDatatype\20030807\relaxngDatatype-20030807.jar;C:\Users\timothy\.m2\repository\pull-parser\pull-parser\2\pull-parser-2.jar;C:\Users\timothy\.m2\repository\xpp3\xpp3\1.1.3.3\xpp3-1.1.3.3.jar;C:\Users\timothy\.m2\repository\stax\stax\1.0\stax-1.0.jar;C:\Users\timothy\.m2\repository\xml-apis\xml-apis\1.0.b2\xml-apis-1.0.b2.jar;C:\Users\timothy\.m2\repository\org\hibernate\javax\persistence\hibernate-jpa-2.0-api\1.0.0.Final\hibernate-jpa-2.0-api-1.0.0.Final.jar;C:\Users\timothy\.m2\repository\org\hibernate\hibernate\3.2.4.sp1\hibernate-3.2.4.sp1.jar;C:\Users\timothy\.m2\repository\net\sf\ehcache\ehcache\1.2.3\ehcache-1.2.3.jar;C:\Users\timothy\.m2\repository\asm\asm-attrs\1.5.3\asm-attrs-1.5.3.jar;C:\Users\timothy\.m2\repository\cglib\cglib\2.1_3\cglib-2.1_3.jar;C:\Users\timothy\.m2\repository\asm\asm\1.5.3\asm-1.5.3.jar;C:\Users\timothy\.m2\repository\commons-collections\commons-collections\2.1.1\commons-collections-2.1.1.jar;C:\Users\timothy\.m2\repository\commons-logging\commons-logging\1.1.1\commons-logging-1.1.1.jar;C:\Users\timothy\.m2\repository\org\freemarker\freemarker\2.3.16\freemarker-2.3.16.jar;C:\Users\timothy\.m2\repository\displaytag\displaytag\1.2\displaytag-1.2.jar;C:\Users\timothy\.m2\repository\com\lowagie\itext\1.3\itext-1.3.jar;C:\Users\timothy\.m2\repository\org\slf4j\slf4j-log4j12\1.4.2\slf4j-log4j12-1.4.2.jar;C:\Users\timothy\.m2\repository\taglibs\standard\1.1.2\standard-1.1.2.jar;C:\Users\timothy\.m2\repository\javax\ejb\ejb-api\3.0-alpha-1\ejb-api-3.0-alpha-1.jar;C:\Users\timothy\.m2\repository\javax\transaction\transaction-api\1.1\transaction-api-1.1.jar;C:\Users\timothy\.m2\repository\javax\xml\jaxrpc-api\1.1\jaxrpc-api-1.1.jar;C:\Users\timothy\.m2\repository\net\sourceforge\stripes\stripes\1.5.8\stripes-1.5.8.jar;C:\Users\timothy\.m2\repository\org\json\json\20090211\json-20090211.jar;C:\Users\timothy\.m2\repository\com\timothy\loancalculator\loan_calculator_shared\1.0.0\loan_calculator_shared-1.0.0.jar;C:\Users\timothy\.m2\repository\javax\transaction\jta\1.1\jta-1.1.jar;C:\Users\timothy\.m2\repository\javax\servlet\jstl\1.2\jstl-1.2.jar;C:\Users\timothy\.m2\repository\javax\mail\mail\1.4\mail-1.4.jar;C:\Users\timothy\.m2\repository\javax\activation\activation\1.1\activation-1.1.jar;C:\Users\timothy\.m2\repository\org\eclipse\persistence\javax.persistence\2.0.0\javax.persistence-2.0.0.jar;C:\Users\timothy\.m2\repository\org\jboss\resteasy\resteasy-jaxrs\2.2.1.GA\resteasy-jaxrs-2.2.1.GA.jar;C:\Users\timothy\.m2\repository\org\jboss\resteasy\jaxrs-api\2.2.1.GA\jaxrs-api-2.2.1.GA.jar;C:\Users\timothy\.m2\repository\org\scannotation\scannotation\1.0.3\scannotation-1.0.3.jar;C:\Users\timothy\.m2\repository\javassist\javassist\3.12.1.GA\javassist-3.12.1.GA.jar;C:\Users\timothy\.m2\repository\javax\annotation\jsr250-api\1.0\jsr250-api-1.0.jar;C:\Users\timothy\.m2\repository\commons-httpclient\commons-httpclient\3.1\commons-httpclient-3.1.jar;C:\Users\timothy\.m2\repository\net\jcip\jcip-annotations\1.0\jcip-annotations-1.0.jar;F:\Projects\Systech\cmp\lib\ibx.jar;F:\Projects\Systech\cmp\lib\stripes-security-1.4.2.jar;F:\Projects\Systech\cmp\lib\stripersist-1.0.jar;F:\Projects\Systech\cmp\lib\secureTag.jar;F:\Projects\Systech\cmp\lib\lucky_dip.jar;F:\Projects\Systech\cmp\lib\utillib.jar;C:\Users\timothy\.m2\repository\javax\servlet\servlet-api\2.5\servlet-api-2.5.jar;C:\Users\timothy\.m2\repository\org\apache\poi\poi\3.7\poi-3.7.jar;C:\Users\timothy\.m2\repository\net\snaq\dbpool\5.0\dbpool-5.0.jar;C:\Users\timothy\.m2\repository\org\apache\commons\commons-email\1.1\commons-email-1.1.jar;C:\Users\timothy\.m2\repository\commons-codec\commons-codec\1.4\commons-codec-1.4.jar;C:\Users\timothy\.m2\repository\org\apache\httpcomponents\httpmime\4.1.3\httpmime-4.1.3.jar;C:\Users\timothy\.m2\repository\org\apache\httpcomponents\httpcore\4.1.4\httpcore-4.1.4.jar;C:\Users\timothy\.m2\repository\org\apache\httpcomponents\httpclient\4.1.3\httpclient-4.1.3.jar;C:\Users\timothy\.m2\repository\org\stripesstuff\stripesstuff\0.4.0\stripesstuff-0.4.0.jar, hibernate.bytecode.use_reflection_optimizer=false, java.vm.specification.name=Java Virtual Machine Specification, java.vm.specification.version=1.7, sun.cpu.endian=little, sun.os.patch.level=, connection.pool_size=10, java.io.tmpdir=C:\Users\timothy\AppData\Local\Temp\, java.vendor.url.bug=http://bugreport.sun.com/bugreport/, os.arch=amd64, java.awt.graphicsenv=sun.awt.Win32GraphicsEnvironment, java.ext.dirs=C:\Program Files\Java\jdk1.7.0_67\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext, hibernate.use_sql_comments=false, user.dir=F:\Projects\Systech\cmp, line.separator=
-, java.vm.name=Java HotSpot(TM) 64-Bit Server VM, cache.provider_class=org.hibernate.cache.NoCacheProvider, file.encoding=UTF-8, java.specification.version=1.7, hibernate.connection.pool_size=10, hibernate.show_sql=false}
-2014-12-04 20:24:04,959 1632 [Thread-13] DEBUG internal.DefaultIdentifierGeneratorFactory  - Setting dialect [org.hibernate.dialect.MySQLDialect]
-2014-12-04 20:24:05,085 1758 [Thread-13] DEBUG entity.AbstractEntityPersister  - Static SQL for entity: com.pixelandtag.sms.producerthreads.Billable
-2014-12-04 20:24:05,085 1758 [Thread-13] DEBUG entity.AbstractEntityPersister  -  Version select: select id from billable_queue where id =?
-2014-12-04 20:24:05,085 1758 [Thread-13] DEBUG entity.AbstractEntityPersister  -  Snapshot select: select billable_.id, billable_.cp_id as cp2_0_, billable_.cp_tx_id as cp3_0_, billable_.discount_applied as discount4_0_, billable_.event_type as event5_0_, billable_.in_outgoing_queue as in6_0_, billable_.keyword as keyword0_, billable_.maxRetriesAllowed as maxRetri8_0_, billable_.message_id as message9_0_, billable_.msisdn as msisdn0_, billable_.operation as operation0_, billable_.price as price0_, billable_.priority as priority0_, billable_.processed as processed0_, billable_.resp_status_code as resp15_0_, billable_.retry_count as retry16_0_, billable_.service_id as service17_0_, billable_.shortcode as shortcode0_, billable_.success as success0_, billable_.tx_id as tx21_0_ from billable_queue billable_ where billable_.id=?
-2014-12-04 20:24:05,085 1758 [Thread-13] DEBUG entity.AbstractEntityPersister  -  Insert 0: insert into billable_queue (cp_id, cp_tx_id, discount_applied, event_type, in_outgoing_queue, keyword, maxRetriesAllowed, message_id, msisdn, operation, price, priority, processed, resp_status_code, retry_count, service_id, shortcode, success, tx_id, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-2014-12-04 20:24:05,085 1758 [Thread-13] DEBUG entity.AbstractEntityPersister  -  Update 0: update billable_queue set cp_id=?, cp_tx_id=?, discount_applied=?, event_type=?, in_outgoing_queue=?, keyword=?, maxRetriesAllowed=?, message_id=?, msisdn=?, operation=?, price=?, priority=?, processed=?, resp_status_code=?, retry_count=?, service_id=?, shortcode=?, success=?, tx_id=? where id=?
-2014-12-04 20:24:05,085 1758 [Thread-13] DEBUG entity.AbstractEntityPersister  -  Delete 0: delete from billable_queue where id=?
-2014-12-04 20:24:05,102 1775 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [NONE]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=?
-2014-12-04 20:24:05,102 1775 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [READ]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=?
-2014-12-04 20:24:05,103 1776 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [UPGRADE]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=? for update
-2014-12-04 20:24:05,103 1776 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [UPGRADE_NOWAIT]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=? for update
-2014-12-04 20:24:05,103 1776 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [FORCE]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=? for update
-2014-12-04 20:24:05,104 1777 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [PESSIMISTIC_READ]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=? lock in share mode
-2014-12-04 20:24:05,104 1777 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [PESSIMISTIC_WRITE]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=? for update
-2014-12-04 20:24:05,104 1777 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [PESSIMISTIC_FORCE_INCREMENT]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=? for update
-2014-12-04 20:24:05,105 1778 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [OPTIMISTIC]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=?
-2014-12-04 20:24:05,105 1778 [Thread-13] DEBUG loader.Loader  - Static select for entity com.pixelandtag.sms.producerthreads.Billable [OPTIMISTIC_FORCE_INCREMENT]: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=?
-2014-12-04 20:24:05,112 1785 [Thread-13] DEBUG loader.Loader  - Static select for action ACTION_MERGE on entity com.pixelandtag.sms.producerthreads.Billable: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=?
-2014-12-04 20:24:05,112 1785 [Thread-13] DEBUG loader.Loader  - Static select for action ACTION_REFRESH on entity com.pixelandtag.sms.producerthreads.Billable: select billable0_.id as id0_0_, billable0_.cp_id as cp2_0_0_, billable0_.cp_tx_id as cp3_0_0_, billable0_.discount_applied as discount4_0_0_, billable0_.event_type as event5_0_0_, billable0_.in_outgoing_queue as in6_0_0_, billable0_.keyword as keyword0_0_, billable0_.maxRetriesAllowed as maxRetri8_0_0_, billable0_.message_id as message9_0_0_, billable0_.msisdn as msisdn0_0_, billable0_.operation as operation0_0_, billable0_.price as price0_0_, billable0_.priority as priority0_0_, billable0_.processed as processed0_0_, billable0_.resp_status_code as resp15_0_0_, billable0_.retry_count as retry16_0_0_, billable0_.service_id as service17_0_0_, billable0_.shortcode as shortcode0_0_, billable0_.success as success0_0_, billable0_.timeStamp as timeStamp0_0_, billable0_.tx_id as tx21_0_0_ from billable_queue billable0_ where billable0_.id=?
-2014-12-04 20:24:05,114 1787 [Thread-13] DEBUG internal.SessionFactoryRegistry  - Initializing SessionFactoryRegistry : org.hibernate.internal.SessionFactoryRegistry@1ad14292
-2014-12-04 20:24:05,117 1790 [Thread-13] DEBUG internal.SessionFactoryRegistry  - Registering SessionFactory: 74651553-db6f-4b9d-b8a9-e108e0dcbc25 (<unnamed>)
-2014-12-04 20:24:05,117 1790 [Thread-13] DEBUG internal.SessionFactoryRegistry  - Not binding SessionFactory to JNDI, no JNDI name configured
-2014-12-04 20:24:05,117 1790 [Thread-13] DEBUG internal.SessionFactoryImpl  - Instantiated session factory
-2014-12-04 20:24:05,121 1794 [Thread-13] DEBUG internal.SessionFactoryImpl  - Checking 0 named HQL queries
-2014-12-04 20:24:05,121 1794 [Thread-13] DEBUG internal.SessionFactoryImpl  - Checking 0 named SQL queries
-2014-12-04 20:24:05,127 1800 [Thread-13] DEBUG internal.StatisticsInitiator  - Statistics initialized [enabled=false]
-2014-12-04 20:24:05,168 1841 [Thread-13] DEBUG internal.SessionImpl  - Opened session at timestamp: 14177138451
-2014-12-04 20:24:05,203 1876 [Thread-13] DEBUG ast.QueryTranslatorImpl  - parse() - HQL: from com.pixelandtag.sms.producerthreads.Billable WHERE cp_tx_id =:cp_tx_id 
-2014-12-04 20:24:05,213 1886 [Thread-13] DEBUG ast.QueryTranslatorImpl  - --- HQL AST ---
- \-[QUERY] Node: 'query'
-    +-[SELECT_FROM] Node: 'SELECT_FROM'
-    |  \-[FROM] Node: 'from'
-    |     \-[RANGE] Node: 'RANGE'
-    |        \-[DOT] Node: '.'
-    |           +-[DOT] Node: '.'
-    |           |  +-[DOT] Node: '.'
-    |           |  |  +-[DOT] Node: '.'
-    |           |  |  |  +-[IDENT] Node: 'com'
-    |           |  |  |  \-[IDENT] Node: 'pixelandtag'
-    |           |  |  \-[IDENT] Node: 'sms'
-    |           |  \-[IDENT] Node: 'producerthreads'
-    |           \-[IDENT] Node: 'Billable'
-    \-[WHERE] Node: 'WHERE'
-       \-[EQ] Node: '='
-          +-[IDENT] Node: 'cp_tx_id'
-          \-[COLON] Node: ':'
-             \-[IDENT] Node: 'cp_tx_id'
-
-2014-12-04 20:24:05,213 1886 [Thread-13] DEBUG ast.ErrorCounter  - throwQueryException() : no errors
-2014-12-04 20:24:05,237 1910 [Thread-13] DEBUG antlr.HqlSqlBaseWalker  - select << begin [level=1, statement=select]
-2014-12-04 20:24:05,251 1924 [Thread-13] DEBUG tree.FromElement  - FromClause{level=1} : com.pixelandtag.sms.producerthreads.Billable (<no alias>) -> billable0_
-2014-12-04 20:24:05,253 1926 [Thread-13] DEBUG tree.FromReferenceNode  - Resolved : {synthetic-alias} -> {synthetic-alias}
-2014-12-04 20:24:05,254 1927 [Thread-13] DEBUG tree.DotNode  - getDataType() : cp_tx_id -> org.hibernate.type.LongType@2d7eae9e
-2014-12-04 20:24:05,255 1928 [Thread-13] DEBUG tree.FromReferenceNode  - Resolved : {synthetic-alias}.cp_tx_id -> billable0_.cp_tx_id
-2014-12-04 20:24:05,257 1930 [Thread-13] DEBUG antlr.HqlSqlBaseWalker  - select : finishing up [level=1, statement=select]
-2014-12-04 20:24:05,257 1930 [Thread-13] DEBUG ast.HqlSqlWalker  - processQuery() :  ( SELECT ( FromClause{level=1} billable_queue billable0_ ) ( WHERE ( = ( billable0_.cp_tx_id {synthetic-alias} cp_tx_id ) ? ) ) )
-2014-12-04 20:24:05,261 1934 [Thread-13] DEBUG ast.HqlSqlWalker  - Derived SELECT clause created.
-2014-12-04 20:24:05,267 1940 [Thread-13] DEBUG util.JoinProcessor  - Using FROM fragment [billable_queue billable0_]
-2014-12-04 20:24:05,267 1940 [Thread-13] DEBUG antlr.HqlSqlBaseWalker  - select >> end [level=1, statement=select]
-2014-12-04 20:24:05,268 1941 [Thread-13] DEBUG ast.QueryTranslatorImpl  - --- SQL AST ---
- \-[SELECT] QueryNode: 'SELECT'  querySpaces (billable_queue)
-    +-[SELECT_CLAUSE] SelectClause: '{derived select clause}'
-    |  +-[SELECT_EXPR] SelectExpressionImpl: 'billable0_.id as id0_' {FromElement{explicit,not a collection join,not a fetch join,fetch non-lazy properties,classAlias=null,role=null,tableName=billable_queue,tableAlias=billable0_,origin=null,columns={,className=com.pixelandtag.sms.producerthreads.Billable}}}
-    |  \-[SQL_TOKEN] SqlFragment: 'billable0_.cp_id as cp2_0_, billable0_.cp_tx_id as cp3_0_, billable0_.discount_applied as discount4_0_, billable0_.event_type as event5_0_, billable0_.in_outgoing_queue as in6_0_, billable0_.keyword as keyword0_, billable0_.maxRetriesAllowed as maxRetri8_0_, billable0_.message_id as message9_0_, billable0_.msisdn as msisdn0_, billable0_.operation as operation0_, billable0_.price as price0_, billable0_.priority as priority0_, billable0_.processed as processed0_, billable0_.resp_status_code as resp15_0_, billable0_.retry_count as retry16_0_, billable0_.service_id as service17_0_, billable0_.shortcode as shortcode0_, billable0_.success as success0_, billable0_.timeStamp as timeStamp0_, billable0_.tx_id as tx21_0_'
-    +-[FROM] FromClause: 'from' FromClause{level=1, fromElementCounter=1, fromElements=1, fromElementByClassAlias=[], fromElementByTableAlias=[billable0_], fromElementsByPath=[], collectionJoinFromElementsByPath=[], impliedElements=[]}
-    |  \-[FROM_FRAGMENT] FromElement: 'billable_queue billable0_' FromElement{explicit,not a collection join,not a fetch join,fetch non-lazy properties,classAlias=null,role=null,tableName=billable_queue,tableAlias=billable0_,origin=null,columns={,className=com.pixelandtag.sms.producerthreads.Billable}}
-    \-[WHERE] SqlNode: 'WHERE'
-       \-[EQ] BinaryLogicOperatorNode: '='
-          +-[DOT] DotNode: 'billable0_.cp_tx_id' {propertyName=cp_tx_id,dereferenceType=ALL,propertyPath=cp_tx_id,path={synthetic-alias}.cp_tx_id,tableAlias=billable0_,className=com.pixelandtag.sms.producerthreads.Billable,classAlias=null}
-          |  +-[IDENT] IdentNode: '{synthetic-alias}' {originalText={synthetic-alias}}
-          |  \-[IDENT] IdentNode: 'cp_tx_id' {originalText=cp_tx_id}
-          \-[NAMED_PARAM] ParameterNode: '?' {name=cp_tx_id, expectedType=org.hibernate.type.LongType@2d7eae9e}
-
-2014-12-04 20:24:05,269 1942 [Thread-13] DEBUG ast.ErrorCounter  - throwQueryException() : no errors
-2014-12-04 20:24:05,275 1948 [Thread-13] DEBUG ast.QueryTranslatorImpl  - HQL: from com.pixelandtag.sms.producerthreads.Billable WHERE cp_tx_id =:cp_tx_id 
-2014-12-04 20:24:05,275 1948 [Thread-13] DEBUG ast.QueryTranslatorImpl  - SQL: select billable0_.id as id0_, billable0_.cp_id as cp2_0_, billable0_.cp_tx_id as cp3_0_, billable0_.discount_applied as discount4_0_, billable0_.event_type as event5_0_, billable0_.in_outgoing_queue as in6_0_, billable0_.keyword as keyword0_, billable0_.maxRetriesAllowed as maxRetri8_0_, billable0_.message_id as message9_0_, billable0_.msisdn as msisdn0_, billable0_.operation as operation0_, billable0_.price as price0_, billable0_.priority as priority0_, billable0_.processed as processed0_, billable0_.resp_status_code as resp15_0_, billable0_.retry_count as retry16_0_, billable0_.service_id as service17_0_, billable0_.shortcode as shortcode0_, billable0_.success as success0_, billable0_.timeStamp as timeStamp0_, billable0_.tx_id as tx21_0_ from billable_queue billable0_ where billable0_.cp_tx_id=?
-2014-12-04 20:24:05,275 1948 [Thread-13] DEBUG ast.ErrorCounter  - throwQueryException() : no errors
-2014-12-04 20:24:05,312 1985 [Thread-13] DEBUG internal.LogicalConnectionImpl  - Obtaining JDBC connection
-2014-12-04 20:24:05,312 1985 [Thread-13] DEBUG internal.LogicalConnectionImpl  - Obtained JDBC connection
-2014-12-04 20:24:05,317 1990 [Thread-13] DEBUG hibernate.SQL  - select billable0_.id as id0_, billable0_.cp_id as cp2_0_, billable0_.cp_tx_id as cp3_0_, billable0_.discount_applied as discount4_0_, billable0_.event_type as event5_0_, billable0_.in_outgoing_queue as in6_0_, billable0_.keyword as keyword0_, billable0_.maxRetriesAllowed as maxRetri8_0_, billable0_.message_id as message9_0_, billable0_.msisdn as msisdn0_, billable0_.operation as operation0_, billable0_.price as price0_, billable0_.priority as priority0_, billable0_.processed as processed0_, billable0_.resp_status_code as resp15_0_, billable0_.retry_count as retry16_0_, billable0_.service_id as service17_0_, billable0_.shortcode as shortcode0_, billable0_.success as success0_, billable0_.timeStamp as timeStamp0_, billable0_.tx_id as tx21_0_ from billable_queue billable0_ where billable0_.cp_tx_id=?
-2014-12-04 20:24:05,400 2073 [Thread-13] DEBUG internal.StatefulPersistenceContext  - Initializing non-lazy collections
-2014-12-04 20:24:05,401 2074 [Thread-13] DEBUG spi.AbstractTransactionImpl  - begin
-2014-12-04 20:24:05,402 2075 [Thread-13] DEBUG jdbc.JdbcTransaction  - initial autocommit status: false
-2014-12-04 20:24:05,439 2112 [Thread-13] DEBUG id.IncrementGenerator  - Fetching initial value: select max(id) from billable_queue
-2014-12-04 20:24:05,439 2112 [Thread-13] DEBUG hibernate.SQL  - select max(id) from billable_queue
-2014-12-04 20:24:05,439 2112 [Thread-13] DEBUG id.IncrementGenerator  - First free id: 1
-2014-12-04 20:24:05,440 2113 [Thread-13] DEBUG internal.AbstractSaveEventListener  - Generated identifier: 1, using strategy: org.hibernate.id.IncrementGenerator
-2014-12-04 20:24:05,447 2120 [Thread-13] DEBUG spi.AbstractTransactionImpl  - committing
-2014-12-04 20:24:05,447 2120 [Thread-13] DEBUG internal.AbstractFlushingEventListener  - Processing flush-time cascades
-2014-12-04 20:24:05,448 2121 [Thread-13] DEBUG internal.AbstractFlushingEventListener  - Dirty checking collections
-2014-12-04 20:24:05,449 2122 [Thread-13] DEBUG internal.AbstractFlushingEventListener  - Flushed: 1 insertions, 0 updates, 0 deletions to 1 objects
-2014-12-04 20:24:05,449 2122 [Thread-13] DEBUG internal.AbstractFlushingEventListener  - Flushed: 0 (re)creations, 0 updates, 0 removals to 0 collections
-2014-12-04 20:24:05,450 2123 [Thread-13] DEBUG util.EntityPrinter  - Listing entities:
-2014-12-04 20:24:05,450 2123 [Thread-13] DEBUG util.EntityPrinter  - com.pixelandtag.sms.producerthreads.Billable{service_id=JOBS, cp_tx_id=1417713766192, timeStamp=null, msisdn=254734252504, event_type=SUBSCRIPTION_PURCHASE, keyword=JOBS, message_id=1, in_outgoing_queue=0, discount_applied=0, retry_count=0, id=1, cp_id=CONTENT360_KE, operation=debit, processed=0, price=5.0, resp_status_code=null, priority=0, tx_id=1417713766192, shortcode=32329, maxRetriesAllowed=1, success=null}
-2014-12-04 20:24:05,458 2131 [Thread-13] DEBUG hibernate.SQL  - insert into billable_queue (cp_id, cp_tx_id, discount_applied, event_type, in_outgoing_queue, keyword, maxRetriesAllowed, message_id, msisdn, operation, price, priority, processed, resp_status_code, retry_count, service_id, shortcode, success, tx_id, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-2014-12-04 20:24:05,460 2133 [Thread-13] DEBUG internal.BatchingBatch  - Executing batch size: 1
-2014-12-04 20:24:05,484 2157 [Thread-13] DEBUG jdbc.JdbcTransaction  - committed JDBC Connection
-2014-12-04 20:24:05,485 2158 [Thread-8] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
-2014-12-04 20:24:05,485 2158 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
-2014-12-04 20:24:05,486 2159 [Thread-8] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
-2014-12-04 20:24:05,498 2171 [Thread-8] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
-2014-12-04 20:24:05,498 2171 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
-2014-12-04 20:24:05,498 2171 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
-2014-12-04 20:24:05,500 2173 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
-2014-12-04 20:24:05,500 2173 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
-2014-12-04 20:24:05,500 2173 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
-2014-12-04 20:24:05,509 2182 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
-2014-12-04 20:24:05,511 2184 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
-2014-12-04 20:24:05,511 2184 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
-2014-12-04 20:24:05,511 2184 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@667dcb61
+2014-12-05 02:51:39,297 10623 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:51:39,297 10623 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:51:39,298 10624 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:51:39,298 10624 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:51:39,298 10624 [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:51:39,298 10624 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-05 02:51:39,299 10625 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:51:39,326 10652 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
+2014-12-05 02:51:39,327 10653 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
+2014-12-05 02:51:39,327 10653 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:51:39,327 10653 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:51:39,329 10655 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:51:39,382 10708 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:51:39,382 10708 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 1
+2014-12-05 02:51:39,382 10708 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:51:39,382 10708 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:51:39,383 10709 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
+2014-12-05 02:51:39,383 10709 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:51:39,384 10710 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:51:39,385 10711 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-05 02:51:39,385 10711 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:51:39,391 10717 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:51:39,391 10717 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:51:39,392 10718 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:51:39,392 10718 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
 
 
 
 
 
->>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message., id=1, timeStamp=2014-12-04 20:22:46.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417713766192, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417713766192]
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=5, timeStamp=2014-12-05 02:51:38.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737098782, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737098782]
 
 
 
 
-2014-12-04 20:24:05,512 2185 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
-2014-12-04 20:24:05,512 2185 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
-2014-12-04 20:24:05,514 2187 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
-2014-12-04 20:25:28,304 84977 [Thread-2] DEBUG producerthreads.MTProducer  - >>>>>>>>>>>>>>>>>>>>>>: CMP_Txid 1417713766192
-2014-12-04 20:25:28,318 84991 [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
-2014-12-04 20:25:28,318 84991 [Thread-3] DEBUG workerthreads.MTHttpSender  - :the service id in worker!::::: mtsms.getServiceID():: 363
-2014-12-04 20:25:28,318 84991 [Thread-3] DEBUG workerthreads.MTHttpSender  - THREAD_WORKER_#_0 got message to send!! MTsms [type=TM, sendFrom=32329, timeStamp=2014-12-04 20:24:05.0, fromAddr=32329, charged=1, SMS_Msgdata=, SMS_SourceAddr=32329, SUB_DeviceType=null, SUB_R_Mobtel=254734252504, SUB_C_Mobtel=254734252504, APIType=1, CMP_Keyword=IOD, CMP_SKeyword=IOD0000, action=null, CMPResponse=null, SMS_DataCodingId=0, MT_STATUS=null, msg_part=null, split=false, newCMP_Txid=-1, sent=false] GenericMT [id=1, sms=Welcome to content360 content platform. This is an auto response message., msisdn=254734252504] GenericMessage [CMP_Txid=1417713766192, priority=0, number_of_sms=1, split_msg=false]
-2014-12-04 20:25:28,323 84996 [Thread-3] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
-2014-12-04 20:25:28,323 84996 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
-2014-12-04 20:25:28,323 84996 [Thread-3] INFO  ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
-2014-12-04 20:25:28,332 85005 [Thread-3] INFO  ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Created a new connection
-2014-12-04 20:25:28,332 85005 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkout - 1/1 (HitRate=0.0%)
-2014-12-04 20:25:28,333 85006 [Thread-3] DEBUG workerthreads.MTHttpSender  - full msg: Welcome to content360 content platform. This is an auto response message.
-2014-12-04 20:25:28,333 85006 [Thread-3] DEBUG workerthreads.MTHttpSender  - part msg: null
-2014-12-04 20:25:28,377 85050 [Thread-3] DEBUG tsccm.ThreadSafeClientConnManager  - Get connection: HttpRoute[{}->http://41.223.58.157:56000], timeout = 0
-2014-12-04 20:25:28,379 85052 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - [HttpRoute[{}->http://41.223.58.157:56000]] total kept alive: 0, total issued: 0, total allocated: 0 out of 2
-2014-12-04 20:25:28,379 85052 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - No free connections [HttpRoute[{}->http://41.223.58.157:56000]][null]
-2014-12-04 20:25:28,379 85052 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - Available capacity: 2 out of 2 [HttpRoute[{}->http://41.223.58.157:56000]][null]
-2014-12-04 20:25:28,379 85052 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - Creating new connection [HttpRoute[{}->http://41.223.58.157:56000]]
-2014-12-04 20:25:28,410 85083 [Thread-3] DEBUG conn.DefaultClientConnectionOperator  - Connecting to 41.223.58.157:56000
-2014-12-04 20:25:28,917 85590 [Thread-3] DEBUG protocol.RequestAddCookies  - CookieSpec selected: best-match
-2014-12-04 20:25:28,927 85600 [Thread-3] DEBUG protocol.RequestAuthCache  - Auth cache not set in the context
-2014-12-04 20:25:28,927 85600 [Thread-3] DEBUG client.DefaultHttpClient  - Attempt 1 to execute request
-2014-12-04 20:25:28,927 85600 [Thread-3] DEBUG conn.DefaultClientConnection  - Sending request: POST /Bharti HTTP/1.1
-2014-12-04 20:25:29,440 86113 [Thread-3] DEBUG conn.DefaultClientConnection  - Receiving response: HTTP/1.1 200 OK
-2014-12-04 20:25:29,444 86117 [Thread-3] DEBUG client.DefaultHttpClient  - Connection can be kept alive indefinitely
-2014-12-04 20:25:29,446 86119 [Thread-3] DEBUG workerthreads.MTHttpSender  - 
-===================HEADER=========================
+2014-12-05 02:51:39,392 10718 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
+2014-12-05 02:51:39,392 10718 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:51:39,393 10719 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:52:04,450 35776 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:52:04,451 35777 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@667dcb61, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@4cb381d8]}
+2014-12-05 02:52:04,451 35777 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:52:04,451 35777 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@667dcb61, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@4cb381d8]} gugamuga_processor : 
 
-2014-12-04 20:25:29,446 86119 [Thread-3] DEBUG workerthreads.MTHttpSender  - 
-===================HEADER END======================
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@667dcb61
+2014-12-05 02:52:04,451 35777 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:52:04,451 35777 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:52:04,451 35777 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:52:04,451 35777 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:52:04,451 35777 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=80.0%)
+2014-12-05 02:52:04,451 35777 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:52:04,452 35778 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache hit [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=33.333336%
+2014-12-05 02:52:04,452 35778 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:52:04,471 35797 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:52:04,471 35797 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 2
+2014-12-05 02:52:04,471 35797 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:52:04,471 35797 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:52:04,472 35798 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=83.33333%)
+2014-12-05 02:52:04,472 35798 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:52:04,473 35799 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:52:04,473 35799 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=85.71429%)
+2014-12-05 02:52:04,473 35799 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:52:04,474 35800 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache hit [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=50.0%
+2014-12-05 02:52:04,474 35800 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:52:04,475 35801 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:52:04,475 35801 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
 
-2014-12-04 20:25:29,446 86119 [Thread-3] INFO  workerthreads.MTHttpSender  - resp: :::::::::::::::::::::::::::::RESP_CODE[200]:::::::::::::::::::::: resp:
-2014-12-04 20:25:29,447 86120 [Thread-3] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
-2014-12-04 20:25:29,447 86120 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
-2014-12-04 20:25:29,448 86121 [Thread-3] INFO  ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Getting connection (user/password): jdbc:mysql://db/pixeland_content360
-2014-12-04 20:25:29,459 86132 [Thread-3] INFO  ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Created a new connection
-2014-12-04 20:25:29,459 86132 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkout - 1/1 (HitRate=0.0%)
-2014-12-04 20:25:29,459 86132 [Thread-3] DEBUG api.CelcomImpl  - created connection! 
-2014-12-04 20:25:29,480 86153 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkin  - 0/1
-2014-12-04 20:25:29,480 86153 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkout - 1/1 (HitRate=50.0%)
-2014-12-04 20:25:29,480 86153 [Thread-3] DEBUG api.CelcomImpl  - created connection! 
-2014-12-04 20:25:29,483 86156 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkin  - 0/1
-2014-12-04 20:25:29,483 86156 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkout - 1/1 (HitRate=66.66667%)
-2014-12-04 20:25:29,483 86156 [Thread-3] DEBUG api.CelcomImpl  - created connection! 
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkin  - 0/1
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - RETRY__ mt.getSUB_R_Mobtel()=254734252504 ::::: MT_Sent=Welcome to content360 content platform. This is an auto response message.:::: Shortcode=32329 :::< . >< . >< . >< . >< . it took 1.15 seconds to clear deliver SMS via HTTP
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - login=content36
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - pass=content12
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - type=text
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - src=32329
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - msisdn=254734252504
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - sms=Welcome to content360 content platform. This is an auto response message.
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - >>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: 16 MB |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< 
-2014-12-04 20:25:29,484 86157 [Thread-3] DEBUG workerthreads.MTHttpSender  - THREAD_WORKER_#_0 ::::::: finished attempt to deliver SMS via HTTP
-2014-12-04 20:25:29,485 86158 [Thread-3] DEBUG tsccm.ThreadSafeClientConnManager  - Released connection is reusable.
-2014-12-04 20:25:29,486 86159 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - Releasing connection [HttpRoute[{}->http://41.223.58.157:56000]][null]
-2014-12-04 20:25:29,486 86159 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - Pooling connection [HttpRoute[{}->http://41.223.58.157:56000]][null]; keep alive indefinitely
-2014-12-04 20:25:29,486 86159 [Thread-3] DEBUG tsccm.ConnPoolByRoute  - Notifying no-one, there are no waiting threads
-2014-12-04 20:25:29,486 86159 [Thread-3] DEBUG ConnectionPool.DBPoolDataSource-celcom-impl  - DBPoolDataSource-celcom-impl: Checkin  - 0/1
-2014-12-04 20:25:29,486 86159 [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=6, timeStamp=2014-12-05 02:52:04.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737124078, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737124078]
+
+
+
+
+2014-12-05 02:52:04,475 35801 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=87.5%)
+2014-12-05 02:52:04,475 35801 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:52:04,476 35802 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:54:47,215 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+
+mturl: null
+mt_username: null
+mt_password: null
+THROTTLE: 50
+WORKER_THREADS: 2
+initialDBConnections: 10
+maxDBConnections: 12
+queueSize: 100
+pollWait: 100
+urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
+2014-12-05 02:54:47,931 716  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:54:47,940 725  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.018 seconds to create the connection pool
+2014-12-05 02:54:47,972 757  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:54:47,972 757  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:54:47,973 758  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:54:47,973 758  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:54:47,973 758  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:54:47,973 758  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:54:47,973 758  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:54:47,973 758  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:54:47,973 758  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:54:47,974 759  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:54:47,974 759  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:54:47,974 759  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:54:47,974 759  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:54:47,974 759  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:54:47,974 759  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:54:47,974 759  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:54:47,974 759  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:54:47,974 759  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:54:47,975 760  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:54:48,302 1087 [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:54:48,303 1088 [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:54:48,305 1090 [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:54:48,305 1090 [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:54:48,317 1102 [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-05 02:54:48,321 1106 [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 346.0 mili-seconds
+2014-12-05 02:54:48,321 1106 [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 348.0 mili-seconds
+2014-12-05 02:54:48,321 1106 [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:54:48,321 1106 [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:54:48,321 1106 [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-05 02:54:48,322 1107 [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-05 02:54:48,322 1107 [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-05 02:54:54,852 7637 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:54:54,852 7637 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@48270dbf, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7bf79b9a]}
+2014-12-05 02:54:54,852 7637 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:54:54,852 7637 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@48270dbf, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7bf79b9a]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@48270dbf
+2014-12-05 02:54:54,852 7637 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:54:54,852 7637 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:54:54,853 7638 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:54:54,853 7638 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:54:54,853 7638 [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:54:54,853 7638 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-05 02:54:54,854 7639 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:54:54,868 7653 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
+2014-12-05 02:54:54,869 7654 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
+2014-12-05 02:54:54,869 7654 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:54:54,869 7654 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:54:54,872 7657 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:54:54,913 7698 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:54:54,913 7698 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 3
+2014-12-05 02:54:54,913 7698 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:54:54,913 7698 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:54:54,914 7699 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
+2014-12-05 02:54:54,914 7699 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:54:54,915 7700 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:54:54,916 7701 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-05 02:54:54,916 7701 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:54:54,922 7707 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:54:54,922 7707 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:54:54,923 7708 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:54:54,923 7708 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=7, timeStamp=2014-12-05 02:54:54.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737294469, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737294469]
+
+
+
+
+2014-12-05 02:54:54,923 7708 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
+2014-12-05 02:54:54,923 7708 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:54:54,925 7710 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:01,935 14720 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:55:01,936 14721 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@48270dbf, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7bf79b9a]}
+2014-12-05 02:55:01,936 14721 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:55:01,936 14721 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@48270dbf, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7bf79b9a]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@48270dbf
+2014-12-05 02:55:01,936 14721 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:55:01,936 14721 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:55:01,936 14721 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:55:01,936 14721 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:55:01,936 14721 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=80.0%)
+2014-12-05 02:55:01,937 14722 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:01,937 14722 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache hit [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=33.333336%
+2014-12-05 02:55:01,937 14722 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:55:01,941 14726 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:01,941 14726 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 4
+2014-12-05 02:55:01,941 14726 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:55:01,941 14726 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:55:01,941 14726 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=83.33333%)
+2014-12-05 02:55:01,941 14726 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:01,942 14727 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:01,943 14728 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=85.71429%)
+2014-12-05 02:55:01,943 14728 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:01,944 14729 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache hit [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=50.0%
+2014-12-05 02:55:01,944 14729 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:55:01,944 14729 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:01,944 14729 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=8, timeStamp=2014-12-05 02:55:01.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737301570, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737301570]
+
+
+
+
+2014-12-05 02:55:01,945 14730 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=87.5%)
+2014-12-05 02:55:01,945 14730 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:01,946 14731 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:46,757 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+
+mturl: null
+mt_username: null
+mt_password: null
+THROTTLE: 50
+WORKER_THREADS: 2
+initialDBConnections: 10
+maxDBConnections: 12
+queueSize: 100
+pollWait: 100
+urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
+2014-12-05 02:55:47,195 438  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:55:47,200 443  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.012 seconds to create the connection pool
+2014-12-05 02:55:47,219 462  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:55:47,219 462  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:55:47,219 462  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:55:47,219 462  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:55:47,219 462  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:55:47,219 462  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:55:47,220 463  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:55:47,220 463  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:55:47,220 463  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:55:47,220 463  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:55:47,220 463  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:55:47,220 463  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:55:47,220 463  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:55:47,220 463  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:55:47,221 464  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:55:47,221 464  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:55:47,221 464  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:55:47,221 464  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:55:47,221 464  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:55:47,476 719  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:55:47,476 719  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:55:47,478 721  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:55:47,479 722  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:55:47,489 732  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-05 02:55:47,492 735  [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 271.0 mili-seconds
+2014-12-05 02:55:47,492 735  [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 273.0 mili-seconds
+2014-12-05 02:55:47,492 735  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:55:47,492 735  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-05 02:55:47,492 735  [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-05 02:55:47,492 735  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:55:47,493 736  [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-05 02:55:53,025 6268 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:55:53,025 6268 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7ccf3329, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@72808c3]}
+2014-12-05 02:55:53,025 6268 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:55:53,025 6268 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7ccf3329, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@72808c3]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7ccf3329
+2014-12-05 02:55:53,025 6268 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:55:53,025 6268 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:55:53,026 6269 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:55:53,026 6269 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:55:53,026 6269 [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:55:53,026 6269 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-05 02:55:53,026 6269 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:55:53,050 6293 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
+2014-12-05 02:55:53,050 6293 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
+2014-12-05 02:55:53,050 6293 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:53,050 6293 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:55:53,057 6300 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:55:53,067 6310 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:53,067 6310 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 5
+2014-12-05 02:55:53,067 6310 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:55:53,067 6310 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:55:53,068 6311 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
+2014-12-05 02:55:53,068 6311 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:53,071 6314 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:53,071 6314 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-05 02:55:53,071 6314 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:53,080 6323 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:55:53,081 6324 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:55:53,082 6325 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:55:53,082 6325 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=9, timeStamp=2014-12-05 02:55:53.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737353011, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737353011]
+
+
+
+
+2014-12-05 02:55:53,082 6325 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
+2014-12-05 02:55:53,082 6325 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:55:53,084 6327 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:00,591 13834 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:56:00,591 13834 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7ccf3329, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@72808c3]}
+2014-12-05 02:56:00,591 13834 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:56:00,591 13834 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7ccf3329, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@72808c3]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@7ccf3329
+2014-12-05 02:56:00,591 13834 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:56:00,591 13834 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:56:00,591 13834 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:56:00,591 13834 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:56:00,592 13835 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=80.0%)
+2014-12-05 02:56:00,592 13835 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:00,592 13835 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache hit [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=33.333336%
+2014-12-05 02:56:00,593 13836 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:56:00,607 13850 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:00,608 13851 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 6
+2014-12-05 02:56:00,608 13851 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:56:00,608 13851 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:56:00,608 13851 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=83.33333%)
+2014-12-05 02:56:00,608 13851 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:00,609 13852 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:00,609 13852 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=85.71429%)
+2014-12-05 02:56:00,609 13852 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:00,610 13853 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache hit [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=50.0%
+2014-12-05 02:56:00,611 13854 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:56:00,611 13854 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:00,611 13854 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=10, timeStamp=2014-12-05 02:56:00.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737360107, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737360107]
+
+
+
+
+2014-12-05 02:56:00,612 13855 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=87.5%)
+2014-12-05 02:56:00,612 13855 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:00,613 13856 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:33,205 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+
+mturl: null
+mt_username: null
+mt_password: null
+THROTTLE: 50
+WORKER_THREADS: 2
+initialDBConnections: 10
+maxDBConnections: 12
+queueSize: 100
+pollWait: 100
+urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
+2014-12-05 02:56:33,673 468  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:56:33,679 474  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.012 seconds to create the connection pool
+2014-12-05 02:56:33,706 501  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:56:33,706 501  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:56:33,706 501  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:56:33,706 501  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:56:33,706 501  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:56:33,706 501  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:56:33,706 501  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:56:33,706 501  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:56:33,706 501  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:56:33,707 502  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:56:33,707 502  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:56:33,707 502  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:56:33,707 502  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:56:33,707 502  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:56:33,707 502  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:56:33,707 502  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:56:33,707 502  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:56:33,707 502  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:56:33,708 503  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:56:33,968 763  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:56:33,968 763  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:56:33,970 765  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:56:33,970 765  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:56:33,981 776  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-05 02:56:33,985 780  [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 278.0 mili-seconds
+2014-12-05 02:56:33,985 780  [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 276.0 mili-seconds
+2014-12-05 02:56:33,985 780  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:56:33,985 780  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:56:33,985 780  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-05 02:56:33,985 780  [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-05 02:56:33,985 780  [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-05 02:56:42,023 8818 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:56:42,024 8819 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@5f52408b, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@110b9691]}
+2014-12-05 02:56:42,024 8819 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@5f52408b, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@110b9691]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@5f52408b
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:56:42,024 8819 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-05 02:56:42,025 8820 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:56:42,040 8835 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
+2014-12-05 02:56:42,040 8835 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
+2014-12-05 02:56:42,040 8835 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:42,040 8835 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:56:42,043 8838 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:56:42,068 8863 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:42,068 8863 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 7
+2014-12-05 02:56:42,068 8863 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:56:42,068 8863 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:56:42,069 8864 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
+2014-12-05 02:56:42,069 8864 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:42,070 8865 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:42,070 8865 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-05 02:56:42,070 8865 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:42,077 8872 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:56:42,078 8873 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:56:42,078 8873 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:56:42,078 8873 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=11, timeStamp=2014-12-05 02:56:41.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737401667, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737401667]
+
+
+
+
+2014-12-05 02:56:42,079 8874 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
+2014-12-05 02:56:42,079 8874 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:56:42,081 8876 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:57:31,627 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+
+mturl: null
+mt_username: null
+mt_password: null
+THROTTLE: 50
+WORKER_THREADS: 2
+initialDBConnections: 10
+maxDBConnections: 12
+queueSize: 100
+pollWait: 100
+urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
+2014-12-05 02:57:32,102 475  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:57:32,109 482  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.014 seconds to create the connection pool
+2014-12-05 02:57:32,132 505  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:57:32,133 506  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:57:32,133 506  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:57:32,133 506  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:57:32,133 506  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:57:32,133 506  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:57:32,133 506  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:57:32,133 506  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:57:32,133 506  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:57:32,134 507  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:57:32,134 507  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:57:32,134 507  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:57:32,134 507  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:57:32,134 507  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:57:32,134 507  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:57:32,134 507  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:57:32,134 507  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:57:32,134 507  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:57:32,135 508  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:57:32,383 756  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:57:32,383 756  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:57:32,385 758  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:57:32,385 758  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:57:32,395 768  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-05 02:57:32,398 771  [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 263.0 mili-seconds
+2014-12-05 02:57:32,398 771  [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 264.0 mili-seconds
+2014-12-05 02:57:32,398 771  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:57:32,398 771  [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-05 02:57:32,398 771  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:57:32,398 771  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-05 02:57:32,399 772  [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-05 02:57:36,420 4793 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:57:36,420 4793 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@3da79a3f, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@467fbdb8]}
+2014-12-05 02:57:36,420 4793 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@3da79a3f, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@467fbdb8]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@3da79a3f
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:57:36,421 4794 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-05 02:57:36,422 4795 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:57:36,433 4806 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
+2014-12-05 02:57:36,433 4806 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
+2014-12-05 02:57:36,433 4806 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:57:36,433 4806 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:57:36,436 4809 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:57:36,462 4835 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:57:36,462 4835 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 8
+2014-12-05 02:57:36,462 4835 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:57:36,463 4836 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:57:36,463 4836 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
+2014-12-05 02:57:36,463 4836 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:57:36,465 4838 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:57:36,465 4838 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-05 02:57:36,465 4838 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:57:36,471 4844 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:57:36,472 4845 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:57:36,472 4845 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:57:36,472 4845 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=12, timeStamp=2014-12-05 02:57:35.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737455938, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737455938]
+
+
+
+
+2014-12-05 02:57:36,472 4845 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
+2014-12-05 02:57:36,472 4845 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:57:36,475 4848 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:59:06,311 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+
+mturl: null
+mt_username: null
+mt_password: null
+THROTTLE: 50
+WORKER_THREADS: 2
+initialDBConnections: 10
+maxDBConnections: 12
+queueSize: 100
+pollWait: 100
+urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
+2014-12-05 02:59:06,795 484  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:59:06,801 490  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.012 seconds to create the connection pool
+2014-12-05 02:59:06,827 516  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:59:06,827 516  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:59:06,827 516  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:59:06,827 516  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:59:06,827 516  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:59:06,828 517  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:59:06,828 517  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:59:06,828 517  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:59:06,828 517  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:59:06,828 517  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-05 02:59:06,828 517  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-05 02:59:06,829 518  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-05 02:59:06,829 518  [main] INFO  api.CelcomImpl  - ********** db username : pixeland_content
+2014-12-05 02:59:06,829 518  [main] INFO  api.CelcomImpl  - ********** db password : D13@pixelTag
+2014-12-05 02:59:06,829 518  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-05 02:59:06,829 518  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-05 02:59:06,829 518  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-05 02:59:06,829 518  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-05 02:59:06,829 518  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:59:07,086 775  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:59:07,086 775  [main] INFO  sms.Content360UnknownKeyword  - >>>>>>>>>>>>> Content360UnknownKeyword keyowrd processor initialized and dbpoolds initialized!
+2014-12-05 02:59:07,088 777  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:59:07,088 777  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:59:07,099 788  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-05 02:59:07,102 791  [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 274.0 mili-seconds
+2014-12-05 02:59:07,102 791  [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 275.0 mili-seconds
+2014-12-05 02:59:07,102 791  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:59:07,102 791  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-05 02:59:07,103 792  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-05 02:59:07,103 792  [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-05 02:59:07,103 792  [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-05 02:59:11,628 5317 [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-05 02:59:11,628 5317 [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@698c6916, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@147597d]}
+2014-12-05 02:59:11,628 5317 [Thread-13] INFO  sms.Content360UnknownKeyword  - max_queue_size:: 5
+2014-12-05 02:59:11,628 5317 [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@698c6916, com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@147597d]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@698c6916
+2014-12-05 02:59:11,628 5317 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:59:11,628 5317 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:59:11,628 5317 [Thread-13] DEBUG sms.Content360UnknownKeyword  - mo_.getPrice().doubleValue() 5.0
+2014-12-05 02:59:11,628 5317 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-05 02:59:11,629 5318 [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-05 02:59:11,629 5318 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-05 02:59:11,629 5318 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-05 02:59:11,648 5337 [Thread-13] INFO  ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Created a new connection
+2014-12-05 02:59:11,650 5339 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=0.0%)
+2014-12-05 02:59:11,650 5339 [Thread-13] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:59:11,650 5339 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:59:11,655 5344 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  before save 0
+2014-12-05 02:59:11,658 5347 [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:59:11,658 5347 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  after save 9
+2014-12-05 02:59:11,658 5347 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-05 02:59:11,659 5348 [Thread-13] DEBUG sms.Content360UnknownKeyword  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-05 02:59:11,660 5349 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=50.0%)
+2014-12-05 02:59:11,661 5350 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:59:11,663 5352 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:59:11,664 5353 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-05 02:59:11,664 5353 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:59:11,673 5362 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-05 02:59:11,674 5363 [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-05 02:59:11,674 5363 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-05 02:59:11,674 5363 [Thread-8] DEBUG sms.Content360UnknownKeyword  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message.Tail Text not subscribed, id=13, timeStamp=2014-12-05 02:59:11.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417737551618, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417737551618]
+
+
+
+
+2014-12-05 02:59:11,675 5364 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
+2014-12-05 02:59:11,675 5364 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
+2014-12-05 02:59:11,678 5367 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1

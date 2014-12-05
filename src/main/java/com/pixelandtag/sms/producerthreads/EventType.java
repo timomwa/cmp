@@ -19,10 +19,7 @@ public enum EventType {
 		this.name = name;
 	}
 
-	@Override
-	public String toString() {
-		return this.name;
-	}
+	
 
 	public static EventType get(String string) {
 		if(string==null)
@@ -35,6 +32,14 @@ public enum EventType {
 		if(string.equalsIgnoreCase(SUBSCRIPTION_PURCHASE.toString()))
 			return SUBSCRIPTION_PURCHASE;
 		if(string.equalsIgnoreCase(RESUBSCRIPTION.toString()))
+			return RESUBSCRIPTION;
+		
+		
+		if(string.equalsIgnoreCase(CONTENT_PURCHASE.getName()))
+			return CONTENT_PURCHASE;
+		if(string.equalsIgnoreCase(SUBSCRIPTION_PURCHASE.getName()))
+			return SUBSCRIPTION_PURCHASE;
+		if(string.equalsIgnoreCase(RESUBSCRIPTION.getName()))
 			return RESUBSCRIPTION;
 		return null;
 	}

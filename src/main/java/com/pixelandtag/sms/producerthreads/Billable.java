@@ -32,9 +32,10 @@ public class Billable implements Serializable {
 	
 
 	@Id
-	@GenericGenerator(name="gen",strategy="increment")
-	@GeneratedValue(generator="gen")
-	private Long id;
+	//@GenericGenerator(name="gen",strategy="increment")
+	//@GeneratedValue(generator="gen")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private int id;
 	
 	/**
 	 * 
@@ -184,11 +185,11 @@ public class Billable implements Serializable {
 		this.retry_count = retry_count;
 	}
 
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -327,7 +328,7 @@ public class Billable implements Serializable {
 				.replaceAll("\\{SERVICE_ID\\}", getService_id())
 				.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()))
 				.replaceAll("\\{CP_ID\\}", getCp_id())
-				.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().toString())
+				.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName())
 				.replaceAll("\\{TX_ID\\}", String.valueOf(getTx_id()))
 				.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
 	}

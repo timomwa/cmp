@@ -46,7 +46,7 @@ public class MOProcessor implements Runnable {
 	//private volatile Map<String, Boolean> split_msg_map;
 	private volatile Map<Integer, ServiceProcessorDTO> processorDtos;
 	private DBPoolDataSource ds;
-	private final String DEFAULT_PROCESSOR = "com.inmobia.celcom.serviceprocessors.sms.DefaultProcessor";
+	//private final String DEFAULT_PROCESSOR = "com.inmobia.celcom.serviceprocessors.sms.DefaultProcessor";
 
 	/*
 	 * public ServiceProcessorI getProcesor() { return procesor; }
@@ -166,7 +166,7 @@ public class MOProcessor implements Runnable {
 						setBusy(true);
 
 						watch.start();
-
+						
 						for (MOSms moSms : moSMSSes) {
 							
 							logger.debug(">>>>>>>>>>> moSms.getProcessor_id() : "+moSms.getProcessor_id());

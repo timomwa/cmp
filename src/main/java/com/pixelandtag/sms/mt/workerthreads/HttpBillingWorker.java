@@ -132,16 +132,14 @@ public class HttpBillingWorker implements Runnable {
 	 */
 	public static  <T> T saveOrUpdate(T t) {
 		try {
-			getSession().beginTransaction();
+			
 			getSession().saveOrUpdate(t);
-			getSession().getTransaction().commit();
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 			try{
 				getSession().getTransaction().rollback();
 			}catch(Exception e1){}
 		}finally{
-			
 		}
 		
 		return t;
@@ -415,7 +413,7 @@ public class HttpBillingWorker implements Runnable {
 	@SuppressWarnings("restriction")
 	private void charge(Billable  billable){
 		
-		
+		begin();
 		//Connection conn = null;
 		this.success  = true;
 		
@@ -430,7 +428,7 @@ public class HttpBillingWorker implements Runnable {
 			
 			//conn = getConn();
 			
-			watch.start();
+			
 			
 			String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
 			String encoding = null;
@@ -444,22 +442,28 @@ public class HttpBillingWorker implements Runnable {
 			StringEntity se = new StringEntity(billable.getChargeXML(BillableI.plainchargeXML));
 			httsppost.setEntity(se);
 			
-			 HttpResponse response = httpsclient.execute(httsppost);
+			
+			watch.start();
 			 
+			HttpResponse response = httpsclient.execute(httsppost);
+			watch.stop();
+			logger.info("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
+				
 			 
 			 final int RESP_CODE = response.getStatusLine().getStatusCode();
 			 
 			 resEntity = response.getEntity();
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
+			
 			 
+				
 
-			 System.out.println("RESP CODE : "+RESP_CODE);
-			 System.out.println("RESP XML : "+resp);
+			 logger.debug("RESP CODE : "+RESP_CODE);
+			 logger.debug("RESP XML : "+resp);
 			 
 			 billable.setResp_status_code(String.valueOf(RESP_CODE));
 			
-			logger.debug("resp: :::::::::::::::::::::::::::::RESP_CODE["+RESP_CODE+"]:::::::::::::::::::::: resp:");
 			
 			billable.setProcessed(1L);
 			
@@ -476,8 +480,8 @@ public class HttpBillingWorker implements Runnable {
 				
 				if(!this.success){
 					String err = getErrorCode(resp);
-					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+getErrorMessage(resp)+"]:::::::::::::::::::::: resp:");
+					logger.info("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
+					logger.info("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+getErrorMessage(resp)+"]:::::::::::::::::::::: resp:");
 					
 				}else{
 					
@@ -552,63 +556,64 @@ public class HttpBillingWorker implements Runnable {
 				
 			} finally{
 				
-				billable.setProcessed(1L);
-				billable.setIn_outgoing_queue(0L);
-				BillingService.saveOrUpdate(billable);
 				
-				if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) )
-					updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-				if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) )
-					updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-				//postMethod.;
-				//client.executeMethod(postMethod);
+				try{
+					
+					billable.setProcessed(1L);
+					billable.setIn_outgoing_queue(0L);
+					getSession().saveOrUpdate(billable);
+					
+					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) )
+						updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code()))
+						updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 				
-				if(!this.success){//return back to queue if we did not succeed
 					
-					
-					
-					
-					//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
+					if(!this.success){//return back to queue if we did not succeed
+						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
+							
+						//on third try, we abort
+						httsppost.abort();
 						
-					//on third try, we abort
-					httsppost.abort();
+						
+					}else{
+						
+						recursiveCounter = 0;
+						//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
+					}
+					
+					watch.reset();
+					
+					setBusy(false);
+					
+					logger.info(getName()+" ::::::: finished attempt to bill via HTTP");
+					
+					removeAllParams(qparams);
+					
+					 // When HttpClient instance is no longer needed,
+		            // shut down the connection manager to ensure
+		            // immediate deallocation of all system resources
+					try {
+						
+						if(resEntity!=null)
+							EntityUtils.consume(resEntity);
+					
+					} catch (Exception e) {
+						
+						log(e);
+					
+					}
 					
 					
-				}else{
-					
-					recursiveCounter = 0;
-					//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
 				}
 				
 				watch.reset();
 				
-				setBusy(false);
+				commit();
 				
-				logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
-				
-				removeAllParams(qparams);
-				
-				 // When HttpClient instance is no longer needed,
-	            // shut down the connection manager to ensure
-	            // immediate deallocation of all system resources
-				try {
-					
-					if(resEntity!=null)
-						EntityUtils.consume(resEntity);
-				
-				} catch (Exception e) {
-					
-					log(e);
-				
-				}
-				
-				
-				
-			/*	try{
-					conn.close();
-				}catch(Exception ex){}*/
-	            
-	            
+				close();
 			}
 	
 	}
@@ -690,14 +695,13 @@ public class HttpBillingWorker implements Runnable {
 	
 	
 	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) {
-		getSession().beginTransaction();
 		Query qry = getSession().createSQLQuery("UPDATE httptosend set priority=:priority, charged=:charged, billing_status=:billing_status WHERE CMP_TxID=:CMP_TxID ")
 		.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
 		.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 1 :  0)
 		.setParameter("billing_status", billstatus.toString())
 		.setParameter("CMP_TxID", cp_tx_id);
 		int success = qry.executeUpdate();
-		getSession().getTransaction().commit();
+		
 	}
 
 	/**

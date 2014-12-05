@@ -1,5 +1,7 @@
 package com.pixelandtag.serviceprocessors.sms;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -58,13 +60,15 @@ public class Content360UnknownKeyword extends GenericServiceProcessor {
 			conn = getCon();
 			
 			final RequestObject req = new RequestObject(mo);
+			
 			final String MSISDN = req.getMsisdn();
 		
 			int language_id = UtilCelcom.getSubscriberLanguage(MSISDN, conn);
 			
 			String response = UtilCelcom.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, conn, language_id) ;
 			
-			mo.setMt_Sent(response);
+			
+			mo.setMt_Sent(response + " "+ getTailTextNotSubecribed().replaceAll("<KEYWORD>", req.getKeyword()).replaceAll("<PRICE>", mo.getPrice().toEngineeringString()));
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -102,6 +106,9 @@ public class Content360UnknownKeyword extends GenericServiceProcessor {
 		}
 		
 	}
+	
+	
+
 
 	@Override
 	public Connection getCon() {

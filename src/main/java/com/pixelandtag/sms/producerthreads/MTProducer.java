@@ -509,6 +509,10 @@ public class MTProducer extends Thread {
 					p = MOProcessorFactory.getProcessorClass(servicep.getProcessorClassName(),ServiceProcessorI.class);//Create new instances of each proccessor pool item
 					p.setName(x+"_"+servicep.getId()+"_"+servicep.getShortcode()+"_"+servicep.getCMP_AKeyword()+"_"+servicep.getCMP_SKeyword()+"_"+servicep.getServiceName());
 					p.setInternalQueue(5);
+					p.setSubscriptionText(servicep.getSubscriptionText());
+					p.setUnsubscriptionText(servicep.getUnsubscriptionText());
+					p.setTailTextSubscribed(servicep.getTailTextSubscribed());
+					p.setTailTextNotSubecribed(servicep.getTailTextNotSubecribed());
 					Thread t = new Thread(p);
 					t.start();
 					processor_array.add(p);

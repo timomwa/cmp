@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -23,6 +24,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -39,6 +41,7 @@ import com.pixelandtag.sms.mt.ACTION;
 import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker;
 import com.pixelandtag.sms.mt.workerthreads.MTHttpSender;
+import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
 
 import snaq.db.DBPoolDataSource;
@@ -71,7 +74,7 @@ public class BillingService extends Thread{
 	}
 	private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
 	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
-	
+	private Properties log4J;
 	public static Session getSession() {
 		Session session = (Session) BillingService.session.get();
 		if (session == null) {
@@ -92,17 +95,29 @@ public class BillingService extends Thread{
 	@SuppressWarnings("unchecked")
 	public static <T> T find(Class<T> entityClass, Long id) {
 		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE id =:id ").setParameter("id", id);
-		if(query.list().size()>0)
-			return (T) query.list().get(0);
-		return null;
+		try{
+			if(query.list().size()>0)
+				return (T) query.list().get(0);
+
+			return null;
+		}finally{
+			close();
+		}
 	}
 	
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T find(Class<T> entityClass, String param_name, Object value) {
-		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
-		if(query.list().size()>0)
-			return (T) query.list().get(0);
+		System.out.println("in com.pixelandtag.sms.producerthreads.BillingService.find(Class<T>, String, Object)");
+		/*logger.info("in com.pixelandtag.sms.producerthreads.BillingService.find(Class<T>, String, Object)");
+		try{
+			Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
+			if(query.list().size()>0)
+				return (T) query.list().get(0);
+		}finally{
+			close();
+		}
+		return null;*/
 		return null;
 	}
 	
@@ -112,18 +127,22 @@ public class BillingService extends Thread{
 	 * @return
 	 */
 	public static  <T> T saveOrUpdate(T t) {
+		logger.debug("in com.pixelandtag.sms.producerthreads.BillingService.saveOrUpdate(T)");
 		try {
-			save_Sem.acquire();
 			getSession().beginTransaction();
 			getSession().saveOrUpdate(t);
 			getSession().getTransaction().commit();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 			try{
 				getSession().getTransaction().rollback();
 			}catch(Exception e1){}
 		}finally{
-			save_Sem.release();
+			logger.debug("exiting com.pixelandtag.sms.producerthreads.BillingService.saveOrUpdate(T)");
+			
+			try{
+				close();
+			}catch(Exception e1){}
 		}
 		
 		return t;
@@ -185,7 +204,8 @@ public class BillingService extends Thread{
     
     
 	private void initWorkers() throws Exception{
-		
+		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
+		PropertyConfigurator.configure(log4J);
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
 		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 				    
@@ -310,7 +330,7 @@ public class BillingService extends Thread{
 			
 			List<Billable> billables = getBillable(100);
 			
-			System.out.println("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
+			logger.debug("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
 			
 			for(Billable billable : billables){
 			
@@ -368,6 +388,8 @@ public class BillingService extends Thread{
 					}
 				}
 				
+				increaseMT();
+				
 				
 			}
 			
@@ -381,9 +403,11 @@ public class BillingService extends Thread{
 			   
 				watch.reset();
 				
-				MTProducer.resetSentMT();
+				resetSentMT();
 			}
 			
+			
+			Thread.sleep(10);//Sleep 100 ms
 		
 		} catch (NullPointerException e) {
 			
@@ -405,6 +429,10 @@ public class BillingService extends Thread{
 			try{
 				commit();
 			}catch(Exception e3){}
+			
+			try{
+				close();
+			}catch(Exception e3){}
 						
 		}
 		
@@ -412,10 +440,14 @@ public class BillingService extends Thread{
 	
 	@SuppressWarnings("unchecked")
 	private List<Billable> getBillable(int limit) {
-		Query qry =  getSession().createQuery("from Billable where in_outgoing_queue=0 AND (retry_count<=maxRetriesAllowed) AND resp_status_code is null AND price>0 AND  processed=0 order by priority asc");
-		qry.setFirstResult(0);
-		qry.setMaxResults(limit);
-		return qry.list();
+		try{
+			Query qry =  getSession().createQuery("from Billable where in_outgoing_queue=0 AND (retry_count<=maxRetriesAllowed) AND resp_status_code is null AND price>0 AND  processed=0 order by priority asc");
+			qry.setFirstResult(0);
+			qry.setMaxResults(limit);
+			return qry.list();
+		}finally{
+			//close();
+		}
 		
 	}
 
@@ -443,7 +475,6 @@ public class BillingService extends Thread{
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
 		try {
 			BillingService billingserv = new BillingService();
 			billingserv.initWorkers();
@@ -465,5 +496,11 @@ public class BillingService extends Thread{
 		.setParameter("CMP_TxID", cp_tx_id);
 		int success = qry.executeUpdate();
 		getSession().getTransaction().commit();
+	}
+
+
+
+	public static void sayHello(String string) {
+		System.out.println("Hello "+string);
 	}
 }

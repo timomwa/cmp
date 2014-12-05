@@ -74,6 +74,14 @@ public interface ServiceProcessorI extends Runnable{
 
 	public void setInternalQueue(int i);
 	
+	public String getSubscriptionText();
+	public void setSubscriptionText(String subscriptionText);
+	public String getUnsubscriptionText();
+	public void setUnsubscriptionText(String unsubscriptionText);
+	public String getTailTextSubscribed();
+	public void setTailTextSubscribed(String tailTextSubscribed) ;
+	public String getTailTextNotSubecribed() ;
+	public void setTailTextNotSubecribed(String tailTextNotSubecribed);
 	
 	
 }

@@ -3,8 +3,10 @@ package com.pixelandtag.api;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -58,6 +60,52 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 						"VALUES(?,?,?,?,?,?,?)";
 
 
+	protected String subscriptionText;
+	protected String unsubscriptionText;
+	protected String tailTextSubscribed;
+	protected String tailTextNotSubecribed;
+	
+	
+	
+	public String getSubscriptionText() {
+		return subscriptionText;
+	}
+
+
+	public void setSubscriptionText(String subscriptionText) {
+		this.subscriptionText = subscriptionText;
+	}
+
+
+	public String getUnsubscriptionText() {
+		return unsubscriptionText;
+	}
+
+
+	public void setUnsubscriptionText(String unsubscriptionText) {
+		this.unsubscriptionText = unsubscriptionText;
+	}
+
+
+	public String getTailTextSubscribed() {
+		return tailTextSubscribed;
+	}
+
+
+	public void setTailTextSubscribed(String tailTextSubscribed) {
+		this.tailTextSubscribed = tailTextSubscribed;
+	}
+
+
+	public String getTailTextNotSubecribed() {
+		return tailTextNotSubecribed;
+	}
+
+
+	public void setTailTextNotSubecribed(String tailTextNotSubecribed) {
+		this.tailTextNotSubecribed = tailTextNotSubecribed;
+	}
+	
 	public void initQueue(int size){
 		this.max_queue_size = size;
 		
@@ -90,6 +138,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 * @see com.pixelandtag.api.ServiceProcessorI#enqueue(com.pixelandtag.celcom.entities.MOSms)
 	 */
 	public boolean submit(MOSms mo_){
+		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
 		boolean success = false;
 		try{
 			mo_  = bill(mo_);
@@ -97,48 +146,160 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		}catch(Exception e){
 			this.logger.error(e.getMessage(),e);
 		}
+		logger.debug(" exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
 		return success;
 	}
 	
 	
 	private MOSms bill(MOSms mo_) {
+		
+		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
+		logger.debug("mo_.getPrice().doubleValue() "+mo_.getPrice().doubleValue());
+		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+mo_.getPrice().compareTo(BigDecimal.ZERO));
 		if(mo_.getPrice().compareTo(BigDecimal.ZERO)==0){//if price is zero
 			mo_.setCharged(true);
 			mo_.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+			logger.debug(" returning.... price is zero ");
 			return mo_;
 		}
+		Connection conn = getCon();
 		
-	
-		Billable billable = BillingService.find(Billable.class, "cp_tx_id",mo_.getCMP_Txid());
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		Billable billable = null;
+		
+		try{
+			
+			String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setLong(1, mo_.getCMP_Txid());
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()){
+				billable = new Billable();
+				billable.setId(rs.getInt("id"));
+				billable.setCp_id(rs.getString("cp_id"));
+				billable.setCp_tx_id(rs.getLong("cp_tx_id"));
+				billable.setDiscount_applied(rs.getString("discount_applied"));
+				billable.setEvent_type(EventType.get(rs.getString("event_type")));
+				billable.setIn_outgoing_queue(rs.getLong("in_outgoing_queue"));
+				billable.setKeyword(rs.getString("keyword"));
+				billable.setMaxRetriesAllowed(rs.getLong("maxRetriesAllowed"));
+				billable.setMessage_id(rs.getLong("message_id"));
+				billable.setMsisdn(rs.getString("msisdn"));
+				billable.setOperation(rs.getString("operation"));
+				billable.setPrice(rs.getBigDecimal("price"));
+				billable.setPriority(rs.getLong("priority"));
+				billable.setResp_status_code(rs.getString("resp_status_code"));
+				billable.setRetry_count(rs.getLong("retry_count"));
+				billable.setService_id(rs.getString("service_id"));
+				billable.setShortcode(rs.getString("shortcode"));
+				billable.setSuccess(rs.getBoolean("success"));
+				billable.setTx_id(rs.getLong("tx_id"));
+				billable.setTimeStamp(new Date());
+			}
+			
+			
+			
+		}catch(Exception e){
+			logger.debug(" something went terribly wrong! ");
+			logger.error(e.getMessage(),e);
+		}finally{
+			try {
+				rs.close();
+			} catch (SQLException e) {
+			}
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+			}
+			
+		}
 		if(billable==null)
 			billable  = new Billable();
 		else
 			return mo_;
 		
 		
-		billable.setMessage_id(mo_.getId());
-		billable.setEvent_type(mo_.getEventType());
+
 		billable.setCp_id("CONTENT360_KE");
 		billable.setCp_tx_id(Long.valueOf(mo_.getCMP_Txid()));
-		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
 		billable.setDiscount_applied("0");
-		billable.setKeyword(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
-		billable.setMsisdn(mo_.getMsisdn());
+		billable.setEvent_type(mo_.getEventType());
 		billable.setIn_outgoing_queue(0l);
+		billable.setKeyword(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setMaxRetriesAllowed(1L);
-		billable.setProcessed(0L);
-		billable.setRetry_count(0L);
+		billable.setMessage_id(mo_.getId());
+		billable.setMsisdn(mo_.getMsisdn());
 		billable.setOperation(mo_.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
 		billable.setPrice(mo_.getPrice());
-		billable.setShortcode(mo_.getSMS_SourceAddr());
 		billable.setPriority(0l);
+		billable.setProcessed(0L);
+		billable.setRetry_count(0L);
 		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		billable.setShortcode(mo_.getSMS_SourceAddr());		
+		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
+		
+		logger.debug(" before save "+billable.getId());
 		
 		
-		BillingService.saveOrUpdate(billable);
+		
+		
+		try{
+			
+			String sql = "INSERT INTO  billable_queue(`cp_id`,`cp_tx_id`,`discount_applied`,`event_type`,"
+					+ "`in_outgoing_queue`,`keyword`,`maxRetriesAllowed`,`message_id`,"
+					+ "`msisdn`,`operation`,`price`,`priority`,`processed`,`retry_count`,`service_id`,`shortcode`,`timeStamp`,`tx_id`)"
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?) ";
+			
+			
+			pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			pstmt.setString(1, billable.getCp_id());
+			pstmt.setLong(2, billable.getCp_tx_id());
+			pstmt.setString(3, billable.getDiscount_applied());
+			pstmt.setString(4, billable.getEvent_type().toString());
+			pstmt.setLong(5, billable.getIn_outgoing_queue());
+			pstmt.setString(6, billable.getKeyword());
+			pstmt.setLong(7, billable.getMaxRetriesAllowed());
+			pstmt.setLong(8, billable.getMessage_id());
+			pstmt.setString(9, billable.getMsisdn());
+			pstmt.setString(10, billable.getOperation());
+			pstmt.setBigDecimal(11, billable.getPrice());
+			pstmt.setLong(12, billable.getPriority());
+			pstmt.setLong(13, billable.isProcessed());
+			pstmt.setLong(14, billable.getRetry_count());
+			pstmt.setString(15, billable.getService_id());
+			pstmt.setString(16, billable.getShortcode());
+			pstmt.setLong(17, billable.getTx_id());
+			
+			int n = pstmt.executeUpdate();
+			rs = pstmt.getGeneratedKeys();
+			if(rs.next())
+				billable.setId(rs.getInt(1));
+			
+		}catch(Exception e){
+			logger.debug(" something went terribly wrong! ");
+			logger.error(e.getMessage(),e);
+		}finally{
+			try {
+				rs.close();
+			} catch (SQLException e) {
+			}
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+			}
+			try {
+				conn.close();
+			} catch (SQLException e) {
+			}
+		}
+		
+		//billable = BillingService.saveOrUpdate(billable);
+		logger.debug(" after save "+billable.getId());
 		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
 		mo_.setPriority(0);
-		
+		logger.debug(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		return mo_;
 		
 		
