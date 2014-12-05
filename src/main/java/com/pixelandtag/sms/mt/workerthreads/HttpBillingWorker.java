@@ -318,9 +318,13 @@ public class HttpBillingWorker implements Runnable {
 					
 					final Billable billable = BillingService.getBillable();
 					
+					begin();
+					
 					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 					
 					charge(billable);
+					
+					close();
 					
 				}catch (Exception e){
 					
@@ -362,6 +366,14 @@ public class HttpBillingWorker implements Runnable {
 			
 			try{
 				//this.conn.close();
+			}catch(Exception e){}
+			
+			
+			try{
+				commit();
+			}catch(Exception e){}
+			try{
+				close();
 			}catch(Exception e){}
 		} 
 		
@@ -413,7 +425,6 @@ public class HttpBillingWorker implements Runnable {
 	@SuppressWarnings("restriction")
 	private void charge(Billable  billable){
 		
-		begin();
 		//Connection conn = null;
 		this.success  = true;
 		
@@ -487,6 +498,7 @@ public class HttpBillingWorker implements Runnable {
 				}else{
 					
 					billable.setResp_status_code("Success");
+					logger.info("resp: :::::::::::::::::::::::::::::ERROR_CODE["+billable.isProcessed()+"]:::::::::::::::::::::: resp:");
 				}
 				
 								
@@ -608,49 +620,62 @@ public class HttpBillingWorker implements Runnable {
 					
 					
 					
-				}catch(Exception e){
-					logger.error(e.getMessage(),e);
+				//}catch(HibernateException e){
+					//logger.warn("FAILED TO MARK AS BILLED READY FOR SENDING");
 					
-					
-					try{
+					/*try{
+						
+						
 						if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
 							int max_retries = 10;
 							int count = 0;
 							boolean success = false;
 							
 							while(!success && count<max_retries){
+
+								logger.info("************************** retrying ("+count+"/"+max_retries+") ");
 								try{
-									logger.info("retrying ("+count+"/"+max_retries+") ");
 									
-									begin();//get the message with that transaction id if it is in the outqueue and send it
+									try{
+										getSession().beginTransaction();
+									}catch(Exception eE){}
+									
 									getSession().saveOrUpdate(billable);
+									
+									try{
+										getSession().getTransaction().commit();
+									}catch(Exception eE){}
+									
 								}catch(Exception ev){
 									try{
-										rollback();
+										getSession().getTransaction().rollback();
 									}catch(Exception eE){}
 								}finally{
+									try{
+										Thread.sleep(1000);
+									}catch(Exception exx){}
+									
 									count++;
 									try{
 										commit();
 									}catch(Exception eE){}
-									try{
-										close();
-									}catch(Exception eT){}
-									}
-							}
+									
+								
 						
-					}
-					}catch(Exception ex){
-						logger.error("BILLED SOMEBODY BUT DIDN'T DELIVER CONTENT!!! "+ex.getMessage(), ex);
-					}
+								}
+							}
+						}*/
+					//}catch(Exception ex){
+					//	logger.error("BILLED SOMEBODY BUT DIDN'T DELIVER CONTENT!!! "+ex.getMessage(), ex);
+					//}
+					
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
 				}
 				
 				watch.reset();
 				try{
 					commit();
-				}catch(Exception e){}
-				try{
-					close();
 				}catch(Exception e){}
 			}
 	
@@ -732,7 +757,7 @@ public class HttpBillingWorker implements Runnable {
 	
 	
 	
-	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) {
+	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) throws HibernateException{
 		Query qry = getSession().createSQLQuery("UPDATE httptosend set priority=:priority, charged=:charged, billing_status=:billing_status WHERE CMP_TxID=:CMP_TxID ")
 		.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
 		.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 1 :  0)

@@ -60,8 +60,8 @@ public class BillingService extends Thread{
 	private static Semaphore uniq;
 	private boolean run = true;
 	public static CelcomHTTPAPI celcomAPI;
-	private static DBPoolDataSource ds;
-	private Connection conn;
+	//private static DBPoolDataSource ds;
+	//private Connection conn;
 	private StopWatch watch;
 	private int x = 0;
 	private static int sentMT = 0;
@@ -680,8 +680,8 @@ public class BillingService extends Thread{
 		
 		}
 		
-		if(ds!=null)
-			ds.releaseConnectionPool();
+		//if(ds!=null)
+		//	ds.releaseConnectionPool();
 		
 		
 		
