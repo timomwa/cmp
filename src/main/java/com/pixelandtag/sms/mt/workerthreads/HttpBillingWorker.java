@@ -263,7 +263,7 @@ public class HttpBillingWorker implements Runnable {
 			dbpds.setValidatorClassName("snaq.db.Select1Validator");
 			dbpds.setValidationQuery("SELECT 'test'");*/
 			
-			logger.info("Initialized db pool ok!");
+			//logger.info("Initialized db pool ok!");
 			
 		} catch (Exception e) {
 			
@@ -479,6 +479,7 @@ public class HttpBillingWorker implements Runnable {
 				
 				
 				if(!this.success){
+					
 					String err = getErrorCode(resp);
 					logger.info("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
 					logger.info("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+getErrorMessage(resp)+"]:::::::::::::::::::::: resp:");
@@ -556,6 +557,28 @@ public class HttpBillingWorker implements Runnable {
 				
 			} finally{
 				
+				watch.reset();
+				
+				setBusy(false);
+				
+				logger.info(getName()+" ::::::: finished attempt to bill via HTTP");
+				
+				removeAllParams(qparams);
+				
+				 // When HttpClient instance is no longer needed,
+	            // shut down the connection manager to ensure
+	            // immediate deallocation of all system resources
+				try {
+					
+					if(resEntity!=null)
+						EntityUtils.consume(resEntity);
+				
+				} catch (Exception e) {
+					
+					log(e);
+				
+				}
+				
 				
 				try{
 					
@@ -582,38 +605,53 @@ public class HttpBillingWorker implements Runnable {
 						//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
 					}
 					
-					watch.reset();
 					
-					setBusy(false);
-					
-					logger.info(getName()+" ::::::: finished attempt to bill via HTTP");
-					
-					removeAllParams(qparams);
-					
-					 // When HttpClient instance is no longer needed,
-		            // shut down the connection manager to ensure
-		            // immediate deallocation of all system resources
-					try {
-						
-						if(resEntity!=null)
-							EntityUtils.consume(resEntity);
-					
-					} catch (Exception e) {
-						
-						log(e);
-					
-					}
 					
 					
 				}catch(Exception e){
 					logger.error(e.getMessage(),e);
+					
+					
+					try{
+						if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+							int max_retries = 10;
+							int count = 0;
+							boolean success = false;
+							
+							while(!success && count<max_retries){
+								try{
+									logger.info("retrying ("+count+"/"+max_retries+") ");
+									
+									begin();//get the message with that transaction id if it is in the outqueue and send it
+									getSession().saveOrUpdate(billable);
+								}catch(Exception ev){
+									try{
+										rollback();
+									}catch(Exception eE){}
+								}finally{
+									count++;
+									try{
+										commit();
+									}catch(Exception eE){}
+									try{
+										close();
+									}catch(Exception eT){}
+									}
+							}
+						
+					}
+					}catch(Exception ex){
+						logger.error("BILLED SOMEBODY BUT DIDN'T DELIVER CONTENT!!! "+ex.getMessage(), ex);
+					}
 				}
 				
 				watch.reset();
-				
-				commit();
-				
-				close();
+				try{
+					commit();
+				}catch(Exception e){}
+				try{
+					close();
+				}catch(Exception e){}
 			}
 	
 	}

@@ -4,13 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
@@ -36,7 +40,9 @@ import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.cmp.persistence.CMPDao;
+import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.sms.mt.ACTION;
 import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker;
@@ -55,14 +61,16 @@ public class BillingService extends Thread{
 	private boolean run = true;
 	public static CelcomHTTPAPI celcomAPI;
 	private static DBPoolDataSource ds;
+	private Connection conn;
 	private StopWatch watch;
 	private int x = 0;
-
 	private static int sentMT = 0;
 	private int queueSize;
 	public volatile  BlockingQueue<HttpBillingWorker> httpSenderWorkers = new LinkedBlockingDeque<HttpBillingWorker>();
 	private volatile static BlockingDeque<Billable> billableQ =  new LinkedBlockingDeque<Billable>(1);
 	private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
+
+	public static List<Long> refugees = new ArrayList<Long>();
 	private static String cannonicalPath = "";
 	private static File ft = new File(".");
 	static{
@@ -85,6 +93,59 @@ public class BillingService extends Thread{
 		return session;
 	}
 	
+	
+
+	/*public static void directHack(long http_to_send_id){
+		
+		try {
+			
+			save_Sem.acquire();
+			
+			refugees.add(http_to_send_id);
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}finally{
+			save_Sem.release();
+		}
+		
+		
+	}*/
+	
+	
+	/*private void processRefugees(){
+		
+		
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		boolean resp = false;
+		Long refugee = refugees.size()>0 ? refugees.remove(0) : null;
+		
+		if(refugee!=null)
+		try {
+			
+			conn = getConnection();
+			pstmt = conn.prepareStatement("UPDATE `"+CelcomHTTPAPI.database+"`.`httptosend` set billing_status=?, priority=0,charged=1  WHERE CMP_TxID=?");
+			pstmt.setString(1, BillingStatus.SUCCESSFULLY_BILLED.toString());
+			pstmt.setLong(1, refugee.longValue());
+			
+			resp = pstmt.executeUpdate()>0;
+			
+		}catch (Exception e) {
+			
+			logger.error(e.getMessage(),e);
+			
+		}finally{
+			
+			try{
+				pstmt.close();
+			}catch(Exception e){}
+			try{
+				conn.close();
+			}catch(Exception e){}
+		}
+	}*/
 	
 
 	/**
@@ -200,6 +261,31 @@ public class BillingService extends Thread{
     public BillingService() throws Exception{
     	watch = new StopWatch();
     	initWorkers();
+    	
+    /*	
+    	int vendor = DriverUtilities.MYSQL;
+	    String driver = DriverUtilities.getDriver(vendor);
+	    String host = HTTPMTSenderApp.props.getProperty("db_host");
+	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
+	    String url = DriverUtilities.makeURL(host, dbName, vendor);
+	    String username = HTTPMTSenderApp.props.getProperty("db_username");
+	    String password = HTTPMTSenderApp.props.getProperty("db_password");
+	    
+	    
+	    ds = new DBPoolDataSource();
+	    ds.setValidatorClassName("snaq.db.Select1Validator");
+	    ds.setName("billing-serv");
+	    ds.setDescription("Pooling DataSource");
+	    ds.setDriverClassName("com.mysql.jdbc.Driver");
+	    ds.setUrl(url);
+	    ds.setUser(username);
+	    ds.setPassword(password);
+	    ds.setMinPool(1);
+	    ds.setMaxPool(2);
+	    ds.setMaxSize(2);
+	    ds.setIdleTimeout(3600);  // Specified in seconds.
+	    
+	    ds.setValidationQuery("SELECT 'Test'");*/
     }
     
     
@@ -284,6 +370,12 @@ public class BillingService extends Thread{
 				
 				populateQueue();
 				
+				try{
+					//logger.info("\n\tTRYING TO PROCESS REFUGEES");
+					//processRefugees();
+					//System.out.println("\n\tDONE PROCESSING REFUGEES");
+				}catch(Exception e){}
+				
 				try {
 					
 					Thread.sleep(1000);
@@ -308,7 +400,8 @@ public class BillingService extends Thread{
 		
 		}finally{
 			
-		
+			myfinalize();
+			
 		}
 		
 		logger.info("producer shut down!");
@@ -475,6 +568,7 @@ public class BillingService extends Thread{
 	}
 
 	public static void main(String[] args) {
+		
 		try {
 			BillingService billingserv = new BillingService();
 			billingserv.initWorkers();
@@ -499,8 +593,97 @@ public class BillingService extends Thread{
 	}
 
 
-
-	public static void sayHello(String string) {
-		System.out.println("Hello "+string);
+/*
+	*//**
+	 * Gets connection object from a pool
+	 * @return java.sql.Connection
+	 * @throws InterruptedException
+	 * @throws SQLException
+	 *//*
+	private Connection getConnFromDbPool() throws InterruptedException, SQLException{
+		
+		return ds.getConnection();
+	}
+	
+	*//**
+	 * Gets the connection.
+	 * If it is not closed or null, return the existing connection object,
+	 * else create one and return it
+	 * @return java.sql.Connection object
+	 * @throws InterruptedException 
+	 * @throws SQLException 
+	 *//*
+	private Connection getConnection() throws InterruptedException, SQLException {
+		
+		//return getConnFromDbPool();
+		
+		
+		try{
+		
+			if(conn!=null || !conn.isClosed()){
+				conn.setAutoCommit(true);
+				return conn;
+			}
+			
+		}catch(Exception e){
+			logger.warn("we'll create a new connection!");
+			//conn = ds.getConnection("root", "");
+		}
+		
+		
+		while( true ) {
+			
+			try {
+				while ( conn==null || conn.isClosed() ) {
+					
+					
+					
+					try {
+						conn = getConnFromDbPool();//MTProducer.
+						logger.debug(">>>> created connection! ");
+						return conn;
+					} catch ( Exception e ) {
+						logger.warn("Could not create connection. Reason: "+e.getMessage());
+						try { Thread.sleep(500); } catch ( Exception ee ) {}
+					}
+				}
+				//return conn;
+			} catch ( Exception e ) {
+				logger.warn("can't get a connection, re-trying");
+				try { Thread.sleep(500); } catch ( Exception ee ) {}
+			}
+		}
+		
+	}*/
+	
+	
+	
+	public void myfinalize(){
+		
+		try{
+			
+		//	conn.close();
+		
+		}catch(Exception e){
+			
+			log(e);
+		
+		}
+		
+		try{
+			
+			cm.shutdown();
+		
+		}catch(Exception e){
+			
+			log(e);
+		
+		}
+		
+		if(ds!=null)
+			ds.releaseConnectionPool();
+		
+		
+		
 	}
 }

@@ -3,6 +3,7 @@ package com.pixelandtag.sms.producerthreads;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -28,6 +29,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.Logger;
 import org.gjt.mm.mysql.Driver;
+import org.hibernate.Query;
 
 import snaq.db.ConnectionPool;
 import snaq.db.DBPoolDataSource;
@@ -95,7 +97,7 @@ public class MTProducer extends Thread {
 	public static volatile Queue<ServiceProcessorDTO> serviceProcessors;
 	
 	private volatile static BlockingDeque<MTsms> mtMsgs = null;
-	public volatile  BlockingQueue<MTHttpSender> httpSenderWorkers = new LinkedBlockingDeque<MTHttpSender>();
+	public volatile  BlockingDeque<MTHttpSender> httpSenderWorkers = new LinkedBlockingDeque<MTHttpSender>();
 	private int idleWorkers;
 	private String fr_tz;
 	private String to_tz;
@@ -163,6 +165,8 @@ public class MTProducer extends Thread {
 		}
 		
 	}	
+	
+	
 	
 	/**
 	 * This method tries - with all might :) not to allow more than one thread to 
@@ -243,8 +247,6 @@ public class MTProducer extends Thread {
 	public void setTo_tz(String to_tz) {
 		this.to_tz = to_tz;
 	}
-
-
 
 
 	public boolean isRun() {
