@@ -39,7 +39,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String UNSUBSCRIBED_ALL_ADVICE = "UNSUBSCRIBED_ALL_ADVICE";
 	public static final String UNKNOWN_KEYWORD_ADVICE = "UNKNOWN_KEYWORD_ADVICE";
 	public static final String UNSUBSCRIBED_SINGLE_SERVICE_ADVICE = "UNSUBSCRIBED_SINGLE_SERVICE_ADVICE";
-	public static final String RM = "RM<PRICE>\n";
+	public static final String RM = "";//"RM<PRICE>\n";
 	public static final String PRICE_TG = "<PRICE>";
 	public static final String CHOSEN = "<CHOSEN>";
 	//private static final String COLON = ":";
@@ -617,6 +617,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 */
 	public void  sendMT(MOSms mo) {
 		
+		
+		System.out.println("\n\n\n\n\n*******************\n\t mo.toString() :  "+mo.toString() + "\n\n\t************\n\n");
+		
+		
+		
 		PreparedStatement pstmt = null;
 		
 		Connection conn = null;
@@ -659,9 +664,16 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setString(14, mo.getBillingStatus().toString());
 			pstmt.setString(15, mo.getBillingStatus().toString());
 			
-			pstmt.executeUpdate();
+			int resp  = pstmt.executeUpdate(); 
+			
+			System.out.println("\n\n\n\n\n*******************\n\t queued for sending ?resp:  "+resp + "\n\n\t************\n\n");
+			
 		
 		} catch (SQLException e) {
+			
+			logger.error(e.getMessage(),e);
+			
+		}catch (Exception e) {
 			
 			logger.error(e.getMessage(),e);
 			

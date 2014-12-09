@@ -36,18 +36,20 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 	private void init_datasource(){
 		
 		int vendor = DriverUtilities.MYSQL;
-		String driver = DriverUtilities.getDriver(vendor);
-		String host = "db";
-		String dbName =  HTTPMTSenderApp.props.getProperty("DATABASE");
-		String url = DriverUtilities.makeURL(host, dbName, vendor);
+	    String driver = DriverUtilities.getDriver(vendor);
+	    String host =  HTTPMTSenderApp.props.getProperty("db_host");
+	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
+	    String url = DriverUtilities.makeURL(host, dbName, vendor);
+	    String username = HTTPMTSenderApp.props.getProperty("db_username");
+	    String password = HTTPMTSenderApp.props.getProperty("db_password");
 		
 		ds = new DBPoolDataSource();
 	    ds.setName("STATICCONTENT_PROCESSOR_DS");
 	    ds.setDescription("Static Content thread datasource: "+ds.getName());
 	    ds.setDriverClassName(driver);
 	    ds.setUrl(url);
-	    ds.setUser("root");
-	    ds.setPassword("");
+	    ds.setUser(username);
+	    ds.setPassword(password);
 	    ds.setMinPool(1);
 	    ds.setMaxPool(2);
 	    ds.setMaxSize(3);
@@ -74,9 +76,11 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 			
 			
 			final String static_categoryvalue = UtilCelcom.getServiceMetaData(conn,serviceid,"static_categoryvalue");
+			final String table = UtilCelcom.getServiceMetaData(conn,serviceid,"table");
 			
 			static_content_processor_logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 			static_content_processor_logger.info(" SERVICEID ::::::::::::::::::::::::: ["+serviceid+"]");
+			static_content_processor_logger.info(" static_categoryvalue ::::::::::::::::::::::::: ["+static_categoryvalue+"]");
 			
 			
 			if(KEYWORD.equalsIgnoreCase("MORE")){
@@ -116,7 +120,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 					tailMsg = additionalInfo.get("tailText_subscribed");
 				}
 				
-				final String content = cr.getUniqueFromCategory("celcom_static_content", "more", "Text", "ID", "Category", static_categoryvalue, MSISDN, serviceid, 1, mo.getProcessor_id(), conn);
+				final String content = cr.getUniqueFromCategory("pixeland_content360", table, "Text", "id", "Category", static_categoryvalue, MSISDN, serviceid, 1, mo.getProcessor_id(), conn);
 				
 				if(content!=null)
 					mo.setMt_Sent(content+SPACE+tailMsg);

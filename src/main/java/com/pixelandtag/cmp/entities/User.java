@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Index;
+
 @Entity
 @Table(name = "user")
 public class User {
@@ -23,6 +25,8 @@ public class User {
 	@ManyToMany(fetch=FetchType.EAGER)
 	private List<Role> roles;
 
+	
+	@Index(name = "u_name_idx")
 	@Column(name = "u_name")
 	private String username;
 	

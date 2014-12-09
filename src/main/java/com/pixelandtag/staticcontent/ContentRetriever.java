@@ -24,6 +24,7 @@ import com.pixelandtag.subscription.dto.SMSServiceDTO;
 
 public class ContentRetriever {
 	
+	private static final String DB_NAME = "pixeland_content360";
 	private Logger log = Logger.getLogger(ContentRetriever.class);
 	private Subscription sub = new Subscription();
 	
@@ -39,7 +40,7 @@ public class ContentRetriever {
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		final String sql = "SELECT c.`ID`, c.`Text` FROM `celcom`.`dynamiccontent_content` c WHERE c.`contentid`=? ORDER BY c.`timestamp` DESC LIMIT 0,1";
+		final String sql = "SELECT c.`ID`, c.`Text` FROM `"+DB_NAME+"`.`dynamiccontent_content` c WHERE c.`contentid`=? ORDER BY c.`timestamp` DESC LIMIT 0,1";
 		String content = null;
 		try{
 		
@@ -143,7 +144,7 @@ public class ContentRetriever {
 				try {
 					sql=(
 						"INSERT DELAYED INTO "+database_name+".contentlog SET "+
-						"processor_id="+processor_id+", serviceid="+serviceid+", msisdn='"+msisdn+"', timestamp=CURDATE(), contentid="+contentid
+						"processor_id="+processor_id+", serviceid="+serviceid+", msisdn='"+msisdn+"', timestamp=now(), contentid="+contentid
 					);
 					stmt.execute(sql);
 				} catch ( Exception e ) {
@@ -371,7 +372,6 @@ public class ContentRetriever {
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
 				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
-				mo.setMsisdn(msisdn);
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());

@@ -27,13 +27,13 @@ public class UtilCelcom {
 
 	final static String DB = HTTPMTSenderApp.props.getProperty("DATABASE");
 
-	private static final String INMOBIA = "IIIIIIIIIIIIIIIIIII";
+	private static final String INMOBIA = "IIIIIIIIIIIIIIIIIII".replaceAll("I", "0");
 
-	public static final int DEFAULT_LANGUAGE = 2;
+	public static final int DEFAULT_LANGUAGE = 1;
 
 	public static Logger logger = Logger.getLogger(UtilCelcom.class);
 
-	private static int DEFAULT_LANGUAGE_ID = 2;
+	private static int DEFAULT_LANGUAGE_ID = 1;
 
 	public UtilCelcom() {
 		super();

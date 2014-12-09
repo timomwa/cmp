@@ -19,6 +19,7 @@ import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.sms.producerthreads.NoServiceProcessorException;
 import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.web.triviaI.MechanicsI;
 
@@ -171,11 +172,17 @@ public class MOProcessor implements Runnable {
 							
 							logger.debug(">>>>>>>>>>> moSms.getProcessor_id() : "+moSms.getProcessor_id());
 							
-							final ServiceProcessorI servp = MTProducer.getFreeProcessor(moSms.getProcessor_id());
-							
-							logger.debug(MTProducer.processor_pool+" gugamuga_processor : \n\n"+servp);
-							
-							boolean success = servp.submit(moSms);
+							try{
+								
+								final ServiceProcessorI servp = MTProducer.getFreeProcessor(moSms.getProcessor_id());
+								
+								logger.debug(MTProducer.processor_pool+" gugamuga_processor : \n\n"+servp);
+								
+								boolean success = servp.submit(moSms);
+								
+							}catch(NoServiceProcessorException spe){
+								logger.error(spe.getMessage());
+							}
 						
 						}
 
