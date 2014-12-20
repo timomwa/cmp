@@ -31,6 +31,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.autodraw.Alarm;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.URLParams;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
@@ -78,20 +79,20 @@ public class HttpBillingWorker implements Runnable {
 	}
 
 	private URLParams urlp;
-	private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
-	private static String cannonicalPath = "";
-	private static File ft = new File(".");
-	static{
+	//private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
+	//private static String cannonicalPath = "";
+	//private static File ft = new File(".");
+	/*static{
 		try {
 			cannonicalPath = ft.getCanonicalPath();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
+	}*/
+	/*private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
 	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
-	
-	public static Session getSession() {
+	*/
+	/*public static Session getSession() {
 		Session session = (Session) HttpBillingWorker.session.get();
 		if (session == null) {
 			session = sessionFactory.openSession();
@@ -99,83 +100,10 @@ public class HttpBillingWorker implements Runnable {
 			getSession().setFlushMode(FlushMode.AUTO);
 		}
 		return session;
-	}
+	}*/
 
-
-
-	/**
-	 * saves and commits
-	 * @param t
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T find(Class<T> entityClass, Long id) {
-		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE id =:id ").setParameter("id", id);
-		if(query.list().size()>0)
-			return (T) query.list().get(0);
-		return null;
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	public static <T> T find(Class<T> entityClass, String param_name, Object value) {
-		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
-		if(query.list().size()>0)
-			return (T) query.list().get(0);
-		return null;
-	}
-	
-	/**
-	 * saves and commits
-	 * @param t
-	 * @return
-	 */
-	public static  <T> T saveOrUpdate(T t) {
-		try {
-			
-			getSession().saveOrUpdate(t);
-		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
-			try{
-				getSession().getTransaction().rollback();
-			}catch(Exception e1){}
-		}finally{
-		}
-		
-		return t;
-	}
-	
-	protected void begin() {
-		getSession().beginTransaction();
-	}
 
 	
-	public void commitMe(){
-		this.commit();
-	}
-	protected void commit() {
-		getSession().getTransaction().commit();
-	}
-
-	protected void rollback() {
-
-		try {
-			getSession().getTransaction().rollback();
-		} catch (HibernateException e) {
-			logger.warn("Cannot rollback", e);
-		}
-		try {
-			getSession().close();
-		} catch (HibernateException e) {
-			logger.warn("Cannot close", e);
-		}
-		HttpBillingWorker.session.set(null);
-	}
-
-	public static void close() {
-		getSession().close();
-		HttpBillingWorker.session.set(null);
-	}
 	
 	
 	
@@ -187,6 +115,7 @@ public class HttpBillingWorker implements Runnable {
 
 	private String MINUS_ONE = "-1";
 
+	private CMPResourceBeanRemote cmp_ejb;
 	private final String FREE_TARRIF_CODE_CMP_SKEYWORD = "free_tarrif_code_cmp_SKeyword";
 	private final String FREE_TARRIF_CODE_CMP_AKEYWORD = "free_tarrif_code_cmp_AKeyword";
 
@@ -223,7 +152,9 @@ public class HttpBillingWorker implements Runnable {
 		}
 	}
 
-	public HttpBillingWorker( String name_,HttpClient httpclient_) throws Exception{
+	public HttpBillingWorker( String name_,HttpClient httpclient_, CMPResourceBeanRemote cmpbean) throws Exception{
+		
+		this.cmp_ejb  = cmpbean;
 		
 		this.watch = new StopWatch();
 		
@@ -234,66 +165,9 @@ public class HttpBillingWorker implements Runnable {
 		this.httpsclient = httpclient_;
 		
 		qparams = new LinkedList<NameValuePair>();
-		
-		/*int vendor = DriverUtilities.MYSQL;
-	    String driver = DriverUtilities.getDriver(vendor);
-	    String host = HTTPMTSenderApp.props.getProperty("db_host");
-	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");*/
-	    
-	    
-	    try {
-			
-		    
-			/*dbpds = new DBPoolDataSource();
-			dbpds.setName(this.name+"-DS-BBL");
-			dbpds.setValidatorClassName("snaq.db.Select1Validator");
-			dbpds.setName("celcom-impl");
-			dbpds.setDescription("Billing class connection");
-			dbpds.setDriverClassName("com.mysql.jdbc.Driver");
-			dbpds.setUrl(url);
-			dbpds.setUser(username);
-			dbpds.setPassword(password);
-			dbpds.setMinPool(1);
-			dbpds.setMaxPool(2);
-			dbpds.setMaxSize(3);
-			dbpds.setIdleTimeout(3600);  // Specified in seconds.
-			dbpds.setValidatorClassName("snaq.db.Select1Validator");
-			dbpds.setValidationQuery("SELECT 'test'");*/
-			
-			//logger.info("Initialized db pool ok!");
-			
-		} catch (Exception e) {
-			
-			logger.error(e.getMessage(),e);
-		
-		}finally{}
   
-		
-	
 	}
-	
-	
-	
-	/*public Connection getConn() {
-		
-		try {
-			
-			return dbpds.getConnection();
-		
-		} catch (Exception e) {
-			
-			logger.error(e.getMessage(),e);
-			
-			return null;
-		
-		}finally{
-		
-		}
-	}*/
-	
+
 
 	public void run() {
 		
@@ -318,13 +192,11 @@ public class HttpBillingWorker implements Runnable {
 					
 					final Billable billable = BillingService.getBillable();
 					
-					begin();
 					
 					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 					
 					charge(billable);
 					
-					close();
 					
 				}catch (Exception e){
 					
@@ -347,34 +219,11 @@ public class HttpBillingWorker implements Runnable {
 		}catch(OutOfMemoryError e){
 			
 			logger.fatal("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
-			//Hasn't happened so far during testing. Not expected to happen during runtime
-			//please send alarm
 			
-			/*Connection conn = null;
-			try{
-				conn = getConn();
-				alarm.send(MechanicsS.getSetting("alarm_emails", conn), "Malaysia Trivia: SEVERE:", "Hi,\n\n We encountered a fatal exception. Please check Malaysia HTTP Sender app.\n\n  Regards");
-			}catch(Exception e2){
-				log(e2);
-			}finally{
-				try{
-					conn.close();
-				}catch(Exception e4){}
-			}*/
 			
 		}finally{
 			
-			try{
-				//this.conn.close();
-			}catch(Exception e){}
 			
-			
-			try{
-				commit();
-			}catch(Exception e){}
-			try{
-				close();
-			}catch(Exception e){}
 		} 
 		
 	}
@@ -437,10 +286,6 @@ public class HttpBillingWorker implements Runnable {
 		
 		try {
 			
-			//conn = getConn();
-			
-			
-			
 			String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
 			String encoding = null;
 			sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
@@ -467,9 +312,6 @@ public class HttpBillingWorker implements Runnable {
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
 			
-			 
-				
-
 			 logger.debug("RESP CODE : "+RESP_CODE);
 			 logger.debug("RESP XML : "+resp);
 			 
@@ -482,12 +324,9 @@ public class HttpBillingWorker implements Runnable {
 				
 				
 				billable.setRetry_count(billable.getRetry_count()+1);
-				//remove from billing queue
 				
 				this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
 				billable.setSuccess(this.success );
-				
-				
 				
 				if(!this.success){
 					
@@ -504,7 +343,6 @@ public class HttpBillingWorker implements Runnable {
 								
 			}else if(RESP_CODE == 400){
 				
-				//log error
 				this.success  = false;
 				
 			}else if(RESP_CODE == 401){
@@ -596,12 +434,12 @@ public class HttpBillingWorker implements Runnable {
 					
 					billable.setProcessed(1L);
 					billable.setIn_outgoing_queue(0L);
-					getSession().saveOrUpdate(billable);
+					cmp_ejb.saveOrUpdate(billable);
 					
 					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) )
-						updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
 					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code()))
-						updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 				
 					
 					if(!this.success){//return back to queue if we did not succeed
@@ -617,74 +455,18 @@ public class HttpBillingWorker implements Runnable {
 						//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
 					}
 					
-					
-					
-					
-				//}catch(HibernateException e){
-					//logger.warn("FAILED TO MARK AS BILLED READY FOR SENDING");
-					
-					/*try{
-						
-						
-						if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
-							int max_retries = 10;
-							int count = 0;
-							boolean success = false;
-							
-							while(!success && count<max_retries){
-
-								logger.info("************************** retrying ("+count+"/"+max_retries+") ");
-								try{
-									
-									try{
-										getSession().beginTransaction();
-									}catch(Exception eE){}
-									
-									getSession().saveOrUpdate(billable);
-									
-									try{
-										getSession().getTransaction().commit();
-									}catch(Exception eE){}
-									
-								}catch(Exception ev){
-									try{
-										getSession().getTransaction().rollback();
-									}catch(Exception eE){}
-								}finally{
-									try{
-										Thread.sleep(1000);
-									}catch(Exception exx){}
-									
-									count++;
-									try{
-										commit();
-									}catch(Exception eE){}
-									
-								
-						
-								}
-							}
-						}*/
-					//}catch(Exception ex){
-					//	logger.error("BILLED SOMEBODY BUT DIDN'T DELIVER CONTENT!!! "+ex.getMessage(), ex);
-					//}
+				
 					
 				}catch(Exception e){
 					logger.error(e.getMessage(),e);
 				}
 				
 				watch.reset();
-				try{
-					commit();
-				}catch(Exception e){}
+				
 			}
 	
 	}
 	
-	
-	
-	
-
 	
 	private  String getErrorMessage(String resp) {
 		int start = resp.indexOf("<errorMessage>")+"<errorMessage>".length();
@@ -757,15 +539,7 @@ public class HttpBillingWorker implements Runnable {
 	
 	
 	
-	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) throws HibernateException{
-		Query qry = getSession().createSQLQuery("UPDATE httptosend set priority=:priority, charged=:charged, billing_status=:billing_status WHERE CMP_TxID=:CMP_TxID ")
-		.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
-		.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 1 :  0)
-		.setParameter("billing_status", billstatus.toString())
-		.setParameter("CMP_TxID", cp_tx_id);
-		int success = qry.executeUpdate();
-		
-	}
+	
 
 	/**
 	 * Utility method for converting Stream To String

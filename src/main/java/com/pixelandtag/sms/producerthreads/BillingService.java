@@ -19,6 +19,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -39,6 +43,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.persistence.CMPDao;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MTsms;
@@ -60,6 +65,7 @@ public class BillingService extends Thread{
 	private static Semaphore uniq;
 	private boolean run = true;
 	public static CelcomHTTPAPI celcomAPI;
+	private CMPResourceBeanRemote cmpbean;
 	//private static DBPoolDataSource ds;
 	//private Connection conn;
 	private StopWatch watch;
@@ -92,61 +98,6 @@ public class BillingService extends Thread{
 		}
 		return session;
 	}
-	
-	
-
-	/*public static void directHack(long http_to_send_id){
-		
-		try {
-			
-			save_Sem.acquire();
-			
-			refugees.add(http_to_send_id);
-			
-		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
-		}finally{
-			save_Sem.release();
-		}
-		
-		
-	}*/
-	
-	
-	/*private void processRefugees(){
-		
-		
-		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		boolean resp = false;
-		Long refugee = refugees.size()>0 ? refugees.remove(0) : null;
-		
-		if(refugee!=null)
-		try {
-			
-			conn = getConnection();
-			pstmt = conn.prepareStatement("UPDATE `"+CelcomHTTPAPI.database+"`.`httptosend` set billing_status=?, priority=0,charged=1  WHERE CMP_TxID=?");
-			pstmt.setString(1, BillingStatus.SUCCESSFULLY_BILLED.toString());
-			pstmt.setLong(1, refugee.longValue());
-			
-			resp = pstmt.executeUpdate()>0;
-			
-		}catch (Exception e) {
-			
-			logger.error(e.getMessage(),e);
-			
-		}finally{
-			
-			try{
-				pstmt.close();
-			}catch(Exception e){}
-			try{
-				conn.close();
-			}catch(Exception e){}
-		}
-	}*/
-	
 
 	/**
 	 * saves and commits
@@ -260,32 +211,22 @@ public class BillingService extends Thread{
     
     public BillingService() throws Exception{
     	watch = new StopWatch();
+    	initEJB();
     	initWorkers();
     	
-    /*	
-    	int vendor = DriverUtilities.MYSQL;
-	    String driver = DriverUtilities.getDriver(vendor);
-	    String host = HTTPMTSenderApp.props.getProperty("db_host");
-	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
-	    
-	    
-	    ds = new DBPoolDataSource();
-	    ds.setValidatorClassName("snaq.db.Select1Validator");
-	    ds.setName("billing-serv");
-	    ds.setDescription("Pooling DataSource");
-	    ds.setDriverClassName("com.mysql.jdbc.Driver");
-	    ds.setUrl(url);
-	    ds.setUser(username);
-	    ds.setPassword(password);
-	    ds.setMinPool(1);
-	    ds.setMaxPool(2);
-	    ds.setMaxSize(2);
-	    ds.setIdleTimeout(3600);  // Specified in seconds.
-	    
-	    ds.setValidationQuery("SELECT 'Test'");*/
+    }
+    
+    public void initEJB() throws NamingException{
+    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put("jboss.naming.client.ejb.context", true);
+		 Context context = new InitialContext(props);
+		 cmpbean =  (CMPResourceBeanRemote) 
+       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
     }
     
     
@@ -307,7 +248,7 @@ public class BillingService extends Thread{
 		
 		for(int i = 0; i<this.workers ; i++){
 			HttpBillingWorker worker;
-			worker = new HttpBillingWorker("THREAD_WORKER_#_"+i,httpsclient);
+			worker = new HttpBillingWorker("THREAD_WORKER_#_"+i,httpsclient, cmpbean);
 			t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);

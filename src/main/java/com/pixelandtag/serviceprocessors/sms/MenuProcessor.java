@@ -60,7 +60,6 @@ public class MenuProcessor extends GenericServiceProcessor{
 			final String KEYWORD = req.getKeyword().trim();
 			final int serviceid = 	mo.getServiceid();
 			
-			
 			conn = getCon();
 			
 			

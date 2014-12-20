@@ -652,3 +652,259 @@ com.pixelandtag.serviceprocessors.sms.Content360UnknownKeyword@698c6916
 2014-12-05 02:59:11,675 5364 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkout - 1/1 (HitRate=75.0%)
 2014-12-05 02:59:11,675 5364 [Thread-8] INFO  sms.Content360UnknownKeyword  - created connection! 
 2014-12-05 02:59:11,678 5367 [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-Content360UnknownKeyword-processor-ds  - DBPoolDataSource-Content360UnknownKeyword-processor-ds: Checkin  - 0/1
+2014-12-20 13:52:25,541 0    [main] INFO  application.HTTPMTSenderApp  - ::>>>????::CONFIG::::
+
+mturl: null
+mt_username: null
+mt_password: null
+THROTTLE: 50
+WORKER_THREADS: 2
+initialDBConnections: 10
+maxDBConnections: 12
+queueSize: 100
+pollWait: 100
+urlparams: URLParams [mturl=http://41.223.58.157:56000/Bharti, login=content36, pass=content12, type=text, src=32329]
+2014-12-20 13:52:25,916 375  [main] INFO  producerthreads.MTProducer  - jdbc:mysql://localhost/pixeland_content360
+2014-12-20 13:52:25,932 391  [main] INFO  producerthreads.MTProducer  - >< . >< . >< . >< . >< . it took 0.012 seconds to create the connection pool
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db username : root
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db password : Admin123#@!
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-20 13:52:25,947 406  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-20 13:52:25,947 406  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-20 13:52:25,947 406  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db username : root
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - ********** db password : Admin123#@!
+2014-12-20 13:52:25,947 406  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-20 13:52:25,947 406  [main] INFO  workerthreads.MTHttpSender  - Initialized db pool ok!
+2014-12-20 13:52:25,947 406  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getFr_tz():::::: -05:00
+2014-12-20 13:52:25,947 406  [main] INFO  workerthreads.MTHttpSender  - this.celcomAPI.getTo_tz():::::: +08:00
+2014-12-20 13:52:25,963 422  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db username : root
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db password : Admin123#@!
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db dbName : pixeland_content360
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db host : db
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db url : jdbc:mysql://db/pixeland_content360
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db username : root
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - ********** db password : Admin123#@!
+2014-12-20 13:52:26,213 672  [main] INFO  api.CelcomImpl  - Initialized db pool ok! celcom mimpl line 131
+2014-12-20 13:52:26,213 672  [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-20 13:52:26,213 672  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Getting connection (user/password): jdbc:mysql://localhost/pixeland_content360
+2014-12-20 13:52:26,229 688  [main] INFO  ConnectionPool.DBPoolDataSource-mo-processor-pool  - DBPoolDataSource-mo-processor-pool: Created a new connection
+2014-12-20 13:52:26,229 688  [Thread-3] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 272.0 mili-seconds
+2014-12-20 13:52:26,229 688  [Thread-4] INFO  workerthreads.MTHttpSender  - THREAD_WORKER_#_1 STARTED AFTER :::::RELEASED_BY_PRODUCER after 270.0 mili-seconds
+2014-12-20 13:52:26,229 688  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-20 13:52:26,229 688  [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
+2014-12-20 13:52:26,229 688  [Thread-2] WARN  producerthreads.MTProducer  - we'll create a new connection!
+2014-12-20 13:52:26,229 688  [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-20 13:52:26,229 688  [Thread-2] DEBUG producerthreads.MTProducer  - >>>> created connection! 
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-20 13:52:26,229 688  [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.MoreProcessor@90a1f5a, com.pixelandtag.serviceprocessors.sms.MoreProcessor@77905258]}
+2014-12-20 13:52:26,229 688  [Thread-13] INFO  sms.MoreProcessor  - max_queue_size:: 5
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.MoreProcessor@90a1f5a, com.pixelandtag.serviceprocessors.sms.MoreProcessor@77905258]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.MoreProcessor@90a1f5a
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG sms.MoreProcessor  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG sms.MoreProcessor  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG sms.MoreProcessor  - mo_.getPrice().doubleValue() 5.0
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG sms.MoreProcessor  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 1
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-20 13:52:26,229 688  [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Parameters changed (minpool=0,maxpool=2,maxsize=3,idleTimeout=3600,cleanInterval=5000)
+2014-12-20 13:52:26,229 688  [Thread-13] INFO  ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Getting connection (user/password): jdbc:mysql://db/pixeland_content360
+2014-12-20 13:52:26,244 703  [Thread-13] INFO  ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Created a new connection
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=0.0%)
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: PreparedStatement cache miss [SELECT * FROM billable_queue WHERE cp_tx_id=? ,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  before save 0
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  after save 3
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG mo.MOProcessor  - >>>>>>>>>>> moSms.getProcessor_id() : 11
+2014-12-20 13:52:26,244 703  [Thread-13] INFO  producerthreads.MTProducer  - gugamuga_processor_pool: : {11=[com.pixelandtag.serviceprocessors.sms.MoreProcessor@90a1f5a, com.pixelandtag.serviceprocessors.sms.MoreProcessor@77905258]}
+2014-12-20 13:52:26,244 703  [Thread-13] INFO  sms.MoreProcessor  - max_queue_size:: 5
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG mo.MOProcessor  - {11=[com.pixelandtag.serviceprocessors.sms.MoreProcessor@90a1f5a, com.pixelandtag.serviceprocessors.sms.MoreProcessor@77905258]} gugamuga_processor : 
+
+com.pixelandtag.serviceprocessors.sms.MoreProcessor@90a1f5a
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) 
+2014-12-20 13:52:26,244 703  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=50.0%)
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  - mo_.getPrice().doubleValue() 0.0
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  mo_.getPrice().compareTo(BigDecimal.ZERO) 0
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  returning.... price is zero 
+2014-12-20 13:52:26,244 703  [Thread-13] DEBUG sms.MoreProcessor  -  exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) 
+2014-12-20 13:52:26,260 719  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:26,260 719  [Thread-8] DEBUG sms.MoreProcessor  -  GUGAMUG req.getMsg().trim() : = JOBS
+2014-12-20 13:52:26,260 719  [Thread-8] DEBUG sms.MoreProcessor  -  GUGAMUG msgL : = 1
+2014-12-20 13:52:26,260 719  [Thread-8] DEBUG sms.MoreProcessor  -  GUGAMUG second_keyword : = null
+2014-12-20 13:52:26,260 719  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=66.66667%)
+2014-12-20 13:52:26,260 719  [Thread-8] INFO  sms.MoreProcessor  -  KEYWORD ::::::::::::::::::::::::: [JOBS]
+2014-12-20 13:52:26,260 719  [Thread-8] INFO  sms.MoreProcessor  -  THE WORD AFTER KEYWORD ::::::::::::::::::::::::: [null]
+2014-12-20 13:52:26,260 719  [Thread-8] INFO  sms.MoreProcessor  -  SERVICEID ::::::::::::::::::::::::: [363]
+2014-12-20 13:52:26,260 719  [Thread-8] ERROR smsmenu.MenuController  - Table 'celcom_static_content.smsmenu_session' doesn't exist
+com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: Table 'celcom_static_content.smsmenu_session' doesn't exist
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:407)
+	at com.mysql.jdbc.Util.getInstance(Util.java:382)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1052)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3593)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3525)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1986)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2140)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2626)
+	at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:2111)
+	at com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2273)
+	at snaq.db.CachedPreparedStatement.executeQuery(CachedPreparedStatement.java:118)
+	at com.pixelandtag.smsmenu.MenuController.getSession(MenuController.java:322)
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:191)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,260 719  [Thread-8] ERROR smsmenu.MenuController  - 
+java.lang.NullPointerException
+	at com.pixelandtag.smsmenu.MenuController.getSession(MenuController.java:361)
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:191)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - session :: null
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - smsmenu_level_id_fk :: -1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - language_id :: 2
+2014-12-20 13:52:26,275 734  [Thread-8] ERROR smsmenu.MenuController  - Table 'celcom_static_content.smsmenu_levels' doesn't exist
+com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: Table 'celcom_static_content.smsmenu_levels' doesn't exist
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:407)
+	at com.mysql.jdbc.Util.getInstance(Util.java:382)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1052)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3593)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3525)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1986)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2140)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2626)
+	at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:2111)
+	at com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2273)
+	at snaq.db.CachedPreparedStatement.executeQuery(CachedPreparedStatement.java:118)
+	at com.pixelandtag.smsmenu.MenuController.getMenuByParentLevelId(MenuController.java:47)
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:214)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,275 734  [Thread-8] INFO  sms.MoreProcessor  - FROM SESSION___________________________null
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: PreparedStatement cache miss [SELECT * FROM pixeland_content360.message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1,TYPE_FORWARD_ONLY,CONCUR_READ_ONLY,HOLD_CURSORS_OVER_COMMIT] - PS-HitRate=0.0%
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG util.UtilCelcom  - looking for :[UNKNOWN_KEYWORD_ADVICE], found [Welcome to content360 content platform. This is an auto response message.]
+2014-12-20 13:52:26,275 734  [Thread-8] INFO  sms.MoreProcessor  - MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message., id=14, timeStamp=2014-12-05 03:31:39.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417739499960, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417739499960]
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=Welcome to content360 content platform. This is an auto response message., id=14, timeStamp=2014-12-05 03:31:39.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=jobs, getSMS_SourceAddr()=32329, getMsisdn()=254734252504, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=jobs, SMS_SourceAddr=32329, SUB_Mobtel=254734252504, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1417739499960, priority=0, number_of_sms=1, split_msg=false], getPrice()=5.0, getProcessor_id()=11, getServiceid()=363, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=0, getCMP_Txid()=1417739499960]
+
+
+
+
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=75.0%)
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=80.0%)
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  -  GUGAMUG req.getMsg().trim() : = 1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  -  GUGAMUG msgL : = 1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  -  GUGAMUG second_keyword : = null
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=83.33333%)
+2014-12-20 13:52:26,275 734  [Thread-8] INFO  sms.MoreProcessor  -  KEYWORD ::::::::::::::::::::::::: [1]
+2014-12-20 13:52:26,275 734  [Thread-8] INFO  sms.MoreProcessor  -  THE WORD AFTER KEYWORD ::::::::::::::::::::::::: [null]
+2014-12-20 13:52:26,275 734  [Thread-8] INFO  sms.MoreProcessor  -  SERVICEID ::::::::::::::::::::::::: [400]
+2014-12-20 13:52:26,275 734  [Thread-8] ERROR smsmenu.MenuController  - Table 'celcom_static_content.smsmenu_session' doesn't exist
+com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: Table 'celcom_static_content.smsmenu_session' doesn't exist
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:407)
+	at com.mysql.jdbc.Util.getInstance(Util.java:382)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1052)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3593)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3525)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1986)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2140)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2626)
+	at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:2111)
+	at com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2273)
+	at snaq.db.CachedPreparedStatement.executeQuery(CachedPreparedStatement.java:118)
+	at com.pixelandtag.smsmenu.MenuController.getSession(MenuController.java:322)
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:191)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,275 734  [Thread-8] ERROR smsmenu.MenuController  - 
+java.lang.NullPointerException
+	at com.pixelandtag.smsmenu.MenuController.getSession(MenuController.java:361)
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:191)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - session :: null
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - smsmenu_level_id_fk :: -1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - language_id :: 2
+2014-12-20 13:52:26,275 734  [Thread-8] ERROR smsmenu.MenuController  - Table 'celcom_static_content.smsmenu_levels' doesn't exist
+com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: Table 'celcom_static_content.smsmenu_levels' doesn't exist
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:526)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:407)
+	at com.mysql.jdbc.Util.getInstance(Util.java:382)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1052)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3593)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3525)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1986)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2140)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2626)
+	at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:2111)
+	at com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2273)
+	at snaq.db.CachedPreparedStatement.executeQuery(CachedPreparedStatement.java:118)
+	at com.pixelandtag.smsmenu.MenuController.getMenuByParentLevelId(MenuController.java:47)
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:214)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,275 734  [Thread-8] INFO  sms.MoreProcessor  - FROM SESSION___________________________null
+2014-12-20 13:52:26,275 734  [Thread-8] ERROR sms.MoreProcessor  - 
+
+
+GUGAMUGA CURRENT MENU >> null
+
+
+2014-12-20 13:52:26,275 734  [Thread-8] ERROR sms.MoreProcessor  - 
+java.lang.NullPointerException
+	at com.pixelandtag.serviceprocessors.sms.MoreProcessor.process(MoreProcessor.java:258)
+	at com.pixelandtag.api.GenericServiceProcessor.run(GenericServiceProcessor.java:499)
+	at java.lang.Thread.run(Thread.java:745)
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG sms.MoreProcessor  - 
+
+
+
+
+
+>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> MOSms [mt_Sent=null, id=15, timeStamp=2014-12-20 13:50:33.0, mo_ack=0, mt_ack=0, MT_STATUS=Success, isSubscriptionPush=false, attribz={}, getSMS_Message_String()=1, getSMS_SourceAddr()=32329, getMsisdn()=111, getSMS_DataCodingId()=0, getCMPResponse()=null, getAPIType()=null, getCMP_AKeyword()=IOD, getCMP_SKeyword()=IOD0000, toString()=GenericMO [SMS_Message_String=1, SMS_SourceAddr=32329, SUB_Mobtel=111, SMS_DataCodingId=0, CMPResponse=null, APIType=null, CMP_AKeyword=IOD, CMP_SKeyword=IOD0000] GenericMessage [CMP_Txid=1419072633584, priority=1, number_of_sms=1, split_msg=false], getPrice()=0.0, getProcessor_id()=11, getServiceid()=400, isSplit_msg()=false, getNumber_of_sms()=1, getPriority()=1, getCMP_Txid()=1419072633584]
+
+
+
+
+2014-12-20 13:52:26,275 734  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkout - 1/1 (HitRate=85.71429%)
+2014-12-20 13:52:26,291 750  [Thread-8] DEBUG ConnectionPool.DBPoolDataSource-MORE_PROCESSOR_DS  - DBPoolDataSource-MORE_PROCESSOR_DS: Checkin  - 0/1
+2014-12-20 13:52:27,233 1692 [Thread-2] DEBUG producerthreads.MTProducer  - >>>>>>>>>>>>>>>>>>>>>>: CMP_Txid 1419072633584
+2014-12-20 13:52:27,249 1708 [Thread-4] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message after: 0
+2014-12-20 13:52:27,249 1708 [Thread-3] DEBUG workerthreads.MTHttpSender  - :the service id in worker!::::: mtsms.getServiceID():: 400
+2014-12-20 13:52:27,249 1708 [Thread-3] DEBUG producerthreads.MTProducer  - >>Threads waiting to retrieve message before : 0
