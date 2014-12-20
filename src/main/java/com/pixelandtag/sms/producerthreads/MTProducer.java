@@ -123,8 +123,9 @@ public class MTProducer extends Thread {
 	 * Gets a free processor Thread for the processor class passed.
 	 * @param mo_processor_id int
 	 * @return
+	 * @throws NoServiceProcessorException 
 	 */
-	public static ServiceProcessorI getFreeProcessor(int mo_processor_id){
+	public static ServiceProcessorI getFreeProcessor(int mo_processor_id) throws NoServiceProcessorException{
 		
 		logger.info("gugamuga_processor_pool: : "+processor_pool);
 		
@@ -133,6 +134,8 @@ public class MTProducer extends Thread {
 		//TODO add a semaphore so only one thread accesses this at a time.
 		//TODO check for processorPool object bing null then, re-direct that message to an existing processor pool
 	    //TODO or, edit the mo receiver so that it does not queue for disabled mo processors
+		if(processorPool==null)
+			throw new NoServiceProcessorException("No service processors pooled! for mo processor id"+mo_processor_id);
 		Iterator<ServiceProcessorI> it = processorPool.iterator();
 		
 		ServiceProcessorI proc;

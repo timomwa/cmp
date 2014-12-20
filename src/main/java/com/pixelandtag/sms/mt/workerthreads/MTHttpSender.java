@@ -276,7 +276,6 @@ public class MTHttpSender implements Runnable{
 					//synchronized(MTProducer.mtMsgs){
 					final MTsms mtsms = MTProducer.getMTsms();
 					//}
-				
 					
 					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+mtsms.getServiceid());
 					

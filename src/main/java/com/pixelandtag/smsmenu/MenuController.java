@@ -16,7 +16,7 @@ public class MenuController {
 	private Logger logger = Logger.getLogger(MenuController.class);
 	
 	
-	private final String DB_NAME = "celcom_static_content";
+	private final String DB_NAME = "pixeland_content360";
 	public static final String NUM_SPACER = ". ";
 	private final String GET_SESSION = "SELECT ses.*, sl.id as 'menu_level_id', sl.name, sl.language_id as 'language_id_',sl.parent_level_id, sl.menu_id, sl.serviceid, sl.visible FROM `"+DB_NAME+"`.`smsmenu_session` ses LEFT JOIN `"+DB_NAME+"`.`smsmenu_levels` sl ON sl.id = ses.smsmenu_levels_id_fk WHERE ses.`msisdn`=? AND ((TIMESTAMPDIFF(HOUR,ses.timeStamp,CONVERT_TZ(CURRENT_TIMESTAMP,'+8:00','+8:00')))<=24 )";
 	private final String GET_MENU_ITEMS = "SELECT * FROM `"+DB_NAME+"`.`smsmenu_levels` WHERE parent_level_id = ? AND visible=1";

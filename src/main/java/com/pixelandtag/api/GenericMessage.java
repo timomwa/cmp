@@ -62,6 +62,8 @@ public abstract class GenericMessage {
 		this.charged = charged;
 	}
 	public BillingStatus getBillingStatus() {
+		if(billingStatus==null)
+			return BillingStatus.NO_BILLING_REQUIRED;
 		return billingStatus;
 	}
 

@@ -22,6 +22,7 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public class Subscription {
 	
+	private static final String DB_NAME = "pixeland_content360";
 	private Logger logger  = Logger.getLogger(Subscription.class);
 	private final String SPACE = " ";
 	private final String NUM_SEPERATOR = "."+SPACE;
@@ -45,7 +46,7 @@ public class Subscription {
 		
 		try{
 			
-			pstmt = conn.prepareStatement("UPDATE `celcom`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE id=?");
+			pstmt = conn.prepareStatement("UPDATE `"+DB_NAME+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE id=?");
 			pstmt.setString(1, status.getStatus());
 			pstmt.setInt(2, subscription_id);
 				
@@ -84,7 +85,7 @@ public class Subscription {
 		
 		try{
 			
-			pstmt = conn.prepareStatement("SELECT * FROM `celcom`.`subscription` WHERE msisdn=? AND sms_service_id_fk=? ORDER BY subscription_timeStamp asc LIMIT 1");
+			pstmt = conn.prepareStatement("SELECT * FROM `"+DB_NAME+"`.`subscription` WHERE msisdn=? AND sms_service_id_fk=? ORDER BY subscription_timeStamp asc LIMIT 1");
 			pstmt.setString(1, msisdn);
 			pstmt.setInt(2, sms_service_id_fk);
 				
@@ -140,7 +141,7 @@ public class Subscription {
 		
 		try{
 			
-			pstmt = conn.prepareStatement("SELECT * FROM `celcom`.`subscription` WHERE msisdn=? AND subscription_status='waiting_confirmation' ORDER BY subscription_timeStamp asc LIMIT 1");
+			pstmt = conn.prepareStatement("SELECT * FROM `"+DB_NAME+"`.`subscription` WHERE msisdn=? AND subscription_status='waiting_confirmation' ORDER BY subscription_timeStamp asc LIMIT 1");
 			pstmt.setString(1, msisdn);
 				
 			rs = pstmt.executeQuery();
@@ -196,7 +197,7 @@ public class Subscription {
 			
 			if(service_id>-1){
 				
-				pstmt = conn.prepareStatement("INSERT INTO `celcom`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status) VALUES(?,?,?,?,?)");
+				pstmt = conn.prepareStatement("INSERT INTO `"+DB_NAME+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status) VALUES(?,?,?,?,?)");
 				pstmt.setInt(1, service_id);
 				pstmt.setString(2, msisdn);
 				pstmt.setInt(3, smsmenu_levels_id_fk);
@@ -261,7 +262,7 @@ public class Subscription {
 			
 			if(service_id>-1){
 				
-				pstmt = conn.prepareStatement("INSERT INTO `celcom`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE subscription_status = ?");
+				pstmt = conn.prepareStatement("INSERT INTO `"+DB_NAME+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE subscription_status = ?");
 				pstmt.setInt(1, service_id);
 				pstmt.setString(2, msisdn);
 				pstmt.setInt(3, smsmenu_levels_id_fk);
@@ -310,7 +311,7 @@ public class Subscription {
 			
 			if(service_id>-1){
 				
-				pstmt = conn.prepareStatement("INSERT INTO `celcom`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk) VALUES(?,?,?) ON DUPLICATE KEY UPDATE subscription_status=?");
+				pstmt = conn.prepareStatement("INSERT INTO `"+DB_NAME+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk) VALUES(?,?,?) ON DUPLICATE KEY UPDATE subscription_status=?");
 				pstmt.setInt(1, service_id);
 				pstmt.setString(2, msisdn);
 				pstmt.setInt(3, smsmenu_levels_id_fk);
@@ -354,7 +355,7 @@ public class Subscription {
 		ResultSet rs = null;
 		SMSServiceDTO sm = null;
 		try{
-			pstmt = conn.prepareStatement("SELECT * FROM `celcom`.`sms_service` WHERE `id`=?", Statement.RETURN_GENERATED_KEYS);
+			pstmt = conn.prepareStatement("SELECT * FROM `"+DB_NAME+"`.`sms_service` WHERE `id`=?", Statement.RETURN_GENERATED_KEYS);
 			pstmt.setInt(1, service_id);
 			rs = pstmt.executeQuery();
 			
@@ -408,7 +409,7 @@ public class Subscription {
 		ResultSet rs = null;
 		SMSServiceDTO sm = null;
 		try{
-			pstmt = conn.prepareStatement("SELECT * FROM `celcom`.`sms_service` WHERE `cmd`=?", Statement.RETURN_GENERATED_KEYS);
+			pstmt = conn.prepareStatement("SELECT * FROM `"+DB_NAME+"`.`sms_service` WHERE `cmd`=?", Statement.RETURN_GENERATED_KEYS);
 			pstmt.setString(1, keyword);
 			rs = pstmt.executeQuery();
 			
@@ -524,7 +525,7 @@ public class Subscription {
 		
 		try{
 			
-			pstmt = conn.prepareStatement("UPDATE `celcom`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE MSISDN=?");
+			pstmt = conn.prepareStatement("UPDATE `"+DB_NAME+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE MSISDN=?");
 			pstmt.setString(1, status.getStatus());
 			pstmt.setString(2, msisdn);
 				
@@ -556,7 +557,7 @@ public class Subscription {
 		LinkedHashMap<Integer,SMSServiceDTO> services = null;
 		try{
 			
-			pstmt = conn.prepareStatement("SELECT group_concat(sms_service_id_fk) as 'sms_services_subscribed' from `celcom`.`subscription` where  subscription_status='confirmed' AND msisdn=? ",Statement.RETURN_GENERATED_KEYS);
+			pstmt = conn.prepareStatement("SELECT group_concat(sms_service_id_fk) as 'sms_services_subscribed' from `"+DB_NAME+"`.`subscription` where  subscription_status='confirmed' AND msisdn=? ",Statement.RETURN_GENERATED_KEYS);
 			pstmt.setString(1, msisdn);
 			rs = pstmt.executeQuery();
 			
@@ -567,7 +568,7 @@ public class Subscription {
 			pstmt.close();
 			
 		
-			pstmt = conn.prepareStatement(String.format("SELECT * FROM `celcom`.`sms_service` WHERE `id` in(%s)",subscribed_services), Statement.RETURN_GENERATED_KEYS);
+			pstmt = conn.prepareStatement(String.format("SELECT * FROM `"+DB_NAME+"`.`sms_service` WHERE `id` in(%s)",subscribed_services), Statement.RETURN_GENERATED_KEYS);
 			rs = pstmt.executeQuery();
 			
 			SMSServiceDTO sm = null;
@@ -649,7 +650,7 @@ public class Subscription {
 		
 		try{
 			
-			pstmt = conn.prepareStatement("UPDATE `celcom`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE sms_service_id_fk =? AND msisdn=?");
+			pstmt = conn.prepareStatement("UPDATE `"+DB_NAME+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE sms_service_id_fk =? AND msisdn=?");
 			pstmt.setString(1, status.getStatus());
 			pstmt.setInt(2, sms_service_id_fk);
 			pstmt.setString(3, msisdn);
