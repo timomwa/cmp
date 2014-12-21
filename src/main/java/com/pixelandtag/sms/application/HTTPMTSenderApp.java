@@ -39,9 +39,6 @@ public class HTTPMTSenderApp extends Thread {
 		log4J = getPropertyFile("log4j.properties");
 		
 		
-		//Settings.database = props.getProperty("DATABASE");
-		
-		
 		urlparams = new URLParams(props);
 		
 		this.constr = props.getProperty("constr");

@@ -105,7 +105,7 @@ public class QueueUpdater implements Runnable {
 		
 		inQueue = new LinkedBlockingDeque<Long>(1);
 		
-		this.celcomAPI = new CelcomImpl(this.connUrl,"THRD_"+name);
+		this.celcomAPI = new CelcomImpl(this.connUrl,"THRD_"+name); 
 		
 	}
 	

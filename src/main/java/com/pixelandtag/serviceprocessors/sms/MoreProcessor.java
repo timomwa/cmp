@@ -57,7 +57,8 @@ public class MoreProcessor extends GenericServiceProcessor {
 		String host = "db";
 		String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
 		String url = DriverUtilities.makeURL(host, dbName, vendor);
-		
+		String username = HTTPMTSenderApp.props.getProperty("db_username");
+		String password = HTTPMTSenderApp.props.getProperty("db_password");
 		try {
 			celcomAPI = new CelcomImpl(url, "MORE_PROC_API_DS");
 		} catch (Exception e) {
@@ -71,15 +72,19 @@ public class MoreProcessor extends GenericServiceProcessor {
 		String driver = DriverUtilities.getDriver(vendor);
 		String host = "db";
 		String dbName =  HTTPMTSenderApp.props.getProperty("DATABASE");
-		String url = DriverUtilities.makeURL(host, dbName, vendor);
+
+	    String username = HTTPMTSenderApp.props.getProperty("db_username");
+	    String password = HTTPMTSenderApp.props.getProperty("db_password");
+		
+	    String url = DriverUtilities.makeURL(host, dbName, vendor,username, password);
 		
 		ds = new DBPoolDataSource();
 	    ds.setName("MORE_PROCESSOR_DS");
 	    ds.setDescription("Processes the More Keyword. Thread datasource: "+ds.getName());
 	    ds.setDriverClassName(driver);
 	    ds.setUrl(url);
-	    ds.setUser("root");
-	    ds.setPassword("");
+	    //ds.setUser("root");
+	   // ds.setPassword("");
 	    ds.setMinPool(1);
 	    ds.setMaxPool(2);
 	    ds.setMaxSize(3);
@@ -214,7 +219,14 @@ public class MoreProcessor extends GenericServiceProcessor {
 				current_menu = menu_controller.getMenuByParentLevelId(language_id,smsmenu_level_id_fk,conn);//get root menu
 			
 			mo_processor_logger.info("FROM SESSION___________________________"+current_menu);
-			if(KEYWORD.equalsIgnoreCase("#")){
+			
+			if(KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
+				
+				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id(), conn);//update session to upper menu.
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(), conn);
+				mo.setMt_Sent(item.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+				
+			}else if(KEYWORD.equalsIgnoreCase("#")){
 				
 				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id(), conn);//update session to upper menu.
 				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(), conn);
@@ -349,6 +361,9 @@ public class MoreProcessor extends GenericServiceProcessor {
 				}
 				
 			}else if(KEYWORD.equalsIgnoreCase(SUBSCRIPTION_CONFIRMATION)){
+				
+				
+				System.out.println("\n\nAT SUBSCRIPTION CONFIRMATION!!! SUB WANTS TO BUY CONTENT!\n\n");
 				
 				LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
 				

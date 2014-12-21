@@ -56,10 +56,11 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	    String driver = DriverUtilities.getDriver(vendor);
 	    String host =  HTTPMTSenderApp.props.getProperty("db_host");
 	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
 	    String username = HTTPMTSenderApp.props.getProperty("db_username");
 	    String password = HTTPMTSenderApp.props.getProperty("db_password");
 		
+	    String url = DriverUtilities.makeURL(host, dbName, vendor,username, password);
+	   
 		try {
 			celcomAPI = new CelcomImpl(url, "MORE_PROC_API_DS");
 		} catch (Exception e) {
@@ -218,7 +219,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				current_menu = menu_controller.getMenuByParentLevelId(language_id,smsmenu_level_id_fk,conn);//get root menu
 			
 			mo_processor_logger.info("FROM SESSION___________________________"+current_menu);
-			if(KEYWORD.equalsIgnoreCase("PROPERTY")){
+			if(KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")){
 				
 				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id(), conn);//update session to upper menu.
 				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(), conn);

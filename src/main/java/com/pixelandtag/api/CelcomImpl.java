@@ -116,14 +116,13 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	   
 	    String host =  "db";//HTTPMTSenderApp.props.getProperty("db_host");
 	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = "root";//"pixeland_content";//HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = "Admin123#@!";//Admin123#@! HTTPMTSenderApp.props.getProperty("db_password");
+	   // String username = "root";//"pixeland_content";//HTTPMTSenderApp.props.getProperty("db_username");
+	    //String password = "Admin123#@!";//Admin123#@! HTTPMTSenderApp.props.getProperty("db_password");
 	    
 	    logger.info("********** db dbName : "+dbName);
 	    logger.info("********** db host : "+host);
 	    logger.info("********** db url : "+url);
-	    logger.info("********** db username : "+username);
-	    logger.info("********** db password : "+password);
+	    logger.info("********** db conStr_ : "+conStr_);
 	    
 	    String msg = "";
 	    
@@ -137,9 +136,9 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			dbpds.setName("celcom-impl");
 			dbpds.setDescription("Impl Pooling DataSource");
 			dbpds.setDriverClassName("com.mysql.jdbc.Driver");
-			dbpds.setUrl(url);
-			dbpds.setUser(username);
-			dbpds.setPassword(password);
+			dbpds.setUrl(conStr_);
+			//dbpds.setUser(username);
+			//dbpds.setPassword(password);
 			dbpds.setMinPool(1);
 			dbpds.setMaxPool(2);
 			dbpds.setMaxSize(3);
