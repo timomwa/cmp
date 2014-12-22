@@ -315,7 +315,6 @@ public class HttpBillingWorker implements Runnable {
 			
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
 			
-			System.out.println(xml);
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			

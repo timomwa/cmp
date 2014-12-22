@@ -18,6 +18,7 @@ public class SMSServiceDTO {
 	private String cmp_skeyword;
 	private boolean enabled;
 	private boolean split_mt;
+	private String pricePointKeyword;
 	
 	public boolean isSplit_mt() {
 		return split_mt;
@@ -85,6 +86,12 @@ public class SMSServiceDTO {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+	public String getPricePointKeyword() {
+		return pricePointKeyword;
+	}
+	public void setPricePointKeyword(String pricePointKeyword) {
+		this.pricePointKeyword = pricePointKeyword;
+	}
 	@Override
 	public String toString() {
 		return "SMSServiceDTO [id=" + id + ", mo_processor_FK="
@@ -93,11 +100,9 @@ public class SMSServiceDTO {
 				+ ", service_description=" + service_description + ", price="
 				+ price + ", cmp_keyword=" + cmp_keyword + ", cmp_skeyword="
 				+ cmp_skeyword + ", enabled=" + enabled + ", split_mt="
-				+ split_mt + "]";
+				+ split_mt + ", pricePointKeyword=" + pricePointKeyword + "]";
 	}
 	
-	
-	
-	
+		
 
 }

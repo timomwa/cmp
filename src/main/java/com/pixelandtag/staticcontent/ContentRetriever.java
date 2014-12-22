@@ -383,6 +383,8 @@ public class ContentRetriever {
 				mo.setServiceid(sm.getId());
 				mo.setSMS_Message_String(sm.getCmd());
 				
+				//added 22nd Dec 2014 - new customer requirement
+				mo.setPricePointKeyword(sm.getPricePointKeyword());
 				
 				//added on 10th June 2013 but not tested
 				mo.setProcessor_id(sm.getMo_processor_FK());

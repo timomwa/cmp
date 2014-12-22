@@ -119,7 +119,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 				}else{
 					tailMsg = additionalInfo.get("tailText_subscribed");
 				}
-				
+
 				final String content = cr.getUniqueFromCategory("pixeland_content360", table, "Text", "id", "Category", static_categoryvalue, MSISDN, serviceid, 1, mo.getProcessor_id(), conn);
 				
 				if(content!=null)

@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -43,6 +44,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
+import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.persistence.CMPDao;
 import com.pixelandtag.connections.DriverUtilities;
@@ -67,6 +69,8 @@ public class BillingService extends Thread{
 	private  Context context = null;
 	public static CelcomHTTPAPI celcomAPI;
 	private CMPResourceBeanRemote cmpbean;
+	private int idleWorkers;
+	
 	//private static DBPoolDataSource ds;
 	//private Connection conn;
 	private StopWatch watch;
@@ -89,6 +93,7 @@ public class BillingService extends Thread{
 	}
 	private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
 	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
+	private static BillingService instance;
 	private Properties log4J;
 	public static Session getSession() {
 		Session session = (Session) BillingService.session.get();
@@ -118,21 +123,6 @@ public class BillingService extends Thread{
 		}
 	}
 	
-	
-	@SuppressWarnings("unchecked")
-	public static <T> T find(Class<T> entityClass, String param_name, Object value) {
-		System.out.println("in com.pixelandtag.sms.producerthreads.BillingService.find(Class<T>, String, Object)");
-		/*logger.info("in com.pixelandtag.sms.producerthreads.BillingService.find(Class<T>, String, Object)");
-		try{
-			Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
-			if(query.list().size()>0)
-				return (T) query.list().get(0);
-		}finally{
-			close();
-		}
-		return null;*/
-		return null;
-	}
 	
 	/**
 	 * saves and commits
@@ -214,7 +204,7 @@ public class BillingService extends Thread{
     	watch = new StopWatch();
     	initEJB();
     	initWorkers();
-    	
+    	instance = this;
     }
     
     public void initEJB() throws NamingException{
@@ -246,7 +236,6 @@ public class BillingService extends Thread{
 		httpsclient = new DefaultHttpClient(cm);
 					
 		Thread t1;
-		System.out.println(this.workers);
 		for(int i = 0; i<this.workers ; i++){
 			HttpBillingWorker worker;
 			worker = new HttpBillingWorker("THREAD_WORKER_#_"+i,httpsclient, cmpbean);
@@ -310,13 +299,15 @@ public class BillingService extends Thread{
 			
 			while(run){
 				
-				populateQueue();
 				
 				try{
-					//logger.info("\n\tTRYING TO PROCESS REFUGEES");
-					//processRefugees();
-					//System.out.println("\n\tDONE PROCESSING REFUGEES");
-				}catch(Exception e){}
+					
+					populateQueue();
+					
+				}catch(Exception e){
+					
+					logger.error(e.getMessage(),e);
+				}
 				
 				try {
 					
@@ -514,6 +505,16 @@ public class BillingService extends Thread{
 
 	public static void main(String[] args) {
 		
+		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+		    public void run() { 
+		    	
+		    	System.out.println("SHUTTING DOWN!");
+		    	BillingService.stopApp();
+		    	
+		    }
+		});
+		
 		try {
 			BillingService billingserv = new BillingService();
 		//	billingserv.initWorkers();
@@ -525,6 +526,138 @@ public class BillingService extends Thread{
 	}
 
 
+
+	protected static void stopApp() {
+		System.out.println("Shutting down...");
+		
+		try{
+			if(instance!=null){
+				System.out.println("Shutting down...");
+				instance.setRun(false);
+				System.out.print("...");
+				instance.waitForQueueToBecomeEmpty();
+				System.out.print("...");
+				instance.waitForAllWorkersToFinish();
+				System.out.print("...");
+				instance.myfinalize();
+				System.out.println("...");
+			
+			}else{
+				
+				System.out.println("App not yet initialized or started.");
+			
+			}
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+		}catch(Error e){
+			logger.error(e.getMessage(),e);
+		}
+		
+	}
+
+	private void waitForAllWorkersToFinish() {
+			
+		boolean finished = false;
+		
+		
+		//First and foremost, let all threads die if they finish to process what they're processing currently.
+		//We don't interrupt them still..
+		for(HttpBillingWorker tw : httpSenderWorkers){
+			if(tw.isRunning())
+				tw.setRun(false);
+		}
+		
+		//all unprocessed messages in queue are put back to the db.
+		
+		while(!finished){//Until all workers are idle or dead...
+			
+			idleWorkers = 0;
+			
+			for(HttpBillingWorker tw : httpSenderWorkers){
+				
+				if(tw.isRunning())
+					tw.setRun(false);
+				
+				
+				
+				//might not be necessary because we already set run to false for each thread.
+				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
+				//because we already set run to false.
+				billableQ.addLast(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				
+				if(!tw.isBusy()){
+					idleWorkers++;
+				}
+				
+			}
+			
+			try {
+				
+				logger.info("workers: "+workers);
+				logger.info("idleWorkers: "+idleWorkers);
+				
+				Thread.sleep(500);
+			
+			} catch (InterruptedException e) {
+				
+				log(e);
+			
+			}
+			
+			finished = workers==idleWorkers;
+			
+		}
+		
+		
+		
+		logger.info("We're shutting down, we put back any unprocessed message to the db queue so that they're picked next time we run..");
+		//Now, if we have a big queue of unprocessed messages, we return them back to the db (or rather set the necessary flags
+		for(Billable sms : billableQ){
+			sms.setIn_outgoing_queue(0L);//and its now not in the queue
+			sms.setProcessed(0L);//nope, we're not processing it
+			logger.info("Returned to db: "+ sms.toString());
+			sms = cmpbean.saveOrUpdate(sms);
+		}
+		//now all messages should be put back in quque
+		
+		
+		
+		billableQ.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
+		logger.info("workers: "+workers);
+		logger.info("idleWorkers: "+idleWorkers);
+		
+		
+		
+	}
+
+	private void setRun(boolean b) {
+		this.run = b;
+		
+	}
+
+	private void waitForQueueToBecomeEmpty() {
+		
+		while(billableQ.size()>0){
+			
+			logger.info("MTProducer.mtMsgs.size() : "+billableQ.size());
+			
+			try {
+				
+				Thread.sleep(500);
+				
+			} catch (InterruptedException e) {
+				
+				log(e);
+			
+			}
+			
+		}
+		
+		logger.info("Queue is now empty, and all threads have been asked not to wait for elements in the queue!");
+		
+		notify();
+		
+	}
 
 	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) {
 		getSession().beginTransaction();

@@ -138,16 +138,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 * @see com.pixelandtag.api.ServiceProcessorI#enqueue(com.pixelandtag.celcom.entities.MOSms)
 	 */
 	public boolean submit(MOSms mo_){
-		//logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
-		//System.out.println(" in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
 		boolean success = false;
 		try{
-			//mo_  = bill(mo_);
 			success =  this.moMsgs.offerLast(mo_);
 		}catch(Exception e){
 			this.logger.error(e.getMessage(),e);
 		}
-		//logger.debug(" exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
 		return success;
 	}
 	
@@ -157,7 +153,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		logger.debug("mo_.getPrice().doubleValue() "+mo_.getPrice().doubleValue());
 		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+mo_.getPrice().compareTo(BigDecimal.ZERO));
-		System.out.println(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+mo_.getPrice().compareTo(BigDecimal.ZERO));
 		if(mo_.getPrice().compareTo(BigDecimal.ZERO)<=0){//if price is zero
 			mo_.setCharged(true);
 			mo_.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
@@ -174,7 +169,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		try{
 			
 			String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
-			System.out.println("SELECT * FROM billable_queue WHERE cp_tx_id='"+mo_.getCMP_Txid()+"' ");
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setLong(1, mo_.getCMP_Txid());
 			rs = pstmt.executeQuery();
@@ -202,13 +196,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				billable.setTx_id(rs.getLong("tx_id"));
 				billable.setTimeStamp(new Date());
 				billable.setPricePointKeyword(rs.getString("price_point_keyword"));
-				System.out.println("billable.toString():  "+billable.toString());
 			}
 			
 			
 			
 		}catch(Exception e){
-			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
@@ -228,7 +220,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		else
 			return mo_;
 		
-		System.out.println("billable ??? "+billable);
 		
 
 		billable.setCp_id("CONTENT360_KE");
@@ -252,15 +243,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setPricePointKeyword(mo_.getPricePointKeyword());
 		logger.debug(" before save "+billable.getId());
 		
-		System.out.println(" before save "+billable.getId());
 		
 		
 		try{
 			
 			String sql = "INSERT INTO  billable_queue(`cp_id`,`cp_tx_id`,`discount_applied`,`event_type`,"
 					+ "`in_outgoing_queue`,`keyword`,`maxRetriesAllowed`,`message_id`,"
-					+ "`msisdn`,`operation`,`price`,`priority`,`processed`,`retry_count`,`service_id`,`shortcode`,`timeStamp`,`tx_id`)"
-					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?) ";
+					+ "`msisdn`,`operation`,`price`,`priority`,`processed`,`retry_count`,`service_id`,`shortcode`,`timeStamp`,`tx_id`,`price_point_keyword`)"
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?) ";
 			
 			
 			pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -281,16 +271,15 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setString(15, billable.getService_id());
 			pstmt.setString(16, billable.getShortcode());
 			pstmt.setLong(17, billable.getTx_id());
+			pstmt.setString(18, billable.getPricePointKeyword());
 			
 			int n = pstmt.executeUpdate();
 			
-			System.out.println(">> n : "+n);
 			rs = pstmt.getGeneratedKeys();
 			if(rs.next())
 				billable.setId(rs.getInt(1));
 			
 			
-			System.out.println("billable.getId():  "+billable.getId());
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -313,10 +302,8 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		//billable = BillingService.saveOrUpdate(billable);
 		logger.debug(" after save "+billable.getId());
-		System.out.println(" after save "+billable.getId());
 		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
 		mo_.setPriority(0);
-		System.out.println(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		logger.debug(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		return mo_;
 		
@@ -586,8 +573,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			conn = getCon();
 			
-			//if(conn==null)
-				//System.out.println(" :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: conn is null");
 			pst = conn.prepareStatement(ACK_SQL,Statement.RETURN_GENERATED_KEYS);
 			
 			pst.setString(1, String.valueOf(message_log_id));
@@ -637,9 +622,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		mo  = bill(mo);
 		
-		System.out.println("\n\n\n\n\n*******************\n\t mo.toString() :  "+mo.toString() + "\n\n\t************\n\n");
-		
-		
 		
 		PreparedStatement pstmt = null;
 		
@@ -681,13 +663,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setString(12, mo.getSMS_DataCodingId());
 			pstmt.setInt(13, mo.getProcessor_id());
 			pstmt.setString(14, mo.getBillingStatus().toString());
-			pstmt.setString(15, mo.getBillingStatus().toString());
-			pstmt.setString(16, mo.getPricePointKeyword());
+			pstmt.setString(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
+			pstmt.setString(16, mo.getBillingStatus().toString());
 			
 			int resp  = pstmt.executeUpdate(); 
 			
-			System.out.println("\n\n\n\n\n*******************\n\t queued for sending ?resp:  "+resp + "\n\n\t************\n\n");
-			
+				
 		
 		} catch (SQLException e) {
 			

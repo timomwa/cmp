@@ -374,6 +374,7 @@ public class Subscription {
 				sm.setCmp_skeyword(rs.getString("CMP_SKeyword"));
 				sm.setEnabled(rs.getBoolean("enabled"));
 				sm.setSplit_mt(rs.getBoolean("split_mt"));
+				sm.setPricePointKeyword(rs.getString("price_point_keyword"));
 				
 			}
 			

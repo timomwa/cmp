@@ -880,6 +880,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			logger.info(":::::::::::::::::::mo.getProcessor_id(): "+mo.getProcessor_id());
 			logger.info(":::::::::::::::::::mo.isSplit_msg(): "+mo.isSplit_msg());
 			logger.info(":::::::::::::::::::mo.getSMS_DataCodingId(): "+mo.getSMS_DataCodingId());
+			logger.info("::::::::::::::::::: mo.getPricePointKeyword(): "+ mo.getPricePointKeyword());
 			
 			pstmt.executeUpdate();
 			
@@ -927,15 +928,15 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			if(connectionObjIsCached){
 				
-				pstmt = getConn().prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?",Statement.RETURN_GENERATED_KEYS);
+				pstmt = getConn().prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk,price_point_keyword) " +
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1,?,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?, price_point_keyword=?",Statement.RETURN_GENERATED_KEYS);
 				
 			}else{
 				
 				conn = getConn();
 				
-				pstmt = conn.prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?",Statement.RETURN_GENERATED_KEYS);
+				pstmt = conn.prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk,price_point_keyword) " +
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1,?,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?, price_point_keyword=?",Statement.RETURN_GENERATED_KEYS);
 			}
 			
 			String txid = mt.getIdStr();
@@ -990,33 +991,36 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				pstmt.setDouble(14, mt.getPrice().doubleValue());//price
 			pstmt.setString(15, mt.getNewCMP_Txid());//new CMPTxid
 			pstmt.setInt(16, mt.getProcessor_id());//processor id
-			pstmt.setString(17, mt.getSms());//SMS
+			pstmt.setString(17, mt.getPricePointKeyword());//processor id
+			pstmt.setString(18, mt.getSms());//SMS
 			
 			if(isRetry)
-				pstmt.setString(18, ERROR.PSAInsufficientBalance.toString());//MT_STATUS
+				pstmt.setString(19, ERROR.PSAInsufficientBalance.toString());//MT_STATUS
 			else
-				pstmt.setString(18, mt.getMT_STATUS());//MT_STATUS
+				pstmt.setString(19, mt.getMT_STATUS());//MT_STATUS
 			
-			pstmt.setInt(19, mt.getNumber_of_sms());//number_of_sms
-			pstmt.setInt(20, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
-			pstmt.setInt(21, mt.getServiceid());//serviceid
+			pstmt.setInt(20, mt.getNumber_of_sms());//number_of_sms
+			pstmt.setInt(21, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
+			pstmt.setInt(22, mt.getServiceid());//serviceid
 			
 			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
-				pstmt.setDouble(22, 1.0d);//price
+				pstmt.setDouble(23, 1.0d);//price
 			else
-				pstmt.setDouble(22, mt.getPrice().doubleValue());//price
+				pstmt.setDouble(23, mt.getPrice().doubleValue());//price
 			
-			pstmt.setString(23, mt.getSMS_DataCodingId());//SMS_DataCodingId
-			pstmt.setString(24, mt.getCMPResponse());//CMPResponse
-			pstmt.setString(25, mt.getAPIType());//APIType,
-			pstmt.setString(26, mt.getNewCMP_Txid());//new CMPTxid
+			pstmt.setString(24, mt.getSMS_DataCodingId());//SMS_DataCodingId
+			pstmt.setString(25, mt.getCMPResponse());//CMPResponse
+			pstmt.setString(26, mt.getAPIType());//APIType,
+			pstmt.setString(27, mt.getNewCMP_Txid());//new CMPTxid
 			
 			if(mt.getSms().startsWith(RM1))
-				pstmt.setString(27, TarrifCode.RM1.getCode());//CMP_SKeyword
+				pstmt.setString(28, TarrifCode.RM1.getCode());//CMP_SKeyword
 			else
-				pstmt.setString(27, mt.getCMP_SKeyword());//CMP_SKeyword
+				pstmt.setString(28, mt.getCMP_SKeyword());//CMP_SKeyword
 			
-			pstmt.setInt(28, mt.getProcessor_id());//CMP_SKeyword
+			pstmt.setInt(29, mt.getProcessor_id());//CMP_SKeyword
+			
+			pstmt.setString(30, mt.getPricePointKeyword());//CMP_SKeyword
 			
 			
 			pstmt.executeUpdate();
