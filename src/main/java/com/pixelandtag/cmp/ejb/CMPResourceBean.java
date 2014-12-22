@@ -17,11 +17,19 @@ import org.hibernate.HibernateException;
 import javax.persistence.Query;
 
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.dynamic.dto.NoContentTypeException;
 
 @Stateless
 @Remote
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CMPResourceBean implements CMPResourceBeanRemote {
+	
+	public boolean testEJB(int k) throws Exception{
+		if(k>0)
+			return true;
+		else
+			throw new NoContentTypeException("No content Exception!! ");
+	}
 
 	private Logger logger = Logger.getLogger(CMPResourceBean.class);
 	

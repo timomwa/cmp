@@ -22,6 +22,7 @@ public class ServiceProcessorDTO {
 	protected String unsubscriptionText;
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
+	private String pricePointKeyword;
 	
 	
 	
@@ -141,6 +142,15 @@ public class ServiceProcessorDTO {
 	public void setKeywords(String[] keywords) {
 		this.keywords = keywords;
 	}
+	
+	public String getPricePointKeyword() {
+		return pricePointKeyword;
+	}
+
+
+	public void setPricePointKeyword(String pricePointKeyword) {
+		this.pricePointKeyword = pricePointKeyword;
+	}
 	@Override
 	public String toString() {
 		return "ServiceProcessorDTO [id=" + id + ", serviceName=" + serviceName
@@ -151,6 +161,9 @@ public class ServiceProcessorDTO {
 				+ Arrays.toString(keywords) + ", servKey=" + servKey
 				+ ", price=" + price + ", toString()=" + super.toString() + "]";
 	}
+
+
+	
 	
 	
 	

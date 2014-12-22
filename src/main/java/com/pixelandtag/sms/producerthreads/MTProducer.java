@@ -907,6 +907,9 @@ public class MTProducer extends Thread {
 					mtsms.setAction(ACTION.get(rs.getString("ACTION")));
 				
 				
+				mtsms.setPricePointKeyword(rs.getString("price_point_keyword"));
+				
+				
 				mtsms.setSplit_msg(rs.getBoolean("split"));//whether to split msg or not..
 				
 				

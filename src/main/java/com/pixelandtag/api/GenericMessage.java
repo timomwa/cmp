@@ -35,6 +35,8 @@ public abstract class GenericMessage {
 	private int number_of_sms = 1;
 	private boolean split_msg;
 	private int processor_id;
+	private String pricePointKeyword;
+
 	
 	private EventType eventType;
 	
@@ -58,6 +60,15 @@ public abstract class GenericMessage {
 	}
 
 
+	public String getPricePointKeyword() {
+		return pricePointKeyword;
+	}
+
+	public void setPricePointKeyword(String pricePointKeyword) {
+		this.pricePointKeyword = pricePointKeyword;
+	}
+	
+	
 	public void setCharged(boolean charged) {
 		this.charged = charged;
 	}

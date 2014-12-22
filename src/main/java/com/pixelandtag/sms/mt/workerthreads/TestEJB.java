@@ -1,5 +1,6 @@
 package com.pixelandtag.sms.mt.workerthreads;
 
+import java.math.BigDecimal;
 import java.util.Hashtable;
 import java.util.Properties;
 
@@ -15,6 +16,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 public class TestEJB {
 	
 	public static void main(String[] args) throws NamingException {
+		
 		 String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
 		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
@@ -29,7 +31,20 @@ public class TestEJB {
 		Billable billable = new Billable();
 		billable.setCp_id("");
 		billable.setMsisdn("12312312");
-		cmpbean.saveOrUpdate(billable);
+		try {
+			boolean resp = cmpbean.testEJB(-1);
+			
+			System.out.println("RESP: "+resp);
+		} catch (Exception e) {
+			System.out.println("RESP: "+e.getMessage());
+		}finally{
+		    if(context!=null)
+		    	try { 
+		    		context.close(); 
+		    		System.out.println("closed!");
+		    	} catch (Exception ex) { ex.printStackTrace(); }
+		    
+		}
         
 	}
 

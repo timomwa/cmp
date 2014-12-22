@@ -17,5 +17,8 @@ public interface CMPResourceBeanRemote {
 	public <T> T find(Class<T> entityClass, Long id) throws Exception;
 	
 	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception;
+	
+	
+	public boolean testEJB(int k) throws Exception;
 
 }

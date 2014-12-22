@@ -1,0 +1,120 @@
+2014-12-22 09:46:30,567 1825 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 09:46:30,771 2029 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 09:59:45,644 1926 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 09:59:45,860 2142 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:07:52,819 1910 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:07:53,021 2112 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:18:59,795 1906 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:19:00,007 2118 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:20:23,989 1837 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:20:24,189 2037 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:28:43,030 1851 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:28:43,238 2059 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:30:56,135 1966 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:30:56,353 2184 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:34:59,917 1896 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:35:00,161 2140 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:38:39,165 1863 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:38:39,356 2054 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:43:48,065 1967 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:43:48,289 2191 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:47:30,915 224817 [Thread-1] INFO  producerthreads.BillingService  - 
+
+		billable.toString():Billable [operation=debit, msisdn=101113677989, shortcode=32329, keyword=CHRISTMASQ, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=CHRISTMASQ, discount_applied=0, cp_tx_id=1419234450187, tx_id=1419234450187]
+
+2014-12-22 10:47:30,915 224817 [Thread-5] INFO  producerthreads.BillingService  - billable.getId():  1
+2014-12-22 10:47:30,915 224817 [Thread-5] INFO  workerthreads.HttpBillingWorker  - :the service id in worker!::::: mtsms.getServiceID():: Billable [operation=debit, msisdn=101113677989, shortcode=32329, keyword=CHRISTMASQ, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=CHRISTMASQ, discount_applied=0, cp_tx_id=1419234450187, tx_id=1419234450187]
+2014-12-22 10:47:30,917 224819 [Thread-1] INFO  producerthreads.BillingService  - END!>>>>>>>>>>>>>>>>>>>>< . >< . >< . >< . >< . it took 0.023 seconds to clear a queue of 1 messages
+2014-12-22 10:47:30,970 224872 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Get connection: HttpRoute[{s}->https://41.223.58.133:8443], timeout = 0
+2014-12-22 10:47:30,972 224874 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - [HttpRoute[{s}->https://41.223.58.133:8443]] total kept alive: 0, total issued: 0, total allocated: 0 out of 2
+2014-12-22 10:47:30,972 224874 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - No free connections [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:47:30,972 224874 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Available capacity: 2 out of 2 [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:47:30,972 224874 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Creating new connection [HttpRoute[{s}->https://41.223.58.133:8443]]
+2014-12-22 10:47:40,352 234254 [Thread-5] INFO  workerthreads.HttpBillingWorker  - billable.getMsisdn()=101113677989 :::: Shortcode=32329 :::< . >< . >< . >< . >< . it took 9.427 seconds to bill via HTTP
+2014-12-22 10:47:40,354 234256 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Released connection is reusable.
+2014-12-22 10:47:40,354 234256 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Releasing connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:47:40,354 234256 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Pooling connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]; keep alive for 10000 MILLISECONDS
+2014-12-22 10:47:40,354 234256 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Notifying no-one, there are no waiting threads
+2014-12-22 10:47:40,354 234256 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_CODE[TWSS_105]:::::::::::::::::::::: resp:
+2014-12-22 10:47:40,354 234256 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_MESSAGE[User Id value is missing or wrong]:::::::::::::::::::::: resp:
+2014-12-22 10:47:40,354 234256 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 ::::::: finished attempt to bill via HTTP
+2014-12-22 10:51:14,456 448358 [Thread-1] INFO  producerthreads.BillingService  - 
+
+		billable.toString():Billable [operation=debit, msisdn=254734606096, shortcode=32329, keyword=BIBLEQ, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=BIBLEQ, discount_applied=0, cp_tx_id=1419234673949, tx_id=1419234673949]
+
+2014-12-22 10:51:14,456 448358 [Thread-5] INFO  producerthreads.BillingService  - billable.getId():  2
+2014-12-22 10:51:14,456 448358 [Thread-1] INFO  producerthreads.BillingService  - END!>>>>>>>>>>>>>>>>>>>>< . >< . >< . >< . >< . it took 0.002 seconds to clear a queue of 1 messages
+2014-12-22 10:51:14,456 448358 [Thread-5] INFO  workerthreads.HttpBillingWorker  - :the service id in worker!::::: mtsms.getServiceID():: Billable [operation=debit, msisdn=254734606096, shortcode=32329, keyword=BIBLEQ, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=BIBLEQ, discount_applied=0, cp_tx_id=1419234673949, tx_id=1419234673949]
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Get connection: HttpRoute[{s}->https://41.223.58.133:8443], timeout = 0
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - [HttpRoute[{s}->https://41.223.58.133:8443]] total kept alive: 1, total issued: 0, total allocated: 1 out of 2
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Getting free connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Closing expired free connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - No free connections [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Available capacity: 2 out of 2 [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:51:14,458 448360 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Creating new connection [HttpRoute[{s}->https://41.223.58.133:8443]]
+2014-12-22 10:51:23,272 457174 [Thread-5] INFO  workerthreads.HttpBillingWorker  - billable.getMsisdn()=254734606096 :::: Shortcode=32329 :::< . >< . >< . >< . >< . it took 8.814 seconds to bill via HTTP
+2014-12-22 10:51:23,272 457174 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Released connection is reusable.
+2014-12-22 10:51:23,272 457174 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Releasing connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:51:23,272 457174 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Pooling connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]; keep alive for 10000 MILLISECONDS
+2014-12-22 10:51:23,272 457174 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Notifying no-one, there are no waiting threads
+2014-12-22 10:51:23,274 457176 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_CODE[TWSS_114]:::::::::::::::::::::: resp:
+2014-12-22 10:51:23,274 457176 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_MESSAGE[Please provide correct service code and price.]:::::::::::::::::::::: resp:
+2014-12-22 10:51:23,274 457176 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 ::::::: finished attempt to bill via HTTP
+2014-12-22 10:58:12,178 1863 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 10:58:12,390 2075 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 10:59:10,160 59845 [Thread-1] INFO  producerthreads.BillingService  - 
+
+		billable.toString():Billable [operation=debit, msisdn=254734606096, shortcode=32329, keyword=CHRISTMASQ, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=CHRISTMASQ, discount_applied=0, cp_tx_id=1419235149491, tx_id=1419235149491]
+
+2014-12-22 10:59:10,160 59845 [Thread-5] INFO  producerthreads.BillingService  - billable.getId():  3
+2014-12-22 10:59:10,160 59845 [Thread-5] INFO  workerthreads.HttpBillingWorker  - :the service id in worker!::::: mtsms.getServiceID():: Billable [operation=debit, msisdn=254734606096, shortcode=32329, keyword=CHRISTMASQ, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=CHRISTMASQ, discount_applied=0, cp_tx_id=1419235149491, tx_id=1419235149491]
+2014-12-22 10:59:10,164 59849 [Thread-1] INFO  producerthreads.BillingService  - END!>>>>>>>>>>>>>>>>>>>>< . >< . >< . >< . >< . it took 0.022 seconds to clear a queue of 1 messages
+2014-12-22 10:59:10,219 59904 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Get connection: HttpRoute[{s}->https://41.223.58.133:8443], timeout = 0
+2014-12-22 10:59:10,220 59905 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - [HttpRoute[{s}->https://41.223.58.133:8443]] total kept alive: 0, total issued: 0, total allocated: 0 out of 2
+2014-12-22 10:59:10,220 59905 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - No free connections [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:59:10,221 59906 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Available capacity: 2 out of 2 [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:59:10,221 59906 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Creating new connection [HttpRoute[{s}->https://41.223.58.133:8443]]
+2014-12-22 10:59:18,514 68199 [Thread-5] INFO  workerthreads.HttpBillingWorker  - billable.getMsisdn()=254734606096 :::: Shortcode=32329 :::< . >< . >< . >< . >< . it took 8.343 seconds to bill via HTTP
+2014-12-22 10:59:18,514 68199 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Released connection is reusable.
+2014-12-22 10:59:18,514 68199 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Releasing connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 10:59:18,514 68199 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Pooling connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]; keep alive for 10000 MILLISECONDS
+2014-12-22 10:59:18,514 68199 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Notifying no-one, there are no waiting threads
+2014-12-22 10:59:18,514 68199 [Thread-5] INFO  workerthreads.HttpBillingWorker  - RESP CODE : 200
+2014-12-22 10:59:18,514 68199 [Thread-5] INFO  workerthreads.HttpBillingWorker  - RESP XML : <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Header/><soapenv:Body><p:chargeResponse xsi:type="p:chargeResponse_._type" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vo="http://ChargingProcess/com/ibm/sdp/services/charging/vo" xmlns:p="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging"><outputMsg xsi:type="vo:ChargingResponse"><status>Failure</status><transactionId>twss_fbc2c90a250fbed</transactionId><error><errorCode>TWSS_114</errorCode><errorMessage>Please provide correct service code and price.</errorMessage></error><cpTransactionId>1419235149491</cpTransactionId></outputMsg></p:chargeResponse>
+</soapenv:Body></soapenv:Envelope>
+
+2014-12-22 10:59:18,514 68199 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_CODE[TWSS_114]:::::::::::::::::::::: resp:
+2014-12-22 10:59:18,514 68199 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_MESSAGE[Please provide correct service code and price.]:::::::::::::::::::::: resp:
+2014-12-22 10:59:18,514 68199 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 ::::::: finished attempt to bill via HTTP
+2014-12-22 11:00:59,645 1862 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 11:00:59,847 2064 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 11:01:26,097 2032 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 11:01:26,311 2246 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 11:02:41,295 77230 [Thread-1] INFO  producerthreads.BillingService  - 
+
+		billable.toString():Billable [operation=debit, msisdn=254734606096, shortcode=32329, keyword=FUNFACTS, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=FUNFACTS, discount_applied=0, cp_tx_id=1419235361082, tx_id=1419235361082]
+
+2014-12-22 11:02:41,295 77230 [Thread-5] INFO  producerthreads.BillingService  - billable.getId():  4
+2014-12-22 11:02:41,295 77230 [Thread-5] INFO  workerthreads.HttpBillingWorker  - :the service id in worker!::::: mtsms.getServiceID():: Billable [operation=debit, msisdn=254734606096, shortcode=32329, keyword=FUNFACTS, price=5.00, cp_id=CONTENT360_KE, event_type=SUBSCRIPTION_PURCHASE, service_id=FUNFACTS, discount_applied=0, cp_tx_id=1419235361082, tx_id=1419235361082]
+2014-12-22 11:02:41,299 77234 [Thread-1] INFO  producerthreads.BillingService  - END!>>>>>>>>>>>>>>>>>>>>< . >< . >< . >< . >< . it took 0.022 seconds to clear a queue of 1 messages
+2014-12-22 11:02:41,353 77288 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Get connection: HttpRoute[{s}->https://41.223.58.133:8443], timeout = 0
+2014-12-22 11:02:41,353 77288 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - [HttpRoute[{s}->https://41.223.58.133:8443]] total kept alive: 0, total issued: 0, total allocated: 0 out of 2
+2014-12-22 11:02:41,353 77288 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - No free connections [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 11:02:41,353 77288 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Available capacity: 2 out of 2 [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 11:02:41,353 77288 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Creating new connection [HttpRoute[{s}->https://41.223.58.133:8443]]
+2014-12-22 11:02:49,923 85858 [Thread-5] INFO  workerthreads.HttpBillingWorker  - billable.getMsisdn()=254734606096 :::: Shortcode=32329 :::< . >< . >< . >< . >< . it took 8.619 seconds to bill via HTTP
+2014-12-22 11:02:49,925 85860 [Thread-5] DEBUG tsccm.ThreadSafeClientConnManager  - Released connection is reusable.
+2014-12-22 11:02:49,925 85860 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Releasing connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]
+2014-12-22 11:02:49,925 85860 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Pooling connection [HttpRoute[{s}->https://41.223.58.133:8443]][null]; keep alive for 10000 MILLISECONDS
+2014-12-22 11:02:49,925 85860 [Thread-5] DEBUG tsccm.ConnPoolByRoute  - Notifying no-one, there are no waiting threads
+2014-12-22 11:02:49,925 85860 [Thread-5] INFO  workerthreads.HttpBillingWorker  - RESP CODE : 200
+2014-12-22 11:02:49,925 85860 [Thread-5] INFO  workerthreads.HttpBillingWorker  - RESP XML : <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Header/><soapenv:Body><p:chargeResponse xsi:type="p:chargeResponse_._type" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vo="http://ChargingProcess/com/ibm/sdp/services/charging/vo" xmlns:p="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging"><outputMsg xsi:type="vo:ChargingResponse"><status>Failure</status><transactionId>twss_a6d6bfadb3dd9af</transactionId><error><errorCode>TWSS_114</errorCode><errorMessage>Please provide correct service code and price.</errorMessage></error><cpTransactionId>1419235361082</cpTransactionId></outputMsg></p:chargeResponse>
+</soapenv:Body></soapenv:Envelope>
+
+2014-12-22 11:02:49,925 85860 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_CODE[TWSS_114]:::::::::::::::::::::: resp:
+2014-12-22 11:02:49,925 85860 [Thread-5] INFO  workerthreads.HttpBillingWorker  - resp: :::::::::::::::::::::::::::::ERROR_MESSAGE[Please provide correct service code and price.]:::::::::::::::::::::: resp:
+2014-12-22 11:02:49,925 85860 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 ::::::: finished attempt to bill via HTTP
+2014-12-22 11:42:32,176 1882 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 11:42:32,378 2084 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down
+2014-12-22 11:46:47,953 1884 [Thread-5] INFO  workerthreads.HttpBillingWorker  - THREAD_WORKER_#_0 STARTED AFTER :::::RELEASED_BY_PRODUCER after 0.0 mili-seconds
+2014-12-22 11:46:48,161 2092 [Finalizer] DEBUG tsccm.ThreadSafeClientConnManager  - Shutting down

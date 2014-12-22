@@ -144,7 +144,7 @@ public class BillingClass {
 		 
 		 String resp = convertStreamToString(response.getEntity().getContent());
 		 
-
+System.out.println(xml);
 		 System.out.println("RESP CODE : "+RESP_CODE);
 		 System.out.println("RESP XML : "+resp);
 		 

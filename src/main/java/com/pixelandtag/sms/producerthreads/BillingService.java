@@ -64,6 +64,7 @@ public class BillingService extends Thread{
 	private static Semaphore save_Sem = new Semaphore(1, true);
 	private static Semaphore uniq;
 	private boolean run = true;
+	private  Context context = null;
 	public static CelcomHTTPAPI celcomAPI;
 	private CMPResourceBeanRemote cmpbean;
 	//private static DBPoolDataSource ds;
@@ -224,7 +225,7 @@ public class BillingService extends Thread{
 		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
 		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
 		 props.put("jboss.naming.client.ejb.context", true);
-		 Context context = new InitialContext(props);
+		 context = new InitialContext(props);
 		 cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
     }
@@ -245,7 +246,7 @@ public class BillingService extends Thread{
 		httpsclient = new DefaultHttpClient(cm);
 					
 		Thread t1;
-		
+		System.out.println(this.workers);
 		for(int i = 0; i<this.workers ; i++){
 			HttpBillingWorker worker;
 			worker = new HttpBillingWorker("THREAD_WORKER_#_"+i,httpsclient, cmpbean);
@@ -367,6 +368,9 @@ public class BillingService extends Thread{
 			logger.debug("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
 			
 			for(Billable billable : billables){
+				
+				logger.info("\n\n\t\tbillable.toString():"+billable.toString()+"\n");
+				
 			
 				x++;
 				
@@ -512,7 +516,7 @@ public class BillingService extends Thread{
 		
 		try {
 			BillingService billingserv = new BillingService();
-			billingserv.initWorkers();
+		//	billingserv.initWorkers();
 			billingserv.start();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -603,7 +607,7 @@ public class BillingService extends Thread{
 		
 		try{
 			
-		//	conn.close();
+			context.close();
 		
 		}catch(Exception e){
 			

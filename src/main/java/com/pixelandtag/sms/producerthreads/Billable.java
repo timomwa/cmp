@@ -40,13 +40,21 @@ public class Billable implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4690931003089822080L;
+	private static final long serialVersionUID = -4690931003011822080L;
 	
 	/**
 	 * HTTP status code
 	 */
 	@Column(name = "resp_status_code")
 	private String resp_status_code;
+	
+	
+	
+	/**
+	 * The price point keyword
+	 */
+	@Column(name = "price_point_keyword")
+	private String pricePointKeyword;
 	
 	
 	/**
@@ -143,6 +151,16 @@ public class Billable implements Serializable {
 	
 	
 	
+	public String getPricePointKeyword() throws PricePointException {
+		if(pricePointKeyword==null || pricePointKeyword.isEmpty())
+			throw new PricePointException("No price point set! Refer to CP Integration form");
+		return pricePointKeyword;
+	}
+
+	public void setPricePointKeyword(String pricePointKeyword) {
+		this.pricePointKeyword = pricePointKeyword;
+	}
+
 	public String getResp_status_code() {
 		return resp_status_code;
 	}
@@ -319,12 +337,12 @@ public class Billable implements Serializable {
 		this.message_id = message_id;
 	}
 
-	public String getChargeXML(String base_charge_xml) {
+	public String getChargeXML(String base_charge_xml) throws PricePointException {
 		return base_charge_xml
 				.replaceAll("\\{OPERATION\\}", getOperation())
 				.replaceAll("\\{MSISDN\\}", getMsisdn())
 				.replaceAll("\\{SHORTCODE\\}", getShortcode())
-				.replaceAll("\\{KEYWORD\\}", getKeyword())
+				.replaceAll("\\{KEYWORD\\}", getPricePointKeyword())
 				.replaceAll("\\{SERVICE_ID\\}", getService_id())
 				.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()))
 				.replaceAll("\\{CP_ID\\}", getCp_id())

@@ -9,8 +9,12 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -45,6 +49,7 @@ public class HttpBillingWorker implements Runnable {
 	private HttpClient httpsclient;
 	private int retry_per_msg = 1;
 	private int pollWait;
+	private  Context context;
 	//private DBPoolDataSource dbpds = null;
 	private StopWatch watch;
 	private boolean run = true;
@@ -154,7 +159,17 @@ public class HttpBillingWorker implements Runnable {
 
 	public HttpBillingWorker( String name_,HttpClient httpclient_, CMPResourceBeanRemote cmpbean) throws Exception{
 		
-		this.cmp_ejb  = cmpbean;
+		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put("jboss.naming.client.ejb.context", true);
+		 context = new InitialContext(props);
+		 this.cmp_ejb  =  (CMPResourceBeanRemote) 
+      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
 		
 		this.watch = new StopWatch();
 		
@@ -193,7 +208,7 @@ public class HttpBillingWorker implements Runnable {
 					final Billable billable = BillingService.getBillable();
 					
 					
-					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+					logger.info(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 					
 					charge(billable);
 					
@@ -223,7 +238,11 @@ public class HttpBillingWorker implements Runnable {
 			
 		}finally{
 			
-			
+		    if(context!=null) 
+		    	try { 
+		    		context.close(); 
+		    	}catch(Exception ex) { ex.printStackTrace(); }
+		    
 		} 
 		
 	}
@@ -294,8 +313,10 @@ public class HttpBillingWorker implements Runnable {
 			httsppost.setHeader("SOAPAction","");
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
 			
+			String xml = billable.getChargeXML(BillableI.plainchargeXML);
 			
-			StringEntity se = new StringEntity(billable.getChargeXML(BillableI.plainchargeXML));
+			System.out.println(xml);
+			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			
 			
@@ -312,8 +333,8 @@ public class HttpBillingWorker implements Runnable {
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
 			
-			 logger.debug("RESP CODE : "+RESP_CODE);
-			 logger.debug("RESP XML : "+resp);
+			 logger.info("RESP CODE : "+RESP_CODE);
+			 logger.info("RESP XML : "+resp);
 			 
 			 billable.setResp_status_code(String.valueOf(RESP_CODE));
 			
@@ -444,7 +465,8 @@ public class HttpBillingWorker implements Runnable {
 					
 					if(!this.success){//return back to queue if we did not succeed
 						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
-							
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+						
 						//on third try, we abort
 						httsppost.abort();
 						

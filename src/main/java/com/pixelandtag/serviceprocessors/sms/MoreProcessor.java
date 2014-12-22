@@ -363,8 +363,6 @@ public class MoreProcessor extends GenericServiceProcessor {
 			}else if(KEYWORD.equalsIgnoreCase(SUBSCRIPTION_CONFIRMATION)){
 				
 				
-				System.out.println("\n\nAT SUBSCRIPTION CONFIRMATION!!! SUB WANTS TO BUY CONTENT!\n\n");
-				
 				LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
 				
 				boolean submenus_have_sub_menus = false;

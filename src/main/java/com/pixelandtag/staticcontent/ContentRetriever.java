@@ -10,6 +10,7 @@ import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
@@ -376,6 +377,7 @@ public class ContentRetriever {
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());
 				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
 				mo.setSMS_SourceAddr(procDTO.getShortcode());
 				mo.setPriority(1);
 				mo.setServiceid(sm.getId());

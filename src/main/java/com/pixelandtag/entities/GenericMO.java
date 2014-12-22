@@ -111,8 +111,6 @@ public abstract class GenericMO extends GenericMessage {
 	private String CMP_SKeyword;
 	
 	
-	
-
 
 	/*public String getCMP_Txid() {
 		return CMP_Txid;
@@ -129,6 +127,8 @@ public abstract class GenericMO extends GenericMessage {
 	public String getSMS_Message_String() {
 		return SMS_Message_String;
 	}
+
+	
 
 	public void setSMS_Message_String(String sMS_Message_String) {
 		SMS_Message_String = sMS_Message_String;

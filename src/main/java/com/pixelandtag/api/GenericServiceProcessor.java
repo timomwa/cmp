@@ -49,12 +49,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	private static final String ACK_SQL = "UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?";
 
 	private static final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
 
 	private static final String SEND_MT_2 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?,  re_tries=re_tries+1";
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?,  re_tries=re_tries+1";
 
 	private static final String TO_STATS_LOG = "INSERT INTO `celcom`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword, price, subscription) " +
 						"VALUES(?,?,?,?,?,?,?)";
@@ -138,15 +138,16 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 * @see com.pixelandtag.api.ServiceProcessorI#enqueue(com.pixelandtag.celcom.entities.MOSms)
 	 */
 	public boolean submit(MOSms mo_){
-		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
+		//logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
+		//System.out.println(" in com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
 		boolean success = false;
 		try{
-			mo_  = bill(mo_);
+			//mo_  = bill(mo_);
 			success =  this.moMsgs.offerLast(mo_);
 		}catch(Exception e){
 			this.logger.error(e.getMessage(),e);
 		}
-		logger.debug(" exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
+		//logger.debug(" exiting com.pixelandtag.api.GenericServiceProcessor.submit(MOSms) ");
 		return success;
 	}
 	
@@ -156,12 +157,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		logger.debug("mo_.getPrice().doubleValue() "+mo_.getPrice().doubleValue());
 		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+mo_.getPrice().compareTo(BigDecimal.ZERO));
-		if(mo_.getPrice().compareTo(BigDecimal.ZERO)==0){//if price is zero
+		System.out.println(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+mo_.getPrice().compareTo(BigDecimal.ZERO));
+		if(mo_.getPrice().compareTo(BigDecimal.ZERO)<=0){//if price is zero
 			mo_.setCharged(true);
 			mo_.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 			logger.debug(" returning.... price is zero ");
 			return mo_;
 		}
+		
 		Connection conn = getCon();
 		
 		PreparedStatement pstmt = null;
@@ -171,6 +174,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		try{
 			
 			String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
+			System.out.println("SELECT * FROM billable_queue WHERE cp_tx_id='"+mo_.getCMP_Txid()+"' ");
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setLong(1, mo_.getCMP_Txid());
 			rs = pstmt.executeQuery();
@@ -197,11 +201,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				billable.setSuccess(rs.getBoolean("success"));
 				billable.setTx_id(rs.getLong("tx_id"));
 				billable.setTimeStamp(new Date());
+				billable.setPricePointKeyword(rs.getString("price_point_keyword"));
+				System.out.println("billable.toString():  "+billable.toString());
 			}
 			
 			
 			
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
@@ -215,11 +222,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			}
 			
 		}
+		
 		if(billable==null)
 			billable  = new Billable();
 		else
 			return mo_;
 		
+		System.out.println("billable ??? "+billable);
 		
 
 		billable.setCp_id("CONTENT360_KE");
@@ -239,10 +248,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo_.getSMS_SourceAddr());		
 		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
-		
+		billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
+		billable.setPricePointKeyword(mo_.getPricePointKeyword());
 		logger.debug(" before save "+billable.getId());
 		
-		
+		System.out.println(" before save "+billable.getId());
 		
 		
 		try{
@@ -273,11 +283,17 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setLong(17, billable.getTx_id());
 			
 			int n = pstmt.executeUpdate();
+			
+			System.out.println(">> n : "+n);
 			rs = pstmt.getGeneratedKeys();
 			if(rs.next())
 				billable.setId(rs.getInt(1));
 			
+			
+			System.out.println("billable.getId():  "+billable.getId());
+			
 		}catch(Exception e){
+			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
@@ -297,8 +313,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		//billable = BillingService.saveOrUpdate(billable);
 		logger.debug(" after save "+billable.getId());
+		System.out.println(" after save "+billable.getId());
 		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
 		mo_.setPriority(0);
+		System.out.println(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		logger.debug(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		return mo_;
 		
@@ -617,6 +635,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 */
 	public void  sendMT(MOSms mo) {
 		
+		mo  = bill(mo);
 		
 		System.out.println("\n\n\n\n\n*******************\n\t mo.toString() :  "+mo.toString() + "\n\n\t************\n\n");
 		
@@ -663,6 +682,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setInt(13, mo.getProcessor_id());
 			pstmt.setString(14, mo.getBillingStatus().toString());
 			pstmt.setString(15, mo.getBillingStatus().toString());
+			pstmt.setString(16, mo.getPricePointKeyword());
 			
 			int resp  = pstmt.executeUpdate(); 
 			
