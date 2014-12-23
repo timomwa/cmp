@@ -322,6 +322,8 @@ public class Billable implements Serializable {
 	
 
 	public boolean isSuccess() {
+		if(success==null)
+			return new Boolean(false);
 		return success;
 	}
 

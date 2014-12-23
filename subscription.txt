@@ -1,0 +1,44 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          subscription
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/Stop Billing Service
+### END INIT INFO
+#
+#source some script files in order to set and export environmental variables
+#as well as add the appropriate executables to $PATH
+[ -r /etc/profile.d/java.sh ] && . /etc/profile.d/java.sh
+[ -r /etc/profile.d/sms_platform.sh ] && . /etc/profile.d/sms_platform.sh
+APP="Billing Platform"
+BILLING_PLATFORM_HOME=/software/sms_platform
+PIDFILE=${BILLING_PLATFORM_HOME}/logs/billing.pid
+LOG_FILE=${BILLING_PLATFORM_HOME}/logs/billing.log
+EXECUTABLE_FILE=${BILLING_PLATFORM_HOME}/subscription.sh
+case "$1" in
+    start)
+        #if [ `ps -p ${PIDFILE}` > /dev/null ]; then
+        #   echo "${APP} is already running!"
+        #   exit 1
+        #else
+           echo "Starting ${APP}"
+           sudo start-stop-daemon --start --quiet --background --chuid root --make-pidfile --pidfile $PIDFILE --exec  ${EXECUTABLE_FILE} >>  ${LOG_FILE} 2>&1
+        #fi
+    ;;
+    stop)
+        #if [ -e ${PIDFILE} -a ${PIDFILE}/exe ]; then
+          echo "Stopping ${APP}"
+          sudo start-stop-daemon --start --quiet --background --chuid root --exec ${EXECUTABLE_FILE} -- --connect command=:stop
+        #else
+          #echo "${APP} isn't running. It's already stopped"
+        #fi
+    ;;
+    *)
+        echo "Usage: /etc/init.d/jboss {start|stop}"
+        exit 1
+    ;;
+esac
+
+exit 0

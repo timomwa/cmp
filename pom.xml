@@ -176,7 +176,7 @@
 			<groupId>javax.ejb</groupId>
 			<artifactId>ejb-api</artifactId>
 			<version>3.0-alpha-1</version>
-			<scope>provided</scope>
+			<!--scope>provided</scope-->
 		</dependency>
 
 

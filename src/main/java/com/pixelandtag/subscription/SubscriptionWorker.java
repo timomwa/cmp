@@ -17,6 +17,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
@@ -26,7 +27,7 @@ public class SubscriptionWorker implements Runnable{
 	
 	private int serviceid;
 	private String name;
-	private String connstr = "jdbc:mysql://db/celcom?user=root&password=";
+	private String connstr;// = "jdbc:mysql://db/pixeland_content360?user=root&password=";
 	private int subs = 0;
 	private boolean busy;
 	public static final int PROCESSING = 1;
@@ -38,12 +39,16 @@ public class SubscriptionWorker implements Runnable{
 	private Connection conn;
 	private int subscription_service_id = -1;
 	private ArrayBlockingQueue<SubscriptionDTO> processors;
+	private String server_tz;
+	private String client_tz;
 	
 	private SubscriptionWorker(){}
 	
-	public SubscriptionWorker(String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
-		
+	public SubscriptionWorker(String server_tz, String client_tz, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
+		this.server_tz = server_tz;
+		this.client_tz = client_tz;
 		logger.debug(" :::::::::: GUGAMUGA processing service : "+service_id);
+		this.connstr = connStr;
 		this.serviceid = service_id;
 		this.name = name_;
 		this.subs = 0;
@@ -122,7 +127,7 @@ public class SubscriptionWorker implements Runnable{
 			setStatus(BUSY);
 			
 			
-			String sql = "SELECT * FROM `celcom`.`subscription` WHERE subscription_status='confirmed' AND sms_service_id_fk = ?";
+			String sql = "SELECT * FROM `"+GenericServiceProcessor.DB+"`.`subscription` WHERE subscription_status='confirmed' AND sms_service_id_fk = ?";
 			
 			pstmt = getConn().prepareStatement(sql);
 			
@@ -151,7 +156,7 @@ public class SubscriptionWorker implements Runnable{
 					mo.setSMS_Message_String(dto.getCmd());
 					mo.setProcessor_id(dto.getProcessor_id());
 					mo.setSubscriptionPush(true);//flag that this is a subscription push. Will help system not do some querying later. Save processor 
-					
+					mo.setPricePointKeyword(dto.getPricePointKeyword());
 					dto.getProcessor().submit(mo);//submit msg to the processor
 					
 				}catch(Exception e){
@@ -164,7 +169,7 @@ public class SubscriptionWorker implements Runnable{
 			rs.close();
 			pstmt.close();
 			
-			sql = "UPDATE `celcom`.`ServiceSubscription` SET lastUpdated=now() WHERE id = ?";
+			sql = "UPDATE `"+GenericServiceProcessor.DB+"`.`ServiceSubscription` SET lastUpdated=convert_tz(now(),'"+server_tz+"','"+client_tz+"') WHERE id = ?";
 			
 			
 			

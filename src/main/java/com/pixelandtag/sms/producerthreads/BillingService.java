@@ -70,7 +70,8 @@ public class BillingService extends Thread{
 	public static CelcomHTTPAPI celcomAPI;
 	private CMPResourceBeanRemote cmpbean;
 	private int idleWorkers;
-	
+	private String server_tz;
+	private String client_tz;
 	//private static DBPoolDataSource ds;
 	//private Connection conn;
 	private StopWatch watch;
@@ -95,6 +96,7 @@ public class BillingService extends Thread{
 	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
 	private static BillingService instance;
 	private Properties log4J;
+	private Properties mtsenderprops;
 	public static Session getSession() {
 		Session session = (Session) BillingService.session.get();
 		if (session == null) {
@@ -218,11 +220,18 @@ public class BillingService extends Thread{
 		 context = new InitialContext(props);
 		 cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
+		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
     
     
 	private void initWorkers() throws Exception{
 		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
+		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
+		
+		server_tz = mtsenderprops.getProperty("SERVER_TZ");
+		client_tz = mtsenderprops.getProperty("CLIENT_TZ");
+		
 		PropertyConfigurator.configure(log4J);
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
 		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
@@ -238,7 +247,7 @@ public class BillingService extends Thread{
 		Thread t1;
 		for(int i = 0; i<this.workers ; i++){
 			HttpBillingWorker worker;
-			worker = new HttpBillingWorker("THREAD_WORKER_#_"+i,httpsclient, cmpbean);
+			worker = new HttpBillingWorker(server_tz, client_tz, "THREAD_WORKER_#_"+i,httpsclient, cmpbean);
 			t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);
@@ -428,7 +437,7 @@ public class BillingService extends Thread{
 				
 				watch.stop();
 				
-				logger.info("END!>>>>>>>>>>>>>>>>>>>>< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()/1000d+"")) + " seconds to clear a queue of "+getSentMT()+" messages");
+				logger.info("END!>>>>>>>>>>>>>>>>>>>>< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()/1000d+"")) + " seconds to log a queue of "+getSentMT()+" messages");
 			   
 				watch.reset();
 				

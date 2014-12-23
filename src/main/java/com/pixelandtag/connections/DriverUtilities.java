@@ -20,6 +20,13 @@ public class DriverUtilities {
 	 * using.
 	 */
 
+	/**
+	 * 
+	 * @param host
+	 * @param dbName
+	 * @param vendor
+	 * @return
+	 */
 	public static String makeURL(String host, String dbName, int vendor) {
 		if (vendor == ORACLE) {
 			return ("jdbc:oracle:thin:@" + host + ":1521:" + dbName);
@@ -32,6 +39,15 @@ public class DriverUtilities {
 		}
 	}
 
+	/**
+	 * 
+	 * @param host
+	 * @param dbName
+	 * @param vendor
+	 * @param username
+	 * @param password
+	 * @return
+	 */
 	public static String makeURL(String host, String dbName, int vendor,
 			String username, String password) {
 		if (vendor == ORACLE) {

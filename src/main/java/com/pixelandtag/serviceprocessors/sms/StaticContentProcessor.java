@@ -2,12 +2,14 @@ package com.pixelandtag.serviceprocessors.sms;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -24,6 +26,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 	private final Logger static_content_processor_logger = Logger.getLogger(StaticContentProcessor.class);
 	private DBPoolDataSource ds;
 	private Subscription subscription;
+	private Properties mtsenderprop;
 	
 	private ContentRetriever cr = new ContentRetriever();
 	private String SPACE = " ";
@@ -33,23 +36,28 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 		subscription = new Subscription();
 	}
 	
+	
+	
+	
 	private void init_datasource(){
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
-	    String host =  HTTPMTSenderApp.props.getProperty("db_host");
-	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
+	    String host = mtsenderprop.getProperty("db_host");
+	    String dbName = mtsenderprop.getProperty("DATABASE");
+	    String username = mtsenderprop.getProperty("db_username");
+	    String password = mtsenderprop.getProperty("db_password");
+	    String url = DriverUtilities.makeURL(host, dbName, vendor, username, password);
+	   
 		
 		ds = new DBPoolDataSource();
 	    ds.setName("STATICCONTENT_PROCESSOR_DS");
 	    ds.setDescription("Static Content thread datasource: "+ds.getName());
 	    ds.setDriverClassName(driver);
 	    ds.setUrl(url);
-	    ds.setUser(username);
-	    ds.setPassword(password);
+	   // ds.setUser(username);
+	   // ds.setPassword(password);
 	    ds.setMinPool(1);
 	    ds.setMaxPool(2);
 	    ds.setMaxSize(3);

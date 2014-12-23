@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -20,6 +21,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
+import com.pixelandtag.util.FileUtils;
 
 /**
  * @author Timothy Mwangi Gikonyo.
@@ -27,6 +29,12 @@ import com.pixelandtag.sms.producerthreads.Operation;
  */
 public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
+	protected Properties mtsenderprop;
+	protected String host;
+	protected String dbName;
+	protected String username;
+	protected String password;
+	public static final String DB = "pixeland_content360";
 	public static final String SPACE = " ";
 	public static final String NEW_LINE = "\n";
 	public static final String SERVICENAME_TAG = "<SERVICE_NAME>";
@@ -392,6 +400,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	}
 	
 	public GenericServiceProcessor(){
+		
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
+		
+		host = mtsenderprop.getProperty("db_host");
+		dbName = mtsenderprop.getProperty("DATABASE");
+		username = mtsenderprop.getProperty("db_username");
+		password = mtsenderprop.getProperty("db_password");
 		
 	}
 	

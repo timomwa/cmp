@@ -38,19 +38,24 @@ public class SubscriptionMain{
 	private ArrayBlockingQueue<ServiceSubscription> to_be_pushed = null;
 	private static Semaphore uniq;
 	private static Properties log4Jprops = null;
+	private static Properties subscription_props = null;
+	private String server_tz;
+	private String client_tz;
+	private String host;
+	private String dbName;
+	private String username;
+	private String password;
 	static{
 		uniq = new Semaphore(1, true);
 	}
+	
+	public static String DB = "pixeland_content360";
 
 	
-	private final String sub = "SELECT ss.id as 'service_subscription_id', pro.id as 'mo_processor_id_fk', pro.shortcode,pro.ServiceName,sm.cmd,sm.CMP_Keyword,sm.CMP_SKeyword,sm.price as 'price', sm.push_unique,ss.serviceid as 'sms_serviceid',pro.threads,pro.ProcessorClass as 'ProcessorClass'"
-				+" FROM `celcom`.`ServiceSubscription` ss "
-				+"LEFT JOIN `celcom`.`sms_service` sm "
-				+"ON sm.id = ss.serviceid "
-				+"LEFT JOIN `celcom`.`mo_processors` pro "
-				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(now()) AND `ss`.`lastUpdated`<now() AND `ss`.`ExpiryDate`>now()";
+	private String sub;
 	
 	private Map<Integer,ArrayBlockingQueue<SubscriptionDTO>> processor_map = new HashMap<Integer,ArrayBlockingQueue<SubscriptionDTO>>();
+	private String constr_;
 	
 	
 	public SubscriptionMain(){
@@ -59,8 +64,26 @@ public class SubscriptionMain{
 	
 	private void init() {
 		
+		log4Jprops = getPropertyFile("log4jsub.properties");
+		subscription_props = getPropertyFile("mtsender.properties");
 		
-		log4Jprops = getPropertyFile("log4j.properties");
+		
+		host = subscription_props.getProperty("db_host");
+		dbName= subscription_props.getProperty("DATABASE");
+		username= subscription_props.getProperty("db_username");
+		password= subscription_props.getProperty("db_password");
+		constr_= subscription_props.getProperty("constr");
+		
+		server_tz = subscription_props.getProperty("SERVER_TZ");
+		client_tz = subscription_props.getProperty("CLIENT_TZ");
+		sub = "SELECT ss.id as 'service_subscription_id', pro.id as 'mo_processor_id_fk', pro.shortcode,pro.ServiceName,sm.cmd,sm.CMP_Keyword,sm.CMP_SKeyword,sm.price as 'price', sm.push_unique,ss.serviceid as 'sms_serviceid',pro.threads,pro.ProcessorClass as 'ProcessorClass',sm.price_point_keyword"
+				+" FROM `"+DB+"`.`ServiceSubscription` ss "
+				+"LEFT JOIN `"+DB+"`.`sms_service` sm "
+				+"ON sm.id = ss.serviceid "
+				+"LEFT JOIN `"+DB+"`.`mo_processors` pro "
+				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(convert_tz(now(),'"+server_tz+"','"+client_tz+"')) AND `ss`.`lastUpdated`<convert_tz(now(),'"+server_tz+"','"+client_tz+"') AND `ss`.`ExpiryDate`>convert_tz(now(),'"+server_tz+"','"+client_tz+"')";
+	
+		System.out.println(sub);
 		//BasicConfigurator.configure();
 		PropertyConfigurator.configure(log4Jprops);
 		
@@ -79,11 +102,9 @@ public class SubscriptionMain{
 		
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
-	    String host = "db";
-	    String dbName =  HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = "root";
-	    String password = "";
+	   
+	   
+	    this.constr_ = DriverUtilities.makeURL(host, dbName, vendor,username,password);
 	    
 	    
 	    ds = new DBPoolDataSource();
@@ -91,9 +112,7 @@ public class SubscriptionMain{
 	    ds.setName("pool-ds");
 	    ds.setDescription("Pooling DataSource");
 	    ds.setDriverClassName(driver);
-	    ds.setUrl(url);
-	    ds.setUser(username);
-	    ds.setPassword(password);
+	    ds.setUrl(constr_);
 	    ds.setMinPool(2);
 	    ds.setMaxPool(3);
 	    ds.setMaxSize(5);
@@ -116,7 +135,6 @@ public class SubscriptionMain{
 		try {
 			
 			stmt = conn.createStatement();
-			
 			
 			rs = stmt.executeQuery(sub);
 			
@@ -150,6 +168,7 @@ public class SubscriptionMain{
 					subdto.setProcessorClass(service_processor_class_name);
 					subdto.setPrice(rs.getDouble("price"));
 					subdto.setId(rs.getInt("service_subscription_id"));
+					subdto.setPricePointKeyword(rs.getString("price_point_keyword"));
 					
 					ServiceProcessorI processor = MOProcessorFactory.getProcessorClass(service_processor_class_name,ServiceProcessorI.class);
 					
@@ -242,7 +261,7 @@ public class SubscriptionMain{
 		
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM `celcom`.`ServiceSubscription` WHERE hour(`schedule`)<=hour(now()) AND `lastUpdated`<now() AND ExpiryDate>now()");//first get services to be pushed now.
+			rs = stmt.executeQuery("SELECT * FROM `"+DB+"`.`ServiceSubscription` WHERE hour(`schedule`)<=hour(convert_tz(now(),'"+server_tz+"','"+client_tz+"')) AND `lastUpdated`<convert_tz(now(),'"+server_tz+"','"+client_tz+"') AND ExpiryDate>convert_tz(now(),'"+server_tz+"','"+client_tz+"')");//first get services to be pushed now.
 			
 			
 			ServiceSubscription subdto;
@@ -288,16 +307,17 @@ public class SubscriptionMain{
 			
 			final int service_id = s.getServiceid();
 			final int subscription_service_id = s.getId();
-			final String service_name = "Subscription thread:  " + processor_map.get(service_id).peek().getServiceName();
 			
-			ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
-			
-			SubscriptionWorker sw = new SubscriptionWorker(service_name,service_id,subscription_service_id,processors);
-			
-			Thread t = new Thread(sw);
-			t.start();
-			
-			
+			if(processor_map.size()>0){
+				final String service_name = "Subscription thread:  " + processor_map.get(service_id).peek().getServiceName();
+				
+				ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
+				
+				SubscriptionWorker sw = new SubscriptionWorker(server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
+				
+				Thread t = new Thread(sw);
+				t.start();
+			}
 		}
 		
 		
@@ -399,18 +419,8 @@ public class SubscriptionMain{
 	
 	
 	public static void main(String[] args){
-		/*String sub = "SELECT pro.id as 'mo_processor_id_fk', pro.shortcode,pro.ServiceName,sm.cmd,sm.CMP_Keyword,sm.CMP_SKeyword,sm.price, sm.push_unique,ss.serviceid as 'sms_serviceid',pro.threads,pro.ProcessorClass as 'ProcessorClass'"
-				+" FROM `celcom`.`ServiceSubscription` ss "
-				+"LEFT JOIN `celcom`.`sms_service` sm "
-				+"ON sm.id = ss.serviceid "
-				+"LEFT JOIN `celcom`.`mo_processors` pro "
-				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1";*/
 		
-		
-	//	logger.debug(sub);
 		new SubscriptionMain().pushSubscriptions();
-		//logger.debug(t);
-		//logger.debug("||||||||||||| >>>>>>>>>>>>>>>> Subscription program finished");
 		
 	}
 	

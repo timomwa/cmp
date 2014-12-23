@@ -25,7 +25,7 @@ import com.pixelandtag.web.beans.MessageType;
 
 public class UtilCelcom {
 
-	final static String DB = HTTPMTSenderApp.props.getProperty("DATABASE");
+	final static String DB = "pixeland_content360";//HTTPMTSenderApp.props.getProperty("DATABASE");
 
 	private static final String INMOBIA = "IIIIIIIIIIIIIIIIIII".replaceAll("I", "0");
 

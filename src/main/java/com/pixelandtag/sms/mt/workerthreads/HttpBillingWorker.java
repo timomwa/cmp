@@ -50,6 +50,8 @@ public class HttpBillingWorker implements Runnable {
 	private int retry_per_msg = 1;
 	private int pollWait;
 	private  Context context;
+	private String server_tz;
+	private String client_tz;
 	//private DBPoolDataSource dbpds = null;
 	private StopWatch watch;
 	private boolean run = true;
@@ -157,7 +159,7 @@ public class HttpBillingWorker implements Runnable {
 		}
 	}
 
-	public HttpBillingWorker( String name_,HttpClient httpclient_, CMPResourceBeanRemote cmpbean) throws Exception{
+	public HttpBillingWorker(String server_tz,String client_tz, String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean) throws Exception{
 		
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
@@ -170,6 +172,8 @@ public class HttpBillingWorker implements Runnable {
 		 this.cmp_ejb  =  (CMPResourceBeanRemote) 
       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 
+		this.server_tz = server_tz;
+		this.client_tz = client_tz;
 		
 		this.watch = new StopWatch();
 		
@@ -357,7 +361,9 @@ public class HttpBillingWorker implements Runnable {
 				}else{
 					
 					billable.setResp_status_code("Success");
-					logger.info("resp: :::::::::::::::::::::::::::::ERROR_CODE["+billable.isProcessed()+"]:::::::::::::::::::::: resp:");
+					logger.info("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
+					
+					
 				}
 				
 								

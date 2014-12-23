@@ -47,6 +47,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 	
 	
 	public MoreProcessor(){
+		super();
 		init_datasource();
 		menu_controller = new MenuController();
 		subscription = new Subscription();
@@ -54,11 +55,11 @@ public class MoreProcessor extends GenericServiceProcessor {
 		
 		int vendor = DriverUtilities.MYSQL;
 		String driver = DriverUtilities.getDriver(vendor);
-		String host = "db";
-		String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-		String url = DriverUtilities.makeURL(host, dbName, vendor);
-		String username = HTTPMTSenderApp.props.getProperty("db_username");
-		String password = HTTPMTSenderApp.props.getProperty("db_password");
+		//String host = "db";
+		//String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
+		String url = DriverUtilities.makeURL(host, dbName, vendor,username,password);
+		/*String username = HTTPMTSenderApp.props.getProperty("db_username");
+		String password = HTTPMTSenderApp.props.getProperty("db_password");*/
 		try {
 			celcomAPI = new CelcomImpl(url, "MORE_PROC_API_DS");
 		} catch (Exception e) {
@@ -71,10 +72,10 @@ public class MoreProcessor extends GenericServiceProcessor {
 		int vendor = DriverUtilities.MYSQL;
 		String driver = DriverUtilities.getDriver(vendor);
 		String host = "db";
-		String dbName =  HTTPMTSenderApp.props.getProperty("DATABASE");
+		//String dbName =  HTTPMTSenderApp.props.getProperty("DATABASE");
 
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
+	   // String username = HTTPMTSenderApp.props.getProperty("db_username");
+	    //String password = HTTPMTSenderApp.props.getProperty("db_password");
 		
 	    String url = DriverUtilities.makeURL(host, dbName, vendor,username, password);
 		

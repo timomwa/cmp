@@ -1,0 +1,14 @@
+2014-12-23 18:43:38,007 0    [main] DEBUG subscription.SubscriptionMain  - 
+initializing...........
+2014-12-23 18:43:38,039 32   [main] DEBUG subscription.SubscriptionMain  - >>>>>>>>>>>>>>>>>>>>>>>>>>> initialize datasource well.
+2014-12-23 18:43:38,039 32   [main] DEBUG db.DBPoolDataSource  - ClassLoader is of type: sun.misc.Launcher$AppClassLoader
+2014-12-23 18:43:38,499 492  [main] DEBUG subscription.SubscriptionMain  -  
+
+
+
+======================= TO BE PUSHED arraylist?? []
+size : 0
+==========================================
+
+
+

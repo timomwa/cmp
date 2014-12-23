@@ -44,8 +44,8 @@ public class MOReceiver extends HttpServlet {
 	private CelcomHTTPAPI celcomAPI;
 	
 	private byte[] OK_200 =  "200 OK".getBytes();
-	private final String SERVER_TIMEZONE = "+08:00";
-	private final String CLIENT_TIMEZONE = "+08:00";
+	private final String SERVER_TIMEZONE = "-05:00";
+	private final String CLIENT_TIMEZONE = "+03:00";
 
 
 	//private final int INITIAL_CONNECTIONS = 10;
