@@ -16,6 +16,7 @@ import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.autodraw.Alarm;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.MM7Api;
@@ -128,6 +129,17 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 
 	@Override
 	public void finalizeMe(){
+		
+
+		try{
+			
+			//context.close();
+		
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+		
+		}
 		
 		try {
 			
@@ -1553,6 +1565,14 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 			}
 		}
 		
+	}
+	
+	
+
+	
+	@Override
+	public CMPResourceBeanRemote getEJB() {
+		return null;
 	}
 	
 	public static void main(String[] args) {

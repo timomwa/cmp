@@ -5,6 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Properties;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
@@ -13,6 +18,7 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.autodraw.Alarm;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.exceptions.MessageNotSetException;
@@ -43,6 +49,24 @@ public class DefaultProcessor extends GenericServiceProcessor {
 	private String ENG_INVALID_KEYWORD = "Oops! Invalid keyword. Reply with HELP to know how to play the trivia. To register, reply with \"ON <YOUR_NAME>\" to 23355. E.g \"ON Tom\".";
 	private String MALAY_INVALID_KEYWORD = "Oops! Kata kunci tidak tepat. Hantar HELP untuk mengetahui bagaimana untuk menyertai trivia. Untuk mendaftar, hantar \"ON <NAMA_ANDA>\" ke 23355. Cth. \"ON Tom\".";
 
+	
+	private InitialContext context;
+	private CMPResourceBeanRemote cmpbean;
+    
+    public void initEJB() throws NamingException{
+    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put("jboss.naming.client.ejb.context", true);
+		 context = new InitialContext(props);
+		 cmpbean =  (CMPResourceBeanRemote) 
+       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
+		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+    }
 	public DefaultProcessor() {
 
 		int vendor = DriverUtilities.MYSQL;
@@ -464,6 +488,17 @@ public class DefaultProcessor extends GenericServiceProcessor {
 	@Override
 	public void finalizeMe() {
 		
+
+		try{
+			
+			context.close();
+		
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+		
+		}
+		
 		try{
 			
 			mm7API.myfinalize();
@@ -560,4 +595,10 @@ public class DefaultProcessor extends GenericServiceProcessor {
 		return getConnection();
 	}
 
+
+	
+	@Override
+	public CMPResourceBeanRemote getEJB() {
+		return this.cmpbean;
+	}
 }

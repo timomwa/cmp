@@ -10,10 +10,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -21,9 +27,11 @@ import org.apache.log4j.PropertyConfigurator;
 
 import snaq.db.DBPoolDataSource;
 
+import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.api.Settings;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
@@ -31,20 +39,41 @@ import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.web.triviaI.MechanicsI;
 
-public class SubscriptionMain{
+public class SubscriptionMain implements Runnable{
 	
 	private Logger logger  = Logger.getLogger(SubscriptionMain.class);
-	private static DBPoolDataSource ds;
+	//private static DBPoolDataSource ds;
 	private ArrayBlockingQueue<ServiceSubscription> to_be_pushed = null;
 	private static Semaphore uniq;
 	private static Properties log4Jprops = null;
 	private static Properties subscription_props = null;
 	private String server_tz;
 	private String client_tz;
-	private String host;
-	private String dbName;
-	private String username;
-	private String password;
+	//private String host;
+	//private String dbName;
+	//private String username;
+	//private String password;
+	private  Context context = null;
+	private CMPResourceBeanRemote cmpbean;
+	public void initEJB() throws Exception{
+	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+			 Properties props = new Properties();
+			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+			 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+			 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+			 props.put("jboss.naming.client.ejb.context", true);
+			 context = new InitialContext(props);
+			 cmpbean =  (CMPResourceBeanRemote) 
+	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+			 
+			 try {
+				 cmpbean.setServerTz(server_tz);
+				 cmpbean.setClientTz(client_tz);
+			} catch (Exception e) {
+				throw new Exception("Problem while setting time zones! server_tz="+server_tz+", client_tz="+client_tz+". Error: "+e.getMessage(),e); 
+			}
+	}
 	static{
 		uniq = new Semaphore(1, true);
 	}
@@ -56,43 +85,65 @@ public class SubscriptionMain{
 	
 	private Map<Integer,ArrayBlockingQueue<SubscriptionDTO>> processor_map = new HashMap<Integer,ArrayBlockingQueue<SubscriptionDTO>>();
 	private String constr_;
+	private boolean run = false;
 	
 	
-	public SubscriptionMain(){
+	public SubscriptionMain() throws Exception{
 		init();
 	}
 	
-	private void init() {
+	public boolean isRun() {
+		return run;
+	}
+
+	public void setRun(boolean run) {
+		this.run = run;
+	}
+
+	private void init() throws Exception {
 		
 		log4Jprops = getPropertyFile("log4jsub.properties");
 		subscription_props = getPropertyFile("mtsender.properties");
 		
 		
-		host = subscription_props.getProperty("db_host");
-		dbName= subscription_props.getProperty("DATABASE");
-		username= subscription_props.getProperty("db_username");
-		password= subscription_props.getProperty("db_password");
+		//host = subscription_props.getProperty("db_host");
+		//dbName= subscription_props.getProperty("DATABASE");
+		//username= subscription_props.getProperty("db_username");
+		//password= subscription_props.getProperty("db_password");
 		constr_= subscription_props.getProperty("constr");
 		
 		server_tz = subscription_props.getProperty("SERVER_TZ");
 		client_tz = subscription_props.getProperty("CLIENT_TZ");
-		sub = "SELECT ss.id as 'service_subscription_id', pro.id as 'mo_processor_id_fk', pro.shortcode,pro.ServiceName,sm.cmd,sm.CMP_Keyword,sm.CMP_SKeyword,sm.price as 'price', sm.push_unique,ss.serviceid as 'sms_serviceid',pro.threads,pro.ProcessorClass as 'ProcessorClass',sm.price_point_keyword"
-				+" FROM `"+DB+"`.`ServiceSubscription` ss "
-				+"LEFT JOIN `"+DB+"`.`sms_service` sm "
+		sub = "SELECT "
+				+ "ss.id as 'service_subscription_id', "//0
+				+ "pro.id as 'mo_processor_id_fk', "//1
+				+ "pro.shortcode,"//2
+				+ "pro.ServiceName,"//3
+				+ "sm.cmd,"//4
+				+ "sm.CMP_Keyword,"//5
+				+ "sm.CMP_SKeyword,"//6
+				+ "sm.price as 'price', "//7
+				+ "sm.push_unique,"//8
+				+ "ss.serviceid as 'sms_serviceid',"//9
+				+ "pro.threads,"//10
+				+ "pro.ProcessorClass as 'ProcessorClass',"//11
+				+ "sm.price_point_keyword"//12
+				+" FROM `"+CelcomImpl.database+"`.`ServiceSubscription` ss "
+				+"LEFT JOIN `"+CelcomImpl.database+"`.`sms_service` sm "
 				+"ON sm.id = ss.serviceid "
-				+"LEFT JOIN `"+DB+"`.`mo_processors` pro "
+				+"LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` pro "
 				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(convert_tz(now(),'"+server_tz+"','"+client_tz+"')) AND `ss`.`lastUpdated`<convert_tz(now(),'"+server_tz+"','"+client_tz+"') AND `ss`.`ExpiryDate`>convert_tz(now(),'"+server_tz+"','"+client_tz+"')";
-	
-		System.out.println(sub);
+
+		//System.out.println(sub);
 		//BasicConfigurator.configure();
 		PropertyConfigurator.configure(log4Jprops);
 		
 		logger.debug("\ninitializing...........");
 		
-		
+
+		initEJB();
 		init_datasource();	
-		init_processor_map();
-		populateServicesToBePushed();
+		
 		
 		
 		
@@ -100,7 +151,7 @@ public class SubscriptionMain{
 
 	private void init_datasource() {
 		
-		int vendor = DriverUtilities.MYSQL;
+		/*int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
 	   
 	   
@@ -120,62 +171,53 @@ public class SubscriptionMain{
 	    
 	    ds.setValidationQuery("SELECT 'Test'");
 	    
-	    logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>> initialize datasource well.");
+	    logger.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>> initialize datasource well.");*/
 		
 	}
 
 	private void init_processor_map() {
 		
-		Connection conn = getConn();
-		
-		Statement stmt = null;
-		
-		ResultSet rs = null;
-		
 		try {
 			
-			stmt = conn.createStatement();
-			
-			rs = stmt.executeQuery(sub);
-			
-			SubscriptionDTO subdto = null;
-			
+			 try {
+				 cmpbean.setServerTz(server_tz);
+				 cmpbean.setClientTz(client_tz);
+			} catch (Exception e) {
+				throw new Exception("Problem while setting time zones! server_tz="+server_tz+", client_tz="+client_tz+". Error: "+e.getMessage(),e); 
+			}
 			ArrayBlockingQueue<SubscriptionDTO> subscr = null;
 			
-			while(rs.next()){
+			List<SubscriptionDTO> subscrList =  cmpbean.getSubscriptionServices();
+			
+			for(SubscriptionDTO subdto: subscrList){
 				
-				final int threads = rs.getInt("threads");
-				final int service_id = rs.getInt("sms_serviceid");
-				final String service_processor_class_name = rs.getString("ProcessorClass");
 				
-				subscr = new ArrayBlockingQueue<SubscriptionDTO>(1000,true);
+				subscr = processor_map.get(subdto.getServiceid());
+				int threads = subdto.getThreads();
+				int threadBalance = threads;//we need to 
 				
-				for(int i = 0; i<threads; i++){
+				//check if that processor's thread has already been initialized and started
+				if(subscr!=null){
+					int sizeLiveprocessors = processor_map.get(subdto.getServiceid()).size();
+					int requiredProcessorthreads = subdto.getThreads();
+					threadBalance = requiredProcessorthreads - sizeLiveprocessors;
+				}
+				
+				
+				if(subscr==null)
+					subscr = new ArrayBlockingQueue<SubscriptionDTO>(1000,true);
+				
+				
+				
+				for(int i = 0; i<threadBalance; i++){//add the balance of threads
 					
-					
-					logger.debug(" >>>>>>>>>>>>>>>>>>>>>>>>>>> service name >>>> "+rs.getString("ServiceName"));
-				
-					subdto = new SubscriptionDTO();
-					subdto.setProcessor_id(rs.getInt("mo_processor_id_fk"));
-					subdto.setShortcode(rs.getString("shortcode"));
-					subdto.setServiceName(rs.getString("ServiceName"));
-					subdto.setCmd(rs.getString("cmd"));
-					subdto.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-					subdto.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-					subdto.setPush_unique(rs.getInt("push_unique"));
-					subdto.setServiceid(service_id);
-					subdto.setThreads(threads);
-					subdto.setProcessorClass(service_processor_class_name);
-					subdto.setPrice(rs.getDouble("price"));
-					subdto.setId(rs.getInt("service_subscription_id"));
-					subdto.setPricePointKeyword(rs.getString("price_point_keyword"));
-					
+					String service_processor_class_name = subdto.getProcessorClass();
 					ServiceProcessorI processor = MOProcessorFactory.getProcessorClass(service_processor_class_name,ServiceProcessorI.class);
 					
 					processor.setName(i+"_"+service_processor_class_name);
 					processor.setName(i+"_"+subdto.getServiceName());
 					processor.setInternalQueue(50);
-					
+					System.out.println("started : "+service_processor_class_name);
 					Thread t = new Thread(processor);
 					t.start();
 					
@@ -185,7 +227,7 @@ public class SubscriptionMain{
 					
 				}
 				
-				processor_map.put(service_id, subscr);
+				processor_map.put(subdto.getServiceid(), subscr);
 			
 			}
 			
@@ -195,17 +237,6 @@ public class SubscriptionMain{
 		
 		}finally{
 			
-			try {
-				rs.close();
-			} catch (Exception e) {}
-			
-			try {
-				stmt.close();
-			} catch (Exception e) {}
-			
-			try {
-				conn.close();
-			} catch (Exception e) {}
 		}
 		
 	}
@@ -217,7 +248,9 @@ public class SubscriptionMain{
 		try{
 			
 			uniq.acquire();
-			
+			try{
+				Thread.sleep(1);
+			}catch(Exception e){}
 			/*String timestamp = String.valueOf(System.currentTimeMillis());
 			
 			return Settings.INMOBIA_SUB.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
@@ -240,7 +273,7 @@ public class SubscriptionMain{
 	 * Gets a connection object from the datasource
 	 * @return - java.sql.Connection  - conn
 	 */
-	private Connection getConn() {
+	/*private Connection getConn() {
 		Connection conn = null;
 		try {
 			conn = ds.getConnection();
@@ -248,50 +281,27 @@ public class SubscriptionMain{
 			log(e);
 		}
 		return conn;
-	}
+	}*/
 	
 
 	public void populateServicesToBePushed(){
 		
-		to_be_pushed = new ArrayBlockingQueue<ServiceSubscription>(1000,true);
-		
-		Connection conn = getConn();
-		Statement stmt = null;
-		ResultSet rs = null;
+		if(to_be_pushed==null)
+			to_be_pushed = new ArrayBlockingQueue<ServiceSubscription>(1000,true);
 		
 		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM `"+DB+"`.`ServiceSubscription` WHERE hour(`schedule`)<=hour(convert_tz(now(),'"+server_tz+"','"+client_tz+"')) AND `lastUpdated`<convert_tz(now(),'"+server_tz+"','"+client_tz+"') AND ExpiryDate>convert_tz(now(),'"+server_tz+"','"+client_tz+"')");//first get services to be pushed now.
 			
+			List<ServiceSubscription> servSub = cmpbean.getServiceSubscription();
 			
-			ServiceSubscription subdto;
+			System.out.println("servSub.size(): "+servSub.size());
 			
-			while(rs.next()){
-				subdto = new ServiceSubscription();
-				subdto.setId(rs.getInt("id"));
-				subdto.setServiceid(rs.getInt("serviceid"));
-				subdto.setSchedule(rs.getString("schedule"));
-				subdto.setLastUpdated(rs.getString("lastUpdated"));
-				subdto.setExpiryDate(rs.getString("ExpiryDate"));
-				
+			for(ServiceSubscription  subdto : servSub)
 				to_be_pushed.put(subdto);
-			}
-			
-			
 			
 		} catch (Exception e) {
 			log(e);
 		}finally{
 			
-			try {
-				rs.close();
-			} catch (Exception e) {}
-			try {
-				stmt.close();
-			} catch (Exception e) {}
-			try {
-				conn.close();
-			} catch (Exception e) {}
 		}
 		
 	}
@@ -304,6 +314,7 @@ public class SubscriptionMain{
 			
 			
 			logger.debug(" \n\n\n\n======================= SERVICESUBSCRIPTION "+s.toString()+"\n==========================================\n\n\n");
+			logger.debug(" \n\n\n\n======================= processor_map.size() "+processor_map.size()+"\n==========================================\n\n\n");
 			
 			final int service_id = s.getServiceid();
 			final int subscription_service_id = s.getId();
@@ -313,7 +324,7 @@ public class SubscriptionMain{
 				
 				ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
 				
-				SubscriptionWorker sw = new SubscriptionWorker(server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
+				SubscriptionWorker sw = new SubscriptionWorker(cmpbean, server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
 				
 				Thread t = new Thread(sw);
 				t.start();
@@ -326,9 +337,22 @@ public class SubscriptionMain{
 	}
 	
 	
-	@Deprecated
 	public void finalizeMe(){
 		
+		setRun(false);
+		
+		
+		try {
+			if(context!=null)
+				context.close();
+		} catch (NamingException e1) {
+			e1.printStackTrace();
+		}catch (RejectedExecutionException e1) {
+			//https://issues.jboss.org/browse/EJBCLIENT-98
+		}catch (Exception e1) {
+			logger.error(e1.getMessage(),e1);
+		}
+			
 		
 		//Finalize all threads.
 		for(Map.Entry<Integer, ArrayBlockingQueue<SubscriptionDTO>> entry : processor_map.entrySet()){
@@ -410,7 +434,7 @@ public class SubscriptionMain{
 		}
 		
 		
-		ds.releaseConnectionPool();
+		//ds.releaseConnectionPool();
 		
 		logger.debug(">>>>>>>>>>>>>>>> Subscription program finished");
 		//System.exit(0);
@@ -418,10 +442,10 @@ public class SubscriptionMain{
 	}
 	
 	
-	public static void main(String[] args){
-		
-		new SubscriptionMain().pushSubscriptions();
-		
+	public static void main(String[] args) throws Exception{
+		SubscriptionMain subApp = new SubscriptionMain();
+		Thread t = new Thread(subApp);
+		t.start();
 	}
 	
 	
@@ -458,6 +482,36 @@ public class SubscriptionMain{
 			logger.error(e.getMessage(), e);
 		}
 		return prop;
+	}
+
+	@Override
+	public void run() {
+
+		
+
+		try{
+			
+			setRun(true);
+			int x = 0;
+			while(run){
+				x++;
+				init_processor_map();
+				populateServicesToBePushed();
+				pushSubscriptions();
+				try{
+					Thread.sleep(1000);
+				}catch(Exception e){
+				}
+			}
+			
+		}catch(Exception e){
+
+			setRun(false);
+			logger.error(e.getMessage(),e);
+		}finally{
+			finalizeMe();
+		}
+		
 	}
 	
 	

@@ -9,6 +9,7 @@ package com.pixelandtag.serviceprocessors.sms;
 import java.sql.Connection;
 
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 
 public class SampleSMSService extends GenericServiceProcessor {
@@ -23,7 +24,16 @@ public class SampleSMSService extends GenericServiceProcessor {
 
 	@Override
 	public void finalizeMe() {
-		// TODO Auto-generated method stub
+
+		try{
+			
+			//context.close();
+		
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+		
+		}
 
 	}
 
@@ -34,4 +44,10 @@ public class SampleSMSService extends GenericServiceProcessor {
 		return null;
 	}
 
+
+	
+	@Override
+	public CMPResourceBeanRemote getEJB() {
+		return null;
+	}
 }

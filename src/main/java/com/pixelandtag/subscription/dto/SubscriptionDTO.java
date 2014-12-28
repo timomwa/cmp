@@ -1,6 +1,8 @@
 package com.pixelandtag.subscription.dto;
 
-public class SubscriptionDTO {
+import java.io.Serializable;
+
+public class SubscriptionDTO implements Serializable {
 
 	private int id;
 	private String subscription_status;

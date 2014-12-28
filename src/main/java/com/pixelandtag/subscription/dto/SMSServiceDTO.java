@@ -1,11 +1,13 @@
 package com.pixelandtag.subscription.dto;
 
+import java.io.Serializable;
+
 /**
  * represents `celcom`.`sms_service`
  * @author tim
  *
  */
-public class SMSServiceDTO {
+public class SMSServiceDTO  implements Serializable {
 	
 	private int id;
 	private int mo_processor_FK;

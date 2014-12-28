@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -19,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 
@@ -41,10 +43,12 @@ public class SubscriptionWorker implements Runnable{
 	private ArrayBlockingQueue<SubscriptionDTO> processors;
 	private String server_tz;
 	private String client_tz;
+	private CMPResourceBeanRemote cmpbean;
 	
 	private SubscriptionWorker(){}
 	
-	public SubscriptionWorker(String server_tz, String client_tz, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
+	public SubscriptionWorker(CMPResourceBeanRemote bean,String server_tz, String client_tz, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
+		this.cmpbean = bean;
 		this.server_tz = server_tz;
 		this.client_tz = client_tz;
 		logger.debug(" :::::::::: GUGAMUGA processing service : "+service_id);
@@ -115,8 +119,6 @@ public class SubscriptionWorker implements Runnable{
 	public void run() {
 		
 		
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		
 		try{
 			
@@ -125,17 +127,12 @@ public class SubscriptionWorker implements Runnable{
 			setBusy(true);
 			
 			setStatus(BUSY);
+			//TODO find a better way to process this. Probably process it in the bean instead
+			//of carrying a big list of msisdn to this end..
+			//Suggestion : make this one transaction in the EJB end
+			List<String> msisdns = cmpbean.listServiceMSISDN("confirmed", this.serviceid);
 			
-			
-			String sql = "SELECT * FROM `"+GenericServiceProcessor.DB+"`.`subscription` WHERE subscription_status='confirmed' AND sms_service_id_fk = ?";
-			
-			pstmt = getConn().prepareStatement(sql);
-			
-			pstmt.setInt(1, this.serviceid);
-			
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()){
+			for(String msisdn : msisdns){
 				
 				
 				try{
@@ -145,8 +142,7 @@ public class SubscriptionWorker implements Runnable{
 					MOSms mo = new MOSms();
 					
 					mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
-					mo.setMsisdn(rs.getString("msisdn"));
-					mo.setMsisdn(rs.getString("msisdn"));
+					mo.setMsisdn(msisdn);
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
 					mo.setSMS_SourceAddr(dto.getShortcode());
@@ -166,19 +162,9 @@ public class SubscriptionWorker implements Runnable{
 			}
 			
 			
-			rs.close();
-			pstmt.close();
+			boolean success = cmpbean.updateServiceSubscription(this.subscription_service_id);
 			
-			sql = "UPDATE `"+GenericServiceProcessor.DB+"`.`ServiceSubscription` SET lastUpdated=convert_tz(now(),'"+server_tz+"','"+client_tz+"') WHERE id = ?";
-			
-			
-			
-			logger.debug("\n\n\n\n\n===============this.subscription_service_id = "+this.subscription_service_id+"\n\n\n\n\n");
-			pstmt = getConn().prepareStatement(sql);
-			pstmt.setInt(1, this.subscription_service_id);
-			pstmt.execute();
-			
-			
+			System.out.println(" Allegedly marked as processed!! ");
 			//Shut down  your own processor here.
 			shutdownProcessors();
 			
@@ -268,6 +254,7 @@ public class SubscriptionWorker implements Runnable{
 		
 		try {
 			
+			if(this.conn!=null)
 			this.conn.close();
 		
 		} catch (Exception e) {

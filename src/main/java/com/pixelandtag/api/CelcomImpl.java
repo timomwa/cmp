@@ -33,6 +33,7 @@ import snaq.db.DBPoolDataSource;
 
 
 
+
 //import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.beans.MessageType;
@@ -2250,6 +2251,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	
 	
 	public long generateNextTxId(){
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			logger.warn("\n\t\t::"+e.getMessage());
+		}
 		return System.currentTimeMillis();
 		//String timestamp = String.valueOf(System.currentTimeMillis());
 		

@@ -202,15 +202,18 @@ public class HttpBillingWorker implements Runnable {
 			watch.reset();
 			
 			StringBuffer sb = new StringBuffer();
-			
+			int c = 0;
 			while(run){
+				c++;
 				
+				System.out.println(c);
 				
 				
 				try {
 					
+					System.out.println("about to get a billable");
 					final Billable billable = BillingService.getBillable();
-					
+					System.out.println("found a billable , trying to charge");
 					
 					logger.info(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 					
@@ -235,6 +238,11 @@ public class HttpBillingWorker implements Runnable {
 			
 			logger.info(getName()+": worker shut down safely!");
 		
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error(e.getMessage(),e);
+			
+			
 		}catch(OutOfMemoryError e){
 			
 			logger.fatal("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
@@ -296,7 +304,7 @@ public class HttpBillingWorker implements Runnable {
 	 */
 	@SuppressWarnings("restriction")
 	private void charge(Billable  billable){
-		
+		System.out.println("in com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker.charge(Billable)");
 		//Connection conn = null;
 		this.success  = true;
 		
@@ -318,14 +326,16 @@ public class HttpBillingWorker implements Runnable {
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
 			
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			
+			logger.info("BILLABLE: "+billable.toString());
+			logger.info("XML SENT \n : "+xml + "\n");
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			
 			
 			watch.start();
-			 
+			 System.out.println(" executing https call");
 			HttpResponse response = httpsclient.execute(httsppost);
+			System.out.println(" done executing https call");
 			watch.stop();
 			logger.info("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
@@ -489,6 +499,9 @@ public class HttpBillingWorker implements Runnable {
 				}
 				
 				watch.reset();
+				
+				
+				System.out.println("DONE! ");
 				
 			}
 	

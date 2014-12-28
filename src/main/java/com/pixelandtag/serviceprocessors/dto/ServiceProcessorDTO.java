@@ -1,8 +1,9 @@
 package com.pixelandtag.serviceprocessors.dto;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class ServiceProcessorDTO {
+public class ServiceProcessorDTO implements Serializable{
 	
 	private int id;
 	private String serviceName;

@@ -1,6 +1,8 @@
 package com.pixelandtag.serviceprocessors.dto;
 
-public class ServiceSubscription {
+import java.io.Serializable;
+
+public class ServiceSubscription implements Serializable{
 	
 	private int id,serviceid;
 	private String schedule,lastUpdated,ExpiryDate;

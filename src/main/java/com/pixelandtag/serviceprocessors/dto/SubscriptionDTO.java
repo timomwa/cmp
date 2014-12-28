@@ -2,7 +2,7 @@ package com.pixelandtag.serviceprocessors.dto;
 
 import com.pixelandtag.api.ServiceProcessorI;
 
-public class SubscriptionDTO extends ServiceProcessorDTO {
+public class SubscriptionDTO extends ServiceProcessorDTO  {
 
 	private int serviceid;
 	private ServiceProcessorI processor;

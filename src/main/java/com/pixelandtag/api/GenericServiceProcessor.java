@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.Settings;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.producerthreads.Billable;
@@ -168,15 +169,16 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			return mo_;
 		}
 		
-		Connection conn = getCon();
 		
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+		//PreparedStatement pstmt = null;
+		//ResultSet rs = null;
 		Billable billable = null;
 		
 		try{
 			
-			String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
+			
+			billable = getEJB().find(Billable.class, "cp_tx_id",mo_.getCMP_Txid());
+			/*String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setLong(1, mo_.getCMP_Txid());
 			rs = pstmt.executeQuery();
@@ -204,7 +206,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				billable.setTx_id(rs.getLong("tx_id"));
 				billable.setTimeStamp(new Date());
 				billable.setPricePointKeyword(rs.getString("price_point_keyword"));
-			}
+			}*/
 			
 			
 			
@@ -212,14 +214,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
-			try {
+			/*try {
 				rs.close();
 			} catch (SQLException e) {
 			}
 			try {
 				pstmt.close();
 			} catch (SQLException e) {
-			}
+			}*/
 			
 		}
 		
@@ -255,7 +257,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		try{
 			
-			String sql = "INSERT INTO  billable_queue(`cp_id`,`cp_tx_id`,`discount_applied`,`event_type`,"
+			
+			billable = getEJB().saveOrUpdate(billable);
+			
+			/*String sql = "INSERT INTO  billable_queue(`cp_id`,`cp_tx_id`,`discount_applied`,`event_type`,"
 					+ "`in_outgoing_queue`,`keyword`,`maxRetriesAllowed`,`message_id`,"
 					+ "`msisdn`,`operation`,`price`,`priority`,`processed`,`retry_count`,`service_id`,`shortcode`,`timeStamp`,`tx_id`,`price_point_keyword`)"
 					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?) ";
@@ -285,7 +290,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			rs = pstmt.getGeneratedKeys();
 			if(rs.next())
-				billable.setId(rs.getInt(1));
+				billable.setId(rs.getInt(1));*/
 			
 			
 			
@@ -294,7 +299,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
-			try {
+			/*try {
 				rs.close();
 			} catch (SQLException e) {
 			}
@@ -305,7 +310,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-			}
+			}*/
 		}
 		
 		//billable = BillingService.saveOrUpdate(billable);
@@ -432,16 +437,20 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
   		return ret;
   }
 	
-	
+	/**
+	 * TODO turn all connection objects to CMPResourceBean
+	 * @param mo
+	 * @param conn
+	 */
 	
 	protected void toStatsLog(MOSms mo, Connection conn) {
 		
-		PreparedStatement pstmt = null;
+		
 		
 		try {
 			
-				
-			pstmt = conn.prepareStatement(TO_STATS_LOG,Statement.RETURN_GENERATED_KEYS);
+			getEJB().toStatsLog(mo,TO_STATS_LOG);	
+			/*pstmt = conn.prepareStatement(TO_STATS_LOG,Statement.RETURN_GENERATED_KEYS);
 			
 			pstmt.setInt(1, mo.getServiceid());
 			pstmt.setString(2, mo.getMsisdn());
@@ -454,24 +463,20 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				pstmt.setDouble(6, mo.getPrice().doubleValue());
 			
 			pstmt.setBoolean(7, mo.isSubscriptionPush());
-			pstmt.executeUpdate();
+			pstmt.executeUpdate();*/
 			
-		} catch (SQLException e) {
-			
-			log(e);
-		
 		} catch (Exception e) {
 			
 			log(e);
-			
+		
 		}finally{
 			
 			try {
 				
-				if(pstmt!=null)
-					pstmt.close();
+			//	if(pstmt!=null)
+				//	pstmt.close();
 				
-			} catch (SQLException e) {
+			} catch (Exception e) {
 				
 				log(e);
 				
@@ -490,6 +495,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
 */		
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			logger.warn(e.getMessage());
+		}
 		return System.currentTimeMillis();
 	}
 	
@@ -578,23 +588,24 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 */
 	public boolean acknowledge(long message_log_id) {
 		
-		PreparedStatement pst = null;
+		//PreparedStatement pst = null;
 		
 		boolean success = false;
 		
-		Connection conn = null;
+		//Connection conn = null;
 		
 		try {
 			
-			conn = getCon();
+			success = getEJB().acknowledge(message_log_id);
+			/*conn = getCon();
 			
 			pst = conn.prepareStatement(ACK_SQL,Statement.RETURN_GENERATED_KEYS);
 			
 			pst.setString(1, String.valueOf(message_log_id));
 			
-			success = pst.executeUpdate()>0;
+			success = pst.executeUpdate()>0;*/
 		
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			
 			logger.error(e.getMessage(),e);
 		
@@ -602,10 +613,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			try {
 				
-				if(pst!=null)
-					pst.close();
+				/*if(pst!=null)
+					pst.close();*/
 			
-			} catch (SQLException e) {
+			} catch (Exception e) {
 				
 				logger.error(e.getMessage(),e);
 			
@@ -613,8 +624,8 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			try {
 				
-				if(conn!=null)
-					conn.close();
+				//if(conn!=null)
+				//	conn.close();
 			
 			} catch (Exception e) {
 				
@@ -638,28 +649,30 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		mo  = bill(mo);
 		
 		
-		PreparedStatement pstmt = null;
+		//PreparedStatement pstmt = null;
 		
-		Connection conn = null;
+		//Connection conn = null;
 		
 		try {
 			
-			conn = getCon();
+			//conn = getCon();
 			
-			if(conn==null)
-				logger.error("Connection object is null!");
+			//if(conn==null)
+			//	logger.error("Connection object is null!");
 			
 			if(!(mo.getCMP_Txid()==-1)){
 			
-				pstmt = conn.prepareStatement(SEND_MT_1, Statement.RETURN_GENERATED_KEYS);
+				//pstmt = conn.prepareStatement(SEND_MT_1, Statement.RETURN_GENERATED_KEYS);
+				getEJB().sendMT(mo,SEND_MT_1);
 			
 			}else{
 				
-				pstmt = conn.prepareStatement(SEND_MT_2, Statement.RETURN_GENERATED_KEYS);
+			//	pstmt = conn.prepareStatement(SEND_MT_2, Statement.RETURN_GENERATED_KEYS);
+				getEJB().sendMT(mo,SEND_MT_2);
 			
 			}
 			
-			pstmt.setString(1, mo.getMt_Sent());
+			/*pstmt.setString(1, mo.getMt_Sent());
 			pstmt.setString(2, mo.getMsisdn());
 			pstmt.setString(3, mo.getSMS_SourceAddr());
 			pstmt.setString(4, mo.getSMS_SourceAddr());
@@ -681,7 +694,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			pstmt.setString(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
 			pstmt.setString(16, mo.getBillingStatus().toString());
 			
-			int resp  = pstmt.executeUpdate(); 
+			int resp  = pstmt.executeUpdate(); */
 			
 				
 		
@@ -697,10 +710,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			try {
 				
-				if(pstmt!=null)
-					pstmt.close();
+			//	if(pstmt!=null)
+				//	pstmt.close();
 			
-			} catch (SQLException e) {
+			} catch (Exception e) {
 				
 				logger.error(e.getMessage(),e);
 			
@@ -708,10 +721,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			try {
 				
-				if(conn!=null)
-					conn.close();
+			//	if(conn!=null)
+				//	conn.close();
 			
-			} catch (SQLException e) {
+			} catch (Exception e) {
 				
 				logger.error(e.getMessage(),e);
 			

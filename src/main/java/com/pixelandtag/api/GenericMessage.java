@@ -1,10 +1,11 @@
 package com.pixelandtag.api;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import com.pixelandtag.sms.producerthreads.EventType;
 
-public abstract class GenericMessage {
+public abstract class GenericMessage implements Serializable{
 	
 	public final static String SUBSCRIPTION_BASED_CONTENT = "1";
 	public final static String IOD_BASED_CONTENT = "2";

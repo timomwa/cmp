@@ -17,6 +17,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 
@@ -77,114 +78,16 @@ public class BillingService extends Thread{
 	private StopWatch watch;
 	private int x = 0;
 	private static int sentMT = 0;
-	private int queueSize;
+	private int queueSize = 0;
 	public volatile  BlockingQueue<HttpBillingWorker> httpSenderWorkers = new LinkedBlockingDeque<HttpBillingWorker>();
-	private volatile static BlockingDeque<Billable> billableQ =  new LinkedBlockingDeque<Billable>(1);
+	private volatile static BlockingDeque<Billable> billableQ =  new LinkedBlockingDeque<Billable>();
 	private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
 
 	public static List<Long> refugees = new ArrayList<Long>();
-	private static String cannonicalPath = "";
-	private static File ft = new File(".");
-	static{
-		try {
-			cannonicalPath = ft.getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
-	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
+	
 	private static BillingService instance;
 	private Properties log4J;
 	private Properties mtsenderprops;
-	public static Session getSession() {
-		Session session = (Session) BillingService.session.get();
-		if (session == null) {
-			session = sessionFactory.openSession();
-			BillingService.session.set(session);
-			getSession().setFlushMode(FlushMode.AUTO);
-		}
-		return session;
-	}
-
-	/**
-	 * saves and commits
-	 * @param t
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T find(Class<T> entityClass, Long id) {
-		Query query = getSession().createQuery("from " + entityClass.getSimpleName() + " WHERE id =:id ").setParameter("id", id);
-		try{
-			if(query.list().size()>0)
-				return (T) query.list().get(0);
-
-			return null;
-		}finally{
-			close();
-		}
-	}
-	
-	
-	/**
-	 * saves and commits
-	 * @param t
-	 * @return
-	 */
-	public static  <T> T saveOrUpdate(T t) {
-		logger.debug("in com.pixelandtag.sms.producerthreads.BillingService.saveOrUpdate(T)");
-		try {
-			getSession().beginTransaction();
-			getSession().saveOrUpdate(t);
-			getSession().getTransaction().commit();
-		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
-			try{
-				getSession().getTransaction().rollback();
-			}catch(Exception e1){}
-		}finally{
-			logger.debug("exiting com.pixelandtag.sms.producerthreads.BillingService.saveOrUpdate(T)");
-			
-			try{
-				close();
-			}catch(Exception e1){}
-		}
-		
-		return t;
-	}
-	
-	protected void begin() {
-		getSession().beginTransaction();
-	}
-
-	
-	public void commitMe(){
-		this.commit();
-	}
-	protected void commit() {
-		getSession().getTransaction().commit();
-	}
-
-	protected void rollback() {
-
-		try {
-			getSession().getTransaction().rollback();
-		} catch (HibernateException e) {
-			logger.warn("Cannot rollback", e);
-		}
-		try {
-			getSession().close();
-		} catch (HibernateException e) {
-			logger.warn("Cannot close", e);
-		}
-		BillingService.session.set(null);
-	}
-
-	public static void close() {
-		getSession().close();
-		BillingService.session.set(null);
-	}
-	
 	
 	
 	static{
@@ -200,6 +103,7 @@ public class BillingService extends Thread{
         }
     };
 	private int workers = 1;
+	private int billables_per_batch = 100;
     
     
     public BillingService() throws Exception{
@@ -227,12 +131,19 @@ public class BillingService extends Thread{
     
 	private void initWorkers() throws Exception{
 		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
+		PropertyConfigurator.configure(log4J);
 		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
 		
 		server_tz = mtsenderprops.getProperty("SERVER_TZ");
 		client_tz = mtsenderprops.getProperty("CLIENT_TZ");
 		
-		PropertyConfigurator.configure(log4J);
+		
+		try{
+			billables_per_batch = Integer.valueOf(mtsenderprops.getProperty("billables_per_batch"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
 		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 				    
@@ -262,12 +173,12 @@ public class BillingService extends Thread{
 		
 		try{
 			
-			logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			logger.info(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!
 			
-			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
-			
+			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			logger.info("SIZE OF QUEUE ? "+billableQ.size());
 			
 			 final Billable billable = billableQ.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
@@ -361,11 +272,11 @@ public class BillingService extends Thread{
 			
 			x = 0;
 			
-			begin();
 			
-			List<Billable> billables = getBillable(100);
+			List<Billable> billables = cmpbean.getBillable(billables_per_batch);
 			
-			logger.debug("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
+			
+			logger.info("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
 			
 			for(Billable billable : billables){
 				
@@ -392,7 +303,7 @@ public class BillingService extends Thread{
 						billableQ.offerLast(billable);
 						
 						billable.setIn_outgoing_queue(1L);
-						getSession().saveOrUpdate(billable);
+						cmpbean.saveOrUpdate(billable);
 						//celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 						
 					}catch(Exception e){
@@ -410,7 +321,7 @@ public class BillingService extends Thread{
 						billableQ.putLast(billable);//if we've got a limit to the queue
 						
 						billable.setIn_outgoing_queue(1L);
-						getSession().saveOrUpdate(billable);
+						cmpbean.saveOrUpdate(billable);
 						//celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I fucking later realzed we still sending SMS twice!!!!!!
 						
 						//addedToqueue = true;
@@ -450,44 +361,18 @@ public class BillingService extends Thread{
 		} catch (NullPointerException e) {
 			
 			log(e);
-			try{
-				rollback();
-			}catch(Exception e3){}
-		
 		} catch (Exception e) {
 			
 			log(e);
-			
-			try{
-			rollback();
-			}catch(Exception e3){}
 		
 		}finally{
 			
-			try{
-				commit();
-			}catch(Exception e3){}
-			
-			try{
-				close();
-			}catch(Exception e3){}
 						
 		}
 		
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<Billable> getBillable(int limit) {
-		try{
-			Query qry =  getSession().createQuery("from Billable where in_outgoing_queue=0 AND (retry_count<=maxRetriesAllowed) AND resp_status_code is null AND price>0 AND  processed=0 order by priority asc");
-			qry.setFirstResult(0);
-			qry.setMaxResults(limit);
-			return qry.list();
-		}finally{
-			//close();
-		}
-		
-	}
+	
 
 	public int getSentMT() {
 		return sentMT;
@@ -625,7 +510,11 @@ public class BillingService extends Thread{
 			sms.setIn_outgoing_queue(0L);//and its now not in the queue
 			sms.setProcessed(0L);//nope, we're not processing it
 			logger.info("Returned to db: "+ sms.toString());
-			sms = cmpbean.saveOrUpdate(sms);
+			try {
+				sms = cmpbean.saveOrUpdate(sms);
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
 		}
 		//now all messages should be put back in quque
 		
@@ -668,17 +557,7 @@ public class BillingService extends Thread{
 		
 	}
 
-	public static void updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) {
-		getSession().beginTransaction();
-		Query qry = getSession().createSQLQuery("UPDATE httptosend set priority=:priority, charged=:charged, billing_status=:billing_status WHERE CMP_TxID=:CMP_TxID ")
-		.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
-		.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 1 :  0)
-		.setParameter("billing_status", billstatus)
-		.setParameter("CMP_TxID", cp_tx_id);
-		int success = qry.executeUpdate();
-		getSession().getTransaction().commit();
-	}
-
+	
 
 /*
 	*//**
@@ -749,12 +628,17 @@ public class BillingService extends Thread{
 		
 		try{
 			
-			context.close();
+			if(context!=null)
+				context.close();
 		
-		}catch(Exception e){
+		}catch(NamingException e){
 			
 			log(e);
 		
+		}catch (RejectedExecutionException e1) {
+			//https://issues.jboss.org/browse/EJBCLIENT-98
+		}catch (Exception e1) {
+			logger.error(e1.getMessage(),e1);
 		}
 		
 		try{
