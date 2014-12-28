@@ -13,6 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.Index;
 
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
@@ -37,6 +41,8 @@ public class Subscription implements Serializable {
 	private String msisdn;
 	
 	@Column(name="subscription_timeStamp")
+	@Index(name="tstmpIDX")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date subscription_timeStamp;
 	
 	@Column(name="smsmenu_levels_id_fk")
