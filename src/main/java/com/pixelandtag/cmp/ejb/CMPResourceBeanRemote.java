@@ -12,9 +12,11 @@ import org.hibernate.HibernateException;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.Subscription;
 
 public interface CMPResourceBeanRemote {
 	
@@ -45,7 +47,7 @@ public interface CMPResourceBeanRemote {
 
 	public List<ServiceSubscription> getServiceSubscription()  throws Exception ;
 
-	public List<String> listServiceMSISDN(String sub_status, int serviceid)  throws Exception ;
+	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid)  throws Exception ;
 
 	public boolean updateServiceSubscription(int subscription_service_id)  throws Exception ;
 
@@ -93,5 +95,13 @@ public interface CMPResourceBeanRemote {
 			String meta_field) throws Exception;
 	
 	public List<Billable> getBillable(int limit) throws Exception;
+
+	public boolean deleteMT(long id) throws Exception ;
+
+	public boolean logMT(MTsms mt) throws Exception ;
+
+	public boolean logResponse(String msisdn, String sms) throws Exception;
+
+	public boolean postponeMT(long id) throws Exception;
 
 }

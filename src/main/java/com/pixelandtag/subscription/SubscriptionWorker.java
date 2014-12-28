@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -23,6 +24,7 @@ import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
+import com.pixelandtag.sms.producerthreads.SubscriptionLog;
 
 
 public class SubscriptionWorker implements Runnable{
@@ -130,9 +132,9 @@ public class SubscriptionWorker implements Runnable{
 			//TODO find a better way to process this. Probably process it in the bean instead
 			//of carrying a big list of msisdn to this end..
 			//Suggestion : make this one transaction in the EJB end
-			List<String> msisdns = cmpbean.listServiceMSISDN("confirmed", this.serviceid);
+			List<com.pixelandtag.sms.producerthreads.Subscription> msisdns = cmpbean.listServiceMSISDN("confirmed", this.serviceid);
 			
-			for(String msisdn : msisdns){
+			for(com.pixelandtag.sms.producerthreads.Subscription sub : msisdns){
 				
 				
 				try{
@@ -142,7 +144,7 @@ public class SubscriptionWorker implements Runnable{
 					MOSms mo = new MOSms();
 					
 					mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
-					mo.setMsisdn(msisdn);
+					mo.setMsisdn(sub.getMsisdn());
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
 					mo.setSMS_SourceAddr(dto.getShortcode());
@@ -153,7 +155,22 @@ public class SubscriptionWorker implements Runnable{
 					mo.setProcessor_id(dto.getProcessor_id());
 					mo.setSubscriptionPush(true);//flag that this is a subscription push. Will help system not do some querying later. Save processor 
 					mo.setPricePointKeyword(dto.getPricePointKeyword());
+					mo.setSubscription_id(sub.getId());
 					dto.getProcessor().submit(mo);//submit msg to the processor
+					
+
+					if(sub.getId()!=null && sub.getId().compareTo(0L)>0){
+						SubscriptionLog slog = new SubscriptionLog();
+						slog.setMsisdn(sub.getMsisdn());
+						slog.setService_subscription_id(this.serviceid);
+						slog.setSubscription_id(sub.getId());
+						slog.setTimeStamp(new Date());
+						try{
+							cmpbean.saveOrUpdate(slog);
+						}catch(Exception e){
+							logger.error(e.getMessage(),e);
+						}
+					}
 					
 				}catch(Exception e){
 					log(e);

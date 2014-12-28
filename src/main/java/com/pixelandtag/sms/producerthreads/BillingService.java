@@ -67,9 +67,7 @@ public class BillingService extends Thread{
 	private static Semaphore save_Sem = new Semaphore(1, true);
 	private static Semaphore uniq;
 	private boolean run = true;
-	private  Context context = null;
 	public static CelcomHTTPAPI celcomAPI;
-	private CMPResourceBeanRemote cmpbean;
 	private int idleWorkers;
 	private String server_tz;
 	private String client_tz;
@@ -95,6 +93,23 @@ public class BillingService extends Thread{
 	}
 	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 	private HttpClient httpsclient;
+	
+	private CMPResourceBeanRemote cmpbean;
+	private  Context context = null;
+	public void initEJB() throws NamingException{
+	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+			 Properties props = new Properties();
+			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+			 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+			 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+			 props.put("jboss.naming.client.ejb.context", true);
+			 context = new InitialContext(props);
+			 cmpbean =  (CMPResourceBeanRemote) 
+	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+			 
+			 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+	 }
 	 
 	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
         @Override
@@ -113,20 +128,7 @@ public class BillingService extends Thread{
     	instance = this;
     }
     
-    public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		 Properties props = new Properties();
-		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
-		 props.put("jboss.naming.client.ejb.context", true);
-		 context = new InitialContext(props);
-		 cmpbean =  (CMPResourceBeanRemote) 
-       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		 
-		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
-    }
+   
     
     
 	private void initWorkers() throws Exception{

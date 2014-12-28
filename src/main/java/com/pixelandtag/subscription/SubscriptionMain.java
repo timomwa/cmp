@@ -66,7 +66,7 @@ public class SubscriptionMain implements Runnable{
 			 context = new InitialContext(props);
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-			 
+			 System.out.println(client_tz);
 			 try {
 				 cmpbean.setServerTz(server_tz);
 				 cmpbean.setClientTz(client_tz);
@@ -114,6 +114,9 @@ public class SubscriptionMain implements Runnable{
 		
 		server_tz = subscription_props.getProperty("SERVER_TZ");
 		client_tz = subscription_props.getProperty("CLIENT_TZ");
+		
+		System.out.println(" server_tz = "+server_tz);
+		System.out.println(" client_tz = "+client_tz);
 		sub = "SELECT "
 				+ "ss.id as 'service_subscription_id', "//0
 				+ "pro.id as 'mo_processor_id_fk', "//1

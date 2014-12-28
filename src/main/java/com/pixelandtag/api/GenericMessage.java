@@ -37,7 +37,7 @@ public abstract class GenericMessage implements Serializable{
 	private boolean split_msg;
 	private int processor_id;
 	private String pricePointKeyword;
-
+	private Long subscription_id;
 	
 	private EventType eventType;
 	
@@ -141,6 +141,15 @@ public abstract class GenericMessage implements Serializable{
 		return CMP_Txid;
 	}
 
+	public Long getSubscription_id() {
+		return subscription_id;
+	}
+
+
+	public void setSubscription_id(Long subscription_id) {
+		this.subscription_id = subscription_id;
+	}
+	
 	@Override
 	public String toString() {
 		return "GenericMessage [CMP_Txid=" + CMP_Txid + ", priority="

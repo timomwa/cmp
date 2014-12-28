@@ -257,9 +257,22 @@ public class URLParams {
 
 	@Override
 	public String toString() {
-		return "URLParams [mturl=" + mturl + ", login=" + login + ", pass="
-				+ pass + ", type=" + type + ", src=" + src + "]";
+		return "URLParams [CP_Id=" + CP_Id + ", CP_UserId=" + CP_UserId
+				+ ", CP_Password=" + CP_Password + ", CMP_ContentType="
+				+ CMP_ContentType + ", CMP_A_Keyword=" + CMP_A_Keyword
+				+ ", CMP_S_Keyword=" + CMP_S_Keyword + ", SMS_Msgdata="
+				+ SMS_Msgdata + ", SMS_SourceAddr=" + SMS_SourceAddr
+				+ ", SUB_DeviceType=" + SUB_DeviceType + ", SMS_MsgTxt="
+				+ SMS_MsgTxt + ", SUB_R_Mobtel=" + SUB_R_Mobtel
+				+ ", SUB_C_Mobtel=" + SUB_C_Mobtel + ", http_timeout="
+				+ http_timeout + ", retry_per_msg=" + retry_per_msg
+				+ ", msg_part_wait=" + msg_part_wait + ", SERVER_TZ="
+				+ SERVER_TZ + ", CLIENT_TZ=" + CLIENT_TZ + ", mturl=" + mturl
+				+ ", login=" + login + ", pass=" + pass + ", type=" + type
+				+ ", src=" + src + "]";
 	}
+
+	
 	
 	
 	

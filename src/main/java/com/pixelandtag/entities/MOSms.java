@@ -27,6 +27,8 @@ public class MOSms extends GenericMO{
 	
 	private String MT_STATUS;
 	
+	
+	
 	private boolean isSubscriptionPush = false;
 	
 	
@@ -137,6 +139,7 @@ public class MOSms extends GenericMO{
 		
 	}
 	
+	
 
 	@Override
 	public String toString() {
@@ -151,13 +154,20 @@ public class MOSms extends GenericMO{
 				+ getCMPResponse() + ", getAPIType()=" + getAPIType()
 				+ ", getCMP_AKeyword()=" + getCMP_AKeyword()
 				+ ", getCMP_SKeyword()=" + getCMP_SKeyword() + ", toString()="
-				+ super.toString() + ", getPrice()=" + getPrice()
-				+ ", getProcessor_id()=" + getProcessor_id()
-				+ ", getServiceid()=" + getServiceid() + ", isSplit_msg()="
-				+ isSplit_msg() + ", getNumber_of_sms()=" + getNumber_of_sms()
-				+ ", getPriority()=" + getPriority() + ", getCMP_Txid()="
-				+ getCMP_Txid() + "]";
+				+ super.toString() + ", isCharged()=" + isCharged()
+				+ ", getEventType()=" + getEventType()
+				+ ", getPricePointKeyword()=" + getPricePointKeyword()
+				+ ", getBillingStatus()=" + getBillingStatus()
+				+ ", getPrice()=" + getPrice() + ", getProcessor_id()="
+				+ getProcessor_id() + ", getServiceid()=" + getServiceid()
+				+ ", isSplit_msg()=" + isSplit_msg() + ", getNumber_of_sms()="
+				+ getNumber_of_sms() + ", getPriority()=" + getPriority()
+				+ ", getCMP_Txid()=" + getCMP_Txid()
+				+ ", getSubscription_id()=" + getSubscription_id()
+				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode()
+				+ "]";
 	}
+
 
 	public static MOSms clone(MOSms mo) {
 		MOSms moC = new MOSms();

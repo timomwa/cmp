@@ -10,6 +10,7 @@ import java.net.SocketTimeoutException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -32,12 +33,14 @@ import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
+import com.pixelandtag.api.UnicodeFormatter;
 import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.URLParams;
@@ -47,6 +50,7 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.sms.producerthreads.SubscriptionLog;
 
 
 
@@ -66,11 +70,12 @@ public class MTHttpSender implements Runnable{
 	private HttpClient httpclient;
 	private int retry_per_msg;
 	private int pollWait;
+	private CMPResourceBeanRemote cmpbean;
 	//private DataSource ds = null;
 	private DBPoolDataSource dbpds = null;
 	
 	//private Connection conn = null;
-	private CelcomHTTPAPI celcomAPI;
+	//private CelcomHTTPAPI celcomAPI;
 	private StopWatch watch;
 	private boolean run = true;
 	private boolean finished = false;
@@ -154,7 +159,15 @@ public class MTHttpSender implements Runnable{
 		}
 	}
 
-	public MTHttpSender(int pollWait_, String name_,URLParams urlp_, String constr, HttpClient httpclient_) throws Exception{
+	public MTHttpSender(CMPResourceBeanRemote cmpbean,int pollWait_, String name_,URLParams urlp_, String constr, HttpClient httpclient_) throws Exception{
+		
+		this.cmpbean = cmpbean;
+		
+		this.urlp = urlp_;
+		
+		this.cmpbean.setServerTz(urlp_.getSERVER_TZ());
+		this.cmpbean.setClientTz(urlp_.getCLIENT_TZ());
+		
 		
 		this.watch = new StopWatch();
 		
@@ -170,20 +183,18 @@ public class MTHttpSender implements Runnable{
 		
 		this.mtUrl = urlp_.getMturl();
 		
-		this.urlp = urlp_;
-		
 		this.pollWait = pollWait_;
 		
 		this.msg_part_wait = urlp_.getMsg_part_wait();
 		
-		this.celcomAPI = new CelcomImpl(this.connStr,"THRD_"+name);
+		//this.celcomAPI = new CelcomImpl(this.connStr,"THRD_"+name);
 		
 		this.httpclient = httpclient_;
 		
 		qparams = new LinkedList<NameValuePair>();
 		
-		this.celcomAPI.setFr_tz(urlp.getSERVER_TZ());
-		this.celcomAPI.setTo_tz(urlp.getCLIENT_TZ());
+		//this.celcomAPI.setFr_tz(urlp.getSERVER_TZ());
+		//this.celcomAPI.setTo_tz(urlp.getCLIENT_TZ());
 		
 		
 		
@@ -223,8 +234,8 @@ public class MTHttpSender implements Runnable{
 		
 		}finally{}
   
-		logger.info("this.celcomAPI.getFr_tz():::::: "+this.celcomAPI.getFr_tz());
-		logger.info("this.celcomAPI.getTo_tz():::::: "+this.celcomAPI.getTo_tz());
+		logger.info("urlp.getSERVER_TZ():::::: "+urlp.getSERVER_TZ());
+		logger.info("urlp.getCLIENT_TZ():::::: "+urlp.getCLIENT_TZ());
 		
 	
 	}
@@ -255,8 +266,8 @@ public class MTHttpSender implements Runnable{
 			
 			pauze();//wait while producer gets ready
 			
-			celcomAPI.setFr_tz(urlp.getSERVER_TZ());//set timezones
-			celcomAPI.setTo_tz(urlp.getCLIENT_TZ());//set timezones
+			this.cmpbean.setServerTz(urlp.getSERVER_TZ());
+			this.cmpbean.setClientTz(urlp.getCLIENT_TZ());
 			
 			watch.stop();
 			
@@ -333,7 +344,7 @@ public class MTHttpSender implements Runnable{
 				
 			}
 			
-			celcomAPI.myfinalize();
+			//celcomAPI.myfinalize();
 			
 			setFinished(true);
 			
@@ -359,11 +370,9 @@ public class MTHttpSender implements Runnable{
 				}catch(Exception e4){}
 			}
 			
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
 		}finally{
-			
-			try{
-				//this.conn.close();
-			}catch(Exception e){}
 		} 
 		
 	}
@@ -414,7 +423,7 @@ public class MTHttpSender implements Runnable{
 	private void sendMT(MTsms mt){
 		
 		
-		Connection conn = null;
+		//Connection conn = null;
 		this.success  = true;
 		
 		setBusy(true);
@@ -431,7 +440,7 @@ public class MTHttpSender implements Runnable{
 		
 		try {
 			
-			conn = getConn();
+			//conn = getConn();
 			
 			
 			
@@ -455,13 +464,13 @@ public class MTHttpSender implements Runnable{
 				if(mt.getNumber_of_sms()>1){//only on the last SMS do we actually send the whole sms...
 					
 					if(mt.getSMS_DataCodingId().equalsIgnoreCase(GenericMessage.NON_ASCII_SMS_ENCODING_ID))
-						qparams.add(new BasicNameValuePair("sms",celcomAPI.toUnicodeString(mt.getMsg_part())));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
+						qparams.add(new BasicNameValuePair("sms",toUnicodeString(mt.getMsg_part())));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
 					else
 						qparams.add(new BasicNameValuePair("sms",mt.getMsg_part()));//URLEncoder.encode(mt.getMsg_part(), "UTF8"));//send part after part if msg is < 140 char.
 					
 				}else{
 					if(mt.getSMS_DataCodingId()!=null && mt.getSMS_DataCodingId().equalsIgnoreCase(GenericMessage.NON_ASCII_SMS_ENCODING_ID))
-						qparams.add(new BasicNameValuePair("sms",celcomAPI.toUnicodeString(mt.getSms())));//URLEncoder.encode(mt.getSms(), "UTF8"));
+						qparams.add(new BasicNameValuePair("sms",toUnicodeString(mt.getSms())));//URLEncoder.encode(mt.getSms(), "UTF8"));
 					else
 						qparams.add(new BasicNameValuePair("sms",mt.getSms()));
 				}
@@ -490,24 +499,23 @@ public class MTHttpSender implements Runnable{
 				mt.setCMPResponse(ERROR.Success.toString());
 				
 				if(getSms_idx()==mt.getNumber_of_sms()){//If we've sent ALL, then we delete the MT from queue, then do other logs.. 
-					celcomAPI.deleteMT(mt.getId());//Delete the MT from smpptosend table. TODO uncomment when in production
+					cmpbean.deleteMT(mt.getId());
 					mt.setMT_STATUS(ERROR.WaitingForDLR.toString());
-					celcomAPI.logMT(mt);//insert into msglog table
+					cmpbean.logMT(mt);
+					
+					
 				}else{
 					logger.debug("PARANOIA: WAITING FOR "+this.msg_part_wait+" milliseconds before sending the next message segment");
 					Thread.sleep(this.msg_part_wait);
-				
 				}
 				
 				//TODO when we launch, remove to save CPU.
 				if(mt.getNumber_of_sms()>1){
 					
-					celcomAPI.logResponse(mt.getMsisdn(),mt.getMsg_part());//log each segment of an SMS..
+					cmpbean.logResponse(mt.getMsisdn(),mt.getMsg_part());//log each segment of an SMS..
 					
 				}else{
-					
-					celcomAPI.logResponse(mt.getMsisdn(),mt.getSms());//log each segment of an SMS..
-				
+					cmpbean.logResponse(mt.getMsisdn(),mt.getSms());//log each segment of an SMS..
 				}
 					
 				//TODO and postponed - introduce postpone functionality
@@ -530,7 +538,7 @@ public class MTHttpSender implements Runnable{
 				mt.setMT_STATUS(ERROR.FailedToSend.toString());
 				mt.setCMPResponse(ERROR.PCM400.toString());
 				
-				celcomAPI.logMT(mt);//insert into msglog table
+				cmpbean.logMT(mt);//insert into msglog table
 				
 				logger.error("\nCP_Id is Null or blank"
 				+"\nCP_UserId Null or blank"
@@ -549,7 +557,7 @@ public class MTHttpSender implements Runnable{
 				
 				mt.setMT_STATUS(ERROR.FailedToSend.toString());
 				
-				celcomAPI.logMT(mt);//insert into msglog table
+				cmpbean.logMT(mt);//insert into msglog table
 				
 				logger.error("\nCMP_ContentType is Null or not defined as per CMP_ContentType in above table..");
 				
@@ -560,7 +568,7 @@ public class MTHttpSender implements Runnable{
 				
 				mt.setMT_STATUS(ERROR.FailedToSend.toString());
 				
-				celcomAPI.logMT(mt);//insert into msglog table
+				cmpbean.logMT(mt);//insert into msglog table
 				
 				logger.error("SMS_SourceAddr is Null or blank"
 							+"\nSUB_R_Mobtel is Null or blank"
@@ -653,9 +661,12 @@ public class MTHttpSender implements Runnable{
 					}else{
 						
 						logger.info(message+" Putting back MT into queue! "+mt.toString());
-						
-						celcomAPI.postponeMT(mt.getId());//If we timeout, we postpone the MT
-					
+						try {
+							cmpbean.postponeMT(mt.getId());//If we timeout, we postpone the MT
+						} catch (Exception e) {
+							logger.error(e.getMessage(),e);
+							e.printStackTrace();
+						}
 					}
 					httppost.abort();
 					
@@ -686,13 +697,6 @@ public class MTHttpSender implements Runnable{
 					log(e);
 				
 				}
-				
-				
-				
-				try{
-					conn.close();
-				}catch(Exception ex){}
-	            
 	            
 			}
 	
@@ -794,6 +798,23 @@ public class MTHttpSender implements Runnable{
 		} else {
 			return "";
 		}
+	}
+	
+	
+	
+	public String toUnicodeString(String sms) {
+		
+		byte[] array = sms.getBytes();
+		
+		String op = "";
+		
+		int arl = array.length;
+		
+		for (int k = 0; k < arl; k++) {
+	    		op += (   "\\" + "u00" + UnicodeFormatter.byteToHex(array[k]) );
+	    }
+		
+		return op;
 	}
 	
 	

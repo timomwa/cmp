@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
@@ -20,6 +21,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -34,6 +39,7 @@ import org.hibernate.Query;
 import snaq.db.ConnectionPool;
 import snaq.db.DBPoolDataSource;
 
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
@@ -116,7 +122,22 @@ public class MTProducer extends Thread {
 	//private static Semaphore dbSemaphore;
 	private static DBPoolDataSource ds;
 	private Alarm alarm = new Alarm();
-	
+	private CMPResourceBeanRemote cmpbean;
+	private  Context context = null;
+	public void initEJB() throws NamingException{
+	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+			 Properties props = new Properties();
+			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+			 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+			 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+			 props.put("jboss.naming.client.ejb.context", true);
+			 context = new InitialContext(props);
+			 cmpbean =  (CMPResourceBeanRemote) 
+	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+			 
+			 System.out.println(getClass().getSimpleName()+": Successfully initialized EJB CMPResourceBeanRemote !!");
+	 }
 	
 	
 	/**
@@ -156,6 +177,9 @@ public class MTProducer extends Thread {
 		try{
 			
 			uniq.acquire();
+			try{
+				Thread.sleep(1);
+			}catch(Exception e){}
 			
 			String timestamp = String.valueOf(System.currentTimeMillis());
 			
@@ -489,7 +513,7 @@ public class MTProducer extends Thread {
 		
 		for(int i = 0; i<this.workers; i++){
 			MTHttpSender worker;
-			worker = new MTHttpSender(pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr, httpclient);
+			worker = new MTHttpSender(cmpbean,pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr, httpclient);
 			t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);
@@ -665,6 +689,7 @@ public class MTProducer extends Thread {
 		
 		watch = new StopWatch();
 		
+		initEJB();
 		initialize();
 	}
 	
@@ -672,6 +697,7 @@ public class MTProducer extends Thread {
 	private void initialize() throws Exception {
 		
 		watch.start();
+		
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
 	    String host = HTTPMTSenderApp.props.getProperty("db_host");

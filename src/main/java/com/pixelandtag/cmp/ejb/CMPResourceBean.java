@@ -30,14 +30,19 @@ import org.hibernate.HibernateException;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.subscription.SubscriptionSource;
+import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 @Stateless
@@ -50,6 +55,9 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 
 	private String client_tz = "+03:00";//TODO externalize
 	
+
+	private String MINUS_ONE = "-1";
+	private final String RM1 = "RM1";
 	
 	private SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public void setServerTz(String server_tz)  throws Exception {
@@ -70,6 +78,153 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	}
 	
 	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean logResponse(String msisdn, String responseText) throws Exception{
+		boolean success = false;
+		try {
+			utx.begin();
+			String sql = "INSERT DELAYED INTO `"+CelcomImpl.database+"`.`raw_out_log`(msisdn,response) VALUES(?,?)";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, msisdn);
+			qry.setParameter(2, responseText);
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		} catch (Exception e) {
+			try{
+			utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
+		
+		return success;
+	}
+	
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean postponeMT(long http_to_send_id) throws Exception{
+		
+		boolean success = false;
+		
+		try {
+			utx.begin();
+			String sql = "UPDATE `"+CelcomImpl.database+"`.`httptosend` SET `sent` = 0, in_outgoing_queue=0 WHERE id = ?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, String.valueOf(http_to_send_id));
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		} catch (Exception e) {
+			try{
+			utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
+		return success;
+	}
+	
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean logMT(MTsms mt) throws Exception{
+		
+		boolean success = false;
+		
+		try {
+				
+			utx.begin();
+			 
+			String sql = "INSERT INTO `"+CelcomImpl.database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk,price_point_keyword) " +
+							"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'),1,?,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?, price_point_keyword=?";
+
+			Query qry = em.createNativeQuery(sql);
+			
+			String txid = mt.getIdStr();
+			if(mt.getCMP_Txid()>0){
+				
+				if(!(mt.getCMP_Txid()==-1)){
+					txid = String.valueOf(mt.getCMP_Txid());
+					qry.setParameter(1, txid);//Since we're starting the transaction, what is in the httptosend as id now becomes the value of CMP_Txid.
+				}else{
+					txid = mt.getIdStr();
+					qry.setParameter(1, txid);//Since we're starting the transaction, what is in the httptosend as id now becomes the value of CMP_Txid.
+				}
+				
+			}else{
+				
+				qry.setParameter(1, mt.getIdStr());
+					txid = mt.getIdStr();
+			}
+			
+			boolean isRetry = !mt.getNewCMP_Txid().equals(MINUS_ONE);
+			
+			qry.setParameter(2, mt.getSms());
+			qry.setParameter(3, mt.getFromAddr());//.getSMS_SourceAddr());//Shortcode sent with.
+			qry.setParameter(4, mt.getMsisdn());//.getSUB_Mobtel());
+			qry.setParameter(5, mt.getSMS_DataCodingId());//SMS_DataCodingId
+			qry.setParameter(6, mt.getCMPResponse());//CMPResponse
+			qry.setParameter(7, mt.getAPIType());//APIType,
+			qry.setParameter(8, mt.getCMP_AKeyword());//CMP_Keyword
+			qry.setParameter(9, mt.getCMP_SKeyword());//CMP_SKeyword
+			qry.setParameter(10, mt.getMT_STATUS());//MT_STATUS
+			qry.setParameter(11, mt.getNumber_of_sms());//number_of_sms
+			qry.setParameter(12, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
+			qry.setParameter(13, mt.getServiceid());//serviceid
+			if(mt.getCMP_SKeyword()!=null && mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+				qry.setParameter(14, 1.0d);//price
+			else
+				qry.setParameter(14, mt.getPrice().doubleValue());//price
+			qry.setParameter(15, mt.getNewCMP_Txid());//new CMPTxid
+			qry.setParameter(16, mt.getProcessor_id());//processor id
+			qry.setParameter(17, mt.getPricePointKeyword());//processor id
+			qry.setParameter(18, mt.getSms());//SMS
+			
+			if(isRetry)
+				qry.setParameter(19, ERROR.PSAInsufficientBalance.toString());//MT_STATUS
+			else
+				qry.setParameter(19, mt.getMT_STATUS());//MT_STATUS
+			
+			qry.setParameter(20, mt.getNumber_of_sms());//number_of_sms
+			qry.setParameter(21, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
+			qry.setParameter(22, mt.getServiceid());//serviceid
+			
+			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+				qry.setParameter(23, 1.0d);//price
+			else
+				qry.setParameter(23, mt.getPrice().doubleValue());//price
+			
+			qry.setParameter(24, mt.getSMS_DataCodingId());//SMS_DataCodingId
+			qry.setParameter(25, mt.getCMPResponse());//CMPResponse
+			qry.setParameter(26, mt.getAPIType());//APIType,
+			qry.setParameter(27, mt.getNewCMP_Txid());//new CMPTxid
+			
+			if(mt.getSms().startsWith(RM1))
+				qry.setParameter(28, TarrifCode.RM1.getCode());//CMP_SKeyword
+			else
+				qry.setParameter(28, mt.getCMP_SKeyword());//CMP_SKeyword
+			
+			qry.setParameter(29, mt.getProcessor_id());//CMP_SKeyword
+			
+			qry.setParameter(30, mt.getPricePointKeyword());//CMP_SKeyword
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		} catch (Exception e) {
+			try{
+				utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+			
+		}
+		
+		return success;
+		
+		
+	}
 	@Override
 	public String getServiceMetaData(int serviceid, String meta_field)
 			throws Exception {
@@ -104,6 +259,35 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		
 		return value;
 	}
+	
+	
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean deleteMT(long id) throws Exception {
+		
+		boolean success = false;
+		
+		try {
+			utx.begin();
+			String sql = "DELETE FROM `"+CelcomImpl.database+"`.`httptosend` WHERE id = ?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, String.valueOf(id));
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		} catch (Exception e) {
+			try{
+				utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+		}
+		
+		return success;
+		
+		
+	}
+	
 
 	@SuppressWarnings("unchecked")
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -331,19 +515,35 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@SuppressWarnings("unchecked")
-	public List<String> listServiceMSISDN(String sub_status, int serviceid) throws Exception {
-		List<String> msisdnL = new ArrayList<String>();
-		
+	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid) throws Exception {
+		List<Subscription> msisdnL = new ArrayList<Subscription>();
 		try {
 			
 			utx.begin();
-			String sql = "SELECT msisdn FROM `"+CelcomImpl.database+"`.`subscription` WHERE subscription_status=:subscription_status AND sms_service_id_fk =:sms_service_id_fk";
+			String sql = "SELECT "
+					+ "id,"//0
+					+ "subscription_status,"//1
+					+ "sms_service_id_fk,"//2
+					+ "msisdn,"//3
+					+ "subscription_timeStamp,"//4
+					+ "smsmenu_levels_id_fk,"//5
+					+ "request_medium "//6
+					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE subscription_status=:subscription_status AND sms_service_id_fk =:sms_service_id_fk AND id not in (SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` WHERE date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter("subscription_status", sub_status);
 			qry.setParameter("sms_service_id_fk", serviceid);
-			List<String> res = qry.getResultList();
-			for(String o : res)
-				msisdnL.add(o);
+			List<Object[]> res = qry.getResultList();
+			for(Object[] o : res){
+				Subscription sub = new Subscription();
+				sub.setId(((Integer)o[0] ).longValue());
+				sub.setSubscription_status(SubscriptionStatus.get((String)o[1]));
+				sub.setSms_service_id_fk(((Integer)o[2]).longValue());
+				sub.setMsisdn((String)o[3]);
+				sub.setSubscription_timeStamp(( (java.util.Date) o[4]) );
+				sub.setSmsmenu_levels_id_fk((Integer)o[5]);
+				sub.setRequest_medium(MediumType.get((String)o[6]));
+				msisdnL.add(sub);
+			}
 			
 			
 			
