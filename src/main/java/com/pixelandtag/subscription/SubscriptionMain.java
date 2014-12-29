@@ -66,7 +66,6 @@ public class SubscriptionMain implements Runnable{
 			 context = new InitialContext(props);
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-			 System.out.println(client_tz);
 			 try {
 				 cmpbean.setServerTz(server_tz);
 				 cmpbean.setClientTz(client_tz);
@@ -115,8 +114,6 @@ public class SubscriptionMain implements Runnable{
 		server_tz = subscription_props.getProperty("SERVER_TZ");
 		client_tz = subscription_props.getProperty("CLIENT_TZ");
 		
-		System.out.println(" server_tz = "+server_tz);
-		System.out.println(" client_tz = "+client_tz);
 		sub = "SELECT "
 				+ "ss.id as 'service_subscription_id', "//0
 				+ "pro.id as 'mo_processor_id_fk', "//1
@@ -296,7 +293,7 @@ public class SubscriptionMain implements Runnable{
 			
 			List<ServiceSubscription> servSub = cmpbean.getServiceSubscription();
 			
-			System.out.println("servSub.size(): "+servSub.size());
+			logger.info("servSub.size(): "+servSub.size());
 			
 			for(ServiceSubscription  subdto : servSub)
 				to_be_pushed.put(subdto);
@@ -309,19 +306,26 @@ public class SubscriptionMain implements Runnable{
 		
 	}
 	
-	public void pushSubscriptions(){
+	public void pushSubscriptions() throws Exception{
 		
 		
-		logger.debug(" \n\n\n\n======================= TO BE PUSHED arraylist?? "+to_be_pushed+"\nsize : "+to_be_pushed.size()+"\n==========================================\n\n\n");
+	//	logger.debug(" \n\n\n\n======================= TO BE PUSHED arraylist?? "+to_be_pushed+"\nsize : "+to_be_pushed.size()+"\n==========================================\n\n\n");
 		for(ServiceSubscription s : to_be_pushed){
 			
 			
-			logger.debug(" \n\n\n\n======================= SERVICESUBSCRIPTION "+s.toString()+"\n==========================================\n\n\n");
-			logger.debug(" \n\n\n\n======================= processor_map.size() "+processor_map.size()+"\n==========================================\n\n\n");
+		//	logger.debug(" \n\n\n\n======================= SERVICESUBSCRIPTION "+s.toString()+"\n==========================================\n\n\n");
+		//	logger.debug(" \n\n\n\n======================= processor_map.size() "+processor_map.size()+"\n==========================================\n\n\n");
 			
 			final int service_id = s.getServiceid();
 			final int subscription_service_id = s.getId();
-			
+			int x = cmpbean.countSubscribers(service_id);
+			int y = cmpbean.countPushesToday(service_id); 
+			try{
+				Thread.sleep(500);
+			}catch(Exception e){
+				logger.error(e.getMessage(),e);
+			}
+			if((x>y))//if subscribers are more than the number of pushed count
 			if(processor_map.size()>0){
 				final String service_name = "Subscription thread:  " + processor_map.get(service_id).peek().getServiceName();
 				
@@ -331,6 +335,12 @@ public class SubscriptionMain implements Runnable{
 				
 				Thread t = new Thread(sw);
 				t.start();
+				
+				try{
+					Thread.sleep(500);//sleep 1/2 second. Save CPU
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
+				}
 			}
 		}
 		

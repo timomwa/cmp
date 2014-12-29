@@ -24,6 +24,10 @@ public class SubscriptionLog implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "updated", nullable = false)
+	private Date updated;
+	 
 	@Column(name = "msisdn")
 	@Index(name="msisdn_idx")
 	private String msisdn;
@@ -34,7 +38,7 @@ public class SubscriptionLog implements Serializable {
 	private int service_subscription_id;
 	
 	
-	@Column(name = "timeStamp", insertable = false, updatable = false)
+	@Column(name = "timeStamp", nullable = false)
 	@Index(name="sblogtmstp_idx")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date timeStamp;
@@ -45,12 +49,19 @@ public class SubscriptionLog implements Serializable {
 	private Long subscription_id;
 	
 	@PrePersist
-	@PreUpdate
-	public void setDefaults(){
+	public void onCreate(){
 		if(timeStamp==null)
 			timeStamp = new Date();
+		if(updated==null)
+			updated = new Date();
 	}
 
+	 @PreUpdate
+	 public void onUpdate() {
+	    updated = new Date();
+	 }
+	 
+	 
 	public Long getId() {
 		return id;
 	}
@@ -76,6 +87,8 @@ public class SubscriptionLog implements Serializable {
 	}
 
 	public Date getTimeStamp() {
+		if(timeStamp==null)
+			timeStamp = new Date();
 		return timeStamp;
 	}
 

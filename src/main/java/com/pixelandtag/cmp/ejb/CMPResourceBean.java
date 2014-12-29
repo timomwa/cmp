@@ -78,6 +78,32 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	}
 	
 	
+	
+	public int countSubscribers(int service_id) throws Exception{
+		
+		int count = -1;
+		
+		try {
+			utx.begin();
+			String sql = "SELECT count(*) FROM `"+CelcomImpl.database+"`.`subscription`  WHERE sms_service_id_fk = ?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, service_id);
+			Object o  = qry.getSingleResult();
+			count = ( (BigInteger) o ).intValue();
+			utx.commit();
+		} catch (Exception e) {
+			try{
+			utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
+		
+		return count;
+	}
+	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean logResponse(String msisdn, String responseText) throws Exception{
 		boolean success = false;
@@ -513,6 +539,51 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		return success;
 	}
 	
+	
+	
+	public int countPushesToday(int service_id) throws Exception{
+		
+		int count = -1;
+		try {
+			
+			String sql = "SELECT "
+					+ "count(*) as 'cnt'"
+					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
+							+ "subscription_status=:subscription_status "
+							+ "AND sms_service_id_fk =:sms_service_id_fk "
+							+ "AND id in "
+							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
+									+ "WHERE "
+									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
+			
+			String sqld = "SELECT "
+					+ "count(*) as 'cnt'"
+					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
+							+ "subscription_status='confirmed'"
+							+ "AND sms_service_id_fk ='"+service_id+"'"
+							+ "AND id in "
+							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
+									+ "WHERE "
+									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
+			
+			
+			
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter("subscription_status", "confirmed");
+			qry.setParameter("sms_service_id_fk", service_id);
+			Object res = qry.getSingleResult();
+			count =  ( (BigInteger) res ).intValue();
+			
+		} catch (Exception e) {
+			
+			logger.error(e.getMessage());
+			throw e;
+		}finally{
+		}
+		return count;
+	}
+	
+	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@SuppressWarnings("unchecked")
 	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid) throws Exception {
@@ -528,7 +599,34 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 					+ "subscription_timeStamp,"//4
 					+ "smsmenu_levels_id_fk,"//5
 					+ "request_medium "//6
-					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE subscription_status=:subscription_status AND sms_service_id_fk =:sms_service_id_fk AND id not in (SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` WHERE date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
+					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
+							+ "subscription_status=:subscription_status "
+							+ "AND sms_service_id_fk =:sms_service_id_fk "
+							+ "AND id not in "
+							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
+									+ "WHERE "
+									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
+			
+			String sqld = "SELECT "
+					+ "id,"//0
+					+ "subscription_status,"//1
+					+ "sms_service_id_fk,"//2
+					+ "msisdn,"//3
+					+ "subscription_timeStamp,"//4
+					+ "smsmenu_levels_id_fk,"//5
+					+ "request_medium "//6
+					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
+							+ "subscription_status='"+sub_status+"'"
+							+ "AND sms_service_id_fk ='"+serviceid+"'"
+							+ "AND id not in "
+							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
+									+ "WHERE "
+									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
+			
+			
+			
+			//System.out.println("\n\n"+sqld+"\n\n ");
+			
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter("subscription_status", sub_status);
 			qry.setParameter("sms_service_id_fk", serviceid);
@@ -570,8 +668,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		try {
 			
 			utx.begin();
-			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`ServiceSubscription` WHERE hour(`schedule`)<=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND `lastUpdated`<convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND ExpiryDate>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";//first get services to be pushed now.
-			System.out.println(sql);
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`ServiceSubscription` WHERE hour(`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND `lastUpdated`<=convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND ExpiryDate>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";//first get services to be pushed now.
+			//System.out.println(sql);
 			Query qry = em.createNativeQuery(sql);
 			List<Object[]> res = qry.getResultList();
 			ServiceSubscription subdto;
@@ -931,8 +1029,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 				+"ON sm.id = ss.serviceid "
 				+"LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` pro "
 				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND `ss`.`lastUpdated`<convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND `ss`.`ExpiryDate`>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";
-	    logger.info("\n\t"+sub+"\n");
-	    System.out.println("\n\t"+sub+"\n");
+	    logger.debug("\n\t"+sub+"\n");
+	  //  System.out.println("\n\t"+sub+"\n");
 		List<SubscriptionDTO> sub_services  = new ArrayList<SubscriptionDTO>();
 	
 		try {

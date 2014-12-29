@@ -159,6 +159,10 @@ public class SubscriptionWorker implements Runnable{
 					dto.getProcessor().submit(mo);//submit msg to the processor
 					
 
+					if("254734606096".equals(sub.getMsisdn()))
+						System.out.println(sub.getMsisdn()+" : subscription_id: "+sub.getId()+ " service id : "+this.serviceid);
+						
+					
 					if(sub.getId()!=null && sub.getId().compareTo(0L)>0){
 						SubscriptionLog slog = new SubscriptionLog();
 						slog.setMsisdn(sub.getMsisdn());
@@ -180,8 +184,7 @@ public class SubscriptionWorker implements Runnable{
 			
 			
 			boolean success = cmpbean.updateServiceSubscription(this.subscription_service_id);
-			
-			System.out.println(" Allegedly marked as processed!! ");
+			System.out.println(" success? "+success);
 			//Shut down  your own processor here.
 			shutdownProcessors();
 			

@@ -216,6 +216,8 @@ public class Billable implements Serializable {
 	
 
 	public Date getTimeStamp() {
+		if(timeStamp==null)
+			timeStamp = new Date();
 		return timeStamp;
 	}
 

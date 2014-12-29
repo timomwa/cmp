@@ -104,4 +104,8 @@ public interface CMPResourceBeanRemote {
 
 	public boolean postponeMT(long id) throws Exception;
 
+	public int countSubscribers(int service_id) throws Exception;
+
+	public int countPushesToday(int service_id) throws Exception;
+
 }
