@@ -62,15 +62,16 @@ public class MoreProcessor extends GenericServiceProcessor {
 		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
 		 props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
-		 cmpbean =  (CMPResourceBeanRemote) 
+		 this.cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 
-		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
-	public MoreProcessor(){
+	public MoreProcessor() throws NamingException{
 		super();
 		init_datasource();
+		initEJB();
 		menu_controller = new MenuController();
 		subscription = new Subscription();
 		cr = new ContentRetriever();

@@ -80,7 +80,7 @@ public class Billable implements Serializable {
 	
 	@PrePersist
 	@PreUpdate
-	public void setDefaults(){
+	public void onCreate(){
 		if(timeStamp==null)
 			timeStamp = new Date();
 		if(success==null)
@@ -96,7 +96,7 @@ public class Billable implements Serializable {
 	@Index(name="priority_idx")
 	private Long priority;
 	
-	@Column(name = "timeStamp", insertable = false, updatable = false)
+	@Column(name = "timeStamp",nullable = false)
 	@Index(name="timeStamp_idx")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date timeStamp;

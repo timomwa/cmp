@@ -38,6 +38,7 @@ public abstract class GenericMessage implements Serializable{
 	private int processor_id;
 	private String pricePointKeyword;
 	private Long subscription_id;
+	private boolean subscription;
 	
 	private EventType eventType;
 	
@@ -48,6 +49,16 @@ public abstract class GenericMessage implements Serializable{
 	
 	public boolean isCharged() {
 		return charged;
+	}
+
+
+	public boolean isSubscription() {
+		return subscription;
+	}
+
+
+	public void setSubscription(boolean subscription) {
+		this.subscription = subscription;
 	}
 
 

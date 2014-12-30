@@ -308,6 +308,7 @@ public class SubscriptionMain implements Runnable{
 	
 	public void pushSubscriptions() throws Exception{
 		
+		StringBuffer sb = new StringBuffer();
 		
 	//	logger.debug(" \n\n\n\n======================= TO BE PUSHED arraylist?? "+to_be_pushed+"\nsize : "+to_be_pushed.size()+"\n==========================================\n\n\n");
 		for(ServiceSubscription s : to_be_pushed){
@@ -320,28 +321,37 @@ public class SubscriptionMain implements Runnable{
 			final int subscription_service_id = s.getId();
 			int x = cmpbean.countSubscribers(service_id);
 			int y = cmpbean.countPushesToday(service_id); 
+			boolean pushnow = cmpbean.shouldPushNow(service_id);
 			try{
-				Thread.sleep(500);
+				Thread.sleep(1000);
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 			}
-			if((x>y))//if subscribers are more than the number of pushed count
-			if(processor_map.size()>0){
-				final String service_name = "Subscription thread:  " + processor_map.get(service_id).peek().getServiceName();
-				
-				ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
-				
-				SubscriptionWorker sw = new SubscriptionWorker(cmpbean, server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
-				
-				Thread t = new Thread(sw);
-				t.start();
-				
-				try{
-					Thread.sleep(500);//sleep 1/2 second. Save CPU
-				}catch(Exception e){
-					logger.error(e.getMessage(),e);
+			sb.append("\n\t\tSERVICE ID            : ").append(service_id);
+			sb.append("\n\t\tTOTAL SUBSRIBERS      : ").append(x);
+			sb.append("\n\t\t# SUBSCRIPTION PUSHES : ").append(y);
+			sb.append("\n\t\tPUSH NOW : ").append(pushnow);
+			logger.debug(sb.toString());
+			
+			sb.setLength(0);
+			if((x>y) && pushnow)//if subscribers are more than the number of pushed count and it's the hour to push
+				if(processor_map.size()>0){
+					
+					final String service_name = "Subscription thread:  " + processor_map.get(service_id).peek().getServiceName();
+					
+					ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
+					
+					SubscriptionWorker sw = new SubscriptionWorker(cmpbean, server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
+					Thread t = new Thread(sw);
+					t.start();
+					
+					try{
+						Thread.sleep(500);//sleep 1/2 second. Save CPU
+					}catch(Exception e){
+						logger.error(e.getMessage(),e);
+					}
 				}
-			}
+				
 		}
 		
 		

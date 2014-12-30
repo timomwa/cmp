@@ -24,9 +24,9 @@ public class SubscriptionLog implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "updated", nullable = false)
-	private Date updated;
+	//@Temporal(TemporalType.TIMESTAMP)
+	//@Column(name = "updated", nullable = false)
+//	private Date updated;
 	 
 	@Column(name = "msisdn")
 	@Index(name="msisdn_idx")
@@ -38,9 +38,9 @@ public class SubscriptionLog implements Serializable {
 	private int service_subscription_id;
 	
 	
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "timeStamp", nullable = false)
 	@Index(name="sblogtmstp_idx")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date timeStamp;
 	
 	//`pixeland_content360`.`subscription`
@@ -52,14 +52,14 @@ public class SubscriptionLog implements Serializable {
 	public void onCreate(){
 		if(timeStamp==null)
 			timeStamp = new Date();
-		if(updated==null)
-			updated = new Date();
+		//if(updated==null)
+		//	updated = new Date();
 	}
 
-	 @PreUpdate
-	 public void onUpdate() {
-	    updated = new Date();
-	 }
+	// @PreUpdate
+	// public void onUpdate() {
+	  //  updated = new Date();
+	// }
 	 
 	 
 	public Long getId() {

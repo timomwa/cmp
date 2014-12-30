@@ -890,6 +890,7 @@ public class MTProducer extends Thread {
 				mtsms.setNewCMP_Txid(rs.getString("newCMP_Txid"));
 				mtsms.setProcessor_id(rs.getInt("mo_processorFK"));
 				mtsms.setShortcode(rs.getString("fromAddr"));
+				mtsms.setSubscription(rs.getBoolean("subscription"));
 				//mtsms.setMT_STATUS(rs.getString("MT_STATUS"));
 				
 				//if(mtsms.getNewCMP_Txid().equals(mtsms.getCMP_Txid()))

@@ -146,6 +146,12 @@ public class BillingService extends Thread{
 			logger.warn(e.getMessage(),e);
 		}
 		
+		try{
+			workers = Integer.valueOf(mtsenderprops.getProperty("billing_workers"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
 		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 				    
@@ -278,7 +284,6 @@ public class BillingService extends Thread{
 			List<Billable> billables = cmpbean.getBillable(billables_per_batch);
 			
 			
-			logger.info("\n\n\n\n\n\n\n\t\t\tbillables:"+billables.size()+"\n\n\n\n\n\n\n");
 			
 			for(Billable billable : billables){
 				

@@ -85,7 +85,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		
 		try {
 			utx.begin();
-			String sql = "SELECT count(*) FROM `"+CelcomImpl.database+"`.`subscription`  WHERE sms_service_id_fk = ?";
+			String sql = "SELECT count(*) FROM `"+CelcomImpl.database+"`.`subscription`  WHERE subscription_status='confirmed' AND sms_service_id_fk = ?";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, service_id);
 			Object o  = qry.getSingleResult();
@@ -163,8 +163,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 				
 			utx.begin();
 			 
-			String sql = "INSERT INTO `"+CelcomImpl.database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk,price_point_keyword) " +
-							"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'),1,?,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?, price_point_keyword=?";
+			String sql = "INSERT INTO `"+CelcomImpl.database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk,price_point_keyword,subscription) " +
+							"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'),1,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?, price_point_keyword=?,subscription=?";
 
 			Query qry = em.createNativeQuery(sql);
 			
@@ -206,35 +206,37 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			qry.setParameter(15, mt.getNewCMP_Txid());//new CMPTxid
 			qry.setParameter(16, mt.getProcessor_id());//processor id
 			qry.setParameter(17, mt.getPricePointKeyword());//processor id
-			qry.setParameter(18, mt.getSms());//SMS
+			qry.setParameter(18, (mt.isSubscription()  ? 1 : 0 ));// is subscription ?
+			qry.setParameter(19, mt.getSms());//SMS
 			
 			if(isRetry)
-				qry.setParameter(19, ERROR.PSAInsufficientBalance.toString());//MT_STATUS
+				qry.setParameter(20, ERROR.PSAInsufficientBalance.toString());//MT_STATUS
 			else
-				qry.setParameter(19, mt.getMT_STATUS());//MT_STATUS
+				qry.setParameter(20, mt.getMT_STATUS());//MT_STATUS
 			
-			qry.setParameter(20, mt.getNumber_of_sms());//number_of_sms
-			qry.setParameter(21, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
-			qry.setParameter(22, mt.getServiceid());//serviceid
+			qry.setParameter(21, mt.getNumber_of_sms());//number_of_sms
+			qry.setParameter(22, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
+			qry.setParameter(23, mt.getServiceid());//serviceid
 			
 			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
-				qry.setParameter(23, 1.0d);//price
+				qry.setParameter(24, 1.0d);//price
 			else
-				qry.setParameter(23, mt.getPrice().doubleValue());//price
+				qry.setParameter(24, mt.getPrice().doubleValue());//price
 			
-			qry.setParameter(24, mt.getSMS_DataCodingId());//SMS_DataCodingId
-			qry.setParameter(25, mt.getCMPResponse());//CMPResponse
-			qry.setParameter(26, mt.getAPIType());//APIType,
-			qry.setParameter(27, mt.getNewCMP_Txid());//new CMPTxid
+			qry.setParameter(25, mt.getSMS_DataCodingId());//SMS_DataCodingId
+			qry.setParameter(26, mt.getCMPResponse());//CMPResponse
+			qry.setParameter(27, mt.getAPIType());//APIType,
+			qry.setParameter(28, mt.getNewCMP_Txid());//new CMPTxid
 			
 			if(mt.getSms().startsWith(RM1))
-				qry.setParameter(28, TarrifCode.RM1.getCode());//CMP_SKeyword
+				qry.setParameter(29, TarrifCode.RM1.getCode());//CMP_SKeyword
 			else
-				qry.setParameter(28, mt.getCMP_SKeyword());//CMP_SKeyword
+				qry.setParameter(29, mt.getCMP_SKeyword());//CMP_SKeyword
 			
-			qry.setParameter(29, mt.getProcessor_id());//CMP_SKeyword
+			qry.setParameter(30, mt.getProcessor_id());//CMP_SKeyword
 			
-			qry.setParameter(30, mt.getPricePointKeyword());//CMP_SKeyword
+			qry.setParameter(31, mt.getPricePointKeyword());//CMP_SKeyword
+			qry.setParameter(32, (mt.isSubscription()  ? 1 : 0 ));// is subscription ?
 			success = qry.executeUpdate()>0;
 			utx.commit();
 		} catch (Exception e) {
@@ -541,6 +543,23 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	
 	
 	
+	
+	public boolean shouldPushNow(int service_id) throws Exception{
+		boolean resp = false;
+		try {
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`ServiceSubscription` WHERE `serviceid`=? AND hour(`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND `lastUpdated`<=convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND ExpiryDate>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";//first get services to be pushed now.
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, service_id);
+			if(qry.getResultList()!=null)
+				resp = (qry.getResultList().size()>0 );//if a record comes, do push
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw e;
+		}finally{
+		}
+		return resp;
+	}
+	
 	public int countPushesToday(int service_id) throws Exception{
 		
 		int count = -1;
@@ -565,7 +584,6 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
 									+ "WHERE "
 									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
-			
 			
 			
 			Query qry = em.createNativeQuery(sql);
@@ -895,7 +913,9 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		return success;
 	}
 	
-	
+	/**
+	 * Logs in httptosend
+	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean sendMT(MOSms mo, String sql) throws Exception{
 		boolean success = false;
@@ -922,7 +942,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			qry.setParameter(13, mo.getProcessor_id());
 			qry.setParameter(14, mo.getBillingStatus().toString());
 			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
-			qry.setParameter(16, mo.getBillingStatus().toString());
+			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
+			qry.setParameter(17, ( mo.isSubscription() ? 1 : 0 ));
 			
 			int num =  qry.executeUpdate();
 			utx.commit();

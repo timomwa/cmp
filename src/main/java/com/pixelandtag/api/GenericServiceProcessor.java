@@ -58,14 +58,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	private static final String ACK_SQL = "UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?";
 
 	private static final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
 
 	private static final String SEND_MT_2 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?,  re_tries=re_tries+1";
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?,  re_tries=re_tries+1";
 
-	private static final String TO_STATS_LOG = "INSERT INTO `celcom`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword, price, subscription) " +
+	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword, price, subscription) " +
 						"VALUES(?,?,?,?,?,?,?)";
 
 
@@ -648,7 +648,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		mo  = bill(mo);
 		
-		
+		CMPResourceBeanRemote cmpBean = getEJB();
 		//PreparedStatement pstmt = null;
 		
 		//Connection conn = null;
@@ -659,17 +659,27 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			//if(conn==null)
 			//	logger.error("Connection object is null!");
+			int max_retry = 5;
+			int count = 0;
 			
 			if(!(mo.getCMP_Txid()==-1)){
 			
 				//pstmt = conn.prepareStatement(SEND_MT_1, Statement.RETURN_GENERATED_KEYS);
-				getEJB().sendMT(mo,SEND_MT_1);
+				boolean success = cmpBean.sendMT(mo,SEND_MT_1);
+				while(!success && count<=max_retry){
+					success  = cmpBean.sendMT(mo,SEND_MT_1);
+					count++;
+				}
 			
 			}else{
 				
 			//	pstmt = conn.prepareStatement(SEND_MT_2, Statement.RETURN_GENERATED_KEYS);
-				getEJB().sendMT(mo,SEND_MT_2);
-			
+				boolean success = cmpBean.sendMT(mo,SEND_MT_2);
+				while(!success && count<=max_retry){
+					success  = cmpBean.sendMT(mo,SEND_MT_1);
+					count++;
+				}
+					
 			}
 			
 			/*pstmt.setString(1, mo.getMt_Sent());

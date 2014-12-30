@@ -201,21 +201,12 @@ public class HttpBillingWorker implements Runnable {
 			
 			watch.reset();
 			
-			StringBuffer sb = new StringBuffer();
-			int c = 0;
 			while(run){
-				c++;
-				
-				System.out.println(c);
-				
 				
 				try {
-					
-					System.out.println("about to get a billable");
 					final Billable billable = BillingService.getBillable();
-					System.out.println("found a billable , trying to charge");
 					
-					logger.info(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 					
 					charge(billable);
 					
@@ -304,8 +295,6 @@ public class HttpBillingWorker implements Runnable {
 	 */
 	@SuppressWarnings("restriction")
 	private void charge(Billable  billable){
-		System.out.println("in com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker.charge(Billable)");
-		//Connection conn = null;
 		this.success  = true;
 		
 		setBusy(true);
@@ -326,18 +315,16 @@ public class HttpBillingWorker implements Runnable {
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
 			
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			logger.info("BILLABLE: "+billable.toString());
-			logger.info("XML SENT \n : "+xml + "\n");
+			logger.debug("BILLABLE: "+billable.toString());
+			logger.debug("XML SENT \n : "+xml + "\n");
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			
 			
 			watch.start();
-			 System.out.println(" executing https call");
 			HttpResponse response = httpsclient.execute(httsppost);
-			System.out.println(" done executing https call");
 			watch.stop();
-			logger.info("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
+			logger.debug("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
 			 
 			 final int RESP_CODE = response.getStatusLine().getStatusCode();
@@ -346,8 +333,8 @@ public class HttpBillingWorker implements Runnable {
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
 			
-			 logger.info("RESP CODE : "+RESP_CODE);
-			 logger.info("RESP XML : "+resp);
+			 logger.debug("RESP CODE : "+RESP_CODE);
+			 logger.debug("RESP XML : "+resp);
 			 
 			 billable.setResp_status_code(String.valueOf(RESP_CODE));
 			
@@ -365,14 +352,16 @@ public class HttpBillingWorker implements Runnable {
 				if(!this.success){
 					
 					String err = getErrorCode(resp);
-					logger.info("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-					logger.info("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+getErrorMessage(resp)+"]:::::::::::::::::::::: resp:");
+					String errMsg = getErrorMessage(resp);
+					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
+					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
+					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
 				}else{
 					
 					billable.setResp_status_code("Success");
-					logger.info("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
-					
+					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
+					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
 				}
 				
@@ -447,7 +436,7 @@ public class HttpBillingWorker implements Runnable {
 				
 				setBusy(false);
 				
-				logger.info(getName()+" ::::::: finished attempt to bill via HTTP");
+				logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
 				
 				removeAllParams(qparams);
 				
@@ -501,7 +490,7 @@ public class HttpBillingWorker implements Runnable {
 				watch.reset();
 				
 				
-				System.out.println("DONE! ");
+				logger.debug("DONE! ");
 				
 			}
 	

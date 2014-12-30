@@ -108,4 +108,6 @@ public interface CMPResourceBeanRemote {
 
 	public int countPushesToday(int service_id) throws Exception;
 
+	public boolean shouldPushNow(int service_id) throws Exception;
+
 }
