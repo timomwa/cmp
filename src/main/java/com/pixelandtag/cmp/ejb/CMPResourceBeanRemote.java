@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -12,6 +13,7 @@ import javax.persistence.EntityManager;
 import org.hibernate.HibernateException;
 
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.api.ERROR;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -169,5 +171,7 @@ public interface CMPResourceBeanRemote {
 			SubscriptionStatus unsubscribed) throws Exception;
 
 	public SMSServiceDTO getSMSservice(String keyword) throws Exception;
+	
+	public boolean updateSMSStatLog(BigInteger transaction_id, ERROR errorcode) throws Exception;
 
 }

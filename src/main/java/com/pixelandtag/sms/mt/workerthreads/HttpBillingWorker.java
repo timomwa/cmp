@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.api.ERROR;
 import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.URLParams;
@@ -363,6 +365,8 @@ public class HttpBillingWorker implements Runnable {
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
+					
+					
 				}
 				
 								
@@ -461,15 +465,32 @@ public class HttpBillingWorker implements Runnable {
 					billable.setIn_outgoing_queue(0L);
 					cmp_ejb.saveOrUpdate(billable);
 					
-					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) )
+					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code()))
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.Success);
+					}
+					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-				
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.InvalidSubscriber);
+					}
+					if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAInsufficientBalance);
+					}
+					
+					if("TWSS_109".equals(billable.getResp_status_code())){
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAChargeFailure);
+						billable.setIn_outgoing_queue(0L);
+						billable.setProcessed(0L);
+						billable.setRetry_count( (billable.getRetry_count()+1 ) );
+						billable.setMaxRetriesAllowed(5L);
+						cmp_ejb.saveOrUpdate(billable);
+						
+					}
 					
 					if(!this.success){//return back to queue if we did not succeed
 						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
-						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+						//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 						
 						//on third try, we abort
 						httsppost.abort();

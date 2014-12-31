@@ -1,7 +1,11 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +36,7 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.entities.Notification;
 import com.pixelandtag.exceptions.NoSettingException;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -168,7 +173,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			if(rs!=null)
 				subscribed_services =(String) rs;
 			
-			
+			if(subscribed_services==null || subscribed_services.trim().isEmpty())
+				return services;
 			sql = String.format("SELECT * FROM `"+CelcomImpl.database+"`.`sms_service` WHERE `id` in(%s)",subscribed_services);
 			Query qr2  = em.createNativeQuery(sql);
 			List<Object[]> obj = qr2.getResultList();
@@ -502,8 +508,9 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	}
 	
 	public String getMessage(String key, int language_id) throws Exception{
+		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
+		
 		try {
-			String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
 			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, language_id);
@@ -519,7 +526,10 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			
 			return message;
 
-		} catch (Exception e) {
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no profile for subscriber "+message);
+			return null;
+		}catch (Exception e) {
 
 			logger.error(e.getMessage(), e);
 
@@ -1981,7 +1991,6 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@SuppressWarnings("unchecked")
 	public List<SubscriptionDTO> getSubscriptionServices()  throws Exception {
 	
@@ -2085,6 +2094,181 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		
 	}
 
+	
+	
+	@SuppressWarnings("unchecked")
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateSMSStatLog(BigInteger transaction_id, ERROR errorcode) throws Exception {
+		
+		boolean success = false;
+		
+		
+		try {
+			
+			long cmpTxid = transaction_id.longValue();
+			
+			String sql;
+			Query qry;
+			Object rs;
+			try{
+				sql = "SELECT CMP_Txid FROM `"+CelcomImpl.database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)";
+				qry = em.createNativeQuery(sql);
+				qry.setParameter(1, cmpTxid);
+				qry.setParameter(2, cmpTxid);
+				rs = qry.getSingleResult();
+					if(rs!=null){
+						cmpTxid = (Long) rs;
+					}
+			}catch(javax.persistence.NoResultException ex){
+				logger.warn(ex.getMessage() + " COULD NOT FIND messagelog record with (CMP_Txid = "+cmpTxid+") OR (newCMP_Txid = "+cmpTxid+")");
+			}
+				
+			
+			rs = null;
+			double priceTbc = 0.0d;
+			boolean wasInLog = false;
+			List<Object[]> rs2 =null;
+			try{
+			
+				sql = "SELECT price,CMP_SKeyword FROM `"+CelcomImpl.database+"`.`SMSStatLog` WHERE transactionID = ?";
+			  
+				Query qry2 = em.createNativeQuery(sql);
+				qry2.setParameter(1, cmpTxid);
+				
+				rs2 = qry2.getResultList();
+			
+			}catch(javax.persistence.NoResultException ex){
+				logger.warn(ex.getMessage() + " COULD NOT FIND SMSStatLog record with transactionID = "+cmpTxid+")");
+				
+			}
+			
+			if(rs2!=null){
+				
+				for(Object[] o : rs2){
+					priceTbc = new Double((Double) (o[0]));
+					wasInLog  = true;
+				}
+				
+				logger.debug("Statlog rec found transactionID = "+cmpTxid);
+			
+			}else{
+				
+				logger.warn("Statlog rec with transactionID = "+cmpTxid+ " NOT found! Try search celcom.messagelog");
+				
+				
+				try {
+					
+					sql = "SELECT "
+							+ "SUB_Mobtel,"//0
+							+ "CMP_Keyword,"//1
+							+ "CMP_SKeyword,"//2
+							+ "serviceid,"//3
+							+ "price "//4
+							+ "from `"+CelcomImpl.database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)";
+					Query qry3 = em.createNativeQuery(sql);
+					
+					qry3.setParameter(1, cmpTxid);
+					qry3.setParameter(2, cmpTxid);
+					
+					List<Object[]> rezults = qry3.getResultList();
+					
+					String msisdn = "UNKNOWN",CMP_Keyword= "UNKNOWN",CMP_SKeyword= "UNKNOWN";
+					
+					int serviceid = -1;
+					
+					if(rezults.size()>0){
+						for(Object[] o :rezults){
+							msisdn = (String) o[0];// rs.getString("SUB_Mobtel");
+							CMP_Keyword = (String) o[1];//rs.getString("CMP_Keyword");
+							CMP_SKeyword = (String) o[2];//rs.getString("CMP_SKeyword");
+							serviceid =(Integer) o[3];// rs.getInt("serviceid");
+							priceTbc = new Double((Double) o[4]);//TarrifCode.get(CMP_SKeyword.trim()).getPrice();
+						}
+						
+							
+					}
+					
+					
+					utx.begin();
+					String sql4 = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword,price,statusCode,charged) " +
+							"VALUES(?,?,?,?,?,?,?,?)";
+					Query qry4 = em.createNativeQuery(sql4);
+					
+					qry4.setParameter(1, serviceid);
+					qry4.setParameter(2, msisdn);
+					qry4.setParameter(3, cmpTxid);
+					qry4.setParameter(4, CMP_Keyword);
+					qry4.setParameter(5, CMP_SKeyword);
+					qry4.setParameter(6, priceTbc);
+					qry4.setParameter(7, errorcode.toString());
+					qry4.setParameter(8, (((priceTbc>0.0d) && errorcode.equals(ERROR.Success)) ? 1: 0 )   );
+					
+					success = qry4.executeUpdate()>0;
+					
+					logger.debug("______CMP_SKeyword="+CMP_SKeyword+"________cmpTxid = "+cmpTxid+"________priceTbc = "+priceTbc+"_________________did not find in smsStatLog but no problem, we found in messagelog__________________________________________SUCCESSFULLY_INSERTED_INTO_SMSStatLog___________________________________________________________________________________");
+					
+					utx.commit();
+				}catch(javax.persistence.NoResultException ex){
+					try{
+						utx.rollback();
+					}catch(Exception ex1){}
+					logger.error(ex.getMessage(),ex);
+				
+				}catch (Exception e) {
+					try{
+						utx.rollback();
+					}catch(Exception ex1){}
+					logger.error(e.getMessage(),e);
+					throw e;
+					
+				}finally{}
+				
+			}
+			
+			
+			
+			//Only if the message exists in SMSStatLog
+			if(wasInLog){
+				
+				utx.begin();
+				String sql5 = "UPDATE `"+CelcomImpl.database+"`.`SMSStatLog` SET statusCode=?,  charged=? WHERE  transactionID = ?";
+				
+				Query qry5 = em.createNativeQuery(sql5);
+				
+				qry5.setParameter(1, errorcode.toString());
+				qry5.setParameter(2, (((priceTbc>0.0) && errorcode.equals(ERROR.Success)) ? 1: 0 )   );
+				qry5.setParameter(3, cmpTxid);
+				
+				success = qry5.executeUpdate()>0;
+				
+				logger.debug("MT (transactionID = "+cmpTxid+ ") " + (success ? "successfully logged into SMSStatLog" : "failed to log into SMSStatLog"));
+				utx.commit();
+			}
+			
+			
+		}catch(javax.persistence.NoResultException ex){
+			try{
+				utx.rollback();
+			}catch(Exception e1){}
+			logger.error(ex.getMessage(),ex);
+		
+		}  catch (Exception e) {
+			
+			try{
+				utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{
+		
+		}
+		
+		return success;
+		
+		
+	}
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@SuppressWarnings("unchecked")
 	@Override

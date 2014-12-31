@@ -633,9 +633,9 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 			}else{
 				
 				
-				System.out.println("subdto : "+subdto);
+				logger.debug("subdto : "+subdto);
 				if(subdto!=null)
-					System.out.println("subdto : "+subdto.getSubscription_status());
+					logger.debug("subdto : "+subdto.getSubscription_status());
 				
 				if(subdto==null || (subdto!=null && !subdto.getSubscription_status().equals(SubscriptionStatus.confirmed.toString()))){
 				

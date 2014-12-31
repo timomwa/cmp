@@ -164,7 +164,9 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 				else
 					mo.setMt_Sent(SPACE);//No content! Send blank msg.
 						
-				static_content_processor_logger.info("CONTENT FOR MSISDN["+MSISDN+"] ::::::::::::::::::::::::: ["+mo.toString()+"]");
+				
+				toStatsLog(mo, null);
+				static_content_processor_logger.debug("CONTENT FOR MSISDN["+MSISDN+"] ::::::::::::::::::::::::: ["+mo.toString()+"]");
 				
 			}else{
 				String unknown_keyword = cmpbean.getServiceMetaData(-1,"unknown_keyword");
@@ -175,7 +177,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 			
 			}
 			
-			static_content_processor_logger.info(mo.toString());
+			static_content_processor_logger.debug(mo.toString());
 			
 		}catch(Exception e){
 			
