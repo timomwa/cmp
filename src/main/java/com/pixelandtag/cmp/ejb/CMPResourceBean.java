@@ -1,17 +1,15 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 import javax.ejb.Remote;
@@ -26,7 +24,6 @@ import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
@@ -37,25 +34,29 @@ import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
 import com.pixelandtag.mms.api.TarrifCode;
+import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.smsmenu.MenuItem;
+import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.MediumType;
+import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
+import com.pixelandtag.web.beans.MessageType;
 
 @Stateless
 @Remote
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CMPResourceBean implements CMPResourceBeanRemote {
 	
-	
 	private String server_tz = "-05:00";//TODO externalize
 
 	private String client_tz = "+03:00";//TODO externalize
 	
-
+	private static int DEFAULT_LANGUAGE_ID = 1;
 	private String MINUS_ONE = "-1";
 	private final String RM1 = "RM1";
 	
@@ -78,19 +79,911 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	}
 	
 	
+	/**
+	 * 
+	 * @param conn
+	 * @param keyword
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public SMSServiceDTO getSMSservice(String keyword) throws Exception {
+		
+		SMSServiceDTO sm = null;
+		try{
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`sms_service` WHERE `cmd`=?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, keyword);
+			List<Object[]> obj = qry.getResultList();
+			
+			if(obj.size()>0){
+				
+				sm = new SMSServiceDTO();
+				
+				for(Object[] o : obj){
+				
+					sm.setId((Integer) o[0] );// rs.getInt("id"));//0
+					sm.setMo_processor_FK((Integer) o[1] );//rs.getInt("mo_processorFK"));//1
+					sm.setCmd((String) o[2] );//rs.getString("cmd"));//2
+					sm.setPush_unique( ((Integer) o[3]).compareTo(1)==0 );//rs.getBoolean("push_unique"));//3
+					sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
+					sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
+					sm.setPrice(new Double((Double) (o[6])));//6
+					sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
+					sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
+					sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+					sm.setEnabled(((Boolean) o[10]));//rs.getBoolean("enabled"));//10
+					sm.setSplit_mt((Boolean) o[11]);//rs.getBoolean("split_mt"));//11
+				}
+				//service_id = rs.getInt(1);
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+		}finally{}
+		
+		return sm;
+	}
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status)  throws Exception {
+		boolean success = false;
+		
+		try{
+			utx.begin();
+			String sql = "UPDATE `"+CelcomImpl.database+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE MSISDN=?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, status.getStatus());
+			qry.setParameter(2, msisdn);
+				
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		}catch(Exception e){
+			try{utx.rollback();}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+		}
+		
+		
+		return success;
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public LinkedHashMap<Integer, SMSServiceDTO> getAllSubscribedServices(
+			String msisdn) throws Exception{
+		String subscribed_services = "";
+		LinkedHashMap<Integer,SMSServiceDTO> services = null;
+		try{
+			String sql = "SELECT group_concat(sms_service_id_fk) as 'sms_services_subscribed' from `"+CelcomImpl.database+"`.`subscription` where  subscription_status='confirmed' AND msisdn=? ";
+			Query qry1 = em.createNativeQuery(sql);
+			
+			qry1.setParameter(1, msisdn);
+			Object rs = qry1.getSingleResult();
+			
+			if(rs!=null)
+				subscribed_services =(String) rs;
+			
+			
+			sql = String.format("SELECT * FROM `"+CelcomImpl.database+"`.`sms_service` WHERE `id` in(%s)",subscribed_services);
+			Query qr2  = em.createNativeQuery(sql);
+			List<Object[]> obj = qr2.getResultList();
+			
+			SMSServiceDTO sm = null;
+			
+			int i = 0;
+			for(Object[] o : obj){
+				
+				if(i==0){
+					services = new LinkedHashMap<Integer,SMSServiceDTO>();
+				}
+				i++;
+				sm = new SMSServiceDTO();
+				
+				sm.setId((Integer) o[0] );// rs.getInt("id"));//0
+				sm.setMo_processor_FK((Integer) o[1] );//rs.getInt("mo_processorFK"));//1
+				sm.setCmd((String) o[2] );//rs.getString("cmd"));//2
+				sm.setPush_unique( ((Integer) o[3]).compareTo(1)==0);//rs.getBoolean("push_unique"));//3
+				sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
+				sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
+				sm.setPrice(new Double((Double) (o[6])));//6
+				sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
+				sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
+				sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+				sm.setEnabled(((Boolean) o[10]));//rs.getBoolean("enabled"));//10
+				sm.setSplit_mt((Boolean) o[11]);//rs.getBoolean("split_mt"));//11
+				
+				services.put(i,sm);
+				
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		return services;
+	}
+	
+	/**
+	 * Updates a subscriber's subscription status
+	 * @param conn
+	 * @param subscription_id
+	 * @param status - com.inmobia.celcom.subscription.dto.SubscriptionStatus
+	 * @return
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateSubscription(int subscription_id, String msisdn, SubscriptionStatus status) throws Exception {
+		
+		boolean success = false;
+		
+		try{
+			utx.begin();
+			String sql = "UPDATE `"+CelcomImpl.database+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE id=? ANd msisdn=?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, status.getStatus());
+			qry.setParameter(2, subscription_id);
+			qry.setParameter(3, msisdn);
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		}catch(Exception e){
+			try{
+			utx.rollback();
+			}catch(Exception ee){}
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		
+		return success;
+	}
+	/**
+	 * Updates a subscriber's subscription status
+	 * @param conn
+	 * @param subscription_id
+	 * @param status - com.inmobia.celcom.subscription.dto.SubscriptionStatus
+	 * @return
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception {
+		
+		boolean success = false;
+		
+		try{
+			utx.begin();
+			String sql = "UPDATE `"+CelcomImpl.database+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE id=?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, status.getStatus());
+			qry.setParameter(2, subscription_id);
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		}catch(Exception e){
+			try{
+			utx.rollback();
+			}catch(Exception ee){}
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		
+		return success;
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public com.pixelandtag.subscription.dto.SubscriptionDTO checkAnyPending(
+			String msisdn) throws Exception {
+		com.pixelandtag.subscription.dto.SubscriptionDTO subscription = null;
+		
+		try{
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`subscription` WHERE msisdn=? AND subscription_status='waiting_confirmation' ORDER BY subscription_timeStamp asc LIMIT 1";
+			Query qry = em.createNativeQuery(sql);
+			
+			qry.setParameter(1, msisdn);
+				
+			List<Object[]> rs = qry.getResultList();
+			
+			for(Object[] o: rs){
+				
+				subscription = new com.pixelandtag.subscription.dto.SubscriptionDTO();
+					
+				subscription.setId( (Integer) o[0] );// rs.getInt("id"));
+				subscription.setSubscription_status( (String) o[1] );// rs.getString("subscription_status"));
+				subscription.setSms_service_id_fk( (Integer) o[2] );//rs.getInt("sms_service_id_fk"));
+				subscription.setMsisdn( (String) o[3] );//rs.getString("msisdn"));
+				subscription.setSubscription_timeStamp(  sdf.format(( (java.sql.Timestamp) o[4]) ));//rs.getString("subscription_timeStamp"));
+				subscription.setSmsmenu_levels_id_fk( (Integer) o[5] );// rs.getInt("smsmenu_levels_id_fk"));
+				
+					
+			}
+				
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}finally{}
+		
+		return subscription;
+		
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public SMSServiceDTO getSMSservice(int service_id) throws Exception{
+		
+		SMSServiceDTO sm = null;
+		try{
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`sms_service` WHERE `id`=?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, service_id);
+			List<Object[]> rs = qry.getResultList();
+			
+			int c = 0;
+			if(rs.size()>0){
+				for(Object[] o : rs){
+					c++;
+					if(c==1)
+						sm = new SMSServiceDTO();
+					
+					sm.setId((Integer) o[0] );// rs.getInt("id"));//0
+					sm.setMo_processor_FK((Integer) o[1] );//rs.getInt("mo_processorFK"));//1
+					sm.setCmd((String) o[2] );//rs.getString("cmd"));//2
+					sm.setPush_unique(((Integer) o[3]).compareTo(1)==0);//rs.getBoolean("push_unique"));//3
+					sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
+					sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
+					sm.setPrice(new Double((Double) (o[6])));//6
+					sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
+					sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
+					sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+					sm.setEnabled(((Boolean) o[10]));//rs.getBoolean("enabled"));//10
+					sm.setSplit_mt((Boolean) o[11]);//rs.getBoolean("split_mt"));//11
+				}
+				
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}finally{}
+		
+		return sm;
+	}
+
+
+	
+	@SuppressWarnings("unchecked")
+	public ServiceProcessorDTO getServiceProcessor(int processor_id_fk) throws Exception{
+
+		ServiceProcessorDTO service = null;
+		
+		try {
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`mo_processors` WHERE `id`=?";
+			Query qry = em.createNativeQuery(sql);
+			
+			qry.setParameter(1, processor_id_fk);
+			
+			List<Object[]> rs = qry.getResultList();
+			
+			for(Object[] o : rs){
+				
+				service = new ServiceProcessorDTO();
+				
+				service.setId((Integer) o[0] );//rs.getInt("id"));//0
+				service.setServiceName((String) o[1] );//rs.getString("ServiceName"));//1
+				service.setShortcode((String) o[2] );//rs.getString("shortcode"));//2
+				service.setThreads((Integer) o[3] );//rs.getInt("threads"));//3
+				service.setProcessorClass((String) o[4] );//rs.getString("ProcessorClass"));//4
+				service.setActive(((Boolean) o[5]));//rs.getBoolean("enabled"));//5
+				service.setClass_status((String) o[6] );//rs.getString("class_status"));//6
+				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
+				
+				
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch (Exception e) {
+			
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		return service;
+	}
+	
+	
+	/*public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription)  throws Exception{
+		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
+		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
+		SMSServiceDTO sm = getSMSservice(service_id);
+		logger.info(s+sm);
+		MOSms mo = null;
+		
+		if(sm!=null){
+			
+			ServiceProcessorDTO procDTO = getServiceProcessor(sm.getMo_processor_FK());
+			
+			try {
+				
+				
+				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
+				mo = new MOSms();
+				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
+				mo.setMsisdn(msisdn);
+				mo.setCMP_AKeyword(sm.getCmp_keyword());
+				mo.setCMP_SKeyword(sm.getCmp_skeyword());
+				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
+				mo.setSMS_SourceAddr(procDTO.getShortcode());
+				mo.setPriority(1);
+				mo.setServiceid(sm.getId());
+				mo.setSMS_Message_String(sm.getCmd());
+				
+				//added 22nd Dec 2014 - new customer requirement
+				mo.setPricePointKeyword(sm.getPricePointKeyword());
+				
+				//added on 10th June 2013 but not tested
+				mo.setProcessor_id(sm.getMo_processor_FK());
+				
+				
+				
+				// **** Below is a Dirty hack. *****
+				//To 
+				//cheat the content processor 
+				//that this is a subscription push, 
+				//so that it does not subscribe 
+				//this subscriber to the service. 
+				//We handle subscription elsewhere, 
+				//this is solely for content fetcnhing 
+				//and not subscribing.
+				mo.setSubscriptionPush(isSubscription);
+				
+				mo = processor.process(mo);
+				
+				
+			}catch(Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+		}else{
+			logger.info(s+" sm is null!");
+		}
+		
+		
+		return mo;
+	}*/
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateProfile(String msisdn, int language_id) throws Exception{
+		boolean success = false;
+		try {
+			utx.begin();
+			String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscriber_profile`(`msisdn`,`language_id`) VALUES(?,?) ON DUPLICATE KEY UPDATE `language_id`=?";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, msisdn);
+			qry.setParameter(2, language_id);
+			qry.setParameter(3, language_id);
+			success  = qry.executeUpdate()>0;
+			utx.commit();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			try{
+			utx.rollback();
+			}catch(Exception e1){}
+			throw e;
+			
+		}finally{
+			}
+		return success;
+	}
+	
+	public String getMessage(String key, int language_id) throws Exception{
+		try {
+			String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
+			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1";
+			Query qry = em.createNativeQuery(sql);
+			qry.setParameter(1, language_id);
+			qry.setParameter(2, key);
+
+			Object obj = qry.getSingleResult();
+			if (obj!=null) {
+				message = (String) obj;
+			}
+
+
+			logger.debug("looking for :[" + key + "], found [" + message + "]");
+			
+			return message;
+
+		} catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+
+			throw e;
+
+		}finally{
+		}
+	}
+	
+	public int getSubscriberLanguage(String msisdn) throws Exception {
+		
+		int language_id = DEFAULT_LANGUAGE_ID;
+		
+		try {
+			String sql = "SELECT language_id FROM `"+CelcomImpl.database+"`.`subscriber_profile` WHERE msisdn=?";
+			Query qry = em.createNativeQuery(sql);
+			
+			qry.setParameter(1, msisdn);
+			
+			Object o = qry.getSingleResult();
+			
+			if(o!=null)
+				language_id = ( (Integer) o ).intValue();
+			else
+				language_id =  DEFAULT_LANGUAGE_ID ;//default language
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no profile for subscriber"+msisdn);
+		} catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+			throw e;
+			
+		}finally{
+		}
+		
+		return language_id;
+	}
+	
+	public void printMenu(MenuItem menuItem, int level, int position)  throws Exception{
+		String tab = "";
+		for(int i=0;i<level;i++){
+			tab +="\t"; //+ ( ( (i+1)==level   ) ? "+" : "") ;
+		}
+		
+		String op = tab + position+ ". " + menuItem.getName();
+		
+		System.out.println(op);
+		LinkedHashMap<Integer,MenuItem> mis = getSubMenus(menuItem.getId());
+		if(mis!=null){
+			level++;
+			position = 1;
+			for (Entry<Integer, MenuItem> entry : mis.entrySet()) {
+				printMenu(entry.getValue(),level, position);
+			 	position++;
+			}
+			
+		}
+	}
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateSession(int language_id, String msisdn,
+			int smsmenu_levels_id_fk) throws Exception{
+		boolean success = false;
+		
+		try{
+			utx.begin();
+			String UPDATE_SESSION = "INSERT INTO `"+CelcomImpl.database+"`.`smsmenu_session`(`msisdn`,`smsmenu_levels_id_fk`,`timeStamp`,`language_id`) VALUES(?,?,now(),?) ON DUPLICATE KEY UPDATE `smsmenu_levels_id_fk`=?,timeStamp=NOW(),language_id=?";
+			Query qry = em.createNativeQuery(UPDATE_SESSION);
+			qry.setParameter(1, msisdn);
+			qry.setParameter(2, smsmenu_levels_id_fk);
+			qry.setParameter(3, language_id);
+			qry.setParameter(4, smsmenu_levels_id_fk);
+			qry.setParameter(5, language_id);
+			
+			success = (qry.executeUpdate()>0);
+			utx.commit();
+		}catch(Exception e){
+			try{
+			utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{
+			
+		}
+		
+		return success;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Session getSession(String msisdn) throws Exception{
+		Session sess = null;
+		
+		try{
+			
+			String GET_SESSION = "SELECT ses.*, sl.id as 'menu_level_id', sl.name, sl.language_id as 'language_id_',sl.parent_level_id, sl.menu_id, sl.serviceid, sl.visible FROM `"+CelcomImpl.database+"`.`smsmenu_session` ses LEFT JOIN `"+CelcomImpl.database+"`.`smsmenu_levels` sl ON sl.id = ses.smsmenu_levels_id_fk WHERE ses.`msisdn`=? AND ((TIMESTAMPDIFF(HOUR,ses.timeStamp,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"')))<=24 )";
+			Query qry = em.createNativeQuery(GET_SESSION);
+			qry.setParameter(1, msisdn);
+			List<Object[]> obj = qry.getResultList();
+			
+			MenuItem mi = null;
+			
+			int menu_level_id = -1;
+			
+			for(Object[] o : obj){
+				sess = new Session();
+				mi = new MenuItem();
+				sess.setId((Integer) o[0]);//rs.getInt("id"));//0
+				sess.setMsisdn((String) o[1]);//rs.getString("msisdn"));//1
+				sess.setSmsmenu_level_id_fk((Integer) o[2]);//rs.getInt("smsmenu_levels_id_fk"));//2
+				sess.setLanguage_id((Integer) o[3]);//rs.getInt("language_id"));//3
+				sess.setTimeStamp( sdf.format(( (java.sql.Timestamp) o[4]) ));//4
+				
+				if(o[6]!=null)
+					menu_level_id = (Integer) o[6];
+				
+				if(menu_level_id>0){//6
+					mi.setId(menu_level_id);
+					mi.setName((String) o[7]);//rs.getString("name"));//7
+					mi.setLanguage_id((Integer) o[8]);//rs.getInt("language_id"));//8
+					mi.setParent_level_id((Integer) o[9]);//rs.getInt("parent_level_id"));//9
+					mi.setMenu_id((Integer) o[5]);//rs.getInt("menu_id"));//5
+					mi.setService_id((Integer) o[11]);//rs.getInt("serviceid"));//11
+					mi.setVisible(((Boolean) o[12]) );//rs.getBoolean("visible"));//12
+					
+					mi.setSub_menus(getSubMenus(menu_level_id));
+					
+					sess.setMenu_item(mi);
+				}
+				
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}finally{}
+		
+		return sess;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public MenuItem getMenuById(int menu_id) throws Exception{
+		
+		MenuItem mi = null;
+		
+		try{
+		
+			String GET_MENU_BY_ID = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE id=? AND visible=1";
+			Query qry = em.createNativeQuery(GET_MENU_BY_ID);
+			qry.setParameter(1, menu_id);
+			
+			List<Object[]> obj = qry.getResultList();
+			
+			LinkedHashMap<Integer, MenuItem> topMenus = getSubMenus(menu_id);
+			
+			//int x = 0;
+			
+			for(Object[] o : obj){
+				//x++;
+				
+				mi = new MenuItem();
+				mi.setId((Integer) o[0]);
+				mi.setName((String) o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Boolean) o[6]) );
+				
+				
+			}
+			
+			if(mi!=null)
+				mi.setSub_menus(topMenus);
+		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		
+		}
+		
+		return mi;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public LinkedHashMap<Integer, MenuItem> getSubMenus(int parent_level_id_fk) throws Exception{
+		
+		LinkedHashMap<Integer,MenuItem> items = null;
+		
+		try{
+			
+			String GET_MENU_ITEMS = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE parent_level_id = ? AND visible=1";
+			Query qry = em.createNativeQuery(GET_MENU_ITEMS);
+			qry.setParameter(1, parent_level_id_fk);
+			
+			List<Object[]> obj = qry.getResultList();
+			
+			int post = 0;
+			
+			MenuItem mi = null;
+			
+			for(Object[] o :obj ){
+				post++;
+				
+				if(post==1)
+					items = new LinkedHashMap<Integer,MenuItem>();
+				
+				mi = new MenuItem();
+				
+				mi.setId((Integer) o[0]);
+				mi.setName((String) o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Boolean) o[6]) );
+				items.put(post,mi);
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+		
+		}finally{
+			
+		}
+		
+		return items;
+	}
+	@SuppressWarnings("unchecked")
+	public MenuItem getTopMenu(int menu_id, int language_id)  throws Exception{
+
+		
+		MenuItem mi = null;
+		
+		try{
+		
+			String GET_TOP_MENU_BY_MENU_ID_AND_LANGUAGE_ID = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE menu_id=? AND language_id=? AND  parent_level_id=-1 AND visible=1";
+			Query qry = em.createNativeQuery(GET_TOP_MENU_BY_MENU_ID_AND_LANGUAGE_ID);
+			
+			qry.setParameter(1, menu_id);
+			qry.setParameter(2, language_id);
+			
+			List<Object[]> obj = qry.getResultList();
+			
+			LinkedHashMap<Integer, MenuItem> topMenus = null;
+			
+			int x = 0;
+			
+			for(Object[] o : obj){
+				x++;
+				
+				if(x==1)
+					topMenus = new LinkedHashMap<Integer, MenuItem>();
+				
+				mi = new MenuItem();
+				
+				mi.setId((Integer) o[0]);
+				mi.setName((String) o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Boolean) o[6]) );
+				
+				topMenus.put(x, mi);
+				
+			}
+			
+			if(mi!=null)
+				mi.setSub_menus(topMenus);
+		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{}
+		
+		return mi;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id) throws Exception{
+		
+		MenuItem menuItem = null;
+		try{
+			String GET_TOP_MENU = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE parent_level_id=? AND language_id=? and visible=1";
+			Query qry = em.createNativeQuery(GET_TOP_MENU);
+			qry.setParameter(1, parent_level_id);
+			qry.setParameter(2, language_id);
+			
+			List<Object[]> rs = qry.getResultList();
+			
+			LinkedHashMap<Integer, MenuItem> topMenus = null;
+			
+			int x = 0;
+			MenuItem mi = null;
+			for(Object[] o : rs){
+				x++;
+				if(x==1){
+					
+					topMenus = new LinkedHashMap<Integer, MenuItem>();
+				}
+				mi = new MenuItem();
+				mi.setId((Integer) o[0]);
+				mi.setName((String) o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Boolean) o[6]) );
+				topMenus.put(x, mi);
+				
+				
+			}
+			
+			
+				menuItem = getMenuById(parent_level_id);
+				if(menuItem==null){
+					menuItem = new MenuItem();
+					menuItem.setId(parent_level_id);
+					menuItem.setParent_level_id(parent_level_id);
+					menuItem.setLanguage_id(language_id);
+				}
+				menuItem.setSub_menus(topMenus);
+			
+		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
+		
+		return menuItem;
+	}
+	
+	/*@SuppressWarnings("unchecked")
+	public MenuItem getMenuById(int parent_level_id) {
+		MenuItem mi = null;
+		
+		
+		try{
+		
+			String GET_MENU_BY_ID = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE id=? AND visible=1";
+			Query qry = em.createNativeQuery(GET_MENU_BY_ID);
+			qry.setParameter(1, parent_level_id);
+			
+			List<Object[]> obj = qry.getResultList();
+			
+			LinkedHashMap<Integer, MenuItem> topMenus = getSubMenus(parent_level_id);
+			
+			//int x = 0;
+			
+			for(Object[] o : obj){
+				//x++;
+				
+				mi = new MenuItem();
+				mi.setId((Integer) o[0]);
+				mi.setName((String) o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Integer) o[6]).compareTo(1)==0 );
+				
+				
+			}
+			
+			if(mi!=null)
+				mi.setSub_menus(topMenus);
+		
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+		
+		}finally{
+		
+			
+		
+		}
+		
+		return mi;
+	}
+*/
+	
+
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean deleteOldLogs() throws Exception{
+		boolean success = false;
+		
+		try {
+			utx.begin();
+			String sql = "delete from `"+CelcomImpl.database+"`.`subscriptionlog` where date(CONVERT_TZ(timeStamp,'"+getServerTz()+"','"+getClientTz()+"'))<date(CONVERT_TZ(now(),'"+getServerTz()+"','"+getClientTz()+"'))";
+			Query qry = em.createNativeQuery(sql);
+			success = qry.executeUpdate()>0;
+			utx.commit();
+		} catch (Exception e) {
+			try{
+			utx.rollback();
+			}catch(Exception e1){}
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
+		
+		return success;
+	}
+	
+	public int getHourNow() throws Exception{
+		int hour_now = -1;
+		
+		try {
+			String sql = "SELECT hour(CONVERT_TZ(now(),'"+getServerTz()+"','"+getClientTz()+"')) as 'hour'";
+			Query qry = em.createNativeQuery(sql);
+			Object o  = qry.getSingleResult();
+			hour_now = ( (BigInteger) o ).intValue();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
+		
+		return hour_now;
+	}
 	
 	public int countSubscribers(int service_id) throws Exception{
 		
 		int count = -1;
 		
 		try {
-			utx.begin();
 			String sql = "SELECT count(*) FROM `"+CelcomImpl.database+"`.`subscription`  WHERE subscription_status='confirmed' AND sms_service_id_fk = ?";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, service_id);
 			Object o  = qry.getSingleResult();
 			count = ( (BigInteger) o ).intValue();
-			utx.commit();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			try{
 			utx.rollback();
@@ -274,6 +1167,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 				throw new NoSettingException("No meta data with field name "+meta_field+", for serviceid "+serviceid);
 			}
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		}catch(Exception e){
 			
 			logger.error(e.getMessage(),e);
@@ -378,6 +1273,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			
 			utx.commit();
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch ( Exception e ) {
 			try{
 			utx.rollback();
@@ -390,6 +1287,51 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		
 		return retval;
 	}
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean subscribe(String msisdn, int service_id, int smsmenu_levels_id_fk, SubscriptionStatus status,SubscriptionSource source) throws Exception{
+		
+		boolean success = false;
+		
+		try{
+			
+			if(service_id>-1){
+				utx.begin();
+				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE subscription_status = ?";
+				Query qry = em.createNativeQuery(sql);
+				
+				qry.setParameter(1, service_id);
+				qry.setParameter(2, msisdn);
+				qry.setParameter(3, smsmenu_levels_id_fk);
+				qry.setParameter(4, source.toString());
+				qry.setParameter(5, status.toString());
+				qry.setParameter(6, status.toString());
+				
+				if(qry.executeUpdate()>0)
+					success = true;
+				utx.commit();
+			}else{
+				success = false;
+			}
+				
+			
+			
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			try{
+				utx.rollback();
+				}catch(Exception e1){}
+			
+			throw e;
+		}finally{}
+		
+		
+		return success;
+	}
+	
+	
+	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean subscribe(String msisdn, int service_id, int smsmenu_levels_id_fk) throws Exception {
 		boolean success = false;
@@ -456,6 +1398,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			}
 				
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		}catch(Exception e){
 			
 			logger.error(e.getMessage(),e);
@@ -470,7 +1414,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, String> getAdditionalServiceInfo(int serviceid) {
+	public Map<String, String> getAdditionalServiceInfo(int serviceid) throws Exception{
 		Map<String, String> additionalInfo = null;
 		
 		
@@ -500,9 +1444,12 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 				c++;
 			}
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		}catch(Exception e){
 			
 			logger.error(e.getMessage(),e);
+			throw e;
 			
 		}finally{
 		
@@ -552,6 +1499,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			qry.setParameter(1, service_id);
 			if(qry.getResultList()!=null)
 				resp = (qry.getResultList().size()>0 );//if a record comes, do push
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			throw e;
@@ -560,6 +1509,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		return resp;
 	}
 	
+	@SuppressWarnings("unused")
 	public int countPushesToday(int service_id) throws Exception{
 		
 		int count = -1;
@@ -592,6 +1542,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			Object res = qry.getSingleResult();
 			count =  ( (BigInteger) res ).intValue();
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			
 			logger.error(e.getMessage());
@@ -603,7 +1555,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid) throws Exception {
 		List<Subscription> msisdnL = new ArrayList<Subscription>();
 		try {
@@ -664,6 +1616,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			
 			
 			utx.commit();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			try{
 				utx.rollback();
@@ -677,7 +1631,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		return msisdnL;
 		
 	}
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@SuppressWarnings("unchecked")
 	public List<ServiceSubscription> getServiceSubscription()  throws Exception {
 		
@@ -685,7 +1639,6 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 
 		try {
 			
-			utx.begin();
 			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`ServiceSubscription` WHERE hour(`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND `lastUpdated`<=convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND ExpiryDate>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";//first get services to be pushed now.
 			//System.out.println(sql);
 			Query qry = em.createNativeQuery(sql);
@@ -704,11 +1657,9 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			}
 			
 			
-			utx.commit();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch (Exception e) {
-			try{
-				utx.rollback();
-			}catch(Exception e1){}
 			logger.error(e.getMessage());
 			throw e;
 		}finally{
@@ -731,7 +1682,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@SuppressWarnings("unchecked")
-	public String getUnique(String database_name,String table,String field,String idfield,String msisdn,int serviceid,int size,int processor_id, Connection conn) throws Exception {
+	public String getUnique(String database_name,String table,String field,String idfield,String msisdn,int serviceid,int size,int processor_id) throws Exception {
 		
 		
 		String retval=null;
@@ -792,6 +1743,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			
 			utx.commit();
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch ( Exception e ) {
 			try{
 				utx.rollback();
@@ -868,24 +1821,25 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	
 	
 	@SuppressWarnings("unchecked")
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception  {
 		T t = null;
 		try{
-			utx.begin();
 			Query query = em.createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
 			if(query.getResultList().size()>0)
 				t = (T) query.getResultList().get(0);
-			utx.commit();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		}catch(Exception  e){
-			try{
-				utx.rollback();
-			}catch(Exception ex){}
 			throw e;
 		}
 		return t;
 	}
 	
+	
+	public String getMessage(MessageType messageType,
+			int language) throws Exception {
+		return getMessage(messageType.toString(), language);
+	}
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -1096,6 +2050,8 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			
 			utx.commit();
 			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			try{
 				utx.rollback();
@@ -1117,6 +2073,9 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			qry.setFirstResult(0);
 			qry.setMaxResults(limit);
 			return qry.getResultList();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return null;
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1131,14 +2090,22 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	@Override
 	public <T> Collection<T> find(Class<T> entityClass,
 			Map<String, Object> criteria, int start, int end)  throws Exception {
-		Query query = em.createQuery("from " + entityClass.getSimpleName()
+		try{
+			Query query = em.createQuery("from " + entityClass.getSimpleName()
+		
 				+ buildWhere(criteria));
-		int counter1 = 0;
-		for (String key : criteria.keySet()){
-			counter1++;
-			query.setParameter("param"+String.valueOf(counter1), criteria.get(key));			
-		}			
-		return query.getResultList();
+			int counter1 = 0;
+			for (String key : criteria.keySet()){
+				counter1++;
+				query.setParameter("param"+String.valueOf(counter1), criteria.get(key));			
+			}			
+			return query.getResultList();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return null;
+		}catch(Exception e){
+			throw e;
+		}
 	}
 
 	private String buildWhere(Map<String, Object> criteria)  throws Exception {
@@ -1153,6 +2120,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		}
 		return sb.toString();
 	}
+
 	
 	
 

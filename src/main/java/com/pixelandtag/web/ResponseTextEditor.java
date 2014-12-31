@@ -195,7 +195,7 @@ public class ResponseTextEditor extends HttpServlet {
 		if(kEY.equals("KEY")){
 			
 			try {
-				ps = conn.prepareStatement("select `key`, `description`  FROM `celcom_static_content`.`message` group by `key`");
+				ps = conn.prepareStatement("select `key`, `description`  FROM `pixeland_content360`.`message` group by `key`");
 				rs = ps.executeQuery();
 				
 				String key,description;
@@ -387,7 +387,7 @@ public class ResponseTextEditor extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			
 		} catch (NamingException e) {
@@ -414,7 +414,7 @@ public class ResponseTextEditor extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			conn = ds.getConnection();
 			

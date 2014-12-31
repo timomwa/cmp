@@ -3,6 +3,7 @@ package com.pixelandtag.cmp.ejb;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,10 +14,17 @@ import org.hibernate.HibernateException;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.smsmenu.MenuItem;
+import com.pixelandtag.smsmenu.Session;
+import com.pixelandtag.subscription.SubscriptionSource;
+import com.pixelandtag.subscription.dto.SMSServiceDTO;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
+import com.pixelandtag.web.beans.MessageType;
 
 public interface CMPResourceBeanRemote {
 	
@@ -40,7 +48,7 @@ public interface CMPResourceBeanRemote {
 
 	public boolean sendMT(MOSms mo, String sql) throws Exception;
 	
-	public String getUnique(String database_name,String table,String field,String idfield,String msisdn,int serviceid,int size,int processor_id, Connection conn) throws Exception;
+	public String getUnique(String database_name,String table,String field,String idfield,String msisdn,int serviceid,int size,int processor_id) throws Exception;
 	
 	
 	public List<SubscriptionDTO> getSubscriptionServices()  throws Exception ;
@@ -109,5 +117,57 @@ public interface CMPResourceBeanRemote {
 	public int countPushesToday(int service_id) throws Exception;
 
 	public boolean shouldPushNow(int service_id) throws Exception;
+
+	public int getHourNow() throws Exception;
+
+	public boolean deleteOldLogs() throws Exception;
+
+	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id)  throws Exception;
+
+	public MenuItem getTopMenu(int menu_id, int language_id)  throws Exception;
+
+	public MenuItem getMenuById(int menu_id) throws Exception;
+
+	public LinkedHashMap<Integer, MenuItem> getSubMenus(int parent_level_id_fk) throws Exception;
+
+	public Session getSession(String msisdn) throws Exception;
+
+	public boolean updateSession(int language_id, String msisdn,
+			int smsmenu_levels_id_fk) throws Exception;
+
+	public void printMenu(MenuItem menuItem, int level, int position)  throws Exception;
+
+	public int getSubscriberLanguage(String msisdn) throws Exception;
+
+	public String getMessage(String mainMenuAdvice, int language_id) throws Exception;
+	
+	public boolean updateProfile(String msisdn, int language_id) throws Exception;
+	
+	public String getMessage(MessageType messageType,
+			int language) throws Exception;
+
+	//public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription)  throws Exception;
+	
+	public SMSServiceDTO getSMSservice(int service_id) throws Exception;
+	
+	public ServiceProcessorDTO getServiceProcessor(int processor_id_fk) throws Exception;
+
+	public boolean subscribe(String mSISDN, int service_id, int id,
+			SubscriptionStatus confirmed, SubscriptionSource sms) throws Exception;
+
+	public com.pixelandtag.subscription.dto.SubscriptionDTO checkAnyPending(
+			String msisdn) throws Exception ;
+
+	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception;
+
+	public LinkedHashMap<Integer, SMSServiceDTO> getAllSubscribedServices(
+			String msisdn) throws Exception;
+
+	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status) throws Exception;
+
+	public boolean updateSubscription(int id, String mSISDN,
+			SubscriptionStatus unsubscribed) throws Exception;
+
+	public SMSServiceDTO getSMSservice(String keyword) throws Exception;
 
 }

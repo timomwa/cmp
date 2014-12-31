@@ -187,6 +187,8 @@ public class SubscriptionMain implements Runnable{
 			}
 			ArrayBlockingQueue<SubscriptionDTO> subscr = null;
 			
+			cmpbean.deleteOldLogs();
+			
 			List<SubscriptionDTO> subscrList =  cmpbean.getSubscriptionServices();
 			
 			for(SubscriptionDTO subdto: subscrList){
@@ -217,7 +219,7 @@ public class SubscriptionMain implements Runnable{
 					processor.setName(i+"_"+service_processor_class_name);
 					processor.setName(i+"_"+subdto.getServiceName());
 					processor.setInternalQueue(50);
-					System.out.println("started : "+service_processor_class_name);
+					logger.info("started : "+service_processor_class_name);
 					Thread t = new Thread(processor);
 					t.start();
 					
@@ -316,11 +318,12 @@ public class SubscriptionMain implements Runnable{
 			
 		//	logger.debug(" \n\n\n\n======================= SERVICESUBSCRIPTION "+s.toString()+"\n==========================================\n\n\n");
 		//	logger.debug(" \n\n\n\n======================= processor_map.size() "+processor_map.size()+"\n==========================================\n\n\n");
-			
 			final int service_id = s.getServiceid();
 			final int subscription_service_id = s.getId();
 			int x = cmpbean.countSubscribers(service_id);
 			int y = cmpbean.countPushesToday(service_id); 
+			//int hour_now = cmpbean.getHourNow();
+			
 			boolean pushnow = cmpbean.shouldPushNow(service_id);
 			try{
 				Thread.sleep(1000);
@@ -515,9 +518,7 @@ public class SubscriptionMain implements Runnable{
 		try{
 			
 			setRun(true);
-			int x = 0;
 			while(run){
-				x++;
 				init_processor_map();
 				populateServicesToBePushed();
 				pushSubscriptions();

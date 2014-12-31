@@ -1,5 +1,6 @@
 package com.pixelandtag.serviceprocessors.sms;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -14,19 +15,24 @@ import org.apache.log4j.Logger;
 import snaq.db.DBPoolDataSource;
 
 import com.inmobia.luckydip.api.NoSettingException;
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.api.MOProcessorFactory;
+import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.smsmenu.MenuController;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.staticcontent.ContentRetriever;
 import com.pixelandtag.subscription.Subscription;
+import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
@@ -72,7 +78,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 		super();
 		init_datasource();
 		initEJB();
-		menu_controller = new MenuController();
+		menu_controller = new MenuController(cmpbean);
 		subscription = new Subscription();
 		cr = new ContentRetriever();
 		
@@ -119,7 +125,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 	
 	@Override
 	public MOSms process(MOSms mo) {
-		Connection conn = null;
+		//Connection conn = null;
 		
 		try {
 			
@@ -211,13 +217,13 @@ public class MoreProcessor extends GenericServiceProcessor {
 			}
 			
 			
-			conn = getCon();
+			//conn = getCon();
 			
 			mo_processor_logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 			mo_processor_logger.info(" THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
 			mo_processor_logger.info(" SERVICEID ::::::::::::::::::::::::: ["+serviceid+"]");
 			
-			final Session sess = menu_controller.getSession(MSISDN, conn);
+			final Session sess = menu_controller.getSession(MSISDN);
 			
 			int smsmenu_level_id_fk = -1;
 			
@@ -227,7 +233,8 @@ public class MoreProcessor extends GenericServiceProcessor {
 				smsmenu_level_id_fk = sess.getSmsmenu_level_id_fk();
 				language_id = sess.getLanguage_id();
 			}else{
-				language_id = UtilCelcom.getSubscriberLanguage(mo.getMsisdn(), conn);//get from db
+				language_id =cmpbean.getSubscriberLanguage(mo.getMsisdn());
+				//language_id = UtilCelcom.getSubscriberLanguage(mo.getMsisdn(), conn);//get from db
 			}
 			
 			
@@ -240,26 +247,27 @@ public class MoreProcessor extends GenericServiceProcessor {
 			if(smsmenu_level_id_fk>-1)
 				current_menu = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
 			else
-				current_menu = menu_controller.getMenuByParentLevelId(language_id,smsmenu_level_id_fk,conn);//get root menu
+				current_menu = menu_controller.getMenuByParentLevelId(language_id,smsmenu_level_id_fk);//get root menu
 			
 			mo_processor_logger.info("FROM SESSION___________________________"+current_menu);
 			
 			if(KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
 				
-				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id(), conn);//update session to upper menu.
-				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(), conn);
-				mo.setMt_Sent(item.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+				//mo.setMt_Sent(item.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+				mo.setMt_Sent(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE,language_id));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("#")){
 				
-				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id(), conn);//update session to upper menu.
-				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(), conn);
-				mo.setMt_Sent(item.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+				mo.setMt_Sent(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("0")){
 				
-				menu_controller.updateSession(language_id, MSISDN, -1, conn);//update session to upper menu.
-				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,-1, conn);
+				menu_controller.updateSession(language_id, MSISDN, -1);//update session to upper menu.
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,-1);
 				mo.setMt_Sent(item.enumerate());//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("GIFT") || KEYWORD.equalsIgnoreCase("HIDIAH") || KEYWORD.equalsIgnoreCase("HADIAH")){
@@ -268,23 +276,23 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				language_id = KEYWORD.equalsIgnoreCase("GIFT") ?  ENG : MAL;
 				int menu_id = 1;
+				cmpbean.updateProfile(mo.getMsisdn(),language_id);
+				//UtilCelcom.updateProfile(mo.getMsisdn(),language_id,conn);
 				
-				UtilCelcom.updateProfile(mo.getMsisdn(),language_id,conn);
+				menu_controller.updateSession(language_id,MSISDN, -1);//update session to upper menu.
+				current_menu = menu_controller.getTopMenu(menu_id, language_id);
 				
-				menu_controller.updateSession(language_id,MSISDN, -1, conn);//update session to upper menu.
-				current_menu = menu_controller.getTopMenu(menu_id, language_id, conn);
-				
-				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));
+				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));
 				
 			}else if(KEYWORD.equalsIgnoreCase("AFCON")){
 				
 				language_id = MAL;
 				int menu_id = 2;
 				
-				menu_controller.updateSession(language_id,MSISDN, -1, conn);//update session to upper menu.
-				current_menu = menu_controller.getTopMenu(menu_id, language_id, conn);
+				menu_controller.updateSession(language_id,MSISDN, -1);//update session to upper menu.
+				current_menu = menu_controller.getTopMenu(menu_id, language_id);
 				
-				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate()+SPACE+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));
+				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate()+SPACE+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));
 				
 			}else if(kw_is_digit){
 				
@@ -308,7 +316,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				MenuItem chosenMenu = current_menu.getMenuByPosition(chosen);
 				//MenuItem chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
 				
-				chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
+				chosenMenu = menu_controller.getMenuById(chosenMenu.getId());
 				
 				
 				if(chosenMenu!=null){
@@ -350,12 +358,12 @@ public class MoreProcessor extends GenericServiceProcessor {
 				if( (submenu!=null && (chosen>submenu.size())) ){
 					
 					//chosenMenu = current_menu.getMenuByPosition(chosen);
-					menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId(), conn);//update session
+					menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId());//update session
 					
 					if(submenus_have_sub_menus){
-						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate() +UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate() +cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 					}else{
-						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate() + UtilCelcom.getMessage(SUBSCRIPTION_ADVICE, conn, language_id));//get all the sub menus there.
+						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate() + cmpbean.getMessage(SUBSCRIPTION_ADVICE, language_id));//get all the sub menus there.
 					}
 				}else{
 					
@@ -363,20 +371,20 @@ public class MoreProcessor extends GenericServiceProcessor {
 					
 					if(chosenMenu.getService_id()==-1){//if there are other items under this, update session
 						
-						menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId(), conn);//update session
+						menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId());//update session
 						
-						chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
+						chosenMenu = menu_controller.getMenuById(chosenMenu.getId());
 						
 						if(submenus_have_sub_menus)
-							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						else
-							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(SUBSCRIPTION_ADVICE, conn, language_id));//get all the sub menus there.
+							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+cmpbean.getMessage(SUBSCRIPTION_ADVICE, language_id));//get all the sub menus there.
 					}else{
 						
 						//chosenMenu = menu_controller.getMenuById(current_menu.getId(), conn);//Get the current menu itself
 						mo_processor_logger.debug("\n\n\n*******************************8\nRTFM subscriber!! You should reply with <ON No.> for example ON "+chosen+" !!! \n*******************************8\n\n\n\n" );
 						//mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, conn, language_id));//get all the sub menus there.
-						String msg = UtilCelcom.getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, conn, language_id);
+						String msg = cmpbean.getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, language_id);
 						msg = msg.replaceAll(SERVICENAME_TAG, chosenMenu.getName());
 						msg = msg.replaceAll(CHOSEN, String.valueOf(chosen));
 						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+msg);//get all the sub menus there.
@@ -415,14 +423,16 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 					chosenMenu = current_menu.getMenuByPosition(chosen);
 					
-					final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
-					final SubscriptionDTO subdto = subscription.getSubscriptionDTO(conn, MSISDN, chosenMenu.getService_id());
+					//final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
+					final MOSms mosm_ =  getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+					
+					final SubscriptionDTO subdto = cmpbean.getSubscriptionDTO(MSISDN, chosenMenu.getService_id());
 					
 					if(chosenMenu.getService_id()<1){//if this still looks like a sub-menu, we send to subscriber the sub menu and tell them how to subscribe
 
-						chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
+						chosenMenu = menu_controller.getMenuById(chosenMenu.getId());
 						
-						menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId(), conn);//update session
+						menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId());//update session
 						
 						submenu = chosenMenu.getSub_menus();
 						
@@ -441,17 +451,18 @@ public class MoreProcessor extends GenericServiceProcessor {
 						
 						
 						if(submenus_have_sub_menus)
-							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						else
-							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(SUBSCRIPTION_ADVICE, conn, language_id));//get all the sub menus there.
+							mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+cmpbean.getMessage(SUBSCRIPTION_ADVICE, language_id));//get all the sub menus there.
 						
 					}else{
 					
 						if(subdto==null || (subdto!=null && !subdto.getSubscription_status().equals(SubscriptionStatus.confirmed.toString()))){
 						
-							subscription.subscribe(conn, MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+							cmpbean.subscribe( MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+							//subscription.subscribe(conn, MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
 							
-							String response = UtilCelcom.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, conn, language_id) ;
+							String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
 							if(response.indexOf(SERVICENAME_TAG)>=0)
 								response = response.replaceAll(SERVICENAME_TAG, chosenMenu.getName());
 							if(response.indexOf(PRICE_TAG)>=0)
@@ -478,7 +489,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 							//that you don't charge a subscriber without warning. They must confim their subscription.
 							
 							//Already subscribed text
-							String response = UtilCelcom.getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, conn, language_id) ;
+							String response = cmpbean.getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
 							if(response.indexOf(SERVICENAME_TAG)>=0)
 								response = response.replaceAll(SERVICENAME_TAG, chosenMenu.getName());
 							if(response.indexOf(PRICE_TAG)>=0)
@@ -498,31 +509,32 @@ public class MoreProcessor extends GenericServiceProcessor {
 				}else{
 					//Here check if subscriber sent valid keyword, fetch service, and subscribe then to that service.
 					if(submenus_have_sub_menus)
-						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate() +UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
+						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate() +cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 					else
-						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate() + UtilCelcom.getMessage(SUBSCRIPTION_ADVICE, conn, language_id));//get all the sub menus there.
+						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+current_menu.enumerate() + cmpbean.getMessage(SUBSCRIPTION_ADVICE, language_id));//get all the sub menus there.
 				
 				}
-				
 				
 			}else if(KEYWORD.equalsIgnoreCase(SUBSCRIPTION_CONFIRMATION+SPACE)){//This step is frozen by adding a space. Requested by Michael Juhl 20th June 2013
 				
 				
 				//TODO - if a subscriber just sends "ON" or "BUY" Without the number, then, we give them the main menu, or the sub menu that they previously were in
-				SubscriptionDTO sub = subscription.checkAnyPending(conn, MSISDN);
+				SubscriptionDTO sub =  cmpbean.checkAnyPending(MSISDN);
 				
 				if(sub!=null){
 					
-					subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
+					cmpbean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+					//subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
 					
-					MenuItem menu = menu_controller.getMenuById(sub.getSmsmenu_levels_id_fk(), conn);
+					MenuItem menu = menu_controller.getMenuById(sub.getSmsmenu_levels_id_fk());
 					
 					language_id = menu.getLanguage_id();
 					
 					mo_processor_logger.info("::::::::::::::::::::::::: serviceid:: "+menu.getService_id() + "\n\nmenu.toString():\n "+menu.toString()+"\n");
-					final MOSms mosm_ =  cr.getContentFromServiceId(menu.getService_id(),MSISDN,conn);
+					final MOSms mosm_  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
+					//final MOSms mosm_ =  cr.getContentFromServiceId(menu.getService_id(),MSISDN,conn);
 					
-					String response = UtilCelcom.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, conn, language_id) ;
+					String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
 					if(response.indexOf(SERVICENAME_TAG)>=0)
 						response = response.replaceAll(SERVICENAME_TAG, menu.getName());
 					if(response.indexOf(PRICE_TAG)>=0)
@@ -540,12 +552,12 @@ public class MoreProcessor extends GenericServiceProcessor {
 					
 					
 				}else{
-					mo.setMt_Sent(UtilCelcom.getMessage(NO_PENDING_SUBSCRIPTION_ADVICE, conn, language_id));
+					mo.setMt_Sent(cmpbean.getMessage(NO_PENDING_SUBSCRIPTION_ADVICE,  language_id));
 				}
 				
 			}else if(KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
 				
-				String msg = UtilCelcom.getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, conn, language_id);
+				String msg = cmpbean.getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id);
 				
 				int stop_number = -1;
 				
@@ -554,14 +566,16 @@ public class MoreProcessor extends GenericServiceProcessor {
 				}catch(Exception e){}
 				
 				
-				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = subscription.getAllSubscribedServices(mo.getMsisdn(),conn);
+				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed  = cmpbean.getAllSubscribedServices(mo.getMsisdn());
+				//LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = subscription.getAllSubscribedServices(mo.getMsisdn(),conn);
 				
 				if(allsubscribed!=null){
 				
 					if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
-						subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
-						msg = UtilCelcom.getMessage(UNSUBSCRIBED_ALL_ADVICE, conn, language_id);
-						msg = msg.replaceAll(SERVICENAME_TAG, UtilCelcom.getMessage(MessageType.ALL_SERVICES, conn, language_id));
+						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed);
+						//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
+						msg = cmpbean.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id);
+						msg = msg.replaceAll(SERVICENAME_TAG, cmpbean.getMessage(MessageType.ALL_SERVICES, language_id));
 						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+SPACE+msg);
 					}else if(second_keyword!=null || stop_number>-1){
 						
@@ -570,7 +584,8 @@ public class MoreProcessor extends GenericServiceProcessor {
 							SMSServiceDTO toUnsubscribe = allsubscribed.get(stop_number);
 							
 							//if(subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-								subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							    cmpbean.updateSubscription(toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+								//subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 								msg = msg.replaceAll(SERVICENAME_TAG, toUnsubscribe.getService_name());
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
@@ -578,10 +593,12 @@ public class MoreProcessor extends GenericServiceProcessor {
 										
 						}else if(second_keyword!=null){
 										
-							SMSServiceDTO smsservice = subscription.getSMSservice(second_keyword, conn);
+							SMSServiceDTO smsservice = cmpbean.getSMSservice(second_keyword);
+							//SMSServiceDTO smsservice = subscription.getSMSservice(second_keyword, conn);
 							
 							//if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-								subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							    cmpbean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+								//subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 								msg = msg.replaceAll(SERVICENAME_TAG, smsservice.getService_name());
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
@@ -590,11 +607,11 @@ public class MoreProcessor extends GenericServiceProcessor {
 						}
 								
 					}else {
-						msg = subscription.stringFyServiceList(allsubscribed)+UtilCelcom.getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, conn, language_id);
+						msg = subscription.stringFyServiceList(allsubscribed)+cmpbean.getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, language_id);
 					}
 							
 				}else{
-					msg = UtilCelcom.getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, conn, language_id);
+					msg = cmpbean.getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id);
 				}
 					
 				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+msg);
@@ -602,17 +619,17 @@ public class MoreProcessor extends GenericServiceProcessor {
 
 			}else if(KEYWORD.equals("HELP")){
 				
-				String msg =  UtilCelcom.getMessage(MessageType.HELP, conn, language_id);
+				String msg =  cmpbean.getMessage(MessageType.HELP, language_id);
 				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+msg);
 				
 			}else if(KEYWORD.equals("INFO")){
 				
-				String msg =  UtilCelcom.getMessage(MessageType.INFO, conn, language_id);
+				String msg =  cmpbean.getMessage(MessageType.INFO,language_id);
 				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+msg);
 			
 			}else{
 				//Unknown keyword
-				mo.setMt_Sent(UtilCelcom.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, conn, language_id));
+				mo.setMt_Sent(cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id));
 			}
 			
 			mo_processor_logger.info(mo.toString());
@@ -624,13 +641,76 @@ public class MoreProcessor extends GenericServiceProcessor {
 		}finally{
 			
 			try{
-				conn.close();
+				//conn.close();
 			}catch(Exception e){}
 		
 		}
 		
 		return mo;
 	}
+
+	public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription) throws Exception {
+		
+		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
+		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
+		SMSServiceDTO sm = cmpbean.getSMSservice(service_id);
+		logger.info(s+sm);
+		MOSms mo = null;
+		
+		if(sm!=null){
+			
+			ServiceProcessorDTO procDTO = cmpbean.getServiceProcessor(sm.getMo_processor_FK());
+			
+			try {
+				
+				
+				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
+				mo = new MOSms();
+				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
+				mo.setMsisdn(msisdn);
+				mo.setCMP_AKeyword(sm.getCmp_keyword());
+				mo.setCMP_SKeyword(sm.getCmp_skeyword());
+				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
+				mo.setSMS_SourceAddr(procDTO.getShortcode());
+				mo.setPriority(1);
+				mo.setServiceid(sm.getId());
+				mo.setSMS_Message_String(sm.getCmd());
+				
+				//added 22nd Dec 2014 - new customer requirement
+				mo.setPricePointKeyword(sm.getPricePointKeyword());
+				
+				//added on 10th June 2013 but not tested
+				mo.setProcessor_id(sm.getMo_processor_FK());
+				
+				
+				
+				// **** Below is a Dirty hack. *****
+				//To 
+				//cheat the content processor 
+				//that this is a subscription push, 
+				//so that it does not subscribe 
+				//this subscriber to the service. 
+				//We handle subscription elsewhere, 
+				//this is solely for content fetcnhing 
+				//and not subscribing.
+				mo.setSubscriptionPush(isSubscription);
+				
+				mo = processor.process(mo);
+				
+				
+			}catch(Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+		}else{
+			logger.info(s+" sm is null!");
+		}
+		
+		
+		return mo;
+	}
+	
+	
 
 	@Override
 	public void finalizeMe() {

@@ -42,7 +42,7 @@ public class ResEditorControler extends HttpServlet {
 	private JSONObject responseJSON = null;
 	private PrintWriter writer;
 	
-	private String DB = "celcom_static_content";
+	private String DB = "pixeland_content360";
 
 	/**
 	 * 
@@ -154,7 +154,7 @@ public class ResEditorControler extends HttpServlet {
 			 String query = "";
 			 String txt = "";
 			 
-			 ps = conn.prepareStatement("SELECT * from `celcom_static_content`.`message` where language_id = ? AND `key`= ?");
+			 ps = conn.prepareStatement("SELECT * from `pixeland_content360`.`message` where language_id = ? AND `key`= ?");
 			 
 			 int language_id = Integer.valueOf(requestJSON.getString("language_id"));
 			 String key = requestJSON.getString("key");
@@ -237,7 +237,7 @@ public class ResEditorControler extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			conn = ds.getConnection();
 			
@@ -293,7 +293,7 @@ public class ResEditorControler extends HttpServlet {
 			 String query = "";
 			 String txt = "";
 			 
-			 ps = conn.prepareStatement("SELECT * from `celcom_static_content`.`message` where id = ?");
+			 ps = conn.prepareStatement("SELECT * from `pixeland_content360`.`message` where id = ?");
 			 
 			 String id = requestJSON.getString("id");
 			 
@@ -319,7 +319,7 @@ public class ResEditorControler extends HttpServlet {
 			 
 			 txt = URLDecoder.decode(requestJSON.getString("text"),"UTF8").trim();
 			 
-			 ps = conn.prepareStatement("UPDATE `celcom_static_content`.`message` set `message` = ? where id = ?");
+			 ps = conn.prepareStatement("UPDATE `pixeland_content360`.`message` set `message` = ? where id = ?");
 				
 			 ps.setString(1, txt);
 			 
@@ -431,7 +431,7 @@ public class ResEditorControler extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			
 		} catch (NamingException e) {

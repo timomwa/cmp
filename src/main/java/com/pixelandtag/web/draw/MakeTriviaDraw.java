@@ -46,7 +46,7 @@ public class MakeTriviaDraw extends HttpServlet {
 	
 	
 	static final long serialVersionUID  = 1135L;
-	final String DB = "axiata_trivia";
+	final String DB = "pixeland_content360";
 	int message_input_size = 300;
 	Logger log = Logger.getLogger(MakeTriviaDraw.class);
 	public MakeTriviaDraw() {

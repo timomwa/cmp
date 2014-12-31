@@ -1,6 +1,8 @@
 package com.pixelandtag.smsmenu;
 
-public class Session {
+import java.io.Serializable;
+
+public class Session implements Serializable {
 
 	private int id;
 	private String msisdn;

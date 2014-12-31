@@ -39,7 +39,7 @@ public class MsisdnController extends HttpServlet {
 	private JSONObject responseJSON = null;
 	private PrintWriter writer;
 	
-	private String DB = "axiata_trivia";
+	private String DB = "pixeland_content360";
 
 	/**
 	 * 
@@ -154,7 +154,7 @@ public class MsisdnController extends HttpServlet {
 			 
 			 date = requestJSON.getString("date").trim();
 			 
-			 ps = conn.prepareStatement("select MT_STATUS,timeStamp,SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive from celcom.messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
+			 ps = conn.prepareStatement("select MT_STATUS,timeStamp,SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive from "+DB+".messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
 				
 			 ps.setString(1, msisdn);
 			 
@@ -273,7 +273,7 @@ public class MsisdnController extends HttpServlet {
 			 
 			 date = requestJSON.getString("date").trim();
 			 
-			 ps = conn.prepareStatement("select count(*) as 'count', statusCode, price from celcom.SMSStatLog where date(timeStamp)=? and msisdn=? group by statusCode, price");
+			 ps = conn.prepareStatement("select count(*) as 'count', statusCode, price from "+DB+".SMSStatLog where date(timeStamp)=? and msisdn=? group by statusCode, price");
 				
 			 ps.setString(1, date);
 			 
@@ -366,7 +366,7 @@ public class MsisdnController extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			conn = ds.getConnection();
 			
@@ -388,7 +388,7 @@ public class MsisdnController extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			
 		} catch (NamingException e) {

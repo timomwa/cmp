@@ -35,7 +35,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
  * @web.servlet-init-param name="A parameter" value="A value"
  */
 public class TriviaStats extends HttpServlet {
-	final String DB = "axiata_trivia";
+	final String DB = "pixeland_content360";
 	com.pixelandtag.util.POI poi = new com.pixelandtag.util.POI();
 	int message_input_size = 300;
 	static final long serialVersionUID = 0;
@@ -207,7 +207,7 @@ public class TriviaStats extends HttpServlet {
 		try {
 			Context initContext = new InitialContext();
 			// DataSource ds = (DataSource)initContext.lookup("java:/VasDS");
-			DataSource ds = (DataSource) initContext.lookup("java:/RESP_EDITOR");
+			DataSource ds = (DataSource) initContext.lookup("java:/cmpDS");
 			con = ds.getConnection();
 
 			if (req.getParameter("username") != null

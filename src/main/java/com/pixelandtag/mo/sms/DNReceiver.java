@@ -198,7 +198,7 @@ public class DNReceiver extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/CELCOM_DN_RECEIVER_ONLY");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			try {
 				celcomAPI = new CelcomImpl(ds);

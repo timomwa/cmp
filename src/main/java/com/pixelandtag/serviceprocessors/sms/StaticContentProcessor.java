@@ -95,13 +95,13 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 	@Override
 	public MOSms process(MOSms mo) {
 		
-		Connection conn = null;
+		//Connection conn = null;
 		
 		//System.out.println("mo.toString():::: "+mo.toString());
 		
 		try {
 			
-			conn = getCon();
+			//conn = getCon();
 			
 			final RequestObject req = new RequestObject(mo);
 			final String KEYWORD = req.getKeyword().trim();
@@ -184,7 +184,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 		}finally{
 			
 			try{
-				conn.close();
+				//conn.close();
 			}catch(Exception e){}
 		
 		}

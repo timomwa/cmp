@@ -53,7 +53,7 @@ public class Trivia extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/AXIATA_TRIVIA_ONLY");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			
 		

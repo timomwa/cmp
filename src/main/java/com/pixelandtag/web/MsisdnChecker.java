@@ -38,7 +38,7 @@ public class MsisdnChecker extends HttpServlet {
 	private Context initContext;
 	
 	private final byte[] OK_200 =  "200 OK".getBytes();
-	private String DB = "axiata_trivia";
+	private String DB = "pixeland_content360";
 
 	/**
 	 * 
@@ -351,7 +351,7 @@ public class MsisdnChecker extends HttpServlet {
 	private String tabilizeAllResponseTexts(Connection conn, String keyM, int languageID) {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT * FROM `axiata_trivia`.`message` WHERE `key`= ? and `language_id` = ?";
+		String sql = "SELECT * FROM `"+DB+"`.`message` WHERE `key`= ? and `language_id` = ?";
 		String table = "<TABLE id=\"mytable\" cellspacing=\"0\"> ";
 		table += "<TR id='header' > <th scope=\"col\" class=\"nobg\"> MESSAGE </th> <th scope=\"col\"> SIZE </th> <th scope=\"col\"> LANG </th> <th scope=\"col\"> DESCRIPTION </th> <th scope=\"col\"> KEY </th  </TR>";
 		
@@ -441,7 +441,7 @@ public class MsisdnChecker extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			
 		} catch (NamingException e) {
@@ -468,7 +468,7 @@ public class MsisdnChecker extends HttpServlet {
 			
 			initContext = new InitialContext();
 			
-			ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			conn = ds.getConnection();
 			

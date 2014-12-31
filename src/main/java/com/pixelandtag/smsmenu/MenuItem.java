@@ -1,9 +1,10 @@
 package com.pixelandtag.smsmenu;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-public class MenuItem {
+public class MenuItem implements Serializable{
 
 	private static final String NUM_SPACER = ".";
 	private static final String NEW_LINE = "\n";

@@ -38,7 +38,7 @@ import com.pixelandtag.util.POI;
  *                           value="A value"
  */
 public class TriviaSearch extends HttpServlet {
-	final String DB = "axiata_trivia";
+	final String DB = "pixeland_content360";
 	static final long serialVersionUID = 0;
 	Logger log = Logger.getLogger(TriviaSearch.class);
 	public TriviaSearch() {
@@ -56,7 +56,7 @@ public class TriviaSearch extends HttpServlet {
 			final String MSISDN = req.getParameter("msisdn");
 			Context initContext = new InitialContext();
 			//DataSource ds = (DataSource)initContext.lookup("java:/VasDS");
-			DataSource ds = (DataSource)initContext.lookup("java:/SMSDS");
+			DataSource ds = (DataSource)initContext.lookup("java:/cmpDS");
 			con = ds.getConnection();
 			
 			if (req.getParameter("username") != null && req.getParameter("password") != null) {

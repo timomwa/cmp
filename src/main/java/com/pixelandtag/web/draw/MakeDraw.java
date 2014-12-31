@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  *                           value="A value"
  */
 public class MakeDraw extends HttpServlet {
-	final String DB = "axiata_trivia";
+	final String DB = "pixeland_content360";
 	static final long serialVersionUID = 3425345L;
 	Logger log = Logger.getLogger(MakeDraw.class);
 	public MakeDraw() {
@@ -48,7 +48,7 @@ public class MakeDraw extends HttpServlet {
 		try {
 			Context initContext = new InitialContext();
 			//DataSource ds = (DataSource)initContext.lookup("java:/VasDS");
-			DataSource ds = (DataSource)initContext.lookup("java:/AXIATA_TRIVIA_ONLY");
+			DataSource ds = (DataSource)initContext.lookup("java:/cmpDS");
 			con = ds.getConnection();
 			
 			if (req.getParameter("username") != null && req.getParameter("password") != null) {

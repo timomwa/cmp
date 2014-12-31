@@ -113,13 +113,13 @@ public class Report extends HttpServlet {
 	public Connection getConnection(){
 		 try{  
 		 	Context initContext = new InitialContext();
-		 	DataSource ds = (DataSource)initContext.lookup("java:/RESP_EDITOR");
+		 	DataSource ds = (DataSource)initContext.lookup("java:/cmpDS");
 		 	return ds.getConnection();
 		 }catch(Exception e){
 		 	try {
 				//Ok.. make a normal connection ... this is a test
 				 Class.forName("com.mysql.jdbc.Driver");
-				 return DriverManager.getConnection("jdbc:mysql://localhost:3306/nacc?user=root&password=");
+				 return DriverManager.getConnection("jdbc:mysql://localhost:3306/nacc?user=root&password=Admin123#@!");
 		 	} catch (ClassNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

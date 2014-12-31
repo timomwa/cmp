@@ -156,10 +156,10 @@ public class SubscriptionWorker implements Runnable{
 					mo.setSubscriptionPush(true);//flag that this is a subscription push. Will help system not do some querying later. Save processor 
 					mo.setPricePointKeyword(dto.getPricePointKeyword());
 					mo.setSubscription_id(sub.getId());
-					dto.getProcessor().submit(mo);//submit msg to the processor
+					boolean success = dto.getProcessor().submit(mo);//submit msg to the processor
 					
 
-					
+					if(success)
 					if(sub.getId()!=null && sub.getId().compareTo(0L)>0){
 						SubscriptionLog slog = new SubscriptionLog();
 						slog.setMsisdn(sub.getMsisdn());
