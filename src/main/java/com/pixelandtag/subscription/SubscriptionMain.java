@@ -288,7 +288,7 @@ public class SubscriptionMain implements Runnable{
 
 	public void populateServicesToBePushed(){
 		
-		if(to_be_pushed==null)
+		//if(to_be_pushed==null)
 			to_be_pushed = new ArrayBlockingQueue<ServiceSubscription>(1000,true);
 		
 		try {

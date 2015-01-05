@@ -2012,7 +2012,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 				+"LEFT JOIN `"+CelcomImpl.database+"`.`sms_service` sm "
 				+"ON sm.id = ss.serviceid "
 				+"LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` pro "
-				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND `ss`.`lastUpdated`<convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND `ss`.`ExpiryDate`>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";
+				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND convert_tz(`ss`.`lastUpdated`,'"+getServerTz()+"','"+getClientTz()+"')<convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND `ss`.`ExpiryDate`>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";
 	    logger.debug("\n\t"+sub+"\n");
 	  //  System.out.println("\n\t"+sub+"\n");
 		List<SubscriptionDTO> sub_services  = new ArrayList<SubscriptionDTO>();
