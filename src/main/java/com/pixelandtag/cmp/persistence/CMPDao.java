@@ -38,7 +38,7 @@ public class CMPDao  extends BaseDao {
 	private void init() {
 		try {
 			resource_bean = (CMPResourceBeanRemote) ctx
-					.lookup("ejb:/celcom/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+					.lookup("ejb:/cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 			DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
 			symbols.setGroupingSeparator(',');
 			df = new DecimalFormat("###,###.##",symbols);

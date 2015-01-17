@@ -1,3 +1,19 @@
+Ext.chart.Chart.CHART_URL = '../../resources/charts.swf';
+Ext.QuickTips.init();
+    
+    // create some portlet tools using built in Ext tool ids
+    var tools = [{
+        id:'gear',
+        handler: function(){
+            Ext.Msg.alert('Message', 'The Settings tool was clicked.');
+        }
+    },{
+        id:'close',
+        handler: function(e, target, panel){
+            panel.ownerCt.remove(panel, true);
+        }
+    }];
+	
 MyDesktop.StatisticsModule = Ext.extend(Ext.app.Module, {
 	id:'statistics-win',
     init : function(){
@@ -19,7 +35,7 @@ MyDesktop.StatisticsModule = Ext.extend(Ext.app.Module, {
                 title: 'Statistics',
                 width:640,
                 height:480,
-                html : '<p>Statistics Module.</p>',
+				items :  [],
                 iconCls: 'statistics-win',
                 shim:false,
                 animCollapse:false,
@@ -27,5 +43,7 @@ MyDesktop.StatisticsModule = Ext.extend(Ext.app.Module, {
             });
         }
         win.show();
+		populate();
+                                    
     }
 });

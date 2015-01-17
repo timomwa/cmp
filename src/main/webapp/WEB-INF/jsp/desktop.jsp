@@ -24,6 +24,11 @@
     <script type="text/javascript" src="js/subscription_management.js"></script>
     <script type="text/javascript" src="js/statistics.js"></script>
     <script type="text/javascript" src="js/customer_care.js"></script>
+    
+
+    <script type="text/javascript" src="js/livebilling_graph.js"></script>
+    
+    
 </head>
 <body scroll="no">
 

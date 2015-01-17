@@ -21,21 +21,39 @@ MyDesktop.ContentManagementModule = Ext.extend(Ext.app.Module, {
 	
 	loadStores : function(src){
 		this.keyords = new Ext.data.JsonStore({
-			url : 'ContentManagement.action?listKeywords=&',
+			url : 'ContentManagement.action?listServices=&',
 			root : 'keywords',
 			fields : [{
 						name : 'id',
 						type : 'int'
 					}, {
+						name : 'mo_processorFK'
+					}, {
+						name : 'cmd'
+					}, {
+						name : 'push_queue'
+					}, {
+						name : 'service_name'
+					}, {
+						name : 'service_description'
+					}, {
 						name : 'price'
 					}, {
-						name : 'subscription_push_tail_text'
+						name : 'price_point_keyword'
 					}, {
-						name : 'description'
+						name : 'enabled'
 					}, {
-						name : 'keyword'
+						name : 'split_mt'
 					}, {
-						name : 'size'
+						name : 'subscriptionText'
+					}, {
+						name : 'unsubscriptionText'
+					}, {
+						name : 'tailText_subscribed'
+					}, {
+						name : 'tailText_notsubscribed'
+					}, {
+						name : 'event_type'
 					}]
 		});
 		this.keyords.load();
@@ -98,21 +116,39 @@ MyDesktop.ContentManagementModule = Ext.extend(Ext.app.Module, {
         win.show();
 		
 		var keyords = new Ext.data.JsonStore({
-			url : 'ContentManagement.action?listKeywords=&',
+			url : 'ContentManagement.action?listServices=&',
 			root : 'keywords',
 			fields : [{
 						name : 'id',
 						type : 'int'
 					}, {
+						name : 'mo_processorFK'
+					}, {
+						name : 'cmd'
+					}, {
+						name : 'push_queue'
+					}, {
+						name : 'service_name'
+					}, {
+						name : 'service_description'
+					}, {
 						name : 'price'
 					}, {
-						name : 'subscription_push_tail_text'
+						name : 'price_point_keyword'
 					}, {
-						name : 'description'
+						name : 'enabled'
 					}, {
-						name : 'keyword'
+						name : 'split_mt'
 					}, {
-						name : 'size'
+						name : 'subscriptionText'
+					}, {
+						name : 'unsubscriptionText'
+					}, {
+						name : 'tailText_subscribed'
+					}, {
+						name : 'tailText_notsubscribed'
+					}, {
+						name : 'event_type'
 					}]
 		});
 		keyords.load();
@@ -144,323 +180,186 @@ MyDesktop.ContentManagementModule = Ext.extend(Ext.app.Module, {
 		var simpleForm = new Ext.FormPanel({
 							id : 'myForm',
 							renderTo: 'keywords_div',
-							labelWidth: 75, // label settings here cascade unless overridden
-							url:'ContentManagement.action?saveOrUpdateKeyword=&',
-							frame:true,
-							title: 'Keyword Management',
-							bodyStyle:'padding:5px 5px 0',
-							width: 450,
-							scope: this,
-							defaults: {width: 330},
-							defaultType: 'textfield',
-							margins : {
-								top: 50,
-								right: 50,
-								bottom: 50,
-								left: 50
-							},
-
-							items: [
-								new Ext.form.ComboBox({
-										fieldLabel: 'Keyword',
-										id : 'keywords_combo',
-										lazyRender:false,
-										displayField: 'keyword',
-										valueField: 'id',
-										store: keyords,
-										mode: 'remote',
-										typeAhead: true,
-										scope: this,
-										triggerAction: 'all',
-										emptyText:'Select a Keyword...',
-										name: 'Keywords',
-										editable: true,
-										loadingText: 'Loading...',
-										minChars: 2,
-										selectOnFocus:true,
-										listeners: {
-										'select': function(cmb, rec, idx) {
-											for(var k = 0; k<keyords.reader.jsonData.size;k++){
-												if(keyords.reader.jsonData.keywords[k].id==cmb.getValue()){
-													simpleForm.findById('keyword_description').setValue(keyords.reader.jsonData.keywords[k].description);
-													simpleForm.findById('keyword_price').setValue(keyords.reader.jsonData.keywords[k].price);
-													simpleForm.findById('keyword_subscription').setValue(keyords.reader.jsonData.keywords[k].subscription_push_tail_text);
-												}
-											}
-											 
-										}
-								}
-									}),{
-									id: 'keyword_description',
-									fieldLabel: 'Description',
-									name: 'keyword.description',
-									allowBlank:false
+							labelAlign : 'left',
+							height : 'auto',
+							 labelWidth : 150,
+							frame : true,
+							autoScroll: true,
+							items: [{
+							autoScroll: true,
+								layout : 'column',
+								border : false,
+								items : [{
+											columnWidth : .5,
+											layout : 'form',
+											border : false,
+												items: [
+												{
+													xtype : 'combo',
+													fieldLabel: 'Keyword',
+													id : 'keywords_combo',
+													lazyRender:false,
+													displayField: 'keyword',
+													valueField: 'id',
+													store: keyords,
+													mode: 'remote',
+													typeAhead: true,
+													scope: this,
+													triggerAction: 'all',
+													emptyText:'Select a Keyword...',
+													name: 'Keywords',
+													editable: true,
+													loadingText: 'Loading...',
+													minChars: 5,
+													labelWidth : 150,
+													displayField : 'cmd',
+													valueField : 'id',
+													anchor : '100%',
+													width: 150,
+													selectOnFocus:true,
+													listeners: {
+																	'select': function(cmb, rec, idx) {
+																		for(var k = 0; k<keyords.reader.jsonData.size;k++){
+																			if(keyords.reader.jsonData.keywords[k].id==cmb.getValue()){
+																				simpleForm.findById('mo_processorFK').setValue(keyords.reader.jsonData.keywords[k].mo_processorFK);
+																				simpleForm.findById('cmd').setValue(keyords.reader.jsonData.keywords[k].cmd);
+																				simpleForm.findById('push_unique').setValue(keyords.reader.jsonData.keywords[k].push_unique);
+																				
+																				simpleForm.findById('service_name').setValue(keyords.reader.jsonData.keywords[k].service_name);
+																				simpleForm.findById('service_description').setValue(keyords.reader.jsonData.keywords[k].service_description);
+																				simpleForm.findById('price').setValue(keyords.reader.jsonData.keywords[k].price);
+																				
+																				
+																				simpleForm.findById('price_point_keyword').setValue(keyords.reader.jsonData.keywords[k].price_point_keyword);
+																				simpleForm.findById('enabled').setValue(keyords.reader.jsonData.keywords[k].enabled);
+																				simpleForm.findById('split_mt').setValue(keyords.reader.jsonData.keywords[k].split_mt);
+																				
+																				
+																				simpleForm.findById('subscriptionText').setValue(keyords.reader.jsonData.keywords[k].subscriptionText);
+																				simpleForm.findById('unsubscriptionText').setValue(keyords.reader.jsonData.keywords[k].unsubscriptionText);
+																				simpleForm.findById('tailText_subscribed').setValue(keyords.reader.jsonData.keywords[k].tailText_subscribed);
+																				
+																																								
+																				simpleForm.findById('tailText_notsubscribed').setValue(keyords.reader.jsonData.keywords[k].tailText_notsubscribed);
+																				simpleForm.findById('event_type').setValue(keyords.reader.jsonData.keywords[k].event_type);
+																			}
+																		}
+																	}
+																}
+												 },{
+													xtype : 'textfield',
+													id: 'mo_processorFK',
+													fieldLabel: 'MOProcessor',
+													name: 'smsservice.mo_processorFK',
+													allowBlank:false,
+													anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'cmd',
+														fieldLabel: 'Keyword',
+														name: 'smsservice.cmd',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'push_unique',
+														fieldLabel: 'Push Unique',
+														name: 'smsservice.push_unique',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'service_name',
+														fieldLabel: 'Service Name',
+														name: 'smsservice.service_name',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'service_description',
+														fieldLabel: 'Service Description',
+														name: 'smsservice.service_description',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'price',
+														fieldLabel: 'Price',
+														name: 'smsservice.price',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'price_point_keyword',
+														fieldLabel: 'Price Point KW',
+														name: 'smsservice.price_point_keyword',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'enabled',
+														fieldLabel: 'Enabled',
+														name: 'smsservice.enabled',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'split_mt',
+														fieldLabel: 'Split SMS into 160 xters',
+														name: 'smsservice.split_mt',
+													    anchor : '95%'
+													},{
+														 xtype : 'textfield',
+														 id: 'subscriptionText',
+														fieldLabel: 'Subscription Text',
+														name: 'smsservice.subscriptionText',
+													    anchor : '95%'
+													}]
+											},{
+													columnWidth : .5,
+													layout : 'form',
+													border : false,
+													items: [
+													{
+														 xtype : 'textfield',
+														 id: 'unsubscriptionText',
+														fieldLabel: 'Unsubscription Text',
+														name: 'smsservice.unsubscriptionText',
+													    anchor : '100%'
+													},{
+														 xtype : 'textfield',
+														 id: 'tailText_subscribed',
+														fieldLabel: 'Tail Text When Subscribed',
+														name: 'smsservice.tailText_subscribed',
+													    anchor : '100%'
+													},{
+														 xtype : 'textfield',
+														 id: 'tailText_notsubscribed',
+														fieldLabel: 'Tail Text When not Subscribed',
+														name: 'smsservice.tailText_notsubscribed',
+													    anchor : '100%'
+													},{
+														 xtype : 'textfield',
+														 id: 'event_type',
+														fieldLabel: 'Event Type',
+														name: 'smsservice.event_type',
+													    anchor : '100%'
+													}
+												]
+										}]
+									}],
+							buttons: [
+							{
+								text: 'Save',
+								iconCls : 'x-icon-save',
+								handler : function submitForm(){
+								
+									alert('Save!!');
+									}
 								},{
-									id: 'keyword_price',
-									fieldLabel: 'Price',
-									name: 'keyword.price'
-								},{
-								    id: 'keyword_subscription',
-									fieldLabel: 'Subscription Push Text',
-									name: 'keyword.subscription'
+								text: 'Cancel',
+								iconCls : 'x-icon-close',
+								handler : function cancel(){
+									alert('Cancelled!');
 								}
-							],
-
-							buttons: [{
-								text: 'Save'
-							},{
-								text: 'Cancel'
-							}]
+								}
+							]
 						});					
 							
-		Ext.QuickTips.init();
-
-    // Menus can be prebuilt and passed by reference
-    var dateMenu = new Ext.menu.DateMenu({
-        handler: function(dp, date){
-            Ext.example.msg('Date Selected', 'You chose {0}.', date.format('M j, Y'));
-        }
-    });
-
-    var colorMenu = new Ext.menu.ColorMenu({
-        handler: function(cm, color){
-            Ext.example.msg('Color Selected', 'You chose {0}.', color);
-        }
-    });
-
-    var store = new Ext.data.ArrayStore({
-        fields: ['abbr', 'state'],
-        data : keyword_combo // from states.js
-    });
-
-    var combo = new Ext.form.ComboBox({
-        store: store,
-        displayField: 'state',
-        typeAhead: true,
-        mode: 'local',
-        triggerAction: 'all',
-        emptyText: 'Select a state...',
-        selectOnFocus: true,
-        width: 135,
-        getListParent: function() {
-            return this.el.up('.x-menu');
-        },
-        iconCls: 'no-icon'
-    });
-
-    var menu = new Ext.menu.Menu({
-        id: 'mainMenu',
-        style: {
-            overflow: 'visible'     // For the Combo popup
-        },
-        items: [
-            combo,                  // A Field in a Menu
-            {
-                text: 'I like Ext',
-                checked: true,       // when checked has a boolean value, it is assumed to be a CheckItem
-                checkHandler: onItemCheck
-            }, '-', {
-                text: 'Radio Options',
-                menu: {        // <-- submenu by nested config object
-                    items: [
-                        // stick any markup in a menu
-                        '<b class="menu-title">Choose a Theme</b>',
-                        {
-                            text: 'Aero Glass',
-                            checked: true,
-                            group: 'theme',
-                            checkHandler: onItemCheck
-                        }, {
-                            text: 'Vista Black',
-                            checked: false,
-                            group: 'theme',
-                            checkHandler: onItemCheck
-                        }, {
-                            text: 'Gray Theme',
-                            checked: false,
-                            group: 'theme',
-                            checkHandler: onItemCheck
-                        }, {
-                            text: 'Default Theme',
-                            checked: false,
-                            group: 'theme',
-                            checkHandler: onItemCheck
-                        }
-                    ]
-                }
-            },{
-                text: 'Choose a Date',
-                iconCls: 'calendar',
-                menu: dateMenu // <-- submenu by reference
-            },{
-                text: 'Choose a Color',
-                menu: colorMenu // <-- submenu by reference
-            }
-        ]
-    });
-
-	var tb = Ext.get('myTolbar');
-	if(!tb){
-			tb = new Ext.Toolbar({id:'myTolbar' });
-			tb.render('toolbar');
-			tb.id = 'myTolbar',
-			tb.add({
-					text:'Button w/ Menu',
-					iconCls: 'bmenu',  // <-- icon
-					menu: menu  // assign menu by instance
-				}, {
-					text: 'Users',
-					iconCls: 'user',
-					menu: {
-						xtype: 'menu',
-						plain: true,
-						items: {
-							xtype: 'buttongroup',
-							title: 'User options',
-							autoWidth: true,
-							columns: 2,
-							defaults: {
-								xtype: 'button',
-								scale: 'large',
-								width: '100%',
-								iconAlign: 'left'
-							},
-							items: [{
-								text: 'User<br/>manager',
-								iconCls: 'edit'
-							},{
-								iconCls: 'add',
-								width: 'auto',
-								tooltip: 'Add user'
-							},{
-								colspan: 2,
-								text: 'Import',
-								scale: 'small'
-							},{
-								colspan: 2,
-								text: 'Who is online?',
-								scale: 'small'
-							}]
-						}
-					}
-				},
-				new Ext.Toolbar.SplitButton({
-					text: 'Split Button',
-					handler: onButtonClick,
-					tooltip: {text:'This is a an example QuickTip for a toolbar item', title:'Tip Title'},
-					iconCls: 'blist',
-					// Menus can be built/referenced by using nested menu config objects
-					menu : {
-						items: [{
-							text: '<b>Bold</b>', handler: onItemClick
-						}, {
-							text: '<i>Italic</i>', handler: onItemClick
-						}, {
-							text: '<u>Underline</u>', handler: onItemClick
-						}, '-', {
-							text: 'Pick a Color',
-							handler: onItemClick,
-							menu: {
-								items: [
-									new Ext.ColorPalette({
-										listeners: {
-											select: function(cp, color){
-												Ext.example.msg('Color Selected', 'You chose {0}.', color);
-											}
-										}
-									}), '-',
-									{
-										text: 'More Colors...',
-										handler: onItemClick
-									}
-								]
-							}
-						}, {
-							text: 'Extellent!',
-							handler: onItemClick
-						}]
-					}
-				}), '-', {
-				text: 'Toggle Me',
-				enableToggle: true,
-				toggleHandler: onItemToggle,
-				pressed: true
-			});
-
-			menu.addSeparator();
-			// Menus have a rich api for
-			// adding and removing elements dynamically
-			var item = menu.add({
-				text: 'Dynamically added Item'
-			});
-			// items support full Observable API
-			item.on('click', onItemClick);
-
-			// items can easily be looked up
-			menu.add({
-				text: 'Disabled Item',
-				id: 'disableMe'  // <-- Items can also have an id for easy lookup
-				// disabled: true   <-- allowed but for sake of example we use long way below
-			});
-			// access items by id or index
-			menu.items.get('disableMe').disable();
-
-			// They can also be referenced by id in or components
-			tb.add('-', {
-				icon: 'list-items.gif', // icons can also be specified inline
-				cls: 'x-btn-icon',
-				tooltip: '<b>Quick Tips</b><br/>Icon only button with tooltip'
-			}, '-');
-
-			var scrollMenu = new Ext.menu.Menu();
-			for (var i = 0; i < 50; ++i){
-				scrollMenu.add({
-					text: 'Item ' + (i + 1)
-				});
-			}
-			// scrollable menu
-			tb.add({
-				icon: 'preview.png',
-				cls: 'x-btn-text-icon',
-				text: 'Scrolling Menu',
-				menu: scrollMenu
-			});
-
-			// add a combobox to the toolbar
-			var combo = new Ext.form.ComboBox({
-				store: store,
-				displayField: 'state',
-				typeAhead: true,
-				mode: 'local',
-				triggerAction: 'all',
-				emptyText:'Select a state...',
-				selectOnFocus:true,
-				width:135
-			});
-			tb.addField(combo);
-
-			tb.doLayout();
-			
-			
-
-			// functions to display feedback
-			function onButtonClick(btn){
-				Ext.Msg.alert('Button Click','You clicked the "'+btn.text+'" button.');
-			}
-
-			function onItemClick(item){
-				Ext.Msg.alert('Menu Click', 'You clicked the "'+item.text+'" menu item.');
-			}
-
-			function onItemCheck(item, checked){
-				Ext.Msg.alert('Item Check', 'You '+(checked ? 'checked' : 'unchecked')+'the "'+item.text+'" menu item.' );
-			}
-
-			function onItemToggle(item, pressed){
-				Ext.Msg.alert('Button Toggled', 'Button "'+item.text+'" was toggled to '+pressed+'.');
-			}
 		
-	}
 		
 	}
 });

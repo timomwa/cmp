@@ -1,5 +1,6 @@
 package com.pixelandtag.action;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,14 @@ import com.pixelandtag.model.FolderDao;
 
 
 public class BaseActionBean implements ActionBean {
+
+	public static final String PREFERED_DATE_FORMAT_0 = "yyyy-MM-dd";
+	
+	public static final String PREFERED_DATE_FORMAT_1 = "dd-MMM-yyyy";
+	
+	public static final SimpleDateFormat preferredDateFormatter_0 = new SimpleDateFormat(PREFERED_DATE_FORMAT_0);
+	
+	public static final SimpleDateFormat preferred_date_format_1 = new SimpleDateFormat(PREFERED_DATE_FORMAT_1);
 
 	/*
 	 * private ActionBeanContext ctx;

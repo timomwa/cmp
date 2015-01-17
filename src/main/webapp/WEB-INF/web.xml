@@ -34,7 +34,7 @@
 	
 	<init-param>
         <param-name>Extension.Packages</param-name>
-        <param-value>com.pixelandtag.cmp,com.pixelandtag.ext,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
+        <param-value>org.stripesstuff.plugin,com.ext,com.pixelandtag.cmp,com.pixelandtag.ext,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
     </init-param>
      <init-param>
          <param-name>UnauthorizedResolutionURL</param-name>

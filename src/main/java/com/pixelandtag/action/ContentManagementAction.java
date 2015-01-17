@@ -8,9 +8,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import antlr.collections.List;
-
-import com.pixelandtag.cmp.entities.Keyword;
+import com.pixelandtag.cmp.entities.SMSService;
 
 import net.sourceforge.stripes.action.Before;
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -19,32 +17,33 @@ import net.sourceforge.stripes.controller.LifecycleStage;
 
 public class ContentManagementAction extends BaseActionBean {
 	private Logger log = Logger.getLogger(this.getClass());
-	private Keyword keyword;
+	private SMSService smsservice;
 	
 	@Before(on = "saveOrUpdateKeyword", stages = LifecycleStage.BindingAndValidation)
 	public void rehydrate() {
-		if (keyword == null) {
-			log.info("Keyword is null,trying to get the params...");
-			String id = getContext().getRequest().getParameter("keyword.id");
+		if (smsservice == null) {
+			log.info("SMSService is null,trying to get the params...");
+			String id = getContext().getRequest().getParameter("smsservice.id");
 			log.info("Keyword id = "+id);
-			keyword = (Keyword) getContext().getRequest().getSession()
-					.getAttribute("keyword");
+			smsservice = (SMSService) getContext().getRequest().getSession()
+					.getAttribute("smsservice");
 			if(!StringUtils.isEmpty(id)){
-				keyword = cmp_dao.find(Keyword.class, new Long(id));
+				smsservice = cmp_dao.find(SMSService.class, new Long(id));
 			}
 		} else {
 			log.info("Got an member from the session :");
 		}
 	}
 	
+	
 	@DefaultHandler
-	public Resolution listKeywords() throws JSONException{
-		Collection<Keyword> test = cmp_dao.lists(Keyword.class, 0, 100);
-		Iterator<Keyword> kws = test.iterator();
+	public Resolution listServices() throws JSONException{
+		Collection<SMSService> test = cmp_dao.lists(SMSService.class, 0, 100);
+		Iterator<SMSService> kws = test.iterator();
 		JSONObject resp = new JSONObject();
 		resp.put("size", test.size());
 		while(kws.hasNext()){
-			Keyword kw = kws.next();
+			SMSService kw = kws.next();
 			System.out.println(kw);
 			log.info("kw : "+kw);
 			resp.append("keywords", kw.toJson());
@@ -52,19 +51,21 @@ public class ContentManagementAction extends BaseActionBean {
 		return sendResponse(resp.toString());
 	}
 	
-	public Resolution saveOrUpdateKeyword(){
+	
+	public Resolution saveOrUpdateService(){
 		return null;
 	}
 
 
-	public Keyword getKeyword() {
-		return keyword;
+	public SMSService getSmsservice() {
+		return smsservice;
 	}
 
 
-	public void setKeyword(Keyword keyword) {
-		this.keyword = keyword;
+	public void setSmsservice(SMSService smsservice) {
+		this.smsservice = smsservice;
 	}
+
 	
 	
 	
