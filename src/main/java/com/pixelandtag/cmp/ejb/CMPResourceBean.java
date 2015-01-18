@@ -33,6 +33,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -2094,7 +2095,39 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 		
 	}
 
-	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean saveStaticSMS(String db_name, String table,
+			String static_category_value, String sms) throws Exception{
+		boolean success = false;
+		try{
+			utx.begin();
+			Query qry2 = em.createNativeQuery("INSERT INTO `"+db_name+"`.`"+table+"`(Category,Text,timeStamp) VALUES(:category, :text, CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'))");
+			qry2.setParameter("category", static_category_value);
+			qry2.setParameter("text", sms);
+			
+			success =  qry2.executeUpdate()>0;
+			utx.commit();
+		}catch(Exception exp){
+			try{
+				utx.rollback();
+			}catch(Exception ex){}
+			logger.error(exp.getMessage(),exp);
+			throw exp;
+		}
+		return success;
+	}
+	@SuppressWarnings("unchecked")
+	public List<SMSMenuLevels> listChildren(Long id)  throws Exception {
+		List<SMSMenuLevels> list = null;
+		try{
+			Query qry = em.createQuery("from SMSMenuLevels sm where parent_level_id=:parent_level_id");
+			qry.setParameter("parent_level_id", id);
+			list =  qry.getResultList();
+		}catch(javax.persistence.NoResultException  nre){
+			logger.error(nre.getMessage(),nre);
+		}
+		return list;
+	}
 	
 	@SuppressWarnings("unchecked")
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)

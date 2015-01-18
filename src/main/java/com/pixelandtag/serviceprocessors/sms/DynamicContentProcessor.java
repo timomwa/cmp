@@ -68,8 +68,8 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 	    ds.setDescription("DYNAMIC Content thread datasource: "+ds.getName());
 	    ds.setDriverClassName(driver);
 	    ds.setUrl(url);
-	    ds.setUser("root");
-	    ds.setPassword("");
+	    //ds.setUser("root");
+	   // ds.setPassword("");
 	    ds.setMinPool(1);
 	    ds.setMaxPool(2);
 	    ds.setMaxSize(3);
@@ -91,7 +91,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 			final String KEYWORD = req.getKeyword().trim();
 			final String MSISDN = req.getMsisdn();
 			final int serviceid = mo.getServiceid();
-			final Map<String,String> additionalInfo = UtilCelcom.getAdditionalServiceInfo(serviceid,conn);
+			final Map<String,String> additionalInfo = cmpbean.getAdditionalServiceInfo(serviceid);
 			final int content_id = Integer.valueOf(UtilCelcom.getServiceMetaData(conn,serviceid,"dynamic_contentid"));
 			
 			dynamic_content_processorLogger.info("KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
@@ -101,12 +101,12 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 			
 			if(!mo.isSubscriptionPush()){//If this is a subscription push, then don't check if sub is subscribed.
 				
-				SubscriptionDTO sub = subscription.getSubscriptionDTO(conn, MSISDN, serviceid);
+				SubscriptionDTO sub = cmpbean.getSubscriptionDTO(MSISDN, serviceid);
 				
 				tailMsg = (sub==null ? additionalInfo.get("tailText_notsubscribed") : (SubscriptionStatus.confirmed==SubscriptionStatus.get(sub.getSubscription_status()) ? additionalInfo.get("tailText_subscribed") : additionalInfo.get("tailText_notsubscribed")));
 						 
 				if(tailMsg==null || tailMsg.equals(additionalInfo.get("tailText_notsubscribed"))){
-					subscription.subscribe(conn, MSISDN, serviceid, -1);
+					cmpbean.subscribe(MSISDN, serviceid, -1);
 				}
 				
 			}else{

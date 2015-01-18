@@ -49,8 +49,8 @@ public class CMPDao  extends BaseDao {
 		
 	}
 	
-	public <T> T saveOrUpdate(T t) {
-		t = resource_bean.getEM().merge(t);
+	public <T> T saveOrUpdate(T t) throws Exception {
+		t = resource_bean.saveOrUpdate(t);
         return t;
 	} 
 

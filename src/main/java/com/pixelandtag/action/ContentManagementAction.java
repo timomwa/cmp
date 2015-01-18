@@ -17,9 +17,10 @@ import net.sourceforge.stripes.controller.LifecycleStage;
 
 public class ContentManagementAction extends BaseActionBean {
 	private Logger log = Logger.getLogger(this.getClass());
+	@org.stripesstuff.plugin.session.Session(key = "smsservice")
 	private SMSService smsservice;
 	
-	@Before(on = "saveOrUpdateKeyword", stages = LifecycleStage.BindingAndValidation)
+	@Before(on = "saveOrUpdateService", stages = LifecycleStage.BindingAndValidation)
 	public void rehydrate() {
 		if (smsservice == null) {
 			log.info("SMSService is null,trying to get the params...");
@@ -52,8 +53,13 @@ public class ContentManagementAction extends BaseActionBean {
 	}
 	
 	
-	public Resolution saveOrUpdateService(){
-		return null;
+	public Resolution saveOrUpdateService() throws Exception{
+		smsservice = cmp_dao.saveOrUpdate(smsservice);
+		JSONObject jsonob = new JSONObject();
+		jsonob.put("success", true);
+		jsonob.put("msg", "Successfully saved keyword");
+		jsonob.put("id", smsservice.getId());
+		return  sendResponse(jsonob.toString());
 	}
 
 

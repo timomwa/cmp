@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.hibernate.HibernateException;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -173,5 +175,10 @@ public interface CMPResourceBeanRemote {
 	public SMSServiceDTO getSMSservice(String keyword) throws Exception;
 	
 	public boolean updateSMSStatLog(BigInteger transaction_id, ERROR errorcode) throws Exception;
+
+	public List<SMSMenuLevels> listChildren(Long id)  throws Exception ;
+
+	public boolean saveStaticSMS(String db_name, String table,
+			String static_category_value, String sms) throws Exception;
 
 }
