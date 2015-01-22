@@ -53,6 +53,12 @@
 			<version>4.1.7.Final</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+			<version>2.0.5</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.jboss</groupId>
@@ -176,7 +182,7 @@
 			<groupId>javax.ejb</groupId>
 			<artifactId>ejb-api</artifactId>
 			<version>3.0-alpha-1</version>
-			<!--scope>provided</scope-->
+			<!--scope>provided</scope -->
 		</dependency>
 
 

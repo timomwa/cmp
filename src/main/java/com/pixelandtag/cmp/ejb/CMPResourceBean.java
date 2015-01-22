@@ -2264,14 +2264,21 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			if(wasInLog){
 				
 				utx.begin();
-				String sql5 = "UPDATE `"+CelcomImpl.database+"`.`SMSStatLog` SET statusCode=?,  charged=? WHERE  transactionID = ?";
+				String sql5 = "UPDATE `"+CelcomImpl.database+"`.`SMSStatLog` SET statusCode=?,  charged=?, statusCode=? WHERE  transactionID = ?";
+				BillingStatus billStatus = BillingStatus.WAITING_BILLING;
+				billStatus = errorcode.equals(ERROR.Success)  ? BillingStatus.SUCCESSFULLY_BILLED : billStatus;
+				billStatus = errorcode.equals(ERROR.PSAInsufficientBalance)  ? BillingStatus.INSUFFICIENT_FUNDS : billStatus;
+				billStatus = errorcode.equals(ERROR.InvalidSubscriber)  ? BillingStatus.BILLING_FAILED_PERMANENTLY : billStatus;
+				billStatus = errorcode.equals(ERROR.PSAChargeFailure)  ? BillingStatus.BILLING_FAILED : billStatus;
+				
 				
 				Query qry5 = em.createNativeQuery(sql5);
 				
 				qry5.setParameter(1, errorcode.toString());
 				qry5.setParameter(2, (((priceTbc>0.0) && errorcode.equals(ERROR.Success)) ? 1: 0 )   );
-				qry5.setParameter(3, cmpTxid);
-				
+				qry5.setParameter(3, billStatus.toString() );
+				qry5.setParameter(4, cmpTxid);
+				//ERROR.PSAInsufficientBalance
 				success = qry5.executeUpdate()>0;
 				
 				logger.debug("MT (transactionID = "+cmpTxid+ ") " + (success ? "successfully logged into SMSStatLog" : "failed to log into SMSStatLog"));

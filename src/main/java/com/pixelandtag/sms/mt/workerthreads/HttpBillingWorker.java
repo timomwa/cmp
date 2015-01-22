@@ -463,7 +463,6 @@ public class HttpBillingWorker implements Runnable {
 					
 					billable.setProcessed(1L);
 					billable.setIn_outgoing_queue(0L);
-					cmp_ejb.saveOrUpdate(billable);
 					
 					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
@@ -472,10 +471,12 @@ public class HttpBillingWorker implements Runnable {
 					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.InvalidSubscriber);
+						billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
 					}
 					if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
 						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAInsufficientBalance);
+						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 					}
 					
 					if("TWSS_109".equals(billable.getResp_status_code())){
@@ -484,9 +485,10 @@ public class HttpBillingWorker implements Runnable {
 						billable.setProcessed(0L);
 						billable.setRetry_count( (billable.getRetry_count()+1 ) );
 						billable.setMaxRetriesAllowed(5L);
-						cmp_ejb.saveOrUpdate(billable);
-						
+						billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 					}
+					
+					cmp_ejb.saveOrUpdate(billable);
 					
 					if(!this.success){//return back to queue if we did not succeed
 						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
