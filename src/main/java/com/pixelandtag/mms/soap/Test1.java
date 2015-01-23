@@ -37,6 +37,8 @@ import javax.xml.soap.SOAPPart;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.pixelandtag.api.BillingStatus;
+
 
 
 
@@ -67,6 +69,11 @@ public class Test1 {
 	 */
 	public static void main(String[] args) throws Exception {
 		
+		
+		
+		String billingfailed = BillingStatus.SUCCESSFULLY_BILLED.toString();
+		System.out.println(billingfailed);
+		if(true)return;
 		
 		double value = 0.58;
 		System.out.println(new BigDecimal(value));
