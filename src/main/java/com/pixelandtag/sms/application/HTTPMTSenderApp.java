@@ -5,11 +5,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.pixelandtag.api.Settings;
 import com.pixelandtag.entities.URLParams;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 

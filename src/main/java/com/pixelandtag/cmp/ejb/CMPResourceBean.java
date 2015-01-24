@@ -1,11 +1,7 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.Resource;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -23,9 +18,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 
@@ -37,7 +30,6 @@ import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
-import com.pixelandtag.entities.Notification;
 import com.pixelandtag.exceptions.NoSettingException;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -56,7 +48,7 @@ import com.pixelandtag.web.beans.MessageType;
 @Stateless
 @Remote
 @TransactionManagement(TransactionManagementType.BEAN)
-public class CMPResourceBean implements CMPResourceBeanRemote {
+public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRemote {
 	
 	private String server_tz = "-05:00";//TODO externalize
 
@@ -67,6 +59,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 	private final String RM1 = "RM1";
 	
 	private SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	public void setServerTz(String server_tz)  throws Exception {
 		this.server_tz = server_tz;
 	}
@@ -1774,19 +1767,7 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 
 	private Logger logger = Logger.getLogger(CMPResourceBean.class);
 	
-	@Resource
-	@PersistenceContext(unitName = "EjbComponentPU4")
-	private EntityManager em;
 	
-
-	@Resource
-	private UserTransaction utx;
-	
-	
-	@Override
-	public EntityManager getEM() {
-		return em;
-	}
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -1805,29 +1786,6 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 			throw e;
 		}
 		return t;
-	}
-	
-	
-	/**
-	 * saves and commits
-	 * @param t
-	 * @return
-	 * @throws Exception 
-	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public <T> T find(Class<T> entityClass, Long id) throws Exception {
-		try{
-			utx.begin();
-			T t = em.find( entityClass,id);
-			utx.commit();
-			return t;
-		}catch(Exception  e){
-			try{
-				utx.rollback();
-			}catch(Exception ex){}
-			throw e;
-			
-		}
 	}
 	
 	
@@ -2343,6 +2301,11 @@ public class CMPResourceBean implements CMPResourceBeanRemote {
 					.append(criteria.size() == counter2 ? "" : " AND ");
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public EntityManager getEM() {
+		return super.getEM();
 	}
 
 	

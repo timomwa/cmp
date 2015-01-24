@@ -1,7 +1,6 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -19,137 +18,28 @@ import javax.transaction.UserTransaction;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomImpl;
-import com.pixelandtag.dating.entities.Person;
-import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
-import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 
 @Stateless
 @Remote
 @TransactionManagement(TransactionManagementType.BEAN)
-public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
+public class BaseEntityBean implements BaseEntityI {
 	
-	
-	public Logger logger = Logger.getLogger(DatingServiceBean.class);
+	private Logger logger = Logger.getLogger(BaseEntityBean.class);
+	@Override
+	public EntityManager getEM() {
+		return em;
+	}
+
 	
 	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")
-	private EntityManager em;
+	protected EntityManager em;
 	
 
 	@Resource
-	private UserTransaction utx;
-
-	
-	@Override
-	public String getMessage(String key, int language_id) throws DatingServiceException{
-		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
-		
-		try {
-			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1";
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, language_id);
-			qry.setParameter(2, key);
-
-			Object obj = qry.getSingleResult();
-			if (obj!=null) {
-				message = (String) obj;
-			}
-
-
-			logger.debug("looking for :[" + key + "], found [" + message + "]");
-			
-			return message;
-
-		}catch(javax.persistence.NoResultException ex){
-			logger.warn(ex.getMessage() + " no profile for subscriber "+message);
-			return null;
-		}catch (Exception e) {
-
-			logger.error(e.getMessage(), e);
-
-			throw new DatingServiceException(e.getMessage(),e);
-
-		}finally{
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public PersonDatingProfile getProfile(Person person) throws DatingServiceException{
-		
-		PersonDatingProfile profile = null;
-		
-		try{
-			Query qry = em.createQuery("from PersonDatingProfile prf WHERE prf.person=:person");
-			qry.setParameter("person", person);
-			List<PersonDatingProfile> lst = qry.getResultList();
-			
-			if(lst.size()>0)
-				profile = lst.get(0);
-			
-		}catch(javax.persistence.NoResultException ex){
-			logger.warn(ex.getMessage() + " no profile for person "+person);
-		}catch (Exception e) {
-
-			logger.error(e.getMessage(), e);
-
-			throw new DatingServiceException(e.getMessage(),e);
-
-		}finally{
-		}
-		
-		return profile;
-		
-	}
-	@Override
-	public String getMessage(DatingMessages datingMsg, int language_id) throws DatingServiceException{
-		return getMessage(datingMsg.toString(),language_id);
-	}
-	
-	@Override
-	public Person register(String msisdn) throws DatingServiceException {
-		Person person = new Person();
-		person.setMsisdn(msisdn);
-		return saveOrUpdate(person);
-	}
-
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public <T> T saveOrUpdate(T t) throws DatingServiceException{
-		try{
-			utx.begin();
-			t = em.merge(t);
-			utx.commit();
-		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error(e.getMessage(),e);
-			throw new DatingServiceException(e.getMessage(),e);
-		}
-		return t;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Person getPerson(String msisdn) throws DatingServiceException {
-		Person person = null;
-		try{
-			Query qry = em.createQuery("from Person p where p.msisdn=:msisdn");
-			qry.setParameter("msisdn", msisdn);
-			List<Person> ps = qry.getResultList();
-			if(ps.size()>0)
-				person = ps.get(0);
-		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
-		}
-		return person;
-	}
-
-	
-	
+	protected UserTransaction utx;
 	
 	private String buildWhere(Map<String, Object> criteria)  throws Exception {
 		StringBuffer sb = new StringBuffer();
@@ -164,9 +54,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return sb.toString();
 	}
 	
-	
-	
-	
+
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@SuppressWarnings("unchecked")
 	@Override
@@ -190,6 +78,24 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 	}
 
+
+@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			utx.begin();
+			t = em.merge(t);
+			utx.commit();
+		}catch(Exception e){
+			try {
+				utx.rollback();
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(),e1);
+			} 
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		return t;
+	}
 	
 /**
 	 * saves and commits
@@ -328,5 +234,22 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		 
 		return success;
 	}
+
+
+	@SuppressWarnings("unchecked")
+	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception  {
+		T t = null;
+		try{
+			Query query = em.createQuery("from " + entityClass.getSimpleName() + " WHERE "+param_name+" =:"+param_name+" ").setParameter(param_name, value);
+			if(query.getResultList().size()>0)
+				t = (T) query.getResultList().get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception  e){
+			throw e;
+		}
+		return t;
+	}
+
 
 }

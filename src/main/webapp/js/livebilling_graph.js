@@ -44,7 +44,7 @@ function populate(){
 					items: {
 						xtype: 'columnchart',
 						store: store,
-						url:'../../resources/charts.swf',
+						url:'/js/charts.swf',
 						xField: 'name',
 						yAxis: new Ext.chart.NumericAxis({
 							displayName: 'Hits',

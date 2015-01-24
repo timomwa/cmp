@@ -1,4 +1,4 @@
-Ext.chart.Chart.CHART_URL = '../../resources/charts.swf';
+Ext.chart.Chart.CHART_URL = '/js/charts.swf';
 Ext.QuickTips.init();
     
     // create some portlet tools using built in Ext tool ids

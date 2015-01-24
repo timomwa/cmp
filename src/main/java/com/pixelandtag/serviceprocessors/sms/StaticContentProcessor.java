@@ -9,12 +9,14 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.UtilCelcom;
+import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -241,7 +243,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 
 	
 	@Override
-	public CMPResourceBeanRemote getEJB() {
+	public BaseEntityI getEJB() {
 		return this.cmpbean;
 	}
 

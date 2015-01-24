@@ -2,6 +2,7 @@ package com.pixelandtag.api;
 
 import java.sql.Connection;
 
+import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 
@@ -66,7 +67,7 @@ public interface ServiceProcessorI extends Runnable{
 	 * define their own EJBs..
 	 * @return
 	 */
-	public CMPResourceBeanRemote getEJB();
+	public BaseEntityI getEJB();
 	
 	
 	/**

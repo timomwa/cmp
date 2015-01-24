@@ -1,22 +1,14 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-
-import org.hibernate.HibernateException;
-
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
-import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
@@ -30,30 +22,15 @@ import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.MessageType;
 
-public interface CMPResourceBeanRemote {
-	
-	public EntityManager getEM();
-	
-	public <T> T saveOrUpdate(T t) throws Exception ;
+public interface CMPResourceBeanRemote extends BaseEntityI {
 	
 	public boolean updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) throws Exception;
-	
-	public <T> T find(Class<T> entityClass, Long id) throws Exception;
-	
-	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception;
 	
 	public <T> Collection<T> find(Class<T> entityClass,Map<String, Object> criteria, int start, int end)  throws Exception ;
 	
 	public boolean testEJB(int k) throws Exception;
-
-	public boolean toStatsLog(MOSms mo, String toStatsLog)  throws Exception ;
-	
-	public boolean  acknowledge(long message_log_id) throws Exception;
-
-	public boolean sendMT(MOSms mo, String sql) throws Exception;
 	
 	public String getUnique(String database_name,String table,String field,String idfield,String msisdn,int serviceid,int size,int processor_id) throws Exception;
-	
 	
 	public List<SubscriptionDTO> getSubscriptionServices()  throws Exception ;
 

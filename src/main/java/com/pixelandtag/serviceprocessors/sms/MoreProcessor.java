@@ -22,6 +22,7 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.util.UtilCelcom;
+import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -767,7 +768,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 
 	
 	@Override
-	public CMPResourceBeanRemote getEJB() {
+	public BaseEntityI getEJB() {
 		return this.cmpbean;
 	}
 	

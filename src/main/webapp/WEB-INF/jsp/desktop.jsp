@@ -14,19 +14,19 @@
     <script type="text/javascript" src="js/ext-all-debug.js"></script>
 
     <!-- DESKTOP -->
-    <script type="text/javascript" src="js/StartMenu.js"></script>
-    <script type="text/javascript" src="js/TaskBar.js"></script>
-    <script type="text/javascript" src="js/Desktop.js"></script>
-    <script type="text/javascript" src="js/App.js"></script>
-    <script type="text/javascript" src="js/Module.js"></script>
-    <script type="text/javascript" src="js/sample.js"></script>
-    <script type="text/javascript" src="js/content_manager.js"></script>
-    <script type="text/javascript" src="js/subscription_management.js"></script>
-    <script type="text/javascript" src="js/statistics.js"></script>
-    <script type="text/javascript" src="js/customer_care.js"></script>
+    <script type="text/javascript" src="js/StartMenu.js?v=2.0"></script>
+    <script type="text/javascript" src="js/TaskBar.js?v=2.0"></script>
+    <script type="text/javascript" src="js/Desktop.js?v=2.0"></script>
+    <script type="text/javascript" src="js/App.js?v=2.0"></script>
+    <script type="text/javascript" src="js/Module.js?v=2.0"></script>
+    <script type="text/javascript" src="js/sample.js?v=2.0"></script>
+    <script type="text/javascript" src="js/content_manager.js?v=2.0"></script>
+    <script type="text/javascript" src="js/subscription_management.js?v=2.0"></script>
+    <script type="text/javascript" src="js/statistics.js?v=2.0"></script>
+    <script type="text/javascript" src="js/customer_care.js?v=2.0"></script>
     
 
-    <script type="text/javascript" src="js/livebilling_graph.js"></script>
+    <script type="text/javascript" src="js/livebilling_graph.js?v=1.0"></script>
     
     
 </head>

@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.Settings;
+import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
@@ -175,7 +176,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		Billable billable = null;
 		
 		try{
-			
 			
 			billable = getEJB().find(Billable.class, "cp_tx_id",mo_.getCMP_Txid());
 			/*String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
@@ -648,7 +648,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		mo  = bill(mo);
 		
-		CMPResourceBeanRemote cmpBean = getEJB();
+		BaseEntityI cmpBean = getEJB();
 		//PreparedStatement pstmt = null;
 		
 		//Connection conn = null;
