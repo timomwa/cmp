@@ -143,7 +143,7 @@ public interface CMPResourceBeanRemote {
 
 	public int getSubscriberLanguage(String msisdn) throws Exception;
 
-	public String getMessage(String mainMenuAdvice, int language_id) throws Exception;
+	public String getMessage(String key, int language_id) throws Exception;
 	
 	public boolean updateProfile(String msisdn, int language_id) throws Exception;
 	
