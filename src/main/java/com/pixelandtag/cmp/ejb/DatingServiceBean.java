@@ -116,6 +116,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	public Person register(String msisdn) throws DatingServiceException {
 		Person person = new Person();
 		person.setMsisdn(msisdn);
+		person.setActive(false);		
 		return saveOrUpdate(person);
 	}
 
@@ -416,7 +417,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setFirstResult(0);
 			qry.setMaxResults(1);
 			List<Object> qidfko  = qry.getResultList();
-			Long question_id_fk =  (Long) qidfko.get(0);
+			
+			Long question_id_fk = -1l;
+			
+			if(qidfko.size()>0)
+			 question_id_fk = (Long) qidfko.get(0);
 			
 			System.out.println("\n\n\n\t\t:::question_id_fk == "+question_id_fk );
 			

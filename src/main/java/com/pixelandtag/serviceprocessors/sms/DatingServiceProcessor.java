@@ -50,7 +50,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		 datingBean =  (DatingServiceI) 
        		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		 
-		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+		 logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
 	@Override
@@ -90,10 +90,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				profile = new PersonDatingProfile();
 				profile.setPerson(person);
 				profile.setUsername(MSISDN);
+				
 				profile = datingBean.saveOrUpdate(profile);
 				
 				ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
-				System.out.println("QUESTION::: "+question.getQuestion());
+				logger.debug("QUESTION::: "+question.getQuestion());
 				mo.setMt_Sent(msg+ SPACE +question.getQuestion());
 				
 				QuestionLog ql = new QuestionLog();
@@ -109,9 +110,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					ProfileQuestion previousQuestion = datingBean.getPreviousQuestion(profile.getId());
 					final ProfileAttribute attr = previousQuestion.getAttrib();
-					System.out.println("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+MESSAGE);
+					logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+MESSAGE);
 				
-					System.out.println("ATRIBUTE ADDRESSING ::: "+attr.toString());
+					logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
 					if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 						boolean isunique = datingBean.isUsernameUnique(KEYWORD);
 						if(isunique){
@@ -125,10 +126,20 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 					
 					if(attr.equals(ProfileAttribute.GENDER)){
-						if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")) 
+						if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")){ 
 							profile.setGender(Gender.MALE);
-						else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")) 
+						}else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
 							profile.setGender(Gender.FEMALE);
+						}else{
+							String msg = null;
+							try{
+								msg = datingBean.getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id);
+							}catch(DatingServiceException dse){
+								logger.error(dse.getMessage(), dse);
+							}
+							mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
+							return mo;
+						}
 					}
 					
 					if(attr.equals(ProfileAttribute.AGE)){
@@ -173,11 +184,23 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						profile.setPreferred_age(age);
 					}
 					if(attr.equals(ProfileAttribute.PREFERRED_GENDER)){
-						if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")) 
+						if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")) {
 							profile.setPreferred_gender(Gender.MALE);
-						else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")) 
+						}else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
 							profile.setPreferred_gender(Gender.FEMALE);
+						}else{
+							String msg = null;
+							try{
+								msg = datingBean.getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id);
+							}catch(DatingServiceException dse){
+								logger.error(dse.getMessage(), dse);
+							}
+							mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
+							return mo;
+						}
 						profile.setProfileComplete(true);
+						person.setActive(true);
+						profile.setPerson(person);
 					}
 					
 					profile = datingBean.saveOrUpdate(profile);
@@ -186,7 +209,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
 					
 					if(question!=null){
-						System.out.println("QUESTION::: "+question.getQuestion());
+						logger.debug("QUESTION::: "+question.getQuestion());
 						mo.setMt_Sent(question.getQuestion().replaceAll(USERNAME_TAG, profile.getUsername()));
 						
 						QuestionLog ql = new QuestionLog();
@@ -197,6 +220,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}else{
 						String msg = datingBean.getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+						
 					}
 				
 				}
