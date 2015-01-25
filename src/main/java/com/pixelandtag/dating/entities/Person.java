@@ -27,7 +27,13 @@ public class Person implements Serializable {
 	private Long id;
 	
 	@Index(name="msisdnidx")
+	@Column(name="msisdn")
 	private String msisdn;
+	
+	
+	@Index(name="active")
+	@Column(name="active")
+	private Boolean active;
 
 	public Long getId() {
 		return id;
@@ -44,6 +50,16 @@ public class Person implements Serializable {
 	public void setMsisdn(String msisdn) {
 		this.msisdn = msisdn;
 	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+	
+	
 	
 	
 	

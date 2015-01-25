@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -59,8 +60,10 @@ public class HTTPMTSenderApp extends Thread {
 		if(props.getProperty("pollWait")!=null)
 			this.pollWait = Integer.valueOf(props.getProperty("pollWait"));
 		
-		
-		PropertyConfigurator.configure(log4J);
+		if(log4J!=null)
+			PropertyConfigurator.configure(log4J);
+		else
+			BasicConfigurator.configure();
 		//PropertyConfigurator.configureAndWatch(getPath("log4j.properties"));
 		//BasicConfigurator.configure();
 		

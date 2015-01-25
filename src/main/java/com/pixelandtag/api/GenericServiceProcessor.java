@@ -41,6 +41,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String NEW_LINE = "\n";
 	public static final String SERVICENAME_TAG = "<SERVICE_NAME>";
 	public static final String PRICE_TAG = "<SMS_SUBSCRIPTION_PRICE>";
+	public static final String USERNAME_TAG = "<USERNAME>";
 	public static final String KEYWORD_TAG = "<KEYWORD>";
 	public static final String CONFIRMED_SUBSCRIPTION_ADVICE = "CONFIRMED_SUBSCRIPTION_ADVICE";
 	public static final String SUBSCRIPTION_CONFIRMATION_ADVICE = "SUBSCRIPTION_CONFIRMATION_ADVICE";

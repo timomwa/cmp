@@ -209,6 +209,7 @@ public class MTProducer extends Thread {
 		
 		try{
 			
+			
 			instance.logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!
@@ -758,7 +759,6 @@ public class MTProducer extends Thread {
 	    
 	    }
 	    
-	    
 	    if(queueSize>0){
 	    	
 	    	mtMsgs = new LinkedBlockingDeque<MTsms>(queueSize);
@@ -805,7 +805,6 @@ public class MTProducer extends Thread {
 		try{
 			
 			while(run){
-				
 				populateQueue();
 				
 				try {
@@ -865,8 +864,10 @@ public class MTProducer extends Thread {
 			stmt = conn.createStatement();
 			
 			rs  = stmt.executeQuery("SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE in_outgoing_queue = 0 AND sent=0 AND billing_status in ('"+BillingStatus.NO_BILLING_REQUIRED+"' , '"+BillingStatus.INSUFFICIENT_FUNDS+"', '"+BillingStatus.SUCCESSFULLY_BILLED+"') order by `Priority` asc"+limitStr);
+			//System.out.println("SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE in_outgoing_queue = 0 AND sent=0 AND billing_status in ('"+BillingStatus.NO_BILLING_REQUIRED+"' , '"+BillingStatus.INSUFFICIENT_FUNDS+"', '"+BillingStatus.SUCCESSFULLY_BILLED+"') order by `Priority` asc"+limitStr);
 			
 			while(rs.next()){
+				
 			
 				x++;
 				final MTsms mtsms = new MTsms();//reliability versus performance . reliabiliy++ balance = struck
@@ -986,6 +987,7 @@ public class MTProducer extends Thread {
 					
 					}
 				}
+				
 				
 				
 				/*if(addedToqueue){

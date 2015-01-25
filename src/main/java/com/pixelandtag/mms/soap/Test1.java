@@ -71,8 +71,9 @@ public class Test1 {
 		
 		
 		
-		String billingfailed = BillingStatus.SUCCESSFULLY_BILLED.toString();
-		System.out.println(billingfailed);
+		String age = "29years";
+		BigDecimal bd = new BigDecimal(age);
+		System.out.println(bd.intValue());
 		if(true)return;
 		
 		double value = 0.58;

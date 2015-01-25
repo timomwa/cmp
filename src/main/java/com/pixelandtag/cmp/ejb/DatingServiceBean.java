@@ -1,6 +1,9 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +24,8 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
+import com.pixelandtag.dating.entities.ProfileQuestion;
+import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
@@ -327,6 +332,112 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 		 
 		return success;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public ProfileQuestion getNextProfileQuestion(Long profile_id) throws DatingServiceException{
+		ProfileQuestion nexqQ = null;
+		
+		try{
+			Query qry = em.createQuery("from ProfileQuestion pq WHERE pq.id NOT IN   (SELECT ql.question_id_fk FROM QuestionLog ql WHERE ql.profile_id_fk=:profile_id_fk ) ORDER BY pq.serial asc");
+			qry.setParameter("profile_id_fk", profile_id);
+			List<ProfileQuestion> pq =  qry.getResultList();
+			if(pq.size()>0)
+				nexqQ = pq.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no more questions for profile  id  "+profile_id);
+			return null;
+		}catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+
+			throw new DatingServiceException(e.getMessage(),e);
+
+		}finally{
+		}
+		
+		return nexqQ;
+	}
+	
+	public boolean isUsernameUnique(String username) throws DatingServiceException{
+		boolean isunique = true;
+		
+		try{
+			
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username=:username");
+			qry.setParameter("username", username);
+			if(qry.getResultList().size()>0)
+				isunique = false;
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no PersonDatingProfile found with the username "+username);
+			return isunique;
+		}catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+
+			throw new DatingServiceException(e.getMessage(),e);
+
+		}finally{
+		}
+
+		return isunique;
+	}
+	
+	
+	
+	
+	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException{
+		Date date = null;
+		try{
+			Query qry = em.createNativeQuery("select DATE_SUB(now(),INTERVAL :age YEAR) ");
+			qry.setParameter("age", age.longValue());
+			Object o = qry.getSingleResult();
+			date = (Date) o;
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+			throw new DatingServiceException(exp.getMessage(), exp);
+		}
+		return date;
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public ProfileQuestion getPreviousQuestion(Long profile_id) throws DatingServiceException{
+		
+		ProfileQuestion nexqQ = null;
+		
+		try{
+			
+			Query qry = em.createQuery("SELECT ql.question_id_fk FROM QuestionLog ql WHERE ql.profile_id_fk=:profile_id_fk order by timeStamp desc,id desc,question_id_fk desc ");
+			qry.setParameter("profile_id_fk", profile_id);
+			qry.setFirstResult(0);
+			qry.setMaxResults(1);
+			List<Object> qidfko  = qry.getResultList();
+			Long question_id_fk =  (Long) qidfko.get(0);
+			
+			System.out.println("\n\n\n\t\t:::question_id_fk == "+question_id_fk );
+			
+			qry = em.createQuery("from ProfileQuestion pq WHERE pq.id=:question_id_fk");
+			qry.setParameter("question_id_fk", question_id_fk.longValue());
+			List<ProfileQuestion> pq =  qry.getResultList();
+			if(pq.size()>0)
+				nexqQ = pq.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no more questions for profile  id  "+profile_id);
+			return null;
+		}catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+
+			throw new DatingServiceException(e.getMessage(),e);
+
+		}finally{
+		}
+		
+		return nexqQ;
 	}
 
 }

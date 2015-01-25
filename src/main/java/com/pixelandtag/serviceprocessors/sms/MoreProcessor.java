@@ -269,7 +269,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				menu_controller.updateSession(language_id, MSISDN, -1);//update session to upper menu.
 				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,-1);
-				mo.setMt_Sent(item.enumerate());//get all the sub menus there.
+				mo.setMt_Sent(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("GIFT") || KEYWORD.equalsIgnoreCase("HIDIAH") || KEYWORD.equalsIgnoreCase("HADIAH")){
 				

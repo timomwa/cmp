@@ -269,6 +269,7 @@ public class MTHttpSender implements Runnable{
 			this.cmpbean.setServerTz(urlp.getSERVER_TZ());
 			this.cmpbean.setClientTz(urlp.getCLIENT_TZ());
 			
+			
 			watch.stop();
 			
 			logger.info(getName()+" STARTED AFTER :::::RELEASED_BY_PRODUCER after "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
@@ -288,6 +289,7 @@ public class MTHttpSender implements Runnable{
 					final MTsms mtsms = MTProducer.getMTsms();
 					//}
 					
+						
 					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+mtsms.getServiceid());
 					
 					
