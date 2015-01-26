@@ -2,8 +2,10 @@ package com.pixelandtag.action;
 
 import java.util.Date;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Query;
 
@@ -102,12 +104,36 @@ public class SMSMenuManagementAction extends BaseActionBean {
 	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	public Resolution listMenu() throws JSONException{
-		List<SMSMenuLevels> test;
-		Query qry = cmp_dao.resource_bean.getEM().createQuery("from SMSMenuLevels sm WHERE sm.parent_level_id=-1");
+		List<SMSMenuLevels> parentsl ;
+		Query qry = cmp_dao.resource_bean.getEM().createQuery("from SMSMenuLevels sm WHERE sm.serviceid=-1");
+		parentsl  = qry.getResultList();
+		JSONObject resp = new JSONObject();
+		resp.put("size", parentsl.size());
+		for(SMSMenuLevels parent :parentsl){
+			List<SMSMenuLevels> children;
+			try {
+				children = cmp_dao.resource_bean.listChildren(parent.getId());
+				if(children!=null && children.size()>0)
+					parent.setChildren(children);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			resp.append("menuitem", parent.toJson());
+			
+		}
+		
+		
+		
+		
+		//Get children
+		
+		
+		/*List<SMSMenuLevels> test;
+		qry = cmp_dao.resource_bean.getEM().createQuery("from SMSMenuLevels sm WHERE sm.parent_level_id=-1");
 		test = qry.getResultList();
 		Iterator<SMSMenuLevels> kws = test.iterator();
-		JSONObject resp = new JSONObject();
-		resp.put("size", test.size());
+		
 		while(kws.hasNext()){
 			SMSMenuLevels kw = kws.next();
 			try {
@@ -120,7 +146,7 @@ public class SMSMenuManagementAction extends BaseActionBean {
 			
 			log.info("kw : "+kw.toJson());
 			resp.append("menuitem", kw.toJson());
-		}
+		}*/
 		return sendResponse(resp.toString());
 	}
 
