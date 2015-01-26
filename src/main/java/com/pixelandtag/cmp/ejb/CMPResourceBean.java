@@ -2081,7 +2081,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	public List<SMSMenuLevels> listChildren(Long id)  throws Exception {
 		List<SMSMenuLevels> list = null;
 		try{
-			Query qry = em.createQuery("from SMSMenuLevels sm where parent_level_id=:parent_level_id");
+			Query qry = em.createQuery("from SMSMenuLevels sm where parent_level_id=:parent_level_id AND serviceid>-1");
 			qry.setParameter("parent_level_id", id);
 			list =  qry.getResultList();
 		}catch(javax.persistence.NoResultException  nre){
