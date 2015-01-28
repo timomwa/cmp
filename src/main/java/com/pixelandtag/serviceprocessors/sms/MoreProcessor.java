@@ -595,15 +595,32 @@ public class MoreProcessor extends GenericServiceProcessor {
 						}else if(second_keyword!=null){
 										
 							SMSServiceDTO smsservice = cmpbean.getSMSservice(second_keyword);
-							//SMSServiceDTO smsservice = subscription.getSMSservice(second_keyword, conn);
 							
-							//if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-							    cmpbean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+							if(smsservice!=null){
+							//SMSServiceDTO smsservice = subscription.getSMSservice(second_keyword, conn);
+							    SubscriptionDTO subscription =  cmpbean.getSubscriptionDTO(MSISDN, smsservice.getId());
+							    
+							    if(subscription!=null){
+								    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
+								    cmpbean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+								}else{
+									msg = cmpbean.getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
+									}
+							    
+							
 								//subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							}else{
+								msg = cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+							}
+							
+							
+							if(msg.indexOf(SERVICENAME_TAG)>=0)
 								msg = msg.replaceAll(SERVICENAME_TAG, smsservice.getService_name());
-							/*}else{
-								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
-							}*/
+							if(msg.indexOf(PRICE_TAG)>=0)
+								msg = msg.replaceAll(PRICE_TAG, String.valueOf(smsservice.getPrice()));
+							if(msg.indexOf(KEYWORD_TAG)>=0)
+								msg = msg.replaceAll(KEYWORD_TAG, smsservice.getCmd());
+						
 										
 						}
 								
