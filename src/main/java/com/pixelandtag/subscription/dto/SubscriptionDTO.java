@@ -10,6 +10,7 @@ public class SubscriptionDTO implements Serializable {
 	private String msisdn;
 	private String subscription_timeStamp;
 	private int smsmenu_levels_id_fk;
+	private int renewal_count;
 	
 	public int getId() {
 		return id;
@@ -47,12 +48,19 @@ public class SubscriptionDTO implements Serializable {
 	public void setSmsmenu_levels_id_fk(int smsmenu_levels_id_fk) {
 		this.smsmenu_levels_id_fk = smsmenu_levels_id_fk;
 	}
+	public int getRenewal_count() {
+		return renewal_count;
+	}
+	public void setRenewal_count(int renewal_count) {
+		this.renewal_count = renewal_count;
+	}
 	@Override
 	public String toString() {
 		return "SubscriptionDTO [id=" + id + ", subscription_status="
 				+ subscription_status + ", sms_service_id_fk="
 				+ sms_service_id_fk + ", msisdn=" + msisdn
 				+ ", subscription_timeStamp=" + subscription_timeStamp
+				+ ", renewal_count=" + renewal_count
 				+ ", smsmenu_levels_id_fk=" + smsmenu_levels_id_fk + "]";
 	}
 	

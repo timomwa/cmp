@@ -10,6 +10,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
@@ -70,6 +71,14 @@ public class Test1 {
 	public static void main(String[] args) throws Exception {
 		
 		
+		LinkedHashMap<Integer, String> ms = new LinkedHashMap<Integer,String>();
+		ms.put(1, "moja");
+		ms.put(2, "mbili");
+		
+		System.out.println(ms.get(3));
+		
+		if(true)
+			return;
 		
 		String age = "29years";
 		BigDecimal bd = new BigDecimal(age);

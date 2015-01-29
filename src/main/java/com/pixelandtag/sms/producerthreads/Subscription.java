@@ -35,9 +35,11 @@ public class Subscription implements Serializable {
 	
 	
 	@Column(name="sms_service_id_fk")
+	@Index(name= "sms_service_idx")
 	private Long sms_service_id_fk;
 	
 	@Column(name="msisdn")
+	@Index(name="msisdnIdx")
 	private String msisdn;
 	
 	@Column(name="subscription_timeStamp")
@@ -53,11 +55,27 @@ public class Subscription implements Serializable {
 	private MediumType request_medium;
 	
 	
+	@Column(name="expiryDate")
+	@Index(name="expiryDateidx")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date expiryDate;
+	
+	@Column(name="renewal_count")
+	private Long renewal_count;
+	
+	@Column(name="subActive")
+	private Boolean subActive;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void setDefaults(){
 		if(subscription_timeStamp==null)
 			subscription_timeStamp = new Date();
+		if(expiryDate==null)
+			expiryDate = new Date();
+		if(subActive==null)
+			subActive = new Boolean(true);
 	}
 
 	public Long getId() {
@@ -114,6 +132,30 @@ public class Subscription implements Serializable {
 
 	public void setRequest_medium(MediumType request_medium) {
 		this.request_medium = request_medium;
+	}
+
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+
+	public Long getRenewal_count() {
+		return renewal_count;
+	}
+
+	public void setRenewal_count(Long renewal_count) {
+		this.renewal_count = renewal_count;
+	}
+
+	public Boolean getSubActive() {
+		return subActive;
+	}
+
+	public void setSubActive(Boolean subActive) {
+		this.subActive = subActive;
 	}
 	
 	

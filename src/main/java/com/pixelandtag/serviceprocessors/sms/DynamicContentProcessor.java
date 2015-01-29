@@ -15,6 +15,7 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
@@ -106,7 +107,8 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 				tailMsg = (sub==null ? additionalInfo.get("tailText_notsubscribed") : (SubscriptionStatus.confirmed==SubscriptionStatus.get(sub.getSubscription_status()) ? additionalInfo.get("tailText_subscribed") : additionalInfo.get("tailText_notsubscribed")));
 						 
 				if(tailMsg==null || tailMsg.equals(additionalInfo.get("tailText_notsubscribed"))){
-					cmpbean.subscribe(MSISDN, serviceid, -1);
+					SMSService smsService = cmpbean.find(SMSService.class, new Long(serviceid));
+					cmpbean.subscribe(MSISDN, smsService, -1);
 				}
 				
 			}else{

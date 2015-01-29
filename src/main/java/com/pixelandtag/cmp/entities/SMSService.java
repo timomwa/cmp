@@ -65,8 +65,15 @@ public class SMSService implements Serializable {
 	private String tailText_notsubscribed;
 	
 	@Column(name="event_type")
-   // @Enumerated(EnumType.STRING)
-	private String event_type;
+   private String event_type;
+	
+	
+	@Column(name="subscription_length")
+	private Long subscription_length;
+	
+	@Column(name="subscription_length_time_unit")
+	@Enumerated(EnumType.STRING)
+	private SubTimeUnit subscription_length_time_unit;
 
 	public Long getId() {
 		return id;
@@ -188,6 +195,23 @@ public class SMSService implements Serializable {
 		this.event_type = event_type;
 	}
 	
+	public Long getSubscription_length() {
+		return subscription_length;
+	}
+
+	public void setSubscription_length(Long subscription_length) {
+		this.subscription_length = subscription_length;
+	}
+
+	public SubTimeUnit getSubscription_length_time_unit() {
+		return subscription_length_time_unit;
+	}
+
+	public void setSubscription_length_time_unit(
+			SubTimeUnit subscription_length_time_unit) {
+		this.subscription_length_time_unit = subscription_length_time_unit;
+	}
+
 	public JSONObject toJson(){
 		JSONObject jsonObj = new JSONObject();
 		try{
@@ -206,7 +230,9 @@ public class SMSService implements Serializable {
 			jsonObj.put("unsubscriptionText", getUnsubscriptionText());
 			jsonObj.put("tailText_subscribed", getTailText_subscribed());
 			jsonObj.put("tailText_notsubscribed", getTailText_notsubscribed());
+			jsonObj.put("subscription_length",getSubscription_length());
 			jsonObj.put("event_type", getEvent_type());
+			jsonObj.put("subscription_length_time_unit", getSubscription_length_time_unit());
 		}catch(JSONException jse){
 			jse.printStackTrace();
 			return null;

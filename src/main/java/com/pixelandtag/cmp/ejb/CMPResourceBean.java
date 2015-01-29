@@ -27,6 +27,7 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -1296,23 +1297,31 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean subscribe(String msisdn, int service_id, int smsmenu_levels_id_fk, SubscriptionStatus status,SubscriptionSource source) throws Exception{
+	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk, SubscriptionStatus status,SubscriptionSource source) throws Exception{
 		
 		boolean success = false;
 		
 		try{
 			
-			if(service_id>-1){
+			if(smsService!=null && smsService.getId()>-1){
 				utx.begin();
-				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status) VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE subscription_status = ?";
+				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status,expiryDate) VALUES(?,?,?,?,?, CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"' ) ) ON DUPLICATE KEY UPDATE subscription_status = ?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"')";
 				Query qry = em.createNativeQuery(sql);
 				
-				qry.setParameter(1, service_id);
+				qry.setParameter(1, smsService.getId());
 				qry.setParameter(2, msisdn);
 				qry.setParameter(3, smsmenu_levels_id_fk);
 				qry.setParameter(4, source.toString());
 				qry.setParameter(5, status.toString());
-				qry.setParameter(6, status.toString());
+
+				qry.setParameter(6, smsService.getSubscription_length());
+				qry.setParameter(7, smsService.getSubscription_length_time_unit().toString());
+				
+				qry.setParameter(8, status.toString());
+				
+				qry.setParameter(9, smsService.getSubscription_length());
+				qry.setParameter(10, smsService.getSubscription_length_time_unit().toString());
+				
 				
 				if(qry.executeUpdate()>0)
 					success = true;
@@ -1340,19 +1349,24 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean subscribe(String msisdn, int service_id, int smsmenu_levels_id_fk) throws Exception {
+	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk) throws Exception {
 		boolean success = false;
 		
 		try{
 			utx.begin();
-			if(service_id>-1){
-				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk) VALUES(?,?,?) ON DUPLICATE KEY UPDATE subscription_status=?";
+			if(smsService!=null && smsService.getId()>-1){
+				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk,expiryDate) VALUES(?,?,?,CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"') ON DUPLICATE KEY UPDATE subscription_status=?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"')";
 				Query qry = em.createNativeQuery(sql);
 				
-				qry.setParameter(1, service_id);
+				qry.setParameter(1, smsService.getId());
 				qry.setParameter(2, msisdn);
 				qry.setParameter(3, smsmenu_levels_id_fk);
-				qry.setParameter(4, SubscriptionStatus.waiting_confirmation.getStatus());
+				qry.setParameter(4, smsService.getSubscription_length());
+				qry.setParameter(5, smsService.getSubscription_length_time_unit());
+				qry.setParameter(6, SubscriptionStatus.waiting_confirmation.getStatus());
+				qry.setParameter(7, smsService.getSubscription_length());
+				qry.setParameter(8, smsService.getSubscription_length_time_unit());
+				
 				
 				if(qry.executeUpdate()>0)
 					success = true;
@@ -1401,6 +1415,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				subscription.setMsisdn( (String) o[3] );//rs.getString("msisdn"));
 				subscription.setSubscription_timeStamp(  sdf.format(( (java.sql.Timestamp) o[4]) ));//rs.getString("subscription_timeStamp"));
 				subscription.setSmsmenu_levels_id_fk( (Integer) o[5] );// rs.getInt("smsmenu_levels_id_fk"));
+				subscription.setRenewal_count( (Integer) o[8] );// rs.getInt("renewal_count"));
 					
 			}
 				
@@ -1576,15 +1591,17 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					+ "subscription_timeStamp,"//4
 					+ "smsmenu_levels_id_fk,"//5
 					+ "request_medium "//6
+					+ "(expiryDate > convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"') as 'subActive' ) "
 					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
 							+ "subscription_status=:subscription_status "
 							+ "AND sms_service_id_fk =:sms_service_id_fk "
+							+ "AND expiryDate > convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"') "
 							+ "AND id not in "
 							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
 									+ "WHERE "
 									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
 			
-			String sqld = "SELECT "
+		/*	String sqld = "SELECT "
 					+ "id,"//0
 					+ "subscription_status,"//1
 					+ "sms_service_id_fk,"//2
@@ -1599,7 +1616,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
 									+ "WHERE "
 									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
-			
+	*/		
 			
 			
 			//System.out.println("\n\n"+sqld+"\n\n ");
@@ -1617,6 +1634,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				sub.setSubscription_timeStamp(( (java.util.Date) o[4]) );
 				sub.setSmsmenu_levels_id_fk((Integer)o[5]);
 				sub.setRequest_medium(MediumType.get((String)o[6]));
+				sub.setSubActive((Boolean)o[7] );
 				msisdnL.add(sub);
 			}
 			

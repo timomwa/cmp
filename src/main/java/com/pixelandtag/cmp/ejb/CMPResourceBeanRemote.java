@@ -9,6 +9,7 @@ import java.util.Map;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
@@ -53,7 +54,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public com.pixelandtag.subscription.dto.SubscriptionDTO getSubscriptionDTO(
 			String mSISDN, int serviceid)  throws Exception;
 
-	public boolean subscribe(String mSISDN, int serviceid, int smsmenu_levels_id_fk) throws Exception ;
+	public boolean subscribe(String mSISDN, SMSService smsService, int smsmenu_levels_id_fk) throws Exception ;
 
 	/**
 	 * 
@@ -133,7 +134,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	
 	public ServiceProcessorDTO getServiceProcessor(int processor_id_fk) throws Exception;
 
-	public boolean subscribe(String mSISDN, int service_id, int id,
+	public boolean subscribe(String mSISDN, SMSService smsService, int id,
 			SubscriptionStatus confirmed, SubscriptionSource sms) throws Exception;
 
 	public com.pixelandtag.subscription.dto.SubscriptionDTO checkAnyPending(
