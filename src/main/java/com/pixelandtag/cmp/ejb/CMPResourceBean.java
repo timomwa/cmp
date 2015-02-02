@@ -109,8 +109,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
 					sm.setPrice(new Double((Double) (o[6])));//6
 					sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
-					sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
-					sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+					sm.setCmp_keyword(  (o[8]!=null ? (String) o[8] : "IOD") );//rs.getString("CMP_Keyword"));//8
+					sm.setCmp_skeyword( (o[9]!=null ? (String) o[9] : "IOD0000" ) );//rs.getString("CMP_SKeyword"));//9
 					sm.setEnabled(((Boolean) o[10]));//rs.getBoolean("enabled"));//10
 					sm.setSplit_mt((Boolean) o[11]);//rs.getBoolean("split_mt"));//11
 				}
@@ -193,8 +193,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
 				sm.setPrice(new Double((Double) (o[6])));//6
 				sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
-				sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
-				sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+				//sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
+				//sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+				sm.setCmp_keyword(  (o[8]!=null ? (String) o[8] : "IOD") );//rs.getString("CMP_Keyword"));//8
+				sm.setCmp_skeyword( (o[9]!=null ? (String) o[9] : "IOD0000" ) );//rs.getString("CMP_SKeyword"));//9
+				
 				sm.setEnabled(((Boolean) o[10]));//rs.getBoolean("enabled"));//10
 				sm.setSplit_mt((Boolean) o[11]);//rs.getBoolean("split_mt"));//11
 				
@@ -353,8 +356,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
 					sm.setPrice(new Double((Double) (o[6])));//6
 					sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
-					sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
-					sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+					//sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
+					//sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
+					sm.setCmp_keyword(  (o[8]!=null ? (String) o[8] : "IOD") );//rs.getString("CMP_Keyword"));//8
+					sm.setCmp_skeyword( (o[9]!=null ? (String) o[9] : "IOD0000" ) );//rs.getString("CMP_SKeyword"));//9
 					sm.setEnabled(((Boolean) o[10]));//rs.getBoolean("enabled"));//10
 					sm.setSplit_mt((Boolean) o[11]);//rs.getBoolean("split_mt"));//11
 				}
@@ -1119,7 +1124,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(22, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
 			qry.setParameter(23, mt.getServiceid());//serviceid
 			
-			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+			if(mt.getCMP_SKeyword()==null || mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
 				qry.setParameter(24, 1.0d);//price
 			else
 				qry.setParameter(24, mt.getPrice().doubleValue());//price
@@ -1305,7 +1310,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			if(smsService!=null && smsService.getId()>-1){
 				utx.begin();
-				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status,expiryDate) VALUES(?,?,?,?,?, CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"' ) ) ON DUPLICATE KEY UPDATE subscription_status = ?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"')";
+				final String TIMEUNIT = smsService.getSubscription_length_time_unit().toString();
+				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status,expiryDate) VALUES(?,?,?,?,?, CONVERT_TZ(DATE_ADD(now(), INTERVAL ? "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"' ) ) ON DUPLICATE KEY UPDATE subscription_status = ?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ?  "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"')";
 				Query qry = em.createNativeQuery(sql);
 				
 				qry.setParameter(1, smsService.getId());
@@ -1315,12 +1321,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				qry.setParameter(5, status.toString());
 
 				qry.setParameter(6, smsService.getSubscription_length());
-				qry.setParameter(7, smsService.getSubscription_length_time_unit().toString());
+				//qry.setParameter(7, smsService.getSubscription_length_time_unit().toString());
 				
-				qry.setParameter(8, status.toString());
+				qry.setParameter(7, status.toString());
 				
-				qry.setParameter(9, smsService.getSubscription_length());
-				qry.setParameter(10, smsService.getSubscription_length_time_unit().toString());
+				qry.setParameter(8, smsService.getSubscription_length());
+				///qry.setParameter(10, smsService.getSubscription_length_time_unit().toString());
 				
 				
 				if(qry.executeUpdate()>0)
@@ -1355,17 +1361,18 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		try{
 			utx.begin();
 			if(smsService!=null && smsService.getId()>-1){
-				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk,expiryDate) VALUES(?,?,?,CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"') ON DUPLICATE KEY UPDATE subscription_status=?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ? ?) , '"+getServerTz()+"','"+getClientTz()+"')";
+				final String TIMEUNIT = smsService.getSubscription_length_time_unit().toString();
+				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk,expiryDate) VALUES(?,?,?,CONVERT_TZ(DATE_ADD(now(), INTERVAL ? "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"')) ON DUPLICATE KEY UPDATE subscription_status=?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ? "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"')";
 				Query qry = em.createNativeQuery(sql);
 				
 				qry.setParameter(1, smsService.getId());
 				qry.setParameter(2, msisdn);
 				qry.setParameter(3, smsmenu_levels_id_fk);
 				qry.setParameter(4, smsService.getSubscription_length());
-				qry.setParameter(5, smsService.getSubscription_length_time_unit());
-				qry.setParameter(6, SubscriptionStatus.waiting_confirmation.getStatus());
-				qry.setParameter(7, smsService.getSubscription_length());
-				qry.setParameter(8, smsService.getSubscription_length_time_unit());
+				//qry.setParameter(5, smsService.getSubscription_length_time_unit());
+				qry.setParameter(5, SubscriptionStatus.waiting_confirmation.getStatus());
+				qry.setParameter(6, smsService.getSubscription_length());
+				//qry.setParameter(8, smsService.getSubscription_length_time_unit());
 				
 				
 				if(qry.executeUpdate()>0)

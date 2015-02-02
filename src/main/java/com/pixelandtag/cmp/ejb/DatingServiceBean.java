@@ -22,6 +22,7 @@ import javax.transaction.UserTransaction;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
@@ -138,6 +139,38 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return t;
 	}
 
+	@SuppressWarnings("unchecked")
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location) throws DatingServiceException{
+		PersonDatingProfile person = null;
+		try{
+			Date dob = calculateDobFromAge(pref_age);
+			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.location like :location AND p.dob<=:dob order by rand()");//AND p.dob>=:dob
+			qry.setParameter("gender", pref_gender);
+			qry.setParameter("location", "%"+location+"%");
+			qry.setParameter("dob", dob);
+			List<PersonDatingProfile> ps = qry.getResultList();
+			if(ps.size()>0)
+				person = ps.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}
+		return person;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public PersonDatingProfile getperSonUsingChatName(String chat_username) throws DatingServiceException{
+		PersonDatingProfile person = null;
+		try{
+			Query qry = em.createQuery("from PersonDatingProfile p where p.username=:username");
+			qry.setParameter("username", chat_username);
+			List<PersonDatingProfile> ps = qry.getResultList();
+			if(ps.size()>0)
+				person = ps.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}
+		return person;
+	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public Person getPerson(String msisdn) throws DatingServiceException {
@@ -368,6 +401,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			
 			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username=:username");
 			qry.setParameter("username", username);
+			if(qry.getResultList().size()>0)
+				isunique = false;
+			
+			
+			qry = em.createQuery("from SMSService sm WHERE sm.cmd=:keyword");
+			qry.setParameter("keyword", username);
 			if(qry.getResultList().size()>0)
 				isunique = false;
 			

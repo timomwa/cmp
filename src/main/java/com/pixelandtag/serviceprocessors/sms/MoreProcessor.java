@@ -588,14 +588,14 @@ public class MoreProcessor extends GenericServiceProcessor {
 						if(second_keyword_is_digit){
 										
 							SMSServiceDTO toUnsubscribe = allsubscribed.get(stop_number);
-							
-							//if(subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-							    cmpbean.updateSubscription(toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
-								//subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							SubscriptionDTO subscription =  cmpbean.getSubscriptionDTO(MSISDN, toUnsubscribe.getId());
+						   
+							if(subscription!=null){
+								cmpbean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
 								msg = msg.replaceAll(SERVICENAME_TAG, toUnsubscribe.getService_name());
-							/*}else{
-								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
-							}*/
+							}else{
+								msg = cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+							}
 										
 						}else if(second_keyword!=null){
 										
@@ -604,7 +604,6 @@ public class MoreProcessor extends GenericServiceProcessor {
 							if(smsservice!=null){
 							//SMSServiceDTO smsservice = subscription.getSMSservice(second_keyword, conn);
 							    SubscriptionDTO subscription =  cmpbean.getSubscriptionDTO(MSISDN, smsservice.getId());
-							    
 							    if(subscription!=null){
 								    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
 								    cmpbean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);

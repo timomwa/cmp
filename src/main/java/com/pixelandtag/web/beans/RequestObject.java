@@ -60,10 +60,9 @@ public class RequestObject {
 			if(msg!=null)
 				if(!msg.isEmpty()){
 				
-					msg = replaceAllIllegalCharactersLeaveSpace(msg).trim();
+					msg = msg.trim();
 					
-					msg = msg.toUpperCase();
-				
+					//msg = msg.toUpperCase();//TIMO revert if there is trouble
 				}else{
 				
 					msg = "Customer";
@@ -72,7 +71,7 @@ public class RequestObject {
 			
 			if(keyword!=null){
 				
-				keyword = keyword.toUpperCase();
+				//keyword = keyword.toUpperCase(); // TIMO revert if there is trouble
 				
 				keyword = replaceAllIllegalCharacters(keyword).trim();;
 				

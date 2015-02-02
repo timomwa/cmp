@@ -857,6 +857,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			
 			
+			System.out.println("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
 			pstmt.setLong(1, mo.getCMP_Txid());
 			pstmt.setString(2, mo.getSMS_Message_String());
 			pstmt.setString(3, mo.getSMS_SourceAddr());
@@ -2020,7 +2021,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 
 	public MOSms resolveKeywords(MOSms mo, Connection conn) {
 		
-		logger.info(">>>>>>V.4>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
+		logger.info(">>>>>>V.5>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
 		
 		if(mo.getSMS_Message_String()!=null){
 			if(mo.getSMS_Message_String().isEmpty())
@@ -2044,12 +2045,12 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', `sms`.id as 'serviceid', `sms`.`split_mt` as 'split_mt', `sms`.`event_type` as 'event_type', `sms`.`price_point_keyword` as 'price_point_keyword' FROM `"+database+"`.`sms_service` `sms` LEFT JOIN `"+database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?",Statement.RETURN_GENERATED_KEYS);
 			
-			mo.setSMS_Message_String(replaceAllIllegalCharacters(mo.getSMS_Message_String()));
+			//mo.setSMS_Message_String(replaceAllIllegalCharacters(mo.getSMS_Message_String()));
 			
 			pstmt.setString(1, mo.getSMS_SourceAddr());
-			pstmt.setString(2, mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase());
+			pstmt.setString(2, replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
 			logger.info("Msg : "+mo.getSMS_Message_String());
-			logger.info("Keyword : "+mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase());
+			logger.info("Keyword : "+replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
 			
 			rs = pstmt.executeQuery();
 			

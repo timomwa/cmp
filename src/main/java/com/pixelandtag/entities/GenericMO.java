@@ -20,7 +20,6 @@ public abstract class GenericMO extends GenericMessage {
 	
 	public GenericMO(HttpServletRequest request) {
 		
-		
 		//setCMP_Txid(request.getParameter("CMP_Txid"));
 		setSMS_Message_String(request.getParameter("text"));
 		setSMS_SourceAddr(request.getParameter("shortCode"));//"32329");

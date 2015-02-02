@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
+import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
@@ -29,6 +30,10 @@ public interface DatingServiceI extends BaseEntityI {
 	public boolean isUsernameUnique(String username) throws DatingServiceException;
 
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException;
+
+	public PersonDatingProfile getperSonUsingChatName(String chat_username) throws DatingServiceException;
+
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location) throws DatingServiceException;
 
 
 }

@@ -11,11 +11,22 @@ import javax.naming.NamingException;
 import org.jboss.naming.remote.client.InitialContextFactory;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.DatingServiceException;
+import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.dating.entities.Gender;
+import com.pixelandtag.dating.entities.Person;
+import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.util.FileUtils;
 
 public class TestEJB {
 	
-	public static void main(String[] args) throws NamingException {
+	
+	private static DatingServiceI datingBean;
+	private static InitialContext context;
+	private static Properties mtsenderprop;
+	
+	public static void main(String[] args) throws NamingException, DatingServiceException {
 		
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
@@ -24,28 +35,32 @@ public class TestEJB {
 		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
 		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
 		 props.put("jboss.naming.client.ejb.context", true);
-		 Context context = new InitialContext(props);
-		 CMPResourceBeanRemote cmpbean =   (CMPResourceBeanRemote) 
-        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 context = new InitialContext(props);
+		 datingBean =  (DatingServiceI) 
+      		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		
-		Billable billable = new Billable();
-		billable.setCp_id("");
-		billable.setMsisdn("12312312");
-		try {
-			boolean resp = cmpbean.testEJB(-1);
+	
+		 Person person = datingBean.getPerson("112");
+		 
+		 PersonDatingProfile profile = datingBean.getProfile(person);
+		 
+			Gender pref_gender = profile.getPreferred_gender();
+			BigDecimal pref_age = profile.getPreferred_age();
+			String location = profile.getLocation();
 			
-			System.out.println("RESP: "+resp);
-		} catch (Exception e) {
-			System.out.println("RESP: "+e.getMessage());
-		}finally{
-		    if(context!=null)
-		    	try { 
-		    		context.close(); 
-		    		System.out.println("closed!");
-		    	} catch (Exception ex) { ex.printStackTrace(); }
-		    
-		}
-        
+			System.out.println("pref_gender : "+pref_gender.toString());
+			System.out.println("pref_age : "+pref_age);
+			System.out.println("location : "+location);
+			PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location);
+
+			if(match!=null)
+				System.out.println(match.getUsername());
+			else
+				System.out.println(match);
+				 
+		 context.close();
+		 
+		 
 	}
 
 }
