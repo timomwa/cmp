@@ -1597,12 +1597,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					+ "msisdn,"//3
 					+ "subscription_timeStamp,"//4
 					+ "smsmenu_levels_id_fk,"//5
-					+ "request_medium "//6
-					+ "(expiryDate > convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"') as 'subActive' ) "
+					+ "request_medium, "//6
+					+ "(expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') ) as 'subActive'  "
 					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
 							+ "subscription_status=:subscription_status "
 							+ "AND sms_service_id_fk =:sms_service_id_fk "
-							+ "AND expiryDate > convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"') "
+							+ "AND expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') "
 							+ "AND id not in "
 							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
 									+ "WHERE "
@@ -1641,7 +1641,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				sub.setSubscription_timeStamp(( (java.util.Date) o[4]) );
 				sub.setSmsmenu_levels_id_fk((Integer)o[5]);
 				sub.setRequest_medium(MediumType.get((String)o[6]));
-				sub.setSubActive((Boolean)o[7] );
+				sub.setSubActive(((BigInteger)o[7]).intValue()>0 );
 				msisdnL.add(sub);
 			}
 			
