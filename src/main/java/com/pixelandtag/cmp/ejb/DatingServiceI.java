@@ -32,8 +32,9 @@ public interface DatingServiceI extends BaseEntityI {
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException;
 
 	public PersonDatingProfile getperSonUsingChatName(String chat_username) throws DatingServiceException;
-
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location) throws DatingServiceException;
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age) throws DatingServiceException;
+	public PersonDatingProfile findMatch(Gender pref_gender) throws DatingServiceException;
 
 
 }

@@ -126,7 +126,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				chatMo.setMsisdn(destination_person.getPerson().getMsisdn());
 				Gender gender = profile.getGender();
 				String pronoun = gender.equals(Gender.FEMALE) ? "Her" : "Him";
-				//chatMo.setSMS_Message_String(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE);
 				chatMo.setMt_Sent(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE.replaceAll(KEYWORD, "").trim() +NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-");
 				chatMo.setCMP_Txid(generateNextTxId());
 				chatMo.setPriority(0);//highest priority possible
@@ -309,7 +308,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 								+ "To chat with "+gender_pronoun.toLowerCase()+", compose a message starting with the word '"+match.getUsername()+"'";
 						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
 						
-						//notify person b?
 					}
 					
 				}
