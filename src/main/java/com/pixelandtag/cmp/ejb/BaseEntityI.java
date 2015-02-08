@@ -28,6 +28,7 @@ public interface BaseEntityI {
 	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception;
 	public Billable charge(Billable billable) throws Exception;
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception;
+	public SMSService getSMSService(String cmd)  throws Exception;
 
 
 }

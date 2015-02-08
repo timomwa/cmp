@@ -90,7 +90,7 @@ public class BaseEntityBean implements BaseEntityI {
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
 		Subscription sub = null;
 		try{
-			Query qry = em.createQuery("from Subscription where msisdn=:msisdn AND sms_service_id_fk:sms_service_id_fk");
+			Query qry = em.createQuery("from Subscription where msisdn=:msisdn AND sms_service_id_fk=:sms_service_id_fk");
 			qry.setParameter("sms_service_id_fk", smsService.getId());
 			qry.setParameter("msisdn", msisdn);
 			
@@ -279,6 +279,9 @@ public class BaseEntityBean implements BaseEntityI {
 			List<Subscription> sublist = qry.getResultList();
 			if(sublist.size()>0)
 				subValid = true;
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return false;
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -312,6 +315,9 @@ public class BaseEntityBean implements BaseEntityI {
 			utx.commit();
 			success = num>0;
 		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return false;
 		}catch(Exception e){
 			try {
 				utx.rollback();
@@ -519,27 +525,7 @@ public class BaseEntityBean implements BaseEntityI {
 			}
 			
 					
-			}catch(ConnectException ce){
-				
-			    success  = false;
-				
-				message = ce.getMessage();
-				
-				logger.error(message, ce);
-				
-				httsppost.abort();
-				
-			}catch(SocketTimeoutException se){
-				
-				success  = false;
-				
-				message = se.getMessage();
-				
-				httsppost.abort();
-				
-				logger.error(message, se);
-				
-			} catch (IOException ioe) {
+			}catch (Exception ioe) {
 				
 				success  = false;
 				
@@ -547,17 +533,7 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				httsppost.abort();
 				
-				logger.error("\n\n==============================================================\n\n"+message+" CONNECTION TO OPERATOR FAILED. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
-				
-			} catch (Exception ioe) {
-				
-				success  = false;
-				
-				message = ioe.getMessage();
-				
-				httsppost.abort();
-				
-				logger.error(message, ioe);
+				throw ioe;
 				
 			} finally{
 				
@@ -566,7 +542,7 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				logger.debug(" ::::::: finished attempt to bill via HTTP");
 				
-				removeAllParams(qparams);
+				//removeAllParams(qparams);
 				
 				 // When HttpClient instance is no longer needed,
 	            // shut down the connection manager to ensure
@@ -613,7 +589,7 @@ public class BaseEntityBean implements BaseEntityI {
 						billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 					}
 					
-					cmp_ejb.saveOrUpdate(billable);
+					//cmp_ejb.saveOrUpdate(billable);
 					
 					if(!success){//return back to queue if we did not succeed
 						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
@@ -641,7 +617,9 @@ public class BaseEntityBean implements BaseEntityI {
 				logger.debug("DONE! ");
 				
 			}
-		return null;
+		
+		
+		return billable;
 	}
 	
 	
@@ -686,6 +664,23 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 	}
 	
+
+	@SuppressWarnings("unchecked")
+	public SMSService getSMSService(String cmd)  throws Exception{
+		SMSService sub = null;
+		try{
+			Query qry = em.createQuery("from SMSService sm WHERE sm.cmd=:cmd");
+			qry.setParameter("cmd", cmd);
+			List<SMSService> subl = qry.getResultList();
+			if(subl.size()>0)
+				sub = subl.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception exp){
+			throw exp;
+		}
+		return sub;
+	}
 	
 	private  String getErrorMessage(String resp) {
 		int start = resp.indexOf("<errorMessage>")+"<errorMessage>".length();

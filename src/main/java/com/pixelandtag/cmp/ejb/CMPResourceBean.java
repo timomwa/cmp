@@ -2116,23 +2116,23 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			long cmpTxid = transaction_id.longValue();
 			
 			String sql;
-			Query qry;
-			Object rs;
-			try{
+			//Query qry;
+			//Object rs;
+			/*try{
 				sql = "SELECT CMP_Txid FROM `"+CelcomImpl.database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)";
 				qry = em.createNativeQuery(sql);
 				qry.setParameter(1, cmpTxid);
 				qry.setParameter(2, cmpTxid);
 				rs = qry.getSingleResult();
 					if(rs!=null){
-						cmpTxid = (Long) rs;
+						cmpTxid = ( (BigInteger) rs ).longValue();
 					}
 			}catch(javax.persistence.NoResultException ex){
 				logger.warn(ex.getMessage() + " COULD NOT FIND messagelog record with (CMP_Txid = "+cmpTxid+") OR (newCMP_Txid = "+cmpTxid+")");
-			}
+			}*/
 				
 			
-			rs = null;
+			//rs = null;
 			double priceTbc = 0.0d;
 			boolean wasInLog = false;
 			List<Object[]> rs2 =null;
