@@ -23,6 +23,7 @@ public class HelloWorldService extends GenericServiceProcessor {
 	private HelloWorldI helloBean;
 	private InitialContext context;
 	private Properties mtsenderprop;
+	
 
 	public HelloWorldService() throws NamingException {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
