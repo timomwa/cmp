@@ -20,7 +20,7 @@ import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.staticcontent.ContentRetriever;
-import com.pixelandtag.subscription.Subscription;
+import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.RequestObject;
@@ -30,7 +30,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 
 	private final Logger dynamic_content_processorLogger = Logger.getLogger(DynamicContentProcessor.class);
 	private DBPoolDataSource ds;
-	private Subscription subscription;
+	private SubscriptionOld subscription;
 	
 	private ContentRetriever cr = new ContentRetriever();
 	private String SPACE = " ";
@@ -53,7 +53,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
     }
 	public DynamicContentProcessor(){
 		init_datasource();
-		subscription = new Subscription();
+		subscription = new SubscriptionOld();
 	}
 	
 	private void init_datasource(){

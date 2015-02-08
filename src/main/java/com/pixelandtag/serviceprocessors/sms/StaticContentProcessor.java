@@ -23,7 +23,7 @@ import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.staticcontent.ContentRetriever;
-import com.pixelandtag.subscription.Subscription;
+import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.RequestObject;
@@ -33,7 +33,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 
 	private final Logger static_content_processor_logger = Logger.getLogger(StaticContentProcessor.class);
 	//private DBPoolDataSource ds;
-	private Subscription subscription;
+	private SubscriptionOld subscription;
 	private Properties mtsenderprop;
 	private ContentRetriever cr = new ContentRetriever();
 	private String SPACE = " ";
@@ -60,7 +60,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 	public StaticContentProcessor() throws NamingException{
 		init_datasource();
 		initEJB();
-		subscription = new Subscription();
+		subscription = new SubscriptionOld();
 	}
 	
 	

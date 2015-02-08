@@ -19,7 +19,7 @@ import com.pixelandtag.dynamic.dbutils.DBConnection;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.sms.ServiceProcessorLoader;
-import com.pixelandtag.subscription.Subscription;
+import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 
@@ -27,7 +27,7 @@ public class ContentRetriever {
 	
 	private static final String DB_NAME = "pixeland_content360";
 	private Logger log = Logger.getLogger(ContentRetriever.class);
-	private Subscription sub = new Subscription();
+	private SubscriptionOld sub = new SubscriptionOld();
 	
 	
 	

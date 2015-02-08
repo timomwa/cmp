@@ -20,10 +20,10 @@ import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 
-public class Subscription {
+public class SubscriptionOld {
 	
 	private static final String DB_NAME = "pixeland_content360";
-	private Logger logger  = Logger.getLogger(Subscription.class);
+	private Logger logger  = Logger.getLogger(SubscriptionOld.class);
 	private final String SPACE = " ";
 	private final String NUM_SEPERATOR = "."+SPACE;
 	private Object NEW_LINE = "\n";
@@ -512,7 +512,7 @@ public class Subscription {
 	
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		Subscription sub = new Subscription();
+		SubscriptionOld sub = new SubscriptionOld();
 		boolean success = sub.subscribe(null,"012702341", "News");
 	}
 

@@ -33,7 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 
-import com.inmobia.util.StopWatch;
+import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.autodraw.Alarm;
@@ -467,6 +467,7 @@ public class HttpBillingWorker implements Runnable {
 					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
 						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.Success);
+						billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
 					}
 					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);

@@ -16,6 +16,7 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
@@ -26,6 +27,8 @@ import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -76,8 +79,85 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		
 			final Person person = datingBean.getPerson(mo.getMsisdn());
 			
-			if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
-				mo = processDating(mo,person);
+			if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
+				PersonDatingProfile profile = datingBean.getProfile(person);
+				Gender pref_gender = profile.getPreferred_gender();
+				BigDecimal pref_age = profile.getPreferred_age();
+				String location = profile.getLocation();
+				
+				PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location);
+				if(match==null)
+					 match = datingBean.findMatch(pref_gender,pref_age);
+				
+				if(match==null){
+					String msg = datingBean.getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
+					mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+				}else{
+					try{
+						SystemMatchLog sysmatchlog = new SystemMatchLog();
+						sysmatchlog.setPerson_a_id(person.getId());
+						sysmatchlog.setPerson_b_id(match.getPerson().getId());
+						sysmatchlog.setPerson_a_notified(true);
+						sysmatchlog = datingBean.saveOrUpdate(sysmatchlog);
+					}catch(Exception exp){
+						logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
+					}
+					String gender_pronoun = pref_gender.equals(Gender.FEMALE)? "Her" : "His";
+					String msg = "Lucky you "+USERNAME_TAG+"! We have a match for you. "+gender_pronoun+" username is "+match.getUsername()+". "
+							+ "To chat with "+gender_pronoun.toLowerCase()+", compose a message starting with the word '"+match.getUsername()+"'";
+					mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+					
+					//notify person b?
+				}
+				
+				
+				
+			}else if(KEYWORD.equalsIgnoreCase("RENEW") || KEYWORD.equalsIgnoreCase("WEZESHA")){
+				
+				System.out.println("mo.getPricePointKeyword() >> "+mo.getPricePointKeyword());
+				System.out.println("mo.getPrice()>> "+mo.getPrice());
+				boolean subvalid = datingBean.subscriptionValid(MSISDN, Long.valueOf(serviceid));
+				
+				if(!subvalid){
+					mo = datingBean.renewSubscription(mo);
+				}else{
+					mo.setPrice(BigDecimal.ZERO);
+					//get exiry date
+					mo.setMt_Sent("You already have a valid subscription. To find a match, reply with FIND");
+				}
+				
+			}else if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
+				
+				boolean subvalid = datingBean.subscriptionValid(MSISDN, Long.valueOf(serviceid));
+				
+				if(subvalid){
+					
+					mo = processDating(mo,person);
+						
+				}else{
+				
+					//Please top up to continue chatting with x ..
+					PersonDatingProfile profile = datingBean.getProfile(person);
+					int lang = -1;
+					if(profile!=null){//if they've got a profile
+						SMSService sm = datingBean.find(SMSService.class, Long.valueOf(serviceid));
+						lang = profile.getLanguage_id();
+						PersonDatingProfile dest = datingBean.getperSonUsingChatName(MESSAGE);//find destination person
+						String msg = "";
+						if(dest!=null){//if they were chatting with someone.
+							msg = datingBean.getMessage(DatingMessages.RENEW_CHAT_SUBSCRIPTION, lang);
+							msg = msg.replaceAll(DEST_USERNAME_TAG,  dest.getUsername());
+							
+						}else{//else generic renew message
+							msg  = datingBean.getMessage(DatingMessages.RENEW_SUBSCRIPTION, lang);
+						}
+						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
+						msg = msg.replaceAll(SERVICENAME_TAG, sm.getService_name());
+						mo.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
+						mo.setMt_Sent(msg);//tell them to renew
+						mo.setPriority(3);
+					}
+				}
 			}else{
 				String msg = datingBean.getMessage(UNKNOWN_KEYWORD_ADVICE, language_id);
 				mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
@@ -88,6 +168,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		}
 		return mo;
 	}
+
+
 
 	private MOSms processDating(MOSms mo, Person person) throws Exception {
 		

@@ -7,8 +7,8 @@ package com.pixelandtag.sms.mt;
 APIType 6:
 IOD - Non-SMS IOD Registration
 IODM - Non-SMS IOD Registration in Bahasa Melayu
-REG - Non-SMS Subscription Registration
-REGM - Non-SMS Subscription Registration in Bahasa
+REG - Non-SMS SubscriptionOld Registration
+REGM - Non-SMS SubscriptionOld Registration in Bahasa
  *FriendFinder possible action values under APIType 7:
 ADD - Add a new friend to user's FriendFinder list
 FIND - Find an existing friend

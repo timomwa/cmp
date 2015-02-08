@@ -19,7 +19,7 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.subscription.Subscription;
+import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.RequestObject;
@@ -31,7 +31,7 @@ public class SubscribeProcessor extends GenericServiceProcessor {
 	private final Logger logger = Logger.getLogger(SubscribeProcessor.class);
 	private DBPoolDataSource ds;
 	//private MenuController menu_controller = null;
-	private Subscription subscription = null;
+	private SubscriptionOld subscription = null;
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
     
@@ -52,7 +52,7 @@ public class SubscribeProcessor extends GenericServiceProcessor {
 	public SubscribeProcessor(){
 		init_datasource();
 		//menu_controller = new MenuController();
-		subscription = new Subscription();
+		subscription = new SubscriptionOld();
 	}
 	
 	private void init_datasource(){

@@ -883,6 +883,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			logger.info(":::::::::::::::::::mo.isSplit_msg(): "+mo.isSplit_msg());
 			logger.info(":::::::::::::::::::mo.getSMS_DataCodingId(): "+mo.getSMS_DataCodingId());
 			logger.info("::::::::::::::::::: mo.getPricePointKeyword(): "+ mo.getPricePointKeyword());
+			logger.info("::::::::::::::::::: mo.getEventType(): "+ mo.getEventType());
+			
 			
 			pstmt.executeUpdate();
 			
@@ -1690,6 +1692,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));//added by Tim since 2012-09-21 at 1.17pm
 				mo.setSplit_msg(rs.getBoolean("msg_was_split"));
 				mo.setEventType(EventType.get(rs.getString("event_type")));
+				mo.setPricePointKeyword(rs.getString("price_point_keyword"));
 				moSMS.add(mo);
 				
 			}
@@ -2091,7 +2094,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					mo.setSplit_msg(rs.getBoolean("split_mt"));
 					mo.setPricePointKeyword(rs.getString("price_point_keyword"));
 					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
-					
+				
 				}
 				
 				

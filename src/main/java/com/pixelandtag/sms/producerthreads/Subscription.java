@@ -76,6 +76,8 @@ public class Subscription implements Serializable {
 			expiryDate = new Date();
 		if(subActive==null)
 			subActive = new Boolean(true);
+		if(renewal_count==null)
+			renewal_count = 0L;
 	}
 
 	public Long getId() {

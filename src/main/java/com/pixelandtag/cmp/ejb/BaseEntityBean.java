@@ -1,9 +1,25 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -15,11 +31,36 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.api.ERROR;
+import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.dating.entities.SubscriptionEvent;
+import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.BillableI;
+import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.subscription.dto.MediumType;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
+import com.pixelandtag.util.StopWatch;
 
 @Stateless
 @Remote
@@ -27,6 +68,96 @@ import com.pixelandtag.mms.api.TarrifCode;
 public class BaseEntityBean implements BaseEntityI {
 	
 	private Logger logger = Logger.getLogger(BaseEntityBean.class);
+	private String server_tz = "-05:00";//TODO externalize
+	private String client_tz = "+03:00";//TODO externalize
+	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";//TODO externalize this
+	private StopWatch watch;
+	private volatile int recursiveCounter = 0;
+	private List<NameValuePair> qparams = null;
+	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
+	private HttpClient httpsclient;
+	
+	@EJB
+	private CMPResourceBeanRemote cmp_ejb;
+	
+	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+        @Override
+        public boolean isTrusted(X509Certificate[] certificate, String authType) {
+            return true;
+        }
+    };
+    @SuppressWarnings("unchecked")
+	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
+		Subscription sub = null;
+		try{
+			Query qry = em.createQuery("from Subscription where msisdn=:msisdn AND sms_service_id_fk:sms_service_id_fk");
+			qry.setParameter("sms_service_id_fk", smsService.getId());
+			qry.setParameter("msisdn", msisdn);
+			
+			List<Subscription> scrl = qry.getResultList();
+			
+			if(scrl.size()>0){
+				sub = scrl.get(0);
+			}
+			
+			if(sub==null){//create new subscription
+				sub = new Subscription();
+				sub.setMsisdn(msisdn);
+				sub.setSms_service_id_fk(smsService.getId());
+				sub.setRenewal_count(0L);
+				sub.setRequest_medium(MediumType.sms);
+				sub.setSubActive(true);
+				sub.setSmsmenu_levels_id_fk(-1);
+			}
+			
+			qry = em.createNativeQuery("select DATE_ADD(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"'), INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
+			qry.setParameter("sub_length", smsService.getSubscription_length());
+			Object o = qry.getSingleResult();
+			Date expiryDate = (Date) o;
+			
+		
+			try{
+				utx.begin();
+				sub.setExpiryDate(expiryDate);
+				sub.setRenewal_count(sub.getRenewal_count()+1);
+				sub.setSubscription_status(SubscriptionStatus.confirmed);
+				sub.setSubscription_timeStamp(new Date());
+				sub = em.merge(sub);
+				
+				SubscriptionHistory sh = new SubscriptionHistory();
+				sh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
+				sh.setMsisdn(msisdn);
+				sh.setService_id(smsService.getId());
+				sh.setTimeStamp(new Date());
+				
+				sh = em.merge(sh);
+				
+				utx.commit();
+			}catch(Exception exp){
+				try{
+					utx.rollback();
+				}catch(Exception expr){}
+				throw exp;
+			}
+			
+			
+		}catch(Exception exp){
+			throw exp;
+		}
+		return sub;
+	}
+	public BaseEntityBean() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
+		watch = new StopWatch();
+		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
+		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+						    
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("https", 8443, sf));
+		cm = new ThreadSafeClientConnManager(schemeRegistry);
+		cm.setDefaultMaxPerRoute(2);
+		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+		httpsclient = new DefaultHttpClient(cm);
+	}
 	@Override
 	public EntityManager getEM() {
 		return em;
@@ -40,6 +171,25 @@ public class BaseEntityBean implements BaseEntityI {
 
 	@Resource
 	protected UserTransaction utx;
+	
+	
+	public void setServerTz(String server_tz)  throws Exception {
+		this.server_tz = server_tz;
+	}
+
+	public void setClientTz(String client_tz)  throws Exception {
+		this.client_tz = client_tz;
+	}
+	
+	
+	public String getServerTz()  throws Exception {
+		return this.server_tz;
+	}
+
+	public String getClientTz()  throws Exception {
+		return this.client_tz;
+	}
+	
 	
 	private String buildWhere(Map<String, Object> criteria)  throws Exception {
 		StringBuffer sb = new StringBuffer();
@@ -119,7 +269,25 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 	}
 	
-/**
+	@SuppressWarnings("unchecked")
+	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{
+		boolean subValid = false;
+		try{
+			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') ");
+			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("serviceid", serviceid);
+			List<Subscription> sublist = qry.getResultList();
+			if(sublist.size()>0)
+				subValid = true;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}
+		return subValid;
+	}
+
+	/**
 	 * To statslog
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -249,6 +417,285 @@ public class BaseEntityBean implements BaseEntityI {
 			throw e;
 		}
 		return t;
+	}
+
+	
+	
+	@Override
+	public Billable charge(Billable billable) throws Exception {
+		
+		HttpPost httsppost = new HttpPost(this.mtUrl);
+
+		HttpEntity resEntity = null;;
+		
+		boolean success = false;
+		String message = "";
+		
+		try {
+			
+			String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
+			String encoding = null;
+			sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
+			encoding = encoder.encode( usernamePassword.getBytes() ); 
+			httsppost.setHeader("Authorization", "Basic " + encoding);
+			httsppost.setHeader("SOAPAction","");
+			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
+			
+			String xml = billable.getChargeXML(BillableI.plainchargeXML);
+			logger.debug("BILLABLE: "+billable.toString());
+			logger.debug("XML SENT \n : "+xml + "\n");
+			StringEntity se = new StringEntity(xml);
+			httsppost.setEntity(se);
+			
+			
+			watch.start();
+			HttpResponse response = httpsclient.execute(httsppost);
+			watch.stop();
+			logger.debug("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
+				
+			 
+			 final int RESP_CODE = response.getStatusLine().getStatusCode();
+			 
+			 resEntity = response.getEntity();
+			 
+			 String resp = convertStreamToString(resEntity.getContent());
+			
+			 logger.debug("RESP CODE : "+RESP_CODE);
+			 logger.debug("RESP XML : "+resp);
+			 
+			 billable.setResp_status_code(String.valueOf(RESP_CODE));
+			
+			
+			 billable.setProcessed(1L);
+			
+			if (RESP_CODE == HttpStatus.SC_OK) {
+				
+				
+				billable.setRetry_count(billable.getRetry_count()+1);
+				
+				success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
+				billable.setSuccess(success );
+				
+				if(!success){
+					
+					String err = getErrorCode(resp);
+					String errMsg = getErrorMessage(resp);
+					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
+					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
+					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+					
+				}else{
+					
+					billable.setResp_status_code("Success");
+					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
+					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+					
+					
+					
+				}
+				
+								
+			}else if(RESP_CODE == 400){
+				
+				success  = false;
+				
+			}else if(RESP_CODE == 401){
+				success  = false;
+				
+				logger.error("\nUnauthorized!");
+				
+			}else if(RESP_CODE == 404 || RESP_CODE == 403){
+				
+				success  = false;
+				
+			}else if(RESP_CODE == 503){
+
+				success  = false;
+				
+			}else{
+				
+				success = false;
+				
+			}
+			
+					
+			}catch(ConnectException ce){
+				
+			    success  = false;
+				
+				message = ce.getMessage();
+				
+				logger.error(message, ce);
+				
+				httsppost.abort();
+				
+			}catch(SocketTimeoutException se){
+				
+				success  = false;
+				
+				message = se.getMessage();
+				
+				httsppost.abort();
+				
+				logger.error(message, se);
+				
+			} catch (IOException ioe) {
+				
+				success  = false;
+				
+				message = ioe.getMessage();
+				
+				httsppost.abort();
+				
+				logger.error("\n\n==============================================================\n\n"+message+" CONNECTION TO OPERATOR FAILED. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
+				
+			} catch (Exception ioe) {
+				
+				success  = false;
+				
+				message = ioe.getMessage();
+				
+				httsppost.abort();
+				
+				logger.error(message, ioe);
+				
+			} finally{
+				
+				watch.reset();
+				
+				
+				logger.debug(" ::::::: finished attempt to bill via HTTP");
+				
+				removeAllParams(qparams);
+				
+				 // When HttpClient instance is no longer needed,
+	            // shut down the connection manager to ensure
+	            // immediate deallocation of all system resources
+				try {
+					
+					if(resEntity!=null)
+						EntityUtils.consume(resEntity);
+				
+				} catch (Exception e) {
+					
+					logger.error(e.getMessage(),e);
+				
+				}
+				
+				
+				try{
+					
+					billable.setProcessed(1L);
+					billable.setIn_outgoing_queue(0L);
+					
+					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.Success);
+						billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
+					}
+					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.InvalidSubscriber);
+						billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
+					}
+					if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
+						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAInsufficientBalance);
+						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
+					}
+					
+					if("TWSS_109".equals(billable.getResp_status_code())){
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAChargeFailure);
+						billable.setIn_outgoing_queue(0L);
+						billable.setProcessed(0L);
+						billable.setRetry_count( (billable.getRetry_count()+1 ) );
+						billable.setMaxRetriesAllowed( (billable.getRetry_count()+2 ) );
+						billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
+					}
+					
+					cmp_ejb.saveOrUpdate(billable);
+					
+					if(!success){//return back to queue if we did not succeed
+						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
+						//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+						
+						//on third try, we abort
+						httsppost.abort();
+						
+						
+					}else{
+						
+						recursiveCounter = 0;
+						//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
+					}
+					
+				
+					
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
+				}
+				
+				watch.reset();
+				
+				
+				logger.debug("DONE! ");
+				
+			}
+		return null;
+	}
+	
+	
+	
+	
+	private void removeAllParams(List<NameValuePair> params) {
+		params.clear();
+	}
+	/**
+	 * Utility method for converting Stream To String
+	 * To convert the InputStream to String we use the
+	 * BufferedReader.readLine() method. We iterate until the BufferedReader
+	 * return null which means there's no more data to read. Each line will
+	 * appended to a StringBuilder and returned as String.
+	 * 
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 */
+	public  String convertStreamToString(InputStream is)
+			throws IOException {
+		
+		StringBuilder sb = null;
+		BufferedReader reader = null;
+		
+		if (is != null) {
+			sb = new StringBuilder();
+			String line;
+
+			try {
+				reader = new BufferedReader(
+						new InputStreamReader(is, "UTF-8"));
+				while ((line = reader.readLine()) != null) {
+					sb.append(line).append("\n");
+				}
+			} finally {
+				is.close();
+			}
+			return sb.toString();
+		} else {
+			return "";
+		}
+	}
+	
+	
+	private  String getErrorMessage(String resp) {
+		int start = resp.indexOf("<errorMessage>")+"<errorMessage>".length();
+		int end  = resp.indexOf("</errorMessage>");
+		return resp.substring(start, end);
+	}
+	private String getErrorCode(String resp) {
+		int start = resp.indexOf("<errorCode>")+"<errorCode>".length();
+		int end  = resp.indexOf("</errorCode>");
+		return resp.substring(start, end);
 	}
 
 

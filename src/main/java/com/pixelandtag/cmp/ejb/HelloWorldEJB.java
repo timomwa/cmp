@@ -1,5 +1,9 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -20,6 +24,13 @@ import com.pixelandtag.sms.producerthreads.HelloWorldData;
 @Remote
 @TransactionManagement(TransactionManagementType.BEAN)
 public class HelloWorldEJB extends BaseEntityBean implements HelloWorldI {
+
+	public HelloWorldEJB() throws KeyManagementException,
+			UnrecoverableKeyException, NoSuchAlgorithmException,
+			KeyStoreException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 

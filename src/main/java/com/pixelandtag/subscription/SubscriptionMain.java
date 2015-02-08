@@ -340,7 +340,7 @@ public class SubscriptionMain implements Runnable{
 			if((x>y) && pushnow)//if subscribers are more than the number of pushed count and it's the hour to push
 				if(processor_map.size()>0){
 					
-					final String service_name = "Subscription thread:  " + processor_map.get(service_id).peek().getServiceName();
+					final String service_name = "SubscriptionOld thread:  " + processor_map.get(service_id).peek().getServiceName();
 					
 					ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
 					
@@ -462,7 +462,7 @@ public class SubscriptionMain implements Runnable{
 		
 		//ds.releaseConnectionPool();
 		
-		logger.debug(">>>>>>>>>>>>>>>> Subscription program finished");
+		logger.debug(">>>>>>>>>>>>>>>> SubscriptionOld program finished");
 		//System.exit(0);
 	
 	}
