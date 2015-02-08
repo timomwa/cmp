@@ -25,6 +25,7 @@ import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -113,6 +114,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			
 			if(destination_person!=null){
+				
 				String source_user = profile.getUsername();
 				//System.out.println(source_user+ CHAT_USERNAME_SEPERATOR + MESSAGE.replaceAll(KEYWORD, "").trim());
 				
