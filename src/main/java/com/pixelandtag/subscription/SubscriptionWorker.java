@@ -148,7 +148,7 @@ public class SubscriptionWorker implements Runnable{
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
 					mo.setSMS_SourceAddr(dto.getShortcode());
-					//if(!sub.getSubActive())//Subscription has expired, we charge them
+					//if(!sub.getSubActive())//SubscriptionOld has expired, we charge them
 					mo.setPrice(BigDecimal.valueOf(dto.getPrice()));
 					mo.setPriority(1);
 					mo.setServiceid(dto.getServiceid());

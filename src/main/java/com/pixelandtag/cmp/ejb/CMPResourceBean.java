@@ -1,6 +1,10 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,33 +55,18 @@ import com.pixelandtag.web.beans.MessageType;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRemote {
 	
-	private String server_tz = "-05:00";//TODO externalize
-
-	private String client_tz = "+03:00";//TODO externalize
 	
+	public CMPResourceBean() throws KeyManagementException,
+			UnrecoverableKeyException, NoSuchAlgorithmException,
+			KeyStoreException {
+		super();
+	}
+
 	private static int DEFAULT_LANGUAGE_ID = 1;
 	private String MINUS_ONE = "-1";
 	private final String RM1 = "RM1";
 	
-	private SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
-	public void setServerTz(String server_tz)  throws Exception {
-		this.server_tz = server_tz;
-	}
 
-	public void setClientTz(String client_tz)  throws Exception {
-		this.client_tz = client_tz;
-	}
-	
-	
-	public String getServerTz()  throws Exception {
-		return this.server_tz;
-	}
-
-	public String getClientTz()  throws Exception {
-		return this.client_tz;
-	}
-	
 	
 	/**
 	 * 
@@ -1499,7 +1488,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		boolean success = false;
 		try{
 			 utx.begin();
-			 String sql = "UPDATE `"+GenericServiceProcessor.DB+"`.`ServiceSubscription` SET lastUpdated=convert_tz(now(),'"+server_tz+"','"+client_tz+"') WHERE id =:id";
+			 String sql = "UPDATE `"+GenericServiceProcessor.DB+"`.`ServiceSubscription` SET lastUpdated=convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') WHERE id =:id";
 			Query qry = em.createNativeQuery(sql);	
 			qry.setParameter("id", subscription_service_id);
 			int num =  qry.executeUpdate();
@@ -2127,23 +2116,23 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			long cmpTxid = transaction_id.longValue();
 			
 			String sql;
-			Query qry;
-			Object rs;
-			try{
+			//Query qry;
+			//Object rs;
+			/*try{
 				sql = "SELECT CMP_Txid FROM `"+CelcomImpl.database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)";
 				qry = em.createNativeQuery(sql);
 				qry.setParameter(1, cmpTxid);
 				qry.setParameter(2, cmpTxid);
 				rs = qry.getSingleResult();
 					if(rs!=null){
-						cmpTxid = (Long) rs;
+						cmpTxid = ( (BigInteger) rs ).longValue();
 					}
 			}catch(javax.persistence.NoResultException ex){
 				logger.warn(ex.getMessage() + " COULD NOT FIND messagelog record with (CMP_Txid = "+cmpTxid+") OR (newCMP_Txid = "+cmpTxid+")");
-			}
+			}*/
 				
 			
-			rs = null;
+			//rs = null;
 			double priceTbc = 0.0d;
 			boolean wasInLog = false;
 			List<Object[]> rs2 =null;

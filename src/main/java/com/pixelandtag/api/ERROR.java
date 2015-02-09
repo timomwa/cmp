@@ -34,7 +34,7 @@ public enum ERROR {
 	PCM402,//Invalid pricecode
 	PCM403,//Invalid Service
 	PCM404,//Exceeded IOD Push Frequency
-	PCM405,//Exceeded Subscription Push Frequency
+	PCM405,//Exceeded SubscriptionOld Push Frequency
 	PCM406,//Invalid IOD services (Msgid mismatch)
 	ContentType_Is_Null, 
 	SERVER_INTERNAL_QUEUE_FULL,

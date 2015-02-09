@@ -52,7 +52,7 @@ public class WebServiceClient {
 		 			   "<netShare>0</netShare>\r\n" +
 		 			      "<cpId>CONTENT360_KE</cpId>\r\n" +
 		 			     "<customerClass></customerClass>\r\n" +
-		 			      "<eventType>Subscription Purchase</eventType>\r\n" +//very important
+		 			      "<eventType>SubscriptionOld Purchase</eventType>\r\n" +//very important
 		 			     "<localTimeStamp></localTimeStamp>\r\n" +
 		 			    "<transactionId>32329</transactionId>\r\n" +
 		 			   "<subscriptionTypeCode>abcd</subscriptionTypeCode>\r\n" +

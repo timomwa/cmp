@@ -1,13 +1,17 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -21,15 +25,21 @@ import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
-import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.sms.producerthreads.Operation;
+import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
 @Remote
@@ -37,6 +47,20 @@ import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
 	
+	
+
+	@EJB
+	private CMPResourceBeanRemote cmp_ejb;
+	
+	public DatingServiceBean() throws KeyManagementException,
+			UnrecoverableKeyException, NoSuchAlgorithmException,
+			KeyStoreException {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+
+
 	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@Resource
@@ -50,6 +74,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@Override
 	public String getMessage(String key, int language_id) throws DatingServiceException{
+		if(language_id<=0)
+			language_id = 1;
 		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
 		
 		try {
@@ -110,6 +136,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	@Override
 	public String getMessage(DatingMessages datingMsg, int language_id) throws DatingServiceException{
+		if(language_id<=0)
+			language_id = 1;
 		return getMessage(datingMsg.toString(),language_id);
 	}
 	
@@ -138,7 +166,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 		return t;
 	}
-
+	
 
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile findMatch(Gender pref_gender) throws DatingServiceException{
@@ -479,7 +507,99 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	
+	public MOSms renewSubscription(MOSms mo) throws DatingServiceException{
+		
+		
+		try{
+			
+			
+			final RequestObject req = new RequestObject(mo);
+			final String KEYWORD = req.getKeyword().trim();
+			final String MESSAGE = req.getMsg().trim();
+			final int serviceid = 	mo.getServiceid();
+			final String MSISDN = req.getMsisdn();
+		
+		
+			int language_id = 1;
 	
+			final Person person = getPerson(mo.getMsisdn());
+			
+		
+			Billable billable = createBillable(mo);
+			
+			billable = charge(billable);
+			
+			String msg = "";
+			
+			PersonDatingProfile profile = person!=null?  getProfile(person) : null;
+			if(profile!=null)
+				language_id = profile.getLanguage_id();
+			
+			if(!billable.isSuccess()){
+				
+				
+				String message_key = BILLING_FAILED;
+				if(billable.getResp_status_code().equalsIgnoreCase(BillingStatus.INSUFFICIENT_FUNDS.toString())){
+					 message_key =  billable.getResp_status_code();
+				}
+				
+				String message = getMessage(message_key, language_id);
+				
+				mo.setMt_Sent(message);
+				
+				return mo;
+				
+			}else{
+				
+				billable = saveOrUpdate(billable);
+				
+				SMSService smsserv = find(SMSService.class, Long.valueOf(serviceid));
+			
+				Subscription sub = renewSubscription(MSISDN, smsserv);
+				
+				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
+				msg = msg.replaceAll(EXPIRY_DATE_TAG, sdf.format( sub.getExpiryDate() ));
+				msg = msg.replaceAll(SERVICE_NAME_TAG, smsserv.getService_name());
+				mo.setMt_Sent(msg);
+				mo.setPrice(mo.getPrice());//set price to subscription price
+				mo.setPriority(0);
+			}
+		
+		}catch(Exception exp){
+			throw new DatingServiceException("Sorry, something went wrong. Try again later.", exp);
+		}
+		
+		return mo;
+	}
+	
+	
+
+	private Billable createBillable(MOSms mo) {
+		Billable billable =  new Billable();
+			
+		billable.setCp_id("CONTENT360_KE");
+		billable.setCp_tx_id(Long.valueOf(mo.getCMP_Txid()));
+		billable.setDiscount_applied("0");
+		billable.setEvent_type(mo.getEventType());
+		billable.setIn_outgoing_queue(0l);
+		billable.setKeyword(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		billable.setMaxRetriesAllowed(1L);
+		billable.setMessage_id(mo.getId());
+		billable.setMsisdn(mo.getMsisdn());
+		billable.setOperation(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+		billable.setPrice(mo.getPrice());
+		billable.setPriority(0l);
+		billable.setProcessed(0L);
+		billable.setRetry_count(0L);
+		billable.setService_id(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		billable.setShortcode(mo.getSMS_SourceAddr());		
+		billable.setTx_id(Long.valueOf(mo.getCMP_Txid()));
+		billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
+		billable.setPricePointKeyword(mo.getPricePointKeyword());
+			
+		return billable;
+	}
+
 	@SuppressWarnings("unchecked")
 	public ProfileQuestion getPreviousQuestion(Long profile_id) throws DatingServiceException{
 		

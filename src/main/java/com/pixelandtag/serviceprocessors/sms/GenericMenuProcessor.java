@@ -31,7 +31,7 @@ import com.pixelandtag.smsmenu.MenuController;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.staticcontent.ContentRetriever;
-import com.pixelandtag.subscription.Subscription;
+import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
@@ -55,7 +55,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	private ContentRetriever cr = null;
 	private DBPoolDataSource ds;
 	private MenuController menu_controller = null;
-	private Subscription subscription = null;
+	private SubscriptionOld subscription = null;
 	private CelcomHTTPAPI celcomAPI = null;
 	
 	private InitialContext context;
@@ -78,7 +78,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	public GenericMenuProcessor(){
 		init_datasource();
 		menu_controller = new MenuController(getEJB());
-		subscription = new Subscription();
+		subscription = new SubscriptionOld();
 		cr = new ContentRetriever();
 		
 		int vendor = DriverUtilities.MYSQL;

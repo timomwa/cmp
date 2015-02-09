@@ -42,6 +42,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String SERVICENAME_TAG = "<SERVICE_NAME>";
 	public static final String PRICE_TAG = "<SMS_SUBSCRIPTION_PRICE>";
 	public static final String USERNAME_TAG = "<USERNAME>";
+	public static final String GENDER_PRONOUN_TAG = "<GENDER_PRONOUN>";
+	public static final String GENDER_PRONOUN_N = "GENDER_PRONOUN_N";
+	public static final String DEST_USERNAME_TAG = "<DEST_USERNAME>";
+	public static final String GENDER_PRONOUN_M = "GENDER_PRONOUN_M";
+	public static final String GENDER_PRONOUN_F = "GENDER_PRONOUN_F";
 	public static final String CHAT_USERNAME_SEPERATOR = " Says: ";
 	public static final String KEYWORD_TAG = "<KEYWORD>";
 	public static final String CONFIRMED_SUBSCRIPTION_ADVICE = "CONFIRMED_SUBSCRIPTION_ADVICE";
@@ -172,58 +177,17 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			return mo_;
 		}
 		
-		
-		//PreparedStatement pstmt = null;
-		//ResultSet rs = null;
 		Billable billable = null;
 		
 		try{
 			
 			billable = getEJB().find(Billable.class, "cp_tx_id",mo_.getCMP_Txid());
-			/*String sql = "SELECT * FROM billable_queue WHERE cp_tx_id=? ";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setLong(1, mo_.getCMP_Txid());
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()){
-				billable = new Billable();
-				billable.setId(rs.getInt("id"));
-				billable.setCp_id(rs.getString("cp_id"));
-				billable.setCp_tx_id(rs.getLong("cp_tx_id"));
-				billable.setDiscount_applied(rs.getString("discount_applied"));
-				billable.setEvent_type(EventType.get(rs.getString("event_type")));
-				billable.setIn_outgoing_queue(rs.getLong("in_outgoing_queue"));
-				billable.setKeyword(rs.getString("keyword"));
-				billable.setMaxRetriesAllowed(rs.getLong("maxRetriesAllowed"));
-				billable.setMessage_id(rs.getLong("message_id"));
-				billable.setMsisdn(rs.getString("msisdn"));
-				billable.setOperation(rs.getString("operation"));
-				billable.setPrice(rs.getBigDecimal("price"));
-				billable.setPriority(rs.getLong("priority"));
-				billable.setResp_status_code(rs.getString("resp_status_code"));
-				billable.setRetry_count(rs.getLong("retry_count"));
-				billable.setService_id(rs.getString("service_id"));
-				billable.setShortcode(rs.getString("shortcode"));
-				billable.setSuccess(rs.getBoolean("success"));
-				billable.setTx_id(rs.getLong("tx_id"));
-				billable.setTimeStamp(new Date());
-				billable.setPricePointKeyword(rs.getString("price_point_keyword"));
-			}*/
-			
 			
 			
 		}catch(Exception e){
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
-			/*try {
-				rs.close();
-			} catch (SQLException e) {
-			}
-			try {
-				pstmt.close();
-			} catch (SQLException e) {
-			}*/
 			
 		}
 		
@@ -251,7 +215,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo_.getSMS_SourceAddr());		
 		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
-		billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
+		billable.setEvent_type(mo_.getEventType()!=null ? mo_.getEventType() : EventType.SUBSCRIPTION_PURCHASE);
 		billable.setPricePointKeyword(mo_.getPricePointKeyword());
 		logger.debug(" before save "+billable.getId());
 		

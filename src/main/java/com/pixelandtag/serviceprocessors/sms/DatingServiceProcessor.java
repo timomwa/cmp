@@ -16,6 +16,7 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
@@ -25,6 +26,11 @@ import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.sms.producerthreads.Operation;
+import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -59,6 +65,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	public MOSms process(MOSms mo) {
 		
 		
+		logger.info("\n\n\tIS SUBSCRIPTION?? "+mo.isSubscription());
 		
 		try {
 			
@@ -73,10 +80,118 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			int language_id = 1;
 		
-			final Person person = datingBean.getPerson(mo.getMsisdn());
+			Person person = datingBean.getPerson(mo.getMsisdn());
+			if(person==null)
+				person = datingBean.register(mo.getMsisdn());
 			
-			if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
-				mo = processDating(mo,person);
+			PersonDatingProfile profile = datingBean.getProfile(person);
+			
+			if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
+				
+				
+				
+				if(person.getId()>0 && profile==null){//Success registering/registered but no profile
+					
+					mo = startProfileQuestions(mo,person);
+					
+					return mo;
+				}
+				
+				Gender pref_gender = profile.getPreferred_gender();
+				BigDecimal pref_age = profile.getPreferred_age();
+				String location = profile.getLocation();
+				
+				PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location);
+				if(match==null)
+					 match = datingBean.findMatch(pref_gender,pref_age);
+				if(match==null)
+					 match = datingBean.findMatch(pref_gender);
+				
+				if(match==null){
+					String msg = datingBean.getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id);
+					mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+				}else{
+					try{
+						SystemMatchLog sysmatchlog = new SystemMatchLog();
+						sysmatchlog.setPerson_a_id(person.getId());
+						sysmatchlog.setPerson_b_id(match.getPerson().getId());
+						sysmatchlog.setPerson_a_notified(true);
+						sysmatchlog = datingBean.saveOrUpdate(sysmatchlog);
+					}catch(Exception exp){
+						logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
+					}
+					String gender_pronoun = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
+					String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
+					msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
+					msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);
+					msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
+					mo.setMt_Sent(msg);
+					
+					//notify person b?
+				}
+				
+				
+				
+			}else if(KEYWORD.equalsIgnoreCase("RENEW") || KEYWORD.equalsIgnoreCase("WEZESHA")){
+				
+				SMSService smsservice = datingBean.getSMSService("DATE");
+				
+				boolean subvalid = datingBean.subscriptionValid(MSISDN, smsservice.getId());
+				
+				if(!subvalid){
+					
+					try{
+						mo = datingBean.renewSubscription(mo);
+					}catch(DatingServiceException dse){
+						logger.error(dse.getMessage(),dse);
+						mo.setMt_Sent(dse.getMessage());
+						mo.setPrice(BigDecimal.ZERO);
+					}
+					
+				}else{
+					mo.setPrice(BigDecimal.ZERO);
+					mo.setMt_Sent("You already have a valid subscription. To find a match, reply with FIND");
+				}
+				
+			}else if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
+				
+				if(mo.isSubscription()){//if it's subscription push, for this service we return no message.
+					mo.setMt_Sent(null);
+					mo.setPrice(BigDecimal.ZERO);
+					return mo;
+				}
+				SMSService smsservice = datingBean.getSMSService("DATE");
+				boolean subvalid = datingBean.subscriptionValid(MSISDN, smsservice.getId());
+				if(subvalid || (profile==null || !profile.getProfileComplete()) ){
+					
+					mo = processDating(mo,person);
+						
+				}else{
+				
+					//Please top up to continue chatting with x ..
+					int lang = 1;
+					if(profile!=null){//if they've got a profile
+						SMSService sm = datingBean.find(SMSService.class, Long.valueOf(serviceid));
+						lang = profile.getLanguage_id();
+						PersonDatingProfile dest = datingBean.getperSonUsingChatName(MESSAGE);//find destination person
+						String msg = "";
+						if(dest!=null){//if they were chatting with someone.
+							msg = datingBean.getMessage(DatingMessages.RENEW_CHAT_SUBSCRIPTION, lang);
+							logger.info("\n\n\n\t1. msg::::>>> "+msg);
+							msg = msg.replaceAll(DEST_USERNAME_TAG,  dest.getUsername());
+							
+						}else{//else generic renew message
+							msg  = datingBean.getMessage(DatingMessages.RENEW_SUBSCRIPTION, lang);
+							logger.info("\n\n\n\t2. msg::::>>> "+msg);
+						}
+						logger.info("\n\n\n\tmsg::::>>> "+msg);
+						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
+						msg = msg.replaceAll(SERVICENAME_TAG, sm.getService_name());
+						mo.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
+						mo.setMt_Sent(msg);//tell them to renew
+						mo.setPriority(3);
+					}
+				}
 			}else{
 				String msg = datingBean.getMessage(UNKNOWN_KEYWORD_ADVICE, language_id);
 				mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
@@ -88,91 +203,84 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		return mo;
 	}
 
+
+
 	private MOSms processDating(MOSms mo, Person person) throws Exception {
-		
-		final RequestObject req = new RequestObject(mo);
-		final String KEYWORD = req.getKeyword().trim();
-		final String MESSAGE = req.getMsg().trim();
-		
-		final int serviceid = 	mo.getServiceid();
-		final String MSISDN = req.getMsisdn();
-		
-		
-		int language_id = 1;
-	
+					
 		if(person==null)
 			person = datingBean.register(mo.getMsisdn());
 		
 		
 		PersonDatingProfile profile = datingBean.getProfile(person);
 		
-		if(profile!=null && profile.getProfileComplete()){//If profile is complete, we allow chat
-			
-			//System.out.println("profile complete ? "+profile.getProfileComplete());
-			PersonDatingProfile destination_person = datingBean.getperSonUsingChatName(KEYWORD);
-			
-			
-			if(destination_person!=null){
-				String source_user = profile.getUsername();
-				//System.out.println(source_user+ CHAT_USERNAME_SEPERATOR + MESSAGE.replaceAll(KEYWORD, "").trim());
-				
-				ChatLog log = new ChatLog();
-				log.setSource_person_id(person.getId());
-				log.setDest_person_id(destination_person.getPerson().getId());
-				log.setMessage(MESSAGE);
-				datingBean.saveOrUpdate(log);
-			
-				MOSms chatMo  = mo.clone();
-				chatMo.setMsisdn(destination_person.getPerson().getMsisdn());
-				Gender gender = profile.getGender();
-				String pronoun = gender.equals(Gender.FEMALE) ? "Her" : "Him";
-				chatMo.setMt_Sent(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE.replaceAll(KEYWORD, "").trim() +NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-");
-				chatMo.setCMP_Txid(generateNextTxId());
-				chatMo.setPriority(0);//highest priority possible
-				chatMo.setPrice(BigDecimal.ZERO);
-				chatMo.setCMP_AKeyword(mo.getCMP_AKeyword());
-				chatMo.setCMP_SKeyword(mo.getCMP_SKeyword());
-				sendMT(chatMo);
-				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent("Message sent to '"+KEYWORD+"'");
-				return mo;
-			}else{//destination person not found.. Check in their friends list. Ask them whom they want to chat to..
-				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent("Sorry, no user with the username '"+KEYWORD+"'");//get their friendslist/match
-				return mo;
-				
-			}
+		if(profile!=null && profile.getProfileComplete()){
+			mo = chat(mo,profile,person);
 		}
-		
-		
+				
 		if(person.getId()>0 && profile==null){//Success registering/registered but no profile
-			//Prompt subscriber to create profile
-			String msg = null;
-			try{
-				msg = datingBean.getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, language_id);
-			}catch(DatingServiceException dse){
-				logger.error(dse.getMessage(), dse);
-			}
 			
-			profile = new PersonDatingProfile();
-			profile.setPerson(person);
-			profile.setUsername(MSISDN);
-			
-			profile = datingBean.saveOrUpdate(profile);
-			
-			ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
-			logger.debug("QUESTION::: "+question.getQuestion());
-			mo.setMt_Sent(msg+ SPACE +question.getQuestion());
-			
-			QuestionLog ql = new QuestionLog();
-			
-			ql.setProfile_id_fk(profile.getId());
-			ql.setQuestion_id_fk(question.getId());
-			ql = datingBean.saveOrUpdate(ql);
+			mo = startProfileQuestions(mo,person);
 		
 		}else{
 			
-			if(!profile.getProfileComplete()){//If profile isn't complete
+			if(!profile.getProfileComplete()){
+				
+				mo = completeProfile(mo,person,profile);
+			
+			}
+		}
+		
+		return mo;
+	}
+
+	private MOSms startProfileQuestions(MOSms mo, Person person) throws DatingServiceException {
+
+		try{
+				final RequestObject req = new RequestObject(mo);
+				final String MSISDN = req.getMsisdn();
+				int language_id = 1;
+				
+				String msg = null;
+				try{
+					msg = datingBean.getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, language_id);
+				}catch(DatingServiceException dse){
+					logger.error(dse.getMessage(), dse);
+				}
+				
+				PersonDatingProfile profile = new PersonDatingProfile();
+				profile.setPerson(person);
+				profile.setUsername(MSISDN);
+				
+				profile = datingBean.saveOrUpdate(profile);
+				
+				ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
+				logger.debug("QUESTION::: "+question.getQuestion());
+				mo.setMt_Sent(msg+ SPACE +question.getQuestion());
+				
+				QuestionLog ql = new QuestionLog();
+				
+				ql.setProfile_id_fk(profile.getId());
+				ql.setQuestion_id_fk(question.getId());
+				ql = datingBean.saveOrUpdate(ql);
+		}catch(Exception exp){
+			throw new DatingServiceException("Sorry, problem occurred, please try again.",exp);
+		}
+		
+		return mo;
+	}
+
+	private MOSms completeProfile(MOSms mo, Person person,
+			PersonDatingProfile profile) throws DatingServiceException {
+		
+		try{
+			
+				final RequestObject req = new RequestObject(mo);
+				final String KEYWORD = req.getKeyword().trim();
+				final String MESSAGE = req.getMsg().trim();
+				final String MSISDN = req.getMsisdn();
+				
+				int language_id = 1;
+				
 				
 				ProfileQuestion previousQuestion = datingBean.getPreviousQuestion(profile.getId());
 				final ProfileAttribute attr = previousQuestion.getAttrib();
@@ -267,6 +375,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					profile.setProfileComplete(true);
 					person.setActive(true);
 					profile.setPerson(person);
+					
+					SMSService smsservice = datingBean.getSMSService("DATE");
+					
+					datingBean.renewSubscription(MSISDN, smsservice);
 				}
 				
 				profile = datingBean.saveOrUpdate(profile);
@@ -289,6 +401,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					String location = profile.getLocation();
 					
 					PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location);
+					if(match==null)
+						 match = datingBean.findMatch(pref_gender,pref_age);
+					if(match==null)
+						 match = datingBean.findMatch(pref_gender);
 					
 					if(match==null){
 						String msg = datingBean.getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
@@ -303,25 +419,87 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						}catch(Exception exp){
 							logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
 						}
-						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? "Her" : "His";
-						String msg = "Lucky you "+USERNAME_TAG+"! We have a match for you. "+gender_pronoun+" username is "+match.getUsername()+". "
-								+ "To chat with "+gender_pronoun.toLowerCase()+", compose a message starting with the word '"+match.getUsername()+"'";
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
-						
+					
+						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
+						String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
+						logger.info("\n\n\n\t\t msg:::"+msg);
+						logger.info("\n\n\n\t\t profile:::"+profile);
+						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
+						msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);
+						msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
+						mo.setMt_Sent(msg);
 					}
 					
 				}
+		
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+			throw new DatingServiceException("Something went Wrong. Kindly try again.",exp);
 			
-			}
 		}
 		
 		return mo;
 	}
 
+	private MOSms chat(MOSms mo, PersonDatingProfile profile, Person person) throws DatingServiceException {
+				
+		try{
+			
+			final RequestObject req = new RequestObject(mo);
+			final String KEYWORD = req.getKeyword().trim();
+			final String MESSAGE = req.getMsg().trim();
+			
+			//If profile is complete, we allow chat
+			
+			//System.out.println("profile complete ? "+profile.getProfileComplete());
+			PersonDatingProfile destination_person = datingBean.getperSonUsingChatName(KEYWORD);
+			
+			
+			if(destination_person!=null){
+				
+				String source_user = profile.getUsername();
+				//System.out.println(source_user+ CHAT_USERNAME_SEPERATOR + MESSAGE.replaceAll(KEYWORD, "").trim());
+				ChatLog log = new ChatLog();
+				log.setSource_person_id(person.getId());
+				log.setDest_person_id(destination_person.getPerson().getId());
+				log.setMessage(MESSAGE.replaceAll("\\d{3,10}", "*"));
+				datingBean.saveOrUpdate(log);
+				int language_id = profile.getLanguage_id()>0 ? profile.getLanguage_id() : 1;
+			
+				MOSms chatMo  = mo.clone();
+				chatMo.setMsisdn(destination_person.getPerson().getMsisdn());
+				Gender gender = profile.getGender();
+				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
+				//chatMo.setSMS_Message_String(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE);
+				chatMo.setMt_Sent(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{3,10}", "*") +NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-");
+				chatMo.setCMP_Txid(generateNextTxId());
+				chatMo.setPriority(0);//highest priority possible
+				chatMo.setPrice(BigDecimal.ZERO);
+				chatMo.setCMP_AKeyword(mo.getCMP_AKeyword());
+				chatMo.setCMP_SKeyword(mo.getCMP_SKeyword());
+				sendMT(chatMo);
+				mo.setPrice(BigDecimal.ZERO);
+				mo.setMt_Sent("Message sent to '"+KEYWORD+"'");
+				return mo;
+			}else{//destination person not found.. Check in their friends list. Ask them whom they want to chat to..
+				mo.setPrice(BigDecimal.ZERO);
+				mo.setMt_Sent("Sorry, no user with the username '"+KEYWORD+"'");//get their friendslist/match
+				return mo;
+				
+			}
+		
+		}catch(Exception exp){
+			throw new DatingServiceException("Sorry, something went wrong. Please try again",exp);
+		}
+	}
+
 	@Override
 	public void finalizeMe() {
-		// TODO Auto-generated method stub
-
+		try {
+			context.close();
+		} catch (NamingException e) {
+			logger.error(e.getMessage(),e);
+		}
 	}
 
 	@Override

@@ -8,7 +8,9 @@ import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
+import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
+import com.pixelandtag.sms.producerthreads.Billable;
 
 
 public interface DatingServiceI extends BaseEntityI {
@@ -35,6 +37,8 @@ public interface DatingServiceI extends BaseEntityI {
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender) throws DatingServiceException;
+	public MOSms renewSubscription(MOSms mo) throws DatingServiceException;
 
+	
 
 }

@@ -154,7 +154,7 @@ public class DailyReport {
 		
 		k = 1;
 		List<SubscriptionBean> subscriptionBeans = getSubscriptionData();
-		sheet = createSheet("Subscription report for " + strdate);
+		sheet = createSheet("SubscriptionOld report for " + strdate);
 		SubscriptionBean subscriptionBean = null;
 		for (int i = 0; i < subheader.length; i++) {
 			row = sheet.createRow(i + 1);
@@ -269,7 +269,7 @@ public class DailyReport {
 	/**
 	 * 
 	 * <p>
-	 * Subscription Data
+	 * SubscriptionOld Data
 	 * </p>
 	 * 
 	 * @return
