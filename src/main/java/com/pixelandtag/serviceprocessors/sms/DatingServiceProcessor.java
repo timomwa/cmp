@@ -65,6 +65,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	public MOSms process(MOSms mo) {
 		
 		
+		logger.info("\n\n\tIS SUBSCRIPTION?? "+mo.isSubscription());
 		
 		try {
 			
@@ -154,8 +155,13 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 			}else if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
 				
-				boolean subvalid = datingBean.subscriptionValid(MSISDN, Long.valueOf(serviceid));
-				
+				if(mo.isSubscription()){//if it's subscription push, for this service we return no message.
+					mo.setMt_Sent(null);
+					mo.setPrice(BigDecimal.ZERO);
+					return mo;
+				}
+				SMSService smsservice = datingBean.getSMSService("DATE");
+				boolean subvalid = datingBean.subscriptionValid(MSISDN, smsservice.getId());
 				if(subvalid || (profile==null || !profile.getProfileComplete()) ){
 					
 					mo = processDating(mo,person);
@@ -163,7 +169,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}else{
 				
 					//Please top up to continue chatting with x ..
-					int lang = -1;
+					int lang = 1;
 					if(profile!=null){//if they've got a profile
 						SMSService sm = datingBean.find(SMSService.class, Long.valueOf(serviceid));
 						lang = profile.getLanguage_id();
@@ -171,11 +177,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						String msg = "";
 						if(dest!=null){//if they were chatting with someone.
 							msg = datingBean.getMessage(DatingMessages.RENEW_CHAT_SUBSCRIPTION, lang);
+							logger.info("\n\n\n\t1. msg::::>>> "+msg);
 							msg = msg.replaceAll(DEST_USERNAME_TAG,  dest.getUsername());
 							
 						}else{//else generic renew message
 							msg  = datingBean.getMessage(DatingMessages.RENEW_SUBSCRIPTION, lang);
+							logger.info("\n\n\n\t2. msg::::>>> "+msg);
 						}
+						logger.info("\n\n\n\tmsg::::>>> "+msg);
 						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
 						msg = msg.replaceAll(SERVICENAME_TAG, sm.getService_name());
 						mo.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
@@ -413,6 +422,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
 						String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
+						logger.info("\n\n\n\t\t msg:::"+msg);
+						logger.info("\n\n\n\t\t profile:::"+profile);
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
 						msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);
 						msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
@@ -448,19 +459,19 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				String source_user = profile.getUsername();
 				//System.out.println(source_user+ CHAT_USERNAME_SEPERATOR + MESSAGE.replaceAll(KEYWORD, "").trim());
-				
 				ChatLog log = new ChatLog();
 				log.setSource_person_id(person.getId());
 				log.setDest_person_id(destination_person.getPerson().getId());
-				log.setMessage(MESSAGE);
+				log.setMessage(MESSAGE.replaceAll("\\d{3,10}", "*"));
 				datingBean.saveOrUpdate(log);
+				int language_id = profile.getLanguage_id()>0 ? profile.getLanguage_id() : 1;
 			
 				MOSms chatMo  = mo.clone();
 				chatMo.setMsisdn(destination_person.getPerson().getMsisdn());
 				Gender gender = profile.getGender();
-				String pronoun = gender.equals(Gender.FEMALE) ? "Her" : "Him";
+				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
 				//chatMo.setSMS_Message_String(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE);
-				chatMo.setMt_Sent(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE.replaceAll(KEYWORD, "").trim() +NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-");
+				chatMo.setMt_Sent(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{3,10}", "*") +NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-");
 				chatMo.setCMP_Txid(generateNextTxId());
 				chatMo.setPriority(0);//highest priority possible
 				chatMo.setPrice(BigDecimal.ZERO);

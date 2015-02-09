@@ -74,6 +74,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@Override
 	public String getMessage(String key, int language_id) throws DatingServiceException{
+		if(language_id<=0)
+			language_id = 1;
 		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
 		
 		try {
@@ -134,6 +136,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	@Override
 	public String getMessage(DatingMessages datingMsg, int language_id) throws DatingServiceException{
+		if(language_id<=0)
+			language_id = 1;
 		return getMessage(datingMsg.toString(),language_id);
 	}
 	
@@ -163,11 +167,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return t;
 	}
 	
+
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile findMatch(Gender pref_gender) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender  order by rand()");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender order by rand()");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
@@ -179,12 +184,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 
 	
+	
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender  AND p.dob<=:dob order by rand()");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.dob<=:dob order by rand()");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("dob", dob);
 			List<PersonDatingProfile> ps = qry.getResultList();
@@ -195,7 +201,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 		return person;
 	}
-
+	
+	
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location) throws DatingServiceException{
 		PersonDatingProfile person = null;
