@@ -507,7 +507,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	
-	public MOSms renewSubscription(MOSms mo) throws DatingServiceException{
+	public MOSms renewSubscription(MOSms mo, Long serviceid) throws DatingServiceException{
 		
 		
 		try{
@@ -516,7 +516,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			final RequestObject req = new RequestObject(mo);
 			final String KEYWORD = req.getKeyword().trim();
 			final String MESSAGE = req.getMsg().trim();
-			final int serviceid = 	mo.getServiceid();
+			//final int serviceid = 	mo.getServiceid();
 			final String MSISDN = req.getMsisdn();
 		
 		
@@ -553,7 +553,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				billable = saveOrUpdate(billable);
 				
-				SMSService smsserv = find(SMSService.class, Long.valueOf(serviceid));
+				SMSService smsserv = find(SMSService.class, serviceid);
 			
 				Subscription sub = renewSubscription(MSISDN, smsserv);
 				

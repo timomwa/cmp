@@ -141,7 +141,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(!subvalid){
 					
 					try{
-						mo = datingBean.renewSubscription(mo);
+						mo = datingBean.renewSubscription(mo,smsservice.getId());
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
 						mo.setMt_Sent(dse.getMessage());
@@ -162,15 +162,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}
 				SMSService smsservice = datingBean.getSMSService("DATE");
 				boolean subvalid = datingBean.subscriptionValid(MSISDN, smsservice.getId());
-				if(subvalid || (profile==null || !profile.getProfileComplete()) ){
+				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
 					
 					mo = processDating(mo,person);
 						
-				}else{
-				
+				}else if((profile==null || !profile.getProfileComplete()) ){//No profile or incomplete profile
+					
 					//Please top up to continue chatting with x ..
 					int lang = 1;
-					if(profile!=null){//if they've got a profile
+					if(!subvalid && profile!=null && profile.getProfileComplete() ){//Profile is complete just need to renew subscription
 						SMSService sm = datingBean.find(SMSService.class, Long.valueOf(serviceid));
 						lang = profile.getLanguage_id();
 						PersonDatingProfile dest = datingBean.getperSonUsingChatName(MESSAGE);//find destination person
@@ -190,6 +190,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						mo.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
 						mo.setMt_Sent(msg);//tell them to renew
 						mo.setPriority(3);
+					}else{//No profile, so they create
+						//(profile!=null &&  !profile.getProfileComplete() ){//if they've got a profile but not a complet
+						mo = processDating(mo,person);
 					}
 				}
 			}else{
