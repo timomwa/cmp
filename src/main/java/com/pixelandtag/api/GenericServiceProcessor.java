@@ -47,7 +47,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String DEST_USERNAME_TAG = "<DEST_USERNAME>";
 	public static final String GENDER_PRONOUN_M = "GENDER_PRONOUN_M";
 	public static final String GENDER_PRONOUN_F = "GENDER_PRONOUN_F";
+	public static final String GENDER_PRONOUN_INCHAT_F = "GENDER_PRONOUN_INCHAT_F";
+	public static final String GENDER_PRONOUN_INCHAT_M = "GENDER_PRONOUN_INCHAT_M";
 	public static final String CHAT_USERNAME_SEPERATOR = " Says: ";
+	public static final String CHAT_USERNAME_SEPERATOR_DIRECT = " : ";
 	public static final String KEYWORD_TAG = "<KEYWORD>";
 	public static final String CONFIRMED_SUBSCRIPTION_ADVICE = "CONFIRMED_SUBSCRIPTION_ADVICE";
 	public static final String SUBSCRIPTION_CONFIRMATION_ADVICE = "SUBSCRIPTION_CONFIRMATION_ADVICE";

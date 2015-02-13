@@ -28,6 +28,8 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
@@ -46,8 +48,7 @@ import com.pixelandtag.web.beans.RequestObject;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
-	
-	
+		
 
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
@@ -56,7 +57,6 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			UnrecoverableKeyException, NoSuchAlgorithmException,
 			KeyStoreException {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 
@@ -169,11 +169,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 
 	@SuppressWarnings("unchecked")
-	public PersonDatingProfile findMatch(Gender pref_gender) throws DatingServiceException{
+	public PersonDatingProfile findMatch(Gender pref_gender, Long curProfileId) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender order by rand()");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.id <> :this_profile order by rand()");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
+			qry.setParameter("this_profile", curProfileId);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -186,13 +187,14 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	@SuppressWarnings("unchecked")
-	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age) throws DatingServiceException{
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curProfileId) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.dob<=:dob order by rand()");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.dob<=:dob AND p.id <> :this_profile order by rand()");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("dob", dob);
+			qry.setParameter("this_profile", curProfileId);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -203,15 +205,17 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	
+	
 	@SuppressWarnings("unchecked")
-	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location) throws DatingServiceException{
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location, Long curProfileId) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.location like :location AND p.dob<=:dob order by rand()");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.id <> :this_profile order by rand()");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("location", "%"+location+"%");
 			qry.setParameter("dob", dob);
+			qry.setParameter("this_profile", curProfileId);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -225,7 +229,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	public PersonDatingProfile getperSonUsingChatName(String chat_username) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
-			Query qry = em.createQuery("from PersonDatingProfile p where p.username=:username");
+			Query qry = em.createQuery("from PersonDatingProfile p where p.username=:username ");
 			qry.setParameter("username", chat_username);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
@@ -292,31 +296,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			throw e;
 		}
 	}
-
 	
-/**
-	 * saves and commits
-	 * @param t
-	 * @return
-	 * @throws Exception 
-	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public <T> T find(Class<T> entityClass, Long id) throws Exception {
-		try{
-			utx.begin();
-			T t = em.find( entityClass,id);
-			utx.commit();
-			return t;
-		}catch(Exception  e){
-			try{
-				utx.rollback();
-			}catch(Exception ex){}
-			throw e;
-			
-		}
-	}
-	
-/**
+    /**
 	 * To statslog
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -490,6 +471,27 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	
+	/**
+	 * Subtracts the period from
+	 * current's timestamp on the server.
+	 * @param period
+	 * @param unit
+	 * @return
+	 * @throws DatingServiceException
+	 */
+	public Date getPastTime(Long period, TimeUnit unit) throws DatingServiceException{
+		Date date = null;
+		try{
+			Query qry = em.createNativeQuery("select DATE_SUB(now(), INTERVAL :period "+unit.toString()+") ");
+			qry.setParameter("period", period);
+			Object o = qry.getSingleResult();
+			date = (Date) o;
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+			throw new DatingServiceException(exp.getMessage(), exp);
+		}
+		return date;
+	}
 	
 	
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException{
@@ -640,4 +642,35 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return nexqQ;
 	}
 
+
+	
+	
+	@SuppressWarnings("unchecked")
+	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException{
+		PersonDatingProfile datingperson_profile = null;
+		try{
+			Date date = getPastTime(period,timeUnit);
+			logger.info("\n\n\n "+date+",person.getId()="+person.getId()+" \n\n\n ");
+			Query qry = em.createQuery("from ChatLog cl WHERE cl.source_person_id=:source_person_id  order by cl.timeStamp desc");///*AND cl.timeStamp>=:timeStamp*/
+			qry.setParameter("source_person_id", person.getId());
+			qry.setFirstResult(1);
+			qry.setMaxResults(1);
+			List<ChatLog> ps = qry.getResultList();
+			logger.info("\n\n\nps  "+ps+"\n\n\n");
+			logger.info("\n\n\nps.size():: "+ps.size()+"\n\n\n");
+			if(ps.size()>0){
+				ChatLog chatlog = ps.get(0);
+				Long latPersonIsentMsg = chatlog.getDest_person_id();
+				logger.info("latPersonIsentMsg:: "+latPersonIsentMsg);
+				Query qry2 = em.createQuery("from PersonDatingProfile pdp WHERE pdp.person.id=:person_id");
+				qry2.setParameter("person_id", latPersonIsentMsg);
+				datingperson_profile = (PersonDatingProfile) qry2.getSingleResult();
+			}
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return datingperson_profile;
+	}
 }

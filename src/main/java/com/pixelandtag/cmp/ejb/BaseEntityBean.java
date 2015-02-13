@@ -253,21 +253,16 @@ public class BaseEntityBean implements BaseEntityI {
 	 * @return
 	 * @throws Exception 
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public <T> T find(Class<T> entityClass, Long id) throws Exception {
 		try{
-			utx.begin();
 			T t = em.find( entityClass,id);
-			utx.commit();
 			return t;
 		}catch(Exception  e){
-			try{
-				utx.rollback();
-			}catch(Exception ex){}
 			throw e;
 			
 		}
 	}
+	
 	
 	@SuppressWarnings("unchecked")
 	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{

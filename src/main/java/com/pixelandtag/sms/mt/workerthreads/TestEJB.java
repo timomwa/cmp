@@ -13,6 +13,7 @@ import org.jboss.naming.remote.client.InitialContextFactory;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
@@ -26,7 +27,7 @@ public class TestEJB {
 	private static InitialContext context;
 	private static Properties mtsenderprop;
 	
-	public static void main(String[] args) throws NamingException, DatingServiceException {
+	public static void main(String[] args) throws Exception {
 		
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
@@ -40,9 +41,12 @@ public class TestEJB {
       		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		
 	
-		 Person person = datingBean.getPerson("112");
+		 Person person = datingBean.find(Person.class, 4203L);
+		 System.out.println(person);
 		 
-		 PersonDatingProfile profile = datingBean.getProfile(person);
+		 PersonDatingProfile profile = datingBean.getProfileOfLastPersonIsentMessageTo(person, 1L, TimeUnit.YEAR); 
+		 System.out.println("LAST PERSON I CHATTED WITH id="+profile.getId()+" username: "+profile.getUsername()); 
+		 profile = datingBean.getProfile(person);
 		 
 			Gender pref_gender = profile.getPreferred_gender();
 			BigDecimal pref_age = profile.getPreferred_age();
@@ -51,7 +55,7 @@ public class TestEJB {
 			System.out.println("pref_gender : "+pref_gender.toString());
 			System.out.println("pref_age : "+pref_age);
 			System.out.println("location : "+location);
-			PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location);
+			PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,-1L);
 
 			if(match!=null)
 				System.out.println(match.getUsername());

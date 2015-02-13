@@ -73,7 +73,7 @@ public class SMSService implements Serializable {
 	
 	@Column(name="subscription_length_time_unit")
 	@Enumerated(EnumType.STRING)
-	private SubTimeUnit subscription_length_time_unit;
+	private TimeUnit subscription_length_time_unit;
 
 	public Long getId() {
 		return id;
@@ -203,12 +203,12 @@ public class SMSService implements Serializable {
 		this.subscription_length = subscription_length;
 	}
 
-	public SubTimeUnit getSubscription_length_time_unit() {
+	public TimeUnit getSubscription_length_time_unit() {
 		return subscription_length_time_unit;
 	}
 
 	public void setSubscription_length_time_unit(
-			SubTimeUnit subscription_length_time_unit) {
+			TimeUnit subscription_length_time_unit) {
 		this.subscription_length_time_unit = subscription_length_time_unit;
 	}
 
