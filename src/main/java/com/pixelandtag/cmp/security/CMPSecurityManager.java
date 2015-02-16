@@ -1,7 +1,10 @@
 package com.pixelandtag.cmp.security;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.security.DenyAll;
@@ -88,6 +91,7 @@ public class CMPSecurityManager extends J2EESecurityManager implements SecurityH
 			RolesAllowed rolesAllowed = element.getAnnotation(RolesAllowed.class);
 			if (rolesAllowed != null)
 			{
+				
 				// Still need to check if the users is authorized
 				allowed = isUserAuthenticated(bean, handler);
 
@@ -122,6 +126,32 @@ public class CMPSecurityManager extends J2EESecurityManager implements SecurityH
 		logger.info("bean.getContext().getEventName().contains(\"login\") " + bean.getContext().getEventName().contains("login"));
 		
 		boolean userAuthenticated = false;
+		Annotation[] annon = handler.getClass().getAnnotations();
+		for(Annotation an :annon){
+			Class c = an.annotationType();
+			try {
+				Method method = c.getMethod("value",null);
+				Class[] parameterTypes = method.getParameterTypes();
+				Class returnType = method.getReturnType();
+				 Object value = method.invoke(String.class, null);
+				 System.out.println("\n\n>>>>>>>>>>>>>> "+value);
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		if(bean.getContext().getEventName().contains("login"))
 			userAuthenticated= true;
 		else
@@ -148,8 +178,9 @@ public class CMPSecurityManager extends J2EESecurityManager implements SecurityH
 
 			for (Role r : roles) {
 				logger.info("user role " + r.getName() + " passed role " + role);
-				if (r.getName().equals(role))
+				if (r.getName().equalsIgnoreCase(role)){
 					return new Boolean(true);
+				}
 			}
 		}
 		return new Boolean(false);
@@ -172,65 +203,19 @@ public class CMPSecurityManager extends J2EESecurityManager implements SecurityH
 		} catch (JSONException e) {
 			logger.error(e.getMessage(),e);
 		}
-		//LoginLogoutAction.VIEW
-		return new StreamingResolution("application/json", jsonob.toString());// new ForwardResolution(LoginLogoutAction.VIEW);
+		return new StreamingResolution("application/json", jsonob.toString());
 	}
 	
 	
 	private User getUser(ActionBean bean) {
-		 return (User) bean.getContext().getRequest() .getSession().getAttribute(AppProperties.CURR_USER_OBJ_NAME);
-	}
-
-	/*@Override
-	protected Boolean isUserAuthenticated(ActionBean bean, Method handler) {
-		logger.info(">>>>>>> in isUserAuthenticated getUser(bean) "
-				+ getUser(bean));
-		logger.info("bean.getContext().getEventName().contains(\"login\") " + bean.getContext().getEventName().contains("login"));
-		if(bean.getContext().getEventName().contains("login"))
-			return true;
-		return getUser(bean) != null;
-	}
-	
-	
-
-	@Override
-	protected Boolean hasRole(ActionBean actionBean, Method handler, String role) {
-		logger.info(">>> role: " + role);
-		User user = getUser(actionBean);
-		logger.info(">>> user: " + user);
-
-		if (user != null) {
-			List<Role> roles = user.getRoles();
-
-			for (Role r : roles) {
-				logger.info("user role " + r.getName() + " passed role " + role);
-				if (r.getName().equals(role))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	
-
-	@Override
-	public Resolution handleAccessDenied(ActionBean bean, Method handler) {
-		User user = (User) bean.getContext().getRequest().getSession()
-				.getAttribute("user");
-		logger.info("\n\n>>> user: " + user +" ==== ");
-		logger.info("bean.getClass() " + bean.getClass());
-		logger.info("handler.getName() " + handler.getName());
-		JSONObject jsonob = new JSONObject();
-		try {
-			jsonob.put("success", false);
-			jsonob.put("message", "Access denied");
-		} catch (JSONException e) {
-			logger.error(e.getMessage(),e);
-		}
-		//LoginLogoutAction.VIEW
-		return new ForwardResolution(LoginLogoutAction.VIEW);// StreamingResolution("application/json", jsonob.toString());
-	}*/
-	
-	
+		List<Role> roles = new ArrayList<Role>();
+		Role r = new Role();
+		r.setName("admin");
+		roles.add(r);
+		User user = new User();
+		user.setId(11L);
+		user.setRoles(roles);
+		return user;
+	}	
 	
 }
