@@ -464,7 +464,6 @@ public class BaseEntityBean implements BaseEntityI {
 			 logger.debug("RESP CODE : "+RESP_CODE);
 			 logger.debug("RESP XML : "+resp);
 			 
-			 billable.setResp_status_code(String.valueOf(RESP_CODE));
 			
 			
 			 billable.setProcessed(1L);
@@ -484,7 +483,7 @@ public class BaseEntityBean implements BaseEntityI {
 					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
 					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
 					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-					
+					billable.setResp_status_code(err);
 				}else{
 					
 					billable.setResp_status_code("Success");
@@ -560,28 +559,29 @@ public class BaseEntityBean implements BaseEntityI {
 					billable.setIn_outgoing_queue(0L);
 					
 					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+						billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
 						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.Success);
-						billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
 					}
 					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
+						billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.InvalidSubscriber);
-						billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
 					}
 					if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
+						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
 						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAInsufficientBalance);
-						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 					}
 					
 					if("TWSS_109".equals(billable.getResp_status_code())){
-						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAChargeFailure);
+						billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 						billable.setIn_outgoing_queue(0L);
 						billable.setProcessed(0L);
 						billable.setRetry_count( (billable.getRetry_count()+1 ) );
 						billable.setMaxRetriesAllowed( (billable.getRetry_count()+2 ) );
-						billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
+						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAChargeFailure);
+						
 					}
 					
 					//cmp_ejb.saveOrUpdate(billable);

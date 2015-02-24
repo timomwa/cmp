@@ -41,6 +41,8 @@ public interface DatingServiceI extends BaseEntityI {
 	public MOSms renewSubscription(MOSms mo, Long serviceId) throws DatingServiceException;
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException;
 
+	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException;
+
 	
 
 }

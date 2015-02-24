@@ -1,6 +1,7 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Properties;
@@ -102,13 +103,13 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				BigDecimal pref_age = profile.getPreferred_age();
 				String location = profile.getLocation();
 				
-				PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,profile.getId());
+				PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
 				if(match==null)
-					 match = datingBean.findMatch(pref_gender,pref_age,profile.getId());
+					 match = datingBean.findMatch(pref_gender,pref_age,person.getId());
 				if(match==null)
-					 match = datingBean.findMatch(pref_gender,profile.getId());
+					 match = datingBean.findMatch(pref_gender,person.getId());
 				
-				if(match==null){
+				if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
 					String msg = datingBean.getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id);
 					mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
 				}else{
@@ -122,10 +123,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
 					}
 					String gender_pronoun = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
+					String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
+					StringBuffer sb = new StringBuffer();
+					BigInteger age = datingBean.calculateAgeFromDob(match.getDob());  
+					sb.append("Age: ").append(age.toString()).append("\n");
+					sb.append("Location : ").append(match.getLocation()).append("\n");
+					sb.append("Gender : ").append(match.getGender()).append("\n");
 					String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
 					msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
 					msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);
+					msg = msg.replaceAll(GENDER_PRONOUN_TAG2, gender_pronoun2);
 					msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
+					msg = msg.replaceAll(PROFILE_TAG, sb.toString());
 					mo.setMt_Sent(msg);
 					
 					//notify person b?
@@ -143,6 +152,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					try{
 						mo = datingBean.renewSubscription(mo,smsservice.getId());
+						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
 						mo.setMt_Sent(dse.getMessage());
@@ -167,7 +177,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					mo = processDating(mo,person);
 						
-				}else if((profile==null || !profile.getProfileComplete()) ){//No profile or incomplete profile
+				}else if((profile==null || !profile.getProfileComplete() || !subvalid) ){//No profile or incomplete profile
 					
 					//Please top up to continue chatting with x ..
 					int lang = 1;
@@ -404,11 +414,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					BigDecimal pref_age = profile.getPreferred_age();
 					String location = profile.getLocation();
 					
-					PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,profile.getId());
+					PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
 					if(match==null)
-						 match = datingBean.findMatch(pref_gender,pref_age,profile.getId());
+						 match = datingBean.findMatch(pref_gender,pref_age,person.getId());
 					if(match==null)
-						 match = datingBean.findMatch(pref_gender,profile.getId());
+						 match = datingBean.findMatch(pref_gender,person.getId());
 					
 					if(match==null){
 						String msg = datingBean.getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
@@ -425,12 +435,20 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						}
 					
 						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
+						String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 						String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
 						logger.info("\n\n\n\t\t msg:::"+msg);
 						logger.info("\n\n\n\t\t profile:::"+profile);
+						StringBuffer sb = new StringBuffer();
+						BigInteger age = datingBean.calculateAgeFromDob(match.getDob()); 
+						sb.append("Age: ").append(age).append("\n");
+						sb.append("Location : ").append(match.getLocation()).append("\n");
+						sb.append("Gender : ").append(match.getGender()).append("\n");
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
 						msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);
+						msg = msg.replaceAll(GENDER_PRONOUN_TAG2, gender_pronoun2);
 						msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
+						msg = msg.replaceAll(PROFILE_TAG, sb.toString());
 						mo.setMt_Sent(msg);
 					}
 					
@@ -459,14 +477,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			PersonDatingProfile destination_person = datingBean.getperSonUsingChatName(KEYWORD);
 			
 			if(destination_person==null){//Is a direct message, so we get last person they sent a message to
-				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.DAY);//last hour
+				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,30L,TimeUnit.MINUTE);//last 30 minutes
 				if(destination_person!=null)
 					directMsg  = true;
 			}
 			
 			int language_id = profile.getLanguage_id()>0 ? profile.getLanguage_id() : 1;
 			
-			if(destination_person!=null){
+			if(destination_person!=null && destination_person.getPerson().getActive()){
 				
 				String source_user = profile.getUsername();
 				//System.out.println(source_user+ CHAT_USERNAME_SEPERATOR + MESSAGE.replaceAll(KEYWORD, "").trim());
@@ -500,16 +518,22 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				mo.setPrice(BigDecimal.ZERO);
 				mo.setMt_Sent("Message sent to '"+destination_person.getUsername()+"'");
 				return mo;
+			}else if(destination_person!=null && !destination_person.getPerson().getActive()){
+				Gender gender  = destination_person.getGender();
+				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
+				String msg = "Sorry, \""+destination_person.getUsername()+"\" has unsubcribed from the chat service and you cannot chat with "+pronoun+". To find a different person to chat with, reply with \"FIND\" and the system will find a match for you based on your profile.";
+				mo.setMt_Sent(msg);
+				return mo;
 			}else{//destination person not found.. Check in their friends list. Ask them whom they want to chat to..
 				mo.setPrice(BigDecimal.ZERO);
-				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,10L,TimeUnit.YEAR);//last 10 years
+				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.YEAR);//last 1 year
 				String msg = "";
 				if(destination_person!=null){
 					Gender gender  = destination_person.getGender();
 					String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 					msg = "Sorry, no user with the username \""+KEYWORD+"\". "
 								+ "You last had a chat with "+destination_person.getUsername()+", if you want to continue chatting with "+pronoun+", send your message starting"
-								+ "with \""+destination_person.getUsername()+"\", or to find another person to chat with, reply with \"FIND\" and we shall hook you up!";
+								+ " with \""+destination_person.getUsername()+"\", or to find another person to chat with, reply with \"FIND\" and we shall hook you up!";
 				}else{
 					msg = "Sorry, no user with the username \""+KEYWORD+"\". ";
 				}

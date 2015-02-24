@@ -17,6 +17,7 @@ import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
+import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.util.FileUtils;
 
@@ -41,11 +42,13 @@ public class TestEJB {
       		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		
 	
-		 Person person = datingBean.find(Person.class, 4203L);
+		 Person person = datingBean.find(Person.class, 1560L);
 		 System.out.println(person);
+		 PersonDatingProfile thisPerson = datingBean.getProfile(person);
+		 
 		 
 		 PersonDatingProfile profile = datingBean.getProfileOfLastPersonIsentMessageTo(person, 1L, TimeUnit.YEAR); 
-		 System.out.println("LAST PERSON I CHATTED WITH id="+profile.getId()+" username: "+profile.getUsername()); 
+		 System.out.println("LAST PERSON I ("+thisPerson.getUsername()+") CHATTED WITH id="+profile.getId()+" username: "+profile.getUsername()); 
 		 profile = datingBean.getProfile(person);
 		 
 			Gender pref_gender = profile.getPreferred_gender();
@@ -55,13 +58,33 @@ public class TestEJB {
 			System.out.println("pref_gender : "+pref_gender.toString());
 			System.out.println("pref_age : "+pref_age);
 			System.out.println("location : "+location);
-			PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,-1L);
+			PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
 
-			if(match!=null)
-				System.out.println(match.getUsername());
-			else
-				System.out.println(match);
-				 
+			int x = 0;
+			if(match==null){
+				match = datingBean.findMatch(pref_gender,pref_age, person.getId());
+				x = 1;
+			}
+			if(match==null){
+				match = datingBean.findMatch(pref_gender,person.getId());
+				x = 2;
+			}
+			if(match!=null){
+				System.out.println(x +". match.getPerson().getId(): "+match.getPerson().getId()+" MAtch: "+match.getId()+" username: "+match.getUsername());
+				try{
+					System.out.println("PERSON A: "+person.getId());
+					System.out.println("PERSON B: "+match.getPerson().getId());
+					SystemMatchLog sysmatchlog = new SystemMatchLog();
+					sysmatchlog.setPerson_a_id(person.getId());
+					sysmatchlog.setPerson_b_id(match.getPerson().getId());
+					sysmatchlog.setPerson_a_notified(true);
+					sysmatchlog = datingBean.saveOrUpdate(sysmatchlog);
+				}catch(Exception exp){
+					exp.printStackTrace();
+				}
+			}else{
+				System.out.println("MAtch: "+match);
+			}
 		 context.close();
 		 
 		 

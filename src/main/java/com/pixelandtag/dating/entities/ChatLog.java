@@ -50,6 +50,8 @@ public class ChatLog implements Serializable {
 		if(timeStamp==null)
 			timeStamp = new Date();
 	}
+	
+	
 
 	public Long getId() {
 		return id;

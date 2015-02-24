@@ -43,8 +43,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String PRICE_TAG = "<SMS_SUBSCRIPTION_PRICE>";
 	public static final String USERNAME_TAG = "<USERNAME>";
 	public static final String GENDER_PRONOUN_TAG = "<GENDER_PRONOUN>";
+	public static final String GENDER_PRONOUN_TAG2  = "<GENDER_PRONOUN2>";
 	public static final String GENDER_PRONOUN_N = "GENDER_PRONOUN_N";
 	public static final String DEST_USERNAME_TAG = "<DEST_USERNAME>";
+	public static final String PROFILE_TAG = "<PROFILE>";
 	public static final String GENDER_PRONOUN_M = "GENDER_PRONOUN_M";
 	public static final String GENDER_PRONOUN_F = "GENDER_PRONOUN_F";
 	public static final String GENDER_PRONOUN_INCHAT_F = "GENDER_PRONOUN_INCHAT_F";

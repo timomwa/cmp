@@ -1,10 +1,12 @@
 package com.pixelandtag.cmp.ejb;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -79,7 +81,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
 		
 		try {
-			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1";
+			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? LIMIT 1";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, language_id);
 			qry.setParameter(2, key);
@@ -169,12 +171,16 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 
 	@SuppressWarnings("unchecked")
-	public PersonDatingProfile findMatch(Gender pref_gender, Long curProfileId) throws DatingServiceException{
+	public PersonDatingProfile findMatch(Gender pref_gender, Long curPersonId) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.id <> :this_profile order by rand()");//AND p.dob>=:dob
+			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
+			alreadyMatched.add(curPersonId);
+			Query qry = em.createQuery("from PersonDatingProfile p where p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched) ");//AND p.dob>=:dob
+			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("gender", pref_gender);
-			qry.setParameter("this_profile", curProfileId);
+			qry.setParameter("person_a_id", curPersonId);
+			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -187,14 +193,18 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	@SuppressWarnings("unchecked")
-	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curProfileId) throws DatingServiceException{
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curPersonId) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
+			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
+			alreadyMatched.add(curPersonId);
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.dob<=:dob AND p.id <> :this_profile order by rand()");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p where p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
+			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("dob", dob);
-			qry.setParameter("this_profile", curProfileId);
+			qry.setParameter("person_a_id", curPersonId);
+			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -207,15 +217,22 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	@SuppressWarnings("unchecked")
-	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location, Long curProfileId) throws DatingServiceException{
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location, Long curPersonId) throws DatingServiceException{
 		PersonDatingProfile person = null;
 		try{
+			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
+			alreadyMatched.add(curPersonId);
+			
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.id <> :this_profile order by rand()");//AND p.dob>=:dob
+			
+			Query qry = em.createQuery("from PersonDatingProfile p where p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched)");//AND p.dob>=:dob
+			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("location", "%"+location+"%");
 			qry.setParameter("dob", dob);
-			qry.setParameter("this_profile", curProfileId);
+			qry.setParameter("person_a_id", curPersonId);
+			//qry.setParameter("alreadyMatched", alreadyMatched);
+			
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -225,6 +242,23 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return person;
 	}
 	
+	@SuppressWarnings("unchecked")
+	private List<Long> getAlreadyMatched(Long person_id) {
+		List<Long> alreadyMatched = new ArrayList<Long>();
+		try{
+			Query qry   = em.createQuery("SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id");
+			qry.setParameter("person_a_id", person_id);
+			alreadyMatched = qry.getResultList();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}
+		
+		if(alreadyMatched.size()<=0)
+			alreadyMatched.add(-1L);
+	
+	return alreadyMatched;
+	}
+
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile getperSonUsingChatName(String chat_username) throws DatingServiceException{
 		PersonDatingProfile person = null;
@@ -493,7 +527,19 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return date;
 	}
 	
-	
+	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException{
+		BigInteger age = null;
+		try{
+			Query qry = em.createNativeQuery("SELECT TIMESTAMPDIFF(YEAR, :dob, CURDATE()) as 'age'");
+			qry.setParameter("dob", dob);
+			Object o = qry.getSingleResult();
+			age = (BigInteger) o;
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+			throw new DatingServiceException(exp.getMessage(), exp);
+		}
+		return age;
+	}
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException{
 		Date date = null;
 		try{
@@ -537,18 +583,25 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(profile!=null)
 				language_id = profile.getLanguage_id();
 			
+			
 			if(!billable.isSuccess()){
 				
 				
 				String message_key = BILLING_FAILED;
-				if(billable.getResp_status_code().equalsIgnoreCase(BillingStatus.INSUFFICIENT_FUNDS.toString())){
+				if(billable.getResp_status_code().equalsIgnoreCase(BillingStatus.INSUFFICIENT_FUNDS.toString())
+						|| "OL402".equals(billable.getResp_status_code()) 
+						|| "OL404".equals(billable.getResp_status_code()) 
+						|| "OL405".equals(billable.getResp_status_code())  
+						|| "OL406".equals(billable.getResp_status_code())){
+				
 					 message_key =  billable.getResp_status_code();
 				}
 				
 				String message = getMessage(message_key, language_id);
 				
 				mo.setMt_Sent(message);
-				
+				mo.setPrice(BigDecimal.ZERO);//set price to subscription price
+				mo.setPriority(0);
 				return mo;
 				
 			}else{
@@ -620,7 +673,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(qidfko.size()>0)
 			 question_id_fk = (Long) qidfko.get(0);
 			
-			System.out.println("\n\n\n\t\t:::question_id_fk == "+question_id_fk );
+			logger.info("\n\n\n\t\t:::question_id_fk == "+question_id_fk );
 			
 			qry = em.createQuery("from ProfileQuestion pq WHERE pq.id=:question_id_fk");
 			qry.setParameter("question_id_fk", question_id_fk.longValue());
@@ -654,7 +707,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			Query qry = em.createQuery("from ChatLog cl WHERE cl.source_person_id=:source_person_id  order by cl.timeStamp desc");///*AND cl.timeStamp>=:timeStamp*/
 			qry.setParameter("source_person_id", person.getId());
 			qry.setFirstResult(1);
-			qry.setMaxResults(1);
+			qry.setMaxResults(10);
 			List<ChatLog> ps = qry.getResultList();
 			logger.info("\n\n\nps  "+ps+"\n\n\n");
 			logger.info("\n\n\nps.size():: "+ps.size()+"\n\n\n");
@@ -662,7 +715,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				ChatLog chatlog = ps.get(0);
 				Long latPersonIsentMsg = chatlog.getDest_person_id();
 				logger.info("latPersonIsentMsg:: "+latPersonIsentMsg);
-				Query qry2 = em.createQuery("from PersonDatingProfile pdp WHERE pdp.person.id=:person_id");
+				Query qry2 = em.createQuery("from PersonDatingProfile p WHERE p.person.active=:active AND p.person.id=:person_id");
+				qry2.setParameter("active", new Boolean(true));
 				qry2.setParameter("person_id", latPersonIsentMsg);
 				datingperson_profile = (PersonDatingProfile) qry2.getSingleResult();
 			}
