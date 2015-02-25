@@ -109,12 +109,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			try{
 			
-				//resp.sendError(HttpServletResponse.SC_OK);
-				
-				//celcomAPI.closeConnectionIfNecessary();
-				
-				//sOutStream.close();
-				
+						
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 				//sOutStream.write("{\"status\": \"MO Request not understood\"}".getBytes());
