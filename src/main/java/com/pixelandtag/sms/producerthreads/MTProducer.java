@@ -805,6 +805,7 @@ public class MTProducer extends Thread {
 		try{
 			
 			while(run){
+				
 				populateQueue();
 				
 				try {

@@ -498,7 +498,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 				MOSms chatMo  = mo.clone();
 				chatMo.setMsisdn(destination_person.getPerson().getMsisdn());
-				Gender gender = destination_person.getGender();
+				Gender gender = profile.getGender();
 				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 				//chatMo.setSMS_Message_String(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE);
 				String msg = "";

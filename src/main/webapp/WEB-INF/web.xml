@@ -188,6 +188,19 @@
 	<servlet>
 		<description>
 		</description>
+		<display-name>USSDReceiver</display-name>
+		<servlet-name>USSDReceiver</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.USSDReceiver</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>USSDReceiver</servlet-name>
+		<url-pattern>/ussd</url-pattern>
+	</servlet-mapping>
+	
+	
+	<servlet>
+		<description>
+		</description>
 		<display-name>MOReceiver</display-name>
 		<servlet-name>MOReceiver</servlet-name>
 		<servlet-class>com.pixelandtag.mo.sms.MOReceiver
