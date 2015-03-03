@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
 
+import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -20,10 +21,12 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.util.StopWatch;
+import com.pixelandtag.web.beans.RequestObject;
 
 /**
  * 
@@ -40,13 +43,14 @@ public class USSDReceiver extends HttpServlet {
 	private StopWatch watch;
 	private DataSource ds;
 	private Context initContext;
-	//private ConnectionPool connectionPool;
-	private CelcomHTTPAPI celcomAPI;
 	
 	private byte[] OK_200 =  "200 OK".getBytes();
 	private final String SERVER_TIMEZONE = "-05:00";
 	private final String CLIENT_TIMEZONE = "+03:00";
 
+	
+	@EJB
+	private CMPResourceBeanRemote cmpBean;
 
 	//private final int INITIAL_CONNECTIONS = 10;
 	//private final int MAX_CONNECTIONS = 50;
@@ -94,7 +98,14 @@ public class USSDReceiver extends HttpServlet {
 		try{
 			
 			pw = resp.getWriter();
-			pw.write("Basic Test first! Let's see if this shows up, then we continue.");
+			final RequestObject ro = new RequestObject(req);
+			
+			String msg = "";
+			
+			String response = cmpBean.processUSSD(ro);
+			
+			
+			pw.write(response);
 			
 		}catch(Exception e){
 			
@@ -152,7 +163,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			try {
 //				//celcomAPI = new CelcomImpl("jdbc:mysql://db/pixeland_content360?user=pixeland_content&password=D13@pixel&Tag","tasdf");
-				celcomAPI = new CelcomImpl(ds);
+			//	celcomAPI = new CelcomImpl(ds);
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}

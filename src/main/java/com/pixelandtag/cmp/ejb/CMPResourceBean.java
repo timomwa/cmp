@@ -49,6 +49,7 @@ import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.MessageType;
+import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
 @Remote
@@ -2070,6 +2071,27 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 	}
 
+	
+	public String processUSSD(RequestObject req) throws USSDEception{
+		String resp = "";
+		
+		String second_keyword = null;
+		
+		String KEYWORD = req.getKeyword().trim().toUpperCase();
+		final String MSISDN = req.getMsisdn();
+		int chosen = -1;
+		boolean kw_is_digit = false;
+		boolean second_keyword_is_digit = false;
+		
+		try{
+			chosen = Integer.valueOf(KEYWORD);
+			kw_is_digit = true;
+		}catch(Exception e){
+		}
+	
+		return resp;
+		
+	}
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean saveStaticSMS(String db_name, String table,
 			String static_category_value, String sms) throws Exception{

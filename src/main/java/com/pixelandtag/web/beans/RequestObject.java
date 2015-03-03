@@ -22,8 +22,10 @@ import com.pixelandtag.entities.MOSms;
  */
 public class RequestObject {
 	
-	private String telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
-	int serviceid;
+	private String lac,code, location,cellid,telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
+	private int serviceid = -1;
+	private long transactionID = -1;
+	private long sessionid = -1;
 	
 	public RequestObject(MOSms request) throws Exception {
 		
@@ -35,6 +37,7 @@ public class RequestObject {
 		keyword = null;
 		price=0;
 		testBalance=null;
+		
 		serviceid = request.getServiceid();
 		
 		
@@ -201,19 +204,38 @@ public class RequestObject {
 		}if (request.getParameter("tripWire") != null){
 			tripWire = request.getParameter("tripWire").trim();
 		}
+		if (request.getParameter("tid") != null){
+			transactionID = -1;
+			try{
+				transactionID  = Long.parseLong(request.getParameter("tid").trim());
+			}catch(Exception exp){}
+		}
+		if (request.getParameter("sessionid") != null){
+			sessionid = -1;
+			try{
+				sessionid  = Long.parseLong(request.getParameter("sessionid").trim());
+			}catch(Exception exp){}
+		}
+		if (request.getParameter("code") != null){
+			code  = request.getParameter("code").trim();
+		}
+		if (request.getParameter("lac") != null){
+			lac  = request.getParameter("lac").trim();
+		}
+		if (request.getParameter("location") != null){
+			location  = request.getParameter("location").trim();
+		}
+		if (request.getParameter("cellid") != null){
+			cellid  = request.getParameter("cellid").trim();
+		}
+		
 		
 		if (request.getParameter("keyword") != null)
 			keyword = request.getParameter("keyword").toUpperCase();
 		
 		if (keyword == null && msg !=null){
 			keyword = msg.split("[\\s]")[0];
-			//keyword = request.getParameter("keyword");
-			/*if(msg!=null)
-				msg = msg.split(keyword)[1];*/
-		}/*else{
-			//System.out.println("msg: "+msg);
-			keyword = msg.split("[\\s]")[0];
-		}*/
+		}
 		
 		if (request.getParameter("serviceActive") != null)
 			serviceActive = request.getParameter("serviceActive");
@@ -346,18 +368,53 @@ public class RequestObject {
 	public String getTripWire() {
 		return tripWire;
 	}
-
 	public void setTripWire(String tripWire) {
 		this.tripWire = tripWire;
 	}
-
 	public void setPrice(int price) {
 		this.price = price;
 	}
-	
 	public int getPrice() {
 		return price;
 	}
+	public long getTransactionID() {
+		return transactionID;
+	}
+	public void setTransactionID(long transactionID) {
+		this.transactionID = transactionID;
+	}
+	public long getSessionid() {
+		return sessionid;
+	}
+	public void setSessionid(long sessionid) {
+		this.sessionid = sessionid;
+	}
+	public String getLac() {
+		return lac;
+	}
+	public void setLac(String lac) {
+		this.lac = lac;
+	}
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	public String getCellid() {
+		return cellid;
+	}
+	public void setCellid(String cellid) {
+		this.cellid = cellid;
+	}
+
+	
 	
 }
 

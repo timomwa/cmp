@@ -22,6 +22,7 @@ import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.MessageType;
+import com.pixelandtag.web.beans.RequestObject;
 
 public interface CMPResourceBeanRemote extends BaseEntityI {
 	
@@ -158,5 +159,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public boolean saveStaticSMS(String db_name, String table,
 			String static_category_value, String sms) throws Exception;
+
+	public String processUSSD(RequestObject ro) throws USSDEception;
 
 }
