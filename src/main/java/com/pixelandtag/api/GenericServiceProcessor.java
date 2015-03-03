@@ -38,6 +38,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	protected String password;
 	public static final String DB = "pixeland_content360";
 	public static final String SPACE = " ";
+	public static final String NUM_SEPERATOR = "."+SPACE;
 	public static final String NEW_LINE = "\n";
 	public static final String SERVICENAME_TAG = "<SERVICE_NAME>";
 	public static final String PRICE_TAG = "<SMS_SUBSCRIPTION_PRICE>";

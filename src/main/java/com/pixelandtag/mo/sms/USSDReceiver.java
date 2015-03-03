@@ -94,16 +94,13 @@ public class USSDReceiver extends HttpServlet {
 		
 		watch.start();
 		
-		PrintWriter pw = null;
+		PrintWriter pw = resp.getWriter();
+		
 		try{
 			
-			pw = resp.getWriter();
 			final RequestObject ro = new RequestObject(req);
 			
-			String msg = "";
-			
 			String response = cmpBean.processUSSD(ro);
-			
 			
 			pw.write(response);
 			
@@ -115,12 +112,11 @@ public class USSDReceiver extends HttpServlet {
 			}catch(Exception ex){
 				logger.error(ex.getMessage(),ex);
 			}
-			//sOutStream.write("{\"status\": \"USSD Request not understood\"}".getBytes());
+			
 		}finally{
 			
 			try{
-			
-						
+				pw.close();
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 				//sOutStream.write("{\"status\": \"MO Request not understood\"}".getBytes());

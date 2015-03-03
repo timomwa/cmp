@@ -24,8 +24,8 @@ public class SubscriptionOld {
 	
 	private static final String DB_NAME = "pixeland_content360";
 	private Logger logger  = Logger.getLogger(SubscriptionOld.class);
-	private final String SPACE = " ";
-	private final String NUM_SEPERATOR = "."+SPACE;
+	private static final String SPACE = " ";
+	private static final String NUM_SEPERATOR = "."+SPACE;
 	private Object NEW_LINE = "\n";
 	
 	

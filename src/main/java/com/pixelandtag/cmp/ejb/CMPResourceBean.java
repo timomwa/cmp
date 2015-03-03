@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -30,6 +31,8 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.api.MOProcessorFactory;
+import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
@@ -42,8 +45,10 @@ import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
+import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
@@ -579,7 +584,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 		}
 	}
-	
+	public boolean updateSession(Long language_id, String msisdn,
+			Long smsmenu_levels_id_fk) throws Exception{
+		return updateSession(language_id.intValue(), msisdn,
+				smsmenu_levels_id_fk.intValue());
+	}
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean updateSession(int language_id, String msisdn,
 			int smsmenu_levels_id_fk) throws Exception{
@@ -618,7 +627,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		try{
 			
-			String GET_SESSION = "SELECT ses.*, sl.id as 'menu_level_id', sl.name, sl.language_id as 'language_id_',sl.parent_level_id, sl.menu_id, sl.serviceid, sl.visible FROM `"+CelcomImpl.database+"`.`smsmenu_session` ses LEFT JOIN `"+CelcomImpl.database+"`.`smsmenu_levels` sl ON sl.id = ses.smsmenu_levels_id_fk WHERE ses.`msisdn`=? AND ((TIMESTAMPDIFF(HOUR,ses.timeStamp,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"')))<=24 )";
+			final String GET_SESSION = "SELECT ses.*, sl.id as 'menu_level_id', sl.name, sl.language_id as 'language_id_',sl.parent_level_id, sl.menu_id, sl.serviceid, sl.visible FROM `"+CelcomImpl.database+"`.`smsmenu_session` ses LEFT JOIN `"+CelcomImpl.database+"`.`smsmenu_levels` sl ON sl.id = ses.smsmenu_levels_id_fk WHERE ses.`msisdn`=? AND ((TIMESTAMPDIFF(HOUR,ses.timeStamp,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"')))<=24 )";
 			Query qry = em.createNativeQuery(GET_SESSION);
 			qry.setParameter(1, msisdn);
 			List<Object[]> obj = qry.getResultList();
@@ -2088,9 +2097,577 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			kw_is_digit = true;
 		}catch(Exception e){
 		}
+		
+		
+		try{
+			
+			String msg[] = req.getMsg().trim().split("[\\s]");
+			
+			logger.debug(" GUGAMUG2 req.getMsg().trim() : = "+req.getMsg().trim());
+			
+			int msgL = msg.length;
+			
+			logger.debug(" GUGAMUG2 msgL : = "+msgL);
+			
+			try{
+				second_keyword = msg[1].trim().toUpperCase();
+			}catch(Exception e){
+			}
+			
+			if(second_keyword==null){
+				
+				try{
+					
+					if(KEYWORD.indexOf("ON")>-1){
+						msg = req.getMsg().toUpperCase().trim().split("ON");
+						msgL = msg.length;
+						logger.debug(" GUGAMUG msgL2 : = "+msgL);
+						second_keyword = msg[1].trim().toUpperCase();
+						KEYWORD = "ON";
+					}
+					
+					if(KEYWORD.indexOf("STOP")>-1){
+						msg = req.getMsg().toUpperCase().trim().split("STOP");
+						msgL = msg.length;
+						logger.debug(" GUGAMUG msgL2 : = "+msgL);
+						second_keyword = msg[1].trim().toUpperCase();
+						KEYWORD = "STOP";
+					}
+					
+					if(KEYWORD.indexOf("BATAL")>-1){
+						msg = req.getMsg().toUpperCase().trim().split("BATAL");
+						msgL = msg.length;
+						logger.debug(" GUGAMUG msgL2 : = "+msgL);
+						second_keyword = msg[1].trim().toUpperCase();
+						KEYWORD = "BATAL";
+					}
+					
+					logger.debug(" GUGAMUG second_keyword : = "+second_keyword);
+					
+					
+					
+					if(msgL>=2){
+						try{
+							chosen = Integer.valueOf(msg[1]);
+							second_keyword_is_digit = true;
+						}catch(Exception e){
+							
+						}
+					}
+					
+					//conn = getCon();
+					
+					logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
+					logger.info(" THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
+					
+					USSDSession sess = getSession(req.getSessionid(),MSISDN);
+					
+					int smsmenu_level_id_fk = -1;
+					
+					int language_id = 1;// default language is always 1 
+					
+					if(sess!=null){
+						smsmenu_level_id_fk = sess.getSmsmenu_levels_id_fk().intValue();
+						language_id = sess.getLanguage_id().intValue();
+						if(smsmenu_level_id_fk>-1){
+							MenuItem mi = getMenuItem(Long.valueOf(smsmenu_level_id_fk+""));
+							sess.setMenu_item(mi);
+						}
+					}else{
+						try{
+							language_id = getSubscriberLanguage(MSISDN);
+						}catch(Exception exp){
+							logger.error(exp);
+						}
+					}
+					
+					
+					logger.debug("session :: "+sess);
+					logger.debug("smsmenu_level_id_fk :: "+smsmenu_level_id_fk);
+					logger.debug("language_id :: "+language_id);
+					
+					MenuItem current_menu = null;
+					
+					if((smsmenu_level_id_fk>-1) && (language_id >-1))
+						current_menu = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
+					else
+						current_menu = getMenuByParentLevelId(language_id,smsmenu_level_id_fk);//get root menu
+					
+					logger.info("FROM SESSION___________________________"+current_menu);
+					
+					
+					if(KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
+						
+						updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
+						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+						resp = item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						return resp;
+					}else if(KEYWORD.equalsIgnoreCase("#")){
+						
+						updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
+						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
+						return resp;
+					}else if(KEYWORD.equalsIgnoreCase("0")){
+						
+						updateSession(language_id, MSISDN, -1);//update session to upper menu.
+						MenuItem item = getMenuByParentLevelId(language_id,-1);
+						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
+						return resp;
+					}else if(KEYWORD.equalsIgnoreCase("GIFT") || KEYWORD.equalsIgnoreCase("HIDIAH") || KEYWORD.equalsIgnoreCase("HADIAH")){
+						
+						logger.debug("\nIN  GIFT OR ENG KWD\n");
+						
+						language_id = KEYWORD.equalsIgnoreCase("GIFT") ?  1 : 2;
+						int menu_id = 1;
+						updateProfile(MSISDN,language_id);
+						//UtilCelcom.updateProfile(mo.getMsisdn(),language_id,conn);
+						
+						updateSession(language_id,MSISDN, -1);//update session to upper menu.
+						current_menu = getTopMenu(menu_id, language_id);
+						
+						resp = (current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));
+						return resp;
+					}else if(kw_is_digit){
+						
+						logger.error("\n\n\nGUGAMUGA CURRENT MENU >> "+current_menu+"\n\n");
+						LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
+						
+						boolean submenus_have_sub_menus = false;
+						
+						for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
+							if(entry.getValue().getSub_menus()!=null && entry.getValue().getSub_menus().size()>0){
+								logger.error("GUGAMUGA  checking if we have sub menus>> "+entry.getValue().getName());
+								submenus_have_sub_menus = true;
+								break;
+							}
+						}
+						
+						logger.error("GUGAMUGA submenus_have_sub_menus >> "+submenus_have_sub_menus);
+						
+						MenuItem chosenMenu = current_menu.getMenuByPosition(chosen);
+						//MenuItem chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
+						
+						chosenMenu = getMenuById(chosenMenu.getId());
+						
+						
+						if(chosenMenu!=null){
+								submenu = chosenMenu.getSub_menus();
+								if(submenu!=null)
+								for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
+									logger.debug("Checking if submenu has got other menus in it... >>>> "+entry.getKey()+ ". "+entry.getValue().toString());
+									
+									if(entry.getValue().getService_id()==-1)
+									submenus_have_sub_menus = true;
+									break;
+								}
+								
+								
+								logger.error("GUGAMUGA  >> "+submenus_have_sub_menus);
+								
+								logger.error("GUGAMUGA  submenu >> "+submenu);
+								
+								logger.debug(" Trying to print out the sub menu chosen. (chosen="+chosen+"");
+								try{
+									logger.debug(" \n\nCHOSEN MENU >>>>>>>>>>>>> (chosen="+chosen+")  : "+chosenMenu.toString()+"\n\n");
+								}catch(Exception e){
+									logger.error(e.getMessage(),e);
+								}
+						}else{
+							logger.debug("\n\n\nchosen menu was null...\n\n\n");
+							logger.debug("\n\n\ncurrent_menu = "+current_menu+"...\n\n\n");
+							
+							logger.debug("\n\n\nchosen menu was null...\n\n\n");
+							logger.error("GUGAMUGA  >> "+submenus_have_sub_menus);
+							logger.debug(" Chosen. (chosen="+chosen+"");
+							
+						}
+						
+					//	menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId(), conn);//update sessi
+						
+						if( (submenu!=null && (chosen>submenu.size())) ){
+							
+							//chosenMenu = current_menu.getMenuByPosition(chosen);
+							updateSession(language_id,MSISDN, chosenMenu.getId());//update session
+							
+							if(submenus_have_sub_menus){
+								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+							}else{
+								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+							}
+							
+							return resp;
+							
+						}else{
+							
+							if(chosenMenu.getService_id()==-1){//if there are other items under this, update session
+								
+								updateSession(language_id,MSISDN, chosenMenu.getId());//update session
+								
+								chosenMenu = getMenuById(chosenMenu.getId());
+								
+								if(submenus_have_sub_menus)
+									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+								else
+									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+							}else{
+								
+								//chosenMenu = menu_controller.getMenuById(current_menu.getId(), conn);//Get the current menu itself
+								logger.debug("\n\n\n*******************************8\nRTFM subscriber!! You should reply with <ON No.> for example ON "+chosen+" !!! \n*******************************8\n\n\n\n" );
+								//mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, conn, language_id));//get all the sub menus there.
+								String msg2 = getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, language_id);
+								msg2 = msg2.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
+								msg2 = msg2.replaceAll(GenericServiceProcessor.CHOSEN, String.valueOf(chosen));
+								resp = msg2;//get all the sub menus there.
+							
+							}
+							
+							return resp;
+						}
+						
+					}else if(KEYWORD.equalsIgnoreCase(GenericServiceProcessor.SUBSCRIPTION_CONFIRMATION)){
+						
+						
+						LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
+						
+						boolean submenus_have_sub_menus = false;
+						
+						if(submenu!=null){
+							for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
+								if(entry.getValue().getSub_menus()!=null && entry.getValue().getSub_menus().size()>0){
+									logger.error("GUGAMUGA  2 checking if we have sub menus >> "+entry.getValue().getName());
+									submenus_have_sub_menus = true;
+									break;
+								}
+							}
+						}else{
+							throw new NoSettingException("The menu with id "+current_menu.getId()+" Name=\""+current_menu.getName()+"\"has no children (sub menus)! Check the celcom_static_content.smsmenu_levels");
+						}
+						
+						
+						MenuItem chosenMenu = null;
+						
+						
+						if(chosen>0){
+							chosenMenu = current_menu.getMenuByPosition(chosen);
+						}
+						
+						if((chosen>0) && chosenMenu!=null){
+						
+							chosenMenu = current_menu.getMenuByPosition(chosen);
+							
+							//final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
+							final MOSms mosm_ =  getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+							
+							final com.pixelandtag.subscription.dto.SubscriptionDTO subdto = getSubscriptionDTO(MSISDN, chosenMenu.getService_id());
+							
+							if(chosenMenu.getService_id()<1){//if this still looks like a sub-menu, we send to subscriber the sub menu and tell them how to subscribe
+
+								chosenMenu = getMenuById(chosenMenu.getId());
+								
+								updateSession(language_id,MSISDN, chosenMenu.getId());//update session
+								
+								submenu = chosenMenu.getSub_menus();
+								
+								if(submenu!=null){
+									for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
+										if(entry.getValue().getSub_menus()!=null && entry.getValue().getSub_menus().size()>0){
+											logger.error("GUGAMUGA  2 checking if we have sub menus >> "+entry.getValue().getName());
+											submenus_have_sub_menus = true;
+											break;
+										}
+									}
+								}else{
+									throw new NoSettingException("The menu with id "+chosenMenu.getId()+" has no children (sub menus)! Check the celcom_static_content.smsmenu_levels");
+								}
+								
+								
+								
+								if(submenus_have_sub_menus)
+									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+								else
+									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+								
+								
+								return resp;
+								
+							}else{
+							
+								if(subdto==null || (subdto!=null && !subdto.getSubscription_status().equals(SubscriptionStatus.confirmed.toString()))){
+									
+									int service_id = chosenMenu.getService_id();
+									
+									SMSService smsService = find(SMSService.class, new Long(service_id));
+									
+									subscribe( MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+									//subscription.subscribe(conn, MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+									
+									String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
+									if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
+										response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
+									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
+										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(mosm_.getPrice()));
+									if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
+										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, mosm_.getSMS_Message_String());
+									
+									
+									//this is sent out normally
+									resp = response;//subscription confirmation
+									
+									return resp;
+									
+								}else{
+									
+									
+									//Send them content for that service.
+									//If celcom allows, we can send the content here, but it is Celcom's policy
+									//that you don't charge a subscriber without warning. They must confim their subscription.
+									
+									//Already subscribed text
+									String response = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
+									if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
+										response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
+									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
+										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(mosm_.getPrice()));
+									if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
+										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, mosm_.getSMS_Message_String());
+									
+									if(submenus_have_sub_menus)
+										resp = response;//get all the sub menus there.
+									else
+										resp = response;//get all the sub menus there.
+									
+									
+								}
+							}
+						
+						}else{
+							//Here check if subscriber sent valid keyword, fetch service, and subscribe then to that service.
+							if(submenus_have_sub_menus)
+								resp = current_menu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+							else
+								resp = current_menu.enumerate() + getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+						
+							return resp;
+						}
+						
+					}else if(KEYWORD.equalsIgnoreCase(GenericServiceProcessor.SUBSCRIPTION_CONFIRMATION+GenericServiceProcessor.SPACE)){//This step is frozen by adding a space. Requested by Michael Juhl 20th June 2013
+						
+						
+						//TODO - if a subscriber just sends "ON" or "BUY" Without the number, then, we give them the main menu, or the sub menu that they previously were in
+						com.pixelandtag.subscription.dto.SubscriptionDTO sub =  checkAnyPending(MSISDN);
+						
+						if(sub!=null){
+							
+							updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+							//subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
+							
+							MenuItem menu = getMenuById(sub.getSmsmenu_levels_id_fk());
+							
+							language_id = menu.getLanguage_id();
+							
+							logger.info("::::::::::::::::::::::::: serviceid:: "+menu.getService_id() + "\n\nmenu.toString():\n "+menu.toString()+"\n");
+							final MOSms mosm_  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
+							//final MOSms mosm_ =  cr.getContentFromServiceId(menu.getService_id(),MSISDN,conn);
+							
+							String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
+							if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
+								response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, menu.getName());
+							if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
+								response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(mosm_.getPrice()));
+							if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
+								response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, mosm_.getSMS_Message_String());
+							
+							
+							//this is sent out normally
+							resp = response;
+							
+							return resp;
+							
+							/*mosm_.setMt_Sent((RM.replaceAll(GenericServiceProcessor.PRICE_TG, String.valueOf(mo.getPrice()))+GenericServiceProcessor.SPACE+mosm_.getMt_Sent()));
+							
+							sendMT(mosm_);
+							*/
+							
+						}else{
+							resp = getMessage(GenericServiceProcessor.NO_PENDING_SUBSCRIPTION_ADVICE,  language_id);
+							return resp;
+						}
+						
+					}else if(KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
+						
+						String msg1 = getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id);
+						
+						int stop_number = -1;
+						
+						try{
+							stop_number = Integer.valueOf(second_keyword);
+						}catch(Exception e){}
+						
+						
+						LinkedHashMap<Integer,SMSServiceDTO> allsubscribed  = getAllSubscribedServices(MSISDN);
+						//LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = subscription.getAllSubscribedServices(mo.getMsisdn(),conn);
+						
+						if(allsubscribed!=null){
+						
+							if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
+								unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed);
+								//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
+								msg1 = getMessage(GenericServiceProcessor.UNSUBSCRIBED_ALL_ADVICE, language_id);
+								msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, getMessage(MessageType.ALL_SERVICES, language_id));
+								resp = GenericServiceProcessor.SPACE+msg1;
+								return resp;
+								
+							}else if(second_keyword!=null || stop_number>-1){
+								
+								if(second_keyword_is_digit){
+												
+									SMSServiceDTO toUnsubscribe = allsubscribed.get(stop_number);
+									com.pixelandtag.subscription.dto.SubscriptionDTO subscription =  getSubscriptionDTO(MSISDN, toUnsubscribe.getId());
+								   
+									if(subscription!=null){
+										updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+										msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, toUnsubscribe.getService_name());
+									}else{
+										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+									}
+									
+									resp = msg1;
+												
+								}else if(second_keyword!=null){
+												
+									SMSServiceDTO smsservice = getSMSservice(second_keyword);
+									
+									if(smsservice!=null){
+									//SMSServiceDTO smsservice = subscription.getSMSservice(second_keyword, conn);
+										com.pixelandtag.subscription.dto.SubscriptionDTO  subscription =  getSubscriptionDTO(MSISDN, smsservice.getId());
+									    if(subscription!=null){
+										    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
+										    updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+										}else{
+											msg1 = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
+											}
+									    
+									
+										//subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+									}else{
+										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+									}
+									
+									
+									if(msg1.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
+										msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, smsservice.getService_name());
+									if(msg1.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
+										msg1 = msg1.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(smsservice.getPrice()));
+									if(msg1.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
+										msg1 = msg1.replaceAll(GenericServiceProcessor.KEYWORD_TAG, smsservice.getCmd());
+								
+												
+								}
+								
+								resp = msg1;
+										
+							}else {
+								msg1 = stringFyServiceList(allsubscribed)+getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, language_id);
+								resp = msg1;
+							}
+									
+						}else{
+							msg1 = getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id);
+							
+						}
+							
+						resp = msg1;
+						return resp;
+						
+
+					}else if(KEYWORD.equals("HELP")){
+						
+						String msg1 =  getMessage(MessageType.HELP, language_id);
+						resp = msg1;
+						
+					}else if(KEYWORD.equals("INFO")){
+						
+						String msg1 =  getMessage(MessageType.INFO,language_id);
+						resp = msg1;
+					
+					}else{
+						//Unknown keyword
+						resp = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+					}
+
+					
+					logger.info("\n\n\t\t\tresp:::: "+resp);
+					
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
+				}
+				
+			}
+		}catch(Exception exp){
+			
+		}
 	
 		return resp;
 		
+	}
+	
+	public String stringFyServiceList(LinkedHashMap<Integer,SMSServiceDTO> allsubscribed) {
+		StringBuffer sb = null;
+		if(allsubscribed!=null && allsubscribed.size()>0){
+			sb = new StringBuffer();
+			for (Entry<Integer, SMSServiceDTO> entry : allsubscribed.entrySet())
+				sb.append(entry.getKey()).append(GenericServiceProcessor.NUM_SEPERATOR).append(entry.getValue().getService_name()).append(GenericServiceProcessor.NEW_LINE);
+		}else{
+			return null;
+		}
+		
+		return sb.toString();
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private MenuItem getMenuItem(Long smsmenu_level_id_fk) {
+		MenuItem mi = null;
+		try{
+			Query qry = em.createNativeQuery("SELECT * from smsmenu_levels sm WHERE sm.id=:id");
+			qry.setParameter("id", smsmenu_level_id_fk);
+			List<Object[]> res = qry.getResultList();
+			for(Object[] o : res){
+				mi = new MenuItem();
+				mi.setId(smsmenu_level_id_fk.intValue());;
+				mi.setName((String)o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Integer) o[6]).compareTo(1)==0 );
+			}
+		}catch(javax.persistence.NoResultException  nre){
+			logger.error(nre.getMessage(),nre);
+		}catch(Exception  exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return mi;
+	}
+	@SuppressWarnings("unchecked")
+	public USSDSession getSession(long sessionid, String msisdn) {
+		USSDSession sess = null;
+		try{
+			Query qry = em.createQuery("from USSDSession s WHERE s.sessionId=:sessionId AND s.msisdn=:msisdn order by s.timeStamp desc");
+			qry.setParameter("sessionId", sessionid);
+			qry.setParameter("msisdn", msisdn);
+			qry.setFirstResult(0);
+			qry.setMaxResults(1);
+			List<USSDSession> sessList = qry.getResultList();
+			if(sessList.size()>0)
+				sess = sessList.get(0);
+		}catch(javax.persistence.NoResultException  nre){
+			logger.error(nre.getMessage(),nre);
+		}catch(Exception  exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return sess;
 	}
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean saveStaticSMS(String db_name, String table,
@@ -2345,6 +2922,69 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@Override
 	public EntityManager getEM() {
 		return super.getEM();
+	}
+	
+	
+
+	public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription) throws Exception {
+		
+		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
+		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
+		SMSServiceDTO sm = getSMSservice(service_id);
+		logger.info(s+sm);
+		MOSms mo = null;
+		
+		if(sm!=null){
+			
+			ServiceProcessorDTO procDTO = getServiceProcessor(sm.getMo_processor_FK());
+			
+			try {
+				
+				
+				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
+				mo = new MOSms();
+				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
+				mo.setMsisdn(msisdn);
+				mo.setCMP_AKeyword(sm.getCmp_keyword());
+				mo.setCMP_SKeyword(sm.getCmp_skeyword());
+				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
+				mo.setSMS_SourceAddr(procDTO.getShortcode());
+				mo.setPriority(1);
+				mo.setServiceid(sm.getId());
+				mo.setSMS_Message_String(sm.getCmd());
+				
+				//added 22nd Dec 2014 - new customer requirement
+				mo.setPricePointKeyword(sm.getPricePointKeyword());
+				
+				//added on 10th June 2013 but not tested
+				mo.setProcessor_id(sm.getMo_processor_FK());
+				
+				
+				
+				// **** Below is a Dirty hack. *****
+				//To 
+				//cheat the content processor 
+				//that this is a subscription push, 
+				//so that it does not subscribe 
+				//this subscriber to the service. 
+				//We handle subscription elsewhere, 
+				//this is solely for content fetcnhing 
+				//and not subscribing.
+				mo.setSubscriptionPush(isSubscription);
+				
+				mo = processor.process(mo);
+				
+				
+			}catch(Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+		}else{
+			logger.info(s+" sm is null!");
+		}
+		
+		
+		return mo;
 	}
 
 	
