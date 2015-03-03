@@ -184,7 +184,7 @@ public class RequestObject implements Serializable{
 		int price,serviceid=-1;
 		telcoid = null;
 		msisdn = null;
-		msg = null;
+		msg = "";
 		keyword = null;
 		price=0;
 		testBalance=null;
