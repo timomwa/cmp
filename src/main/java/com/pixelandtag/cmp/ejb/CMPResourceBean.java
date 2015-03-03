@@ -6,10 +6,15 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,9 +35,11 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
@@ -43,7 +50,9 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
+import com.pixelandtag.sms.mo.MOProcessor;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
@@ -1793,6 +1802,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 
 	private Logger logger = Logger.getLogger(CMPResourceBean.class);
+	private String database = "pixeland_content360";
 	
 	
 	
@@ -2084,22 +2094,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	public String processUSSD(RequestObject req) throws USSDEception{
 		String resp = "";
 		
-		String second_keyword = null;
-		
-		String KEYWORD = req.getKeyword().trim().toUpperCase();
-		final String MSISDN = req.getMsisdn();
-		int chosen = -1;
-		boolean kw_is_digit = false;
-		boolean second_keyword_is_digit = false;
-		
 		try{
-			chosen = Integer.valueOf(KEYWORD);
-			kw_is_digit = true;
-		}catch(Exception e){
-		}
-		
-		
-		try{
+			
+			String second_keyword = null;
+			
+			String KEYWORD = req.getKeyword().trim().toUpperCase();
+			final String MSISDN = req.getMsisdn();
+			int chosen = -1;
+			boolean kw_is_digit = false;
+			boolean second_keyword_is_digit = false;
+			
+			try{
+				chosen = Integer.valueOf(KEYWORD);
+				kw_is_digit = true;
+			}catch(Exception e){
+			}
 			
 			String msg[] = req.getMsg().trim().split("[\\s]");
 			
@@ -2142,6 +2151,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						KEYWORD = "BATAL";
 					}
 					
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
+				}
+				
+			}
+					
 					logger.debug(" GUGAMUG second_keyword : = "+second_keyword);
 					
 					
@@ -2158,6 +2173,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					//conn = getCon();
 					
 					logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
+					logger.info(" MSG ::::::::::::::::::::::::: ["+msg+"]");
 					logger.info(" THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
 					
 					USSDSession sess = getSession(req.getSessionid(),MSISDN);
@@ -2196,21 +2212,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					logger.info("FROM SESSION___________________________"+current_menu);
 					
 					
-					if(KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
+					if(KEYWORD.equalsIgnoreCase("") || KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
 						
-						updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
+						updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
 						resp = item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("#")){
 						
-						updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
+						updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
 						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("0")){
 						
-						updateSession(language_id, MSISDN, -1);//update session to upper menu.
+						updateSession(language_id, MSISDN, -1,sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,-1);
 						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						return resp;
@@ -2223,7 +2239,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						updateProfile(MSISDN,language_id);
 						//UtilCelcom.updateProfile(mo.getMsisdn(),language_id,conn);
 						
-						updateSession(language_id,MSISDN, -1);//update session to upper menu.
+						updateSession(language_id,MSISDN, -1,sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
 						current_menu = getTopMenu(menu_id, language_id);
 						
 						resp = (current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));
@@ -2235,6 +2251,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						boolean submenus_have_sub_menus = false;
 						
+						if(submenu!=null)
 						for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
 							if(entry.getValue().getSub_menus()!=null && entry.getValue().getSub_menus().size()>0){
 								logger.error("GUGAMUGA  checking if we have sub menus>> "+entry.getValue().getName());
@@ -2288,7 +2305,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						if( (submenu!=null && (chosen>submenu.size())) ){
 							
 							//chosenMenu = current_menu.getMenuByPosition(chosen);
-							updateSession(language_id,MSISDN, chosenMenu.getId());//update session
+							updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
 							
 							if(submenus_have_sub_menus){
 								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
@@ -2302,7 +2319,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							
 							if(chosenMenu.getService_id()==-1){//if there are other items under this, update session
 								
-								updateSession(language_id,MSISDN, chosenMenu.getId());//update session
+								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
 								
 								chosenMenu = getMenuById(chosenMenu.getId());
 								
@@ -2326,6 +2343,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						}
 						
 					}else if(KEYWORD.equalsIgnoreCase(GenericServiceProcessor.SUBSCRIPTION_CONFIRMATION)){
+						
 						
 						
 						LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
@@ -2357,7 +2375,22 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							chosenMenu = current_menu.getMenuByPosition(chosen);
 							
 							//final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
-							final MOSms mosm_ =  getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+						 
+							SMSService smsserv = find(SMSService.class, Long.parseLong(chosenMenu.getService_id()+""));
+							Long processor_fk = smsserv.getMo_processorFK();
+							MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+							
+							MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+							mosm_.setMsisdn(MSISDN);
+							mosm_.setServiceid(chosenMenu.getService_id());
+							mosm_.setSMS_Message_String(smsserv.getCmd());
+							mosm_.setSMS_SourceAddr(proc.getShortcode());
+							mosm_.setCMP_AKeyword(smsserv.getCmd());
+							mosm_.setCMP_SKeyword(smsserv.getCmd());
+							mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+							
+							logMO(mosm_);
+							//Mimic an MO
 							
 							final com.pixelandtag.subscription.dto.SubscriptionDTO subdto = getSubscriptionDTO(MSISDN, chosenMenu.getService_id());
 							
@@ -2365,7 +2398,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 								chosenMenu = getMenuById(chosenMenu.getId());
 								
-								updateSession(language_id,MSISDN, chosenMenu.getId());//update session
+								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
 								
 								submenu = chosenMenu.getSub_menus();
 								
@@ -2437,7 +2470,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									else
 										resp = response;//get all the sub menus there.
 									
-									
+									return resp;
 								}
 							}
 						
@@ -2598,20 +2631,31 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 					
 					logger.info("\n\n\t\t\tresp:::: "+resp);
-					
-				}catch(Exception e){
-					logger.error(e.getMessage(),e);
-				}
 				
-			}
 		}catch(Exception exp){
-			
+			logger.error(exp.getMessage(), exp);
 		}
 	
 		return resp;
 		
 	}
 	
+	private void updateSession(int language_id, String msisdn,
+			int smsmenu_levels_id_fk, USSDSession sess, int menuId, long sessionId) {
+		if(sess==null)
+			sess = new USSDSession();
+		sess.setLanguage_id(Long.parseLong(language_id+""));
+		sess.setMenuid(Long.parseLong(menuId+""));
+		sess.setSessionId(sessionId);
+		sess.setSmsmenu_levels_id_fk(Long.parseLong(smsmenu_levels_id_fk+""));
+		sess.setMsisdn(msisdn);
+		sess.setTimeStamp(new Date());
+		try {
+			sess = saveOrUpdate(sess);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public String stringFyServiceList(LinkedHashMap<Integer,SMSServiceDTO> allsubscribed) {
 		StringBuffer sb = null;
 		if(allsubscribed!=null && allsubscribed.size()>0){
@@ -2641,7 +2685,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				mi.setParent_level_id((Integer) o[3]);
 				mi.setMenu_id((Integer) o[4]);
 				mi.setService_id((Integer) o[5]);
-				mi.setVisible(((Integer) o[6]).compareTo(1)==0 );
+				mi.setVisible(((Boolean) o[6]) );
+				mi.setSub_menus(getSubMenus(smsmenu_level_id_fk.intValue()) );
 			}
 		}catch(javax.persistence.NoResultException  nre){
 			logger.error(nre.getMessage(),nre);
@@ -2989,6 +3034,230 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 	
 	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
+	 */
+	public void logMO(MOSms mo) {
+		
+		logger.debug("LOGGING_MO_CELCOM_");
+		
+		if(mo.getCMP_Txid()<1)
+			mo.setCMP_Txid(generateNextTxId());
+		
+		
+		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()   ["+mo.getSMS_DataCodingId()+"]");
+		logger.debug("BEFORE_LOGGING_SMS : GenericMessage.NON_ASCII_SMS_ENCODING_ID   ["+mo.getSMS_DataCodingId()+"]");
+		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()!=null  ["+(mo.getSMS_DataCodingId()!=null)+"]");
+		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)  ["+(mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID))+"]");
+		
+		if((mo.getSMS_DataCodingId()!=null) && mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)){
+			logger.debug("BEFORE_DECODING Data Encoding = Old sms = "+mo.getSMS_Message_String());
+			mo.setSMS_Message_String(hexToString(mo.getSMS_Message_String().replaceAll("00","")));
+			logger.debug("AFTER_DECODING new sms = "+mo.getSMS_Message_String());
+		}
+		
+		try {
+			
+			mo = resolveKeywords(mo);//First resolve the keyword..
+				
+			Query qry = em.createNativeQuery("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type,price_point_keyword) " +
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			
+			System.out.println("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
+			qry.setParameter(1, mo.getCMP_Txid());
+			qry.setParameter(2, mo.getSMS_Message_String());
+			qry.setParameter(3, mo.getSMS_SourceAddr());
+			qry.setParameter(4, mo.getMsisdn());
+			qry.setParameter(5, mo.getSMS_DataCodingId());
+			qry.setParameter(6, mo.getCMPResponse());
+			qry.setParameter(7, mo.getAPIType());
+			qry.setParameter(8, mo.getCMP_AKeyword());
+			qry.setParameter(9, mo.getCMP_SKeyword());
+			
+			qry.setParameter(10, mo.getPrice().doubleValue());
+			qry.setParameter(11, mo.getServiceid());
+			qry.setParameter(12, mo.getProcessor_id());
+			qry.setParameter(13, mo.isSplit_msg());
+			
+			qry.setParameter(14, mo.getEventType()!=null ? mo.getEventType().getName() : EventType.CONTENT_PURCHASE.getName());
+			qry.setParameter(15, mo.getPricePointKeyword());
+			
+			logger.info(":::::::::::::::::::mo.getCMP_Keyword(): "+mo.getCMP_AKeyword());
+			logger.info(":::::::::::::::::::mo.getCMP_SKeyword(): "+mo.getCMP_SKeyword());
+			logger.info(":::::::::::::::::::mo.getPrice(): "+mo.getPrice());
+			logger.info(":::::::::::::::::::mo.getProcessor_id(): "+mo.getProcessor_id());
+			logger.info(":::::::::::::::::::mo.isSplit_msg(): "+mo.isSplit_msg());
+			logger.info(":::::::::::::::::::mo.getSMS_DataCodingId(): "+mo.getSMS_DataCodingId());
+			logger.info("::::::::::::::::::: mo.getPricePointKeyword(): "+ mo.getPricePointKeyword());
+			logger.info("::::::::::::::::::: mo.getEventType(): "+ mo.getEventType());
+			
+			
+			qry.executeUpdate();
+			
+		} catch (Exception e) {
+			logger.error(e);
+		}finally{
+			
+		}
+		
+		
+		
+		
+	}
+	
+	
+	public long generateNextTxId(){
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			logger.warn("\n\t\t::"+e.getMessage());
+		}
+		return System.currentTimeMillis();
+	}
+	
+	public static String hexToString(String txtInHex){
+		
+        byte [] txtInByte = new byte [txtInHex.length() / 2];
+        int j = 0;
+        for (int i = 0; i < txtInHex.length(); i += 2)
+        {
+                txtInByte[j++] = Byte.parseByte(txtInHex.substring(i, i + 2), 16);
+        }
+        return new String(txtInByte);
+    }
+	
+	
+	
+	
+	
+
+	@SuppressWarnings("unchecked")
+	public MOSms resolveKeywords(MOSms mo) {
+		
+		logger.info(">>>>>>V.5>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
+		
+		if(mo.getSMS_Message_String()!=null){
+			if(mo.getSMS_Message_String().isEmpty())
+				return mo;
+			
+		}else{
+			mo.setSMS_Message_String(mo.getSMS_Message_String().trim().toUpperCase());
+			logger.info(">>>>>>>>>>>>>>>>>>>SMS["+mo.getSMS_Message_String()+"]");
+		}
+		
+		try {
+			
+			
+			Query qry = em.createNativeQuery("SELECT "
+					+ "`mop`.id as 'mo_processor_id_fk', "//0
+					+ "`sms`.CMP_Keyword, "//1
+					+ "`sms`.CMP_SKeyword, "//2
+					+ "`sms`.price as 'sms_price', "//3
+					+ "`sms`.id as 'serviceid', "//4
+					+ "`sms`.`split_mt` as 'split_mt', "//5
+					+ "`sms`.`event_type` as 'event_type', "//6
+					+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//7
+					+ "FROM `"+database+"`.`sms_service` `sms` LEFT JOIN `"+database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?");
+			
+			qry.setParameter(1, mo.getSMS_SourceAddr());
+			qry.setParameter(2, replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
+			logger.info("Msg : "+mo.getSMS_Message_String());
+			logger.info("Keyword : "+replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
+			
+			List<Object[]> resp = qry.getResultList();
+			
+			
+			if(resp.size()>0){
+				for(Object[] o: resp){
+					mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
+					mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
+					mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
+					mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
+					mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+					mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
+					mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
+					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
+				}
+			}else{
+				
+				Query qry2 = em.createNativeQuery("SELECT "
+						+ "`mop`.id as 'mo_processor_id_fk', "//0
+						+ "`sms`.CMP_Keyword, `sms`.CMP_SKeyword, "//1
+						+ "`sms`.price as 'sms_price', "//2
+						+ "sms.id as 'serviceid', "//3
+						+ "`sms`.`split_mt` as 'split_mt', "//4
+						+ "`sms`.`event_type` as 'event_type', "//5
+						+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//6
+						+ "FROM `"+database+"`.`sms_service` sms LEFT JOIN `"+database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.cmd='DEFAULT' AND sms.enabled=1 AND mop.shortcode=?");
+				
+				qry2.setParameter(1,mo.getSMS_SourceAddr());
+				
+				List<Object[]> resp2 = qry.getResultList();
+				
+				if(resp2.size()>0){
+					
+					for(Object[] o: resp2){
+						/*mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
+						mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
+						mo.setServiceid(rs.getInt("serviceid"));
+						mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
+						mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
+						mo.setSplit_msg(rs.getBoolean("split_mt"));
+						mo.setPricePointKeyword(rs.getString("price_point_keyword"));
+						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));*/
+						mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
+						mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
+						mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
+						mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
+						mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+						mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
+						mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
+						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
+					}
+				
+				}
+				
+				
+			}
+		
+		} catch (Exception e) {
+			logger.error(e);
+		}finally{
+			
+		}
+		
+		
+		return mo;
+	}
+	
+	
+	
+
+	public String replaceAllIllegalCharacters(String text){
+		
+		if(text==null)
+			return null;
+		
+		text = text.replaceAll("[\\r]", "");
+		text = text.replaceAll("[\\n]", "");
+		text = text.replaceAll("[\\t]", "");
+		text = text.replaceAll("[.]", "");
+		text = text.replaceAll("[,]", "");
+		text = text.replaceAll("[?]", "");
+		text = text.replaceAll("[@]", "");
+		text = text.replaceAll("[\"]", "");
+		text = text.replaceAll("[\\]]", "");
+		text = text.replaceAll("[\\[]", "");
+		text = text.replaceAll("[\\{]", "");
+		text = text.replaceAll("[\\}]", "");
+		text = text.replaceAll("[\\(]", "");
+		text = text.replaceAll("[\\)]", "");
+		text = text.trim();
+		
+		return text;
+		
+	}
 
 
 }
