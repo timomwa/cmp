@@ -82,7 +82,7 @@ public class RequestObject implements Serializable{
 				
 				//keyword = keyword.toUpperCase(); // TIMO revert if there is trouble
 				
-				keyword = replaceAllIllegalCharacters(keyword).trim();;
+				keyword = replaceAllIllegalCharacters(keyword).trim();
 				
 			}
 			
@@ -257,13 +257,14 @@ public class RequestObject implements Serializable{
 			if(msg!=null){
 				msg = msg.trim();
 				
-				msg = msg.toUpperCase();
+				//msg = msg.toUpperCase();
 			}
 			
 			if(keyword!=null){
 				keyword = keyword.trim();
 				
-				keyword = keyword.toUpperCase();
+				//keyword = keyword.toUpperCase();
+				keyword = replaceAllIllegalCharacters(keyword).trim();
 			}
 			
 		}catch (Exception e){

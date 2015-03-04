@@ -77,9 +77,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			final int serviceid = 	mo.getServiceid();
 			final String MSISDN = req.getMsisdn();
 			
-		
-
-			
 			int language_id = 1;
 		
 			Person person = datingBean.getPerson(mo.getMsisdn());
@@ -89,8 +86,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			PersonDatingProfile profile = datingBean.getProfile(person);
 			
 			if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
-				
-				
 				
 				if(person.getId()>0 && profile==null){//Success registering/registered but no profile
 					
@@ -126,7 +121,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 					StringBuffer sb = new StringBuffer();
 					BigInteger age = datingBean.calculateAgeFromDob(match.getDob());  
-					sb.append("Age: ").append(age.toString()).append("\n");
+					sb.append("\n").append("Age: ").append(age.toString()).append("\n");
 					sb.append("Location : ").append(match.getLocation()).append("\n");
 					sb.append("Gender : ").append(match.getGender()).append("\n");
 					String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
@@ -441,7 +436,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						logger.info("\n\n\n\t\t profile:::"+profile);
 						StringBuffer sb = new StringBuffer();
 						BigInteger age = datingBean.calculateAgeFromDob(match.getDob()); 
-						sb.append("Age: ").append(age).append("\n");
+						sb.append("\n").append("Age: ").append(age).append("\n");
 						sb.append("Location : ").append(match.getLocation()).append("\n");
 						sb.append("Gender : ").append(match.getGender()).append("\n");
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());

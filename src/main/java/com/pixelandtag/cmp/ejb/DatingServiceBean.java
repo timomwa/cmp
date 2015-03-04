@@ -29,13 +29,18 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
+import com.pixelandtag.dating.entities.ProfileAttribute;
 import com.pixelandtag.dating.entities.ProfileQuestion;
+import com.pixelandtag.dating.entities.QuestionLog;
+import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
@@ -61,7 +66,379 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		super();
 	}
 
+	public String processDating(RequestObject ro) throws Exception{
+		
+		String resp = "Request received.";
+		
+		final String MSISDN = ro.getMsisdn();
+		
+		Person person = getPerson(MSISDN);
+		
+		if(person==null)
+			person = register(MSISDN);
+		
+		PersonDatingProfile profile = getProfile(person);
+		
+		if( (profile!=null && profile.getProfileComplete()) //If profile is already created and valid, 
+				&& //and no keyword or message passed along, then we find a match for them
+			 (ro.getKeyword()==null || ro.getMsg()==null || ro.getMsg().isEmpty() || ro.getKeyword().isEmpty() )){
+			
+			String msg = findMatch(ro,person,profile);
+			
+			
+			SMSService smsserv = getSMSService("DATE");
+			Long processor_fk = smsserv.getMo_processorFK();
+			MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+			
+			if(smsserv!=null && processor_fk!=null && proc!=null){
+				MOSms mo = new MOSms();
+				mo.setMsisdn(MSISDN);
+				mo.setPrice(BigDecimal.ZERO);
+				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+				mo.setMt_Sent(msg);
+				mo.setServiceid(smsserv.getId().intValue());
+				mo.setProcessor_id(processor_fk.intValue());
+				mo.setSMS_SourceAddr(proc.getShortcode());
+				mo.setPriority(0);
+				mo.setCMP_AKeyword(smsserv.getCmd());
+				mo.setCMP_SKeyword(smsserv.getCmd());
+				
+				if(ro.getTransactionID()>1)
+					mo.setCMP_Txid(ro.getTransactionID());
+				else
+					mo.setCMP_Txid(generateNextTxId());
+				
+				mo.setSplit_msg(false);
+				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+				mo.setSubscription(false);
+				sendMT(mo);
+			}
+			
+		
+		}else if(person.getId()>0 && profile==null){//Success registering/registered but no profile
+			
+			resp = startProfileQuestions(ro,person);
+		
+		}else{
+			
+			if(!profile.getProfileComplete()){
+				
+				resp = completeProfile(ro,person,profile);
+			
+			}
+		}
+		
+		return resp;
+	}
+	
+	
+	
+	public String findMatch(RequestObject ro,Person person, PersonDatingProfile profile) {
 
+		String resp = "Request to find match received.";
+		
+		Gender pref_gender = profile.getPreferred_gender();
+		BigDecimal pref_age = profile.getPreferred_age();
+		String location = profile.getLocation();
+		int language_id = profile.getLanguage_id();
+		
+		try{
+			
+			PersonDatingProfile match = findMatch(pref_gender,pref_age, location,person.getId());
+			if(match==null)
+				 match = findMatch(pref_gender,pref_age,person.getId());
+			if(match==null)
+				 match = findMatch(pref_gender,person.getId());
+			
+			if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
+				resp = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id);
+				resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+			}else{
+				try{
+					SystemMatchLog sysmatchlog = new SystemMatchLog();
+					sysmatchlog.setPerson_a_id(person.getId());
+					sysmatchlog.setPerson_b_id(match.getPerson().getId());
+					sysmatchlog.setPerson_a_notified(true);
+					sysmatchlog = saveOrUpdate(sysmatchlog);
+				}catch(Exception exp){
+					logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
+				}
+				String gender_pronoun = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id);
+				String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id);
+				StringBuffer sb = new StringBuffer();
+				BigInteger age = calculateAgeFromDob(match.getDob());  
+				sb.append("\n").append("Age: ").append(age.toString()).append("\n");
+				sb.append("Location : ").append(match.getLocation()).append("\n");
+				sb.append("Gender : ").append(match.getGender()).append("\n");
+				String msg = getMessage(DatingMessages.MATCH_FOUND, language_id);
+				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG, gender_pronoun);
+				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG2, gender_pronoun2);
+				msg = msg.replaceAll(GenericServiceProcessor.DEST_USERNAME_TAG, match.getUsername());
+				msg = msg.replaceAll(GenericServiceProcessor.PROFILE_TAG, sb.toString());
+				resp = msg;
+			}
+		
+		}catch(Exception exp){
+			resp = "Sorry, we couldn't process request at the moment. Please try again.";
+			logger.error(exp.getMessage(),exp);
+		}
+		
+		return resp;
+		
+	}
+
+	public String completeProfile(RequestObject req, Person person,
+			PersonDatingProfile profile) throws DatingServiceException {
+		
+		String resp = "Request Received.";
+		
+		try{
+			
+				final String KEYWORD = req.getKeyword().trim();
+				final String MESSAGE = req.getMsg().trim();
+				final String MSISDN = req.getMsisdn();
+				
+				int language_id = 1;
+				
+				
+				ProfileQuestion previousQuestion = getPreviousQuestion(profile.getId());
+				final ProfileAttribute attr = previousQuestion.getAttrib();
+				logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+MESSAGE);
+			
+				logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
+				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
+					boolean isunique = isUsernameUnique(KEYWORD);
+					if(isunique){
+						profile.setUsername(KEYWORD);
+					}else{
+						resp = getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
+						return resp;
+					}
+						
+				}
+				
+				if(attr.equals(ProfileAttribute.GENDER)){
+					if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")){ 
+						profile.setGender(Gender.MALE);
+					}else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
+						profile.setGender(Gender.FEMALE);
+					}else{
+						
+						try{
+							resp = getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id);
+						}catch(DatingServiceException dse){
+							logger.error(dse.getMessage(), dse);
+						}
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
+						return resp;
+					}
+				}
+				
+				if(attr.equals(ProfileAttribute.AGE)){
+					Date dob = new Date();
+					BigDecimal age = null;
+					try{
+						age = new BigDecimal(KEYWORD);
+					}catch(java.lang.NumberFormatException nfe){
+						resp = getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+						return resp;
+					}
+					
+					if(age.compareTo(new BigDecimal(18l))<0){
+						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+						return resp;
+					}
+					
+					dob = calculateDobFromAge(age);
+					profile.setDob( dob );
+				}
+				
+				if(attr.equals(ProfileAttribute.LOCATION)){
+					profile.setLocation(MESSAGE);
+				}
+				if(attr.equals(ProfileAttribute.PREFERRED_AGE)){
+					BigDecimal age = null;
+					try{
+						age = new BigDecimal(KEYWORD);
+					}catch(java.lang.NumberFormatException nfe){
+						resp = getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+						return resp;
+					}
+					
+					if(age.compareTo(new BigDecimal(18l))<0){
+						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+						return resp;
+					}
+					profile.setPreferred_age(age);
+				}
+				if(attr.equals(ProfileAttribute.PREFERRED_GENDER)){
+					if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")) {
+						profile.setPreferred_gender(Gender.MALE);
+					}else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
+						profile.setPreferred_gender(Gender.FEMALE);
+					}else{
+						try{
+							resp = getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id);
+						}catch(DatingServiceException dse){
+							logger.error(dse.getMessage(), dse);
+						}
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
+						return resp;
+					}
+					profile.setProfileComplete(true);
+					person.setActive(true);
+					profile.setPerson(person);
+					
+					SMSService smsservice = getSMSService("DATE");
+					
+					renewSubscription(MSISDN, smsservice);
+				}
+				
+				profile = saveOrUpdate(profile);
+				
+				
+				ProfileQuestion question = getNextProfileQuestion(profile.getId());
+				
+				if(question!=null){
+					logger.debug("QUESTION::: "+question.getQuestion());
+					resp = question.getQuestion().replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+					
+					QuestionLog ql = new QuestionLog();
+					
+					ql.setProfile_id_fk(profile.getId());
+					ql.setQuestion_id_fk(question.getId());
+					ql = saveOrUpdate(ql);
+				}else{
+					Gender pref_gender = profile.getPreferred_gender();
+					BigDecimal pref_age = profile.getPreferred_age();
+					String location = profile.getLocation();
+					
+					PersonDatingProfile match = findMatch(pref_gender,pref_age, location,person.getId());
+					if(match==null)
+						 match = findMatch(pref_gender,pref_age,person.getId());
+					if(match==null)
+						 match = findMatch(pref_gender,person.getId());
+					
+					if(match==null){
+						resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+					}else{
+						try{
+							SystemMatchLog sysmatchlog = new SystemMatchLog();
+							sysmatchlog.setPerson_a_id(person.getId());
+							sysmatchlog.setPerson_b_id(match.getPerson().getId());
+							sysmatchlog.setPerson_a_notified(true);
+							sysmatchlog = saveOrUpdate(sysmatchlog);
+						}catch(Exception exp){
+							logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
+						}
+					    
+						
+						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id);
+						String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id);
+						String msg = getMessage(DatingMessages.MATCH_FOUND, language_id);
+						logger.info("\n\n\n\t\t msg:::"+resp);
+						logger.info("\n\n\n\t\t profile:::"+profile);
+						StringBuffer sb = new StringBuffer();
+						BigInteger age = calculateAgeFromDob(match.getDob()); 
+						sb.append("\n").append("Age: ").append(age).append("\n");
+						sb.append("Location : ").append(match.getLocation()).append("\n");
+						sb.append("Gender : ").append(match.getGender()).append("\n");
+						msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+						msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG, gender_pronoun);
+						msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG2, gender_pronoun2);
+						msg = msg.replaceAll(GenericServiceProcessor.DEST_USERNAME_TAG, match.getUsername());
+						msg = msg.replaceAll(GenericServiceProcessor.PROFILE_TAG, sb.toString());
+						
+						SMSService smsserv = getSMSService("DATE");
+						Long processor_fk = smsserv.getMo_processorFK();
+						MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+						
+						if(smsserv!=null && processor_fk!=null && proc!=null){
+							MOSms mo = new MOSms();
+							mo.setMsisdn(MSISDN);
+							mo.setPrice(BigDecimal.ZERO);
+							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+							mo.setMt_Sent(msg);
+							mo.setServiceid(smsserv.getId().intValue());
+							mo.setProcessor_id(processor_fk.intValue());
+							mo.setSMS_SourceAddr(proc.getShortcode());
+							mo.setPriority(0);
+							mo.setCMP_AKeyword(smsserv.getCmd());
+							mo.setCMP_SKeyword(smsserv.getCmd());
+							
+							if(req.getTransactionID()>1)
+								mo.setCMP_Txid(req.getTransactionID());
+							else
+								mo.setCMP_Txid(generateNextTxId());
+							
+							mo.setSplit_msg(false);
+							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+							mo.setSubscription(false);
+							sendMT(mo);
+							resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
+							resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+						}else{
+							resp = "Request received but we couldn't process your request. Do try again later.";
+						}
+						
+					}
+					
+				}
+		
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+			//throw new DatingServiceException("Something went Wrong. Kindly try again.",exp);
+			resp = "Request received, but something went wrong in that we couldn't process your request. Kindly try again later";
+			
+		}
+		
+		return resp;
+	}
+	
+	private String startProfileQuestions(RequestObject req, Person person) throws DatingServiceException {
+
+		String resp = "Request received.";
+		
+		try{
+				final String MSISDN = req.getMsisdn();
+				int language_id = 1;
+				
+				
+				try{
+					resp = getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, language_id);
+				}catch(DatingServiceException dse){
+					logger.error(dse.getMessage(), dse);
+				}
+				
+				PersonDatingProfile profile = new PersonDatingProfile();
+				profile.setPerson(person);
+				profile.setUsername(MSISDN);
+				
+				profile = saveOrUpdate(profile);
+				
+				ProfileQuestion question = getNextProfileQuestion(profile.getId());
+				logger.debug("QUESTION::: "+question.getQuestion());
+				resp =  GenericServiceProcessor.SPACE +question.getQuestion();
+				
+				QuestionLog ql = new QuestionLog();
+				
+				ql.setProfile_id_fk(profile.getId());
+				ql.setQuestion_id_fk(question.getId());
+				ql = saveOrUpdate(ql);
+		}catch(Exception exp){
+			throw new DatingServiceException("Sorry, problem occurred, please try again.",exp);
+		}
+		
+		return resp;
+	}
+	
 
 	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
@@ -398,6 +775,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 
+	public boolean sendMT(MOSms mo) throws Exception{
+		final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
+
+		return sendMT(mo,SEND_MT_1);
+	}
 /**
 	 * Logs in httptosend
 	 */
@@ -416,9 +800,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setParameter(5, mo.getCMP_AKeyword());
 			qry.setParameter(6, mo.getCMP_SKeyword());
 			qry.setParameter(7, mo.getPriority());
-			
+		
 			if(!(mo.getCMP_Txid()==-1)){
 				qry.setParameter(8, String.valueOf(mo.getCMP_Txid()));
+			}else{
+				qry.setParameter(8, String.valueOf(generateNextTxId()));
 			}
 			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
 			qry.setParameter(10, mo.getServiceid());
@@ -428,7 +814,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setParameter(14, mo.getBillingStatus().toString());
 			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
 			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
-			qry.setParameter(17, ( mo.isSubscription() ? 1 : 0 ));
+			qry.setParameter(17, mo.getBillingStatus().toString());
 			
 			int num =  qry.executeUpdate();
 			utx.commit();
@@ -726,5 +1112,16 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			logger.error(exp.getMessage(), exp);
 		}
 		return datingperson_profile;
+	}
+	
+	
+
+	public long generateNextTxId(){
+		try {
+			Thread.sleep(6);
+		} catch (InterruptedException e) {
+			logger.warn("\n\t\t::"+e.getMessage());
+		}
+		return System.currentTimeMillis();
 	}
 }

@@ -12,6 +12,7 @@ import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.web.beans.RequestObject;
 
 
 public interface DatingServiceI extends BaseEntityI {
@@ -42,6 +43,7 @@ public interface DatingServiceI extends BaseEntityI {
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException;
 
 	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException;
+	public String processDating(RequestObject ro) throws Exception;
 
 	
 

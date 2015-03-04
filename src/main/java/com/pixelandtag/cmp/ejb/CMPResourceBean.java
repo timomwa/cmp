@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -42,6 +43,7 @@ import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -80,6 +82,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	private static int DEFAULT_LANGUAGE_ID = 1;
 	private String MINUS_ONE = "-1";
 	private final String RM1 = "RM1";
+	
+	@EJB
+	private DatingServiceI datingBean;
 	
 
 	
@@ -2090,7 +2095,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 	}
 
-	
+
 	public String processUSSD(RequestObject req) throws USSDEception{
 		String resp = "";
 		

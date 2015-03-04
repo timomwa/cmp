@@ -161,6 +161,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 			String static_category_value, String sms) throws Exception;
 
 	public String processUSSD(RequestObject ro) throws USSDEception;
+
 	
 
 }

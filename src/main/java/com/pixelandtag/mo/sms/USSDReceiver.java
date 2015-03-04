@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -49,8 +50,11 @@ public class USSDReceiver extends HttpServlet {
 	private final String CLIENT_TIMEZONE = "+03:00";
 
 	
+	//@EJB
+	//private CMPResourceBeanRemote cmpBean;
+	
 	@EJB
-	private CMPResourceBeanRemote cmpBean;
+	private DatingServiceI datingBean;
 
 	//private final int INITIAL_CONNECTIONS = 10;
 	//private final int MAX_CONNECTIONS = 50;
@@ -100,7 +104,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			final RequestObject ro = new RequestObject(req);
 			
-			String response = cmpBean.processUSSD(ro);
+			String response = datingBean.processDating(ro);//cmpBean.processUSSD(ro);
 			
 			pw.write(response);
 			
