@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.subscription.dto.MediumType;
 
 /**
  * This class is instantiated by use of the constructor that
@@ -32,6 +33,7 @@ public class RequestObject implements Serializable{
 	private int serviceid = -1;
 	private long transactionID = -1;
 	private long sessionid = -1;
+	private MediumType mediumType;
 	
 	public RequestObject(MOSms request) throws Exception {
 		
@@ -419,6 +421,14 @@ public class RequestObject implements Serializable{
 	}
 	public void setCellid(String cellid) {
 		this.cellid = cellid;
+	}
+
+	public MediumType getMediumType() {
+		return mediumType;
+	}
+
+	public void setMediumType(MediumType mediumType) {
+		this.mediumType = mediumType;
 	}
 
 	

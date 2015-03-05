@@ -207,6 +207,29 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+MESSAGE);
 			
 				logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
+				
+				if(attr.equals(ProfileAttribute.DISCLAIMER)){
+					boolean keywordIsNumber = false;
+					int agreed = -1;
+					try{
+						agreed = Integer.parseInt(KEYWORD);
+						keywordIsNumber = true;
+					}catch(Exception exp){}
+					
+					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
+						person.setAgreed_to_tnc(true);
+						person = saveOrUpdate(person);
+					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
+						resp = "Ok. Bye";
+						return resp;
+					}else{
+						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id) + GenericServiceProcessor.SPACE +previousQuestion.getQuestion() ;
+						return resp;
+					}
+						
+				}
+				
+				
 				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 					boolean isunique = isUsernameUnique(KEYWORD);
 					if(isunique){

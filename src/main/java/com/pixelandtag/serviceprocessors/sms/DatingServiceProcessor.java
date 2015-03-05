@@ -296,6 +296,29 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+MESSAGE);
 			
 				logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
+				
+				if(attr.equals(ProfileAttribute.DISCLAIMER)){
+					boolean keywordIsNumber = false;
+					int agreed = -1;
+					try{
+						agreed = Integer.parseInt(KEYWORD);
+						keywordIsNumber = true;
+					}catch(Exception exp){}
+					
+					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
+						person.setAgreed_to_tnc(true);
+						person = datingBean.saveOrUpdate(person);
+					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
+						mo.setMt_Sent("Ok. Bye");
+						return mo;
+					}else{
+						String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id);
+						mo.setMt_Sent(msg+SPACE+previousQuestion.getQuestion());
+						return mo;
+					}
+						
+				}
+				
 				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 					boolean isunique = datingBean.isUsernameUnique(KEYWORD);
 					if(isunique){

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public enum MediumType {
 	
-	sms("sms"),wap("wap");
+	ussd("ussd"),sms("sms"),wap("wap");
 	
 	private final String status;
 	

@@ -10,6 +10,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
@@ -34,6 +36,19 @@ public class Person implements Serializable {
 	@Index(name="active")
 	@Column(name="active")
 	private Boolean active;
+	
+	
+	@Index(name="agreed_to_tnc")
+	@Column(name="agreed_to_tnc")
+	private Boolean agreed_to_tnc;
+	
+	
+	@PrePersist
+	@PreUpdate
+	public void onCreate(){
+		if(agreed_to_tnc==null)
+			agreed_to_tnc = new Boolean(false);
+	}
 
 	public Long getId() {
 		return id;
@@ -57,6 +72,16 @@ public class Person implements Serializable {
 
 	public void setActive(Boolean active) {
 		this.active = active;
+	}
+
+	public Boolean getAgreed_to_tnc() {
+		if(agreed_to_tnc==null)
+			return new Boolean(false);
+		return agreed_to_tnc;
+	}
+
+	public void setAgreed_to_tnc(Boolean agreed_to_tnc) {
+		this.agreed_to_tnc = agreed_to_tnc;
 	}
 	
 	

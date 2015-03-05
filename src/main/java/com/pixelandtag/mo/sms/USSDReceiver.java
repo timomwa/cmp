@@ -26,6 +26,7 @@ import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -103,6 +104,8 @@ public class USSDReceiver extends HttpServlet {
 		try{
 			
 			final RequestObject ro = new RequestObject(req);
+			
+			ro.setMediumType(MediumType.ussd);
 			
 			String response = datingBean.processDating(ro);//cmpBean.processUSSD(ro);
 			
