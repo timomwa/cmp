@@ -1,6 +1,7 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -688,7 +689,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
-				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
+				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());

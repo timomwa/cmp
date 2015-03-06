@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+
 
 
 
@@ -846,7 +848,7 @@ public class MechanicsS{
 	 * @param tx_id
 	 * @return
 	 */
-	public static MTsms getMTsmsFromMessageLog(long tx_id, Connection conn){
+	public static MTsms getMTsmsFromMessageLog(BigInteger tx_id, Connection conn){
 		
 		MTsms mtsms = null;
 		PreparedStatement pstmt = null;
@@ -855,14 +857,14 @@ public class MechanicsS{
 		try{
 			
 			pstmt = conn.prepareStatement("SELECT * FROM `celcom`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-			pstmt.setLong(1, tx_id);
-			pstmt.setLong(2, tx_id);
+			pstmt.setBigDecimal(1, new BigDecimal(tx_id));
+			pstmt.setBigDecimal(2, new BigDecimal(tx_id));
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()){
 				mtsms = new MTsms();
 				mtsms.setId(rs.getInt("id"));
-				mtsms.setCMP_Txid(rs.getLong("CMP_Txid"));
+				mtsms.setCMP_Txid(new BigInteger(rs.getString("CMP_Txid")));
 				//mtsms.setSms(rs.getString("MO_Received"));
 				mtsms.setShortcode(rs.getString("SMS_SourceAddr"));
 				mtsms.setSUB_R_Mobtel(rs.getString("SUB_Mobtel"));
@@ -4021,7 +4023,7 @@ public class MechanicsS{
 			
 			pstmt.setInt(1, mo.getServiceid());
 			pstmt.setString(2, mo.getMsisdn());
-			pstmt.setLong(3, mo.getCMP_Txid());
+			pstmt.setBigDecimal(3, new BigDecimal(mo.getCMP_Txid()));
 			pstmt.setString(4, mo.getCMP_AKeyword());
 			pstmt.setString(5, mo.getCMP_SKeyword());
 			pstmt.setDouble(6, mo.getPrice().doubleValue());
@@ -4100,7 +4102,7 @@ public class MechanicsS{
 	 * @param setRetryLater
 	 * @param isReTry
 	 */
-	public static void toggleRetry(long cmp_Txid, boolean reTry, Connection conn) {
+	public static void toggleRetry(BigInteger cmp_Txid, boolean reTry, Connection conn) {
 		
 		
 		
@@ -4110,7 +4112,7 @@ public class MechanicsS{
 		
 			pstmt = conn.prepareStatement("UPDATE `celcom`.`messagelog` SET re_try="+(reTry ? "1" : "0") +" WHERE CMP_Txid  = ?");
 		
-			pstmt.setLong(1, cmp_Txid);
+			pstmt.setBigDecimal(1, new BigDecimal(cmp_Txid));
 			
 			int rec = pstmt.executeUpdate();
 			

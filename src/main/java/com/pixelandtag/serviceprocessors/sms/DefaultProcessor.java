@@ -1,5 +1,6 @@
 package com.pixelandtag.serviceprocessors.sms;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -197,7 +198,7 @@ public class DefaultProcessor extends GenericServiceProcessor {
 				if (!mo.getMt_Sent().isEmpty()) {
 	
 					mo.setMt_Sent(RM0+MALAY_INVALID_KEYWORD);
-					mo.setCMP_Txid(generateNextTxId());
+					mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 					sendMT(mo);
 	
 				}

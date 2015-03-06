@@ -1,5 +1,6 @@
 package com.pixelandtag.web.triviaI;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -115,7 +116,7 @@ public interface MechanicsI {
 	 * @param txid - attached transaction id
 	 * @return boolean - true if the transaction was successful, else returns false
 	 */
-	public boolean insertIntoHTTPToSend(String msisdn, String message, long txid);
+	public boolean insertIntoHTTPToSend(String msisdn, String message, BigInteger txid);
 	
 	/**
 	 * 

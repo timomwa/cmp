@@ -5,6 +5,7 @@ package com.pixelandtag.serviceprocessors.sms;
  *Author 			
  */
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -993,7 +994,7 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 								final String reply1 = RM1+MechanicsS.perSonalizeMessage(reply, sub, 5, conn);
 								
 								MOSms regS = MOSms.clone(mo);
-								this.mocopyWithin.setCMP_Txid(Long.valueOf(generateNextTxId()));
+								this.mocopyWithin.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 								regS.setMt_Sent(reply1);
 								regS.setCMP_SKeyword(TarrifCode.RM1.getCode());
 								regS .setPrice(BigDecimal.valueOf(1d));
@@ -1251,7 +1252,7 @@ public class AxiataTriviaProcessor extends GenericServiceProcessor {
 										final String reply1 = RM0+MechanicsS.perSonalizeMessage(reply, sub, points, conn);
 										
 										MOSms mosms = MOSms.clone(mo);
-										mosms.setCMP_Txid(Long.valueOf(generateNextTxId()));
+										mosms.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 										mosms.setMt_Sent(reply1);
 										mosms.setPriority(0);//give it a higher priority
 										mosms.setCMP_SKeyword(TarrifCode.RM0.getCode());

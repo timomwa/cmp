@@ -2,6 +2,7 @@ package com.pixelandtag.subscription;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -393,7 +394,7 @@ public class SubscriptionMain implements Runnable{
 				
 				try{
 					MOSms mo = new MOSms();
-					mo.setCMP_Txid(-1l); 
+					mo.setCMP_Txid(BigInteger.valueOf(-1l)); 
 					dto.getProcessor().submit(mo);
 				}catch(Exception e){
 					log(e);

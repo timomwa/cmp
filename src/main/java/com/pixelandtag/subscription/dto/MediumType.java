@@ -7,14 +7,14 @@ public enum MediumType {
 	
 	ussd("ussd"),sms("sms"),wap("wap");
 	
-	private final String status;
+	private final String type;
 	
-	private MediumType(String status){
-		this.status = status;
+	private MediumType(String type){
+		this.type = type;
 	}
 	
-	public String getStatus() {
-		return status;
+	public String getType() {
+		return type;
 	}
 	
 	
@@ -22,7 +22,7 @@ public enum MediumType {
 	
 	static {
 		for (MediumType status : MediumType.values()){
-			lookup.put(status.getStatus(), status);
+			lookup.put(status.getType(), status);
 		}
 	}
 	

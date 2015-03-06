@@ -1,6 +1,7 @@
 package com.pixelandtag.sms.producerthreads;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -928,7 +929,7 @@ public class MTProducer extends Thread {
 				
 				
 				if(rs.getString("CMP_Txid")!=null){// && !rs.getString("CMP_TxID").equalsIgnoreCase("NULL") )
-					mtsms.setCMP_Txid(rs.getLong("CMP_Txid"));
+					mtsms.setCMP_Txid(new BigInteger(rs.getString("CMP_Txid")));
 					logger.debug(">>>>>>>>>>>>>>>>>>>>>>: CMP_Txid "+rs.getString("CMP_Txid"));
 				}
 				

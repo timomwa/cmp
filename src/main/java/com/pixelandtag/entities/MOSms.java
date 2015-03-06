@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 
 public class MOSms extends GenericMO{
 	
@@ -40,7 +41,7 @@ public class MOSms extends GenericMO{
 	}
 	
 
-	public MOSms(HttpServletRequest request) {
+	public MOSms(HttpServletRequest request) throws TransactionIDGenException {
 		
 		super(request);
 		

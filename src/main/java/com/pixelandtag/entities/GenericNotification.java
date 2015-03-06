@@ -1,5 +1,7 @@
 package com.pixelandtag.entities;
 
+import java.math.BigInteger;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.api.ERROR;
@@ -9,7 +11,7 @@ public abstract class GenericNotification extends GenericMessage {
 	
 	
 	public GenericNotification(HttpServletRequest request){
-		setCMP_Txid(Long.valueOf(request.getParameter("CMP_Txid")));
+		setCMP_Txid(new BigInteger(request.getParameter("CMP_Txid")));
 		setErrorCode(ERROR.get(request.getParameter("ERRORCODE")));
 	}
 	

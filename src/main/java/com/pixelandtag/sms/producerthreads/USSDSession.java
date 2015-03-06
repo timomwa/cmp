@@ -1,6 +1,7 @@
 package com.pixelandtag.sms.producerthreads;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -51,7 +52,7 @@ public class USSDSession  implements Serializable{
 	
 	@Column(name = "sessionId")
 	@Index(name="ssessidx")
-	private Long sessionId;
+	private BigInteger sessionId;
 	
 	
 	
@@ -136,13 +137,13 @@ public class USSDSession  implements Serializable{
 
 
 
-	public Long getSessionId() {
+	public BigInteger getSessionId() {
 		return sessionId;
 	}
 
 
 
-	public void setSessionId(Long sessionId) {
+	public void setSessionId(BigInteger sessionId) {
 		this.sessionId = sessionId;
 	}
 

@@ -2,6 +2,7 @@ package com.pixelandtag.api;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import com.pixelandtag.sms.producerthreads.EventType;
 
@@ -31,7 +32,7 @@ public abstract class GenericMessage implements Serializable{
 	
 	private int serviceid;
 	private BigDecimal price;
-	private long CMP_Txid;
+	private BigInteger CMP_Txid;
 	private int priority = 1;
 	private int number_of_sms = 1;
 	private boolean split_msg;
@@ -73,6 +74,8 @@ public abstract class GenericMessage implements Serializable{
 
 
 	public String getPricePointKeyword() {
+		if(pricePointKeyword==null || pricePointKeyword.isEmpty())
+			pricePointKeyword = "JOBS";
 		return pricePointKeyword;
 	}
 
@@ -97,6 +100,8 @@ public abstract class GenericMessage implements Serializable{
 
 
 	public BigDecimal getPrice() {
+		if(price==null)
+			return BigDecimal.ZERO;
 		return price;
 	}
 
@@ -144,11 +149,13 @@ public abstract class GenericMessage implements Serializable{
 		this.priority = priority;
 	}
 
-	public void setCMP_Txid(long CMP_Txid_) {
+	public void setCMP_Txid(BigInteger CMP_Txid_) {
 		this.CMP_Txid = CMP_Txid_;
 	}
 	
-	public long getCMP_Txid() {
+	public BigInteger getCMP_Txid() {
+		if(CMP_Txid==null)
+			CMP_Txid = BigInteger.valueOf(-1L);
 		return CMP_Txid;
 	}
 

@@ -527,7 +527,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{3,10}", "*")) ;
 				}
 				chatMo.setMt_Sent(msg);
-				chatMo.setCMP_Txid(generateNextTxId());
+				chatMo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 				chatMo.setPriority(0);//highest priority possible
 				chatMo.setPrice(BigDecimal.ZERO);
 				chatMo.setCMP_AKeyword(mo.getCMP_AKeyword());

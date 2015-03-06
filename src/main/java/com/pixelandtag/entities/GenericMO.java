@@ -1,8 +1,14 @@
 package com.pixelandtag.entities;
 
+import java.math.BigInteger;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.api.GenericMessage;
+import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
+import com.pixelandtag.subscription.SubscriptionMain;
+import com.pixelandtag.subscription.dto.MediumType;
 
 /**
  * 
@@ -18,11 +24,25 @@ public abstract class GenericMO extends GenericMessage {
 	public GenericMO(){
 	}
 	
-	public GenericMO(HttpServletRequest request) {
+	public GenericMO(HttpServletRequest request) throws TransactionIDGenException{
 		
-		//setCMP_Txid(request.getParameter("CMP_Txid"));
-		setSMS_Message_String(request.getParameter("text"));
-		setSMS_SourceAddr(request.getParameter("shortCode"));//"32329");
+		//setCMP_Txid(request.getParameter("tid"));
+		if(request.getParameter("tid")!=null && !request.getParameter("tid").isEmpty()){
+			try{
+				setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));//Too big to handle in db for now..new BigInteger(request.getParameter("tid")));
+			}catch(Exception exp){
+				exp.printStackTrace();
+				throw new TransactionIDGenException("The tid (transaction id) passed to us from the operator isn't an integer! "+exp.getMessage());
+			}
+		}
+		if(request.getParameter("text")!=null)
+			setSMS_Message_String(request.getParameter("text"));
+		if(request.getParameter("msg")!=null)
+			setSMS_Message_String(request.getParameter("msg"));
+		if(request.getParameter("shortCode")!=null && !request.getParameter("shortCode").isEmpty())
+			setSMS_SourceAddr(request.getParameter("shortCode"));//"32329");
+		if(request.getParameter("code")!=null && !request.getParameter("code").isEmpty())
+			setSMS_SourceAddr(request.getParameter("code"));//"32329");
 		setMsisdn(request.getParameter("msisdn"));
 		//setSMS_DataCodingId(request.getParameter("SMS_DataCodingId"));
 		//setCMPResponse(request.getParameter("PCMResponse"));
@@ -108,6 +128,9 @@ public abstract class GenericMO extends GenericMessage {
 	 * Reminder has been sent to Subscriber
 	 */
 	private String CMP_SKeyword;
+	
+	
+	private MediumType mediumType;
 	
 	
 
@@ -203,6 +226,17 @@ public abstract class GenericMO extends GenericMessage {
 
 	public void setCMP_SKeyword(String cMP_SKeyword) {
 		CMP_SKeyword = cMP_SKeyword;
+	}
+
+	
+	public MediumType getMediumType() {
+		if(mediumType==null)
+			mediumType =  MediumType.sms;
+		return mediumType;
+	}
+
+	public void setMediumType(MediumType mediumType) {
+		this.mediumType = mediumType;
 	}
 
 	@Override

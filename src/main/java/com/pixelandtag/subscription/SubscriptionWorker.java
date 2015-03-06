@@ -3,6 +3,7 @@ package com.pixelandtag.subscription;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -143,7 +144,7 @@ public class SubscriptionWorker implements Runnable{
 					
 					MOSms mo = new MOSms();
 					
-					mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
+					mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
 					mo.setMsisdn(sub.getMsisdn());
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
@@ -223,7 +224,7 @@ public class SubscriptionWorker implements Runnable{
 			
 			try{
 				MOSms mo = new MOSms();
-				mo.setCMP_Txid(-1);
+				mo.setCMP_Txid(BigInteger.valueOf(-1L));
 				dto.getProcessor().submit(mo);
 			}catch(Exception e){
 				log(e);

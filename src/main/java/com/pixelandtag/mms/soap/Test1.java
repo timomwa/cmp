@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -70,7 +71,37 @@ public class Test1 {
 	 */
 	public static void main(String[] args) throws Exception {
 		
+		String text = "".split("[\\s]")[0].toUpperCase();
+		text = text.replaceAll("[\\r]", "");
+		text = text.replaceAll("[\\n]", "");
+		text = text.replaceAll("[\\t]", "");
+		text = text.replaceAll("[.]", "");
+		text = text.replaceAll("[,]", "");
+		text = text.replaceAll("[?]", "");
+		text = text.replaceAll("[@]", "");
+		text = text.replaceAll("[\"]", "");
+		text = text.replaceAll("[\\]]", "");
+		text = text.replaceAll("[\\[]", "");
+		text = text.replaceAll("[\\{]", "");
+		text = text.replaceAll("[\\}]", "");
+		text = text.replaceAll("[\\(]", "");
+		text = text.replaceAll("[\\)]", "");
+		text = text.trim();
+		System.out.println(text);
 		
+		
+		if(true)
+			return;
+		System.out.println("".split("[\\s]")[0].toUpperCase());
+		if(true)
+			return;
+		
+		BigInteger bi = new BigInteger("200220150306095055363089");
+		System.out.println(bi);
+		System.out.println(new BigDecimal(bi));
+		System.out.println(BigInteger.ONE);
+		if(true)
+			return;
 		LinkedHashMap<Integer, String> ms = new LinkedHashMap<Integer,String>();
 		ms.put(1, "moja");
 		ms.put(2, "mbili");

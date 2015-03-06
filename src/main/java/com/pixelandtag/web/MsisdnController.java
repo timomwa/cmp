@@ -38,6 +38,9 @@ public class MsisdnController extends HttpServlet {
 	private JSONObject requestJSON = null;
 	private JSONObject responseJSON = null;
 	private PrintWriter writer;
+
+	private final String SERVER_TIMEZONE = "-05:00";
+	private final String CLIENT_TIMEZONE = "+03:00";
 	
 	private String DB = "pixeland_content360";
 
@@ -154,7 +157,7 @@ public class MsisdnController extends HttpServlet {
 			 
 			 date = requestJSON.getString("date").trim();
 			 
-			 ps = conn.prepareStatement("select MT_STATUS,timeStamp,SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive from "+DB+".messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
+			 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
 				
 			 ps.setString(1, msisdn);
 			 
@@ -163,7 +166,7 @@ public class MsisdnController extends HttpServlet {
 			 rs = ps.executeQuery();
 			 
 			 
-			 String timeStamp="",SUB_Mobtel="",CMP_Txid="",MO_Received="",MT_Sent="",MT_STATUS="", dlrArrive="";
+			 String timeStamp="",SUB_Mobtel="",CMP_Txid="",MO_Received="",MT_Sent="",MT_STATUS="", dlrArrive="", source="";
 			 
 			 int i = 0;
 			 
@@ -175,6 +178,7 @@ public class MsisdnController extends HttpServlet {
 				 MT_Sent = StringEscapeUtils.escapeHtml(rs.getString("MT_Sent"));
 				 MT_STATUS = StringEscapeUtils.escapeHtml(rs.getString("MT_STATUS"));
 				 dlrArrive = StringEscapeUtils.escapeHtml(rs.getString("dlrArrive"));
+				 source = StringEscapeUtils.escapeHtml(rs.getString("source"));
 				 //System.out.println("count:::::::"+count);
 				 responseJSON.append("timeStamp", timeStamp);
 				 responseJSON.append("SUB_Mobtel", SUB_Mobtel);
@@ -183,6 +187,7 @@ public class MsisdnController extends HttpServlet {
 				 responseJSON.append("MT_Sent", MT_Sent);
 				 responseJSON.append("MT_STATUS", MT_STATUS);
 				 responseJSON.append("dlrArrive", dlrArrive);
+				 responseJSON.append("source", source);
 				 i++;
 			 }
 			 

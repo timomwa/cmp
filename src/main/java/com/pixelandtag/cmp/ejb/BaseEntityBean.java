@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -50,14 +51,18 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
 import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
+import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
@@ -374,7 +379,7 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(6, mo.getCMP_SKeyword());
 			qry.setParameter(7, mo.getPriority());
 			
-			if(!(mo.getCMP_Txid()==-1)){
+			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 				qry.setParameter(8, String.valueOf(mo.getCMP_Txid()));
 			}
 			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
@@ -561,17 +566,17 @@ public class BaseEntityBean implements BaseEntityI {
 					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
 						billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.Success);
+						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
 					}
 					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
 						billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.InvalidSubscriber);
+						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
 					}
 					if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
 						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
-						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAInsufficientBalance);
+						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
 					}
 					
 					if("TWSS_109".equals(billable.getResp_status_code())){
@@ -580,7 +585,7 @@ public class BaseEntityBean implements BaseEntityI {
 						billable.setProcessed(0L);
 						billable.setRetry_count( (billable.getRetry_count()+1 ) );
 						billable.setMaxRetriesAllowed( (billable.getRetry_count()+2 ) );
-						cmp_ejb.updateSMSStatLog(BigInteger.valueOf(billable.getCp_tx_id()),ERROR.PSAChargeFailure);
+						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
 						
 					}
 					
@@ -659,7 +664,226 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 	}
 	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void logMO(MOSms mo) throws TransactionIDGenException{
+		
+		logger.debug("LOGGING_MO_CELCOM_");
+		
+		if(mo.getCMP_Txid().compareTo(BigInteger.ONE)<0){
+			try{
+				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
+			}catch(InterruptedException exp){
+				logger.error(exp.getMessage(), exp);
+				throw new TransactionIDGenException("Couldn't acquire lock, so could not generate the transaction id!");
+			}
+		}
+		
+		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()   ["+mo.getSMS_DataCodingId()+"]");
+		logger.debug("BEFORE_LOGGING_SMS : GenericMessage.NON_ASCII_SMS_ENCODING_ID   ["+mo.getSMS_DataCodingId()+"]");
+		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()!=null  ["+(mo.getSMS_DataCodingId()!=null)+"]");
+		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)  ["+(mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID))+"]");
+		
+		if((mo.getSMS_DataCodingId()!=null) && mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)){
+			logger.debug("BEFORE_DECODING Data Encoding = Old sms = "+mo.getSMS_Message_String());
+			mo.setSMS_Message_String(hexToString(mo.getSMS_Message_String().replaceAll("00","")));
+			logger.debug("AFTER_DECODING new sms = "+mo.getSMS_Message_String());
+		}
+		
+		try {
+			
+			mo = resolveKeywords(mo);//First resolve the keyword..
+				
+			utx.begin();
+			Query qry = em.createNativeQuery("INSERT INTO `"+CelcomImpl.database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type,price_point_keyword,MT_Sent,source) " +
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			
+			logger.info("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
+			qry.setParameter(1, mo.getCMP_Txid().toString());
+			qry.setParameter(2, mo.getSMS_Message_String());
+			qry.setParameter(3, mo.getSMS_SourceAddr());
+			qry.setParameter(4, mo.getMsisdn());
+			qry.setParameter(5, mo.getSMS_DataCodingId());
+			qry.setParameter(6, mo.getCMPResponse());
+			qry.setParameter(7, mo.getAPIType());
+			qry.setParameter(8, mo.getCMP_AKeyword());
+			qry.setParameter(9, mo.getCMP_SKeyword());
+			
+			qry.setParameter(10, mo.getPrice()!=null ? mo.getPrice().doubleValue() : 0.0d);
+			qry.setParameter(11, mo.getServiceid());
+			qry.setParameter(12, mo.getProcessor_id());
+			qry.setParameter(13, mo.isSplit_msg());
+			
+			qry.setParameter(14, mo.getEventType()!=null ? mo.getEventType().getName() : EventType.CONTENT_PURCHASE.getName());
+			qry.setParameter(15, mo.getPricePointKeyword());
+			qry.setParameter(16, mo.getMt_Sent());
+			qry.setParameter(17, mo.getMediumType().getType());
+			logger.info("::::::::::::::::::: mo.getMt_Sent(): "+ mo.getMt_Sent());
+			logger.info(":::::::::::::::::::mo.getCMP_Txid(): "+mo.getCMP_Txid().toString());
+			logger.info(":::::::::::::::::::mo.getCMP_Keyword(): "+mo.getCMP_AKeyword());
+			logger.info(":::::::::::::::::::mo.getCMP_SKeyword(): "+mo.getCMP_SKeyword());
+			logger.info(":::::::::::::::::::mo.getPrice(): "+mo.getPrice());
+			logger.info(":::::::::::::::::::mo.getProcessor_id(): "+mo.getProcessor_id());
+			logger.info(":::::::::::::::::::mo.isSplit_msg(): "+mo.isSplit_msg());
+			logger.info(":::::::::::::::::::mo.getSMS_DataCodingId(): "+mo.getSMS_DataCodingId());
+			logger.info("::::::::::::::::::: mo.getPricePointKeyword(): "+ mo.getPricePointKeyword());
+			logger.info("::::::::::::::::::: mo.getEventType(): "+ mo.getEventType());
+			
+			
+			qry.executeUpdate();
+			utx.commit();
+			
+		} catch (Exception e) {
+			try{
+				utx.rollback();
+			}catch(Exception exp){}
+			logger.error(e.getMessage(),e);
+		}finally{
+			
+		}
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public MOSms resolveKeywords(MOSms mo) {
+		
+		logger.info(">>>>>>V.6>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
+		
+		
+		
+		if(mo.getSMS_Message_String()!=null){
+			if(mo.getSMS_Message_String().isEmpty())
+				return mo;
+			
+		}else{
+			mo.setSMS_Message_String(mo.getSMS_Message_String().trim().toUpperCase());
+			logger.info(">>>>>>>>>>>>>>>>>>>SMS["+mo.getSMS_Message_String()+"]");
+		}
+		
+		
+		try {
+			
+			Query qry = em.createNativeQuery("SELECT "
+					+ "`mop`.id as 'mo_processor_id_fk', "//0
+					+ "`sms`.CMP_Keyword, "//1
+					+ "`sms`.CMP_SKeyword, "//2
+					+ "`sms`.price as 'sms_price', "//3
+					+ "`sms`.id as 'serviceid', "//4
+					+ "`sms`.`split_mt` as 'split_mt', "//5
+					+ "`sms`.`event_type` as 'event_type', "//6
+					+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//7
+					+ "FROM `"+CelcomImpl.database+"`.`sms_service` `sms` LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?");
+			qry.setParameter(1, mo.getSMS_SourceAddr());
+			qry.setParameter(2, replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
+			logger.info("Msg : "+mo.getSMS_Message_String());
+			logger.info("Keyword : "+replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
+			
+			List<Object[]> resp = qry.getResultList();
+			
+			
+			if(resp.size()>0){
+				for(Object[] o: resp){
+					mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
+					mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
+					mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
+					mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
+					mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+					mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
+					mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
+					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
+				}
+			}else{
+				
+				Query qry2 = em.createNativeQuery("SELECT "
+						+ "`mop`.id as 'mo_processor_id_fk', "//0
+						+ "`sms`.CMP_Keyword, `sms`.CMP_SKeyword, "//1
+						+ "`sms`.price as 'sms_price', "//2
+						+ "sms.id as 'serviceid', "//3
+						+ "`sms`.`split_mt` as 'split_mt', "//4
+						+ "`sms`.`event_type` as 'event_type', "//5
+						+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//6
+						+ "FROM `"+CelcomImpl.database+"`.`sms_service` sms LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.cmd='DEFAULT' AND sms.enabled=1 AND mop.shortcode=?");
+				
+				qry2.setParameter(1,mo.getSMS_SourceAddr());
+				
+				List<Object[]> resp2 = qry.getResultList();
+				
+				if(resp2.size()>0){
+					
+					for(Object[] o: resp2){
+						/*mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
+						mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
+						mo.setServiceid(rs.getInt("serviceid"));
+						mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
+						mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
+						mo.setSplit_msg(rs.getBoolean("split_mt"));
+						mo.setPricePointKeyword(rs.getString("price_point_keyword"));
+						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));*/
+						mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
+						mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
+						mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
+						mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
+						mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+						mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
+						mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
+						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
+					}
+				
+				}
+				
+				
+			}
+		
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}finally{
+			
+		}
+		
+		
+		return mo;
+	}
+	
+	
+	public static String hexToString(String txtInHex){
+		
+        byte [] txtInByte = new byte [txtInHex.length() / 2];
+        int j = 0;
+        for (int i = 0; i < txtInHex.length(); i += 2)
+        {
+                txtInByte[j++] = Byte.parseByte(txtInHex.substring(i, i + 2), 16);
+        }
+        return new String(txtInByte);
+    }
 
+	
+	public String replaceAllIllegalCharacters(String text){
+		
+		if(text==null)
+			return null;
+		
+		text = text.replaceAll("[\\r]", "");
+		text = text.replaceAll("[\\n]", "");
+		text = text.replaceAll("[\\t]", "");
+		text = text.replaceAll("[.]", "");
+		text = text.replaceAll("[,]", "");
+		text = text.replaceAll("[?]", "");
+		text = text.replaceAll("[@]", "");
+		text = text.replaceAll("[\"]", "");
+		text = text.replaceAll("[\\]]", "");
+		text = text.replaceAll("[\\[]", "");
+		text = text.replaceAll("[\\{]", "");
+		text = text.replaceAll("[\\}]", "");
+		text = text.replaceAll("[\\(]", "");
+		text = text.replaceAll("[\\)]", "");
+		text = text.trim();
+		
+		return text;
+		
+	}
 	@SuppressWarnings("unchecked")
 	public SMSService getSMSService(String cmd)  throws Exception{
 		SMSService sub = null;

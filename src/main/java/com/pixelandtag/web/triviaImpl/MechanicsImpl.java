@@ -1,5 +1,7 @@
 package com.pixelandtag.web.triviaImpl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -804,7 +806,7 @@ public class MechanicsImpl implements MechanicsI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.web.triviaI.MechanicsI#insertIntoVasSMPPToSend(java.lang.String, java.lang.String)
 	 */
-	public boolean insertIntoHTTPToSend(String msisdn, String message, long txId) {
+	public boolean insertIntoHTTPToSend(String msisdn, String message, BigInteger txId) {
 		
 		
 			/*if(mo.getMt_Sent().trim().startsWith(RM1)){
@@ -846,7 +848,7 @@ public class MechanicsImpl implements MechanicsI {
 				
 				//pstmt.setString(10, String.valueOf(mo.getCMP_Txid()));
 				pstmt.setInt(8, 1);
-				pstmt.setLong(9, txId);
+				pstmt.setBigDecimal(9, new BigDecimal(txId));
 				
 				pstmt.executeUpdate();
 				

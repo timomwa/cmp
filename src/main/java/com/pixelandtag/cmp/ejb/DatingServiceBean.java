@@ -81,7 +81,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		if( (profile!=null && profile.getProfileComplete()) //If profile is already created and valid, 
 				&& //and no keyword or message passed along, then we find a match for them
-			 (ro.getKeyword()==null || ro.getMsg()==null || ro.getMsg().isEmpty() || ro.getKeyword().isEmpty() )){
+			 (ro.getKeyword()==null || ro.getMsg()==null || ro.getMsg().isEmpty() || ro.getKeyword().isEmpty() 
+			 || (ro.getCode()!=null && ro.getMsg().equals(ro.getCode()))  )){
 			
 			String msg = findMatch(ro,person,profile);
 			
@@ -103,10 +104,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				mo.setCMP_AKeyword(smsserv.getCmd());
 				mo.setCMP_SKeyword(smsserv.getCmd());
 				
-				if(ro.getTransactionID()>1)
+				if(ro.getTransactionID().compareTo(BigInteger.ONE)>0)
 					mo.setCMP_Txid(ro.getTransactionID());
 				else
-					mo.setCMP_Txid(generateNextTxId());
+					mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 				
 				mo.setSplit_msg(false);
 				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
@@ -396,10 +397,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							mo.setCMP_AKeyword(smsserv.getCmd());
 							mo.setCMP_SKeyword(smsserv.getCmd());
 							
-							if(req.getTransactionID()>1)
+							if(req.getTransactionID().compareTo(BigInteger.ONE)>0)
 								mo.setCMP_Txid(req.getTransactionID());
 							else
-								mo.setCMP_Txid(generateNextTxId());
+								mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 							
 							mo.setSplit_msg(false);
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
@@ -824,7 +825,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setParameter(6, mo.getCMP_SKeyword());
 			qry.setParameter(7, mo.getPriority());
 		
-			if(!(mo.getCMP_Txid()==-1)){
+			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 				qry.setParameter(8, String.valueOf(mo.getCMP_Txid()));
 			}else{
 				qry.setParameter(8, String.valueOf(generateNextTxId()));
@@ -1042,7 +1043,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		Billable billable =  new Billable();
 			
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(Long.valueOf(mo.getCMP_Txid()));
+		billable.setCp_tx_id(mo.getCMP_Txid());
 		billable.setDiscount_applied("0");
 		billable.setEvent_type(mo.getEventType());
 		billable.setIn_outgoing_queue(0l);
@@ -1057,7 +1058,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setRetry_count(0L);
 		billable.setService_id(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo.getSMS_SourceAddr());		
-		billable.setTx_id(Long.valueOf(mo.getCMP_Txid()));
+		billable.setTx_id(mo.getCMP_Txid());
 		billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
 		billable.setPricePointKeyword(mo.getPricePointKeyword());
 			

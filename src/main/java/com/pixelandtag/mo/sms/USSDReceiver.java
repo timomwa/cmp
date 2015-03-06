@@ -111,6 +111,17 @@ public class USSDReceiver extends HttpServlet {
 			
 			pw.write(response);
 			
+			
+			try{
+				
+				final MOSms moMessage = new MOSms(req);
+				moMessage.setMediumType(MediumType.ussd);
+				moMessage.setMt_Sent(response);
+				datingBean.logMO(moMessage);
+			
+			}catch(Exception e){
+				logger.error(e.getMessage(),e);
+			}
 		}catch(Exception e){
 			
 			logger.error(e.getMessage(),e);

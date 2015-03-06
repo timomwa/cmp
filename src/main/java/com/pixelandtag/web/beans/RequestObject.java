@@ -1,10 +1,12 @@
 package com.pixelandtag.web.beans;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.MediumType;
 
 /**
@@ -31,8 +33,8 @@ public class RequestObject implements Serializable{
 	private static final long serialVersionUID = -697978310928640125L;
 	private String lac,code, location,cellid,telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
 	private int serviceid = -1;
-	private long transactionID = -1;
-	private long sessionid = -1;
+	private BigInteger transactionID = null;
+	private BigInteger sessionid = null;
 	private MediumType mediumType;
 	
 	public RequestObject(MOSms request) throws Exception {
@@ -213,15 +215,15 @@ public class RequestObject implements Serializable{
 			tripWire = request.getParameter("tripWire").trim();
 		}
 		if (request.getParameter("tid") != null){
-			transactionID = -1;
+			transactionID = new BigInteger("-1");
 			try{
-				transactionID  = Long.parseLong(request.getParameter("tid").trim());
+				transactionID  = BigInteger.valueOf(SubscriptionMain.generateNextTxId());//Too big to handle in db for now.. request.getParameter("tid").trim());
 			}catch(Exception exp){}
 		}
 		if (request.getParameter("sessionid") != null){
-			sessionid = -1;
+			sessionid = new BigInteger("-1");
 			try{
-				sessionid  = Long.parseLong(request.getParameter("sessionid").trim());
+				sessionid  = new BigInteger(request.getParameter("sessionid").trim());
 			}catch(Exception exp){}
 		}
 		if (request.getParameter("code") != null){
@@ -255,6 +257,7 @@ public class RequestObject implements Serializable{
 		setPrice(price);
 		
 		try{
+			
 			
 			if(msg!=null){
 				msg = msg.trim();
@@ -386,16 +389,16 @@ public class RequestObject implements Serializable{
 	public int getPrice() {
 		return price;
 	}
-	public long getTransactionID() {
+	public BigInteger getTransactionID() {
 		return transactionID;
 	}
-	public void setTransactionID(long transactionID) {
+	public void setTransactionID(BigInteger transactionID) {
 		this.transactionID = transactionID;
 	}
-	public long getSessionid() {
+	public BigInteger getSessionid() {
 		return sessionid;
 	}
-	public void setSessionid(long sessionid) {
+	public void setSessionid(BigInteger sessionid) {
 		this.sessionid = sessionid;
 	}
 	public String getLac() {

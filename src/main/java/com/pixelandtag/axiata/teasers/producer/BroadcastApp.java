@@ -3,6 +3,7 @@ package com.pixelandtag.axiata.teasers.producer;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,6 +17,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
+
 
 
 
@@ -462,7 +464,7 @@ public class BroadcastApp {
 		
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
-			mo.setCMP_Txid(MechanicsS.generateNextTxId());
+			mo.setCMP_Txid(BigInteger.valueOf(MechanicsS.generateNextTxId()));
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0100");
 			mo.setPrice(BigDecimal.valueOf(1.0d));
@@ -562,7 +564,7 @@ public class BroadcastApp {
 			
 			MOSms mo = new MOSms();
 			
-			long txid = MechanicsS.generateNextTxId();
+			BigInteger txid =BigInteger.valueOf( MechanicsS.generateNextTxId());
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(txid);
@@ -585,7 +587,7 @@ public class BroadcastApp {
 				
 				mo = new MOSms();
 				
-				txid = MechanicsS.generateNextTxId();
+				txid = BigInteger.valueOf(MechanicsS.generateNextTxId());
 				mo.setServiceid(2);
 				mo.setMsisdn(sub.getMsisdn());
 				mo.setCMP_Txid(txid);
@@ -653,7 +655,7 @@ public class BroadcastApp {
 			
 			MOSms mo = new MOSms();
 			
-			long txid = MechanicsS.generateNextTxId();
+			BigInteger txid = BigInteger.valueOf(MechanicsS.generateNextTxId());
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
 			mo.setCMP_Txid(txid);
@@ -663,7 +665,7 @@ public class BroadcastApp {
 			
 			MechanicsS.toStatsLog(mo, conn);
 			
-			mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg,MechanicsS.generateNextTxId());
+			mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg, BigInteger.valueOf(MechanicsS.generateNextTxId()));
 			
 			mechanics.setTeased(sub.getMsisdn());
 		

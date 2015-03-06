@@ -1,5 +1,6 @@
 package com.pixelandtag.mms.producerthreads;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -330,7 +331,7 @@ public class MMSProducer extends Thread  {
 				
 				mtmms = new MMS();
 				mtmms.setId(rs.getString("id"));
-				mtmms.setCMP_Txid(rs.getLong("id"));
+				mtmms.setCMP_Txid(BigInteger.valueOf(rs.getLong("id")));
 				mtmms.setTransactionID(rs.getString("id"));
 				mtmms.setMsisdn(rs.getString("msisdn"));
 				mtmms.setSubject(rs.getString("subject"));

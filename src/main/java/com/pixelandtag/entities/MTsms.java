@@ -35,6 +35,8 @@ public class MTsms extends GenericMT {
 	
 
 	public String getNewCMP_Txid() {
+		if(newCMP_Txid==null)
+			newCMP_Txid = "-1";
 		return newCMP_Txid;
 	}
 

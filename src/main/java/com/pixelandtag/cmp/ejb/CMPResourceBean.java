@@ -1088,9 +1088,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			Query qry = em.createNativeQuery(sql);
 			
 			String txid = mt.getIdStr();
-			if(mt.getCMP_Txid()>0){
+			if(mt.getCMP_Txid().compareTo(BigInteger.ZERO)>0){
 				
-				if(!(mt.getCMP_Txid()==-1)){
+				if(!(mt.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 					txid = String.valueOf(mt.getCMP_Txid());
 					qry.setParameter(1, txid);//Since we're starting the transaction, what is in the httptosend as id now becomes the value of CMP_Txid.
 				}else{
@@ -1104,7 +1104,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					txid = mt.getIdStr();
 			}
 			
-			boolean isRetry = !mt.getNewCMP_Txid().equals(MINUS_ONE);
+			boolean isRetry = mt.getNewCMP_Txid()!=null ? (!mt.getNewCMP_Txid().equals(MINUS_ONE) ) : false;
 			
 			qry.setParameter(2, mt.getSms());
 			qry.setParameter(3, mt.getFromAddr());//.getSMS_SourceAddr());//Shortcode sent with.
@@ -1854,7 +1854,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateMessageInQueue(long cp_tx_id, BillingStatus billstatus) throws Exception{
+	public boolean updateMessageInQueue(BigInteger cp_tx_id, BillingStatus billstatus) throws Exception{
 		boolean success = false;
 		try{
 			 utx.begin();
@@ -1897,7 +1897,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(6, mo.getCMP_SKeyword());
 			qry.setParameter(7, mo.getPriority());
 			
-			if(!(mo.getCMP_Txid()==-1)){
+			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 				qry.setParameter(8, String.valueOf(mo.getCMP_Txid()));
 			}
 			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
@@ -2646,7 +2646,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	private void updateSession(int language_id, String msisdn,
-			int smsmenu_levels_id_fk, USSDSession sess, int menuId, long sessionId) {
+			int smsmenu_levels_id_fk, USSDSession sess, int menuId, BigInteger sessionId) {
 		if(sess==null)
 			sess = new USSDSession();
 		sess.setLanguage_id(Long.parseLong(language_id+""));
@@ -2701,7 +2701,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return mi;
 	}
 	@SuppressWarnings("unchecked")
-	public USSDSession getSession(long sessionid, String msisdn) {
+	public USSDSession getSession(BigInteger sessionid, String msisdn) {
 		USSDSession sess = null;
 		try{
 			Query qry = em.createQuery("from USSDSession s WHERE s.sessionId=:sessionId AND s.msisdn=:msisdn order by s.timeStamp desc");
@@ -2993,7 +2993,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
-				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
+				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());
@@ -3040,76 +3040,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	
-	/* (non-Javadoc)
-	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
-	 */
-	public void logMO(MOSms mo) {
-		
-		logger.debug("LOGGING_MO_CELCOM_");
-		
-		if(mo.getCMP_Txid()<1)
-			mo.setCMP_Txid(generateNextTxId());
-		
-		
-		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()   ["+mo.getSMS_DataCodingId()+"]");
-		logger.debug("BEFORE_LOGGING_SMS : GenericMessage.NON_ASCII_SMS_ENCODING_ID   ["+mo.getSMS_DataCodingId()+"]");
-		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()!=null  ["+(mo.getSMS_DataCodingId()!=null)+"]");
-		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)  ["+(mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID))+"]");
-		
-		if((mo.getSMS_DataCodingId()!=null) && mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)){
-			logger.debug("BEFORE_DECODING Data Encoding = Old sms = "+mo.getSMS_Message_String());
-			mo.setSMS_Message_String(hexToString(mo.getSMS_Message_String().replaceAll("00","")));
-			logger.debug("AFTER_DECODING new sms = "+mo.getSMS_Message_String());
-		}
-		
-		try {
-			
-			mo = resolveKeywords(mo);//First resolve the keyword..
-				
-			Query qry = em.createNativeQuery("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type,price_point_keyword) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-			
-			System.out.println("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
-			qry.setParameter(1, mo.getCMP_Txid());
-			qry.setParameter(2, mo.getSMS_Message_String());
-			qry.setParameter(3, mo.getSMS_SourceAddr());
-			qry.setParameter(4, mo.getMsisdn());
-			qry.setParameter(5, mo.getSMS_DataCodingId());
-			qry.setParameter(6, mo.getCMPResponse());
-			qry.setParameter(7, mo.getAPIType());
-			qry.setParameter(8, mo.getCMP_AKeyword());
-			qry.setParameter(9, mo.getCMP_SKeyword());
-			
-			qry.setParameter(10, mo.getPrice().doubleValue());
-			qry.setParameter(11, mo.getServiceid());
-			qry.setParameter(12, mo.getProcessor_id());
-			qry.setParameter(13, mo.isSplit_msg());
-			
-			qry.setParameter(14, mo.getEventType()!=null ? mo.getEventType().getName() : EventType.CONTENT_PURCHASE.getName());
-			qry.setParameter(15, mo.getPricePointKeyword());
-			
-			logger.info(":::::::::::::::::::mo.getCMP_Keyword(): "+mo.getCMP_AKeyword());
-			logger.info(":::::::::::::::::::mo.getCMP_SKeyword(): "+mo.getCMP_SKeyword());
-			logger.info(":::::::::::::::::::mo.getPrice(): "+mo.getPrice());
-			logger.info(":::::::::::::::::::mo.getProcessor_id(): "+mo.getProcessor_id());
-			logger.info(":::::::::::::::::::mo.isSplit_msg(): "+mo.isSplit_msg());
-			logger.info(":::::::::::::::::::mo.getSMS_DataCodingId(): "+mo.getSMS_DataCodingId());
-			logger.info("::::::::::::::::::: mo.getPricePointKeyword(): "+ mo.getPricePointKeyword());
-			logger.info("::::::::::::::::::: mo.getEventType(): "+ mo.getEventType());
-			
-			
-			qry.executeUpdate();
-			
-		} catch (Exception e) {
-			logger.error(e);
-		}finally{
-			
-		}
-		
-		
-		
-		
-	}
+	
 	
 	
 	public long generateNextTxId(){
@@ -3133,112 +3064,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
     }
 	
 	
-	
-	
-	
-
-	@SuppressWarnings("unchecked")
-	public MOSms resolveKeywords(MOSms mo) {
-		
-		logger.info(">>>>>>V.5>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
-		
-		if(mo.getSMS_Message_String()!=null){
-			if(mo.getSMS_Message_String().isEmpty())
-				return mo;
-			
-		}else{
-			mo.setSMS_Message_String(mo.getSMS_Message_String().trim().toUpperCase());
-			logger.info(">>>>>>>>>>>>>>>>>>>SMS["+mo.getSMS_Message_String()+"]");
-		}
-		
-		try {
-			
-			
-			Query qry = em.createNativeQuery("SELECT "
-					+ "`mop`.id as 'mo_processor_id_fk', "//0
-					+ "`sms`.CMP_Keyword, "//1
-					+ "`sms`.CMP_SKeyword, "//2
-					+ "`sms`.price as 'sms_price', "//3
-					+ "`sms`.id as 'serviceid', "//4
-					+ "`sms`.`split_mt` as 'split_mt', "//5
-					+ "`sms`.`event_type` as 'event_type', "//6
-					+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//7
-					+ "FROM `"+database+"`.`sms_service` `sms` LEFT JOIN `"+database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?");
-			
-			qry.setParameter(1, mo.getSMS_SourceAddr());
-			qry.setParameter(2, replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
-			logger.info("Msg : "+mo.getSMS_Message_String());
-			logger.info("Keyword : "+replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
-			
-			List<Object[]> resp = qry.getResultList();
-			
-			
-			if(resp.size()>0){
-				for(Object[] o: resp){
-					mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
-					mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
-					mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
-					mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
-					mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
-					mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
-					mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
-					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
-				}
-			}else{
-				
-				Query qry2 = em.createNativeQuery("SELECT "
-						+ "`mop`.id as 'mo_processor_id_fk', "//0
-						+ "`sms`.CMP_Keyword, `sms`.CMP_SKeyword, "//1
-						+ "`sms`.price as 'sms_price', "//2
-						+ "sms.id as 'serviceid', "//3
-						+ "`sms`.`split_mt` as 'split_mt', "//4
-						+ "`sms`.`event_type` as 'event_type', "//5
-						+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//6
-						+ "FROM `"+database+"`.`sms_service` sms LEFT JOIN `"+database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.cmd='DEFAULT' AND sms.enabled=1 AND mop.shortcode=?");
-				
-				qry2.setParameter(1,mo.getSMS_SourceAddr());
-				
-				List<Object[]> resp2 = qry.getResultList();
-				
-				if(resp2.size()>0){
-					
-					for(Object[] o: resp2){
-						/*mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-						mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-						mo.setServiceid(rs.getInt("serviceid"));
-						mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-						mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
-						mo.setSplit_msg(rs.getBoolean("split_mt"));
-						mo.setPricePointKeyword(rs.getString("price_point_keyword"));
-						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));*/
-						mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
-						mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
-						mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
-						mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
-						mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
-						mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
-						mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
-						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
-					}
-				
-				}
-				
-				
-			}
-		
-		} catch (Exception e) {
-			logger.error(e);
-		}finally{
-			
-		}
-		
-		
-		return mo;
-	}
-	
-	
-	
-
 	public String replaceAllIllegalCharacters(String text){
 		
 		if(text==null)

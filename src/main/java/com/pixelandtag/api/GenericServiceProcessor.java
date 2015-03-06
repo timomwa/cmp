@@ -1,6 +1,7 @@
 package com.pixelandtag.api;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -205,7 +206,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(Long.valueOf(mo_.getCMP_Txid()));
+		billable.setCp_tx_id(mo_.getCMP_Txid());
 		billable.setDiscount_applied("0");
 		billable.setEvent_type(mo_.getEventType());
 		billable.setIn_outgoing_queue(0l);
@@ -220,7 +221,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setRetry_count(0L);
 		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo_.getSMS_SourceAddr());		
-		billable.setTx_id(Long.valueOf(mo_.getCMP_Txid()));
+		billable.setTx_id(mo_.getCMP_Txid());
 		billable.setEvent_type(mo_.getEventType()!=null ? mo_.getEventType() : EventType.SUBSCRIPTION_PURCHASE);
 		billable.setPricePointKeyword(mo_.getPricePointKeyword());
 		logger.debug(" before save "+billable.getId());
@@ -494,7 +495,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 					
 					acknowledge(mo.getId());
 					
-					if(!(mo.getCMP_Txid()==-1)){
+					if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 						
 						setBusy(true);//set to busy so that it's not picked from the pool.
 					
@@ -634,7 +635,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			int max_retry = 5;
 			int count = 0;
 			
-			if(!(mo.getCMP_Txid()==-1)){
+			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 			
 				//pstmt = conn.prepareStatement(SEND_MT_1, Statement.RETURN_GENERATED_KEYS);
 				boolean success = cmpBean.sendMT(mo,SEND_MT_1);

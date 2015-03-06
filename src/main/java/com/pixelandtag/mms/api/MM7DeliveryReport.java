@@ -2,6 +2,7 @@ package com.pixelandtag.mms.api;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Iterator;
 
 import javax.xml.soap.Detail;
@@ -43,7 +44,7 @@ public class MM7DeliveryReport extends GenericMessage implements Serializable {
 		}else{
 			
 			String transactionID = header.getTextContent();
-			this.setCMP_Txid(Long.valueOf(header.getTextContent()));
+			this.setCMP_Txid(new BigInteger(header.getTextContent()));
 			//System.out.println("header.getTextContent(): "+header.getTextContent());
 			
 			

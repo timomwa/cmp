@@ -2,6 +2,7 @@ package com.pixelandtag.sms.producerthreads;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -132,10 +133,10 @@ public class Billable implements Serializable {
 	
 	@Column(name = "cp_tx_id", unique=true)
 	@Index(name="cp_idtxid_idx")
-	private Long cp_tx_id;
+	private BigInteger cp_tx_id;
 	
 	@Column(name = "tx_id")
-	private Long tx_id;
+	private BigInteger tx_id;
 	
 	@Column(name = "processed")
 	@Index(name="processed_idx")
@@ -290,19 +291,19 @@ public class Billable implements Serializable {
 		this.discount_applied = discount_applied;
 	}
 
-	public long getCp_tx_id() {
+	public BigInteger getCp_tx_id() {
 		return cp_tx_id;
 	}
 
-	public void setCp_tx_id(long cp_tx_id) {
+	public void setCp_tx_id(BigInteger cp_tx_id) {
 		this.cp_tx_id = cp_tx_id;
 	}
 
-	public Long getTx_id() {
+	public BigInteger getTx_id() {
 		return tx_id;
 	}
 
-	public void setTx_id(long tx_id) {
+	public void setTx_id(BigInteger tx_id) {
 		this.tx_id = tx_id;
 	}
 

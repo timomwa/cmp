@@ -53,7 +53,8 @@ var TRIVIA = {
 							"<th scope='col'>MO_Received</th>" +
 							"<th scope='col'>MT_Sent</th>" +
 							"<th scope='col'>MT_STATUS</th>" +
-							"<th scope='col'>dlrArrive</th></TR></TABLE>");
+							"<th scope='col'>dlrArrive</th>" +
+							"<th scope='col'>source</th></TR></TABLE>");
 					
 					TRIVIA.statsdiv.html("");
 					TRIVIA.statsdiv.css('width','90%');
@@ -76,8 +77,9 @@ var TRIVIA = {
 							var MT_Sent =  unescape(data.MT_Sent[b]);
 							var MT_STATUS =  unescape(data.MT_STATUS[b]);
 							var dlrArrive =  unescape(data.dlrArrive[b]);
+							var source = unescape(data.source[b]);
 							
-							
+							var spanC = (source == 'ussd') ? "red" : "green";
 							table.append($("<TR>" +
 							"<TD>"+CMP_Txid+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
@@ -85,7 +87,8 @@ var TRIVIA = {
 							"<TD>"+MO_Received+"</TD>" +
 							"<TD>"+MT_Sent+"</TD>" +
 							"<TD>"+MT_STATUS+"</TD>" +
-							"<TD>"+dlrArrive+"</TD></TR>"));
+							"<TD>"+dlrArrive+"</TD>" +
+							"<TD><span class='"+spanC+"'>"+source+"</span></TD></TR>"));
 							
 							//TRIVIA.statsdiv.append("<span class='lefters'>"+statusCode+" = "+count+" </span><br/>");
 							

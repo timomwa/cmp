@@ -1,5 +1,7 @@
 package com.pixelandtag.mms.apiImpl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -121,7 +123,7 @@ public class MMSApiImpl implements MM7Api {
 			if(rs.next()){
 				mms = new MMS();
 				mms.setId(rs.getString("id"));
-				mms.setCMP_Txid(Long.valueOf(rs.getString("txID")));
+				mms.setCMP_Txid(new BigInteger(rs.getString("txID")));
 				mms.setMsisdn(rs.getString("msisdn"));
 				mms.setSubject(rs.getString("subject"));
 				mms.setMms_text(rs.getString("mms_text"));
@@ -574,7 +576,7 @@ public class MMSApiImpl implements MM7Api {
 				
 				pstmt.setString(1, report.getStatusText()+"_"+report.getStatusCode());
 				
-				pstmt.setLong(2, report.getCMP_Txid());
+				pstmt.setBigDecimal(2, new BigDecimal(report.getCMP_Txid()));
 				
 				success = pstmt.executeUpdate()>0;
 				

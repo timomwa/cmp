@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.Subscription;
@@ -29,6 +30,9 @@ public interface BaseEntityI {
 	public Billable charge(Billable billable) throws Exception;
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception;
 	public SMSService getSMSService(String cmd)  throws Exception;
+	public void logMO(MOSms mo) throws TransactionIDGenException;
+	public String replaceAllIllegalCharacters(String text);
+	public MOSms resolveKeywords(MOSms mo);
 
 
 }

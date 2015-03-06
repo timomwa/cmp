@@ -1,5 +1,7 @@
 package com.pixelandtag.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1514,7 +1516,7 @@ public class UtilCelcom {
 			try {
 				pstmt = conn.prepareStatement("INSERT INTO `voucher_system`.`unprocessed_participant_batch`(`msisdn`,`cmp_txid_fk`) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
 				pstmt.setString(1, mt.getMsisdn());
-				pstmt.setLong(2, mt.getCMP_Txid());
+				pstmt.setBigDecimal(2, new BigDecimal(mt.getCMP_Txid()));
 				pstmt.executeUpdate();
 				
 			} catch (Exception e) {
