@@ -844,14 +844,15 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	@SuppressWarnings("unchecked")
-	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id) throws Exception{
+	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id, int menuid) throws Exception{
 		
 		MenuItem menuItem = null;
 		try{
-			String GET_TOP_MENU = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE parent_level_id=? AND language_id=? and visible=1";
+			String GET_TOP_MENU = "SELECT * FROM `"+CelcomImpl.database+"`.`smsmenu_levels` WHERE parent_level_id=? AND language_id=? and menu_id=? and visible=1";
 			Query qry = em.createNativeQuery(GET_TOP_MENU);
 			qry.setParameter(1, parent_level_id);
 			qry.setParameter(2, language_id);
+			qry.setParameter(3, menuid);
 			
 			List<Object[]> rs = qry.getResultList();
 			
@@ -866,7 +867,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					topMenus = new LinkedHashMap<Integer, MenuItem>();
 				}
 				mi = new MenuItem();
-				mi.setId((Integer) o[0]);
+				mi.setId(((Integer) o[0]).intValue());
 				mi.setName((String) o[1]);
 				mi.setLanguage_id((Integer) o[2]);
 				mi.setParent_level_id((Integer) o[3]);
@@ -2104,6 +2105,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			String second_keyword = null;
 			
 			String KEYWORD = req.getKeyword().trim().toUpperCase();
+			if(req.getMediumType() == MediumType.ussd){
+				KEYWORD = req.getMsg().replaceAll(req.getCode(), "");
+			}
 			final String MSISDN = req.getMsisdn();
 			int chosen = -1;
 			boolean kw_is_digit = false;
@@ -2162,7 +2166,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 			}
 					
-					logger.debug(" GUGAMUG second_keyword : = "+second_keyword);
+					logger.info("\t\t GUGAMUG second_keyword : = "+second_keyword);
 					
 					
 					
@@ -2177,15 +2181,16 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					
 					//conn = getCon();
 					
-					logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
-					logger.info(" MSG ::::::::::::::::::::::::: ["+msg+"]");
-					logger.info(" THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
+					logger.info("\t\t KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
+					logger.info("\t\t MSG ::::::::::::::::::::::::: ["+msg+"]");
+					logger.info("\t\t THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
 					
 					USSDSession sess = getSession(req.getSessionid(),MSISDN);
 					
 					int smsmenu_level_id_fk = -1;
 					
 					int language_id = 1;// default language is always 1 
+					int menuid = req.getMediumType()==MediumType.ussd ? 2 : 1;//first menu is always default
 					
 					if(sess!=null){
 						smsmenu_level_id_fk = sess.getSmsmenu_levels_id_fk().intValue();
@@ -2203,36 +2208,44 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					}
 					
 					
-					logger.debug("session :: "+sess);
-					logger.debug("smsmenu_level_id_fk :: "+smsmenu_level_id_fk);
-					logger.debug("language_id :: "+language_id);
+					logger.info("\t\tsession :: "+sess);
+					logger.info("\t\tsmsmenu_level_id_fk :: "+smsmenu_level_id_fk);
+					logger.info("\t\tlanguage_id :: "+language_id);
+					logger.info("\t\tmenuid :: "+menuid);
 					
 					MenuItem current_menu = null;
 					
 					if((smsmenu_level_id_fk>-1) && (language_id >-1))
 						current_menu = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
 					else
-						current_menu = getMenuByParentLevelId(language_id,smsmenu_level_id_fk);//get root menu
+						current_menu = getMenuByParentLevelId(language_id,smsmenu_level_id_fk,menuid);//get root menu
 					
 					logger.info("FROM SESSION___________________________"+current_menu);
 					
 					
-					if(KEYWORD.equalsIgnoreCase("") || KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
+					if( (KEYWORD.contains("*") && (req.getMediumType()==MediumType.ussd)) ){
+					
+						updateSession(language_id,MSISDN, current_menu.getMenu_id(),sess,current_menu.getParent_level_id(),req.getSessionid());//update session to upper menu.
+						resp = current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> "+resp);
+						return resp;
+						
+					}else if(KEYWORD.equalsIgnoreCase("") || KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
 						
 						updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
 						resp = item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("#")){
 						
 						updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
 						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("0")){
 						
 						updateSession(language_id, MSISDN, -1,sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-						MenuItem item = getMenuByParentLevelId(language_id,-1);
+						MenuItem item = getMenuByParentLevelId(language_id,-1,menuid);
 						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("GIFT") || KEYWORD.equalsIgnoreCase("HIDIAH") || KEYWORD.equalsIgnoreCase("HADIAH")){
@@ -2279,9 +2292,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
 									logger.debug("Checking if submenu has got other menus in it... >>>> "+entry.getKey()+ ". "+entry.getValue().toString());
 									
-									if(entry.getValue().getService_id()==-1)
-									submenus_have_sub_menus = true;
-									break;
+									if(entry.getValue().getService_id()==-1){
+										submenus_have_sub_menus = true;
+										break;
+									}
 								}
 								
 								
@@ -2315,7 +2329,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							if(submenus_have_sub_menus){
 								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
 							}else{
-								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//advice on how to subscribe
+								SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getId()+""));
+								System.out.println("\n\n\n\t\t\t1. smsserv.toString()::::::::::::::::::>>>>>>>>>>>>>>>>>"+smsserv );
+								subscribe(MSISDN, smsserv, chosenMenu.getId());
 							}
 							
 							return resp;
@@ -2333,6 +2350,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								else
 									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
 							}else{
+								
+								if(req.getMediumType() == MediumType.ussd){
+									
+									SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getService_id()+""));
+									System.out.println("\n\n\n\t\t\t1. smsserv ::::::::::::::::::>>>>>>>>>>>>>>>>>"+smsserv );
+									subscribe(MSISDN, smsserv, chosenMenu.getId());
+									
+									
+									final com.pixelandtag.subscription.dto.SubscriptionDTO subdto = getSubscriptionDTO(MSISDN, chosenMenu.getService_id());
+									
+									System.out.println("\n\n\n\n\n\n:::::::::::::::::: chosenMenu "+chosenMenu);
+									
+									
+									
+								}
 								
 								//chosenMenu = menu_controller.getMenuById(current_menu.getId(), conn);//Get the current menu itself
 								logger.debug("\n\n\n*******************************8\nRTFM subscriber!! You should reply with <ON No.> for example ON "+chosen+" !!! \n*******************************8\n\n\n\n" );
@@ -2643,6 +2675,30 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 		return resp;
 		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public SMSMenuLevels getMenuItemFromUSSDTag(String ussdTag) throws Exception{
+		SMSMenuLevels smLevels = null;
+		Query qry = em.createQuery("from SMSMenuLevels sm WHERE sm.ussdTag=:ussdTag");
+		qry.setParameter("ussdTag", ussdTag);
+		List<SMSMenuLevels> lvs = qry.getResultList();
+		if(lvs.size()>0)
+			smLevels = lvs.get(0);
+		return smLevels;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public int getMenuIdFromUSSDTag(String ussdTag) throws Exception{
+		int smLevels = 1;
+		Query qry = em.createQuery("from SMSMenuLevels sm WHERE sm.ussdTag=:ussdTag");
+		qry.setParameter("ussdTag", ussdTag);
+		List<SMSMenuLevels> lvs = qry.getResultList();
+		if(lvs.size()>0)
+			smLevels = lvs.get(0).getMenu_id().intValue();
+		
+		System.out.println("\n\n\n\t\t\t getMenuIdFromUSSDTag(String) smLevels =="+smLevels);
+		return smLevels;
 	}
 	
 	private void updateSession(int language_id, String msisdn,

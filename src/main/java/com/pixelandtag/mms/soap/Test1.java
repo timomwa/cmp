@@ -71,6 +71,13 @@ public class Test1 {
 	 */
 	public static void main(String[] args) throws Exception {
 		
+		String KEYWORD = "*100";
+		
+		System.out.println(KEYWORD.contains("*"));
+		
+		if(true)
+			return;
+		
 		String text = "".split("[\\s]")[0].toUpperCase();
 		text = text.replaceAll("[\\r]", "");
 		text = text.replaceAll("[\\n]", "");

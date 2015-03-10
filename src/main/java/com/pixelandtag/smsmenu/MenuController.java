@@ -33,8 +33,8 @@ public class MenuController {
 	 * @return
 	 * @throws Exception 
 	 */
-	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id) throws Exception{
-		return cmpbean.getMenuByParentLevelId(language_id, parent_level_id);
+	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id,int menuid) throws Exception{
+		return cmpbean.getMenuByParentLevelId(language_id, parent_level_id,menuid);
 	}
 	
 	

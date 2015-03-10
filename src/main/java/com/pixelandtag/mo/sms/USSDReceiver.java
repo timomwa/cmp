@@ -51,14 +51,12 @@ public class USSDReceiver extends HttpServlet {
 	private final String CLIENT_TIMEZONE = "+03:00";
 
 	
-	//@EJB
-	//private CMPResourceBeanRemote cmpBean;
+	@EJB
+	private CMPResourceBeanRemote cmpBean;
 	
 	@EJB
 	private DatingServiceI datingBean;
 
-	//private final int INITIAL_CONNECTIONS = 10;
-	//private final int MAX_CONNECTIONS = 50;
 
 	/**
 	 * 
@@ -107,8 +105,13 @@ public class USSDReceiver extends HttpServlet {
 			
 			ro.setMediumType(MediumType.ussd);
 			
-			String response = datingBean.processDating(ro);//cmpBean.processUSSD(ro);
+			String response =""; 
 			
+			///if(ro.getMsg().startsWith(ro.getCode())){
+				response = cmpBean.processUSSD(ro);
+			//}else{
+			//	response = datingBean.processDating(ro);//cmpBean.processUSSD(ro);
+			//}
 			pw.write(response);
 			
 			

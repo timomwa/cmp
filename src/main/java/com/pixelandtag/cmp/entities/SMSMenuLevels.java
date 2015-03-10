@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.entities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -9,9 +10,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Index;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +24,11 @@ import org.json.JSONObject;
 @Table(name = "smsmenu_levels")
 public class SMSMenuLevels implements Serializable{
 
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4735063375711392570L;
 
 	@Transient
 	private List<SMSMenuLevels> children = new ArrayList<SMSMenuLevels>();
@@ -45,6 +54,10 @@ public class SMSMenuLevels implements Serializable{
 	
 	@Column(name="visible")
 	private Boolean visible;
+	
+	@Column(name="ussdTag")
+	@Index(name="ussdtgidx")
+	private String ussdTag = "";
 
 	public Long getId() {
 		return id;
@@ -112,6 +125,22 @@ public class SMSMenuLevels implements Serializable{
 		this.children = children;
 	}
 
+	public String getUssdTag() {
+		return ussdTag;
+	}
+
+	public void setUssdTag(String ussdTag) {
+		this.ussdTag = ussdTag;
+	}
+	
+	@PrePersist
+	@PreUpdate
+	public void onCreate(){
+		if(ussdTag==null)
+			ussdTag = "";
+	}
+	
+	
 	public JSONObject toJson() throws JSONException{
 		JSONObject obj = new JSONObject();
 		obj.put("id", getId());
@@ -121,6 +150,7 @@ public class SMSMenuLevels implements Serializable{
 		obj.put("menu_id", getMenu_id());
 		obj.put("serviceid", getServiceid());
 		obj.put("visible", getVisible());
+		obj.put("ussdTag", getUssdTag());
 		JSONArray jsar = new JSONArray();
 		for(SMSMenuLevels chld : children){
 			JSONObject childrn = new JSONObject();
@@ -131,6 +161,7 @@ public class SMSMenuLevels implements Serializable{
 			childrn.put("menu_id", chld.getMenu_id());
 			childrn.put("serviceid", chld.getServiceid());
 			childrn.put("visible", chld.getVisible());
+			childrn.put("ussdTag", chld.getUssdTag());
 			jsar.put(childrn);
 		}
 		obj.put("children", jsar);

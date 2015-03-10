@@ -105,7 +105,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public boolean deleteOldLogs() throws Exception;
 
-	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id)  throws Exception;
+	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id, int menuid)  throws Exception;
 
 	public MenuItem getTopMenu(int menu_id, int language_id)  throws Exception;
 

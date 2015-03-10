@@ -240,7 +240,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				//language_id = UtilCelcom.getSubscriberLanguage(mo.getMsisdn(), conn);//get from db
 			}
 			
-			
+			int menuid = 1;
 			mo_processor_logger.debug("session :: "+sess);
 			mo_processor_logger.debug("smsmenu_level_id_fk :: "+smsmenu_level_id_fk);
 			mo_processor_logger.debug("language_id :: "+language_id);
@@ -250,27 +250,27 @@ public class MoreProcessor extends GenericServiceProcessor {
 			if(smsmenu_level_id_fk>-1)
 				current_menu = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
 			else
-				current_menu = menu_controller.getMenuByParentLevelId(language_id,smsmenu_level_id_fk);//get root menu
+				current_menu = menu_controller.getMenuByParentLevelId(language_id,smsmenu_level_id_fk,menuid);//get root menu
 			
 			mo_processor_logger.info("FROM SESSION___________________________"+current_menu);
 			
 			if(KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
 				
 				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
-				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
 				//mo.setMt_Sent(item.enumerate()+UtilCelcom.getMessage(MAIN_MENU_ADVICE, conn, language_id));//get all the sub menus there.
 				mo.setMt_Sent(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE,language_id));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("#")){
 				
 				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
-				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id());
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
 				mo.setMt_Sent(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("0")){
 				
 				menu_controller.updateSession(language_id, MSISDN, -1);//update session to upper menu.
-				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,-1);
+				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,-1,menuid);
 				mo.setMt_Sent(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("GIFT") || KEYWORD.equalsIgnoreCase("HIDIAH") || KEYWORD.equalsIgnoreCase("HADIAH")){
