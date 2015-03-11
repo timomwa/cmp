@@ -293,8 +293,12 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter("msisdn", msisdn);
 			qry.setParameter("serviceid", serviceid);
 			List<Subscription> sublist = qry.getResultList();
-			if(sublist.size()>0)
-				subValid = true;
+			if(sublist.size()>0){
+				Subscription s = sublist.get(0);
+				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
+				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
+				subValid = (s.getSubscription_status() == SubscriptionStatus.confirmed);
+			}
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 			return false;

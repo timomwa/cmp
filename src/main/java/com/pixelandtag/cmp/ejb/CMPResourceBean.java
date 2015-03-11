@@ -2359,7 +2359,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								
 								System.out.println("\n\n\n\t\t\t chosenMenu.getService_id() ::::::::::::::::::>>>>>>>>>>>>>>>>>"+chosenMenu.getService_id() );
 								System.out.println("\n\n\n\t\t\t1. smsserv ::::::::::::::::::>>>>>>>>>>>>>>>>>"+smsserv );
-								subscribe(MSISDN, smsserv, chosenMenu.getId());
+								//subscribe(MSISDN, smsserv, chosenMenu.getId());
 								
 								
 								MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);

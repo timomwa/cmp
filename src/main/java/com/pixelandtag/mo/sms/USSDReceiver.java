@@ -139,7 +139,7 @@ public class USSDReceiver extends HttpServlet {
 			if(response.equals("")){//if profile isn't complete, we try complete it
 				PersonDatingProfile prof  = datingBean.getProfile(p);
 				if(!prof.getProfileComplete())
-					datingBean.processDating(ro);
+				 response = datingBean.processDating(ro);
 			}
 			
 			if(response.equals("")){//we assume they want to renew subscription
