@@ -319,9 +319,36 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					person.setActive(true);
 					profile.setPerson(person);
 					
-					SMSService smsservice = getSMSService("DATE");
+					/*	SMSService smsserv = getSMSService("BILLING_SERV5");
+					Long processor_fk = smsserv.getMo_processorFK();
+					MOProcessorE proc = find(MOProcessorE.class, processor_fk);
 					
-					renewSubscription(MSISDN, smsservice);
+					if(smsserv!=null && processor_fk!=null && proc!=null){//Mimic MO billing
+						MOSms mo = new MOSms();
+						mo.setMsisdn(MSISDN);
+						mo.setPrice(new BigDecimal(smsserv.getPrice()));
+						mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+						mo.setMt_Sent(smsserv.getCmd());
+						mo.set
+						mo.setServiceid(smsserv.getId().intValue());
+						mo.setProcessor_id(processor_fk.intValue());
+						mo.setSMS_SourceAddr(proc.getShortcode());
+						mo.setPriority(0);
+						mo.setCMP_AKeyword(smsserv.getCmd());
+						mo.setCMP_SKeyword(smsserv.getCmd());
+						
+						if(req.getTransactionID().compareTo(BigInteger.ONE)>0)
+							mo.setCMP_Txid(req.getTransactionID());
+						else
+							mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+						
+						mo.setSplit_msg(false);
+						mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+						mo.setSubscription(false);
+						
+						sendMT(mo);
+					}*/
+					//renewSubscription(MSISDN, smsservice);
 				}
 				
 				profile = saveOrUpdate(profile);

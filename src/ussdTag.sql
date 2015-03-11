@@ -24,3 +24,10 @@ delete from dating_person where msisdn='254735594326';
 delete from subscription  where msisdn='254735594326';
 
 
+UPDATE `pixeland_content360`.`message` SET `message`='Sorry <USERNAME>. Please top up & renew your <SERVICE_NAME> subscription to continue chatting with <DEST_USERNAME>. Dial *329# to subscribe to chat bundles.' WHERE `id`='41';
+UPDATE `pixeland_content360`.`message` SET `message`='Sorry <USERNAME>. Please top up & renew your <SERVICE_NAME> subscription to continue chatting with <DEST_USERNAME>. Dial *329# to subscribe to chat bundles.' WHERE `id`='42';
+UPDATE `pixeland_content360`.`message` SET `message`='Sorry, Please renew your subscription to continue enjoying enjoying the service. Dial *329# to purchase chat bundle.' WHERE `id`='37';
+UPDATE `pixeland_content360`.`message` SET `message`='Sorry, Please renew your subscription to continue enjoying enjoying the service. Dial *329# to purchase chat bundle.' WHERE `id`='38';
+
+
+
