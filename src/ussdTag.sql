@@ -18,3 +18,9 @@ INSERT INTO `pixeland_content360`.`sms_service` (`mo_processorFK`, `cmd`, `push_
 UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`='442' WHERE `id`='152';
 
 
+
+delete from dating_profile where person_id_fk = (select id from dating_person where msisdn='254735594326');
+delete from dating_person where msisdn='254735594326';
+delete from subscription  where msisdn='254735594326';
+
+
