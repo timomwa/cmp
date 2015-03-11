@@ -65,7 +65,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			KeyStoreException {
 		super();
 	}
-
+	
 	public String processDating(RequestObject ro) throws Exception{
 		
 		String resp = "Request received.";
@@ -899,6 +899,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(qry.getResultList().size()>0)
 				isunique = false;
 			
+			qry = em.createQuery("from DisallowedWords WHERE word=:username");
+			qry.setParameter("username", username);
+			if(qry.getResultList().size()>0)
+				isunique = false;
+			
 		}catch(javax.persistence.NoResultException ex){
 			logger.warn(ex.getMessage() + " no PersonDatingProfile found with the username "+username);
 			return isunique;
@@ -1056,10 +1061,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setPriority(0l);
 		billable.setProcessed(0L);
 		billable.setRetry_count(0L);
-		billable.setService_id(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		if(mo.getServiceid()>0)
+			billable.setService_id(mo.getServiceid()+"");
+		else
+			billable.setService_id(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo.getSMS_SourceAddr());		
 		billable.setTx_id(mo.getCMP_Txid());
-		billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
+		billable.setEvent_type((mo.getEventType()!=null ? mo.getEventType() :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(mo.getPricePointKeyword());
 			
 		return billable;

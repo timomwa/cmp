@@ -1,6 +1,7 @@
 package com.pixelandtag.cmp.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +10,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import org.json.JSONException;
@@ -23,6 +26,7 @@ public class SMSService implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	
 	
 	
 	@Column(name="mo_processorFK")
@@ -75,6 +79,23 @@ public class SMSService implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private TimeUnit subscription_length_time_unit;
 
+	
+	/**
+	 * When we want a service to just
+	 * do the billing, we state the delegateFor
+	 * This works where sms services
+	 * are just billing points as opposed to
+	 * actual services one can subscribe to
+	 * due to lack of time
+	 * we use this method before we get 
+	 * a proper subscription service in
+	 * place.
+	 */
+	@Column(name="isjustAPricePoint")
+	private Boolean isjustAPricePoint;
+	
+	
+	
 	public Long getId() {
 		return id;
 	}
@@ -210,6 +231,26 @@ public class SMSService implements Serializable {
 	public void setSubscription_length_time_unit(
 			TimeUnit subscription_length_time_unit) {
 		this.subscription_length_time_unit = subscription_length_time_unit;
+	}
+
+	
+
+	public Boolean getIsjustAPricePoint() {
+		if(isjustAPricePoint==null)
+			return Boolean.FALSE;
+		return isjustAPricePoint;
+	}
+
+	public void setIsjustAPricePoint(Boolean isjustAPricePoint) {
+		this.isjustAPricePoint = isjustAPricePoint;
+	}
+	
+	
+	@PrePersist
+	@PreUpdate
+	public void onCreate(){
+		if(isjustAPricePoint==null)
+			isjustAPricePoint = new Boolean(false);
 	}
 
 	public JSONObject toJson(){

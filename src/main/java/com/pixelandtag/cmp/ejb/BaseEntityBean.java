@@ -91,6 +91,22 @@ public class BaseEntityBean implements BaseEntityI {
             return true;
         }
     };
+    
+    public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception{
+		
+		boolean isAtive = false;
+		
+		if(msisdn==null || services==null || services.size()<1 )
+			return false;
+		
+		for(String kwd: services){
+			SMSService smsservice = getSMSService(kwd);
+			if(subscriptionValid(msisdn, smsservice.getId()))
+				return true;
+			
+		}
+		return isAtive;
+	}
     @SuppressWarnings("unchecked")
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
 		Subscription sub = null;
@@ -669,7 +685,7 @@ public class BaseEntityBean implements BaseEntityI {
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void logMO(MOSms mo) throws TransactionIDGenException{
+	public MOSms logMO(MOSms mo) throws TransactionIDGenException{
 		
 		logger.debug("LOGGING_MO_CELCOM_");
 		
@@ -733,8 +749,24 @@ public class BaseEntityBean implements BaseEntityI {
 			logger.info("::::::::::::::::::: mo.getEventType(): "+ mo.getEventType());
 			
 			
+			
+			
 			qry.executeUpdate();
 			utx.commit();
+			
+			try{
+				
+				Query qry2 = em.createNativeQuery("SELECT id FROM `"+CelcomImpl.database+"`.`messagelog` WHERE  CMP_Txid=?");
+				qry2.setParameter(1, mo.getCMP_Txid().toString());
+				Object o = qry2.getSingleResult();
+				Long l   =  ((BigInteger) o).longValue();
+				mo.setId(l.longValue());
+				
+			}catch(javax.persistence.NoResultException nre){
+				logger.warn(nre.getMessage(), nre);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+			}
 			
 		} catch (Exception e) {
 			try{
@@ -744,6 +776,8 @@ public class BaseEntityBean implements BaseEntityI {
 		}finally{
 			
 		}
+		
+		return mo;
 		
 	}
 	
@@ -788,9 +822,9 @@ public class BaseEntityBean implements BaseEntityI {
 				for(Object[] o: resp){
 					mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
 					mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
-					mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
-					mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
-					mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+					mo.setServiceid( ((Integer)o[4]).intValue());//rs.getInt("serviceid"));
+					mo.setPrice(BigDecimal.valueOf((Double)o[3]));//BigDecimal.valueOf(rs.getDouble("sms_price")));
+					mo.setProcessor_id(((Integer)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
 					mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
 					mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
 					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));

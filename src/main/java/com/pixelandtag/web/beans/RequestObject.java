@@ -33,6 +33,7 @@ public class RequestObject implements Serializable{
 	private static final long serialVersionUID = -697978310928640125L;
 	private String lac,code, location,cellid,telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
 	private int serviceid = -1;
+	private Long messageId;
 	private BigInteger transactionID = null;
 	private BigInteger sessionid = null;
 	private MediumType mediumType;
@@ -432,6 +433,12 @@ public class RequestObject implements Serializable{
 
 	public void setMediumType(MediumType mediumType) {
 		this.mediumType = mediumType;
+	}
+	public Long getMessageId() {
+		return messageId;
+	}
+	public void setMessageId(Long messageId) {
+		this.messageId = messageId;
 	}
 
 	

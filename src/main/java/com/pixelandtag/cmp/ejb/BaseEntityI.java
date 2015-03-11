@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.ejb;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -30,9 +31,10 @@ public interface BaseEntityI {
 	public Billable charge(Billable billable) throws Exception;
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception;
 	public SMSService getSMSService(String cmd)  throws Exception;
-	public void logMO(MOSms mo) throws TransactionIDGenException;
+	public MOSms logMO(MOSms mo) throws TransactionIDGenException;
 	public String replaceAllIllegalCharacters(String text);
 	public MOSms resolveKeywords(MOSms mo);
+	public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception;
 
 
 }

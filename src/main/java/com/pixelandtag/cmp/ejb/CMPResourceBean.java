@@ -55,6 +55,7 @@ import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.mo.MOProcessor;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
@@ -2351,29 +2352,54 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
 							}else{
 								
-								if(req.getMediumType() == MediumType.ussd){
-									
-									SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getService_id()+""));
-									System.out.println("\n\n\n\t\t\t1. smsserv ::::::::::::::::::>>>>>>>>>>>>>>>>>"+smsserv );
-									subscribe(MSISDN, smsserv, chosenMenu.getId());
-									
-									
-									final com.pixelandtag.subscription.dto.SubscriptionDTO subdto = getSubscriptionDTO(MSISDN, chosenMenu.getService_id());
-									
-									System.out.println("\n\n\n\n\n\n:::::::::::::::::: chosenMenu "+chosenMenu);
-									
-									
-									
+								//Subscription subscr = getSubscription(MSISDN,Long.valueOf(chosenMenu.getService_id()));
+								SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getService_id()+""));
+								Long processor_fk = smsserv.getMo_processorFK();
+								MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+								
+								System.out.println("\n\n\n\t\t\t chosenMenu.getService_id() ::::::::::::::::::>>>>>>>>>>>>>>>>>"+chosenMenu.getService_id() );
+								System.out.println("\n\n\n\t\t\t1. smsserv ::::::::::::::::::>>>>>>>>>>>>>>>>>"+smsserv );
+								subscribe(MSISDN, smsserv, chosenMenu.getId());
+								
+								
+								MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+								mosm_.setMsisdn(MSISDN);
+								mosm_.setServiceid(chosenMenu.getService_id());
+								mosm_.setSMS_Message_String(smsserv.getCmd());
+								mosm_.setSMS_SourceAddr(proc.getShortcode());
+								mosm_.setCMP_AKeyword(smsserv.getCmd());
+								mosm_.setCMP_SKeyword(smsserv.getCmd());
+								mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+								mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+								mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
+								mosm_.setServiceid(smsserv.getId().intValue());
+								mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
+								mosm_.setId(req.getMessageId());
+								
+
+								logMO(mosm_);
+								
+								if(smsserv.getCmd().equals("BILLING_SERV5")
+										||
+										smsserv.getCmd().equals("BILLING_SERV5")
+										||
+										smsserv.getCmd().equals("BILLING_SERV15")
+										||
+										smsserv.getCmd().equals("BILLING_SERV30")
+										||
+										smsserv.getCmd().equals("DATE")){
+									resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
+								}else if(smsserv.getCmd().equals("FIND")){
+									resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+								}else{
+									resp = "Request received and is being processed.";
 								}
 								
-								//chosenMenu = menu_controller.getMenuById(current_menu.getId(), conn);//Get the current menu itself
-								logger.debug("\n\n\n*******************************8\nRTFM subscriber!! You should reply with <ON No.> for example ON "+chosen+" !!! \n*******************************8\n\n\n\n" );
-								//mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+chosenMenu.enumerate()+UtilCelcom.getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, conn, language_id));//get all the sub menus there.
-								String msg2 = getMessage(MessageType.DOUBLE_CONFIRMATION_ADVICE, language_id);
-								msg2 = msg2.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
-								msg2 = msg2.replaceAll(GenericServiceProcessor.CHOSEN, String.valueOf(chosen));
-								resp = msg2;//get all the sub menus there.
-							
+								
+								
+								
+								
+								
 							}
 							
 							return resp;
@@ -2676,6 +2702,39 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return resp;
 		
 	}
+	
+	@SuppressWarnings("unchecked")
+	private Subscription getSubscription(String msisdn, Long serviceid) throws Exception{
+		Subscription subscr = null;
+		boolean subValid = false;
+		try{
+			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') ");
+			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("serviceid", serviceid);
+			List<Subscription> sublist = qry.getResultList();
+			if(sublist.size()>0)
+				subValid = true;
+			
+			
+			qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid");
+			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("serviceid", serviceid);
+			sublist = qry.getResultList();
+			if(sublist.size()>0){
+				subscr = sublist.get(0);
+				subscr.setValid(subValid);
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}
+		return subscr;
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	public SMSMenuLevels getMenuItemFromUSSDTag(String ussdTag) throws Exception{

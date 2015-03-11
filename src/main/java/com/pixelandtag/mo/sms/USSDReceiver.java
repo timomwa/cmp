@@ -2,9 +2,12 @@ package com.pixelandtag.mo.sms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.ejb.EJB;
 import javax.naming.Context;
@@ -23,8 +26,11 @@ import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
+import com.pixelandtag.dating.entities.Person;
+import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.util.StopWatch;
@@ -98,6 +104,7 @@ public class USSDReceiver extends HttpServlet {
 		watch.start();
 		
 		PrintWriter pw = resp.getWriter();
+		String response =""; 
 		
 		try{
 			
@@ -105,28 +112,45 @@ public class USSDReceiver extends HttpServlet {
 			
 			ro.setMediumType(MediumType.ussd);
 			
-			String response =""; 
-			
-			///if(ro.getMsg().startsWith(ro.getCode())){
-				response = cmpBean.processUSSD(ro);
-			//}else{
-			//	response = datingBean.processDating(ro);//cmpBean.processUSSD(ro);
-			//}
-			pw.write(response);
 			
 			
+			long messageID = -1;
 			try{
 				
 				final MOSms moMessage = new MOSms(req);
 				moMessage.setMediumType(MediumType.ussd);
 				moMessage.setMt_Sent(response);
-				datingBean.logMO(moMessage);
-			
+				messageID = datingBean.logMO(moMessage).getId();
+				ro.setMessageId(messageID);
+				
+				logger.info("\n\n\n\n\n\t\t\t GENERATED MESSAGE ID:::)()()()()()()()(() "+messageID);
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 			}
-		}catch(Exception e){
 			
+			
+			Person p = datingBean.getPerson(ro.getMsisdn());
+			
+			if(p==null || (p!=null && !p.getActive())){
+				response = datingBean.processDating(ro);
+			}
+			
+			
+			if(response.equals("")){//if profile isn't complete, we try complete it
+				PersonDatingProfile prof  = datingBean.getProfile(p);
+				if(!prof.getProfileComplete())
+					datingBean.processDating(ro);
+			}
+			
+			if(response.equals("")){//we assume they want to renew subscription
+					
+				response = cmpBean.processUSSD(ro);
+			}
+			
+			pw.write(response);
+			
+		}catch(Exception e){
+			pw.write("There was a problem processing your request. Kindly do try again minutes.");
 			logger.error(e.getMessage(),e);
 			try{
 				pw.close();

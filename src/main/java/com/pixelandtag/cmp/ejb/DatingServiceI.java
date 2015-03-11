@@ -3,6 +3,7 @@ package com.pixelandtag.cmp.ejb;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.Gender;

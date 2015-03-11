@@ -3,7 +3,9 @@ package com.pixelandtag.serviceprocessors.sms;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -137,16 +139,24 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				
 				
-			}else if(KEYWORD.equalsIgnoreCase("RENEW") || KEYWORD.equalsIgnoreCase("WEZESHA")){
+			}else if(KEYWORD.equalsIgnoreCase("RENEW") || KEYWORD.equalsIgnoreCase("WEZESHA") || KEYWORD.equalsIgnoreCase("BILLING_SERV5")
+					|| KEYWORD.equalsIgnoreCase("BILLING_SERV15")
+					|| KEYWORD.equalsIgnoreCase("BILLING_SERV30")){
 				
-				SMSService smsservice = datingBean.getSMSService("DATE");
+				SMSService smsservice0 = datingBean.getSMSService("DATE");
+				List<String> services = new ArrayList<String>();
+				services.add("BILLING_SERV5");
+				services.add("DATE");
+				services.add("BILLING_SERV15");
+				services.add("BILLING_SERV30");
 				
-				boolean subvalid = datingBean.subscriptionValid(MSISDN, smsservice.getId());
+				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
+				
 				
 				if(!subvalid){
 					
 					try{
-						mo = datingBean.renewSubscription(mo,smsservice.getId());
+						mo = datingBean.renewSubscription(mo,smsservice0.getId());
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
@@ -166,8 +176,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					mo.setPrice(BigDecimal.ZERO);
 					return mo;
 				}
-				SMSService smsservice = datingBean.getSMSService("DATE");
-				boolean subvalid = datingBean.subscriptionValid(MSISDN, smsservice.getId());
+				
+				List<String> services = new ArrayList<String>();
+				services.add("BILLING_SERV5");
+				services.add("DATE");
+				services.add("BILLING_SERV15");
+				services.add("BILLING_SERV30");
+				
+				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
+				
 				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
 					
 					mo = processDating(mo,person);

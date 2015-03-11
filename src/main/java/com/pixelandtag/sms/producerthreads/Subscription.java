@@ -15,6 +15,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
@@ -33,6 +34,8 @@ public class Subscription implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscription_status;
 	
+	@Transient
+	private boolean isValid;
 	
 	@Column(name="sms_service_id_fk")
 	@Index(name= "sms_service_idx")
@@ -158,6 +161,14 @@ public class Subscription implements Serializable {
 
 	public void setSubActive(Boolean subActive) {
 		this.subActive = subActive;
+	}
+
+	public boolean isValid() {
+		return isValid;
+	}
+
+	public void setValid(boolean isValid) {
+		this.isValid = isValid;
 	}
 	
 	
