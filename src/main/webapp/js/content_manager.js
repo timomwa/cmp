@@ -95,7 +95,7 @@ var keyords = new Ext.data.JsonStore({
 					}, {
 						name : 'price'
 					}, {
-						name : 'price_point_keyword'
+						name : 'price_point_keyword' 
 					}, {
 						name : 'enabled'
 					}, {
@@ -150,7 +150,7 @@ var myForm = Ext.get('keywords_combo');
 													displayField : 'cmd',
 													valueField : 'id',
 													anchor : '95%',
-													selectOnFocus:true,
+													selectOnFocus:true, 
 													listeners: {
 																	'select': function(cmb, rec, idx) {
 																		for(var k = 0; k<keyords.reader.jsonData.size;k++){

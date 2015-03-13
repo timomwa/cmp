@@ -84,7 +84,7 @@ public class MTProducer extends Thread {
 	private int pollWait;
 	private StopWatch watch;
 	private boolean run = true;
-	private URLParams urlparams;
+	private URLParams urlparams; 
 	public static CelcomHTTPAPI celcomAPI;
 	private Statement stmt = null;
 	private ResultSet rs = null;
