@@ -685,6 +685,46 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void updateMO(String msg, Long msgId) throws TransactionIDGenException{
+		try{
+			utx.begin();
+			Query qry2 = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog`  set MT_Sent=:sms WHERE  id=:id");
+			qry2.setParameter("sms", msg);
+			qry2.setParameter("id", msgId);
+			qry2.executeUpdate();
+			utx.commit();
+			
+		}catch(javax.persistence.NoResultException nre){
+			logger.warn(nre.getMessage(), nre);
+		}catch(Exception exp){
+			try{
+				utx.rollback();
+			}catch(Exception expz){}
+			logger.error(exp.getMessage(), exp);
+		}
+	}
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public MOSms updateMO(MOSms mo) throws TransactionIDGenException{
+		try{
+			utx.begin();
+			Query qry2 = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog`  set MT_Sent=? WHERE  id=?");
+			qry2.setParameter(1, mo.getMt_Sent());
+			qry2.setParameter(2, mo.getId());
+			qry2.executeUpdate();
+			utx.commit();
+			
+		}catch(javax.persistence.NoResultException nre){
+			logger.warn(nre.getMessage(), nre);
+		}catch(Exception exp){
+			try{
+				utx.rollback();
+			}catch(Exception expz){}
+			logger.error(exp.getMessage(), exp);
+		}
+		
+		return mo;
+	}
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
@@ -719,7 +759,7 @@ public class BaseEntityBean implements BaseEntityI {
 				
 			utx.begin();
 			Query qry = em.createNativeQuery("INSERT INTO `"+CelcomImpl.database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type,price_point_keyword,MT_Sent,source) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "); 
 			
 			logger.info("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
 			qry.setParameter(1, mo.getCMP_Txid().toString());

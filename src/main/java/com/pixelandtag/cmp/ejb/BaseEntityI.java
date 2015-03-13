@@ -35,6 +35,8 @@ public interface BaseEntityI {
 	public String replaceAllIllegalCharacters(String text);
 	public MOSms resolveKeywords(MOSms mo);
 	public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception;
+	public MOSms updateMO(MOSms mo) throws TransactionIDGenException;
+	public void updateMO(String msg, Long msgId) throws TransactionIDGenException;
 
 
 }

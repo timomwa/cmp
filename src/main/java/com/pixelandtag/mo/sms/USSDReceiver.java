@@ -116,6 +116,21 @@ public class USSDReceiver extends HttpServlet {
 			
 			long messageID = -1;
 			
+			final MOSms moMessage = new MOSms(req);
+			
+			try{
+				
+			
+				moMessage.setMediumType(MediumType.ussd);
+				moMessage.setMt_Sent(response);
+				messageID = datingBean.logMO(moMessage).getId();
+				ro.setMessageId(messageID);
+				
+				logger.info("\n\n\n\n\n\t\t\t GENERATED MESSAGE ID:::)()()()()()()()(() "+messageID);
+			}catch(Exception e){
+				logger.error(e.getMessage(),e);
+			}
+			
 			
 			Person p = datingBean.getPerson(ro.getMsisdn());
 			
@@ -136,15 +151,14 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			
+			
+
 			try{
 				
-				final MOSms moMessage = new MOSms(req);
-				moMessage.setMediumType(MediumType.ussd);
 				moMessage.setMt_Sent(response);
-				messageID = datingBean.logMO(moMessage).getId();
+				datingBean.updateMO(response,messageID);
 				ro.setMessageId(messageID);
 				
-				logger.info("\n\n\n\n\n\t\t\t GENERATED MESSAGE ID:::)()()()()()()()(() "+messageID);
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 			}

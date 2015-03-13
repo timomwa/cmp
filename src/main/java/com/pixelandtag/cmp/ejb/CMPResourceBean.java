@@ -2377,7 +2377,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								mosm_.setId(req.getMessageId());
 								
 
-								logMO(mosm_);
+								logMO(mosm_); 
 								
 								if(smsserv.getCmd().equals("BILLING_SERV5")
 										||
