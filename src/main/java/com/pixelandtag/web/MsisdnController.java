@@ -157,12 +157,25 @@ public class MsisdnController extends HttpServlet {
 			 
 			 date = requestJSON.getString("date").trim();
 			 
-			 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
-				
-			 ps.setString(1, msisdn);
-			 
-			 ps.setString(2, date);
-			 
+			 if(msisdn!=null && !msisdn.isEmpty()){
+				 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
+				 ps.setString(1, msisdn);
+				 ps.setString(2, date);
+			 }else{
+				 try{
+					 int limit = Integer.valueOf(date);
+					 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where date(timeStamp)=? order by timeStamp desc limit "+limit);
+					 
+				 }catch(NumberFormatException ex){
+					 
+					 try{
+						 ps.close();
+					 }catch(Exception exp){}
+					 
+					 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where date(timeStamp)=? order by timeStamp desc limit 50");
+					 ps.setString(1, date);
+				 }
+			 }
 			 rs = ps.executeQuery();
 			 
 			 
