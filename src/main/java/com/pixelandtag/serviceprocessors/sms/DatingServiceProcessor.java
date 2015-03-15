@@ -512,7 +512,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			PersonDatingProfile destination_person = datingBean.getperSonUsingChatName(KEYWORD);
 			
 			if(destination_person==null){//Is a direct message, so we get last person they sent a message to
-				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,30L,TimeUnit.MINUTE);//last 30 minutes
+				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.MINUTE);//last 30 minutes
 				if(destination_person!=null)
 					directMsg  = true;
 			}

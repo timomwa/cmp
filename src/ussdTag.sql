@@ -30,4 +30,42 @@ UPDATE `pixeland_content360`.`message` SET `message`='Sorry, Please renew your s
 UPDATE `pixeland_content360`.`message` SET `message`='Sorry, Please renew your subscription to continue enjoying enjoying the service. Dial *329# to purchase chat bundle.' WHERE `id`='38';
 
 
+insert into dating_disallowedwords select next_val+1,'I' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'AM' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'HE' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'SHE' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'AND' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'STOP' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'WHERE' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'WANT' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'UNSUBSCRIBED' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'ON' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'DATE' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'IUNSUBSCRIBED' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'HOW' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
 
