@@ -49,7 +49,7 @@ import org.w3c.dom.NodeList;
 
 public class BillingClass {
 
-	private static String xml  =  "" +
+	/*private static String xml  =  "" +
 		      "<soapenv:Envelope\r\n" +
 		      "xmlns:soapenv=" + 
 		      "\"http://schemas.xmlsoap.org/soap/envelope/\"\r\n" + 
@@ -61,13 +61,13 @@ public class BillingClass {
 		      "<inputMsg>\r\n" + 
 		      "<operation>debit</operation>\r\n" + 
 		      "<userId>254734252504</userId>\r\n" + 
-		      "<contentId>32329_JOBS</contentId>\r\n" + 
-		      "<itemName>32329_JOBS</itemName>\r\n" + 
-		      "<contentDescription>32329_JOBS</contentDescription>\r\n" +
+		      "<contentId>32329LOVECHAT</contentId>\r\n" + 
+		      "<itemName>32329LOVECHAT</itemName>\r\n" + 
+		      "<contentDescription>32329LOVECHAT</contentDescription>\r\n" +
 		     "<circleId></circleId>\r\n" +
 		      "<lineOfBusiness></lineOfBusiness>\r\n" + 
 		     "<customerSegment></customerSegment>\r\n" +
-		      "<contentMediaType>32329_JOBS</contentMediaType>\r\n" + 
+		      "<contentMediaType>32329LOVECHAT</contentMediaType>\r\n" + 
 		     "<serviceId>JOBS</serviceId>\r\n" + 
 		    "<parentId></parentId>\r\n" +
 		      "<actualPrice>5.0</actualPrice>\r\n" + 
@@ -78,7 +78,7 @@ public class BillingClass {
 		   "<netShare>0</netShare>\r\n" +
 		      "<cpId>CONTENT360_KE</cpId>\r\n" +
 		     "<customerClass></customerClass>\r\n" +
-		      "<eventType>SubscriptionOld Purchase</eventType>\r\n" +//very important
+		      "<eventType>Subscription Purchase</eventType>\r\n" +//very important
 		     "<localTimeStamp></localTimeStamp>\r\n" +
 		    "<transactionId>32329</transactionId>\r\n" +
 		   "<subscriptionTypeCode>abcd</subscriptionTypeCode>\r\n" +
@@ -98,8 +98,59 @@ public class BillingClass {
 		      "</inputMsg>\r\n" + 	      
 		      "</char:charge>\r\n" + 		      
 		      "</soapenv:Body>\r\n" +  
-		      "</soapenv:Envelope>\r\n";
+		      "</soapenv:Envelope>\r\n";*/
 
+	private static String xml  =  "" +
+		      "<soapenv:Envelope\r\n" +
+		      "xmlns:soapenv=" + 
+		      "\"http://schemas.xmlsoap.org/soap/envelope/\"\r\n" + 
+		      "xmlns:char=" + 
+		      "\"http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging\">\r\n" +  
+		      "<soapenv:Header />\r\n" + 
+		      "<soapenv:Body>\r\n" + 
+		      "<char:charge>\r\n" + 
+		      "<inputMsg>\r\n" + 
+		      "<operation>debit</operation>\r\n" + 
+		      "<userId>254734252504</userId>\r\n" + 
+		      "<contentId>32329LOVECHAT</contentId>\r\n" + 
+		      "<itemName>32329LOVECHAT</itemName>\r\n" + 
+		      "<contentDescription>32329LOVECHAT</contentDescription>\r\n" +
+		     "<circleId></circleId>\r\n" +
+		      "<lineOfBusiness></lineOfBusiness>\r\n" + 
+		     "<customerSegment></customerSegment>\r\n" +
+		      "<contentMediaType>32329LOVECHAT</contentMediaType>\r\n" + 
+		     "<serviceId>439</serviceId>\r\n" + 
+		    "<parentId></parentId>\r\n" +
+		      "<actualPrice>5.0</actualPrice>\r\n" + 
+		      "<basePrice>5.0</basePrice>\r\n" +
+		      "<discountApplied>0</discountApplied>\r\n" +
+		     "<paymentMethod></paymentMethod>\r\n" +
+		    "<revenuePercent></revenuePercent>\r\n" +
+		   "<netShare>0</netShare>\r\n" +
+		      "<cpId>CONTENT360_KE</cpId>\r\n" +
+		     "<customerClass></customerClass>\r\n" +
+		      "<eventType>Subscription Purchase</eventType>\r\n" +//very important
+		     "<localTimeStamp></localTimeStamp>\r\n" +
+		    "<transactionId>32329</transactionId>\r\n" +
+		   "<subscriptionTypeCode>abcd</subscriptionTypeCode>\r\n" +
+		  "<subscriptionName>0</subscriptionName>\r\n" +
+		 "<parentType></parentType>\r\n" +
+		      "<deliveryChannel>SMS</deliveryChannel>\r\n" +
+		     "<subscriptionExternalId>0</subscriptionExternalId>\r\n" +
+		     "<contentSize></contentSize>\r\n" +
+		      "<currency>Kshs</currency>\r\n" + 
+		      "<copyrightId>mauj</copyrightId>\r\n" + 
+		     "<cpTransactionId>123456787785</cpTransactionId>\r\n" + 
+		    "<copyrightDescription>copyright</copyrightDescription>\r\n" + 
+		      "<sMSkeyword>asdf</sMSkeyword>\r\n" + 
+		      "<srcCode>32329</srcCode>\r\n" + 
+		     "<contentUrl>www.content360.co.ke</contentUrl>\r\n" + 
+		    "<subscriptiondays>2</subscriptiondays>\r\n" +
+		      "</inputMsg>\r\n" + 	      
+		      "</char:charge>\r\n" + 		      
+		      "</soapenv:Body>\r\n" +  
+		      "</soapenv:Envelope>\r\n";
+	
 	@SuppressWarnings("restriction")
 	public static void main(String[] args) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, InstantiationException, IllegalAccessException, ClassNotFoundException, ClientProtocolException, IOException, SOAPException {
 		

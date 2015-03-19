@@ -143,7 +143,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					|| KEYWORD.equalsIgnoreCase("BILLING_SERV15")
 					|| KEYWORD.equalsIgnoreCase("BILLING_SERV30")){
 				
-				SMSService smsservice0 = datingBean.getSMSService("DATE");
+				SMSService smsservice0 = datingBean.getSMSService(KEYWORD);
 				List<String> services = new ArrayList<String>();
 				services.add("BILLING_SERV5");
 				services.add("DATE");

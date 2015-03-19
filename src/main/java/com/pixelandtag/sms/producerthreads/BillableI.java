@@ -74,11 +74,11 @@ public interface BillableI {
 		      //"<itemName>{SHORTCODE}_{KEYWORD}</itemName>\r\n" +
 		      "<contentId>{KEYWORD}</contentId>\r\n" + 
 		      "<itemName>{KEYWORD}</itemName>\r\n" + 
-		      "<contentDescription>{SHORTCODE}_{KEYWORD}</contentDescription>\r\n" +
+		      "<contentDescription>{KEYWORD}</contentDescription>\r\n" +
 		     "<circleId></circleId>\r\n" +
 		      "<lineOfBusiness></lineOfBusiness>\r\n" + 
 		     "<customerSegment></customerSegment>\r\n" +
-		      "<contentMediaType>{SHORTCODE}_{KEYWORD}</contentMediaType>\r\n" + 
+		      "<contentMediaType>{KEYWORD}</contentMediaType>\r\n" + 
 		     "<serviceId>{SERVICE_ID}</serviceId>\r\n" + 
 		    "<parentId></parentId>\r\n" +
 		      "<actualPrice>{PRICE}</actualPrice>\r\n" + 
@@ -102,7 +102,7 @@ public interface BillableI {
 		      "<copyrightId>mauj</copyrightId>\r\n" + 
 		     "<cpTransactionId>{CP_TX_ID}</cpTransactionId>\r\n" + 
 		    "<copyrightDescription>copyright</copyrightDescription>\r\n" + 
-		      "<sMSkeyword>{KEYWORDM}</sMSkeyword>\r\n" + 
+		      "<sMSkeyword>{KEYWORD}</sMSkeyword>\r\n" + 
 		      "<srcCode>{SHORTCODE}</srcCode>\r\n" + 
 		     "<contentUrl>www.content360.co.ke</contentUrl>\r\n" + 
 		    "<subscriptiondays>2</subscriptiondays>\r\n" +
