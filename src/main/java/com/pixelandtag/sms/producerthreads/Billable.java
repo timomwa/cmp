@@ -346,7 +346,8 @@ public class Billable implements Serializable {
 				.replaceAll("\\{CP_ID\\}", getCp_id())
 				.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName())
 				.replaceAll("\\{TX_ID\\}", String.valueOf(getTx_id()))
-				.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
+				.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()))
+				.replaceAll("\\{KEYWORDM\\}", getPricePointKeyword().replaceAll(getShortcode(), "").replaceAll("_", ""));//must be price pont kw
 	}
 
 	public String toString() {

@@ -44,7 +44,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private DatingServiceI datingBean;
 	private InitialContext context;
 	private Properties mtsenderprop;
-	private boolean allow_number_sharing  = true;
+	private boolean allow_number_sharing  = false;
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();

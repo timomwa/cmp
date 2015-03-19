@@ -14,6 +14,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 
+	<repositories>
+		
+	</repositories>
 
 	<groupId>com.timothy.sms_platform</groupId>
 	<artifactId>sms_platform_war</artifactId>
@@ -23,12 +26,6 @@
 	<url>http://maven.apache.org</url>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -389,8 +386,8 @@
 				<configuration>
 					<archive>
 						<manifest>
-						 	<addClasspath>true</addClasspath>
-               				<classpathPrefix>lib/</classpathPrefix>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
 							<mainClass>com.pixelandtag.sms.producerthreads.BillingService</mainClass>
 						</manifest>
 					</archive>
