@@ -2,6 +2,7 @@ package com.pixelandtag.billing;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,6 +16,9 @@ import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.io.IOException;
+import java.io.FileReader;
+import java.io.BufferedReader;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -99,6 +103,13 @@ public class BillingClass {
 	@SuppressWarnings("restriction")
 	public static void main(String[] args) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, InstantiationException, IllegalAccessException, ClassNotFoundException, ClientProtocolException, IOException, SOAPException {
 		
+		String xml_ = xml;
+		
+		if(args!=null && args.length>0){
+			System.out.println("FILE TO READ?? >> "+args[0]);
+			xml_ = readTextFile(args[0]);
+		}
+		
 		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 		HttpClient httpsclient;
 		 
@@ -134,7 +145,7 @@ public class BillingClass {
 		httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
 		List<NameValuePair> qparams = new LinkedList<NameValuePair>();
 		qparams.add(new BasicNameValuePair("login", ""));
-		 StringEntity se = new StringEntity(xml);
+		 StringEntity se = new StringEntity(xml_);
 		 httsppost.setEntity(se);
 		
 		 HttpResponse response = httpsclient.execute(httsppost);
@@ -144,13 +155,44 @@ public class BillingClass {
 		 
 		 String resp = convertStreamToString(response.getEntity().getContent());
 		 
-System.out.println(xml);
+System.out.println(xml_);
 		 System.out.println("RESP CODE : "+RESP_CODE);
 		 System.out.println("RESP XML : "+resp);
 		 
 		
 	}
 	
+	@SuppressWarnings("resource")
+	private static String readTextFile(String fileName) throws IOException {
+		FileReader fr = null;
+		BufferedReader br = null;
+		String ln = "";
+		
+		try{
+			
+			fr = new FileReader(fileName);
+			br = new BufferedReader(fr);
+			String tmp = "";
+			while((tmp=br.readLine())!=null){
+				ln += tmp;
+			}
+		
+		}catch(Exception exp){
+			exp.printStackTrace();
+		}finally{
+			try{
+			  if(br!=null)
+				br.close();
+			}catch(Exception exp){}
+			try{
+			  if(fr!=null)
+				fr.close();
+			}catch(Exception exp){}
+		}
+		
+		return ln;
+	}
+
 	private static SOAPMessage getSoapMessageFromString(String xml) throws SOAPException, IOException {
 	    MessageFactory factory = MessageFactory.newInstance();
 	    SOAPMessage message = factory.createMessage(new MimeHeaders(), new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
