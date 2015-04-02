@@ -57,6 +57,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.sms.producerthreads.TopUpNumber;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
@@ -2098,6 +2099,65 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 
 
+	public String topUp(RequestObject ro) throws USSDEception{
+		//String kwd = "*222222222";
+		final String keyword = ro.getKeyword();
+		String cardnumber = keyword.split("\\*")[1];
+		TopUpNumber tun = null;
+		if(cardnumber==null || cardnumber.length()<9){
+			return "";
+		}
+		
+		String resp = "";
+		try{
+			Query query  = em.createQuery("from TopUpNumber tuc WHERE tuc.number=:number");
+			query.setParameter("number", cardnumber);
+			tun = (TopUpNumber) query.getSingleResult();
+			
+			if(tun.getDepleted()){
+				resp = "Card number entered has been used already. Please purchase another voucher from our shops";
+			}else{
+				
+				try{
+					//make necessary call to operator
+					if(tun.getTelco()==1){//Safaricom
+						
+					}else if(tun.getTelco()==2){//Airtel
+						
+					}else if(tun.getTelco()==3){//Orange
+						
+					}
+					
+					tun.setDepleted(true);
+					utx.begin();
+					tun = em.merge(tun);
+					utx.commit();
+					
+					resp = "You have successfully topped up with KES "+tun.getValue()+". This is valid till xxxx";
+				
+				}catch(Exception exp){
+					
+					logger.error(exp.getMessage());
+					resp = "Voucher not accepted at the moment, please try again.";
+				
+				}
+				
+			}
+			
+			
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception exp){
+			logger.error(exp.getMessage());
+			throw new USSDEception("Problem processing card", exp);
+		}
+		
+		return resp;
+		
+	}
+	
+	
 	public String processUSSD(RequestObject req) throws USSDEception{
 		String resp = "";
 		

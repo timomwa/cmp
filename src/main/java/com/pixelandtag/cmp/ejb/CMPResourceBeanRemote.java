@@ -162,6 +162,8 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public String processUSSD(RequestObject ro) throws USSDEception;
 
+	public String topUp(RequestObject ro) throws USSDEception;
+
 	
 
 }

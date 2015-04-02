@@ -163,8 +163,9 @@ public class MsisdnController extends HttpServlet {
 				 ps.setString(2, date);
 			 }else{
 				 try{
+					 
 					 int limit = Integer.valueOf(date);
-					 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where date(timeStamp)=? order by timeStamp desc limit "+limit);
+					 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog order by timeStamp desc limit "+limit);
 					 
 				 }catch(NumberFormatException ex){
 					 

@@ -132,9 +132,15 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			
+			
+			if(ro.getKeyword()!=null && ro.getKeyword().length()>10){
+				response   = cmpBean.topUp(ro);
+			}
+			
+			
 			Person p = datingBean.getPerson(ro.getMsisdn());
 			
-			if(p==null || (p!=null && !p.getActive())){
+			if((response==null || response.isEmpty()) && (p==null || (p!=null && !p.getActive()))){
 				response = datingBean.processDating(ro);
 			}
 			
