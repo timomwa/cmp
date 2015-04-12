@@ -250,7 +250,7 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 
 
-@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public <T> T saveOrUpdate(T t) throws Exception{
 		try{
 			utx.begin();

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -19,6 +20,7 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.ChatLog;
@@ -42,6 +44,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 	final Logger logger = Logger.getLogger(DatingServiceProcessor.class);
 	private DatingServiceI datingBean;
+	private LocationBeanI location_ejb;
 	private InitialContext context;
 	private Properties mtsenderprop;
 	private boolean allow_number_sharing  = false;
@@ -49,7 +52,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
 	}
-	
 	public void initEJB() throws NamingException{
     	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
@@ -61,6 +63,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		 context = new InitialContext(props);
 		 datingBean =  (DatingServiceI) 
        		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
+		 
+		 location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
 		 
 		 logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
@@ -99,8 +103,17 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				Gender pref_gender = profile.getPreferred_gender();
 				BigDecimal pref_age = profile.getPreferred_age();
 				String location = profile.getLocation();
-				
+				//location_ejb
 				PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
+				
+				if(match==null){
+					try{
+						match = datingBean.findMatch(profile);//try find by their location
+					}catch(DatingServiceException exp){
+						logger.error(exp.getMessage(),exp);
+					}
+				}
+				
 				if(match==null)
 					 match = datingBean.findMatch(pref_gender,pref_age,person.getId());
 				if(match==null)

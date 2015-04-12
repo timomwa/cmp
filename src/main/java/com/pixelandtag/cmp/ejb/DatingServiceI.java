@@ -40,6 +40,7 @@ public interface DatingServiceI extends BaseEntityI {
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,Long curProfileId) throws DatingServiceException;
+	public PersonDatingProfile findMatch(PersonDatingProfile profile) throws DatingServiceException;
 	public MOSms renewSubscription(MOSms mo, Long serviceId) throws DatingServiceException;
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException;
 

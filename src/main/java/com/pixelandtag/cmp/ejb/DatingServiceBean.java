@@ -35,9 +35,11 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
+import com.pixelandtag.dating.entities.Location;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileAttribute;
+import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
@@ -59,6 +61,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
+	
+	@EJB
+	private LocationBeanI location_ejb;
 	
 	public DatingServiceBean() throws KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,
@@ -283,6 +288,18 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				if(attr.equals(ProfileAttribute.LOCATION)){
 					profile.setLocation(MESSAGE);
+					
+					if((req.getCellid()!=null && !req.getCellid().isEmpty()) && (req.getLac()!=null && !req.getLac().isEmpty())){
+						
+						try{
+							location_ejb.findOrCreateLocation(Long.valueOf(req.getCellid()), Long.valueOf(req.getLac()), MESSAGE, profile);
+						}catch(Exception exp){
+							logger.error(exp.getMessage(), exp);
+						}
+						
+						
+					}
+					
 				}
 				if(attr.equals(ProfileAttribute.PREFERRED_AGE)){
 					BigDecimal age = null;
@@ -453,6 +470,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return resp;
 	}
 	
+	
+
 	private String startProfileQuestions(RequestObject req, Person person) throws DatingServiceException {
 
 		String resp = "Request received.";
@@ -604,7 +623,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("person_a_id", curPersonId);
@@ -627,7 +646,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p where p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("dob", dob);
@@ -644,6 +663,49 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.DatingServiceI#findMatch(com.pixelandtag.dating.entities.PersonDatingProfile)
+	 */
+	public PersonDatingProfile findMatch(PersonDatingProfile profile) throws DatingServiceException{
+	
+		PersonDatingProfile persondatingProfile = null;
+		
+		try {
+			
+			ProfileLocation profileLocation  = location_ejb.findProfileLocation(profile);
+			
+			if(profileLocation!=null && profileLocation.getProfile()!=null){
+			
+				Date dob = calculateDobFromAge(profile.getPreferred_age());
+				
+				Query qry = em.createQuery("from ProfileLocation pl WHERE (pl.profile.username <> pl.profile.person.msisdn) AND  pl.profile.person.active=:active "
+						+ "pl.profile.dob<=:dob AND pl.profile.gender=:prefGender AND (  pl.location.cellid=:cellid OR pl.location.location_id=:location_id OR  pl.location.locationName=:locationName) order by pl.timeStamp desc");
+				qry.setFirstResult(0);
+				qry.setMaxResults(1);
+				
+				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
+				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				qry.setParameter("locationName", profileLocation.getLocation().getLocationName());
+				qry.setParameter("prefGender", profile.getPreferred_gender());
+				qry.setParameter("dob", dob);
+				qry.setParameter("active", new Boolean(true));
+				
+				ProfileLocation pl = (ProfileLocation) qry.getSingleResult();
+				
+				persondatingProfile = pl.getProfile();
+			
+			}
+		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+			throw new DatingServiceException("Problem finding match.",e);
+		}
+		
+		return persondatingProfile;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location, Long curPersonId) throws DatingServiceException{
 		PersonDatingProfile person = null;
@@ -653,7 +715,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			
 			Date dob = calculateDobFromAge(pref_age);
 			
-			Query qry = em.createQuery("from PersonDatingProfile p where p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched)");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id)");//:alreadyMatched)");//AND p.dob>=:dob
 			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("location", "%"+location+"%");

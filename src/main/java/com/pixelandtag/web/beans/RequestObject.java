@@ -230,16 +230,15 @@ public class RequestObject implements Serializable{
 		if (request.getParameter("code") != null){
 			code  = request.getParameter("code").trim();
 		}
-		if (request.getParameter("lac") != null){
-			lac  = request.getParameter("lac").trim();
-		}
 		if (request.getParameter("location") != null){
 			location  = request.getParameter("location").trim();
+		}
+		if (request.getParameter("lac") != null){
+			lac  = request.getParameter("lac").trim();
 		}
 		if (request.getParameter("cellid") != null){
 			cellid  = request.getParameter("cellid").trim();
 		}
-		
 		
 		if (request.getParameter("keyword") != null)
 			keyword = request.getParameter("keyword").toUpperCase();
