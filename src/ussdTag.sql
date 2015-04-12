@@ -24,8 +24,12 @@ delete from dating_person where msisdn='254735594326';
 delete from subscription  where msisdn='254735594326';
 
 
-delete from dating_profile where person_id_fk = (select id from dating_person where msisdn='254738828963');
-delete from dating_person where msisdn='254738828963';
+delete from dating_profile where person_id_fk = (select id from dating_person where msisdn='254733660220');
+delete from dating_person where msisdn='254733660220';
+delete from subscription  where msisdn='254733660220';
+
+delete from dating_profile where person_id_fk = (select id from dating_person where msisdn='254734252504');
+delete from dating_person where msisdn='254734252504';
 delete from subscription  where msisdn='254734252504';
 
 

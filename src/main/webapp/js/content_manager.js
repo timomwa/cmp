@@ -402,7 +402,7 @@ function loadLeftPanel(e){
 
 	var l = e.autoEl.cn.length;
 	var content_id = e.id.split('_')[1];
-	console.log('content_id : '+content_id);
+	console.log('content_id : '+content_id); 
 	var uploadpannel = Ext.getCmp('uploadpannel');
 	uploadpannel.setTitle('SMS Content Upload ['+e.autoEl.cn.substring(0,l-6)+']');
 	var form = Ext.getCmp('contentUploadForm').getForm();

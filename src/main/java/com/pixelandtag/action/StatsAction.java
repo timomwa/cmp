@@ -22,7 +22,7 @@ public class StatsAction extends BaseActionBean {
 	@DefaultHandler
 	@RolesAllowed({"admin"})
 	public Resolution getStats() throws JSONException{
-		Query qry = cmp_dao.resource_bean.getEM().createNativeQuery("select date(timeStamp) dt, count(*) count, price, price*count(*) total_kshs from  billable_queue where success=1 group by dt,price order by dt desc limit 7");
+		Query qry = cmp_dao.resource_bean.getEM().createNativeQuery("select date(timeStamp) dt, count(*) count, price, sum(price) total_kshs from  billable_queue where success=1 group by dt order by dt desc limit 7");
 		List<Object[]> recs = qry.getResultList();
 		
 		JSONObject mainObject = new JSONObject();
