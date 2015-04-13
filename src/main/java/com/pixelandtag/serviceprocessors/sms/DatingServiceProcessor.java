@@ -18,6 +18,7 @@ import org.jboss.ejb.client.EJBClientContext;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
@@ -36,6 +37,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
@@ -45,8 +47,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	final Logger logger = Logger.getLogger(DatingServiceProcessor.class);
 	private DatingServiceI datingBean;
 	private LocationBeanI location_ejb;
+	private CMPResourceBeanRemote cmp_bean;
 	private InitialContext context;
-	private Properties mtsenderprop;
+	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = false;
 	private boolean allow_multiple_plans = true;
 	
@@ -66,7 +69,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		 datingBean =  (DatingServiceI) 
        		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		 
-		 location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
+		location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
+		cmp_bean = (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 
 		 logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
@@ -93,7 +97,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			PersonDatingProfile profile = datingBean.getProfile(person);
 			
-			if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
+			if(KEYWORD.equalsIgnoreCase("BUNDLES")){
+				String submenustring = cmp_bean.getSubMenuString(KEYWORD,language_id);
+				mo.setMt_Sent(submenustring+cmp_bean.getMessage(MAIN_MENU_ADVICE,language_id));//get all the sub menus there.
+			
+			}else if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
 				
 				if(person.getId()>0 && profile==null){//Success registering/registered but no profile
 					

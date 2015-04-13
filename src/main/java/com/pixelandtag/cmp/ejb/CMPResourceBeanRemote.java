@@ -163,6 +163,9 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public String processUSSD(RequestObject ro) throws USSDEception;
 
 	public String topUp(RequestObject ro) throws USSDEception;
+	public MenuItem getTopMenu(String string) throws Exception;
+
+	public String getSubMenuString(String keyword, int language_id) throws Exception;
 
 	
 

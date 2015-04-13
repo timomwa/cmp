@@ -50,6 +50,8 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.smsmenu.MenuItem;
+import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
@@ -393,9 +395,24 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					if(match==null)
 						 match = findMatch(pref_gender,person.getId());
 					
-					if(match==null){
-						resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
-						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+					if(match==null){//Profile is complete
+						MenuItem topMenu = cmp_ejb.getTopMenu("BUNDLES");
+						MenuItem item = null;
+						if(topMenu!=null)
+							item = cmp_ejb.getMenuByParentLevelId(language_id,topMenu.getId(),topMenu.getMenu_id());
+						resp =  item!=null ? item.enumerate() : null;
+						
+						if(resp!=null){
+							Session sess = cmp_ejb.getSession(MSISDN);
+							if(sess==null){
+								sess = new Session();
+								sess.setLanguage_id(language_id);
+								sess.setMenu_item(item);
+								sess.setMsisdn(MSISDN);
+								sess.setSmsmenu_level_id_fk(item.getId());
+							}
+							cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id());//update session to upper menu.
+						}
 					}else{
 						try{
 							SystemMatchLog sysmatchlog = new SystemMatchLog();
@@ -450,8 +467,25 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 							mo.setSubscription(false);
 							sendMT(mo);
-							resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
-							resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+							//resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
+							//resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+							MenuItem topMenu = cmp_ejb.getTopMenu("BUNDLES");
+							MenuItem item = null;
+							if(topMenu!=null)
+								item = cmp_ejb.getMenuByParentLevelId(language_id,topMenu.getId(),topMenu.getMenu_id());
+							resp =  item!=null ? item.enumerate() : null;
+							
+							if(resp!=null){
+								Session sess = cmp_ejb.getSession(MSISDN);
+								if(sess==null){
+									sess = new Session();
+									sess.setLanguage_id(language_id);
+									sess.setMenu_item(item);
+									sess.setMsisdn(MSISDN);
+									sess.setSmsmenu_level_id_fk(item.getId());
+								}
+								cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id());//update session to upper menu.
+							}
 						}else{
 							resp = "Request received but we couldn't process your request. Do try again later.";
 						}

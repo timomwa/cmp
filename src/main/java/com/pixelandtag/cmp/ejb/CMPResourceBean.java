@@ -6,12 +6,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -36,14 +31,12 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
-import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
-import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -52,10 +45,8 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
-import com.pixelandtag.sms.mo.MOProcessor;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.sms.producerthreads.TopUpNumber;
 import com.pixelandtag.sms.producerthreads.USSDSession;
@@ -841,6 +832,44 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			throw e;
 		
 		}finally{}
+		
+		return mi;
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public MenuItem getTopMenu(String keyword) throws Exception{
+		
+		MenuItem mi = null;
+		try{
+			String GET_TOP_MENU =  "select sml.* from `"+CelcomImpl.database+"`.`smsmenu_levels` sml left join `"+CelcomImpl.database+"`.`sms_service` sms on sms.id=sml.serviceid WHERE sms.cmd=?";
+			Query qry = em.createNativeQuery(GET_TOP_MENU);
+			qry.setParameter(1, keyword);
+			
+			List<Object[]> rs = qry.getResultList();
+			
+			for(Object[] o : rs){
+				
+				mi = new MenuItem();
+				mi.setId(((Integer) o[0]).intValue());
+				mi.setName((String) o[1]);
+				mi.setLanguage_id((Integer) o[2]);
+				mi.setParent_level_id((Integer) o[3]);
+				mi.setMenu_id((Integer) o[4]);
+				mi.setService_id((Integer) o[5]);
+				mi.setVisible(((Boolean) o[6]) );
+			}
+		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			
+			logger.error(e.getMessage(),e);
+			throw e;
+		
+		}finally{
+		}
 		
 		return mi;
 	}
@@ -2284,7 +2313,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					logger.info("FROM SESSION___________________________"+current_menu);
 					
 					
-					if( (KEYWORD.contains("*") && (req.getMediumType()==MediumType.ussd)) ){
+					if( KEYWORD.contains("*") && req.getMediumType()==MediumType.ussd ){
 					
 						updateSession(language_id,MSISDN, current_menu.getMenu_id(),sess,current_menu.getParent_level_id(),req.getSessionid());//update session to upper menu.
 						resp = current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
@@ -2346,6 +2375,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						chosenMenu = getMenuById(chosenMenu.getId());
 						
+						logger.error("\t\t\t>>> GUGAMUGA ********* chosenMenu >> "+chosenMenu);
 						
 						if(chosenMenu!=null){
 								submenu = chosenMenu.getSub_menus();
@@ -3262,6 +3292,15 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		return text;
 		
+	}
+	
+	@Override
+	public String getSubMenuString(String keyword, int language_id) throws Exception {
+		MenuItem topMenu = getTopMenu(keyword);
+		MenuItem item = null;
+		if(topMenu!=null)
+			item = getMenuByParentLevelId(language_id,topMenu.getId(),topMenu.getMenu_id());
+		return item!=null ? item.enumerate() : null;
 	}
 
 
