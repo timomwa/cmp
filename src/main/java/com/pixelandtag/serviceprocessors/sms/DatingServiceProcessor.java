@@ -48,6 +48,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private InitialContext context;
 	private Properties mtsenderprop;
 	private boolean allow_number_sharing  = false;
+	private boolean allow_multiple_plans = true;
+	
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
@@ -166,7 +168,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
 				
 				
-				if(!subvalid){
+				if(!subvalid || allow_multiple_plans  ){
 					
 					try{
 						mo = datingBean.renewSubscription(mo,smsservice0.getId());
@@ -207,7 +209,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					//Please top up to continue chatting with x ..
 					int lang = 1;
 					if(!subvalid && profile!=null && profile.getProfileComplete() ){//Profile is complete just need to renew subscription
-						SMSService sm = datingBean.find(SMSService.class, Long.valueOf(serviceid));
+						SMSService dating = datingBean.getSMSService("DATE");
 						lang = profile.getLanguage_id();
 						PersonDatingProfile dest = datingBean.getperSonUsingChatName(MESSAGE);//find destination person
 						String msg = "";
@@ -222,7 +224,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						}
 						logger.info("\n\n\n\tmsg::::>>> "+msg);
 						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
-						msg = msg.replaceAll(SERVICENAME_TAG, sm.getService_name());
+						msg = msg.replaceAll(SERVICENAME_TAG, dating.getService_name());
 						mo.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
 						mo.setMt_Sent(msg);//tell them to renew
 						mo.setPriority(3);
@@ -469,8 +471,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						 match = datingBean.findMatch(pref_gender,person.getId());
 					
 					if(match==null){
+						
 						String msg = datingBean.getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+						
 					}else{
 						try{
 							SystemMatchLog sysmatchlog = new SystemMatchLog();
