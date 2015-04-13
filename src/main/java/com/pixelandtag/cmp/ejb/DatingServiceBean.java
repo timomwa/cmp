@@ -977,6 +977,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		try{
 			
+			try{
+				BigDecimal bd = new BigDecimal(username);
+				return false;
+			}catch(Exception exp){}
+			
 			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username=:username");
 			qry.setParameter("username", username);
 			if(qry.getResultList().size()>0)

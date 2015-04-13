@@ -8,6 +8,8 @@ import java.security.UnrecoverableKeyException;
 import javax.annotation.Resource;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
@@ -49,6 +51,24 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			UnrecoverableKeyException, NoSuchAlgorithmException,
 			KeyStoreException {
 		super();
+	}
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public <T> T saveOrUpdate(T t) throws DatingServiceException{
+		try{
+			utx.begin();
+			t = em.merge(t);
+			utx.commit();
+		}catch(Exception e){
+			try {
+				utx.rollback();
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(),e1);
+			} 
+			logger.error(e.getMessage(),e);
+			throw new DatingServiceException(e.getMessage(),e);
+		}
+		return t;
 	}
 
 	/* (non-Javadoc)
@@ -97,7 +117,7 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			profileLocation = (ProfileLocation) query.getSingleResult();
 			
 		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
+			logger.warn(ex.getMessage());
 		}catch(Exception exp){
 			logger.error(exp.getMessage());
 			throw new Exception("Problem finding location",exp);
@@ -125,7 +145,7 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			location = (Location) query.getSingleResult();
 			
 		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
+			logger.warn(ex.getMessage());
 		}catch(Exception exp){
 			logger.error(exp.getMessage());
 			throw new Exception("Problem finding location",exp);
@@ -151,7 +171,7 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			profLoc = (ProfileLocation) query.getSingleResult();
 			
 		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
+			logger.warn(ex.getMessage());
 		}catch(Exception exp){
 			logger.error(exp.getMessage());
 			throw new Exception("Problem finding profile location", exp);

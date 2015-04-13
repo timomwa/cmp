@@ -3,15 +3,21 @@ package com.pixelandtag.dating.entities;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
+
 
 @Entity
 @Table(name = "dating_profileloc")
@@ -26,10 +32,14 @@ public class ProfileLocation implements Serializable  {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "location")
+	@ManyToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
+	@JoinColumn(name = "location_id_fk")
+	@Index(name="plocidx")
 	private Location location;
 	
-	@Column(name = "profile")
+	@ManyToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
+	@JoinColumn(name = "profile_id_fk")
+	@Index(name="plocpidx")
 	private PersonDatingProfile profile;
 	
 	/**
