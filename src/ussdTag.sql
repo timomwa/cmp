@@ -79,3 +79,14 @@ update hibernate_sequence set next_val=next_val+1;
 insert into dating_disallowedwords select next_val+1,'HOW' from hibernate_sequence;
 update hibernate_sequence set next_val=next_val+1;
 
+
+
+
+
+
+/*add these when testing 14th April*/
+INSERT INTO `pixeland_content360`.`sms_service` (`mo_processorFK`, `cmd`, `push_unique`, `service_name`, `service_description`, `price`, `price_point_keyword`, `CMP_Keyword`, `CMP_SKeyword`, `enabled`, `split_mt`) VALUES (14, 'BUNDLES', 1, 'Chat bundles', 'Chat bundles', 0, '32329_MAPENZI', 'IOD', 'IOD0000', 1, 0);
+INSERT INTO `pixeland_content360`.`sms_service_metadata` (`sms_service_id_fk`, `meta_field`, `meta_value`) VALUES (444, 'db_name', 'pixeland_content360');
+UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`=444 WHERE `id`='151';
+UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`=-1 WHERE `id`='151';
+UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`=444 WHERE `id`='151';
