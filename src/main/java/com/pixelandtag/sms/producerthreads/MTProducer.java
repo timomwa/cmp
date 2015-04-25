@@ -148,7 +148,6 @@ public class MTProducer extends Thread {
 	 * @throws NoServiceProcessorException 
 	 */
 	public static ServiceProcessorI getFreeProcessor(int mo_processor_id) throws NoServiceProcessorException{
-		
 		logger.info("gugamuga_processor_pool: : "+processor_pool);
 		
 		ArrayList<ServiceProcessorI> processorPool = processor_pool.get(mo_processor_id);

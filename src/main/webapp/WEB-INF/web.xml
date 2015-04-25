@@ -4,6 +4,22 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>CMP_HOME</display-name>
 	
+	<filter>
+    <filter-name>Resteasy</filter-name>
+    <filter-class>
+             org.jboss.resteasy.plugins.server.servlet.FilterDispatcher
+        </filter-class>
+    <init-param>
+      <param-name>resteasy.scan</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>Resteasy</filter-name>
+    <url-pattern>/rest/*</url-pattern>
+  </filter-mapping>
+	
+	 
 	
 	<filter>
 			<filter-name>DynamicMappingFilter</filter-name>
@@ -13,7 +29,7 @@
 	
 	<filter>
 	
-	
+	 
 
 	<filter-name>StripesFilter</filter-name>
 			<filter-class>net.sourceforge.stripes.controller.StripesFilter
