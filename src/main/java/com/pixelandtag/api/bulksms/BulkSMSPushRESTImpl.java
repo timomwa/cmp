@@ -1,8 +1,6 @@
 package com.pixelandtag.api.bulksms;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -19,9 +17,11 @@ import com.pixelandtag.cmp.ejb.APIAuthenticationException;
 import com.pixelandtag.cmp.ejb.BulkSMSI;
 import com.pixelandtag.cmp.ejb.ParameterException;
 import com.pixelandtag.cmp.ejb.PersistenceException;
+import com.pixelandtag.cmp.ejb.PlanBalanceException;
+import com.pixelandtag.cmp.ejb.QueueFullException;
 
 @Stateless
-public class SendBulkAPI implements Sendbulk{
+public class BulkSMSPushRESTImpl extends BaseRestImpl implements BulkSMSPushRESTI {
 
 	
 	private Logger logger = Logger.getLogger(getClass());
@@ -29,8 +29,9 @@ public class SendBulkAPI implements Sendbulk{
 	@EJB
 	private BulkSMSI bulksms_api;
 	
+	
 	@Override
-	public Response pushList(@Context HttpHeaders headers, InputStream incomingData, @Context HttpServletRequest req)
+	public Response push(@Context HttpHeaders headers, InputStream incomingData, @Context HttpServletRequest req)
 			throws QueueException {
 	
 		Response response = null;
@@ -60,6 +61,26 @@ public class SendBulkAPI implements Sendbulk{
 			response = Response.status(Response.Status.CREATED)
 					.entity(jsob.toString()).build();
 			return response;
+			
+		}catch(QueueFullException qfe){
+			try {
+				jsob.put("success", false);
+				jsob.put("message", qfe.getMessage());
+			} catch (JSONException e1) {
+				logger.error(e1.getMessage(),e1);
+			}
+			response =  Response.status(Response.Status.SERVICE_UNAVAILABLE)
+				.entity(jsob.toString()).build();
+			
+		}catch(PlanBalanceException pbe){
+			try {
+				jsob.put("success", false);
+				jsob.put("message", pbe.getMessage());
+			} catch (JSONException e1) {
+				logger.error(e1.getMessage(),e1);
+			}
+			response =  Response.status(Response.Status.NOT_ACCEPTABLE)
+				.entity(jsob.toString()).build();
 		}catch(ParameterException parame){
 			//logger.error(parame.getMessage(),parame);
 			try {
@@ -115,36 +136,7 @@ public class SendBulkAPI implements Sendbulk{
 		return response;
 	}
 
-	/**
-	 * Converts input stream to
-	 * String
-	 * @param incomingData
-	 * @return java.lang.String
-	 */
-	private String readString(InputStream incomingData) {
-		InputStreamReader isr = null;
-		StringBuffer sb = new StringBuffer();
-		String data = "";
-		try {
-			isr = new InputStreamReader(incomingData);
-			BufferedReader in = new BufferedReader(isr);
-			String line = null;
-			while ((line = in.readLine()) != null) {
-				sb.append(line);
-			}
-			data = sb.toString();
-		}catch(Exception exp){
-			logger.error(exp.getMessage(),exp);
-		}finally{
-			try{
-				isr.close();
-			}catch(Exception exp){
-				logger.warn(exp.getMessage());
-			}
-		}
-		
-		return data;
-	}
+	
 	
 	
 	

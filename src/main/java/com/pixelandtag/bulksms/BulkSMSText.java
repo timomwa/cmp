@@ -1,6 +1,7 @@
 package com.pixelandtag.bulksms;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -45,11 +46,21 @@ public class BulkSMSText implements Serializable{
 	@Index(name="txtpidx")
 	private Date timecreated;
 	
+	@Column(name = "schedule_tz")
+	private String scheduletimezone;
+	
+	
+	@Column(name = "queuesize", precision=0,scale=19)
+	private BigInteger queueSize;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
 		if(timecreated==null)
 			timecreated = new Date();
+		if(queueSize==null)
+			queueSize = BigInteger.ZERO;
 	}
 	
 	/**
@@ -100,6 +111,14 @@ public class BulkSMSText implements Serializable{
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public BigInteger getQueueSize() {
+		return queueSize;
+	}
+
+	public void setQueueSize(BigInteger queueSize) {
+		this.queueSize = queueSize;
 	}
 
 	

@@ -1,5 +1,8 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.ejb.Local;
 import javax.ejb.Remote;
@@ -75,7 +78,52 @@ public class BulkSMSEJB implements BulkSMSI {
 	}
 	
 
-	private IPAddressWhitelist getWhitelist(String ipAddress,BulkSMSAccount account) throws APIAuthenticationException,ParameterException{
+	public BigInteger getCurrentOutgoingQueue(BulkSMSPlan plan,MTStatus status)  {
+		BigInteger planBalance = null;
+		try{
+			Query query = em.createQuery("select coalesce(count(*),0) from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
+					+ " WHERE q.text=txt and q.status=:status AND txt.plan=:plan");
+			query.setParameter("plan", plan);
+			query.setParameter("status", status);
+			Long val = ((Long) query.getSingleResult());
+			planBalance = BigInteger.valueOf( (val==null? 0L: val) );
+			
+			if(planBalance==null)
+				planBalance = BigInteger.ZERO;
+			
+		}catch(javax.persistence.NoResultException nre){
+			logger.warn(nre.getMessage()+"This plan has no sms");
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return planBalance;
+	}
+	
+	
+	@Override
+	public BigInteger getPlanBalance(BulkSMSPlan plan) throws PlanBalanceException {
+		BigInteger planBalance = null;
+		try{
+			Query query = em.createQuery("select coalesce((pln.numberOfSMS - count(*)), pln.numberOfSMS) from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
+					+ " WHERE q.text=txt and txt.plan=:plan");
+			query.setParameter("plan", plan);
+			planBalance = (BigInteger) query.getSingleResult();
+			
+			if(planBalance==null)
+				planBalance = plan.getNumberOfSMS();
+			
+		}catch(javax.persistence.NoResultException nre){
+			logger.warn(nre.getMessage()+"This plan has no sms");
+			throw new PlanBalanceException("Could not get the plan balance. Does it exist?");
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+			throw new PlanBalanceException("Could not get the plan balance.");
+		}
+		return planBalance;
+	}
+	
+	
+	public IPAddressWhitelist getWhitelist(String ipAddress,BulkSMSAccount account) throws APIAuthenticationException,ParameterException{
 		IPAddressWhitelist whitelist = null;
 		try{
 			Query query = em.createQuery("from IPAddressWhitelist ip WHERE ip.ipaddress=:ipaddress"+(account!=null ? " AND ip.account=:account" : ""));
@@ -151,7 +199,7 @@ public class BulkSMSEJB implements BulkSMSI {
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
-	public void enqueue(String sourceIp, String apiKey,String username, String password,String jsonString) throws APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException{
+	public void enqueue(String sourceIp, String apiKey,String username, String password,String jsonString) throws APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException,QueueFullException,PlanBalanceException{
 	
 		//boolean success = true;
 		JSONObject inJso  =  new JSONObject(jsonString);
@@ -230,13 +278,32 @@ public class BulkSMSEJB implements BulkSMSI {
 		}
 		
 		BulkSMSPlan plan = getPlan(account,planid);
+		BigInteger planBalance = getPlanBalance(plan);
+		BigInteger thisBatch = BigInteger.valueOf(msisdnlist.length());
+		
+		logger.info(" PLAN BALANCE BEFORE ::::::: "+planBalance.intValue());
+		logger.info(" THIS BATCH BEFORE ::::::: "+thisBatch.intValue());
+		logger.info(" NOT ENOUGH BALANCE ?::::::: "+(planBalance.compareTo(thisBatch)<0));
+		
+		if(planBalance.compareTo(thisBatch)<0){//if we don't have enough balance.
+			throw new PlanBalanceException("This plan doesn't have enough credits. Current plan balance is "+planBalance.intValue()+", this batch: "+thisBatch.intValue());
+		}
+		
+		BigInteger currentoutgoingsize = getCurrentOutgoingQueue(plan,MTStatus.RECEIVED);
+		
+		if(plan.getMaxoutqueue().compareTo(currentoutgoingsize)<=0)//queue full
+			throw new QueueFullException("Queue is full, please try again.");
+		
+		
 		BulkSMSText textb = new BulkSMSText();
 		textb.setContent(text);
 		textb.setPlan(plan);
 		textb.setSenderid(senderid);
+		textb.setQueueSize(BigInteger.valueOf(msisdnlist.length()));
 		
 		try{
 			utx.begin();
+			
 			textb = em.merge(textb);
 			
 			for(int x = 0; x<msisdnlist.length(); x++){
@@ -258,9 +325,47 @@ public class BulkSMSEJB implements BulkSMSI {
 		}finally{
 			
 		}
-		
-		//return success;
 	}
+
+
+	
+
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String getPlanQueueStatus(BulkSMSPlan plan) {
+		JSONObject jsob = new JSONObject();
+		
+		try{
+			
+			Query query = em.createQuery("select coalesce(count(*),0), q.status from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
+					+ " WHERE q.text=txt AND txt.plan=:plan group by q.status");
+			query.setParameter("plan", plan);
+			List<Object[]> obj = query.getResultList();
+			
+			for(Object[] o : obj){
+				Long count = (Long)o[0];
+				MTStatus status = (MTStatus)o[1];
+				JSONObject stats = new JSONObject();
+				stats.put("count", count);
+				stats.put("status", status.toString());
+				jsob.append("stats", stats);
+			}
+			
+		}catch(javax.persistence.NoResultException nre){
+			logger.warn(nre.getMessage()+"This plan has no sms");
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return jsob.toString();
+	}
+
+
+	
+	
+
+
+	
 
 
 

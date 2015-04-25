@@ -39,8 +39,15 @@ public class BulkSMSPlan implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "no_of_sms")
+	@Column(name = "no_of_sms", precision=0, scale=19)
 	private BigInteger numberOfSMS;
+	
+	/**
+	 * The maximum number of
+	 * sms allowed in the outgoing queue.
+	 */
+	@Column(name = "max_outgoing_size", precision=0, scale=19)
+	private BigInteger maxoutqueue;
 	
 	@Column(name = "date_purch")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -81,6 +88,9 @@ public class BulkSMSPlan implements Serializable {
 			validity = 365;
 			timeunit = TimeUnit.DAY;
 		}
+		if(maxoutqueue==null)
+			maxoutqueue = new BigInteger("5000");
+		
 	}
 
 	public Long getId() {
@@ -153,6 +163,14 @@ public class BulkSMSPlan implements Serializable {
 
 	public void setTelcoid(String telcoid) {
 		this.telcoid = telcoid;
+	}
+
+	public BigInteger getMaxoutqueue() {
+		return maxoutqueue;
+	}
+
+	public void setMaxoutqueue(BigInteger maxoutqueue) {
+		this.maxoutqueue = maxoutqueue;
 	}
 	
 

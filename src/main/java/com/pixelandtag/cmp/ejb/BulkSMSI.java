@@ -1,12 +1,17 @@
 package com.pixelandtag.cmp.ejb;
 
+import java.math.BigInteger;
+
 import javax.ejb.Local;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.pixelandtag.api.MTStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
+import com.pixelandtag.bulksms.IPAddressWhitelist;
 
 public interface BulkSMSI {
 	
@@ -41,7 +46,7 @@ public interface BulkSMSI {
 	 * @throws ParameterException
 	 * @throws JSONException
 	 */
-	public void enqueue(String sourceIp, String apiKey, String username, String password, String jsonString) throws APIAuthenticationException,PlanException,PersistenceException,ParameterException,JSONException;
+	public void enqueue(String sourceIp, String apiKey, String username, String password, String jsonString) throws APIAuthenticationException,PlanException,PersistenceException,ParameterException,JSONException,PlanBalanceException,QueueFullException;
 
 	/**
 	 *  Checks if requesting host is allowed
@@ -60,5 +65,41 @@ public interface BulkSMSI {
 	 * @throws APIAuthenticationException,ParameterException
 	 */
 	public boolean hostAllowed(BulkSMSAccount account,String sourceIp) throws APIAuthenticationException,ParameterException;
+	
+	
+	/**
+	 * 
+	 * @param plan
+	 * @return
+	 * @throws PlanBalanceException
+	 */
+	public BigInteger getPlanBalance(BulkSMSPlan plan) throws PlanBalanceException;
+	
+	/**
+	 * Accepts a null account and searches
+	 * only the ip Address
+	 * @param ipAddress - java.lang.String
+	 * @param account - com.pixelandtag.bulksms.BulkSMSAccount
+	 * @return com.pixelandtag.bulksms.IPAddressWhitelist
+	 * @throws APIAuthenticationException
+	 * @throws ParameterException
+	 */
+	public IPAddressWhitelist getWhitelist(String ipAddress,BulkSMSAccount account) throws APIAuthenticationException,ParameterException;
 
+	/**
+	 * 
+	 * @param plan - com.pixelandtag.bulksms.BulkSMSPlan
+	 * @param status - com.pixelandtag.api.MTStatus
+	 * @return - java.math.BigInteger
+	 */
+	public BigInteger getCurrentOutgoingQueue(BulkSMSPlan plan,MTStatus status);
+
+	/**
+	 * 
+	 * @param plan
+	 * @return
+	 */
+	public String getPlanQueueStatus(BulkSMSPlan plan);
+
+	
 }
