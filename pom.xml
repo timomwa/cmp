@@ -478,6 +478,9 @@
 					<webResources>
 						<resource>
 							<directory>${basedir}/src/main/webapp</directory>
+							<includes>
+								<include>WEB-INF/lib/celcom.jar</include>
+							</includes>
 							<excludes>
 								<exclude>CVS/**</exclude>
 								<exclude>**/*.xml</exclude>

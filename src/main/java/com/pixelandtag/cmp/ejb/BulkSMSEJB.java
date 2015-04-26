@@ -305,15 +305,16 @@ public class BulkSMSEJB implements BulkSMSI {
 		}
 		
 		sb.append("sheduledate").append(" : ").append(sheduledate).append("\n");
-		
+		com.inmobia.util.StopWatch s;
 		logger.info("\n\n incoming batch: "+sb.toString());
 		
 		BulkSMSAccount account = getAccout(apiKey,username,password);
+		if(!account.getActive())
+			throw new APIAuthenticationException("This plan is not active. Contact support.");
 		boolean hostAllowed = hostAllowed(account, sourceIp);
-		if(!hostAllowed){
+		if(!hostAllowed)
 			throw new APIAuthenticationException("Host not allowed.");
-			
-		}
+		
 		
 		BulkSMSPlan plan = getPlan(account,planid);
 		BigInteger planBalance = getPlanBalance(plan);
@@ -486,9 +487,9 @@ public class BulkSMSEJB implements BulkSMSI {
 			if(price!=null && !price.isEmpty())
 				lastpartofQuery += ((lastpartofQuery.length()>0) ? "AND " :"") + "txt.price=:price ";
 			
-			lastpartofQuery = "AND "+lastpartofQuery;
+			lastpartofQuery = (lastpartofQuery.isEmpty() ? "" : "AND ")+lastpartofQuery;
 			
-			System.out.println(">>>>>>>>>>>> "+lastpartofQuery);
+			logger.info(">>>>>>>>>>>> "+lastpartofQuery);
 			
 			Query query = em.createQuery("select coalesce(count(*),0), q.status,coalesce(txt.sheduledate,timecreated), txt.timezone, q.text.id, txt.content from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
 					+ " WHERE q.text=txt AND txt.plan=:plan "+lastpartofQuery+"  group by q.status,q.text.id, txt.sheduledate order by q.text.id desc");
@@ -534,13 +535,11 @@ public class BulkSMSEJB implements BulkSMSI {
 				
 			}
 			
+			
+			if(statsar.size()<1)
+				jsob.append("stats", new JSONObject());
 			for(Long n : statsar.keySet())
 				jsob.append("stats", statsar.get(n));
-				
-			
-			
-			
-			
 			
 			
 		}catch(javax.persistence.NoResultException nre){
