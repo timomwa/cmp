@@ -41,7 +41,7 @@ public class IPAddressWhitelist implements Serializable{
 	private String ipaddress;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name = "account_id_fk")
+	@JoinColumn(name = "accnt_id_fk")
 	@Index(name="wlaccidx")
 	private BulkSMSAccount account;
 

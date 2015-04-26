@@ -1,4 +1,4 @@
-package com.pixelandtag.api.bulksms;
+package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
 
@@ -46,8 +46,6 @@ public class BulkQueryEJB implements BulkQueryI {
 	public String query(String sourceIp, String apiKey, String username,
 			String password, String jsonString) throws APIAuthenticationException,ParameterException, JSONException, PlanException, PlanBalanceException{
 		
-		String resp = "";
-				
 		JSONObject inJso  =  new JSONObject(jsonString);
 		String planid = null;
 		String telcoid = null;
@@ -82,7 +80,7 @@ public class BulkQueryEJB implements BulkQueryI {
 		sb.append("senderid").append(" : ").append(senderid).append("\n");
 		sb.append("price").append(" : ").append(price).append("\n");
 				
-		if(planid==null||telcoid==null||senderid==null||price==null){
+		if(planid==null){
 			throw new ParameterException("Missing parameters. Parameters: ["+sb.toString()+"]");
 		}
 				
@@ -97,7 +95,7 @@ public class BulkQueryEJB implements BulkQueryI {
 
 		BulkSMSPlan plan = bulksms_api.getPlan(account,planid);
 		BigInteger planBalance = bulksms_api.getPlanBalance(plan);
-		String planstatus_str = bulksms_api.getPlanQueueStatus(plan);
+		String planstatus_str = bulksms_api.getPlanQueueStatus(plan,telcoid,senderid,price); 
 		JSONObject planstatus = new JSONObject(planstatus_str);
 		BigInteger currentoutgoingsize = bulksms_api.getCurrentOutgoingQueue(plan,MTStatus.RECEIVED);
 			

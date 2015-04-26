@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.pixelandtag.cmp.ejb.APIAuthenticationException;
+import com.pixelandtag.cmp.ejb.BulkQueryI;
 import com.pixelandtag.cmp.ejb.BulkSMSI;
 import com.pixelandtag.cmp.ejb.ParameterException;
 
@@ -49,7 +50,7 @@ private Logger logger = Logger.getLogger(getClass());
 			
 			System.out.println("jsonString >>> "+jsonString);
 			
-			String resp = bulkquery_api.query(ipAddress, apiKey,username,password,jsonString);
+			String resp = bulkquery_api.query(ipAddress, apiKey,username,password,jsonString); 
 			
 			response = Response.status(Response.Status.OK).entity(resp).build();
 		

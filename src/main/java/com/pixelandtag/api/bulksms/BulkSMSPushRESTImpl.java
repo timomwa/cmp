@@ -89,7 +89,7 @@ public class BulkSMSPushRESTImpl extends BaseRestImpl implements BulkSMSPushREST
 			} catch (JSONException e1) {
 				logger.error(e1.getMessage(),e1);
 			}
-			response =  Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+			response =  Response.status(Response.Status.NOT_ACCEPTABLE)
 				.entity(jsob.toString()).build();
 		}catch(PersistenceException pse){
 			//logger.error(pse.getMessage(),pse);

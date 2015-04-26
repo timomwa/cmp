@@ -97,9 +97,12 @@ public interface BulkSMSI {
 	/**
 	 * 
 	 * @param plan
+	 * @param price 
+	 * @param senderid 
+	 * @param telcoid 
 	 * @return
 	 */
-	public String getPlanQueueStatus(BulkSMSPlan plan);
+	public String getPlanQueueStatus(BulkSMSPlan plan, String telcoid, String senderid, String price);
 
 	
 }

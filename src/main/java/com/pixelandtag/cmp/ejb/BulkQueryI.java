@@ -1,4 +1,4 @@
-package com.pixelandtag.api.bulksms;
+package com.pixelandtag.cmp.ejb;
 
 import javax.ws.rs.Path;
 
