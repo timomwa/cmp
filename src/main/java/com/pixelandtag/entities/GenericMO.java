@@ -21,6 +21,13 @@ import com.pixelandtag.subscription.dto.MediumType;
  */
 public abstract class GenericMO extends GenericMessage {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7042242727138250600L;
+
+
+
 	public GenericMO(){
 	}
 	

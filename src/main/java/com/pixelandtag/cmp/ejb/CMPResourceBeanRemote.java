@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.entities.MTsms;
@@ -170,6 +171,10 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public void updateSession(int language_id, String msisdn,
 			int smsmenu_levels_id_fk, USSDSession sess, int menuId, BigInteger sessionId);
+
+	public MTsms getMTsms(Long id);
+	
+	public MTsms convertToLegacyMt(HttpToSend httpTosend);
 	
 
 }

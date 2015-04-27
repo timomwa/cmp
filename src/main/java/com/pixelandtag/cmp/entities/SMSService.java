@@ -78,6 +78,10 @@ public class SMSService implements Serializable {
 	@Column(name="subscription_length_time_unit")
 	@Enumerated(EnumType.STRING)
 	private TimeUnit subscription_length_time_unit;
+	
+	
+	@Column(name="forward_url")
+	private String forwardURL;
 
 	
 	/**

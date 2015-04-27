@@ -7,6 +7,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -29,12 +30,15 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
@@ -45,6 +49,8 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
+import com.pixelandtag.sms.mt.ACTION;
+import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Subscription;
@@ -66,6 +72,8 @@ import com.pixelandtag.web.beans.RequestObject;
 public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRemote {
 	
 	
+	
+	
 	public CMPResourceBean() throws KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,
 			KeyStoreException {
@@ -75,12 +83,97 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	private static int DEFAULT_LANGUAGE_ID = 1;
 	private String MINUS_ONE = "-1";
 	private final String RM1 = "RM1";
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	@EJB
 	private DatingServiceI datingBean;
 	
 
-	
+	public MTsms getMTsms(Long id){
+		MTsms mtsms = null;
+		//String query = "SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE id=:id";//in_outgoing_queue = 0 AND sent=0 AND billing_status in ('"+BillingStatus.NO_BILLING_REQUIRED+"' , '"+BillingStatus.INSUFFICIENT_FUNDS+"', '"+BillingStatus.SUCCESSFULLY_BILLED+"') order by `Priority` asc";
+		//Query qry = em.createNativeQuery(query);
+		try {
+			HttpToSend httpTosend = em.find(HttpToSend.class, id);
+			mtsms = convertToLegacyMt(httpTosend);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return mtsms;
+		
+	}
+	public MTsms convertToLegacyMt(HttpToSend httpTosend) {
+		MTsms mtsms = new MTsms();
+		mtsms.setId(httpTosend.getId());
+		mtsms.setSms(httpTosend.getSms());
+		mtsms.setMsisdn(httpTosend.getMsisdn());
+		mtsms.setType(httpTosend.getType());
+		mtsms.setSendFrom(httpTosend.getSendfrom());
+		mtsms.setPrice(httpTosend.getPrice());
+		mtsms.setPriority(httpTosend.getPriority());
+		mtsms.setServiceid(httpTosend.getServiceid().intValue());
+		mtsms.setTimeStamp(sdf.format(httpTosend.getTimestamp()));
+		mtsms.setFromAddr(httpTosend.getFromAddr());
+		mtsms.setCharged(httpTosend.getCharged());
+		mtsms.setCMP_AKeyword(httpTosend.getCMP_AKeyword());
+		mtsms.setCMP_SKeyword(httpTosend.getCMP_SKeyword());
+		mtsms.setAPIType(httpTosend.getApiType());
+		mtsms.setNewCMP_Txid(httpTosend.getNewCMP_Txid());
+		mtsms.setProcessor_id(httpTosend.getMo_processorFK().intValue());
+		mtsms.setShortcode(httpTosend.getSendfrom());
+		mtsms.setSubscription(httpTosend.getSubscription());
+		//mtsms.setMT_STATUS(rs.getString("MT_STATUS"));
+		
+		//if(mtsms.getNewCMP_Txid().equals(mtsms.getCMP_Txid()))
+		
+		if(httpTosend.getSMS_DataCodingId()!=null)// && !rs.getString("apiType").equalsIgnoreCase("NULL"))
+			mtsms.setSMS_DataCodingId(httpTosend.getSMS_DataCodingId()+"");
+		
+		if(httpTosend.getApiType()!=null)// && !rs.getString("apiType").equalsIgnoreCase("NULL"))
+			mtsms.setAPIType(httpTosend.getApiType());
+		
+		
+		//If receiver msisdn is null, then we take MSISDN as the msisdn to receive msg
+		if(httpTosend.getSub_r_mobtel()==null){// || rs.getString("sub_r_mobtel").equalsIgnoreCase("NULL")){
+			mtsms.setSUB_R_Mobtel(httpTosend.getMsisdn());
+		}else{
+			mtsms.setSUB_R_Mobtel(httpTosend.getSub_r_mobtel());
+		}
+		
+		//If c_mobtel (msisdn to bill) is null, then we take MSISDN to be the msisdn to bill 
+		if(httpTosend.getSub_c_mobtel()==null){// || rs.getString("sub_c_mobtel").equalsIgnoreCase("NULL")){
+			mtsms.setSUB_C_Mobtel(httpTosend.getMsisdn());
+		}else{
+			mtsms.setSUB_C_Mobtel(httpTosend.getSub_c_mobtel());
+		}
+		
+		
+		if(httpTosend.getCMP_AKeyword()!=null)// && !rs.getString("CMP_AKeyword").equalsIgnoreCase("NULL") )
+			mtsms.setCMP_AKeyword(httpTosend.getCMP_AKeyword());
+		
+		
+		if(httpTosend.getCMP_SKeyword()!=null)// && !rs.getString("CMP_SKeyword").equalsIgnoreCase("NULL") )
+			mtsms.setCMP_SKeyword(httpTosend.getCMP_SKeyword());
+		
+		
+		if(httpTosend.getCMP_TxID()!=null){// && !rs.getString("CMP_TxID").equalsIgnoreCase("NULL") )
+			mtsms.setCMP_Txid(httpTosend.getCMP_TxID());
+			logger.debug(">>>>>>>>>>>>>>>>>>>>>>: CMP_Txid "+httpTosend.getCMP_TxID());
+		}
+		
+		
+		if(httpTosend.getAction()!=null)// && !rs.getString("ACTION").equalsIgnoreCase("NULL") )
+			mtsms.setAction(httpTosend.getAction());
+		
+		
+		mtsms.setPricePointKeyword(httpTosend.getPrice_point_keyword());
+		
+		mtsms.setSplit_msg(httpTosend.getSplit());//whether to split msg or not..
+		
+		return mtsms;
+	}
 	/**
 	 * 
 	 * @param conn
@@ -406,6 +499,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				service.setProcessorClass((String) o[4] );//rs.getString("ProcessorClass"));//4
 				service.setActive(((Boolean) o[5]));//rs.getBoolean("enabled"));//5
 				service.setClass_status((String) o[6] );//rs.getString("class_status"));//6
+				service.setForwarding_url((o[8]!=null ? (String) o[8] : ""));
+				service.setProcessor_type(ProcessorType.fromString((String)o[9]));
 				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
 				
 				
@@ -2505,28 +2600,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								
 								//Subscription subscr = getSubscription(MSISDN,Long.valueOf(chosenMenu.getService_id()));
 								SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getService_id()+""));
-								Long processor_fk = smsserv.getMo_processorFK();
-								MOProcessorE proc = find(MOProcessorE.class, processor_fk);
 								
-								//subscribe(MSISDN, smsserv, chosenMenu.getId());
-								
-								
-								MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-								mosm_.setMsisdn(MSISDN);
-								mosm_.setServiceid(chosenMenu.getService_id());
-								mosm_.setSMS_Message_String(smsserv.getCmd());
-								mosm_.setSMS_SourceAddr(proc.getShortcode());
-								mosm_.setCMP_AKeyword(smsserv.getCmd());
-								mosm_.setCMP_SKeyword(smsserv.getCmd());
-								mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-								mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
-								mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
-								mosm_.setServiceid(smsserv.getId().intValue());
-								mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
-								mosm_.setId(req.getMessageId());
-								
-
-								logMO(mosm_); 
 								
 								if(smsserv.getCmd().equals("BILLING_SERV5")
 										||

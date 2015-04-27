@@ -3,8 +3,18 @@ package com.pixelandtag.serviceprocessors.dto;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
+import com.pixelandtag.cmp.entities.ProcessorType;
+
 public class ServiceProcessorDTO implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -409154920628397349L;
 	private int id;
 	private String serviceName;
 	private String shortcode;
@@ -24,6 +34,8 @@ public class ServiceProcessorDTO implements Serializable{
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
 	private String pricePointKeyword;
+	private ProcessorType processor_type;
+	private String forwarding_url;
 	
 	
 	
@@ -152,6 +164,9 @@ public class ServiceProcessorDTO implements Serializable{
 	public void setPricePointKeyword(String pricePointKeyword) {
 		this.pricePointKeyword = pricePointKeyword;
 	}
+	
+	
+
 	@Override
 	public String toString() {
 		return "ServiceProcessorDTO [id=" + id + ", serviceName=" + serviceName
@@ -160,7 +175,33 @@ public class ServiceProcessorDTO implements Serializable{
 				+ CMP_AKeyword + ", CMP_SKeyword=" + CMP_SKeyword + ", active="
 				+ active + ", class_status=" + class_status + ", keywords="
 				+ Arrays.toString(keywords) + ", servKey=" + servKey
-				+ ", price=" + price + ", toString()=" + super.toString() + "]";
+				+ ", price=" + price + ", subscriptionText=" + subscriptionText
+				+ ", unsubscriptionText=" + unsubscriptionText
+				+ ", tailTextSubscribed=" + tailTextSubscribed
+				+ ", tailTextNotSubecribed=" + tailTextNotSubecribed
+				+ ", pricePointKeyword=" + pricePointKeyword
+				+ ", processor_type=" + processor_type + ", forwarding_url="
+				+ forwarding_url + "]";
+	}
+
+
+	public ProcessorType getProcessor_type() {
+		return processor_type;
+	}
+
+
+	public void setProcessor_type(ProcessorType processor_type) {
+		this.processor_type = processor_type;
+	}
+
+
+	public String getForwarding_url() {
+		return forwarding_url;
+	}
+
+
+	public void setForwarding_url(String forwarding_url) {
+		this.forwarding_url = forwarding_url;
 	}
 
 

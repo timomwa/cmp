@@ -8,6 +8,10 @@ import com.pixelandtag.sms.producerthreads.EventType;
 
 public abstract class GenericMessage implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2538337546926006070L;
 	public final static String SUBSCRIPTION_BASED_CONTENT = "1";
 	public final static String IOD_BASED_CONTENT = "2";
 	public final static String PROMO_BASED_CONTENT = "3";

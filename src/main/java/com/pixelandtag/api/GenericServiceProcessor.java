@@ -622,22 +622,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		mo  = bill(mo);
 		
 		BaseEntityI cmpBean = getEJB();
-		//PreparedStatement pstmt = null;
-		
-		//Connection conn = null;
 		
 		try {
 			
-			//conn = getCon();
-			
-			//if(conn==null)
-			//	logger.error("Connection object is null!");
 			int max_retry = 5;
 			int count = 0;
 			
 			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 			
-				//pstmt = conn.prepareStatement(SEND_MT_1, Statement.RETURN_GENERATED_KEYS);
 				boolean success = cmpBean.sendMT(mo,SEND_MT_1);
 				while(!success && count<=max_retry){
 					success  = cmpBean.sendMT(mo,SEND_MT_1);
@@ -655,31 +647,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 					
 			}
 			
-			/*pstmt.setString(1, mo.getMt_Sent());
-			pstmt.setString(2, mo.getMsisdn());
-			pstmt.setString(3, mo.getSMS_SourceAddr());
-			pstmt.setString(4, mo.getSMS_SourceAddr());
-			
-			pstmt.setString(5, mo.getCMP_AKeyword());
-			pstmt.setString(6, mo.getCMP_SKeyword());
-			pstmt.setInt(7, mo.getPriority());
-			
-			if(!(mo.getCMP_Txid()==-1)){
-				pstmt.setString(8, String.valueOf(mo.getCMP_Txid()));
-				//logger.debug("mo.getCMP_Txid():::: "+mo.getCMP_Txid()+" >>>>>>>>>MO OBJ: "+mo.toString());
-			}
-			pstmt.setInt(9, (mo.isSplit_msg() ? 1 : 0));
-			pstmt.setInt(10, mo.getServiceid());
-			pstmt.setString(11, String.valueOf(mo.getPrice()));
-			pstmt.setString(12, mo.getSMS_DataCodingId());
-			pstmt.setInt(13, mo.getProcessor_id());
-			pstmt.setString(14, mo.getBillingStatus().toString());
-			pstmt.setString(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
-			pstmt.setString(16, mo.getBillingStatus().toString());
-			
-			int resp  = pstmt.executeUpdate(); */
-			
-				
 		
 		} catch (SQLException e) {
 			
@@ -690,28 +657,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			logger.error(e.getMessage(),e);
 			
 		}finally{
-			
-			try {
-				
-			//	if(pstmt!=null)
-				//	pstmt.close();
-			
-			} catch (Exception e) {
-				
-				logger.error(e.getMessage(),e);
-			
-			}
-			
-			try {
-				
-			//	if(conn!=null)
-				//	conn.close();
-			
-			} catch (Exception e) {
-				
-				logger.error(e.getMessage(),e);
-			
-			}
 			
 			
 		}

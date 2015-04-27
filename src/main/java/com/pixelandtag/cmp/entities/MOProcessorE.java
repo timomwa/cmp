@@ -1,6 +1,8 @@
 package com.pixelandtag.cmp.entities;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +11,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 @Entity
@@ -46,6 +50,13 @@ public class MOProcessorE implements Serializable {
 	@Column(name="class_status")
 	@Enumerated(EnumType.STRING)
 	private ClassStatus class_status;
+	
+	@Column(name="processor_type")
+	@Enumerated(EnumType.STRING)
+	ProcessorType processor_type;
+	
+	@Column(name="forwarding_url")
+	private String forwarding_url;
 
 	public Long getId() {
 		return id;
@@ -102,7 +113,29 @@ public class MOProcessorE implements Serializable {
 	public void setClass_status(ClassStatus class_status) {
 		this.class_status = class_status;
 	}
+
+	public ProcessorType getProcessor_type() {
+		return processor_type;
+	}
+
+	public void setProcessor_type(ProcessorType processor_type) {
+		this.processor_type = processor_type;
+	}
+
+	public String getForwarding_url() {
+		return forwarding_url;
+	}
+
+	public void setForwarding_url(String forwarding_url) {
+		this.forwarding_url = forwarding_url;
+	}
 	
-	
+	@PrePersist
+	@PreUpdate
+	public void onCreate(){
+		if(processor_type==null)
+			processor_type = ProcessorType.LOCAL;
+		
+	}
 
 }

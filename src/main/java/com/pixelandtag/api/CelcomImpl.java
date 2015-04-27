@@ -34,6 +34,8 @@ import snaq.db.DBPoolDataSource;
 
 
 
+
+import com.pixelandtag.cmp.entities.ProcessorType;
 //import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.beans.MessageType;
@@ -1911,14 +1913,14 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			if(connectionObjIsCached){
 				
-				pstmt = getConn().prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed'  FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
+				pstmt = getConn().prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed' , `mop`.`processor_type` as 'processor_type' , `mop`.`forwarding_url` as 'forwarding_url'  FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
 			
 			}else{
 				
 				
 				conn = getConn();
 				
-				pstmt = conn.prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed' FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
+				pstmt = conn.prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed', `mop`.`processor_type` as 'processor_type' , `mop`.`forwarding_url` as 'forwarding_url' FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
 				
 			}
 			
@@ -1949,6 +1951,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				service.setShortcode(rs.getString("shortcode"));
 				if(rs.getString("keywords")!=null)
 					service.setKeywords(rs.getString("keywords").split(","));
+				service.setForwarding_url(rs.getString("forwarding_url"));
+				service.setProcessor_type(ProcessorType.fromString(rs.getString("processor_type")));
 				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
 				
 				service.setThreads(rs.getInt("threads"));

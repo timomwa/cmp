@@ -99,8 +99,6 @@ public class MOReceiver extends HttpServlet {
 				return;
 			}
 			
-			
-			
 			final MOSms moMessage = new MOSms(req);
 			
 			if(ds==null){

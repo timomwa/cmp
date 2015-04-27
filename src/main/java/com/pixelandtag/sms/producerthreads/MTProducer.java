@@ -27,12 +27,14 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.gjt.mm.mysql.Driver;
 import org.hibernate.Query;
@@ -41,6 +43,7 @@ import snaq.db.ConnectionPool;
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
@@ -60,6 +63,8 @@ import com.pixelandtag.sms.mt.ACTION;
 import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClientWorker;
+import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.MTHttpSender;
 
 /**
@@ -100,11 +105,12 @@ public class MTProducer extends Thread {
 	 * This will hold a processor pool.
 	 */
 	public static volatile Map<Integer,ArrayList<ServiceProcessorI>> processor_pool = new HashMap<Integer,ArrayList<ServiceProcessorI>>();
-	
 	public static volatile Queue<ServiceProcessorDTO> serviceProcessors;
 	
 	private volatile static BlockingDeque<MTsms> mtMsgs = null;
+	private volatile static BlockingDeque<GenericHTTPParam> genericMT = null;
 	public volatile  BlockingDeque<MTHttpSender> httpSenderWorkers = new LinkedBlockingDeque<MTHttpSender>();
+	public volatile  BlockingDeque<GenericHTTPClientWorker> generichttpSenderWorkers = new LinkedBlockingDeque<GenericHTTPClientWorker>();
 	private int idleWorkers;
 	private String fr_tz;
 	private String to_tz;
@@ -112,6 +118,7 @@ public class MTProducer extends Thread {
 	public static final String DEFLT = "DEFAULT_DEFAULT";
 	private static int sentMT = 0;
 	
+	private static Semaphore semaphoreg;
 	private static Semaphore semaphore;//a semaphore because we might need to recover from a deadlock later.. listen for when we have many recs in the db but no msg is being sent out..
 	private static Semaphore uniq;
 	static{
@@ -139,6 +146,7 @@ public class MTProducer extends Thread {
 			 
 			 System.out.println(getClass().getSimpleName()+": Successfully initialized EJB CMPResourceBeanRemote !!");
 	 }
+	
 	
 	
 	/**
@@ -193,6 +201,59 @@ public class MTProducer extends Thread {
 		
 	}	
 	
+	
+	/**
+	 * This method tries - with all might :) not to allow more than one thread to 
+	 * access the MT message dequeue object.
+	 * During tests, I experienced a situation where two threads got the same message
+	 * from one queue.. Its like before the message was removed from the queue, another thread
+	 * already took the given message...
+	 * @return  com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam
+	 * @throws InterruptedException
+	 * @throws NullPointerException
+	 */
+	public static GenericHTTPParam getGenericHttp() throws InterruptedException, NullPointerException{
+		
+		try{
+			
+			
+			instance.logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			
+			semaphoreg.acquire();//now lock out everybody else!
+			
+			
+			instance.logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			
+			
+			 final GenericHTTPParam myMt = genericMT.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 
+			 //celcomAPI.beingProcessedd(myMt.getId(), true);//mark it as being processed first before returning.
+			 try {
+				 
+				celcomAPI.markInQueue(myMt.getId());
+			
+			 } catch (Exception e) {
+				
+				 instance.logger.error("\nRootException: " + e.getMessage()+ ": " +
+				 		"\n Something happenned. We were not able to mark " +
+				 		"\n the message as being in queue. " +
+				 		"\n To prevent another thread re-taking the message, " +
+				 		"\n we've returned null to the thread/method requesting for " +
+				 		"\na n MT.",e);
+				 
+				 return null;
+			}
+			 
+			 return myMt;
+		
+		}finally{
+			
+			semaphoreg.release(); // then give way to the next thread trying to access this method..
+			
+		
+		}
+		
+	}
 	
 	
 	/**
@@ -404,6 +465,13 @@ public class MTProducer extends Thread {
 				tw.setRun(false);
 		}
 		
+		for(GenericHTTPClientWorker tw : generichttpSenderWorkers){
+			if(tw.isRunning())
+				tw.setRun(false);
+		}
+		
+		
+		
 		//all unprocessed messages in queue are put back to the db.
 		
 		while(!finished){//Until all workers are idle or dead...
@@ -414,9 +482,6 @@ public class MTProducer extends Thread {
 				
 				if(tw.isRunning())
 					tw.setRun(false);
-				
-				
-				
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
@@ -428,7 +493,26 @@ public class MTProducer extends Thread {
 				
 			}
 			
+			
+			for(GenericHTTPClientWorker tw : generichttpSenderWorkers){
+				
+				if(tw.isRunning())
+					tw.setRun(false);
+				//might not be necessary because we already set run to false for each thread.
+				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
+				//because we already set run to false.
+				genericMT.addLast(new GenericHTTPParam());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				
+				if(!tw.isBusy()){
+					idleWorkers++;
+				}
+				
+			}
+			
 			try {
+				
+				logger.info("(workers*2): "+(workers*2));
+				logger.info("idleWorkers: "+idleWorkers);
 				
 				logger.info("workers: "+workers);
 				logger.info("idleWorkers: "+idleWorkers);
@@ -441,7 +525,7 @@ public class MTProducer extends Thread {
 			
 			}
 			
-			finished = workers==idleWorkers;
+			finished = (workers*2)>=idleWorkers;
 			
 		}
 		
@@ -456,10 +540,17 @@ public class MTProducer extends Thread {
 			celcomAPI.changeQueueStatus(sms.getIdStr(), false);//and its now not in the queue
 		}
 		//now all messages should be put back in quque
-		
-		
-		
 		mtMsgs.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
+		
+		
+		for(GenericHTTPParam sms : genericMT){
+			
+			logger.info("Returned to db: "+ sms.toString());
+			celcomAPI.beingProcessedd(sms.getId(), false);//nope, we're not processing it
+			celcomAPI.changeQueueStatus(sms.getId()+"", false);//and its now not in the queue
+		}
+		//now all messages should be put back in quque
+		genericMT.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
 		
 		//queueUpdater.setRun(false);//Stop the Queue updater worker
 		
@@ -510,14 +601,20 @@ public class MTProducer extends Thread {
 	
 	private void initWorkers() throws Exception{
 		
-		Thread t1;
 		
 		for(int i = 0; i<this.workers; i++){
 			MTHttpSender worker;
 			worker = new MTHttpSender(cmpbean,pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr, httpclient);
-			t1 = new Thread(worker);
+			Thread t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);
+			
+			GenericHTTPClientWorker genWorker;
+			genWorker = new GenericHTTPClientWorker(cmpbean,httpclient) ;
+			Thread t2 = new Thread(genWorker);
+			t2.start();
+			generichttpSenderWorkers.add(genWorker);
+		
 		}
 				
 		//First we load all processors from db
@@ -568,7 +665,7 @@ public class MTProducer extends Thread {
 			
 			moProcessor = new MOProcessor(constr, "MO_PROCESSOR_1");
 			
-			t1 = new Thread(moProcessor);
+			Thread t1 = new Thread(moProcessor);
 			
 			t1.start();
 			
@@ -585,6 +682,8 @@ public class MTProducer extends Thread {
 		
 		//wake all thread's because we're done initializing.
 		for(MTHttpSender worker: httpSenderWorkers)
+			worker.rezume();
+		for(GenericHTTPClientWorker worker: generichttpSenderWorkers)
 			worker.rezume();
 		
 			
@@ -667,6 +766,8 @@ public class MTProducer extends Thread {
 	public MTProducer(String connStr_, int workers_, int throttle_, int initialConnections_, int maxConnections_, int queueSize_, int pollWait_, URLParams urlparams_) throws Exception{
 		
 		semaphore = new Semaphore(1, FAIR);
+		
+		semaphoreg = new Semaphore(1, FAIR);
 		
 		this.throttle = throttle_;
 		
@@ -762,12 +863,14 @@ public class MTProducer extends Thread {
 	    if(queueSize>0){
 	    	
 	    	mtMsgs = new LinkedBlockingDeque<MTsms>(queueSize);
+	    	genericMT = new LinkedBlockingDeque<GenericHTTPParam>(queueSize);
 	    	
 	    	limitStr = " LIMIT "+queueSize;
 	   
 	    }else{
 	    	
 	    	mtMsgs = new LinkedBlockingDeque<MTsms>();
+	    	genericMT = new LinkedBlockingDeque<GenericHTTPParam>(queueSize);
 	    
 	    	limitStr = "";
 	    
@@ -789,8 +892,11 @@ public class MTProducer extends Thread {
 	    SchemeRegistry schemeRegistry = new SchemeRegistry();
     	schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
     	cm = new ThreadSafeClientConnManager(schemeRegistry);
-		cm.setDefaultMaxPerRoute(this.workers);
-		cm.setMaxTotal(this.workers);//http connections that are equal to the worker threads.
+		cm.setDefaultMaxPerRoute((this.workers*2));
+		cm.setMaxTotal((this.workers*2));//http connections that are equal to the worker threads.
+		
+		
+		
 		
 		httpclient = new DefaultHttpClient(cm);
 		
@@ -941,6 +1047,11 @@ public class MTProducer extends Thread {
 				mtsms.setSplit_msg(rs.getBoolean("split"));//whether to split msg or not..
 				
 				
+				ServiceProcessorDTO processor =  findProcessorDto(mtsms.getProcessor_id());
+				
+				System.out.println("\n\n\n\n\n :::::::::::::::::::::: processor.getProcessor_type()::: "+processor.getProcessor_type());
+				
+				
 				if(queueSize==0){//if we can add as many objects to the queue, then we just keep adding
 					
 					logger.debug("::::::::::::::rs.getBoolean(\"split\"): "+rs.getBoolean("split"));
@@ -950,14 +1061,28 @@ public class MTProducer extends Thread {
 					//so its least likely for there to be no space to add an element.
 					try {
 						
-						//Inserts the specified element at the end of this 
-						//deque if it is possible to do so immediately without violating 
-						//capacity restrictions, returning true upon success and false if no 
-						//space is currently available. When using a capacity-restricted deque, 
-						//this method is generally preferable to the addLast method, which can fail 
-						//to insert an element only by throwing an exception. 
-						mtMsgs.offerLast(mtsms);
-						
+						if(processor.getProcessor_type()==ProcessorType.MT_ROUTER){
+							GenericHTTPParam param = new GenericHTTPParam();
+							param.setUrl(processor.getForwarding_url());
+							param.setMtsms(mtsms);
+							param.setId(mtsms.getId());
+							List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+							qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
+							qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
+							qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
+							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
+							
+							param.setHttpParams(qparams);
+							genericMT.offerLast(param);//if we've got a limit to the queue
+						}else{
+							//Inserts the specified element at the end of this 
+							//deque if it is possible to do so immediately without violating 
+							//capacity restrictions, returning true upon success and false if no 
+							//space is currently available. When using a capacity-restricted deque, 
+							//this method is generally preferable to the addLast method, which can fail 
+							//to insert an element only by throwing an exception. 
+							mtMsgs.offerLast(mtsms);
+						}
 						celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 						
 					}catch(Exception e){
@@ -972,8 +1097,21 @@ public class MTProducer extends Thread {
 					//The queue has space in it to add an element.
 					try {
 						
-						mtMsgs.putLast(mtsms);//if we've got a limit to the queue
-						
+						if(processor.getProcessor_type()==ProcessorType.MT_ROUTER){
+							GenericHTTPParam param = new GenericHTTPParam();
+							param.setUrl(processor.getForwarding_url());
+							param.setMtsms(mtsms);
+							param.setId(mtsms.getId());
+							List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+							qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
+							qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
+							qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
+							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
+							param.setHttpParams(qparams);
+							genericMT.putLast(param);//if we've got a limit to the queue
+						}else{
+							mtMsgs.putLast(mtsms);//if we've got a limit to the queue
+						}
 						celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I fucking later realzed we still sending SMS twice!!!!!!
 						
 						//addedToqueue = true;
@@ -1068,6 +1206,16 @@ public class MTProducer extends Thread {
 		
 	}
 
+
+
+	private ServiceProcessorDTO findProcessorDto(int processor_id){
+		for(ServiceProcessorDTO servicep : serviceProcessors)
+			if(servicep.getId()==processor_id)
+				return servicep;
+		return null;
+	}
+	
+	
 
 
 	/**

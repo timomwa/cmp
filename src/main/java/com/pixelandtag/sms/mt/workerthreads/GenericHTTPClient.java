@@ -1,0 +1,286 @@
+package com.pixelandtag.sms.mt.workerthreads;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.util.List;
+import java.util.Vector;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
+
+import com.inmobia.util.StopWatch;
+import com.pixelandtag.api.ERROR;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.web.triviaImpl.MechanicsS;
+
+public class GenericHTTPClient{
+	
+	private static final int msg_part_wait = 0;//Time to wait in mills before sending broken message
+	private Logger logger = Logger.getLogger(getClass());
+	private HttpClient httpclient = null;
+	private String MINUS_ONE = "-1";
+	private String name;
+	private StopWatch watch;
+	private boolean run = true;
+	private volatile static ThreadSafeClientConnManager cm;
+	private volatile int sms_idx = 0;
+	private CMPResourceBeanRemote cmpbean;
+	private volatile boolean success = true;
+	private boolean finished = false;
+	private boolean busy = false;
+	private volatile String message = "";
+
+	private volatile int recursiveCounter = 0;
+	
+	
+	public GenericHTTPClient(CMPResourceBeanRemote cmpbean){
+		this.cmpbean = cmpbean;
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+	    cm = new ThreadSafeClientConnManager(schemeRegistry);
+		cm.setDefaultMaxPerRoute(2);
+		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+		httpclient = new DefaultHttpClient(cm);
+		init();
+	}
+	
+	public GenericHTTPClient(CMPResourceBeanRemote cmpbean, HttpClient httpclient_){
+		this.cmpbean = cmpbean;
+		this.httpclient = httpclient_;
+		init();
+	}
+	
+	
+
+	private void init(){
+		
+		this.watch = new StopWatch();
+		watch.start();
+		
+	}
+	
+	
+	/**
+	 * Sends the MT message
+	 * @param mt - com.pixelandtag.MTsms
+	 */
+	public HttpResponse call(GenericHTTPParam genericparams){
+		
+		this.success = true;
+		setBusy(true);
+		HttpPost httppost = null;
+		HttpResponse response = null;
+		try {
+			httppost = new HttpPost(genericparams.getUrl());
+			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(genericparams.getHttpParams(), "UTF-8");
+			httppost.setEntity(entity);
+			response = httpclient.execute(httppost);
+			printHeader(httppost);
+			watch.reset();
+			
+			setBusy(false);
+			
+			logger.debug(getName()+" ::::::: finished attempt to deliver SMS via HTTP");
+			
+		} catch (UnsupportedEncodingException e) {
+			logger.error(e.getMessage(),e);
+			httppost.abort();
+			this.success = false;
+		} catch (ClientProtocolException e) {
+			logger.error(e.getMessage(),e);
+			httppost.abort();
+			this.success = false;
+		} catch (IOException e) {
+			logger.error(e.getMessage(),e);
+			httppost.abort();
+			this.success = false;
+		}finally{
+			setBusy(false);
+		}
+		return response;
+	}
+	
+	
+	private synchronized void setBusy(boolean busy) {
+		this.busy = busy;
+		notify();
+	}
+	
+	private void printHeader(HttpPost httppost) {
+		logger.debug("\n===================HEADER=========================\n");
+		try{
+			
+			for(org.apache.http.Header h : httppost.getAllHeaders()){
+				if(h!=null){
+					logger.debug("name: "+h.getName());
+					logger.debug("value: "+h.getValue());
+					for(org.apache.http.HeaderElement hl : h.getElements()){
+						if(hl!=null){
+							logger.debug("\tname: "+hl.getName());
+							logger.debug("\tvalue: "+hl.getValue());
+							if(hl.getParameters()!=null)
+								for(NameValuePair nvp : hl.getParameters()){
+									if(nvp!=null){
+										logger.debug("\t\tname: "+nvp.getName());
+										logger.debug("\t\tvalue: "+nvp.getValue());
+									}
+								}
+						}
+					}
+				}
+			}
+		}catch(Exception e){
+		
+		logger.warn(e.getMessage(),e);
+	
+		}
+	
+		logger.debug("\n===================HEADER END======================\n");
+	}
+
+	public boolean isRunning() {
+		return run;
+	}
+	
+	public void setRun(boolean run) {
+		this.run = run;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	private void logAllParams(List<NameValuePair> params) {
+		
+		for(NameValuePair np: params){
+			
+			if(np.getName().equals("SMS_MsgTxt"))
+				logger.debug(np.getName()+ "=" + np.getValue()+" Length="+np.getValue().length());
+			else
+				logger.debug(np.getName() + "=" + np.getValue());
+			
+		}
+		
+		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + MTProducer.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
+	}
+
+	public synchronized void rezume(){
+		this.notify();
+	}
+	
+	public synchronized void pauze(){
+		try {
+			
+			this.wait();
+		
+		} catch (InterruptedException e) {
+			
+			logger.debug(getName()+" we now run!");
+		
+		}
+	}
+	
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public boolean isBusy() {
+		return busy;
+	}
+	
+	public boolean isFinished() {
+		return finished;
+	}
+
+	private void setFinished(boolean finished) {
+		this.finished = finished;
+	}
+
+	private Vector<String> splitText(String input){
+  		int maxSize = 136;
+		Vector<String> ret=new Vector<String>();
+  		
+  		while(true){
+  			input=input.trim();
+  			if (input.length()<=maxSize){
+  				ret.add(input);
+  				break;
+  			}
+  			int pos=maxSize;
+  			
+            while(input.charAt(pos)!=' ' && input.charAt(pos)!='\n')
+  				pos--;
+  			String tmp=input.substring(0,pos);
+  			ret.add(tmp);
+  			input=input.substring(pos);
+  			
+  		}
+  		return ret;
+  }
+	
+	
+	/**
+	 * Utility method for converting Stream To String
+	 * To convert the InputStream to String we use the
+	 * BufferedReader.readLine() method. We iterate until the BufferedReader
+	 * return null which means there's no more data to read. Each line will
+	 * appended to a StringBuilder and returned as String.
+	 * 
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 */
+	public String convertStreamToString(InputStream is)
+			throws IOException {
+		
+		StringBuilder sb = null;
+		BufferedReader reader = null;
+		
+		if (is != null) {
+			sb = new StringBuilder();
+			String line;
+
+			try {
+				reader = new BufferedReader(
+						new InputStreamReader(is, "UTF-8"));
+				while ((line = reader.readLine()) != null) {
+					sb.append(line).append("\n");
+				}
+			} finally {
+				is.close();
+			}
+			return sb.toString();
+		} else {
+			return "";
+		}
+	}
+}
