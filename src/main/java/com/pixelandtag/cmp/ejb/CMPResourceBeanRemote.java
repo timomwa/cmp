@@ -16,6 +16,7 @@ import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.Subscription;
+import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.subscription.SubscriptionSource;
@@ -167,6 +168,8 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public String getSubMenuString(String keyword, int language_id) throws Exception;
 
+	public void updateSession(int language_id, String msisdn,
+			int smsmenu_levels_id_fk, USSDSession sess, int menuId, BigInteger sessionId);
 	
 
 }

@@ -132,12 +132,6 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			
-			
-			if(ro.getKeyword()!=null && ro.getKeyword().length()>10){
-				response   = cmpBean.topUp(ro);
-			}
-			
-			
 			Person p = datingBean.getPerson(ro.getMsisdn());
 			
 			if((response==null || response.isEmpty()) && (p==null || (p!=null && !p.getActive()))){
@@ -145,13 +139,14 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			
-			if(response.equals("")){//if profile isn't complete, we try complete it
+			if(response==null || response.equals("")){//if profile isn't complete, we try complete it
 				PersonDatingProfile prof  = datingBean.getProfile(p);
 				if(!prof.getProfileComplete())
 				 response = datingBean.processDating(ro);
 			}
 			
-			if(response.equals("")){//we assume they want to renew subscription
+			System.out.println("has profile complete... do something else like purchase bundles:: response:"+response);
+			if(response==null || response.equals("")){//we assume they want to renew subscription
 					
 				response = cmpBean.processUSSD(ro);
 			}

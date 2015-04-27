@@ -6,6 +6,10 @@ import java.util.Map.Entry;
 
 public class MenuItem implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1370952203966405005L;
 	private static final String NUM_SPACER = ".";
 	private static final String NEW_LINE = "\n";
 	private int id;
@@ -95,7 +99,7 @@ public class MenuItem implements Serializable{
 	 * @return
 	 */
 	public MenuItem getMenuByPosition(int chosen){
-		return sub_menus.get(chosen);
+		return sub_menus==null? null : sub_menus.get(chosen);
 	}
 	
 	/**

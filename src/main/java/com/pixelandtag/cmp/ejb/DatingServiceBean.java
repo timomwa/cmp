@@ -52,6 +52,7 @@ import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
+import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
@@ -133,6 +134,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				resp = completeProfile(ro,person,profile);
 			
+			}else{
+				//force process to go to another method
+				resp = null;
 			}
 		}
 		
@@ -337,37 +341,6 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					profile.setProfileComplete(true);
 					person.setActive(true);
 					profile.setPerson(person);
-					
-					/*	SMSService smsserv = getSMSService("BILLING_SERV5");
-					Long processor_fk = smsserv.getMo_processorFK();
-					MOProcessorE proc = find(MOProcessorE.class, processor_fk);
-					
-					if(smsserv!=null && processor_fk!=null && proc!=null){//Mimic MO billing
-						MOSms mo = new MOSms();
-						mo.setMsisdn(MSISDN);
-						mo.setPrice(new BigDecimal(smsserv.getPrice()));
-						mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
-						mo.setMt_Sent(smsserv.getCmd());
-						mo.set
-						mo.setServiceid(smsserv.getId().intValue());
-						mo.setProcessor_id(processor_fk.intValue());
-						mo.setSMS_SourceAddr(proc.getShortcode());
-						mo.setPriority(0);
-						mo.setCMP_AKeyword(smsserv.getCmd());
-						mo.setCMP_SKeyword(smsserv.getCmd());
-						
-						if(req.getTransactionID().compareTo(BigInteger.ONE)>0)
-							mo.setCMP_Txid(req.getTransactionID());
-						else
-							mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
-						
-						mo.setSplit_msg(false);
-						mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
-						mo.setSubscription(false);
-						
-						sendMT(mo);
-					}*/
-					//renewSubscription(MSISDN, smsservice);
 				}
 				
 				profile = saveOrUpdate(profile);
@@ -395,25 +368,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					if(match==null)
 						 match = findMatch(pref_gender,person.getId());
 					
-					if(match==null){//Profile is complete
-						MenuItem topMenu = cmp_ejb.getTopMenu("BUNDLES");
-						MenuItem item = null;
-						if(topMenu!=null)
-							item = cmp_ejb.getMenuByParentLevelId(language_id,topMenu.getId(),topMenu.getMenu_id());
-						resp =  item!=null ? item.enumerate() : null;
-						
-						if(resp!=null){
-							Session sess = cmp_ejb.getSession(MSISDN);
-							if(sess==null){
-								sess = new Session();
-								sess.setLanguage_id(language_id);
-								sess.setMenu_item(item);
-								sess.setMsisdn(MSISDN);
-								sess.setSmsmenu_level_id_fk(item.getId());
-							}
-							cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id());//update session to upper menu.
-						}
-					}else{
+					
 						try{
 							SystemMatchLog sysmatchlog = new SystemMatchLog();
 							sysmatchlog.setPerson_a_id(person.getId());
@@ -469,10 +424,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							sendMT(mo);
 							//resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 							//resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+							
 							MenuItem topMenu = cmp_ejb.getTopMenu("BUNDLES");
 							MenuItem item = null;
-							if(topMenu!=null)
+							if(topMenu!=null){
 								item = cmp_ejb.getMenuByParentLevelId(language_id,topMenu.getId(),topMenu.getMenu_id());
+							}
 							resp =  item!=null ? item.enumerate() : null;
 							
 							if(resp!=null){
@@ -484,14 +441,17 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 									sess.setMsisdn(MSISDN);
 									sess.setSmsmenu_level_id_fk(item.getId());
 								}
-								cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id());//update session to upper menu.
+								if(req.getMediumType()==MediumType.ussd)
+									cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id(),null,item.getMenu_id(),req.getSessionid());
+								else
+									cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id());//update session to upper menu.
+								resp = "Select your chat bundles.\n"+ resp+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
 							}
 						}else{
 							resp = "Request received but we couldn't process your request. Do try again later.";
 						}
 						
-					}
-					
+										
 				}
 		
 		}catch(Exception exp){

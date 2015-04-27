@@ -305,7 +305,7 @@ public class BulkSMSEJB implements BulkSMSI {
 		}
 		
 		sb.append("sheduledate").append(" : ").append(sheduledate).append("\n");
-		com.inmobia.util.StopWatch s;
+		
 		logger.info("\n\n incoming batch: "+sb.toString());
 		
 		BulkSMSAccount account = getAccout(apiKey,username,password);
