@@ -52,6 +52,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
+import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
@@ -92,6 +93,36 @@ public class BaseEntityBean implements BaseEntityI {
         }
     };
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void  mimicMO(String keyword, String msisdn){
+		try {
+			SMSService smsserv = getSMSService(keyword);
+			Long processor_fk = smsserv.getMo_processorFK();
+			MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+			
+			MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+			mosm_.setMsisdn(msisdn);
+			mosm_.setServiceid(smsserv.getId().intValue());
+			mosm_.setSMS_Message_String(smsserv.getCmd());
+			mosm_.setSMS_SourceAddr(proc.getShortcode());
+			mosm_.setCMP_AKeyword(smsserv.getCmd());
+			mosm_.setCMP_SKeyword(smsserv.getCmd());
+			mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+			mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+			mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
+			mosm_.setServiceid(smsserv.getId().intValue());
+			mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
+			mosm_.setProcessor_id(processor_fk);
+			
+			logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
+
+			logMO(mosm_);
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		
+	}
     public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception{
 		
 		boolean isAtive = false;
@@ -730,6 +761,7 @@ public class BaseEntityBean implements BaseEntityI {
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Override
 	public MOSms logMO(MOSms mo) throws TransactionIDGenException{
 		
 		logger.debug("LOGGING_MO_CELCOM_");
@@ -828,8 +860,7 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	@SuppressWarnings("unchecked")
 	public MOSms resolveKeywords(MOSms mo) {
-		
-		logger.info(">>>>>>V.6>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
+		logger.info(">>>>>>V.7>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
 		
 		
 		
@@ -862,14 +893,14 @@ public class BaseEntityBean implements BaseEntityI {
 			
 			List<Object[]> resp = qry.getResultList();
 			
-			
 			if(resp.size()>0){
 				for(Object[] o: resp){
 					mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
 					mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
 					mo.setServiceid( ((Integer)o[4]).intValue());//rs.getInt("serviceid"));
 					mo.setPrice(BigDecimal.valueOf((Double)o[3]));//BigDecimal.valueOf(rs.getDouble("sms_price")));
-					mo.setProcessor_id(((Integer)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+					Long proc_id = Long.valueOf( (  (Integer)o[0] )+"" );
+					mo.setProcessor_id(proc_id);//rs.getInt("mo_processor_id_fk"));
 					mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
 					mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
 					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
@@ -888,7 +919,7 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				qry2.setParameter(1,mo.getSMS_SourceAddr());
 				
-				List<Object[]> resp2 = qry.getResultList();
+				List<Object[]> resp2 = qry2.getResultList();
 				
 				if(resp2.size()>0){
 					
@@ -903,14 +934,27 @@ public class BaseEntityBean implements BaseEntityI {
 						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));*/
 						mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
 						mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
-						mo.setServiceid( ((BigInteger)o[4]).intValue());//rs.getInt("serviceid"));
-						mo.setPrice((BigDecimal)o[3]);//BigDecimal.valueOf(rs.getDouble("sms_price")));
-						mo.setProcessor_id(((BigInteger)o[0]).intValue());//rs.getInt("mo_processor_id_fk"));
+						mo.setServiceid( ((Integer)o[4]).intValue());//rs.getInt("serviceid"));
+						mo.setPrice(  BigDecimal.valueOf((Double)o[3])  );//BigDecimal.valueOf(rs.getDouble("sms_price")));
+						Long proc_id = Long.valueOf( (  (Integer)o[0] )+"" );
+						mo.setProcessor_id(proc_id);//rs.getInt("mo_processor_id_fk"));
 						mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
 						mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
 						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
 					}
 				
+				}else{
+					Query qry3 = em.createNativeQuery("SELECT `mop`.id as 'mo_processor_id_fk' FROM `"+CelcomImpl.database+"`.`mo_processors` mop WHERE mop.shortcode=?");
+					
+					qry3.setParameter(1,mo.getSMS_SourceAddr());
+					
+					List<Integer> resp3 = qry3.getResultList();
+					
+					for(Integer o: resp3){
+						Long proc_id = Long.valueOf(  o.intValue() );
+						mo.setProcessor_id(proc_id);//rs.getInt("mo_processor_id_fk"));
+					}
+					
 				}
 				
 				
@@ -918,6 +962,7 @@ public class BaseEntityBean implements BaseEntityI {
 		
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
+			e.printStackTrace();
 		}finally{
 			
 		}
@@ -990,6 +1035,24 @@ public class BaseEntityBean implements BaseEntityI {
 		int end  = resp.indexOf("</errorCode>");
 		return resp.substring(start, end);
 	}
+	
+	
+	
+	public boolean sendMT(MOSms mo) throws Exception{
+		final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
+				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
+				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
 
+		return sendMT(mo,SEND_MT_1);
+	}
+	
+	public long generateNextTxId(){
+		try {
+			Thread.sleep(112);
+		} catch (InterruptedException e) {
+			logger.warn("\n\t\t::"+e.getMessage());
+		}
+		return System.currentTimeMillis();
+	}
 
 }

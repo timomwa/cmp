@@ -121,7 +121,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		mtsms.setCMP_SKeyword(httpTosend.getCMP_SKeyword());
 		mtsms.setAPIType(httpTosend.getApiType());
 		mtsms.setNewCMP_Txid(httpTosend.getNewCMP_Txid());
-		mtsms.setProcessor_id(httpTosend.getMo_processorFK().intValue());
+		mtsms.setProcessor_id(httpTosend.getMo_processorFK());
 		mtsms.setShortcode(httpTosend.getSendfrom());
 		mtsms.setSubscription(httpTosend.getSubscription());
 		//mtsms.setMT_STATUS(rs.getString("MT_STATUS"));
@@ -197,7 +197,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				for(Object[] o : obj){
 				
 					sm.setId((Integer) o[0] );// rs.getInt("id"));//0
-					sm.setMo_processor_FK((Integer) o[1] );//rs.getInt("mo_processorFK"));//1
+					sm.setMo_processor_FK(Long.valueOf(  ((Integer) o[1])).longValue() );//rs.getInt("mo_processorFK"));//1
 					sm.setCmd((String) o[2] );//rs.getString("cmd"));//2
 					sm.setPush_unique( ((Integer) o[3]).compareTo(1)==0 );//rs.getBoolean("push_unique"));//3
 					sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
@@ -281,7 +281,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				sm = new SMSServiceDTO();
 				
 				sm.setId((Integer) o[0] );// rs.getInt("id"));//0
-				sm.setMo_processor_FK((Integer) o[1] );//rs.getInt("mo_processorFK"));//1
+				sm.setMo_processor_FK( Long.valueOf(((Integer) o[1]).longValue()) );//rs.getInt("mo_processorFK"));//1
 				sm.setCmd((String) o[2] );//rs.getString("cmd"));//2
 				sm.setPush_unique( ((Integer) o[3]).compareTo(1)==0);//rs.getBoolean("push_unique"));//3
 				sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
@@ -444,7 +444,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						sm = new SMSServiceDTO();
 					
 					sm.setId((Integer) o[0] );// rs.getInt("id"));//0
-					sm.setMo_processor_FK((Integer) o[1] );//rs.getInt("mo_processorFK"));//1
+					sm.setMo_processor_FK(Long.valueOf( (Integer) o[1]).longValue() );//rs.getInt("mo_processorFK"));//1
 					sm.setCmd((String) o[2] );//rs.getString("cmd"));//2
 					sm.setPush_unique(((Integer) o[3]).compareTo(1)==0);//rs.getBoolean("push_unique"));//3
 					sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
@@ -476,7 +476,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 	
 	@SuppressWarnings("unchecked")
-	public ServiceProcessorDTO getServiceProcessor(int processor_id_fk) throws Exception{
+	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception{
 
 		ServiceProcessorDTO service = null;
 		
@@ -1369,7 +1369,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public String getUniqueFromCategory(String database_name,String table,
 			String field,String idfield,String categoryfield,String categoryvalue,
-			String msisdn,int serviceid,int size,int processor_id) throws Exception{
+			String msisdn,int serviceid,int size,Long processor_id) throws Exception{
 		String retval=null;
 		int contentid=0;
 		
@@ -1386,7 +1386,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			}
 			String sql = "SELECT s."+idfield+" AS id, s."+field+" AS txt, COUNT(log.id) AS cnt " +
 					"FROM "+database_name+"."+table+" s "+
-					"LEFT JOIN "+database_name+".contentlog log ON ( log.processor_id = "+processor_id+" AND log.serviceid = "+serviceid+" AND log.msisdn='"+msisdn+"' AND log.contentid=s.id ) " +
+					"LEFT JOIN "+database_name+".contentlog log ON ( log.processor_id = "+processor_id.intValue()+" AND log.serviceid = "+serviceid+" AND log.msisdn='"+msisdn+"' AND log.contentid=s.id ) " +
 					"WHERE ( "+where+") "+
 					"GROUP BY s.id "+
 					"ORDER BY cnt ASC "+
@@ -1402,7 +1402,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					contentid = (Integer) o[0];
 					int count = ( (BigInteger) o[2] ).intValue();
 					if ( count>0 ) {
-						String sql2 = "DELETE FROM "+database_name+".contentlog WHERE processor_id="+processor_id+" AND serviceid="+serviceid+" AND msisdn='"+msisdn+"'";
+						String sql2 = "DELETE FROM "+database_name+".contentlog WHERE processor_id="+processor_id.intValue()+" AND serviceid="+serviceid+" AND msisdn='"+msisdn+"'";
 						Query qry2 = em.createNativeQuery(sql2);
 						qry2.executeUpdate();
 					}
@@ -1415,7 +1415,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				try {
 					sql3=(
 						"INSERT DELAYED INTO "+database_name+".contentlog SET "+
-						"processor_id="+processor_id+", serviceid="+serviceid+", msisdn='"+msisdn+"', timestamp=now(), contentid="+contentid
+						"processor_id="+processor_id.intValue()+", serviceid="+serviceid+", msisdn='"+msisdn+"', timestamp=now(), contentid="+contentid
 					);
 					Query qry3 = em.createNativeQuery(sql3);
 					qry3.executeUpdate();
@@ -2163,7 +2163,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					logger.debug(" >>>>>>>>>>>>>>>>>>>>>>>>>>> service name >>>> "+(String) (o[3]));
 				
 					subdto = new SubscriptionDTO();
-					subdto.setProcessor_id( ( (Integer) (o[1]) ).intValue());//rs.getInt("mo_processor_id_fk"));
+					subdto.setProcessor_id( Long.valueOf(( (Integer) (o[1]) ).longValue() +"") );//rs.getInt("mo_processor_id_fk"));
 					subdto.setShortcode(   (String) (o[2]) );//rs.getString("shortcode"));
 					subdto.setServiceName(  (String) (o[3]) );//rs.getString("ServiceName"));
 					subdto.setCmd( (String) (o[4]) );//rs.getString("cmd"));
@@ -2515,6 +2515,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									MOProcessorE proc = find(MOProcessorE.class, processor_fk);
 									
 									//subscribe(MSISDN, smsserv, chosenMenu.getId());
+									logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
 									
 									
 									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
@@ -2530,8 +2531,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
 									mosm_.setId(req.getMessageId());
-									mosm_.setProcessor_id(processor_fk.intValue());
-	
+									mosm_.setProcessor_id(processor_fk);
+									
+									
 									logMO(mosm_); 
 									
 									if(smsserv.getCmd().equals("BILLING_SERV5")
@@ -2687,7 +2689,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
 									mosm_.setId(req.getMessageId());
-									mosm_.setProcessor_id(processor_fk.intValue());
+									mosm_.setProcessor_id(processor_fk);
+									logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
 									
 									logMO(mosm_);
 									
@@ -2750,7 +2753,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							mosm_.setCMP_AKeyword(smsserv.getCmd());
 							mosm_.setCMP_SKeyword(smsserv.getCmd());
 							mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-							mosm_.setProcessor_id(processor_fk.intValue());
+							mosm_.setProcessor_id(processor_fk);
+							logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
 							
 							logMO(mosm_);
 							//Mimic an MO
@@ -3482,18 +3486,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 	
 	
-	
-	
-	
-	
-	public long generateNextTxId(){
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			logger.warn("\n\t\t::"+e.getMessage());
-		}
-		return System.currentTimeMillis();
-	}
 	
 	public static String hexToString(String txtInHex){
 		

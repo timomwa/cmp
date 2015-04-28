@@ -364,7 +364,7 @@ public class SubscriptionOld {
 					sm = new SMSServiceDTO();
 				
 				sm.setId(rs.getInt("id"));
-				sm.setMo_processor_FK(rs.getInt("mo_processorFK"));
+				sm.setMo_processor_FK(Long.valueOf(rs.getInt("mo_processorFK")+""));
 				sm.setCmd(rs.getString("cmd"));
 				sm.setPush_unique(rs.getBoolean("push_unique"));
 				sm.setService_name(rs.getString("service_name"));
@@ -419,7 +419,7 @@ public class SubscriptionOld {
 					sm = new SMSServiceDTO();
 				
 				sm.setId(rs.getInt("id"));
-				sm.setMo_processor_FK(rs.getInt("mo_processorFK"));
+				sm.setMo_processor_FK(Long.valueOf(rs.getInt("mo_processorFK")+""));
 				sm.setCmd(rs.getString("cmd"));
 				sm.setPush_unique(rs.getBoolean("push_unique"));
 				sm.setService_name(rs.getString("service_name"));
@@ -584,7 +584,7 @@ public class SubscriptionOld {
 				sm = new SMSServiceDTO();
 				
 				sm.setId(rs.getInt("id"));
-				sm.setMo_processor_FK(rs.getInt("mo_processorFK"));
+				sm.setMo_processor_FK(Long.valueOf(rs.getInt("mo_processorFK")+""));
 				sm.setCmd(rs.getString("cmd"));
 				sm.setPush_unique(rs.getBoolean("push_unique"));
 				sm.setService_name(rs.getString("service_name"));

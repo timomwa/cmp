@@ -9,8 +9,12 @@ import java.io.Serializable;
  */
 public class SMSServiceDTO  implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2322969150452669128L;
 	private int id;
-	private int mo_processor_FK;
+	private Long mo_processor_FK;
 	private String cmd;
 	private boolean push_unique;
 	private String service_name;
@@ -31,7 +35,7 @@ public class SMSServiceDTO  implements Serializable {
 	public int getId() {
 		return id;
 	}
-	public int getMo_processor_FK() {
+	public Long getMo_processor_FK() {
 		return mo_processor_FK;
 	}
 	public String getCmd() {
@@ -61,7 +65,7 @@ public class SMSServiceDTO  implements Serializable {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public void setMo_processor_FK(int mo_processor_FK) {
+	public void setMo_processor_FK(Long mo_processor_FK) {
 		this.mo_processor_FK = mo_processor_FK;
 	}
 	public void setCmd(String cmd) {

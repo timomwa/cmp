@@ -182,7 +182,7 @@ public interface CelcomHTTPAPI extends Settings {
 	
 	public void myfinalize();
 	
-	public long generateNextTxId();
+	//public long generateNextTxId();
 	
 	public String toUnicodeString(String sms);
 	

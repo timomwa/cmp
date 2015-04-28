@@ -11,7 +11,7 @@ public abstract class GenericMessage implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2538337546926006070L;
+	private static final long serialVersionUID = 2538337546926006071L;
 	public final static String SUBSCRIPTION_BASED_CONTENT = "1";
 	public final static String IOD_BASED_CONTENT = "2";
 	public final static String PROMO_BASED_CONTENT = "3";
@@ -40,7 +40,7 @@ public abstract class GenericMessage implements Serializable{
 	private int priority = 1;
 	private int number_of_sms = 1;
 	private boolean split_msg;
-	private int processor_id;
+	private Long processor_id;
 	private String pricePointKeyword;
 	private Long subscription_id;
 	private boolean subscription;
@@ -109,11 +109,11 @@ public abstract class GenericMessage implements Serializable{
 		return price;
 	}
 
-	public int getProcessor_id() {
+	public Long getProcessor_id() {
 		return processor_id;
 	}
 
-	public void setProcessor_id(int processor_id) {
+	public void setProcessor_id(Long processor_id) {
 		this.processor_id = processor_id;
 	}
 

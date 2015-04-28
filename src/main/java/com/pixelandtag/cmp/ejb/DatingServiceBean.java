@@ -103,10 +103,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				MOSms mo = new MOSms();
 				mo.setMsisdn(MSISDN);
 				mo.setPrice(BigDecimal.ZERO);
-				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED); 
 				mo.setMt_Sent(msg);
 				mo.setServiceid(smsserv.getId().intValue());
-				mo.setProcessor_id(processor_fk.intValue());
+				mo.setProcessor_id(processor_fk);
 				mo.setSMS_SourceAddr(proc.getShortcode());
 				mo.setPriority(0);
 				mo.setCMP_AKeyword(smsserv.getCmd());
@@ -120,7 +120,6 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				mo.setSplit_msg(false);
 				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 				mo.setSubscription(false);
-				mo.setProcessor_id(processor_fk.intValue());
 				sendMT(mo);
 			}
 			
@@ -245,14 +244,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 					boolean isunique = isUsernameUnique(KEYWORD);
-					if(isunique){
+					if(isunique || person.getMsisdn().equals(KEYWORD)){
 						profile.setUsername(KEYWORD);
 					}else{
 						resp = getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
 						return resp;
 					}
-						
 				}
 				
 				if(attr.equals(ProfileAttribute.GENDER)){
@@ -408,7 +406,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 							mo.setMt_Sent(msg);
 							mo.setServiceid(smsserv.getId().intValue());
-							mo.setProcessor_id(processor_fk.intValue());
+							mo.setProcessor_id(processor_fk);
 							mo.setSMS_SourceAddr(proc.getShortcode());
 							mo.setPriority(0);
 							mo.setCMP_AKeyword(smsserv.getCmd());
@@ -422,7 +420,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							mo.setSplit_msg(false);
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 							mo.setSubscription(false);
-							mo.setProcessor_id(processor_fk.intValue());
+							mo.setProcessor_id(processor_fk);
 							sendMT(mo);
 							//resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 							//resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
@@ -884,63 +882,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 
-	public boolean sendMT(MOSms mo) throws Exception{
-		final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
-
-		return sendMT(mo,SEND_MT_1);
-	}
+	
 /**
 	 * Logs in httptosend
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean sendMT(MOSms mo, String sql) throws Exception{
-		boolean success = false;
-		try{
-		 
-			utx.begin();
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, mo.getMt_Sent());
-			qry.setParameter(2, mo.getMsisdn());
-			qry.setParameter(3, mo.getSMS_SourceAddr());
-			qry.setParameter(4, mo.getSMS_SourceAddr());
-			
-			qry.setParameter(5, mo.getCMP_AKeyword());
-			qry.setParameter(6, mo.getCMP_SKeyword());
-			qry.setParameter(7, mo.getPriority());
-		
-			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
-				qry.setParameter(8, String.valueOf(mo.getCMP_Txid()));
-			}else{
-				qry.setParameter(8, String.valueOf(generateNextTxId()));
-			}
-			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
-			qry.setParameter(10, mo.getServiceid());
-			qry.setParameter(11, String.valueOf(mo.getPrice()));
-			qry.setParameter(12, mo.getSMS_DataCodingId());
-			qry.setParameter(13, mo.getProcessor_id());
-			qry.setParameter(14, mo.getBillingStatus().toString());
-			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
-			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
-			qry.setParameter(17, mo.getBillingStatus().toString());
-			
-			int num =  qry.executeUpdate();
-			utx.commit();
-			success = num>0;
-		
-		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error(e.getMessage(),e);
-			throw e;
-		}
-		 
-		return success;
-	}
+	
 	
 	
 	@SuppressWarnings("unchecked")

@@ -155,10 +155,10 @@ public class MTProducer extends Thread {
 	 * @return
 	 * @throws NoServiceProcessorException 
 	 */
-	public static ServiceProcessorI getFreeProcessor(int mo_processor_id) throws NoServiceProcessorException{
+	public static ServiceProcessorI getFreeProcessor(Long mo_processor_id) throws NoServiceProcessorException{
 		logger.info("gugamuga_processor_pool: : "+processor_pool);
 		
-		ArrayList<ServiceProcessorI> processorPool = processor_pool.get(mo_processor_id);
+		ArrayList<ServiceProcessorI> processorPool = processor_pool.get(mo_processor_id.intValue());
 		
 		//TODO add a semaphore so only one thread accesses this at a time.
 		//TODO check for processorPool object bing null then, re-direct that message to an existing processor pool
@@ -627,7 +627,6 @@ public class MTProducer extends Thread {
 		if(serviceProcessors!=null){
 			for(ServiceProcessorDTO servicep : serviceProcessors){
 				
-				
 				final int processor_threads = servicep.getThreads();
 				
 				ArrayList<ServiceProcessorI> processor_array = new ArrayList<ServiceProcessorI>();
@@ -996,7 +995,7 @@ public class MTProducer extends Thread {
 				mtsms.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 				mtsms.setAPIType(rs.getString("apiType"));
 				mtsms.setNewCMP_Txid(rs.getString("newCMP_Txid"));
-				mtsms.setProcessor_id(rs.getInt("mo_processorFK"));
+				mtsms.setProcessor_id(Long.valueOf(rs.getInt("mo_processorFK")+""));
 				mtsms.setShortcode(rs.getString("fromAddr"));
 				mtsms.setSubscription(rs.getBoolean("subscription"));
 				//mtsms.setMT_STATUS(rs.getString("MT_STATUS"));
@@ -1047,7 +1046,7 @@ public class MTProducer extends Thread {
 				mtsms.setSplit_msg(rs.getBoolean("split"));//whether to split msg or not..
 				
 				
-				ServiceProcessorDTO processor =  findProcessorDto(mtsms.getProcessor_id());
+				ServiceProcessorDTO processor =  findProcessorDto(mtsms.getProcessor_id().intValue());
 				
 				System.out.println("\n\n\n\n\n :::::::::::::::::::::: processor.getProcessor_type()::: "+processor.getProcessor_type());
 				

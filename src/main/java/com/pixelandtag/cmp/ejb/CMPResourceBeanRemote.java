@@ -75,7 +75,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	 */
 	public String getUniqueFromCategory(String database_name,String table,
 			String field,String idfield,String categoryfield,String categoryvalue,
-			String msisdn,int serviceid,int size,int processor_id) throws Exception;
+			String msisdn,int serviceid,int size,Long processor_id) throws Exception;
 
 	/**
 	 * 
@@ -135,7 +135,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	
 	public SMSServiceDTO getSMSservice(int service_id) throws Exception;
 	
-	public ServiceProcessorDTO getServiceProcessor(int processor_id_fk) throws Exception;
+	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
 
 	public boolean subscribe(String mSISDN, SMSService smsService, int id,
 			SubscriptionStatus confirmed, SubscriptionSource sms) throws Exception;
@@ -176,6 +176,8 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	
 	public MTsms convertToLegacyMt(HttpToSend httpTosend);
 	public void clearUssdSesion(USSDSession sess);
+
+	
 	
 
 }

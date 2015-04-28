@@ -35,6 +35,7 @@ import snaq.db.DBPoolDataSource;
 
 
 
+
 import com.pixelandtag.cmp.entities.ProcessorType;
 //import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
@@ -872,7 +873,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			pstmt.setDouble(10, mo.getPrice().doubleValue());
 			pstmt.setInt(11, mo.getServiceid());
-			pstmt.setInt(12, mo.getProcessor_id());
+			pstmt.setInt(12, mo.getProcessor_id().intValue());
 			pstmt.setBoolean(13, mo.isSplit_msg());
 			
 			pstmt.setString(14, mo.getEventType()!=null ? mo.getEventType().getName() : EventType.CONTENT_PURCHASE.getName());
@@ -996,7 +997,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			else
 				pstmt.setDouble(14, mt.getPrice().doubleValue());//price
 			pstmt.setString(15, mt.getNewCMP_Txid());//new CMPTxid
-			pstmt.setInt(16, mt.getProcessor_id());//processor id
+			pstmt.setInt(16, mt.getProcessor_id().intValue());//processor id
 			pstmt.setString(17, mt.getPricePointKeyword());//processor id
 			pstmt.setString(18, mt.getSms());//SMS
 			
@@ -1024,7 +1025,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			else
 				pstmt.setString(28, mt.getCMP_SKeyword());//CMP_SKeyword
 			
-			pstmt.setInt(29, mt.getProcessor_id());//CMP_SKeyword
+			pstmt.setInt(29, mt.getProcessor_id().intValue());//CMP_SKeyword
 			
 			pstmt.setString(30, mt.getPricePointKeyword());//CMP_SKeyword
 			
@@ -1691,7 +1692,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setMT_STATUS(rs.getString("MT_STATUS"));
 				mo.setServiceid(rs.getInt("serviceid"));
 				mo.setPrice(BigDecimal.valueOf(rs.getDouble("price")));
-				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));//added by Tim since 2012-09-21 at 1.17pm
+				mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));//added by Tim since 2012-09-21 at 1.17pm
 				mo.setSplit_msg(rs.getBoolean("msg_was_split"));
 				mo.setEventType(EventType.get(rs.getString("event_type")));
 				mo.setPricePointKeyword(rs.getString("price_point_keyword"));
@@ -1913,14 +1914,14 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			if(connectionObjIsCached){
 				
-				pstmt = getConn().prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed' , `mop`.`processor_type` as 'processor_type' , `mop`.`forwarding_url` as 'forwarding_url'  FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
+				pstmt = getConn().prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed' , `mop`.`processor_type` as 'processor_type' , `mop`.`forwarding_url` as 'forwarding_url'  FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 AND `mop`.`processor_type` <> 'PHANTOM' group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
 			
 			}else{
 				
 				
 				conn = getConn();
 				
-				pstmt = conn.prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed', `mop`.`processor_type` as 'processor_type' , `mop`.`forwarding_url` as 'forwarding_url' FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
+				pstmt = conn.prepareStatement("SELECT `mop`.id,`mop`.ServiceName,`mop`.ProcessorClass,`mop`.enabled,`mop`.class_status,`mop`.shortcode,`mop`.threads, `smss`.CMP_Keyword, `smss`.CMP_SKeyword, group_concat(`smss`.`cmd`) as `keywords`,  `smss`.`subscriptionText` as 'subscriptionText', `smss`.`unsubscriptionText` as 'unsubscriptionText', `smss`.`tailText_subscribed` as 'tailText_subscribed', `smss`.`tailText_notsubscribed` as 'tailText_notsubscribed', `mop`.`processor_type` as 'processor_type' , `mop`.`forwarding_url` as 'forwarding_url' FROM `"+database+"`.`mo_processors` `mop` LEFT JOIN `"+database+"`.`sms_service` `smss` ON `smss`.`mo_processorFK`=`mop`.`id` WHERE `mop`.`enabled`=1 AND `mop`.`processor_type` <> 'PHANTOM' group by `mop`.`id`", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
 				
 			}
 			
@@ -2067,7 +2068,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 				mo.setServiceid(rs.getInt("serviceid"));
 				mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-				mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
+				mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));
 				mo.setSplit_msg(rs.getBoolean("split_mt"));
 				mo.setPricePointKeyword(rs.getString("price_point_keyword"));
 				mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
@@ -2094,7 +2095,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 					mo.setServiceid(rs.getInt("serviceid"));
 					mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-					mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
+					mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));
 					mo.setSplit_msg(rs.getBoolean("split_mt"));
 					mo.setPricePointKeyword(rs.getString("price_point_keyword"));
 					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
@@ -2258,18 +2259,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		}
 	
 	
-	public long generateNextTxId(){
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			logger.warn("\n\t\t::"+e.getMessage());
-		}
-		return System.currentTimeMillis();
-		//String timestamp = String.valueOf(System.currentTimeMillis());
-		
-		//return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
-		
-	}
+	
 
 	@Override
 	public void flagMMSIfAny(Notification notification) {
@@ -2508,7 +2498,14 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	
-		
+	public long generateNextTxId(){
+		try {
+			Thread.sleep(112);
+		} catch (InterruptedException e) {
+			logger.warn("\n\t\t::"+e.getMessage());
+		}
+		return System.currentTimeMillis();
+	}
 	
 	
 	

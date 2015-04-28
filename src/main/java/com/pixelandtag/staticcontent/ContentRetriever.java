@@ -286,7 +286,7 @@ public class ContentRetriever {
 	 * @param conn
 	 * @return
 	 */
-	public ServiceProcessorDTO getServiceProcessor(int id,Connection conn){
+	public ServiceProcessorDTO getServiceProcessor(Long id,Connection conn){
 
 		PreparedStatement pstmt = null;
 		
@@ -297,7 +297,7 @@ public class ContentRetriever {
 		try {
 			
 			pstmt = conn.prepareStatement("SELECT * FROM `"+CelcomImpl.database+"`.`mo_processors` WHERE `id`=?", Statement.RETURN_GENERATED_KEYS);//"SELECT * FROM `"+DATABASE+"`.`mo_processors` WHERE enabled=1");
-			pstmt.setInt(1, id);
+			pstmt.setInt(1, id.intValue());
 			
 			rs = pstmt.executeQuery();
 			

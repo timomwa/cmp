@@ -37,6 +37,9 @@ public interface BaseEntityI {
 	public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception;
 	public MOSms updateMO(MOSms mo) throws TransactionIDGenException;
 	public void updateMO(String msg, Long msgId) throws TransactionIDGenException;
+	public void mimicMO(String keyword, String msisdn);
+	public boolean sendMT(MOSms mo) throws Exception;
+	public long generateNextTxId();
 
 
 }

@@ -8,14 +8,14 @@ public class SubscriptionDTO extends ServiceProcessorDTO  {
 	private ServiceProcessorI processor;
 	private String cmd;
 	private int push_unique;
-	private int processor_id;
+	private Long processor_id;
 
 	
-	public int getProcessor_id() {
+	public Long getProcessor_id() {
 		return processor_id;
 	}
 
-	public void setProcessor_id(int processor_id) {
+	public void setProcessor_id(Long processor_id) {
 		this.processor_id = processor_id;
 	}
 

@@ -217,7 +217,7 @@ public class MOSms extends GenericMO{
 		moC.setMsisdn(getMsisdn());
 		moC.setTimeStamp(getTimeStamp());
 		moC.setServiceid(getServiceid());
-		
+		moC.setProcessor_id(getProcessor_id());
 		return moC;
 	}
 

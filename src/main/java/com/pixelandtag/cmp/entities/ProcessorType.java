@@ -2,7 +2,7 @@ package com.pixelandtag.cmp.entities;
 
 
 public enum ProcessorType {
-	CONTENT_PROXY,LOCAL,MT_ROUTER;
+	CONTENT_PROXY,LOCAL,MT_ROUTER,PHANTOM;
 	public static ProcessorType fromString(String val){
 		if(val==null || val.equals(""))
 			return null;
@@ -13,6 +13,8 @@ public enum ProcessorType {
 			return LOCAL;
 		if(val.equalsIgnoreCase("CONTENT_PROXY"))
 			return CONTENT_PROXY;
+		if(val.equalsIgnoreCase("PHANTOM"))
+			return PHANTOM;
 		return null;
 	}
 

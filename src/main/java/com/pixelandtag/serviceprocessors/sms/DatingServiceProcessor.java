@@ -208,6 +208,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
 				
+				if(!subvalid)
+					cmp_bean.mimicMO("BILLING_SERV5",MSISDN);
+				
 				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
 					
 					mo = processDating(mo,person);
@@ -254,7 +257,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 
 
-	private MOSms processDating(MOSms mo, Person person) throws Exception {
+	private MOSms processDating(MOSms mo, Person person) throws Exception { 
 					
 		if(person==null)
 			person = datingBean.register(mo.getMsisdn());
@@ -586,7 +589,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				return mo;
 			}else{//destination person not found.. Check in their friends list. Ask them whom they want to chat to..
 				mo.setPrice(BigDecimal.ZERO);
-				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.YEAR);//last 1 year
+				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.MINUTE);//last 1 year
 				String msg = "";
 				if(destination_person!=null){
 					Gender gender  = destination_person.getGender();
