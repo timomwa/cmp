@@ -2449,57 +2449,47 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					}else if(kw_is_digit){
 						
 						logger.error("\n\n\nGUGAMUGA CURRENT MENU >> "+current_menu+"\n\n");
-						LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
+						LinkedHashMap<Integer,MenuItem> submenus = current_menu.getSub_menus();
 						
 						boolean submenus_have_sub_menus = false;
 						
-						if(submenu!=null)
+						/*if(submenu!=null)
 						for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
 							if(entry.getValue().getSub_menus()!=null && entry.getValue().getSub_menus().size()>0){
 								logger.error("GUGAMUGA  checking if we have sub menus>> "+entry.getValue().getName());
 								submenus_have_sub_menus = true;
 								break;
 							}
-						}
+						}*/
 						
-						logger.error("GUGAMUGA submenus_have_sub_menus >> "+submenus_have_sub_menus);
 						
 						MenuItem chosenMenu = null;
 						try{
 							chosenMenu = current_menu.getMenuByPosition(chosen) ;
+							chosenMenu = chosenMenu!=null ? getMenuById(chosenMenu.getId()) : null;
 						}catch(ArrayIndexOutOfBoundsException arrin){}
 						
-						logger.error("GUGAMUGA chosenMenu >> "+chosenMenu);
+						
+						logger.error("\n\n\nGUGAMUGA CHOSEN MENU >> "+chosenMenu+"\n\n");
 						
 						//MenuItem chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
 						
 						//chosenMenu = chosenMenu!=null ? getMenuById(chosenMenu.getId()) : null;
 						
-						logger.error("\t\t\t>>> GUGAMUGA ********* chosenMenu >> "+chosenMenu);
 						
 						if(chosenMenu!=null){
-								submenu = chosenMenu.getSub_menus();
-								if(submenu!=null)
-								for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
-									logger.debug("Checking if submenu has got other menus in it... >>>> "+entry.getKey()+ ". "+entry.getValue().toString());
+							LinkedHashMap<Integer,MenuItem>  submenu_ = chosenMenu.getSub_menus();
+								if(submenu_!=null)
+								for (Entry<Integer, MenuItem> entry : submenu_.entrySet()){
+									logger.info("Checking if submenu has got other menus in it... >>>> "+entry.getKey()+ ". "+entry.getValue().toString());
 									
+									if(!submenus_have_sub_menus)
 									if(entry.getValue().getService_id()==-1){
 										submenus_have_sub_menus = true;
-										break;
 									}
 								}
 								
 								
-								logger.error("GUGAMUGA  >> "+submenus_have_sub_menus);
-								
-								logger.error("GUGAMUGA  submenu >> "+submenu);
-								
-								logger.debug(" Trying to print out the sub menu chosen. (chosen="+chosen+"");
-								try{
-									logger.debug(" \n\nCHOSEN MENU >>>>>>>>>>>>> (chosen="+chosen+")  : "+chosenMenu.toString()+"\n\n");
-								}catch(Exception e){
-									logger.error(e.getMessage(),e);
-								}
 						}else{
 							
 							if(KEYWORD.equals("1")){
@@ -2541,25 +2531,29 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
 									
 									
-									
-									
 								}else if(smsserv.getCmd().equals("FIND")){
 									resp = "Request to find friend near your area received. You shall receive an sms shortly.";
 								}else{
 									resp = "Request received and is being processed.";
 								}
 								
-								updateSession(language_id,MSISDN, current_menu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-								
-								
+								updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
 							}
 							
 							
 						}
 						
 					//	menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId(), conn);//update sessi
-						
-						if( (submenu!=null && (chosen>submenu.size())) ){
+						try{
+						logger.info("submenus:: "+submenus);
+						if(submenus!=null){
+						logger.info("submenus.size():: "+submenus!=null?submenus.size():0);
+						logger.info("submenus!=null && (chosen>submenus.size()) :: "+(submenus!=null && (chosen>submenus.size())));
+						}else{
+							logger.info("no submenus. that's ok");
+						}
+						}catch(Exception exp){}
+						if( (submenus!=null && (chosen>submenus.size())) ){
 							
 							//chosenMenu = current_menu.getMenuByPosition(chosen);
 							updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
@@ -2586,7 +2580,16 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							
 						}else{
 							
-							if(chosenMenu!=null && chosenMenu.getService_id()==-1){//if there are other items under this, update session
+							logger.info("chosenMenu:: "+chosenMenu);
+							logger.info("chosenMenu.getService_id():: "+((chosenMenu!=null)?chosenMenu.getService_id():null));
+							if(chosenMenu!=null){
+								logger.info("(chosenMenu.getService_id()==-1 || chosenMenu.getService_id()<0 || chosenMenu.getId()==444 || chosenMenu.getId()==442) :: "+(chosenMenu.getService_id()==-1 || chosenMenu.getService_id()<0 || chosenMenu.getId()==444 || chosenMenu.getId()==442));
+							}else{
+								logger.info("chosen menu is null, that's ok too");
+							}
+							if(chosenMenu!=null && (chosenMenu.getService_id()==-1 
+									|| chosenMenu.getService_id()<=0 
+									|| chosenMenu.getService_id()==444)){//if there are other items under this, update session
 								
 								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
 								
@@ -2597,9 +2600,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								else
 									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
 							}else{
-								
 								//Subscription subscr = getSubscription(MSISDN,Long.valueOf(chosenMenu.getService_id()));
-								SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getService_id()+""));
+								int serviceid = current_menu!=null ? current_menu.getService_id() : chosenMenu.getService_id() ;
+								int parent_level_id = chosenMenu==null ? current_menu.getParent_level_id() : chosenMenu.getParent_level_id() ;
+								int menuid_ = chosenMenu==null ? current_menu.getMenu_id() : chosenMenu.getMenu_id() ;
+								logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid"+serviceid);
+								SMSService smsserv = em.find(SMSService.class, Long.valueOf(serviceid+""));
 								
 								
 								if(smsserv.getCmd().equals("BILLING_SERV5")
@@ -2625,7 +2631,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									resp = "Request received and is being processed.";
 								}
 								
-								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,chosenMenu.getMenu_id(),req.getSessionid());//update session to upper menu.
+								updateSession(language_id,MSISDN, parent_level_id,sess,menuid_,req.getSessionid());//update session to upper menu.
 								
 								
 								

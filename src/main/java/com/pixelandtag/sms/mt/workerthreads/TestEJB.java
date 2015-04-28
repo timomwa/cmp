@@ -19,6 +19,7 @@ import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.util.FileUtils;
 
 public class TestEJB {
@@ -27,6 +28,7 @@ public class TestEJB {
 	private static DatingServiceI datingBean;
 	private static InitialContext context;
 	private static Properties mtsenderprop;
+	private static CMPResourceBeanRemote cmpresourcebean;
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -40,8 +42,18 @@ public class TestEJB {
 		 context = new InitialContext(props);
 		 datingBean =  (DatingServiceI) 
       		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
-		
+		 cmpresourcebean =  (CMPResourceBeanRemote) 
+		      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 	
+		 //com.pixelandtag.cmp.ejb.CMPResourceBean.getMenuByParentLevelId(int, int, int)
+		 int language_id =1;
+		 int parent_level_id = -1;
+		 int menuid=2;
+		 //int 
+		 MenuItem mi =   cmpresourcebean.getMenuByParentLevelId(language_id, parent_level_id, menuid);
+		 System.out.println(mi);
+		 
+		 /*
 		 Person person = datingBean.find(Person.class, 1560L);
 		 System.out.println(person);
 		 PersonDatingProfile thisPerson = datingBean.getProfile(person);
@@ -58,9 +70,18 @@ public class TestEJB {
 			System.out.println("pref_gender : "+pref_gender.toString());
 			System.out.println("pref_age : "+pref_age);
 			System.out.println("location : "+location);
-			PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
+			PersonDatingProfile match = datingBean.findMatch(profile);
+					
+					
+					System.out.println("MATCH FOUND ?? "+match);
 
 			int x = 0;
+			
+			if(match==null){
+				match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
+				x = 1;
+			}
+			
 			if(match==null){
 				match = datingBean.findMatch(pref_gender,pref_age, person.getId());
 				x = 1;
@@ -85,6 +106,8 @@ public class TestEJB {
 			}else{
 				System.out.println("MAtch: "+match);
 			}
+			
+			*/
 		 context.close();
 		 
 		 
