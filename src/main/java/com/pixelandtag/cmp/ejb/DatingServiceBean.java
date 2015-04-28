@@ -244,13 +244,21 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 					boolean isunique = isUsernameUnique(KEYWORD);
-					if(isunique || person.getMsisdn().equals(KEYWORD)){
+					
+					if(isunique){
 						profile.setUsername(KEYWORD);
 					}else{
-						resp = getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
+						if(KEYWORD.equalsIgnoreCase(req.getCode())){
+							resp = getMessage(DatingMessages.REPLY_WITH_USERNAME, language_id);
+						}else{
+							resp = getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
+						}
+						
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
 						return resp;
+					
 					}
+					
 				}
 				
 				if(attr.equals(ProfileAttribute.GENDER)){
@@ -280,10 +288,15 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 						return resp;
 					}
-					
+					if(age.compareTo(new BigDecimal(100l))>=0){
+						resp = getMessage(DatingMessages.UNREALISTIC_AGE, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+						resp = resp.replaceAll(GenericServiceProcessor.AGE_TAG,  age.intValue()+"");
+						return resp;
+					}
 					if(age.compareTo(new BigDecimal(18l))<0){
 						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
-						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  age.intValue()+"");
 						return resp;
 					}
 					

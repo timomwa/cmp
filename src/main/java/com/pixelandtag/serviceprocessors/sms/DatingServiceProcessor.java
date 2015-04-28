@@ -365,13 +365,20 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 					boolean isunique = datingBean.isUsernameUnique(KEYWORD);
-					if(isunique && !(KEYWORD.equalsIgnoreCase(mo.getSMS_SourceAddr()) )){
+					if(isunique){
 						profile.setUsername(KEYWORD);
 					}else{
-						String msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
+						String msg = "";
+						if(KEYWORD.equalsIgnoreCase(mo.getSMS_SourceAddr())){
+							msg = datingBean.getMessage(DatingMessages.REPLY_WITH_USERNAME, language_id);
+						}else{
+							msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
+						}
 						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
 						return mo;
+					
 					}
+					
 						
 				}
 				
@@ -398,15 +405,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					try{
 						age = new BigDecimal(KEYWORD);
 					}catch(java.lang.NumberFormatException nfe){
-						String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
-						mo.setMt_Sent(msg.replaceAll(AGE_TAG, age.intValue()+""));
+						String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
+						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
+						msg = msg.replaceAll(AGE_TAG, age.intValue()+"");
+						mo.setMt_Sent(msg);
 						return mo;
 					}
 					
 					if(age.compareTo(new BigDecimal(100l))>=0){
-						String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
+						String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, language_id);
+						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
+						msg = msg.replaceAll(AGE_TAG, age.intValue()+"");
+						mo.setMt_Sent(msg);
 						return mo;
 					}
 					
