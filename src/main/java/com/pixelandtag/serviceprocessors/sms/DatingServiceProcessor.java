@@ -114,8 +114,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				BigDecimal pref_age = profile.getPreferred_age();
 				String location = profile.getLocation();
 				//location_ejb
-				PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
-				
+				PersonDatingProfile match = null;
 				if(match==null){
 					try{
 						match = datingBean.findMatch(profile);//try find by their location
@@ -123,6 +122,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						logger.error(exp.getMessage(),exp);
 					}
 				}
+				
+				match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
+				
 				
 				if(match==null)
 					 match = datingBean.findMatch(pref_gender,pref_age,person.getId());

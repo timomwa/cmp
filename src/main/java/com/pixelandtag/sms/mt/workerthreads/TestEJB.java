@@ -46,14 +46,7 @@ public class TestEJB {
 		      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 	
 		 //com.pixelandtag.cmp.ejb.CMPResourceBean.getMenuByParentLevelId(int, int, int)
-		 int language_id =1;
-		 int parent_level_id = -1;
-		 int menuid=2;
-		 //int 
-		 MenuItem mi =   cmpresourcebean.getMenuByParentLevelId(language_id, parent_level_id, menuid);
-		 System.out.println(mi);
 		 
-		 /*
 		 Person person = datingBean.find(Person.class, 1560L);
 		 System.out.println(person);
 		 PersonDatingProfile thisPerson = datingBean.getProfile(person);
@@ -70,10 +63,16 @@ public class TestEJB {
 			System.out.println("pref_gender : "+pref_gender.toString());
 			System.out.println("pref_age : "+pref_age);
 			System.out.println("location : "+location);
-			PersonDatingProfile match = datingBean.findMatch(profile);
+			PersonDatingProfile match = null;
 					
+					try{
+							match = 	datingBean.findMatch(profile);
+							if(match==null)
+								throw new Exception("why??");
+					}catch(Exception e){
+						e.printStackTrace();
+					}
 					
-					System.out.println("MATCH FOUND ?? "+match);
 
 			int x = 0;
 			
@@ -107,7 +106,7 @@ public class TestEJB {
 				System.out.println("MAtch: "+match);
 			}
 			
-			*/
+			
 		 context.close();
 		 
 		 

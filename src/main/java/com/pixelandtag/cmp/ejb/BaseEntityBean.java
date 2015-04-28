@@ -439,6 +439,7 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(12, mo.getSMS_DataCodingId());
 			qry.setParameter(13, mo.getProcessor_id());
 			qry.setParameter(14, mo.getBillingStatus().toString());
+			logger.info("\n\n\n\n\n\t\t\t\t\t\t:::::: mo.getBillingStatus().toString() ::: "+mo.getBillingStatus().toString());
 			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
 			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
 			qry.setParameter(17, ( mo.isSubscription() ? 1 : 0 ));
@@ -448,12 +449,14 @@ public class BaseEntityBean implements BaseEntityI {
 			success = num>0;
 		
 		}catch(Exception e){
+			logger.info("\n\n\n\n\n\t\t\t\t\t\t:::::: mo.getBillingStatus().toString() ::: "+mo.getBillingStatus().toString());
+			
 			try {
 				utx.rollback();
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(),e1);
 			} 
-			logger.error(e.getMessage(),e);
+			logger.error("\n\n\n\n\n\t\t\t\t\t\t:::::: mo.getBillingStatus().toString() ::: "+mo.getBillingStatus().toString() + e.getMessage(),e);
 			throw e;
 		}
 		 
