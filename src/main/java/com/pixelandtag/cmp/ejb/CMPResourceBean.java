@@ -2530,7 +2530,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
 									mosm_.setId(req.getMessageId());
-									
+									mosm_.setProcessor_id(processor_fk.intValue());
 	
 									logMO(mosm_); 
 									
@@ -2687,6 +2687,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
 									mosm_.setId(req.getMessageId());
+									mosm_.setProcessor_id(processor_fk.intValue());
 									
 									logMO(mosm_);
 									
@@ -2749,6 +2750,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							mosm_.setCMP_AKeyword(smsserv.getCmd());
 							mosm_.setCMP_SKeyword(smsserv.getCmd());
 							mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+							mosm_.setProcessor_id(processor_fk.intValue());
 							
 							logMO(mosm_);
 							//Mimic an MO

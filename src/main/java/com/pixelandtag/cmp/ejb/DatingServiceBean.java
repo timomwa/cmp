@@ -120,6 +120,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				mo.setSplit_msg(false);
 				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 				mo.setSubscription(false);
+				mo.setProcessor_id(processor_fk.intValue());
 				sendMT(mo);
 			}
 			
@@ -421,6 +422,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							mo.setSplit_msg(false);
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
 							mo.setSubscription(false);
+							mo.setProcessor_id(processor_fk.intValue());
 							sendMT(mo);
 							//resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 							//resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
