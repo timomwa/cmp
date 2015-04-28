@@ -48,7 +48,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 
 	public void initEJB() throws NamingException {
 		String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";
-		;
+		
 		Properties props = new Properties();
 		props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
 		props.put(Context.PROVIDER_URL, "remote://localhost:4447");
@@ -82,8 +82,18 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			qparams.add(new BasicNameValuePair("cptxid", mo.getCMP_Txid().toString()));
 			qparams.add(new BasicNameValuePair("sourceaddress",mo.getSMS_SourceAddr()));	
 			qparams.add(new BasicNameValuePair("msisdn",mo.getMsisdn()));
-			qparams.add(new BasicNameValuePair("sms",mo.getSMS_Message_String()));
-			qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
+			String sms = "";
+			
+			try{
+				String mosms = mo.getSMS_Message_String().trim();
+				String firstword=mosms.split("\\s")[0].trim();
+				sms = mo.getSMS_Message_String().replaceAll(firstword,"").trim();
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+				sms = mo.getSMS_Message_String();
+			}
+			qparams.add(new BasicNameValuePair("sms",sms));
+			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
 			
 			param.setHttpParams(qparams);
@@ -92,14 +102,15 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			final int RESP_CODE = resp.getStatusLine().getStatusCode();
 			if(RESP_CODE==HttpStatus.SC_OK){
 				String message = httpclient.convertStreamToString(resp.getEntity().getContent());
+				logger.info("\n\n\n\n\tPROXY_RESPONSE: "+message);
 				mo.setMt_Sent(message);
 			}else if(RESP_CODE==HttpStatus.SC_CREATED || RESP_CODE==HttpStatus.SC_NO_CONTENT){
-				//No need to respond.
-			}else if(RESP_CODE==HttpStatus.SC_INTERNAL_SERVER_ERROR || RESP_CODE ==HttpStatus.SC_NOT_FOUND){
-				//re-try
+				//mo.setMt_Sent("Request received.");
+			}else if(RESP_CODE==HttpStatus.SC_INTERNAL_SERVER_ERROR){
+				mo.setMt_Sent("External application Error. Kindly try again");
+			}else if(RESP_CODE ==HttpStatus.SC_NOT_FOUND){
+				//mo.setMt_Sent("External application is down.");
 			}
-			//mo.setPrice(BigDecimal.ZERO);
-			//mo.setMt_Sent(message);
 			
 
 		} catch (Exception e) {

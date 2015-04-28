@@ -123,9 +123,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 				}
 				
-				match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
-				
-				
+				if(match==null)
+					match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
 				if(match==null)
 					 match = datingBean.findMatch(pref_gender,pref_age,person.getId());
 				if(match==null)
@@ -351,7 +350,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}catch(Exception exp){}
 					
 					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
-						person.setAgreed_to_tnc(true);
+						person.setAgreed_to_tnc(Boolean.TRUE);
 						person = datingBean.saveOrUpdate(person);
 					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
 						mo.setMt_Sent("Ok. Bye");
@@ -366,7 +365,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
 					boolean isunique = datingBean.isUsernameUnique(KEYWORD);
-					if(isunique){
+					if(isunique && !(KEYWORD.equalsIgnoreCase(mo.getSMS_SourceAddr()) )){
 						profile.setUsername(KEYWORD);
 					}else{
 						String msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
@@ -399,8 +398,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					try{
 						age = new BigDecimal(KEYWORD);
 					}catch(java.lang.NumberFormatException nfe){
-						String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
+						String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, language_id);
 						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+						mo.setMt_Sent(msg.replaceAll(AGE_TAG, age.intValue()+""));
+						return mo;
+					}
+					
+					if(age.compareTo(new BigDecimal(100l))>=0){
+						String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
+						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
 						return mo;
 					}
 					
@@ -415,7 +421,19 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}
 				
 				if(attr.equals(ProfileAttribute.LOCATION)){
+					boolean location_is_only_number = false;
+					try{
+						new BigDecimal(MESSAGE);
+						location_is_only_number = true;
+					}catch(java.lang.NumberFormatException nfe){
+					}
+					if(KEYWORD.equalsIgnoreCase(mo.getSMS_SourceAddr()) || MESSAGE.equalsIgnoreCase(mo.getSMS_SourceAddr()) || location_is_only_number){
+						String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, language_id);
+						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
+						return mo;
+					}else{
 					profile.setLocation(MESSAGE);
+					}
 				}
 				if(attr.equals(ProfileAttribute.PREFERRED_AGE)){
 					BigDecimal age = null;
@@ -477,7 +495,16 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					BigDecimal pref_age = profile.getPreferred_age();
 					String location = profile.getLocation();
 					
-					PersonDatingProfile match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
+					PersonDatingProfile match = null;
+					if(match==null){
+						try{
+							match = datingBean.findMatch(profile);//try find by their location
+						}catch(DatingServiceException exp){
+							logger.warn(exp.getMessage(),exp);
+						}
+					}
+					if(match==null)
+						match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
 					if(match==null)
 						 match = datingBean.findMatch(pref_gender,pref_age,person.getId());
 					if(match==null)

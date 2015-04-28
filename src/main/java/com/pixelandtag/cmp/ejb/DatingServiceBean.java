@@ -924,7 +924,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				return false;
 			}catch(Exception exp){}
 			
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username=:username");
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE (p.username=:username OR p.person.msisdn=:username)");
 			qry.setParameter("username", username);
 			if(qry.getResultList().size()>0)
 				isunique = false;
