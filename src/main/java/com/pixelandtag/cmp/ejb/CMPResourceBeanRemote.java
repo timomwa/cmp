@@ -175,6 +175,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public MTsms getMTsms(Long id);
 	
 	public MTsms convertToLegacyMt(HttpToSend httpTosend);
+	public void clearUssdSesion(USSDSession sess);
 	
 
 }

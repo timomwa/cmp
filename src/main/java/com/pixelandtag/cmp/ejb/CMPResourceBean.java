@@ -2398,37 +2398,37 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					logger.info("\t\tlanguage_id :: "+language_id);
 					logger.info("\t\tmenuid :: "+menuid);
 					
-					MenuItem current_menu = null;
+					MenuItem menu_from_session = null;
 					
 					if((smsmenu_level_id_fk>-1) && (language_id >-1))
-						current_menu = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
+						menu_from_session = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
 					else
-						current_menu = getMenuByParentLevelId(language_id,smsmenu_level_id_fk,menuid);//get root menu
+						menu_from_session = getMenuByParentLevelId(language_id,smsmenu_level_id_fk,menuid);//get root menu
 					
-					logger.info("FROM SESSION___________________________"+current_menu);
+					logger.info("FROM SESSION___________________________"+menu_from_session);
 					
 					
 					if( KEYWORD.contains("*") && req.getMediumType()==MediumType.ussd ){
 					
-						updateSession(language_id,MSISDN, current_menu.getMenu_id(),sess,current_menu.getParent_level_id(),req.getSessionid());//update session to upper menu.
-						resp = current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						updateSession(language_id,MSISDN, menu_from_session.getMenu_id(),sess,menu_from_session.getParent_level_id(),req.getSessionid());//update session to upper menu.
+						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
 						return resp;
 						
 					}else if(KEYWORD.equalsIgnoreCase("") || KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
 						
-						updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
+						updateSession(language_id,MSISDN, menu_from_session.getParent_level_id(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
+						MenuItem item = getMenuByParentLevelId(language_id,menu_from_session.getParent_level_id(),menuid);
 						resp = item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("#")){
 						
-						updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-						MenuItem item = getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
+						updateSession(language_id,MSISDN, menu_from_session.getParent_level_id(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
+						MenuItem item = getMenuByParentLevelId(language_id,menu_from_session.getParent_level_id(),menuid);
 						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("0")){
 						
-						updateSession(language_id, MSISDN, -1,sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
+						updateSession(language_id, MSISDN, -1,sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,-1,menuid);
 						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
 						return resp;
@@ -2441,15 +2441,15 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						updateProfile(MSISDN,language_id);
 						//UtilCelcom.updateProfile(mo.getMsisdn(),language_id,conn);
 						
-						updateSession(language_id,MSISDN, -1,sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
-						current_menu = getTopMenu(menu_id, language_id);
+						updateSession(language_id,MSISDN, -1,sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
+						menu_from_session = getTopMenu(menu_id, language_id);
 						
-						resp = (current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));
+						resp = (menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));
 						return resp;
 					}else if(kw_is_digit){
 						
-						logger.error("\n\n\nGUGAMUGA CURRENT MENU >> "+current_menu+"\n\n");
-						LinkedHashMap<Integer,MenuItem> submenus = current_menu.getSub_menus();
+						logger.error("\n\n\nGUGAMUGA CURRENT MENU >> "+menu_from_session+"\n\n");
+						LinkedHashMap<Integer,MenuItem> submenus = menu_from_session.getSub_menus();
 						
 						boolean submenus_have_sub_menus = false;
 						
@@ -2465,7 +2465,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						MenuItem chosenMenu = null;
 						try{
-							chosenMenu = current_menu.getMenuByPosition(chosen) ;
+							chosenMenu = menu_from_session.getMenuByPosition(chosen) ;
 							chosenMenu = chosenMenu!=null ? getMenuById(chosenMenu.getId()) : null;
 						}catch(ArrayIndexOutOfBoundsException arrin){}
 						
@@ -2477,7 +2477,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						//chosenMenu = chosenMenu!=null ? getMenuById(chosenMenu.getId()) : null;
 						
 						
-						if(chosenMenu!=null){
+						if(chosenMenu!=null && chosenMenu.getSub_menus()!=null && chosenMenu.getSub_menus().size()>0){
 							LinkedHashMap<Integer,MenuItem>  submenu_ = chosenMenu.getSub_menus();
 								if(submenu_!=null)
 								for (Entry<Integer, MenuItem> entry : submenu_.entrySet()){
@@ -2490,35 +2490,16 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								}
 								
 								
-						}else{
+						}else {
+						
+						
 							
-							if(KEYWORD.equals("1")){
+							if(KEYWORD.equals("1")  ){
 								//Subscription subscr = getSubscription(MSISDN,Long.valueOf(chosenMenu.getService_id()));
-								SMSService smsserv = em.find(SMSService.class, Long.valueOf(current_menu.getService_id()+""));
-								Long processor_fk = smsserv.getMo_processorFK();
-								MOProcessorE proc = find(MOProcessorE.class, processor_fk);
-								
-								//subscribe(MSISDN, smsserv, chosenMenu.getId());
-								
-								
-								MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-								mosm_.setMsisdn(MSISDN);
-								mosm_.setServiceid(current_menu.getService_id());
-								mosm_.setSMS_Message_String(smsserv.getCmd());
-								mosm_.setSMS_SourceAddr(proc.getShortcode());
-								mosm_.setCMP_AKeyword(smsserv.getCmd());
-								mosm_.setCMP_SKeyword(smsserv.getCmd());
-								mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-								mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
-								mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
-								mosm_.setServiceid(smsserv.getId().intValue());
-								mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
-								mosm_.setId(req.getMessageId());
-								
-
-								logMO(mosm_); 
-								
-								if(smsserv.getCmd().equals("BILLING_SERV5")
+								SMSService smsserv = em.find(SMSService.class, Long.valueOf(menu_from_session.getService_id()+""));
+								logger.info("\n\n\n\t\t smsserv.getCmd():::::::::::::::::: "+smsserv.getCmd());
+								if(smsserv!=null && 
+										(smsserv.getCmd().equals("BILLING_SERV5")
 										||
 										smsserv.getCmd().equals("BILLING_SERV5")
 										||
@@ -2526,20 +2507,63 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										||
 										smsserv.getCmd().equals("BILLING_SERV30")
 										||
-										smsserv.getCmd().equals("DATE")){
+										smsserv.getCmd().equals("DATE")
+										||
+										smsserv.getCmd().equals("FIND")) ){
 									
-									resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
+									Long processor_fk = smsserv.getMo_processorFK();
+									MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+									
+									//subscribe(MSISDN, smsserv, chosenMenu.getId());
 									
 									
-								}else if(smsserv.getCmd().equals("FIND")){
-									resp = "Request to find friend near your area received. You shall receive an sms shortly.";
-								}else{
-									resp = "Request received and is being processed.";
-								}
+									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+									mosm_.setMsisdn(MSISDN);
+									mosm_.setServiceid(menu_from_session.getService_id());
+									mosm_.setSMS_Message_String(smsserv.getCmd());
+									mosm_.setSMS_SourceAddr(proc.getShortcode());
+									mosm_.setCMP_AKeyword(smsserv.getCmd());
+									mosm_.setCMP_SKeyword(smsserv.getCmd());
+									mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+									mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
+									mosm_.setServiceid(smsserv.getId().intValue());
+									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
+									mosm_.setId(req.getMessageId());
+									
+	
+									logMO(mosm_); 
+									
+									if(smsserv.getCmd().equals("BILLING_SERV5")
+											||
+											smsserv.getCmd().equals("BILLING_SERV5")
+											||
+											smsserv.getCmd().equals("BILLING_SERV15")
+											||
+											smsserv.getCmd().equals("BILLING_SERV30")
+											||
+											smsserv.getCmd().equals("DATE")){
+										
+										resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
+										
+										
+									}else if(smsserv.getCmd().equals("FIND")){
+										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+									}else{
+										resp = "Request received and is being processed. ^K";
+									}
+									sess.setSessionId(req.getSessionid());
+									clearUssdSesion(sess);
+									//updateSession(language_id,MSISDN, -1,sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 								
-								updateSession(language_id,MSISDN, current_menu.getParent_level_id(),sess,current_menu.getMenu_id(),req.getSessionid());//update session to upper menu.
+									return resp;
+								}
 							}
-							
+							/*else{
+								sess.setSessionId(req.getSessionid());
+								clearUssdSesion(sess);
+								return "You can always purchase chat bundles any other time you like by dialing *329#";
+							}*/
 							
 						}
 						
@@ -2556,7 +2580,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						if( (submenus!=null && (chosen>submenus.size())) ){
 							
 							//chosenMenu = current_menu.getMenuByPosition(chosen);
-							updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
+							updateSession(language_id,MSISDN, chosenMenu.getId(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session
 							
 							if(submenus_have_sub_menus){
 								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
@@ -2587,26 +2611,43 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							}else{
 								logger.info("chosen menu is null, that's ok too");
 							}
-							if(chosenMenu!=null && (chosenMenu.getService_id()==-1 
-									|| chosenMenu.getService_id()<=0 
-									|| chosenMenu.getService_id()==444)){//if there are other items under this, update session
-								
-								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
-								
+							if( (chosenMenu!=null 
+									&& (chosenMenu.getSub_menus()!=null)  
+									&& 
+									(chosenMenu.getService_id()<=0 
+										|| (chosenMenu.getService_id()==444 
+										||  (menu_from_session!=null && menu_from_session.getService_id()==444) ) 
+									) 
+								)
+							 ){
 								chosenMenu = getMenuById(chosenMenu.getId());
+								String key = "";
+								if(submenus_have_sub_menus){
+									key = GenericServiceProcessor.MAIN_MENU_ADVICE;
+								}else{
+									key = GenericServiceProcessor.SUBSCRIPTION_ADVICE;
+								}
 								
-								if(submenus_have_sub_menus)
-									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
-								else
-									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+								if(chosenMenu.getSub_menus()!=null){
+									resp = chosenMenu.enumerate()+getMessage(key, language_id);//get all the sub menus there.
+									updateSession(language_id,MSISDN, chosenMenu.getId(),sess,chosenMenu.getMenu_id(),req.getSessionid());//update session
+								}else{
+									resp =  menu_from_session.enumerate()+getMessage(key, language_id);//get all the sub menus there.
+									updateSession(language_id,MSISDN, chosenMenu.getId(),sess,chosenMenu.getMenu_id(),req.getSessionid());//update session
+								}
+									
+							
+								
+								return resp;
+								
 							}else{
 								//Subscription subscr = getSubscription(MSISDN,Long.valueOf(chosenMenu.getService_id()));
-								int serviceid = current_menu!=null ? current_menu.getService_id() : chosenMenu.getService_id() ;
-								int parent_level_id = chosenMenu==null ? current_menu.getParent_level_id() : chosenMenu.getParent_level_id() ;
-								int menuid_ = chosenMenu==null ? current_menu.getMenu_id() : chosenMenu.getMenu_id() ;
-								logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid"+serviceid);
+								int serviceid = chosenMenu==null ? menu_from_session.getService_id() : chosenMenu.getService_id() ;
+								int parent_level_id = chosenMenu==null ? menu_from_session.getParent_level_id() : chosenMenu.getId() ;
+								int menuid_ = chosenMenu==null ? menu_from_session.getMenu_id() : chosenMenu.getMenu_id() ;
 								SMSService smsserv = em.find(SMSService.class, Long.valueOf(serviceid+""));
 								
+								logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid:: "+serviceid+ " CMD :"+(smsserv!=null ? smsserv.getCmd() : null));
 								
 								if(smsserv.getCmd().equals("BILLING_SERV5")
 										||
@@ -2625,19 +2666,39 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									
 									
 									
-								}else if(smsserv.getCmd().equals("FIND")){
-									resp = "Request to find friend near your area received. You shall receive an sms shortly.";
 								}else{
-									resp = "Request received and is being processed.";
+									
+									Long processor_fk = smsserv.getMo_processorFK();
+									MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+									
+									//subscribe(MSISDN, smsserv, chosenMenu.getId());
+									
+									
+									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+									mosm_.setMsisdn(MSISDN);
+									mosm_.setServiceid(menu_from_session.getService_id());
+									mosm_.setSMS_Message_String(smsserv.getCmd());
+									mosm_.setSMS_SourceAddr(proc.getShortcode());
+									mosm_.setCMP_AKeyword(smsserv.getCmd());
+									mosm_.setCMP_SKeyword(smsserv.getCmd());
+									mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+									mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
+									mosm_.setServiceid(smsserv.getId().intValue());
+									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
+									mosm_.setId(req.getMessageId());
+									
+									logMO(mosm_);
+									
+									if(smsserv.getCmd().equals("FIND")){
+										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+									}else{
+										resp = "Request received and is being processed.";
+									}
 								}
-								
 								updateSession(language_id,MSISDN, parent_level_id,sess,menuid_,req.getSessionid());//update session to upper menu.
-								
-								
-								
 							}
 							
-							return resp;
 						}
 						
 					}else if(KEYWORD.equalsIgnoreCase(GenericServiceProcessor.SUBSCRIPTION_CONFIRMATION)
@@ -2646,7 +2707,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						
 						
-						LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();
+						LinkedHashMap<Integer,MenuItem> submenu = menu_from_session.getSub_menus();
 						
 						boolean submenus_have_sub_menus = false;
 						
@@ -2659,7 +2720,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								}
 							}
 						}else{
-							throw new NoSettingException("The menu with id "+current_menu.getId()+" Name=\""+current_menu.getName()+"\"has no children (sub menus)! Check the celcom_static_content.smsmenu_levels");
+							throw new NoSettingException("The menu with id "+menu_from_session.getId()+" Name=\""+menu_from_session.getName()+"\"has no children (sub menus)! Check the celcom_static_content.smsmenu_levels");
 						}
 						
 						
@@ -2667,12 +2728,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						
 						if(chosen>0){
-							chosenMenu = current_menu.getMenuByPosition(chosen);
+							chosenMenu = menu_from_session.getMenuByPosition(chosen);
 						}
 						
 						if((chosen>0) && chosenMenu!=null){
 						
-							chosenMenu = current_menu.getMenuByPosition(chosen);
+							chosenMenu = menu_from_session.getMenuByPosition(chosen);
 							
 							//final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
 						 
@@ -2698,7 +2759,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 								chosenMenu = getMenuById(chosenMenu.getId());
 								
-								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,current_menu.getMenu_id(),req.getSessionid());//update session
+								updateSession(language_id,MSISDN, chosenMenu.getId(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session
 								
 								submenu = chosenMenu.getSub_menus();
 								
@@ -2777,9 +2838,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						}else{
 							//Here check if subscriber sent valid keyword, fetch service, and subscribe then to that service.
 							if(submenus_have_sub_menus)
-								resp = current_menu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+								resp = menu_from_session.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
 							else
-								resp = current_menu.enumerate() + getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+								resp = menu_from_session.enumerate() + getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
 						
 							return resp;
 						}
@@ -2924,9 +2985,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						String msg1 =  getMessage(MessageType.INFO,language_id);
 						resp = msg1;
 					
-					}else if(current_menu!=null && current_menu.getService_id()>-1){
+					}else if(menu_from_session!=null && menu_from_session.getService_id()>-1){
 						//updateSession(language_id,MSISDN, current_menu.getMenu_id(),sess,current_menu.getId(),req.getSessionid());//update session to upper menu.
-						resp = current_menu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
 					}else{
 						//Unknown keyword
 						resp = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
@@ -2943,8 +3004,34 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 	}
 	
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void clearUssdSesion(USSDSession sess) {
+	
+		if(sess.getId()!=null){
+			try{
+				utx.begin();
+				Query qry = em.createQuery("from USSDSession s WHERE s.msisdn=:msisdn AND s.sessionId=:sessionId");
+				qry.setParameter("msisdn", sess.getMsisdn());
+				qry.setParameter("sessionId", sess.getSessionId());
+				USSDSession s = (USSDSession) qry.getSingleResult();
+				
+				System.out.println(":::::::::::::::::::: Session : "+s);
+				//sess = em.find(USSDSession.class, sess.getId());
+				em.remove(s);
+				utx.commit();
+			}catch(Exception e){
+				logger.error(e.getMessage(),e);
+				try{
+				utx.rollback();
+				}catch(Exception exp){}
+			}
+		}
+		// TODO Auto-generated method stub
+		
+	}
 	@SuppressWarnings("unchecked")
-	private Subscription getSubscription(String msisdn, Long serviceid) throws Exception{
+	public Subscription getSubscription(String msisdn, Long serviceid) throws Exception{
 		Subscription subscr = null;
 		boolean subValid = false;
 		try{

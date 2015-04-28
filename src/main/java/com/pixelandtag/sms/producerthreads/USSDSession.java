@@ -31,7 +31,7 @@ public class USSDSession  implements Serializable{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+	private Long id;
 	
 	@Column(name = "msisdn")
 	@Index(name="smsidnidx")
@@ -65,13 +65,13 @@ public class USSDSession  implements Serializable{
 
 
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
 
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
