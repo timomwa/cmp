@@ -47,6 +47,9 @@ public interface DatingServiceI extends BaseEntityI {
 
 	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException;
 	public String processDating(RequestObject ro) throws Exception;
+	public PersonDatingProfile getProfile(String msisdn) throws DatingServiceException;
+
+	
 
 	
 

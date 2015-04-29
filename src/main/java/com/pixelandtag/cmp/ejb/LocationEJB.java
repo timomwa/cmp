@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -20,8 +21,10 @@ import javax.transaction.UserTransaction;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.dating.entities.Location;
+import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileLocation;
+import com.pixelandtag.web.beans.RequestObject;
 
 /**
  * 
@@ -42,6 +45,9 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
+	
+	@EJB
+	DatingServiceI dating_ejb;
 	
 
 	@Resource
@@ -173,11 +179,28 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 		}catch(javax.persistence.NoResultException ex){
 			logger.warn(ex.getMessage());
 		}catch(Exception exp){
-			logger.error(exp.getMessage());
+			logger.error(exp.getMessage(),exp);
 			throw new Exception("Problem finding profile location", exp);
 		}
 		
 		return profLoc;
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#updateSubscriberLocation(com.pixelandtag.web.beans.RequestObject)
+	 */
+	public void updateSubscriberLocation(RequestObject ro){
+		try {
+			Long cellid = Long.valueOf(ro.getCellid());
+			Long locationid = Long.valueOf(ro.getLac());
+			PersonDatingProfile prof =  dating_ejb.getProfile(ro.getMsisdn());
+			findOrCreateLocation(cellid,locationid,ro.getLocation(),prof);
+			
+		} catch (Exception exp) {
+			logger.error(exp.getMessage(),exp);
+		}
+		
 	}
 
 }

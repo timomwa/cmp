@@ -53,6 +53,7 @@ import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.subscription.dto.MediumType;
+import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
@@ -67,6 +68,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@EJB
 	private LocationBeanI location_ejb;
+	
+	private StopWatch watch = new StopWatch();
 	
 	public DatingServiceBean() throws KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,
@@ -156,7 +159,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		try{
 			
-			PersonDatingProfile match = findMatch(pref_gender,pref_age, location,person.getId());
+			PersonDatingProfile match = findMatch(profile);
+			if(match==null)
+				match  = findMatch(pref_gender,pref_age, location,person.getId());
 			if(match==null)
 				 match = findMatch(pref_gender,pref_age,person.getId());
 			if(match==null)
@@ -374,7 +379,17 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					BigDecimal pref_age = profile.getPreferred_age();
 					String location = profile.getLocation();
 					
-					PersonDatingProfile match = findMatch(pref_gender,pref_age, location,person.getId());
+					PersonDatingProfile match = null;
+					if(match==null){
+						try{
+							match = findMatch(profile);//try find by their location
+						}catch(DatingServiceException exp){
+							logger.warn(exp.getMessage(),exp);
+						}
+					}
+					
+					if(match==null)
+						match = findMatch(pref_gender,pref_age, location,person.getId());
 					if(match==null)
 						 match = findMatch(pref_gender,pref_age,person.getId());
 					if(match==null)
@@ -564,6 +579,34 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	@SuppressWarnings("unchecked")
+	public PersonDatingProfile getProfile(String msisdn) throws DatingServiceException{
+		
+		PersonDatingProfile profile = null;
+		
+		try{
+			Query qry = em.createQuery("from PersonDatingProfile prf WHERE prf.person.msisdn=:msisdn");
+			qry.setParameter("msisdn", msisdn);
+			List<PersonDatingProfile> lst = qry.getResultList();
+			
+			if(lst.size()>0)
+				profile = lst.get(0);
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no profile for person "+msisdn);
+		}catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+
+			throw new DatingServiceException(e.getMessage(),e);
+
+		}finally{
+		}
+		
+		return profile;
+		
+	}
+	
+	@SuppressWarnings("unchecked")
 	public PersonDatingProfile getProfile(Person person) throws DatingServiceException{
 		
 		PersonDatingProfile profile = null;
@@ -676,7 +719,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	public PersonDatingProfile findMatch(PersonDatingProfile profile) throws DatingServiceException{
 	
 		PersonDatingProfile persondatingProfile = null;
-		
+		int k =0;
+		k = 2;
+		if(k==2)
+			return null;
 		try {
 			
 			ProfileLocation profileLocation  = location_ejb.findProfileLocation(profile);
@@ -685,18 +731,46 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			
 				Date dob = calculateDobFromAge(profile.getPreferred_age());
 				
-				Query qry = em.createQuery("from ProfileLocation pl WHERE (pl.profile.username <> pl.profile.person.msisdn) AND  pl.profile.person.active=:active "
-						+ "AND pl.profile.dob<=:dob AND pl.profile.gender=:prefGender AND (  pl.location.cellid=:cellid OR pl.location.location_id=:location_id OR  pl.location.locationName=:locationName) order by pl.timeStamp asc");
+				Query qry = em.createQuery("   FROM "
+											+ "	ProfileLocation pl "
+											+ "WHERE "
+											+ "   (   (pl.profile.username <> pl.profile.person.msisdn) "
+											+ "	   AND  "
+											+ "      pl.profile.person.active=:active "
+											+ "    AND "
+											+ "      pl.profile.dob<=:dob "
+											+ "    AND "
+											+ "      pl.profile.gender=:prefGender "
+											+ "    AND "
+											+ "        ( pl.location.cellid=:cellid "
+											+ "				OR "
+											+ "				    pl.location.location_id=:location_id "
+											+ "				OR  "
+											+ "					lower(pl.location.locationName)=lower(:locationName)"
+											+ "		   ) "
+											+ "   )  AND "
+											+ "    (   pl.profile.person.id "
+											+ "				NOT IN "
+											+ "					(SELECT "
+											+ "						DISTINCT person_b_id "
+											+ "					 FROM "
+											+ "						SystemMatchLog sml "
+											+ "					 WHERE "
+											+ "                     sml.person_a_id = :person_a_id"
+											+ "                 )"
+											+ "   )"
+											+ " order by "
+											+ "    pl.timeStamp asc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				
 				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
 				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
-				qry.setParameter("locationName", profileLocation.getLocation().getLocationName());
+				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
 				qry.setParameter("prefGender", profile.getPreferred_gender());
+				qry.setParameter("person_a_id",profile.getPerson().getId());
 				qry.setParameter("dob", dob);
 				qry.setParameter("active", new Boolean(true));
-				
 				ProfileLocation pl = (ProfileLocation) qry.getSingleResult();
 				
 				persondatingProfile = pl.getProfile();
@@ -728,11 +802,25 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setParameter("location", "%"+location+"%");
 			qry.setParameter("dob", dob);
 			qry.setParameter("person_a_id", curPersonId);
-			//qry.setParameter("alreadyMatched", alreadyMatched);
+			
+			try{
+				watch.start();
+			}catch(Exception exp){
+				logger.error(exp);
+			}
 			
 			List<PersonDatingProfile> ps = qry.getResultList();
-			if(ps.size()>0)
+			
+			if(ps.size()>0){
 				person = ps.get(0);
+				try{
+					watch.stop();
+					logger.info("::::::::::It took "+(Double.parseDouble(watch.elapsedTime(java.util.concurrent.TimeUnit.MILLISECONDS)+"")) + " mili-seconds to search a member");
+					watch.reset();
+				}catch(Exception exp){
+					logger.error(exp);
+				}
+			}
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 		}

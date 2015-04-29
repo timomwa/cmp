@@ -1051,8 +1051,8 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	public long generateNextTxId(){
 		try {
-			Thread.sleep(112);
-		} catch (InterruptedException e) {
+			//Thread.sleep();
+		} catch (Exception e) {
 			logger.warn("\n\t\t::"+e.getMessage());
 		}
 		return System.currentTimeMillis();

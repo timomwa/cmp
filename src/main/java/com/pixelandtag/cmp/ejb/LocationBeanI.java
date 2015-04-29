@@ -3,6 +3,7 @@ package com.pixelandtag.cmp.ejb;
 import com.pixelandtag.dating.entities.Location;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileLocation;
+import com.pixelandtag.web.beans.RequestObject;
 
 public interface LocationBeanI extends BaseEntityI {
 	
@@ -51,6 +52,14 @@ public interface LocationBeanI extends BaseEntityI {
 	 * @throws Exception
 	 */
 	public ProfileLocation findProfileLocation(PersonDatingProfile profile) throws Exception;
+	
+	
+	/**
+	 * Straight from the ussd request.
+	 * this one updates
+	 * @param ro
+	 */
+	public void updateSubscriberLocation(RequestObject ro);
 	
 }
 

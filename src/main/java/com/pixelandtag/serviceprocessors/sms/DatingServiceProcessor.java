@@ -141,7 +141,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						sysmatchlog.setPerson_a_notified(true);
 						sysmatchlog = datingBean.saveOrUpdate(sysmatchlog);
 					}catch(Exception exp){
-						logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
+						logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n",exp);
 					}
 					String gender_pronoun = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_M, language_id);
 					String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);

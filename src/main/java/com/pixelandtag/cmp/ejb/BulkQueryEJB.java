@@ -40,7 +40,7 @@ public class BulkQueryEJB implements BulkQueryI {
 	private UserTransaction utx;
 	
 	@EJB
-	private BulkSMSI bulksms_api;
+	private BulkSMSUtilBeanI util_ejb;
 	
 	@Override
 	public String query(String sourceIp, String apiKey, String username,
@@ -86,18 +86,18 @@ public class BulkQueryEJB implements BulkQueryI {
 				
 		logger.info("\n\n incoming batch: "+sb.toString());
 				
-		BulkSMSAccount account = bulksms_api.getAccout(apiKey,username,password);
-		boolean hostAllowed = bulksms_api.hostAllowed(account, sourceIp);
+		BulkSMSAccount account = util_ejb.getAccout(apiKey,username,password);
+		boolean hostAllowed = util_ejb.hostAllowed(account, sourceIp);
 		if(!hostAllowed){
 			throw new APIAuthenticationException("Host not allowed.");
 		}
 		
 
-		BulkSMSPlan plan = bulksms_api.getPlan(account,planid);
-		BigInteger planBalance = bulksms_api.getPlanBalance(plan);
-		String planstatus_str = bulksms_api.getPlanQueueStatus(plan,telcoid,senderid,price); 
+		BulkSMSPlan plan = util_ejb.getPlan(account,planid);
+		BigInteger planBalance = util_ejb.getPlanBalance(plan);
+		String planstatus_str = util_ejb.getPlanQueueStatus(plan,telcoid,senderid,price); 
 		JSONObject planstatus = new JSONObject(planstatus_str);
-		BigInteger currentoutgoingsize = bulksms_api.getCurrentOutgoingQueue(plan,MTStatus.RECEIVED);
+		BigInteger currentoutgoingsize = util_ejb.getCurrentOutgoingQueue(plan,MTStatus.RECEIVED);
 			
 		planstatus.put("activationDate", plan.getDatePurchased());
 		planstatus.put("bundle_size", plan.getNumberOfSMS().intValue());

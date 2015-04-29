@@ -26,6 +26,7 @@ import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
@@ -62,6 +63,9 @@ public class USSDReceiver extends HttpServlet {
 	
 	@EJB
 	private DatingServiceI datingBean;
+	
+	@EJB
+	private LocationBeanI locationBean;
 
 
 	/**
@@ -124,13 +128,14 @@ public class USSDReceiver extends HttpServlet {
 				messageID = datingBean.logMO(moMessage).getId();
 				ro.setMessageId(messageID);
 				
-				logger.info("\n\n\n\n\n\t\t\t GENERATED MESSAGE ID:::)()()()()()()()(() "+messageID);
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 			}
 			
 			
 			Person p = datingBean.getPerson(ro.getMsisdn());
+			
+			locationBean.updateSubscriberLocation(ro);
 			
 			if((response==null || response.isEmpty()) && (p==null || (p!=null && !p.getActive()))){
 				response = datingBean.processDating(ro);
@@ -143,14 +148,10 @@ public class USSDReceiver extends HttpServlet {
 				 response = datingBean.processDating(ro);
 			}
 			
-			System.out.println("has profile complete... do something else like purchase bundles:: response:"+response);
 			if(response==null || response.equals("")){//we assume they want to renew subscription
 					
 				response = cmpBean.processUSSD(ro);
 			}
-			
-			
-			
 
 			try{
 				

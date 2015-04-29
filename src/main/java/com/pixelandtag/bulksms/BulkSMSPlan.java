@@ -77,6 +77,9 @@ public class BulkSMSPlan implements Serializable {
 	@Index(name="plnaccidx")
 	private String telcoid;
 	
+	@Column(name = "dn_url")
+	private String dn_url;
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
@@ -171,6 +174,14 @@ public class BulkSMSPlan implements Serializable {
 
 	public void setMaxoutqueue(BigInteger maxoutqueue) {
 		this.maxoutqueue = maxoutqueue;
+	}
+
+	public String getDn_url() {
+		return dn_url;
+	}
+
+	public void setDn_url(String dn_url) {
+		this.dn_url = dn_url;
 	}
 	
 

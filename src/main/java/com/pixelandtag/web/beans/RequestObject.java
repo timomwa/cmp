@@ -414,7 +414,7 @@ public class RequestObject implements Serializable{
 		this.code = code;
 	}
 	public String getLocation() {
-		return location;
+		return (location==null) ? "" : location;
 	}
 	public void setLocation(String location) {
 		this.location = location;

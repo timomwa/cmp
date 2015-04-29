@@ -44,6 +44,10 @@ public class BulkSMSQueue implements Serializable{
 	@Index(name="logmsidnidx")
 	private String msisdn;
 	
+	@Column(name = "bulktxId")
+	@Index(name="logblkidx")
+	private String bulktxId;
+	
 	@Column(name = "cptxId")
 	@Index(name="logcpidx")
 	private String cptxId;
@@ -147,7 +151,28 @@ public class BulkSMSQueue implements Serializable{
 	public void setTimelogged(Date timelogged) {
 		this.timelogged = timelogged;
 	}
-	
 
-	
+	public String getBulktxId() {
+		return bulktxId;
+	}
+
+	public void setBulktxId(String bulktxId) {
+		this.bulktxId = bulktxId;
+	}
+
+	public Integer getValidity() {
+		return validity;
+	}
+
+	public void setValidity(Integer validity) {
+		this.validity = validity;
+	}
+
+	public TimeUnit getTimeunit() {
+		return timeunit;
+	}
+
+	public void setTimeunit(TimeUnit timeunit) {
+		this.timeunit = timeunit;
+	}
 }
