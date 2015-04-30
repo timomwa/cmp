@@ -40,6 +40,11 @@
 			<version>2.3.1.GA</version>
 		</dependency>
 
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax</artifactId>
+			<version>1.2.0</version>
+		</dependency>
 
 		<!-- Added by timothy mwangi -->
 		<dependency>
@@ -220,13 +225,8 @@
 
 
 
-		<!-- dependency>
-			<groupId>com.timothy.loancalculator</groupId>
-			<artifactId>loan_calculator_shared</artifactId>
-			<version>1.0.0</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency -->
+		<!-- dependency> <groupId>com.timothy.loancalculator</groupId> <artifactId>loan_calculator_shared</artifactId> 
+			<version>1.0.0</version> <type>jar</type> <scope>provided</scope> </dependency -->
 
 
 
