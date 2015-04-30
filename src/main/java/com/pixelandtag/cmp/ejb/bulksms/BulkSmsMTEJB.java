@@ -1,4 +1,4 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.bulksms;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -28,6 +28,7 @@ import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.bulksms.BulkSMSText;
 import com.pixelandtag.bulksms.IPAddressWhitelist;
+import com.pixelandtag.cmp.ejb.sequences.SequenceGenI;
 import com.pixelandtag.cmp.entities.CMPSequence;
 import com.pixelandtag.cmp.exceptions.CMPSequenceException;
 

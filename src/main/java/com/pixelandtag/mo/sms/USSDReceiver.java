@@ -100,7 +100,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			String ip_addr = req.getRemoteAddr();
 			
-			logger.error("\t\t\tUSSD YAY!!!>>>>> REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
+			logger.debug("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
 			
 		}
 		
@@ -167,7 +167,7 @@ public class USSDReceiver extends HttpServlet {
 			pw.write(response);
 			
 		}catch(Exception e){
-			pw.write("There was a problem processing your request. Kindly do try again minutes.");
+			//pw.write("");
 			logger.error(e.getMessage(),e);
 			try{
 				pw.close();

@@ -13,10 +13,9 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pixelandtag.cmp.ejb.APIAuthenticationException;
-import com.pixelandtag.cmp.ejb.BulkQueryI;
-import com.pixelandtag.cmp.ejb.BulkSMSI;
-import com.pixelandtag.cmp.ejb.ParameterException;
+import com.pixelandtag.cmp.ejb.bulksms.APIAuthenticationException;
+import com.pixelandtag.cmp.ejb.bulksms.BulkQueryI;
+import com.pixelandtag.cmp.ejb.bulksms.ParameterException;
 
 @Stateless
 public class BulkSMSQueryRESTImpl extends BaseRestImpl implements BulkSMSQueryRESTI{

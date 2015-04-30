@@ -1,4 +1,4 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.sequences;
 
 import java.math.BigInteger;
 

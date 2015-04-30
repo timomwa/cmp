@@ -15,12 +15,12 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pixelandtag.cmp.ejb.APIAuthenticationException;
-import com.pixelandtag.cmp.ejb.BulkSmsMTI;
-import com.pixelandtag.cmp.ejb.ParameterException;
-import com.pixelandtag.cmp.ejb.PersistenceException;
-import com.pixelandtag.cmp.ejb.PlanBalanceException;
-import com.pixelandtag.cmp.ejb.QueueFullException;
+import com.pixelandtag.cmp.ejb.bulksms.APIAuthenticationException;
+import com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI;
+import com.pixelandtag.cmp.ejb.bulksms.ParameterException;
+import com.pixelandtag.cmp.ejb.bulksms.PersistenceException;
+import com.pixelandtag.cmp.ejb.bulksms.PlanBalanceException;
+import com.pixelandtag.cmp.ejb.bulksms.QueueFullException;
 
 
 @Stateless

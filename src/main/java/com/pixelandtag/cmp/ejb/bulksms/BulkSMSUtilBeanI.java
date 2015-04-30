@@ -1,4 +1,4 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.bulksms;
 
 import java.math.BigInteger;
 import java.text.ParseException;

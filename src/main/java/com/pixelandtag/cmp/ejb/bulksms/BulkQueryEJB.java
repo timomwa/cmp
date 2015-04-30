@@ -1,4 +1,4 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.bulksms;
 
 import java.math.BigInteger;
 
@@ -19,11 +19,10 @@ import org.json.JSONObject;
 import com.pixelandtag.api.MTStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
-import com.pixelandtag.cmp.ejb.APIAuthenticationException;
-import com.pixelandtag.cmp.ejb.BulkSMSI;
-import com.pixelandtag.cmp.ejb.ParameterException;
-import com.pixelandtag.cmp.ejb.PlanBalanceException;
-import com.pixelandtag.cmp.ejb.PlanException;
+import com.pixelandtag.cmp.ejb.bulksms.APIAuthenticationException;
+import com.pixelandtag.cmp.ejb.bulksms.ParameterException;
+import com.pixelandtag.cmp.ejb.bulksms.PlanBalanceException;
+import com.pixelandtag.cmp.ejb.bulksms.PlanException;
 
 @Stateless
 @Remote

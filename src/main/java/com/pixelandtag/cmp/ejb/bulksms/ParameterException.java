@@ -1,4 +1,4 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.bulksms;
 
 public class  ParameterException extends Exception{
 

@@ -1,13 +1,6 @@
-package com.pixelandtag.cmp.ejb;
-
-import javax.ws.rs.Path;
+package com.pixelandtag.cmp.ejb.bulksms;
 
 import org.json.JSONException;
-
-import com.pixelandtag.cmp.ejb.APIAuthenticationException;
-import com.pixelandtag.cmp.ejb.ParameterException;
-import com.pixelandtag.cmp.ejb.PlanBalanceException;
-import com.pixelandtag.cmp.ejb.PlanException;
 
 
 public interface BulkQueryI {

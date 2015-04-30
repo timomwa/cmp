@@ -47,6 +47,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Synchronize;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
@@ -1086,7 +1087,7 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	public long generateNextTxId(){
 		try {
-			//Thread.sleep();
+			Thread.sleep(11);
 		} catch (Exception e) {
 			logger.warn("\n\t\t::"+e.getMessage());
 		}

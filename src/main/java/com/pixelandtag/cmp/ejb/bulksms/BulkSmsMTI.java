@@ -1,6 +1,5 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.bulksms;
 
-import org.hibernate.SQLQueryResultMappingBuilder.ReturnsHolder;
 import org.json.JSONException;
 
 import com.pixelandtag.cmp.exceptions.CMPSequenceException;

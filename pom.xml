@@ -220,13 +220,13 @@
 
 
 
-		<dependency>
+		<!-- dependency>
 			<groupId>com.timothy.loancalculator</groupId>
 			<artifactId>loan_calculator_shared</artifactId>
 			<version>1.0.0</version>
 			<type>jar</type>
 			<scope>provided</scope>
-		</dependency>
+		</dependency -->
 
 
 

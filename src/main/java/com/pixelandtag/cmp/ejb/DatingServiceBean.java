@@ -1228,8 +1228,6 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(qidfko.size()>0)
 			 question_id_fk = (Long) qidfko.get(0);
 			
-			logger.info("\n\n\n\t\t:::question_id_fk == "+question_id_fk );
-			
 			qry = em.createQuery("from ProfileQuestion pq WHERE pq.id=:question_id_fk");
 			qry.setParameter("question_id_fk", question_id_fk.longValue());
 			List<ProfileQuestion> pq =  qry.getResultList();
@@ -1257,19 +1255,15 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException{
 		PersonDatingProfile datingperson_profile = null;
 		try{
-			Date date = getPastTime(period,timeUnit);
-			logger.info("\n\n\n "+date+",person.getId()="+person.getId()+" \n\n\n ");
+			//Date date = getPastTime(period,timeUnit);
 			Query qry = em.createQuery("from ChatLog cl WHERE cl.source_person_id=:source_person_id  order by cl.timeStamp desc");///*AND cl.timeStamp>=:timeStamp*/
 			qry.setParameter("source_person_id", person.getId());
 			qry.setFirstResult(1);
 			qry.setMaxResults(10);
 			List<ChatLog> ps = qry.getResultList();
-			logger.info("\n\n\nps  "+ps+"\n\n\n");
-			logger.info("\n\n\nps.size():: "+ps.size()+"\n\n\n");
 			if(ps.size()>0){
 				ChatLog chatlog = ps.get(0);
 				Long latPersonIsentMsg = chatlog.getDest_person_id();
-				logger.info("latPersonIsentMsg:: "+latPersonIsentMsg);
 				Query qry2 = em.createQuery("from PersonDatingProfile p WHERE p.person.active=:active AND p.person.id=:person_id");
 				qry2.setParameter("active", new Boolean(true));
 				qry2.setParameter("person_id", latPersonIsentMsg);

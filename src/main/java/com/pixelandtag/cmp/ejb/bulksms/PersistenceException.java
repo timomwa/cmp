@@ -1,12 +1,10 @@
-package com.pixelandtag.cmp.ejb;
+package com.pixelandtag.cmp.ejb.bulksms;
 
-public class PlanException extends Exception {
-	
+public class PersistenceException extends Exception {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -5021627526990735572L;
-	
+	private static final long serialVersionUID = 1012096149966221239L;
 	private Throwable throwable;
 	private String message;
 
@@ -19,14 +17,13 @@ public class PlanException extends Exception {
 	}
 
 
-	public PlanException(String message) {
+	public PersistenceException(String message) {
 		this.message = message;
 	}
 	
 	
-	public PlanException(String message, Exception e) {
+	public PersistenceException(String message, Exception e) {
 		this.message = message;
 		this.throwable = e;
 	}
-
 }

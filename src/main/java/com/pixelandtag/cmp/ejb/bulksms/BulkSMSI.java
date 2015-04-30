@@ -1,17 +1,6 @@
-package com.pixelandtag.cmp.ejb;
-
-import java.math.BigInteger;
-
-import javax.ejb.Local;
-import javax.ws.rs.core.HttpHeaders;
+package com.pixelandtag.cmp.ejb.bulksms;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.pixelandtag.api.MTStatus;
-import com.pixelandtag.bulksms.BulkSMSAccount;
-import com.pixelandtag.bulksms.BulkSMSPlan;
-import com.pixelandtag.bulksms.IPAddressWhitelist;
 
 public interface BulkSMSI {
 	

@@ -91,13 +91,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 	public MTsms getMTsms(Long id){
 		MTsms mtsms = null;
-		//String query = "SELECT * FROM `"+CelcomHTTPAPI.database+"`.`httptosend` WHERE id=:id";//in_outgoing_queue = 0 AND sent=0 AND billing_status in ('"+BillingStatus.NO_BILLING_REQUIRED+"' , '"+BillingStatus.INSUFFICIENT_FUNDS+"', '"+BillingStatus.SUCCESSFULLY_BILLED+"') order by `Priority` asc";
-		//Query qry = em.createNativeQuery(query);
 		try {
 			HttpToSend httpTosend = em.find(HttpToSend.class, id);
 			mtsms = convertToLegacyMt(httpTosend);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -2453,19 +2450,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						return resp;
 					}else if(kw_is_digit){
 						
-						logger.error("\n\n\nGUGAMUGA CURRENT MENU >> "+menu_from_session+"\n\n");
 						LinkedHashMap<Integer,MenuItem> submenus = menu_from_session.getSub_menus();
 						
 						boolean submenus_have_sub_menus = false;
-						
-						/*if(submenu!=null)
-						for (Entry<Integer, MenuItem> entry : submenu.entrySet()){
-							if(entry.getValue().getSub_menus()!=null && entry.getValue().getSub_menus().size()>0){
-								logger.error("GUGAMUGA  checking if we have sub menus>> "+entry.getValue().getName());
-								submenus_have_sub_menus = true;
-								break;
-							}
-						}*/
 						
 						
 						MenuItem chosenMenu = null;
@@ -2474,20 +2461,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							chosenMenu = chosenMenu!=null ? getMenuById(chosenMenu.getId()) : null;
 						}catch(ArrayIndexOutOfBoundsException arrin){}
 						
-						
-						logger.error("\n\n\nGUGAMUGA CHOSEN MENU >> "+chosenMenu+"\n\n");
-						
-						//MenuItem chosenMenu = menu_controller.getMenuById(chosenMenu.getId(), conn);
-						
-						//chosenMenu = chosenMenu!=null ? getMenuById(chosenMenu.getId()) : null;
-						
-						
 						if(chosenMenu!=null && chosenMenu.getSub_menus()!=null && chosenMenu.getSub_menus().size()>0){
 							LinkedHashMap<Integer,MenuItem>  submenu_ = chosenMenu.getSub_menus();
 								if(submenu_!=null)
 								for (Entry<Integer, MenuItem> entry : submenu_.entrySet()){
-									logger.info("Checking if submenu has got other menus in it... >>>> "+entry.getKey()+ ". "+entry.getValue().toString());
-									
 									if(!submenus_have_sub_menus)
 									if(entry.getValue().getService_id()==-1){
 										submenus_have_sub_menus = true;
@@ -2500,9 +2477,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 							
 							if(KEYWORD.equals("1")  ){
-								//Subscription subscr = getSubscription(MSISDN,Long.valueOf(chosenMenu.getService_id()));
 								SMSService smsserv = em.find(SMSService.class, Long.valueOf(menu_from_session.getService_id()+""));
-								logger.info("\n\n\n\t\t smsserv.getCmd():::::::::::::::::: "+smsserv.getCmd());
 								if(smsserv!=null && 
 										(smsserv.getCmd().equals("BILLING_SERV5")
 										||
@@ -2518,10 +2493,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									
 									Long processor_fk = smsserv.getMo_processorFK();
 									MOProcessorE proc = find(MOProcessorE.class, processor_fk);
-									
-									//subscribe(MSISDN, smsserv, chosenMenu.getId());
-									logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
-									
 									
 									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
 									mosm_.setMsisdn(MSISDN);
@@ -2557,7 +2528,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									}else if(smsserv.getCmd().equals("FIND")){
 										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
 									}else{
-										resp = "Request received and is being processed. ^K";
+										resp = "Request received and is being processed.";
 									}
 									sess.setSessionId(req.getSessionid());
 									clearUssdSesion(sess);
