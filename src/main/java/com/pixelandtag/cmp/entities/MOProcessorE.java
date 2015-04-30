@@ -57,6 +57,14 @@ public class MOProcessorE implements Serializable {
 	
 	@Column(name="forwarding_url")
 	private String forwarding_url;
+	
+	@Column(name="protocol")
+	private String protocol;
+	
+	@Column(name="smppid")
+	private Long smppid;
+	
+	
 
 	public Long getId() {
 		return id;
@@ -137,5 +145,23 @@ public class MOProcessorE implements Serializable {
 			processor_type = ProcessorType.LOCAL;
 		
 	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	public Long getSmppid() {
+		return smppid;
+	}
+
+	public void setSmppid(Long smppid) {
+		this.smppid = smppid;
+	}
+	
+	
 
 }

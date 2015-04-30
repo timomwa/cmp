@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -16,6 +17,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
+import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
@@ -35,6 +37,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	private HelloWorldI helloBean;
 	private InitialContext context;
 	private Properties mtsenderprop;
+	private StopWatch watch;
 	private CMPResourceBeanRemote cmpbean;
 	private GenericHTTPClient httpclient;
 	private ServiceProcessorDTO serviceprocessor;
@@ -44,6 +47,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
 		httpclient = new GenericHTTPClient(cmpbean);
+		watch = new StopWatch();
 	}
 
 	public void initEJB() throws NamingException {
@@ -82,24 +86,18 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			qparams.add(new BasicNameValuePair("cptxid", mo.getCMP_Txid().toString()));
 			qparams.add(new BasicNameValuePair("sourceaddress",mo.getSMS_SourceAddr()));	
 			qparams.add(new BasicNameValuePair("msisdn",mo.getMsisdn()));
-			/*String sms = "";
 			
-			try{
-				String mosms = mo.getSMS_Message_String().trim();
-				String firstword=mosms.split("\\s")[0].trim();
-				sms = mo.getSMS_Message_String().replaceAll(firstword,"").trim();
-			}catch(Exception exp){
-				logger.error(exp.getMessage(),exp);
-				sms = mo.getSMS_Message_String();
-			}*/
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+mo.getSMS_Message_String());
 			qparams.add(new BasicNameValuePair("sms",mo.getSMS_Message_String()));
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
 			
 			param.setHttpParams(qparams);
-			
+			watch.start();
 			final int RESP_CODE = httpclient.call(param);
+			watch.stop();
+			logger.info(getName()+" PROXY_LATENCY_ON forwarding url ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+			watch.reset();
 			final String message = httpclient.getRespose_msg();
 			logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESP_CODE: "+RESP_CODE);
 			logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+message);
@@ -115,7 +113,9 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			}
 			
 
-			cmpbean.sendMTSMPP(mo);
+			if(serviceprocessor.getProtocol().equalsIgnoreCase("smpp")){
+				cmpbean.sendMTSMPP(mo,serviceprocessor.getSmppid());
+			}
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

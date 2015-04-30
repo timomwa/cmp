@@ -36,6 +36,8 @@ public class ServiceProcessorDTO implements Serializable{
 	private String pricePointKeyword;
 	private ProcessorType processor_type;
 	private String forwarding_url;
+	private String protocol;
+	private Long smppid;
 	
 	
 	
@@ -205,11 +207,22 @@ public class ServiceProcessorDTO implements Serializable{
 	}
 
 
-	
-	
-	
-	
-	
-	
+	public String getProtocol() {
+		return protocol;
+	}
 
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+
+	public Long getSmppid() {
+		return smppid;
+	}
+
+
+	public void setSmppid(Long smppid) {
+		this.smppid = smppid;
+	}
 }

@@ -415,7 +415,7 @@ public class BaseEntityBean implements BaseEntityI {
 	 * Logs in httptosend
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean sendMTSMPP(MOSms mo) throws Exception{
+	public boolean sendMTSMPP(MOSms mo, Long sppid) throws Exception{
 		boolean success = false;
 		try{
 			String insertQ = "insert into "
@@ -423,7 +423,7 @@ public class BaseEntityBean implements BaseEntityI {
 					+ "VALUES(?, ?, ?, ?, 0, now(), ?);";
 			utx.begin();
 			Query qry = em.createNativeQuery(insertQ);
-			qry.setParameter(1, 1);
+			qry.setParameter(1, sppid.intValue());
 			qry.setParameter(2, mo.getMsisdn());
 			qry.setParameter(3, mo.getSMS_SourceAddr());
 			qry.setParameter(4, mo.getMt_Sent());

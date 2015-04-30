@@ -501,6 +501,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				service.setClass_status((String) o[6] );//rs.getString("class_status"));//6
 				service.setForwarding_url((o[8]!=null ? (String) o[8] : ""));
 				service.setProcessor_type(ProcessorType.fromString((String)o[9]));
+				//private String protocol;
+				//private Long smppid;
+				service.setProtocol((String) o[10] );
+				service.setSmppid(Long.valueOf(  ((Integer) o[3]) ));
 				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
 				
 				
