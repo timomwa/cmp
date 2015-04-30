@@ -2005,6 +2005,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return success;
 	}
 	
+	
 	/**
 	 * Logs in httptosend
 	 */

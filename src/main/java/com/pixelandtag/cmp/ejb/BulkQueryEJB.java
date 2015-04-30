@@ -86,7 +86,7 @@ public class BulkQueryEJB implements BulkQueryI {
 				
 		logger.info("\n\n incoming batch: "+sb.toString());
 				
-		BulkSMSAccount account = util_ejb.getAccout(apiKey,username,password);
+		BulkSMSAccount account = util_ejb.getAccout(apiKey,username,password); 
 		boolean hostAllowed = util_ejb.hostAllowed(account, sourceIp);
 		if(!hostAllowed){
 			throw new APIAuthenticationException("Host not allowed.");

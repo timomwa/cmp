@@ -26,6 +26,7 @@ public interface BaseEntityI {
 	public boolean toStatsLog(MOSms mo, String toStatsLog)  throws Exception ;
 	public boolean  acknowledge(long message_log_id) throws Exception;
 	public boolean sendMT(MOSms mo, String sql) throws Exception;
+	public boolean sendMTSMPP(MOSms mo) throws Exception;
 	public EntityManager getEM();
 	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception;
 	public Billable charge(Billable billable) throws Exception;

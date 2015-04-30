@@ -80,6 +80,13 @@ public class BulkSMSPlan implements Serializable {
 	@Column(name = "dn_url")
 	private String dn_url;
 	
+	@Column(name = "protocol")
+	private String protocol;
+	
+	@Column(name = "processor_id")
+	private Long processor_id;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
@@ -182,6 +189,22 @@ public class BulkSMSPlan implements Serializable {
 
 	public void setDn_url(String dn_url) {
 		this.dn_url = dn_url;
+	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	public Long getProcessor_id() {
+		return processor_id;
+	}
+
+	public void setProcessor_id(Long processor_id) {
+		this.processor_id = processor_id;
 	}
 	
 

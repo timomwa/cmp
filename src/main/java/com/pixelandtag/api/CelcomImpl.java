@@ -2100,6 +2100,36 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 					mo.setPricePointKeyword(rs.getString("price_point_keyword"));
 					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
 				
+				}else{
+					
+					try{
+						rs.close();
+					}catch(Exception e){}
+					
+					try{
+						pstmt.close();
+					}catch(Exception e){}
+					
+					pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', sms.id as 'serviceid', `sms`.`split_mt` as 'split_mt', `sms`.`event_type` as 'event_type', `sms`.`price_point_keyword` as 'price_point_keyword' FROM `"+database+"`.`sms_service` sms LEFT JOIN `"+database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.enabled=1 AND mop.shortcode=?",Statement.RETURN_GENERATED_KEYS);
+					
+					pstmt.setString(1,mo.getSMS_SourceAddr());
+					
+					rs = pstmt.executeQuery();
+					
+					if(rs.next()){
+						
+						mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
+						mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
+						mo.setServiceid(rs.getInt("serviceid"));
+						mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
+						mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));
+						mo.setSplit_msg(rs.getBoolean("split_mt"));
+						mo.setPricePointKeyword(rs.getString("price_point_keyword"));
+						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
+					
+					}
+					
+					
 				}
 				
 				

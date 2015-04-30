@@ -82,7 +82,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			qparams.add(new BasicNameValuePair("cptxid", mo.getCMP_Txid().toString()));
 			qparams.add(new BasicNameValuePair("sourceaddress",mo.getSMS_SourceAddr()));	
 			qparams.add(new BasicNameValuePair("msisdn",mo.getMsisdn()));
-			String sms = "";
+			/*String sms = "";
 			
 			try{
 				String mosms = mo.getSMS_Message_String().trim();
@@ -91,18 +91,20 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			}catch(Exception exp){
 				logger.error(exp.getMessage(),exp);
 				sms = mo.getSMS_Message_String();
-			}
-			qparams.add(new BasicNameValuePair("sms",sms));
+			}*/
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+mo.getSMS_Message_String());
+			qparams.add(new BasicNameValuePair("sms",mo.getSMS_Message_String()));
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
 			
 			param.setHttpParams(qparams);
 			
-			HttpResponse resp = httpclient.call(param);
-			final int RESP_CODE = resp.getStatusLine().getStatusCode();
+			final int RESP_CODE = httpclient.call(param);
+			final String message = httpclient.getRespose_msg();
+			logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESP_CODE: "+RESP_CODE);
+			logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+message);
+			
 			if(RESP_CODE==HttpStatus.SC_OK){
-				String message = httpclient.convertStreamToString(resp.getEntity().getContent());
-				logger.info("\n\n\n\n\tPROXY_RESPONSE: "+message);
 				mo.setMt_Sent(message);
 			}else if(RESP_CODE==HttpStatus.SC_CREATED || RESP_CODE==HttpStatus.SC_NO_CONTENT){
 				//mo.setMt_Sent("Request received.");
@@ -113,8 +115,10 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			}
 			
 
+			cmpbean.sendMTSMPP(mo);
+			
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(),e);
 		}
 
 		return mo;

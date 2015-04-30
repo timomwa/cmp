@@ -46,8 +46,12 @@ public abstract class GenericMO extends GenericMessage {
 			setSMS_Message_String(request.getParameter("text"));
 		if(request.getParameter("msg")!=null)
 			setSMS_Message_String(request.getParameter("msg"));
+		if(request.getParameter("message")!=null)
+			setSMS_Message_String(request.getParameter("message"));
 		if(request.getParameter("shortCode")!=null && !request.getParameter("shortCode").isEmpty())
 			setSMS_SourceAddr(request.getParameter("shortCode"));//"32329");
+		if(request.getParameter("shortcode")!=null && !request.getParameter("shortcode").isEmpty())
+			setSMS_SourceAddr(request.getParameter("shortcode"));//"32329");
 		if(request.getParameter("code")!=null && !request.getParameter("code").isEmpty())
 			setSMS_SourceAddr(request.getParameter("code"));//"32329");
 		setMsisdn(request.getParameter("msisdn"));

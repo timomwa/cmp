@@ -42,6 +42,7 @@ public class GenericHTTPClient{
 	private String MINUS_ONE = "-1";
 	private String name;
 	private StopWatch watch;
+	private String respose_msg = "";
 	private boolean run = true;
 	private volatile static ThreadSafeClientConnManager cm;
 	private volatile int sms_idx = 0;
@@ -49,7 +50,6 @@ public class GenericHTTPClient{
 	private volatile boolean success = true;
 	private boolean finished = false;
 	private boolean busy = false;
-	private volatile String message = "";
 
 	private volatile int recursiveCounter = 0;
 	
@@ -59,8 +59,8 @@ public class GenericHTTPClient{
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 	    cm = new ThreadSafeClientConnManager(schemeRegistry);
-		cm.setDefaultMaxPerRoute(2);
-		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+		cm.setDefaultMaxPerRoute(10);
+		cm.setMaxTotal(10);//http connections that are equal to the worker threads.
 		httpclient = new DefaultHttpClient(cm);
 		init();
 	}
@@ -85,9 +85,10 @@ public class GenericHTTPClient{
 	 * Sends the MT message
 	 * @param mt - com.pixelandtag.MTsms
 	 */
-	public HttpResponse call(GenericHTTPParam genericparams){
-		
+	public int call(GenericHTTPParam genericparams){
+		this.respose_msg = "";
 		this.success = true;
+		int resp_code = 0;
 		setBusy(true);
 		HttpPost httppost = null;
 		HttpResponse response = null;
@@ -96,13 +97,25 @@ public class GenericHTTPClient{
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(genericparams.getHttpParams(), "UTF-8");
 			httppost.setEntity(entity);
 			response = httpclient.execute(httppost);
-			printHeader(httppost);
+			
+			resp_code = response.getStatusLine().getStatusCode();
+			//printHeader(httppost);
 			watch.reset();
 			
 			setBusy(false);
 			
-			logger.debug(getName()+" ::::::: finished attempt to deliver SMS via HTTP");
+			this.respose_msg  = convertStreamToString(response.getEntity().getContent());
 			
+			logger.info(getName()+" PROXY ::::::: finished attempt to deliver SMS via HTTP :::: RESP::: "+respose_msg);
+			try {
+				
+				EntityUtils.consume(response.getEntity());
+			
+			} catch (Exception e) {
+				
+				logger.error(e);
+			
+			}
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e.getMessage(),e);
 			httppost.abort();
@@ -117,8 +130,9 @@ public class GenericHTTPClient{
 			this.success = false;
 		}finally{
 			setBusy(false);
+			
 		}
-		return response;
+		return resp_code;
 	}
 	
 	
@@ -259,7 +273,7 @@ public class GenericHTTPClient{
 	 * @return
 	 * @throws IOException
 	 */
-	public String convertStreamToString(InputStream is)
+	private String convertStreamToString(InputStream is)
 			throws IOException {
 		
 		StringBuilder sb = null;
@@ -283,4 +297,15 @@ public class GenericHTTPClient{
 			return "";
 		}
 	}
+
+	public String getRespose_msg() {
+		return respose_msg;
+	}
+
+	public void setRespose_msg(String respose_msg) {
+		this.respose_msg = respose_msg;
+	}
+	
+	
+	
 }

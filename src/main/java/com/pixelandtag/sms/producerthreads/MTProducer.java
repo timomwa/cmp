@@ -1073,6 +1073,8 @@ public class MTProducer extends Thread {
 							
 							param.setHttpParams(qparams);
 							genericMT.offerLast(param);//if we've got a limit to the queue
+							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+							
 						}else{
 							//Inserts the specified element at the end of this 
 							//deque if it is possible to do so immediately without violating 
@@ -1081,8 +1083,9 @@ public class MTProducer extends Thread {
 							//this method is generally preferable to the addLast method, which can fail 
 							//to insert an element only by throwing an exception. 
 							mtMsgs.offerLast(mtsms);
+							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+							
 						}
-						celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 						
 					}catch(Exception e){
 						
@@ -1108,10 +1111,13 @@ public class MTProducer extends Thread {
 							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
 							param.setHttpParams(qparams);
 							genericMT.putLast(param);//if we've got a limit to the queue
+							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I fucking later realzed we still sending SMS twice!!!!!!
+							
 						}else{
 							mtMsgs.putLast(mtsms);//if we've got a limit to the queue
+							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I fucking later realzed we still sending SMS twice!!!!!!
+							
 						}
-						celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I fucking later realzed we still sending SMS twice!!!!!!
 						
 						//addedToqueue = true;
 						
