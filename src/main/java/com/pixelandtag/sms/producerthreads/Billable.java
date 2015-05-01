@@ -135,6 +135,7 @@ public class Billable implements Serializable {
 	@Index(name="cp_idtxid_idx")
 	private BigInteger cp_tx_id;
 	
+	@Deprecated
 	@Column(name = "tx_id")
 	private BigInteger tx_id;
 	
@@ -299,10 +300,12 @@ public class Billable implements Serializable {
 		this.cp_tx_id = cp_tx_id;
 	}
 
+	@Deprecated
 	public BigInteger getTx_id() {
 		return tx_id;
 	}
 
+	@Deprecated
 	public void setTx_id(BigInteger tx_id) {
 		this.tx_id = tx_id;
 	}

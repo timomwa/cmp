@@ -2,10 +2,12 @@ package com.pixelandtag.sms.mt.workerthreads;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.NameValuePair;
 
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.sms.producerthreads.Billable;
 /**
  * 
  * @author Timothy
@@ -24,6 +26,9 @@ public class GenericHTTPParam implements Serializable{
 	private MTsms mtsms;
 	
 	private List<NameValuePair> httpParams;
+	private Map<String,String> headerParams;
+	private String stringentity;
+	
 	public String getUrl() {
 		return url;
 	}
@@ -47,6 +52,18 @@ public class GenericHTTPParam implements Serializable{
 	}
 	public void setMtsms(MTsms mtsms) {
 		this.mtsms = mtsms;
+	}
+	public Map<String, String> getHeaderParams() {
+		return headerParams;
+	}
+	public void setHeaderParams(Map<String, String> headerParams) {
+		this.headerParams = headerParams;
+	}
+	public String getStringentity() {
+		return stringentity;
+	}
+	public void setStringentity(String stringentity) {
+		this.stringentity = stringentity;
 	}
 	
 	

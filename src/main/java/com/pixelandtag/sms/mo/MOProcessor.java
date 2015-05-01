@@ -178,19 +178,25 @@ public class MOProcessor implements Runnable {
 								
 								logger.debug(MTProducer.processor_pool+" gugamuga_processor : \n\n"+servp);
 								
-								boolean success = servp.submit(moSms);
-								
+								if(servp!=null){
+									boolean success = servp.submit(moSms);
+								}else{
+									logger.warn(":::::: COULD not get a free processor with processor id: "+moSms.getProcessor_id());
+									//put sms back in queue?
+								}
 							}catch(NoServiceProcessorException spe){
 								logger.error(spe.getMessage());
+							}finally{
+								moSMSSes.remove(moSms);
 							}
 						
 						}
 
 						
 
-						// logger.info(getName()+
-						// ": it took "+(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)+" to process "+size+
-						// " MO messages");
+						 logger.debug(getName()+
+						 ": it took "+(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)+" to process "+size+
+						 " MO messages");
 
 						watch.reset();
 

@@ -46,7 +46,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	public ContentProxyProcessor() throws NamingException {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
-		httpclient = new GenericHTTPClient(cmpbean);
+		httpclient = new GenericHTTPClient();
 		watch = new StopWatch();
 	}
 

@@ -30,7 +30,6 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
-import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
@@ -49,11 +48,8 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
-import com.pixelandtag.sms.mt.ACTION;
-import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.sms.producerthreads.TopUpNumber;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
@@ -1724,87 +1720,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	@SuppressWarnings({ "unchecked", "unused" })
-	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid) throws Exception {
-		List<Subscription> msisdnL = new ArrayList<Subscription>();
-		try {
-			
-			utx.begin();
-			String sql = "SELECT "
-					+ "id,"//0
-					+ "subscription_status,"//1
-					+ "sms_service_id_fk,"//2
-					+ "msisdn,"//3
-					+ "subscription_timeStamp,"//4
-					+ "smsmenu_levels_id_fk,"//5
-					+ "request_medium, "//6
-					+ "(expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') ) as 'subActive'  "
-					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
-							+ "subscription_status=:subscription_status "
-							+ "AND sms_service_id_fk =:sms_service_id_fk "
-							+ "AND expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') "
-							+ "AND id not in "
-							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
-									+ "WHERE "
-									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
-			
-		/*	String sqld = "SELECT "
-					+ "id,"//0
-					+ "subscription_status,"//1
-					+ "sms_service_id_fk,"//2
-					+ "msisdn,"//3
-					+ "subscription_timeStamp,"//4
-					+ "smsmenu_levels_id_fk,"//5
-					+ "request_medium "//6
-					+ "FROM `"+CelcomImpl.database+"`.`subscription` WHERE "
-							+ "subscription_status='"+sub_status+"'"
-							+ "AND sms_service_id_fk ='"+serviceid+"'"
-							+ "AND id not in "
-							+ "(SELECT subscription_id FROM `"+CelcomImpl.database+"`.`subscriptionlog` "
-									+ "WHERE "
-									+ "date(convert_tz(`timeStamp`,'"+getServerTz()+"','"+getClientTz()+"'))=date(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')))";
-	*/		
-			
-			
-			//System.out.println("\n\n"+sqld+"\n\n ");
-			
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter("subscription_status", sub_status);
-			qry.setParameter("sms_service_id_fk", serviceid);
-			List<Object[]> res = qry.getResultList();
-			for(Object[] o : res){
-				Subscription sub = new Subscription();
-				sub.setId(((Integer)o[0] ).longValue());
-				sub.setSubscription_status(SubscriptionStatus.get((String)o[1]));
-				sub.setSms_service_id_fk(((Integer)o[2]).longValue());
-				sub.setMsisdn((String)o[3]);
-				sub.setSubscription_timeStamp(( (java.util.Date) o[4]) );
-				sub.setSmsmenu_levels_id_fk((Integer)o[5]);
-				sub.setRequest_medium(MediumType.get((String)o[6]));
-				sub.setSubActive(((BigInteger)o[7]).intValue()>0 );
-				msisdnL.add(sub);
-			}
-			
-			
-			
-			utx.commit();
-		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
-		} catch (Exception e) {
-			try{
-				utx.rollback();
-			}catch(Exception e1){}
-			logger.error(e.getMessage());
-			throw e;
-		}finally{
-		}
-
-
-		return msisdnL;
 		
-	}
-	
 	@SuppressWarnings("unchecked")
 	public List<ServiceSubscription> getServiceSubscription()  throws Exception {
 		
@@ -3012,37 +2928,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		// TODO Auto-generated method stub
 		
 	}
-	@SuppressWarnings("unchecked")
-	public Subscription getSubscription(String msisdn, Long serviceid) throws Exception{
-		Subscription subscr = null;
-		boolean subValid = false;
-		try{
-			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') ");
-			qry.setParameter("msisdn", msisdn);
-			qry.setParameter("serviceid", serviceid);
-			List<Subscription> sublist = qry.getResultList();
-			if(sublist.size()>0)
-				subValid = true;
-			
-			
-			qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid");
-			qry.setParameter("msisdn", msisdn);
-			qry.setParameter("serviceid", serviceid);
-			sublist = qry.getResultList();
-			if(sublist.size()>0){
-				subscr = sublist.get(0);
-				subscr.setValid(subValid);
-			}
-			
-		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
-		}catch(Exception e){
-			logger.error(e.getMessage(),e);
-			throw e;
-			
-		}
-		return subscr;
-	}
+	
 	
 	
 	@SuppressWarnings("unchecked")
@@ -3188,23 +3074,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			long cmpTxid = transaction_id.longValue();
 			
 			String sql;
-			//Query qry;
-			//Object rs;
-			/*try{
-				sql = "SELECT CMP_Txid FROM `"+CelcomImpl.database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)";
-				qry = em.createNativeQuery(sql);
-				qry.setParameter(1, cmpTxid);
-				qry.setParameter(2, cmpTxid);
-				rs = qry.getSingleResult();
-					if(rs!=null){
-						cmpTxid = ( (BigInteger) rs ).longValue();
-					}
-			}catch(javax.persistence.NoResultException ex){
-				logger.warn(ex.getMessage() + " COULD NOT FIND messagelog record with (CMP_Txid = "+cmpTxid+") OR (newCMP_Txid = "+cmpTxid+")");
-			}*/
-				
 			
-			//rs = null;
 			double priceTbc = 0.0d;
 			boolean wasInLog = false;
 			List<Object[]> rs2 =null;
@@ -3264,30 +3134,28 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							serviceid =(Integer) o[3];// rs.getInt("serviceid");
 							priceTbc = new Double((Double) o[4]);//TarrifCode.get(CMP_SKeyword.trim()).getPrice();
 						}
-						
-							
 					}
+						utx.begin();
+						String sql4 = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword,price,statusCode,charged) " +
+								"VALUES(?,?,?,?,?,?,?,?)";
+						Query qry4 = em.createNativeQuery(sql4);
+						
+						qry4.setParameter(1, serviceid);
+						qry4.setParameter(2, msisdn);
+						qry4.setParameter(3, cmpTxid);
+						qry4.setParameter(4, CMP_Keyword);
+						qry4.setParameter(5, CMP_SKeyword);
+						qry4.setParameter(6, priceTbc);
+						qry4.setParameter(7, errorcode.toString());
+						qry4.setParameter(8, (((priceTbc>0.0d) && errorcode.equals(ERROR.Success)) ? 1: 0 )   );
+						
+						success = qry4.executeUpdate()>0;
+						
+						logger.debug("______CMP_SKeyword="+CMP_SKeyword+"________cmpTxid = "+cmpTxid+"________priceTbc = "+priceTbc+"_________________did not find in smsStatLog but no problem, we found in messagelog__________________________________________SUCCESSFULLY_INSERTED_INTO_SMSStatLog___________________________________________________________________________________");
+						
+						utx.commit();
 					
 					
-					utx.begin();
-					String sql4 = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword,price,statusCode,charged) " +
-							"VALUES(?,?,?,?,?,?,?,?)";
-					Query qry4 = em.createNativeQuery(sql4);
-					
-					qry4.setParameter(1, serviceid);
-					qry4.setParameter(2, msisdn);
-					qry4.setParameter(3, cmpTxid);
-					qry4.setParameter(4, CMP_Keyword);
-					qry4.setParameter(5, CMP_SKeyword);
-					qry4.setParameter(6, priceTbc);
-					qry4.setParameter(7, errorcode.toString());
-					qry4.setParameter(8, (((priceTbc>0.0d) && errorcode.equals(ERROR.Success)) ? 1: 0 )   );
-					
-					success = qry4.executeUpdate()>0;
-					
-					logger.debug("______CMP_SKeyword="+CMP_SKeyword+"________cmpTxid = "+cmpTxid+"________priceTbc = "+priceTbc+"_________________did not find in smsStatLog but no problem, we found in messagelog__________________________________________SUCCESSFULLY_INSERTED_INTO_SMSStatLog___________________________________________________________________________________");
-					
-					utx.commit();
 				}catch(javax.persistence.NoResultException ex){
 					try{
 						utx.rollback();

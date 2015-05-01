@@ -30,12 +30,13 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
-import com.pixelandtag.dating.entities.Location;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileAttribute;
@@ -49,7 +50,6 @@ import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
-import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.subscription.dto.MediumType;
@@ -61,13 +61,25 @@ import com.pixelandtag.web.beans.RequestObject;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
-		
+public Logger logger = Logger.getLogger(DatingServiceBean.class);
+	
+	@Resource
+	@PersistenceContext(unitName = "EjbComponentPU4")
+	private EntityManager em;
+	
+
+	@Resource
+	private UserTransaction utx;
 
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
 	
 	@EJB
 	private LocationBeanI location_ejb;
+	
+	
+	@EJB
+	SubscriptionBeanI subscriptionBean;
 	
 	private StopWatch watch = new StopWatch();
 	
@@ -532,17 +544,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 
-	public Logger logger = Logger.getLogger(DatingServiceBean.class);
-	
-	@Resource
-	@PersistenceContext(unitName = "EjbComponentPU4")
-	private EntityManager em;
-	
-
-	@Resource
-	private UserTransaction utx;
-
-	
+		
 	@Override
 	public String getMessage(String key, int language_id) throws DatingServiceException{
 		if(language_id<=0)
@@ -840,8 +842,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		if(alreadyMatched.size()<=0)
 			alreadyMatched.add(-1L);
-	
-	return alreadyMatched;
+		return alreadyMatched;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1162,10 +1163,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				SMSService smsserv = find(SMSService.class, serviceid);
 			
-				Subscription sub = renewSubscription(MSISDN, smsserv);
+				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv);
 				
 				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
-				msg = msg.replaceAll(EXPIRY_DATE_TAG, sdf.format( sub.getExpiryDate() ));
+				msg = msg.replaceAll(EXPIRY_DATE_TAG, prettier_df.format( sub.getExpiryDate() ));
 				msg = msg.replaceAll(SERVICE_NAME_TAG, smsserv.getService_name());
 				mo.setMt_Sent(msg);
 				mo.setPrice(mo.getPrice());//set price to subscription price

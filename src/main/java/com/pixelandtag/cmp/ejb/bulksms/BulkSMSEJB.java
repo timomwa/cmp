@@ -41,6 +41,7 @@ import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.bulksms.BulkSMSText;
 import com.pixelandtag.bulksms.IPAddressWhitelist;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 
 @Stateless
 @Remote
@@ -59,6 +60,9 @@ public class BulkSMSEJB implements BulkSMSI {
 	
 	@EJB
 	BulkSMSUtilBeanI util_ejb;
+	
+	@EJB
+	TimezoneConverterI timezoneEJB;
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -139,14 +143,14 @@ public class BulkSMSEJB implements BulkSMSI {
 		if((schedule!=null && timezone==null || timezone.isEmpty()) || (planid==null|| planid.isEmpty())||(text==null|| text.isEmpty())||(telcoid==null|| telcoid.isEmpty())||(senderid==null|| senderid.isEmpty())||(price==null || price.isEmpty())||(msisdnlist==null || msisdnlist.length()==0)||priority<0){
 			throw new ParameterException("Missing parameters. Parameters: ["+sb.toString()+"]");
 		}
-		boolean tz_valid = util_ejb.validateTimezone(timezone);
+		boolean tz_valid = timezoneEJB.validateTimezone(timezone);
 		if(!tz_valid){
 			throw new ParameterException("Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
 		}
 		Date sheduledate = null;
 		try {
-			sheduledate = util_ejb.stringToDate(schedule);
-			boolean isinthepast = util_ejb.isDateInThePast(sheduledate,timezone);
+			sheduledate = timezoneEJB.stringToDate(schedule);
+			boolean isinthepast = timezoneEJB.isDateInThePast(sheduledate,timezone);
 			if(isinthepast)
 				throw new ParameterException("The schedule date is in the past.");
 		} catch (ParseException e) {

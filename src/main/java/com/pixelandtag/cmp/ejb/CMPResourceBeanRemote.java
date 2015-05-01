@@ -16,7 +16,6 @@ import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
@@ -39,8 +38,6 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public List<SubscriptionDTO> getSubscriptionServices()  throws Exception ;
 
 	public List<ServiceSubscription> getServiceSubscription()  throws Exception ;
-
-	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid)  throws Exception ;
 
 	public boolean updateServiceSubscription(int subscription_service_id)  throws Exception ;
 

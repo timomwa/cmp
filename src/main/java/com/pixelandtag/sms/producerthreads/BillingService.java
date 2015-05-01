@@ -1,25 +1,15 @@
 package com.pixelandtag.sms.producerthreads;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.cert.X509Certificate;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -32,33 +22,14 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
 
 import com.inmobia.util.StopWatch;
-import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.cmp.persistence.CMPDao;
-import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MTsms;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.sms.mt.ACTION;
-import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker;
-import com.pixelandtag.sms.mt.workerthreads.MTHttpSender;
 import com.pixelandtag.util.FileUtils;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
-
-import snaq.db.DBPoolDataSource;
 
 public class BillingService extends Thread{
 	
@@ -78,8 +49,8 @@ public class BillingService extends Thread{
 	private static int sentMT = 0;
 	private int queueSize = 0;
 	public volatile  BlockingQueue<HttpBillingWorker> httpSenderWorkers = new LinkedBlockingDeque<HttpBillingWorker>();
-	private volatile static BlockingDeque<Billable> billableQ =  new LinkedBlockingDeque<Billable>();
-	private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
+	private volatile static BlockingDeque<Billable> billableQ = null;
+	//private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
 
 	public static List<Long> refugees = new ArrayList<Long>();
 	
@@ -122,7 +93,14 @@ public class BillingService extends Thread{
     
     
     public BillingService() throws Exception{
+    	
     	watch = new StopWatch();
+    	
+    	if(queueSize<=0)
+    		billableQ =  new LinkedBlockingDeque<Billable>();
+    	else	
+    		billableQ =  new LinkedBlockingDeque<Billable>(queueSize);
+    	
     	initEJB();
     	initWorkers();
     	instance = this;
@@ -158,8 +136,8 @@ public class BillingService extends Thread{
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("https", 8443, sf));
 		cm = new ThreadSafeClientConnManager(schemeRegistry);
-		cm.setDefaultMaxPerRoute(2);
-		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+		cm.setDefaultMaxPerRoute(workers);
+		cm.setMaxTotal(workers*2);//http connections that are equal to the worker threads.
 						
 		httpsclient = new DefaultHttpClient(cm);
 					

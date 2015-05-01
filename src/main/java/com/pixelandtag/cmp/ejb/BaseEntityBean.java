@@ -6,15 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +44,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Synchronize;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
@@ -55,17 +51,14 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
-import com.pixelandtag.dating.entities.SubscriptionEvent;
-import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.sms.producerthreads.Subscription;
 import com.pixelandtag.subscription.SubscriptionMain;
-import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 
@@ -139,66 +132,7 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 		return isAtive;
 	}
-    @SuppressWarnings("unchecked")
-	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
-		Subscription sub = null;
-		try{
-			Query qry = em.createQuery("from Subscription where msisdn=:msisdn AND sms_service_id_fk=:sms_service_id_fk");
-			qry.setParameter("sms_service_id_fk", smsService.getId());
-			qry.setParameter("msisdn", msisdn);
-			
-			List<Subscription> scrl = qry.getResultList();
-			
-			if(scrl.size()>0){
-				sub = scrl.get(0);
-			}
-			
-			if(sub==null){//create new subscription
-				sub = new Subscription();
-				sub.setMsisdn(msisdn);
-				sub.setSms_service_id_fk(smsService.getId());
-				sub.setRenewal_count(0L);
-				sub.setRequest_medium(MediumType.sms);
-				sub.setSubActive(true);
-				sub.setSmsmenu_levels_id_fk(-1);
-			}
-			
-			qry = em.createNativeQuery("select DATE_ADD(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"'), INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
-			qry.setParameter("sub_length", smsService.getSubscription_length());
-			Object o = qry.getSingleResult();
-			Date expiryDate = (Date) o;
-			
-		
-			try{
-				utx.begin();
-				sub.setExpiryDate(expiryDate);
-				sub.setRenewal_count(sub.getRenewal_count()+1);
-				sub.setSubscription_status(SubscriptionStatus.confirmed);
-				sub.setSubscription_timeStamp(new Date());
-				sub = em.merge(sub);
-				
-				SubscriptionHistory sh = new SubscriptionHistory();
-				sh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
-				sh.setMsisdn(msisdn);
-				sh.setService_id(smsService.getId());
-				sh.setTimeStamp(new Date());
-				
-				sh = em.merge(sh);
-				
-				utx.commit();
-			}catch(Exception exp){
-				try{
-					utx.rollback();
-				}catch(Exception expr){}
-				throw exp;
-			}
-			
-			
-		}catch(Exception exp){
-			throw exp;
-		}
-		return sub;
-	}
+  
 	public BaseEntityBean() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
 		watch = new StopWatch();
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 

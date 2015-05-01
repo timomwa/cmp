@@ -1,4 +1,4 @@
-package com.pixelandtag.sms.producerthreads;
+package com.pixelandtag.cmp.entities.subscription;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -25,6 +25,11 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 @Entity
 @Table(name = "subscription")
 public class Subscription implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3833333504322509883L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

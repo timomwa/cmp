@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +24,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
@@ -34,28 +37,26 @@ import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
 
-public class GenericHTTPClient{
+public class GenericHTTPClient implements Serializable{
 	
-	private static final int msg_part_wait = 0;//Time to wait in mills before sending broken message
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6923599491151170899L;
 	private Logger logger = Logger.getLogger(getClass());
 	private HttpClient httpclient = null;
-	private String MINUS_ONE = "-1";
 	private String name;
 	private StopWatch watch;
 	private String respose_msg = "";
 	private boolean run = true;
 	private volatile static ThreadSafeClientConnManager cm;
-	private volatile int sms_idx = 0;
-	private CMPResourceBeanRemote cmpbean;
 	private volatile boolean success = true;
 	private boolean finished = false;
 	private boolean busy = false;
 
-	private volatile int recursiveCounter = 0;
 	
 	
-	public GenericHTTPClient(CMPResourceBeanRemote cmpbean){
-		this.cmpbean = cmpbean;
+	public GenericHTTPClient(){
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 	    cm = new ThreadSafeClientConnManager(schemeRegistry);
@@ -65,8 +66,7 @@ public class GenericHTTPClient{
 		init();
 	}
 	
-	public GenericHTTPClient(CMPResourceBeanRemote cmpbean, HttpClient httpclient_){
-		this.cmpbean = cmpbean;
+	public GenericHTTPClient(HttpClient httpclient_){
 		this.httpclient = httpclient_;
 		init();
 	}
@@ -94,13 +94,29 @@ public class GenericHTTPClient{
 		HttpResponse response = null;
 		try {
 			httppost = new HttpPost(genericparams.getUrl());
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(genericparams.getHttpParams(), "UTF-8");
-			httppost.setEntity(entity);
+			
+			Map<String,String> headerparams = genericparams.getHeaderParams();
+			
+			if(headerparams!=null && headerparams.size()>0)
+				for(String key : headerparams.keySet()){
+					httppost.setHeader(key, headerparams.get(key));
+				}
+			
+			if(genericparams.getStringentity()==null || genericparams.getStringentity().isEmpty()){
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(genericparams.getHttpParams(), "UTF-8");
+				httppost.setEntity(entity);
+			}else{
+				StringEntity se = new StringEntity(genericparams.getStringentity());
+				httppost.setEntity(se);
+			}
+		
+			watch.start();
 			response = httpclient.execute(httppost);
+			watch.stop();
+			logger.info(getName()+" :::: LINK_LATENCY : ("+genericparams.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+			watch.reset();
 			
 			resp_code = response.getStatusLine().getStatusCode();
-			//printHeader(httppost);
-			watch.reset();
 			
 			setBusy(false);
 			
