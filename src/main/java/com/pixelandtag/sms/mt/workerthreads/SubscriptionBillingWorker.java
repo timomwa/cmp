@@ -138,123 +138,139 @@ public class SubscriptionBillingWorker implements Runnable {
 
 			while(run){
 				
+				
 				try {
 					
-					logger.debug(getName()+" kujaribu kutafuta billable");
 					final Billable billable = SubscriptionRenewal.getBillable();
-					logger.debug(getName()+":::: tumekamata moja hapa.."+billable);
-					billable.setMsisdn("");
-					if((5>0 ) && billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
-						setBusy(true);
-						logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
-						logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
-						String xml = billable.getChargeXML(BillableI.plainchargeXML);
-						logger.info("BILLABLE: "+billable.toString());
-						logger.debug("XML SENT \n : "+xml + "\n");
-						param.setStringentity(xml);
-						param.setHeaderParams(headerattrs);
-						watch.start();
-						final int RESP_CODE = genericHttpClient.call(param);
-						watch.stop();
-						logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
-						watch.reset();
-						final String resp = genericHttpClient.getRespose_msg();
-						logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+resp);
-						billable.setResp_status_code(String.valueOf(RESP_CODE));
-						billable.setProcessed(1L);
+					
+					try{
 						
-						if (RESP_CODE == HttpStatus.SC_OK) {
+							logger.debug(getName()+" kujaribu kutafuta billable");
 							
-							Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
-
-							
-							logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
-							
-							billable.setRetry_count(billable.getRetry_count()+1);
-							this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
-							billable.setSuccess(this.success );
-							if(!this.success){
-								String err = getErrorCode(resp);
-								String errMsg = getErrorMessage(resp);
-								logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-								logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
-								logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-								billable.setSuccess(false);
-								billable.setResp_status_code(errMsg);
+							logger.debug(getName()+":::: tumekamata moja hapa.."+billable);
+							if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
+								setBusy(true);
+								logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+								logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+								String xml = billable.getChargeXML(BillableI.plainchargeXML);
+								logger.info("BILLABLE: "+billable.toString());
+								logger.debug("XML SENT \n : "+xml + "\n");
+								param.setStringentity(xml);
+								param.setHeaderParams(headerattrs);
+								watch.start();
+								final int RESP_CODE = genericHttpClient.call(param);
+								watch.stop();
+								logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+								watch.reset();
+								final String resp = genericHttpClient.getRespose_msg();
+								logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+resp);
+								billable.setResp_status_code(String.valueOf(RESP_CODE));
+								billable.setProcessed(1L);
+								
+								if (RESP_CODE == HttpStatus.SC_OK) {
+									
+									Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+		
+									
+									logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
+									
+									billable.setRetry_count(billable.getRetry_count()+1);
+									this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
+									billable.setSuccess(this.success );
+									if(!this.success){
+										String err = getErrorCode(resp);
+										String errMsg = getErrorMessage(resp);
+										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
+										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
+										logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+										billable.setSuccess(false);
+										billable.setResp_status_code(errMsg);
+									}else{
+										billable.setResp_status_code("Success");
+										logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
+										logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+										billable.setSuccess(true);
+									}
+									cmp_ejb.saveOrUpdate(billable);
+									
+								}else if(RESP_CODE == 400){
+									this.success  = false;
+								}else if(RESP_CODE == 401){
+									this.success  = false;
+									logger.error("\n::::::::::::::::: Unauthorized! :::::::::::::::");
+									
+								}else if(RESP_CODE == 404 || RESP_CODE == 403){
+									
+									this.success  = false;
+									
+								}else if(RESP_CODE == 503){
+			
+									this.success  = false;
+									
+								}else if(RESP_CODE==0){
+									this.success = false;
+									logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
+									subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+								
+								}else{
+									
+									this.success  = false;
+								
+								}
+								
+								logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
+								
+								try{
+									
+									billable.setProcessed(1L);
+									billable.setIn_outgoing_queue(0L);
+									
+									if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
+										billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
+									}
+									if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
+										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
+										billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
+									}
+									if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
+										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
+										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
+										billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
+									}
+									
+									if("TWSS_109".equals(billable.getResp_status_code())){
+										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
+										billable.setIn_outgoing_queue(0L);
+										billable.setProcessed(0L);
+										billable.setRetry_count( (billable.getRetry_count()+1 ) );
+										billable.setMaxRetriesAllowed(5L);
+										billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
+									}
+								
+								}catch(Exception e){
+									logger.error(e.getMessage(),e);
+								}
+								
+								logger.debug("DONE! ");
+								
 							}else{
-								billable.setResp_status_code("Success");
-								logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
-								logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-								billable.setSuccess(true);
+								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
+									Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+									logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
+								}else{
+									setRun(false);//Poison pill
+									setFinished(true);
+								}
 							}
-							cmp_ejb.saveOrUpdate(billable);
-							
-						}else if(RESP_CODE == 400){
-							this.success  = false;
-						}else if(RESP_CODE == 401){
-							this.success  = false;
-							logger.error("\n::::::::::::::::: Unauthorized! :::::::::::::::");
-							
-						}else if(RESP_CODE == 404 || RESP_CODE == 403){
-							
-							this.success  = false;
-							
-						}else if(RESP_CODE == 503){
-	
-							this.success  = false;
-							
-						}else{
-							
-							this.success = false;
-							
-						}
+					}catch(Exception exp){
 						
-						logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
+						logger.error(exp.getMessage(),exp);
+						logger.info("SUBSCRIPTION_RENEWAL:::::::::SOMETHING WENT WRONG, WE TRY AGAIN ");
+						subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 						
-						try{
-							
-							billable.setProcessed(1L);
-							billable.setIn_outgoing_queue(0L);
-							
-							if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
-								cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-								cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
-								billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
-							}
-							if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
-								cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-								cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
-								billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
-							}
-							if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
-								cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
-								cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
-								billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
-							}
-							
-							if("TWSS_109".equals(billable.getResp_status_code())){
-								cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
-								billable.setIn_outgoing_queue(0L);
-								billable.setProcessed(0L);
-								billable.setRetry_count( (billable.getRetry_count()+1 ) );
-								billable.setMaxRetriesAllowed(5L);
-								billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
-							}
-						
-						}catch(Exception e){
-							logger.error(e.getMessage(),e);
-						}
-						
-						logger.debug("DONE! ");
-						
-					}else{
-						if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
-							Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
-							logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
-						}else{
-							setRun(false);//Poison pill
-							setFinished(true);
-						}
 					}
 						
 					setBusy(false);
@@ -262,6 +278,7 @@ public class SubscriptionBillingWorker implements Runnable {
 				}catch (Exception e){
 					log(e);
 				}finally{
+					
 				}
 				
 			}

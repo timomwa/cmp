@@ -11,6 +11,7 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;

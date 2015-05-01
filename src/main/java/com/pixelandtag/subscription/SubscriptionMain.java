@@ -47,7 +47,7 @@ public class SubscriptionMain extends Thread{
 		
 		
 		
-		log4Jprops = FileUtils.getPropertyFile("log4jsub.properties");
+		//log4Jprops = FileUtils.getPropertyFile("log4jsub.properties");
 		subscription_props = FileUtils.getPropertyFile("mtsender.properties");
 		
 		if(log4Jprops==null)
@@ -95,10 +95,10 @@ public class SubscriptionMain extends Thread{
 		Thread ts = new Thread(subscriptionRenewal);
 		ts.start();
 		
-		SubscriptionMainTread subApp = new SubscriptionMainTread(submain.cmpbean,submain.subscriptinoEJB);
+		/*SubscriptionMainTread subApp = new SubscriptionMainTread(submain.cmpbean,submain.subscriptinoEJB);
 		Thread t = new Thread(subApp);
 		t.start();
-
+*/
 		
 		
 		

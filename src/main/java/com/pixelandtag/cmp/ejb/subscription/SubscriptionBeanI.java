@@ -54,4 +54,22 @@ public interface SubscriptionBeanI {
 	 */
 	public Subscription getSubscription(String msisdn, Long serviceid) throws Exception;
 
+
+	/**
+	 * 
+	 * @param string - status "RENEWAL"
+	 * @param id - subscription id
+	 * @throws Exception
+	 */
+	public void updateQueueStatus(Long status, Long id) throws Exception;
+	
+	/**
+	 * 
+	 * @param status
+	 * @param msisdn
+	 * @param sms_service_id
+	 * @throws Exception
+	 */
+	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id) throws Exception;
+
 }

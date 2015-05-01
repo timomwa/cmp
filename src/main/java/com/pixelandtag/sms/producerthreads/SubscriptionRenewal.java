@@ -193,14 +193,16 @@ public class SubscriptionRenewal extends  Thread {
 	
 	
 
-	private void populateQueue() {
+	private void populateQueue() throws Exception {
 
 		List<Subscription> subsl = subscriptio_nejb.getExpiredSubscriptions(Long.valueOf(this.workers));
 
-		logger.info("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
+		System.out.println("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
 		
 		for (Subscription sub : subsl) {
-
+			
+			sub.setQueue_status(1L);
+			subscriptio_nejb.updateQueueStatus(1L,sub.getId());
 			
 			logger.info(" sub "+sub);
 			Long sms_service_id = sub.getSms_service_id_fk();

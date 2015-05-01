@@ -75,6 +75,10 @@ public class Subscription implements Serializable {
 	private Boolean subActive;
 	
 	
+	@Column(name="queue_status")
+	private Long queue_status;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void setDefaults(){
@@ -86,6 +90,9 @@ public class Subscription implements Serializable {
 			subActive = new Boolean(true);
 		if(renewal_count==null)
 			renewal_count = 0L;
+		if(queue_status==null)
+			queue_status = 0L;
+		
 	}
 
 	public Long getId() {
@@ -174,6 +181,14 @@ public class Subscription implements Serializable {
 
 	public void setValid(boolean isValid) {
 		this.isValid = isValid;
+	}
+
+	public Long getQueue_status() {
+		return queue_status;
+	}
+
+	public void setQueue_status(Long queue_status) {
+		this.queue_status = queue_status;
 	}
 	
 	

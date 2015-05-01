@@ -58,8 +58,13 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public List<Subscription> getExpiredSubscriptions(Long size) {
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
-			Date dt = new Date();
-			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<:todaydate");
+			Date dt = null;
+			try{
+				dt = timezoneEJB.convertDateToDestinationTimezone(new Date(), "Africa/Nairobi");
+			}catch(Exception e){
+				dt = new Date();
+			}
+			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<:todaydate AND s.queue_status = 0");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
 			qry.setParameter("todaydate", dt);
 			logger.info(" GUGAMUGA:::: EXPIRY CHECK CHECKING TO SEE IF WE HAVE DATES BEFORE dt"+dt);
@@ -83,11 +88,48 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		try{
 			SMSService service = em.find(SMSService.class, serviceid);
 			sub = renewSubscription(msisdn, service);
+			updateQueueStatus(0L,sub.getId());
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}
 		return sub;
 	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateQueueStatus(java.lang.String, java.lang.String, java.lang.Long)
+	 */
+	@Override
+	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id) throws Exception{
+		try{
+			Subscription sub = getSubscription(msisdn, sms_service_id);
+			updateQueueStatus(status,sub.getId());
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+	}
+	
+	
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void updateQueueStatus(Long status, Long id) throws Exception{
+		try{
+			utx.begin();
+			Query qry = em.createQuery("UPDATE Subscription s SET s.queue_status=:queue_status WHERE s.id=:id");
+			qry.setParameter("queue_status", status);
+			qry.setParameter("id", id);
+			qry.executeUpdate();
+			utx.commit();
+		}catch(Exception exp){
+			try{
+				utx.rollback();
+			}catch(Exception exp2){
+			}
+			logger.error(exp.getMessage(),exp);
+			throw exp;
+		}
+	}
+	
 	
 	
 	@Override
