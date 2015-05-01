@@ -111,8 +111,8 @@ public class USSDReceiver extends HttpServlet {
 		String response =""; 
 		
 		try{
-			
-			final RequestObject ro = new RequestObject(req);
+			Long tx_id = cmpBean.generateNextTxId();
+			final RequestObject ro = new RequestObject(req,tx_id);
 			
 			ro.setMediumType(MediumType.ussd);
 			
@@ -120,7 +120,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			long messageID = -1;
 			
-			final MOSms moMessage = new MOSms(req);
+			final MOSms moMessage = new MOSms(req,tx_id);
 			
 			try{
 				moMessage.setMediumType(MediumType.ussd);

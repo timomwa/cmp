@@ -16,6 +16,8 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.CMPResourceBean;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.dynamic.dbutils.DBConnection;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -29,7 +31,12 @@ public class ContentRetriever {
 	private static final String DB_NAME = "pixeland_content360";
 	private Logger log = Logger.getLogger(ContentRetriever.class);
 	private SubscriptionOld sub = new SubscriptionOld();
+	private CMPResourceBeanRemote cmpresource;
 	
+	
+	public ContentRetriever(CMPResourceBeanRemote cmpresource_){
+		this.cmpresource = cmpresource_;
+	}
 	
 	
 	/**
@@ -257,7 +264,7 @@ public class ContentRetriever {
 	
 	
 	public static void main(String[] args) {
-		Connection conn  = DBConnection.createFromConnString(DBConnection.CONSTR);
+		/*Connection conn  = DBConnection.createFromConnString(DBConnection.CONSTR);
 		
 		try{
 		
@@ -276,7 +283,7 @@ public class ContentRetriever {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 
 	
@@ -373,7 +380,7 @@ public class ContentRetriever {
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
-				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
+				mo.setCMP_Txid(BigInteger.valueOf(cmpresource.generateNextTxId()));
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());

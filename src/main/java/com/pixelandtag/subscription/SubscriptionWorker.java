@@ -22,7 +22,7 @@ import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.SubscriptionLog;
 
 
-public class SubscriptionWorker implements Runnable{
+public class SubscriptionWorker extends Thread{
 	
 	private int serviceid;
 	private String name;
@@ -38,19 +38,15 @@ public class SubscriptionWorker implements Runnable{
 	private Connection conn;
 	private int subscription_service_id = -1;
 	private ArrayBlockingQueue<SubscriptionDTO> processors;
-	private String server_tz;
-	private String client_tz;
 	private CMPResourceBeanRemote cmpbean;
 	private SubscriptionBeanI subscriptionbean;
 	
 	private SubscriptionWorker(){}
 	
-	public SubscriptionWorker(CMPResourceBeanRemote bean,SubscriptionBeanI subscriptionbean_,String server_tz, String client_tz, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
+	public SubscriptionWorker(CMPResourceBeanRemote bean,SubscriptionBeanI subscriptionbean_, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
 		
 		this.cmpbean = bean;
 		this.subscriptionbean = subscriptionbean_;
-		this.server_tz = server_tz;
-		this.client_tz = client_tz;
 		logger.debug(" :::::::::: GUGAMUGA processing service : "+service_id);
 		this.connstr = connStr;
 		this.serviceid = service_id;
@@ -81,13 +77,12 @@ public class SubscriptionWorker implements Runnable{
 		
 	}
 	
-	public String getName() {
-		return name;
+	
+	public void cancelBatch(){
+		interrupt();
 	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
+	
+	
 
 	public int getStatus() {
 		return status;
@@ -141,7 +136,7 @@ public class SubscriptionWorker implements Runnable{
 					
 					MOSms mo = new MOSms();
 					
-					mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
+					mo.setCMP_Txid(BigInteger.valueOf(cmpbean.generateNextTxId()));
 					mo.setMsisdn(sub.getMsisdn());
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
@@ -194,6 +189,8 @@ public class SubscriptionWorker implements Runnable{
 		}finally{
 			
 			setBusy(false);
+
+			setStatus(FINISHED);
 			
 			finalizeMe();
 			

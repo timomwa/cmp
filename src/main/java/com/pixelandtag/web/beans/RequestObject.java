@@ -183,7 +183,7 @@ public class RequestObject implements Serializable{
 		
 	}
 
-	public RequestObject(HttpServletRequest request) throws Exception {
+	public RequestObject(HttpServletRequest request, Long nextTransactionid) throws Exception {
 		
 		String telcoid, msisdn, msg, keyword,testBalance,tripWire = null, litmus = null;
 		int price,serviceid=-1;
@@ -218,7 +218,7 @@ public class RequestObject implements Serializable{
 		if (request.getParameter("tid") != null){
 			transactionID = new BigInteger("-1");
 			try{
-				transactionID  = BigInteger.valueOf(SubscriptionMain.generateNextTxId());//Too big to handle in db for now.. request.getParameter("tid").trim());
+				transactionID  = BigInteger.valueOf(nextTransactionid);//Too big to handle in db for now.. request.getParameter("tid").trim());
 			}catch(Exception exp){}
 		}
 		if (request.getParameter("sessionid") != null){

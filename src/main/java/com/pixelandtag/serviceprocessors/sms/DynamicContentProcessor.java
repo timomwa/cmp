@@ -32,7 +32,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 	private DBPoolDataSource ds;
 	private SubscriptionOld subscription;
 	
-	private ContentRetriever cr = new ContentRetriever();
+	private ContentRetriever cr = null;
 	private String SPACE = " ";
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
@@ -48,7 +48,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 		 context = new InitialContext(props);
 		 cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		 
+		 cr = new ContentRetriever(cmpbean);
 		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	public DynamicContentProcessor(){

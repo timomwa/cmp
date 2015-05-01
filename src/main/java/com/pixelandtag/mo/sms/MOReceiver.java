@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
 
+import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -20,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -47,7 +49,9 @@ public class MOReceiver extends HttpServlet {
 	private final String SERVER_TIMEZONE = "-05:00";
 	private final String CLIENT_TIMEZONE = "+03:00";
 
-
+	@EJB
+	private CMPResourceBeanRemote cmpBean;
+	
 	//private final int INITIAL_CONNECTIONS = 10;
 	//private final int MAX_CONNECTIONS = 50;
 
@@ -99,7 +103,7 @@ public class MOReceiver extends HttpServlet {
 				return;
 			}
 			
-			final MOSms moMessage = new MOSms(req);
+			final MOSms moMessage = new MOSms(req,cmpBean.generateNextTxId());
 			
 			if(ds==null){
 				init();

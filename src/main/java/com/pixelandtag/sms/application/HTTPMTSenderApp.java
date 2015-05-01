@@ -99,15 +99,10 @@ public class HTTPMTSenderApp extends Thread {
 		
 		
 		HTTPMTSenderApp mtSender = new HTTPMTSenderApp();
-		
 		mtSender.initialize();
 		
-		
-		
-		//String connStr_, int workers_, int throttle_, int initialConnections_, int maxConnections_, int queueSize_, int pollWait_, String mturl_
 		MTProducer mt = new MTProducer(mtSender.constr, mtSender.workers, mtSender.throttle, mtSender.initialDBConnections, mtSender.maxDBConnections, mtSender.queueSize, mtSender.pollWait, mtSender.urlparams);
 		mt.start();
-		//mt.rezume();
 		
 	}
 	

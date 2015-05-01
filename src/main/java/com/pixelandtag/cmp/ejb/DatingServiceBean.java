@@ -1280,12 +1280,5 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	
 
-	public long generateNextTxId(){
-		try {
-			Thread.sleep(6);
-		} catch (InterruptedException e) {
-			logger.warn("\n\t\t::"+e.getMessage());
-		}
-		return System.currentTimeMillis();
-	}
+	
 }

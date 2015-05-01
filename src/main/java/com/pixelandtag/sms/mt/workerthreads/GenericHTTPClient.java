@@ -27,6 +27,9 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
@@ -109,7 +112,11 @@ public class GenericHTTPClient implements Serializable{
 				StringEntity se = new StringEntity(genericparams.getStringentity());
 				httppost.setEntity(se);
 			}
-		
+			HttpParams params = new BasicHttpParams();
+			params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 10000);
+			params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
+			params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
+			httppost.setParams(params);
 			watch.start();
 			response = httpclient.execute(httppost);
 			watch.stop();

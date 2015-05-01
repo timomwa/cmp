@@ -61,6 +61,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
 			qry.setParameter("todaydate", new Date());
+			qry.setFirstResult(0);
+			qry.setMaxResults(size.intValue());
 			expired = qry.getResultList();
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
@@ -87,6 +89,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
 			Subscription sub = null;
 			try{
@@ -102,15 +105,13 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				qry.setParameter("curdate_local", nowInNairobiTz);
 				qry.setParameter("sub_length", smsService.getSubscription_length());
 				Object o = qry.getSingleResult();
-				Date expiryDate = (Date) o;
+				String expiryDate = (String) o;
 				
-			
 				try{
 					utx.begin();
-					sub.setExpiryDate(expiryDate);
+					sub.setExpiryDate(timezoneEJB.stringToDate(expiryDate));
 					sub.setRenewal_count(sub.getRenewal_count()+1);
 					sub.setSubscription_status(SubscriptionStatus.confirmed);
-					sub.setSubscription_timeStamp(new Date());
 					sub = em.merge(sub);
 					
 					SubscriptionHistory sh = new SubscriptionHistory();

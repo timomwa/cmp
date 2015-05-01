@@ -35,7 +35,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 	//private DBPoolDataSource ds;
 	private SubscriptionOld subscription;
 	private Properties mtsenderprop;
-	private ContentRetriever cr = new ContentRetriever();
+	private ContentRetriever cr = null;
 	private String SPACE = " ";
 	
 	
@@ -53,7 +53,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 			 context = new InitialContext(props);
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-			 
+			 cr = new ContentRetriever(cmpbean);
 			 System.out.println(getClass().getSimpleName()+" : Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 	

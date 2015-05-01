@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -16,6 +17,8 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.cmp.ejb.CMPResourceBean;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.util.StopWatch;
@@ -43,6 +46,9 @@ public class Trivia extends HttpServlet {
 	private final int MAX_CONNECTIONS = 50;
 	private Logger logger = Logger.getLogger(Trivia.class);
 	
+
+	@EJB
+	private CMPResourceBeanRemote cmpresource;
 	
 	@Override
 	public void init() throws ServletException {
@@ -146,7 +152,7 @@ public class Trivia extends HttpServlet {
 		
 		try {
 			
-			final RequestObject ro = new RequestObject(request);
+			final RequestObject ro = new RequestObject(request,cmpresource.generateNextTxId());
 			final String MSISDN = ro.getMsisdn();
 			final String MSG = ro.getMsg();
 			final String KEYWORD  = ro.getKeyword();

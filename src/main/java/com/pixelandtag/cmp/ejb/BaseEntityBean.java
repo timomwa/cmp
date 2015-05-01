@@ -741,8 +741,8 @@ public class BaseEntityBean implements BaseEntityI {
 		
 		if(mo.getCMP_Txid().compareTo(BigInteger.ONE)<0){
 			try{
-				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
-			}catch(InterruptedException exp){
+				mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
 				throw new TransactionIDGenException("Couldn't acquire lock, so could not generate the transaction id!");
 			}
@@ -1021,11 +1021,13 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	public long generateNextTxId(){
 		try {
-			Thread.sleep(11);
+			Thread.sleep(112);
 		} catch (Exception e) {
 			logger.warn("\n\t\t::"+e.getMessage());
 		}
 		return System.currentTimeMillis();
 	}
+	
+	
 
 }

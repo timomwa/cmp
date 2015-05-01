@@ -399,10 +399,6 @@ public class BillingService extends Thread{
 			BillingService billingserv = new BillingService();
 			billingserv.start();
 			
-			
-			SubscriptionRenewal subscriptionRenewal = new SubscriptionRenewal();
-			subscriptionRenewal.start();
-			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

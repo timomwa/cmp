@@ -1,6 +1,7 @@
 package com.pixelandtag.sms.mt.workerthreads;
 
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -92,8 +93,13 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 	}
 
-	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean, SubscriptionBeanI subscriptionejb_) throws Exception{
+	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_) throws Exception{
 		 
+		if(cmpbean_==null)
+			throw new Exception("CMP EJB is nulll");
+		if(subscriptionejb_==null)
+			throw new Exception("CMP EJB is nulll");
+		this.cmp_ejb = cmpbean_;
 		this.subscriptionejb = subscriptionejb_;
 		
 		this.watch = new StopWatch();
@@ -134,9 +140,12 @@ public class SubscriptionBillingWorker implements Runnable {
 				
 				try {
 					
+					logger.debug(getName()+" kujaribu kutafuta billable");
 					final Billable billable = SubscriptionRenewal.getBillable();
-					if(billable.getId()>0){
+					logger.debug(getName()+":::: tumekamata moja hapa.."+billable);
+					if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 						setBusy(true);
+						logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 						logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 						String xml = billable.getChargeXML(BillableI.plainchargeXML);
 						logger.info("BILLABLE: "+billable.toString());
@@ -149,7 +158,6 @@ public class SubscriptionBillingWorker implements Runnable {
 						logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 						watch.reset();
 						final String resp = genericHttpClient.getRespose_msg();
-						logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESP_CODE: "+RESP_CODE);
 						logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+message);
 						billable.setResp_status_code(String.valueOf(RESP_CODE));
 						billable.setProcessed(1L);
@@ -157,6 +165,7 @@ public class SubscriptionBillingWorker implements Runnable {
 						if (RESP_CODE == HttpStatus.SC_OK) {
 							
 							Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+
 							
 							logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
 							
@@ -169,11 +178,16 @@ public class SubscriptionBillingWorker implements Runnable {
 								logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
 								logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
 								logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+								billable.setSuccess(false);
+								billable.setResp_status_code(errMsg);
 							}else{
 								billable.setResp_status_code("Success");
 								logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 								logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+								billable.setSuccess(true);
 							}
+							cmp_ejb.saveOrUpdate(billable);
+							
 						}else if(RESP_CODE == 400){
 							this.success  = false;
 						}else if(RESP_CODE == 401){
@@ -225,8 +239,6 @@ public class SubscriptionBillingWorker implements Runnable {
 								billable.setMaxRetriesAllowed(5L);
 								billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 							}
-					
-							cmp_ejb.saveOrUpdate(billable);
 						
 						}catch(Exception e){
 							logger.error(e.getMessage(),e);
@@ -235,9 +247,15 @@ public class SubscriptionBillingWorker implements Runnable {
 						logger.debug("DONE! ");
 						
 					}else{
-						setRun(false);
+						if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
+							Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+							logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
+						}else{
+							setRun(false);//Poison pill
+							setFinished(true);
+						}
 					}
-					
+						
 					setBusy(false);
 				
 				}catch (Exception e){

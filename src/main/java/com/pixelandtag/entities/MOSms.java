@@ -41,9 +41,9 @@ public class MOSms extends GenericMO{
 	}
 	
 
-	public MOSms(HttpServletRequest request) throws TransactionIDGenException {
+	public MOSms(HttpServletRequest request, Long txid) throws TransactionIDGenException {
 		
-		super(request);
+		super(request,txid);
 		
 		Enumeration enums = request.getParameterNames();
 		

@@ -53,7 +53,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	private final Logger mo_processor_logger = Logger.getLogger(GenericMenuProcessor.class);
 	//private final String RESET_SESSION_ENG = "\nREPLY with \"Number\" to get the list of services.";
 	//private final String RESET_SESSION_MAL = "\nBALAS dengan \"Nombor\" untuk dapatkan senarai servis.";
-	private ContentRetriever cr = null;
+	//private ContentRetriever cr = null;
 	private DBPoolDataSource ds;
 	private MenuController menu_controller = null;
 	private SubscriptionOld subscription = null;
@@ -80,7 +80,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 		init_datasource();
 		menu_controller = new MenuController(getEJB());
 		subscription = new SubscriptionOld();
-		cr = new ContentRetriever();
+		//cr = new ContentRetriever();
 		
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
@@ -750,7 +750,7 @@ public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSu
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
-				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
+				mo.setCMP_Txid(BigInteger.valueOf(cmpbean.generateNextTxId())); 
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());

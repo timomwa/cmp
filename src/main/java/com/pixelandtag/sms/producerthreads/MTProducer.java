@@ -1138,27 +1138,6 @@ public class MTProducer extends Thread {
 					}
 				}
 				
-				
-				
-				/*if(addedToqueue){
-					try {
-						
-						//This method waits here for space to be available... 
-						//this queue's size is 1. Untill it's cleared by the thread, the method holds here...
-						QueueUpdater.inQueue.putLast(mtsms.getId());
-						
-					} catch (InterruptedException e) {//If this message was not added to be marked as "in queue", then it will be picked up again and sent again.. so to avoid that, we remove from current queue
-						log(e);
-						logger.warn("REMOVING MSG FROM QUEUE SINCE THERE IS POSIBILITY OF IT BEING SENT TWICE "+mtsms.toString());
-						mtMsgs.remove(mtsms);
-					}catch (Exception e){
-						log(e);
-						logger.warn("REMOVING MSG FROM QUEUE SINCE THERE IS POSIBILITY OF IT BEING SENT TWICE "+mtsms.toString());
-						mtMsgs.remove(mtsms);
-					}
-				}*/
-				
-				
 			}
 			
 			
@@ -1284,21 +1263,7 @@ public class MTProducer extends Thread {
 			
 	}
 	
-	/*public static String hexToString(String hex)
-	{
-	    StringBuilder sb = new StringBuilder();
-
-	    for (int count = 0; count < hex.length() - 1; count += 2)
-	    {
-	        String output = hex.substring(count, (count + 2));    //grab the hex in pairs
-
-	        int decimal = Integer.parseInt(output, 16);    //convert hex to decimal
-
-	        sb.append((char)decimal);    //convert the decimal to character
-	    }
-
-	    return sb.toString();
-	}*/
+	
 	
 	
 	public static String hexToString(String txtInHex)

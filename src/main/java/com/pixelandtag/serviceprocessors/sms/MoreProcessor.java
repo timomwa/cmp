@@ -83,7 +83,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 		initEJB();
 		menu_controller = new MenuController(cmpbean);
 		subscription = new SubscriptionOld();
-		cr = new ContentRetriever();
+		cr = new ContentRetriever(cmpbean);
 		
 		int vendor = DriverUtilities.MYSQL;
 		String driver = DriverUtilities.getDriver(vendor);
@@ -689,7 +689,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
-				mo.setCMP_Txid(BigInteger.valueOf(SubscriptionMain.generateNextTxId()));
+				mo.setCMP_Txid(BigInteger.valueOf(cmpbean.generateNextTxId())); 
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());
