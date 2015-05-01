@@ -169,9 +169,23 @@ public class SubscriptionBillingWorker implements Runnable {
 								
 								if (RESP_CODE == HttpStatus.SC_OK) {
 									
+									if(resp!=null)
+									if(resp.toUpperCase().equalsIgnoreCase("SLAClusterEnforcementMediation".toUpperCase())){
+										//We've been throttled. Let's slow down a little bit.
+										logger.debug("Throttling! We've been capped.");
+										SubscriptionRenewal.enable_biller_random_throttling = true;
+										
+									}else if(resp.toUpperCase().equalsIgnoreCase("Insufficient".toUpperCase())){
+										//Resume back to normal. No throttling
+										SubscriptionRenewal.enable_biller_random_throttling = false;
+									}
+									
 									billable.setRetry_count(billable.getRetry_count()+1);
 									this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
 									billable.setSuccess(this.success );
+									
+									
+									
 									if(!this.success){
 										String err = getErrorCode(resp);
 										String errMsg = getErrorMessage(resp);
@@ -188,6 +202,9 @@ public class SubscriptionBillingWorker implements Runnable {
 										billable.setSuccess(true);
 										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
 										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
+									
+										//Resume back to normal. No throttling
+										SubscriptionRenewal.enable_biller_random_throttling = false;
 										
 									}
 									cmp_ejb.saveOrUpdate(billable);

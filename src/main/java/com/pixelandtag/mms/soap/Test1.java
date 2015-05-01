@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Random;
 
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
@@ -63,7 +64,17 @@ public class Test1 {
 	private static final String DISTRIBUTION_INDICATION = "false";
 	private static final String contentPath = "C:\\Users\\Paul\\Desktop\\MMS Pis\\mi_soap.jpg";
 	private static final String MMS_TEXT = "MMS First Text";
+	private static int max_throttle_billing = 60000;
+	private static boolean enable_biller_random_throttling=true;
+	private static int min_throttle_billing = 1000;
+	private static Random r = new Random();
 	
+	
+	public static int getRandomWaitTime(){
+    	return enable_biller_random_throttling
+    			? 
+    			(r.nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
+	}
 	
 	/**
 	 * @param args
@@ -71,9 +82,7 @@ public class Test1 {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		String KEYWORD = "*100";
-		
-		System.out.println(KEYWORD.contains("*"));
+		System.out.println("SLAClusterEnforcementMediation:mediate: Limit exceeded for requester: CONTENT360_KE".toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase()));
 		
 		if(true)
 			return;

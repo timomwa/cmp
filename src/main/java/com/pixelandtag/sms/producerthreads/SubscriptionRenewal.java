@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -57,10 +58,14 @@ public class SubscriptionRenewal extends  Thread {
 	private Properties mtsenderprops;
 	private HttpClient httpsclient;
 	private int idleWorkers;
+	public static int max_throttle_billing = 60000;
+	public static boolean enable_biller_random_throttling=false;
+	public static int min_throttle_billing = 1000;
+	private static Random r = new Random();
+	
 	
 	public SubscriptionRenewal(CMPResourceBeanRemote cmpbean_,SubscriptionBeanI subscriptinoEJB_) throws Exception{
 		
-
 		this.cmpbean = cmpbean_;
 		this.subscriptio_nejb = subscriptinoEJB_;
 		initWorkers();
@@ -74,10 +79,31 @@ public class SubscriptionRenewal extends  Thread {
 	}
 	
 	
+	public static int getRandomWaitTime(){
+	    	return enable_biller_random_throttling
+	    			? 
+	    			(r.nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
+	}
+	 
 	private void initWorkers() throws Exception {
 		
 		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
-
+		try{
+			enable_biller_random_throttling = mtsenderprops.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		try{
+			min_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("min_throttle_billing"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		try{
+			max_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("max_throttle_billing"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		
 		try {
 			billables_per_batch = Integer.valueOf(mtsenderprops
 					.getProperty("billables_per_batch"));
@@ -200,6 +226,17 @@ public class SubscriptionRenewal extends  Thread {
 		System.out.println("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
 		
 		for (Subscription sub : subsl) {
+			
+			int wait_time_mills = getRandomWaitTime();
+			
+			try{
+				if(wait_time_mills>-1){
+					logger.debug(":::::: TRYING_TO_BEHAVE LIKE A HUMAN BEING.. WAITING RANDOM NUMBER OF MILLISECONDS:: "+wait_time_mills);
+					Thread.sleep(wait_time_mills);
+				}
+			}catch(Exception e){
+				logger.error(e.getMessage(),e);
+			}
 			
 			sub.setQueue_status(1L);
 			subscriptio_nejb.updateQueueStatus(1L,sub.getId());

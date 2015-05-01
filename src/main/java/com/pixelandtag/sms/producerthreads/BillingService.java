@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -51,8 +52,13 @@ public class BillingService extends Thread{
 	private int queueSize = 0;
 	public volatile  BlockingQueue<HttpBillingWorker> httpSenderWorkers = new LinkedBlockingDeque<HttpBillingWorker>();
 	private volatile static BlockingDeque<Billable> billableQ = null;
-	//private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
+	private static int max_throttle_billing = 60000;
+	private static boolean enable_biller_random_throttling=false;
+	private static int min_throttle_billing = 1000;
+	private static Random r = new Random();
+	
 
+	
 	public static List<Long> refugees = new ArrayList<Long>();
 	
 	private static BillingService instance;
@@ -108,7 +114,11 @@ public class BillingService extends Thread{
     }
     
    
-    
+    public static int getRandomWaitTime(){
+    	return enable_biller_random_throttling
+    			? 
+    			(r.nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
+    }
     
 	private void initWorkers() throws Exception{
 		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
@@ -118,6 +128,21 @@ public class BillingService extends Thread{
 		server_tz = mtsenderprops.getProperty("SERVER_TZ");
 		client_tz = mtsenderprops.getProperty("CLIENT_TZ");
 		
+		try{
+			enable_biller_random_throttling = mtsenderprops.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		try{
+			min_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("min_throttle_billing"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		try{
+			max_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("max_throttle_billing"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
 		
 		try{
 			billables_per_batch = Integer.valueOf(mtsenderprops.getProperty("billables_per_batch"));
