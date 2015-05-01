@@ -169,11 +169,6 @@ public class SubscriptionBillingWorker implements Runnable {
 								
 								if (RESP_CODE == HttpStatus.SC_OK) {
 									
-									Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
-		
-									
-									logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
-									
 									billable.setRetry_count(billable.getRetry_count()+1);
 									this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
 									billable.setSuccess(this.success );
@@ -185,6 +180,9 @@ public class SubscriptionBillingWorker implements Runnable {
 										logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 										billable.setSuccess(false);
 										billable.setResp_status_code(errMsg);
+										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
+										
 									}else{
 										billable.setResp_status_code("Success");
 										logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
