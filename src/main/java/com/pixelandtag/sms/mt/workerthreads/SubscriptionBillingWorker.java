@@ -143,6 +143,7 @@ public class SubscriptionBillingWorker implements Runnable {
 					logger.debug(getName()+" kujaribu kutafuta billable");
 					final Billable billable = SubscriptionRenewal.getBillable();
 					logger.debug(getName()+":::: tumekamata moja hapa.."+billable);
+					billable.setMsisdn("");
 					if((5>0 ) && billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 						setBusy(true);
 						logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
