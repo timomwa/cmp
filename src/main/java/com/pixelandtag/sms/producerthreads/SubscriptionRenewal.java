@@ -61,7 +61,6 @@ public class SubscriptionRenewal extends  Thread {
 	public static int max_throttle_billing = 60000;
 	public static boolean enable_biller_random_throttling=false;
 	public static int min_throttle_billing = 1000;
-	private static Random r = new Random();
 	
 	
 	public SubscriptionRenewal(CMPResourceBeanRemote cmpbean_,SubscriptionBeanI subscriptinoEJB_) throws Exception{
@@ -82,7 +81,7 @@ public class SubscriptionRenewal extends  Thread {
 	public static int getRandomWaitTime(){
 	    	return enable_biller_random_throttling
 	    			? 
-	    			(r.nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
+	    			(new Random().nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
 	}
 	 
 	private void initWorkers() throws Exception {
