@@ -59,7 +59,7 @@ public class SubscriptionRenewal extends  Thread {
 	private HttpClient httpsclient;
 	private int idleWorkers;
 	public static int max_throttle_billing = 60000;
-	public static boolean enable_biller_random_throttling=false;
+	private static boolean enable_biller_random_throttling=false;
 	public static int min_throttle_billing = 1000;
 	
 	
@@ -79,7 +79,7 @@ public class SubscriptionRenewal extends  Thread {
 	
 	
 	public static int getRandomWaitTime(){
-	    	return enable_biller_random_throttling
+	    	return isEnable_biller_random_throttling()
 	    			? 
 	    			(new Random().nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
 	}
@@ -217,6 +217,17 @@ public class SubscriptionRenewal extends  Thread {
 	}
 	
 	
+
+	public static boolean isEnable_biller_random_throttling() {
+		return enable_biller_random_throttling;
+	}
+
+
+	public static void setEnable_biller_random_throttling(
+			boolean enable_biller_random_throttling) {
+		SubscriptionRenewal.enable_biller_random_throttling = enable_biller_random_throttling;
+	}
+
 
 	private void populateQueue() throws Exception {
 
