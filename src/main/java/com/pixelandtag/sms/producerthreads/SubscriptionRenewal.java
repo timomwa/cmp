@@ -61,6 +61,7 @@ public class SubscriptionRenewal extends  Thread {
 	public static int max_throttle_billing = 60000;
 	private static boolean enable_biller_random_throttling=false;
 	public static int min_throttle_billing = 1000;
+	private static boolean adaptive_throttling  = false;
 	
 	
 	public SubscriptionRenewal(CMPResourceBeanRemote cmpbean_,SubscriptionBeanI subscriptinoEJB_) throws Exception{
@@ -99,6 +100,11 @@ public class SubscriptionRenewal extends  Thread {
 		}
 		try{
 			max_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("max_throttle_billing"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		try{
+			adaptive_throttling = mtsenderprops.getProperty("adaptive_throttling").trim().equalsIgnoreCase("true");
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
@@ -144,6 +150,16 @@ public class SubscriptionRenewal extends  Thread {
 
 
 	
+	public static boolean isAdaptive_throttling() {
+		return adaptive_throttling;
+	}
+
+
+	public void setAdaptive_throttling(boolean adaptive_throttling) {
+		this.adaptive_throttling = adaptive_throttling;
+	}
+
+
 	public static Billable getBillable() {
 		
 		try{
