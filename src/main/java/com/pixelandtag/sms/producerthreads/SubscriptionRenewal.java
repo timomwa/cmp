@@ -10,13 +10,8 @@ import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
@@ -26,16 +21,13 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.cmp.ejb.sequences.SequenceGenEJB;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
-import com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker;
 import com.pixelandtag.sms.mt.workerthreads.SubscriptionBillingWorker;
 import com.pixelandtag.util.FileUtils;
 

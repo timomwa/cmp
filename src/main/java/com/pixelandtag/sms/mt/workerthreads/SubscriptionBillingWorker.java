@@ -143,7 +143,7 @@ public class SubscriptionBillingWorker implements Runnable {
 					logger.debug(getName()+" kujaribu kutafuta billable");
 					final Billable billable = SubscriptionRenewal.getBillable();
 					logger.debug(getName()+":::: tumekamata moja hapa.."+billable);
-					if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
+					if((5>0 ) && billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 						setBusy(true);
 						logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 						logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
@@ -158,7 +158,7 @@ public class SubscriptionBillingWorker implements Runnable {
 						logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 						watch.reset();
 						final String resp = genericHttpClient.getRespose_msg();
-						logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+message);
+						logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+resp);
 						billable.setResp_status_code(String.valueOf(RESP_CODE));
 						billable.setProcessed(1L);
 						

@@ -58,9 +58,11 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public List<Subscription> getExpiredSubscriptions(Long size) {
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
-			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate");
+			Date dt = new Date();
+			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<:todaydate");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
-			qry.setParameter("todaydate", new Date());
+			qry.setParameter("todaydate", dt);
+			logger.info(" GUGAMUGA:::: EXPIRY CHECK CHECKING TO SEE IF WE HAVE DATES BEFORE dt"+dt);
 			qry.setFirstResult(0);
 			qry.setMaxResults(size.intValue());
 			expired = qry.getResultList();
