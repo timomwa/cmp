@@ -8,13 +8,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
-import org.jboss.ejb.client.EJBClientContext;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
@@ -22,6 +20,7 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.ChatLog;
@@ -33,12 +32,6 @@ import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.entities.MOSms;
-import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.sms.producerthreads.Operation;
-import com.pixelandtag.sms.producerthreads.Subscription;
-import com.pixelandtag.smsmenu.MenuItem;
-import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -48,6 +41,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private DatingServiceI datingBean;
 	private LocationBeanI location_ejb;
 	private CMPResourceBeanRemote cmp_bean;
+	private SubscriptionBeanI subscriptionBean;
 	private InitialContext context;
 	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = false;
@@ -68,10 +62,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		 context = new InitialContext(props);
 		 datingBean =  (DatingServiceI) 
        		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
-		 
 		location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
 		cmp_bean = (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		 
+		subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
@@ -483,7 +476,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					SMSService smsservice = datingBean.getSMSService("DATE");
 					
-					datingBean.renewSubscription(MSISDN, smsservice);
+					subscriptionBean.renewSubscription(MSISDN, smsservice);
 				}
 				
 				profile = datingBean.saveOrUpdate(profile);

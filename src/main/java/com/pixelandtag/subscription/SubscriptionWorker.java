@@ -23,6 +23,8 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.SubscriptionLog;
@@ -47,11 +49,14 @@ public class SubscriptionWorker implements Runnable{
 	private String server_tz;
 	private String client_tz;
 	private CMPResourceBeanRemote cmpbean;
+	private SubscriptionBeanI subscriptionbean;
 	
 	private SubscriptionWorker(){}
 	
-	public SubscriptionWorker(CMPResourceBeanRemote bean,String server_tz, String client_tz, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
+	public SubscriptionWorker(CMPResourceBeanRemote bean,SubscriptionBeanI subscriptionbean_,String server_tz, String client_tz, String connStr, String name_,int service_id, int subscription_service_id_, ArrayBlockingQueue<SubscriptionDTO> processors){
+		
 		this.cmpbean = bean;
+		this.subscriptionbean = subscriptionbean_;
 		this.server_tz = server_tz;
 		this.client_tz = client_tz;
 		logger.debug(" :::::::::: GUGAMUGA processing service : "+service_id);
@@ -133,9 +138,9 @@ public class SubscriptionWorker implements Runnable{
 			//TODO find a better way to process this. Probably process it in the bean instead
 			//of carrying a big list of msisdn to this end..
 			//Suggestion : make this one transaction in the EJB end
-			List<com.pixelandtag.sms.producerthreads.Subscription> msisdns = cmpbean.listServiceMSISDN("confirmed", this.serviceid);
+			List<Subscription> msisdns = subscriptionbean.listServiceMSISDN("confirmed", this.serviceid);
 			
-			for(com.pixelandtag.sms.producerthreads.Subscription sub : msisdns){
+			for(Subscription sub : msisdns){
 				
 				
 				try{

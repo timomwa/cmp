@@ -33,6 +33,7 @@ import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.api.Settings;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
@@ -50,10 +51,7 @@ public class SubscriptionMain implements Runnable{
 	private static Properties subscription_props = null;
 	private String server_tz;
 	private String client_tz;
-	//private String host;
-	//private String dbName;
-	//private String username;
-	//private String password;
+	private SubscriptionBeanI subscriptinoEJB;
 	private  Context context = null;
 	private CMPResourceBeanRemote cmpbean;
 	public void initEJB() throws Exception{
@@ -67,6 +65,8 @@ public class SubscriptionMain implements Runnable{
 			 context = new InitialContext(props);
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+			 subscriptinoEJB =  (SubscriptionBeanI) 
+			       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 			 try {
 				 cmpbean.setServerTz(server_tz);
 				 cmpbean.setClientTz(client_tz);
@@ -345,7 +345,7 @@ public class SubscriptionMain implements Runnable{
 					
 					ArrayBlockingQueue<SubscriptionDTO> processors = processor_map.get(service_id);
 					
-					SubscriptionWorker sw = new SubscriptionWorker(cmpbean, server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
+					SubscriptionWorker sw = new SubscriptionWorker(cmpbean, subscriptinoEJB,server_tz,client_tz,constr_,service_name,service_id,subscription_service_id,processors);
 					Thread t = new Thread(sw);
 					t.start();
 					

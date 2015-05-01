@@ -47,6 +47,7 @@ public class SubscriptionRenewal extends Thread {
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
 	private Map<Long, MOProcessorE> mo_processorCache = new HashMap<Long, MOProcessorE>();
 	private volatile static BlockingDeque<Billable> billableQ = new LinkedBlockingDeque<Billable>();
+	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
 	
 	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
@@ -60,10 +61,10 @@ public class SubscriptionRenewal extends Thread {
         }
     };
 	private int billables_per_batch = 1000;
-	private SubscriptionRenewal instance;
 	private Properties log4J;
 	private Properties mtsenderprops;
 	private HttpClient httpsclient;
+	private int idleWorkers;
 	
 	
 	public SubscriptionRenewal() throws Exception {
@@ -76,6 +77,9 @@ public class SubscriptionRenewal extends Thread {
 		initWorkers();
 		instance = this;
 	}
+	
+	
+	
 
 	private void initWorkers() throws Exception {
 		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
@@ -103,7 +107,7 @@ public class SubscriptionRenewal extends Thread {
 		schemeRegistry.register(new Scheme("https", 8443, sf));
 		cm = new ThreadSafeClientConnManager(schemeRegistry);
 		cm.setDefaultMaxPerRoute(workers);
-		cm.setMaxTotal(workers * 2);// http connections that are equal to the
+		cm.setMaxTotal(workers*2);// http connections that are equal to the
 									// worker threads.
 
 		httpsclient = new DefaultHttpClient(cm);
@@ -139,6 +143,48 @@ public class SubscriptionRenewal extends Thread {
 				.println("Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 
+
+	public static Billable getBillable() {
+		
+		try{
+			
+			logger.info(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			
+			semaphore.acquire();//now lock out everybody else!
+			
+			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			logger.info("SIZE OF QUEUE ? "+billableQ.size());
+			
+			 final Billable billable = billableQ.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 
+			 try {
+				 
+				logger.info("billable.getId():  "+billable.getId());
+			
+			 } catch (Exception e) {
+				
+				 logger.error("\nRootException: " + e.getMessage()+ ": " +
+				 		"\n Something happenned. We were not able to mark " +
+				 		"\n the message as being in queue. " +
+				 		"\n To prevent another thread re-taking the object, " +
+				 		"\n we've returned null to the thread/method requesting for " +
+				 		"\na n MT.",e);
+				 
+				 return null;
+			}
+			 
+			 return billable;
+		
+		} catch (Exception e1) {
+			logger.error(e1.getMessage(),e1);			
+			return null;
+		}finally{
+			semaphore.release(); // then give way to the next thread trying to access this method..
+		}
+	}
+	
+	
+
 	public void run() {
 
 		try {
@@ -166,6 +212,8 @@ public class SubscriptionRenewal extends Thread {
 		logger.info("producer shut down!");
 		System.exit(0);
 	}
+	
+	
 
 	private void populateQueue() {
 
@@ -175,7 +223,9 @@ public class SubscriptionRenewal extends Thread {
 		for (Subscription sub : subsl) {
 
 			Long sms_service_id = sub.getSms_service_id_fk();
+			
 			SMSService service = sms_serviceCache.get(sms_service_id);
+			
 			if (service == null) {
 				try {
 					service = cmpbean.find(SMSService.class, sms_service_id);
@@ -186,16 +236,14 @@ public class SubscriptionRenewal extends Thread {
 			}
 
 			if (service != null) {
-
-				MOProcessorE processor = mo_processorCache.get(service
-						.getMo_processorFK());
-
+				MOProcessorE processor = mo_processorCache.get(service.getMo_processorFK());
 				if (processor == null) {
 					try {
 						processor = cmpbean.find(MOProcessorE.class,
 								service.getMo_processorFK());
 					} catch (Exception exp) {
-
+						logger.warn("Could not find the processor with id : "
+								+service.getMo_processorFK());
 					}
 				}
 
@@ -295,9 +343,132 @@ public class SubscriptionRenewal extends Thread {
 
 	private void setRun(boolean b) {
 		this.run = b;
-
 	}
 
+	
+	protected static void stopApp() {
+		System.out.println("Shutting down...");
+		
+		try{
+			if(instance!=null){
+				System.out.println("Shutting down...");
+				instance.setRun(false);
+				System.out.print("...");
+				instance.waitForQueueToBecomeEmpty();
+				System.out.print("...");
+				instance.waitForAllWorkersToFinish();
+				System.out.print("...");
+				instance.myfinalize();
+				System.out.println("...");
+			
+			}else{
+				
+				System.out.println("App not yet initialized or started.");
+			
+			}
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+		}catch(Error e){
+			logger.error(e.getMessage(),e);
+		}
+		
+	}
+	
+	
+	private void waitForAllWorkersToFinish() {
+		
+		boolean finished = false;
+		
+		
+		//First and foremost, let all threads die if they finish to process what they're processing currently.
+		//We don't interrupt them still..
+		for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
+			if(tw.isRunning())
+				tw.setRun(false);
+		}
+		
+		//all unprocessed messages in queue are put back to the db.
+		
+		while(!finished){//Until all workers are idle or dead...
+			
+			idleWorkers = 0;
+			
+			for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
+				
+				if(tw.isRunning())
+					tw.setRun(false);
+				
+				
+				
+				//might not be necessary because we already set run to false for each thread.
+				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
+				//because we already set run to false.
+				billableQ.addLast(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				
+				if(!tw.isBusy()){
+					idleWorkers++;
+				}
+				
+			}
+			
+			try {
+				
+				logger.info("workers: "+workers);
+				logger.info("idleWorkers: "+idleWorkers);
+				
+				Thread.sleep(500);
+			
+			} catch (InterruptedException e) {
+				
+				logger.error(e.getMessage(),e);
+			
+			}
+			
+			finished = workers==idleWorkers;
+			
+		}
+		
+		
+		
+		logger.info("We're shutting down, we put back any unprocessed message to the db queue so that they're picked next time we run..");
+		//Now, if we have a big queue of unprocessed messages, we return them back to the db (or rather set the necessary flags
+		for(Billable sms : billableQ){
+			sms.setIn_outgoing_queue(0L);//and its now not in the queue
+			sms.setProcessed(0L);//nope, we're not processing it
+			logger.info("Returned to db: "+ sms.toString());
+			try {
+				sms = cmpbean.saveOrUpdate(sms);
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+		}
+		//now all messages should be put back in quque
+		
+		
+		
+		billableQ.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
+		logger.info("workers: "+workers);
+		logger.info("idleWorkers: "+idleWorkers);
+		
+		
+		
+	}
+	
+
+	private void waitForQueueToBecomeEmpty() {
+		
+		while(billableQ.size()>0){
+			logger.info("BillableQueu.size() : "+billableQ.size());
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				logger.error(e.getMessage(),e);
+			}
+		}
+		logger.info("Queue is now empty, and all threads have been asked not to wait for elements in the queue!");
+		notify();
+	}
+	
 	public void myfinalize() {
 
 		try {

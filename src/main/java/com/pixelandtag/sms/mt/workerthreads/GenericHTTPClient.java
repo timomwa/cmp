@@ -59,7 +59,7 @@ public class GenericHTTPClient implements Serializable{
 	public GenericHTTPClient(){
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-	    cm = new ThreadSafeClientConnManager(schemeRegistry);
+	    cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
 		cm.setDefaultMaxPerRoute(10);
 		cm.setMaxTotal(10);//http connections that are equal to the worker threads.
 		httpclient = new DefaultHttpClient(cm);

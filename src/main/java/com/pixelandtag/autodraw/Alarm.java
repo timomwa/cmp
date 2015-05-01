@@ -59,33 +59,6 @@ public class Alarm {
 
 	}
 	
-	public static void main(String arg[]){
-		
-		
-		//Alarm alarm = new Alarm();
-		//alarm.send("timothy@inmobia.com,paul.kevin@inmobia.com", "Trivia system testing", "Hi,\n\n Testing \n\nRegards.");
-		
-		/*
-		 
-		 
-		 Fibonachi?
-		 
-		String n_ = "5";
-		BigInteger n = new BigInteger(n_);
-		BigInteger y = new BigInteger("1");
-		BigInteger x = new BigInteger("1");
-		
-		while(x.compareTo(n) == -1 ||  x.compareTo(n) == 0){
-			System.out.print(y + " x " + x);
-			y = y.multiply(x);
-			System.out.println(" = " + y);
-			x = x.add(new BigInteger("1"));
-		}
-		System.out.println("\n"+n+"! = "+y);*/
-		
-		
-		
-	}
 	
 
 	public void send(String emails,

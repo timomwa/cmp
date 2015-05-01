@@ -21,6 +21,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import javax.naming.Context;
@@ -35,6 +36,9 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 import org.gjt.mm.mysql.Driver;
 import org.hibernate.Query;
@@ -168,13 +172,18 @@ public class MTProducer extends Thread {
 		Iterator<ServiceProcessorI> it = processorPool.iterator();
 		
 		ServiceProcessorI proc;
-		
+		int poolsize = processorPool.size();
+		int busy = 0;
 		while(it.hasNext()){
 			proc = it.next();
 			if(!proc.queueFull()){
+				logger.info("We have "+poolsize+" processors for the processor with id "+mo_processor_id+", busy: "+busy+", availabe: "+ (poolsize-busy));
 				return proc;
 			}
+			busy++;
 		}
+		logger.info("We have "+poolsize+" processors for the processor with id "+mo_processor_id+", busy: "+busy+", availabe: "+ (poolsize-busy));
+		
 		
 		return null;
 	}
@@ -890,12 +899,9 @@ public class MTProducer extends Thread {
 	    
 	    SchemeRegistry schemeRegistry = new SchemeRegistry();
     	schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-    	cm = new ThreadSafeClientConnManager(schemeRegistry);
+    	cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
 		cm.setDefaultMaxPerRoute((this.workers*2));
 		cm.setMaxTotal((this.workers*2));//http connections that are equal to the worker threads.
-		
-		
-		
 		
 		httpclient = new DefaultHttpClient(cm);
 		
@@ -1048,7 +1054,7 @@ public class MTProducer extends Thread {
 				
 				ServiceProcessorDTO processor =  findProcessorDto(mtsms.getProcessor_id().intValue());
 				
-				System.out.println("\n\n\n\n\n :::::::::::::::::::::: processor.getProcessor_type()::: "+processor.getProcessor_type());
+				logger.debug("\n\n\n\n\n :::::::::::::::::::::: processor.getProcessor_type()::: "+processor.getProcessor_type());
 				
 				
 				if(queueSize==0){//if we can add as many objects to the queue, then we just keep adding

@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -135,7 +136,7 @@ public class BillingService extends Thread{
 				    
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("https", 8443, sf));
-		cm = new ThreadSafeClientConnManager(schemeRegistry);
+		cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
 		cm.setDefaultMaxPerRoute(workers);
 		cm.setMaxTotal(workers*2);//http connections that are equal to the worker threads.
 						
@@ -396,8 +397,12 @@ public class BillingService extends Thread{
 		
 		try {
 			BillingService billingserv = new BillingService();
-		//	billingserv.initWorkers();
 			billingserv.start();
+			
+			
+			SubscriptionRenewal subscriptionRenewal = new SubscriptionRenewal();
+			subscriptionRenewal.start();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

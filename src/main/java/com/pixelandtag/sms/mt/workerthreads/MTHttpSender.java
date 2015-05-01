@@ -25,6 +25,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
@@ -92,6 +95,7 @@ public class MTHttpSender implements Runnable{
 	private volatile HttpResponse response;
 	private volatile int recursiveCounter = 0;
 	private Alarm alarm = new Alarm();
+	
 	
 	
 	public boolean isBusy() {
@@ -170,6 +174,8 @@ public class MTHttpSender implements Runnable{
 		
 		
 		this.watch = new StopWatch();
+		
+		
 		
 		this.name = name_;
 		
@@ -327,6 +333,8 @@ public class MTHttpSender implements Runnable{
 						}
 						
 						
+					}else{
+						setRun(false);
 					}
 					
 				
@@ -341,6 +349,7 @@ public class MTHttpSender implements Runnable{
 				}finally{
 					
 					setSms_idx(0);
+					setBusy(false);
 				
 				}
 				
@@ -453,9 +462,6 @@ public class MTHttpSender implements Runnable{
 			qparams.add(new BasicNameValuePair("msisdn",mt.getMsisdn()));
 			
 			
-			watch.start();
-			
-			
 			if(mt.getSms()!=null || mt.getMsg_part()!=null){
 				
 				logger.debug("full msg: "+mt.getSms());
@@ -484,7 +490,11 @@ public class MTHttpSender implements Runnable{
 			
 			httppost.setEntity(entity);
 			
+			watch.start();
 			response = httpclient.execute(httppost);
+			watch.stop();
+			logger.info(getName()+" :::: LINK_LATENCY : ("+this.mtUrl+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+			watch.reset();
 			
 			resEntity = response.getEntity();
 			
@@ -628,8 +638,9 @@ public class MTHttpSender implements Runnable{
 				message = ioe.getMessage();
 				
 				httppost.abort();
-				
-				logger.error("\n\n==============================================================\n\n"+message+" CONNECTION TO OPERATOR FAILED. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
+				watch.stop();
+				logger.error("\n\n===========================LATENCY : ("+this.mtUrl+")===================================\n\n"+message+" CONNECTION TO OPERATOR FAILED TIME "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + "ms. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
+				watch.reset();
 				
 			} catch (Exception ioe) {
 				
@@ -699,6 +710,8 @@ public class MTHttpSender implements Runnable{
 					log(e);
 				
 				}
+				
+				setBusy(false);
 	            
 			}
 	
