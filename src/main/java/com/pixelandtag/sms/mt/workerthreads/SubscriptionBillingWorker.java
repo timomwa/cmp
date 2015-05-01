@@ -15,6 +15,8 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.MTProducer;
@@ -35,6 +37,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private volatile String message = "";
 	private Alarm alarm = new Alarm();
 	private GenericHTTPClient genericHttpClient;
+	private SubscriptionBeanI subscriptionejb;
 	
 	public boolean isBusy() {
 		return busy;
@@ -89,8 +92,10 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 	}
 
-	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean) throws Exception{
+	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean, SubscriptionBeanI subscriptionejb_) throws Exception{
 		 
+		this.subscriptionejb = subscriptionejb_;
+		
 		this.watch = new StopWatch();
 		
 		this.name = name_;
@@ -150,6 +155,11 @@ public class SubscriptionBillingWorker implements Runnable {
 						billable.setProcessed(1L);
 						
 						if (RESP_CODE == HttpStatus.SC_OK) {
+							
+							Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+							
+							logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
+							
 							billable.setRetry_count(billable.getRetry_count()+1);
 							this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
 							billable.setSuccess(this.success );

@@ -15,6 +15,17 @@ public interface SubscriptionBeanI {
 	 */
 	public List<Subscription> getExpiredSubscriptions(Long size);
 	
+	
+	/**
+	 * Renews the subscription to this services for this msisdn
+	 * @param msisdn
+	 * @param smsService - Long serviceid
+	 * @return
+	 * @throws Exception
+	 */
+	public Subscription renewSubscription(String msisdn, Long serviceId) throws Exception;
+	
+	
 	/**
 	 * Renews the subscription to this services for this msisdn
 	 * @param msisdn

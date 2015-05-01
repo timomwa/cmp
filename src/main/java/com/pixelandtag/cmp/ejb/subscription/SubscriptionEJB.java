@@ -71,8 +71,21 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	
 	/* (non-Javadoc)
-	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#renewSubscription(java.lang.String, com.pixelandtag.cmp.entities.SMSService)
+	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#renewSubscription(java.lang.String, java.lang.Long)
 	 */
+	@Override
+	public Subscription renewSubscription(String msisdn, Long serviceid) throws Exception{
+		Subscription sub = null;
+		try{
+			SMSService service = em.find(SMSService.class, serviceid);
+			sub = renewSubscription(msisdn, service);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return sub;
+	}
+	
+	
 	@Override
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
 			Subscription sub = null;

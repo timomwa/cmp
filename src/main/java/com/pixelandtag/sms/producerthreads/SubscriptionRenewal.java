@@ -78,9 +78,25 @@ public class SubscriptionRenewal extends Thread {
 		instance = this;
 	}
 	
-	
-	
 
+	public void initEJB() throws NamingException {
+		String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";
+		;
+		Properties props = new Properties();
+		props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+		props.put(Context.SECURITY_PRINCIPAL, "testuser");
+		props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		props.put("jboss.naming.client.ejb.context", true);
+		context = new InitialContext(props);
+		cmpbean = (CMPResourceBeanRemote) context
+				.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		subscriptio_nejb = (SubscriptionBeanI) context
+				.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.subscription.SubscriptionEJB");
+		System.out
+				.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+	}
+	
 	private void initWorkers() throws Exception {
 		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
 		PropertyConfigurator.configure(log4J);
@@ -115,7 +131,7 @@ public class SubscriptionRenewal extends Thread {
 		Thread t1;
 		for (int i = 0; i < this.workers; i++) {
 			SubscriptionBillingWorker worker;
-			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, httpsclient, cmpbean);
+			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, httpsclient, cmpbean,subscriptio_nejb);
 			t1 = new Thread(worker);
 			t1.start();
 			billingsubscriptionWorkers.add(worker);
@@ -123,24 +139,6 @@ public class SubscriptionRenewal extends Thread {
 		// wake all thread's because we're done initializing.
 		for (SubscriptionBillingWorker worker : billingsubscriptionWorkers)
 			worker.rezume();
-	}
-
-	public void initEJB() throws NamingException {
-		String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";
-		;
-		Properties props = new Properties();
-		props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-		props.put(Context.SECURITY_PRINCIPAL, "testuser");
-		props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
-		props.put("jboss.naming.client.ejb.context", true);
-		context = new InitialContext(props);
-		cmpbean = (CMPResourceBeanRemote) context
-				.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		subscriptio_nejb = (SubscriptionBeanI) context
-				.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.subscription.SubscriptionEJB");
-		System.out
-				.println("Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 
 
@@ -256,6 +254,7 @@ public class SubscriptionRenewal extends Thread {
 				billable.setDiscount_applied("0");
 				billable.setIn_outgoing_queue(0l);
 				billable.setKeyword(service.getCmd());
+				billable.setService_id(service.getId().toString());
 				billable.setMaxRetriesAllowed(1L);
 				billable.setMsisdn(sub.getMsisdn());
 				billable.setOperation(BigDecimal.valueOf(service.getPrice())
