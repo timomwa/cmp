@@ -163,7 +163,7 @@ public class SubscriptionBillingWorker implements Runnable {
 								logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 								watch.reset();
 								final String resp = genericHttpClient.getRespose_msg();
-								logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+resp);
+								logger.info("\n\n\t\t::::::SMPP::::RESP_CODE=["+RESP_CODE+"]:::::PROXY_RESPONSE: "+resp);
 								billable.setResp_status_code(String.valueOf(RESP_CODE));
 								billable.setProcessed(1L);
 								
