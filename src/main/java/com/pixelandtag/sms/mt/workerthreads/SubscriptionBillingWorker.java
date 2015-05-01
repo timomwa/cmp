@@ -180,14 +180,15 @@ public class SubscriptionBillingWorker implements Runnable {
 										logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 										billable.setSuccess(false);
 										billable.setResp_status_code(errMsg);
-										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
-										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
 										
 									}else{
 										billable.setResp_status_code("Success");
 										logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 										logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 										billable.setSuccess(true);
+										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
+										
 									}
 									cmp_ejb.saveOrUpdate(billable);
 									
