@@ -137,12 +137,23 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
 			Subscription sub = null;
 			try{
-				Query qry = em.createQuery("from Subscription where msisdn=:msisdn AND sms_service_id_fk=:sms_service_id_fk");
-				qry.setParameter("sms_service_id_fk", smsService.getId());
-				qry.setParameter("msisdn", msisdn);
-				qry.setFirstResult(0);
-				qry.setMaxResults(1);
-				sub = (Subscription) qry.getSingleResult();
+				Query qry;
+				try{
+					qry = em.createQuery("from Subscription where msisdn=:msisdn AND sms_service_id_fk=:sms_service_id_fk");
+					qry.setParameter("sms_service_id_fk", smsService.getId());
+					qry.setParameter("msisdn", msisdn);
+					qry.setFirstResult(0);
+					qry.setMaxResults(1);
+					sub = (Subscription) qry.getSingleResult();
+				}catch(javax.persistence.NoResultException exp){
+					
+				}
+				
+				if(sub==null){
+					sub = new Subscription();
+					sub.setMsisdn(msisdn);
+					sub.setSms_service_id_fk(smsService.getId());
+				}
 				
 				Date nowInNairobiTz = timezoneEJB.convertDateToDestinationTimezone(new Date(), "Africa/Nairobi");
 				qry = em.createNativeQuery("select DATE_ADD(:curdate_local, INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
@@ -150,6 +161,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				qry.setParameter("sub_length", smsService.getSubscription_length());
 				Object o = qry.getSingleResult();
 				String expiryDate = (String) o;
+				
+				logger.error(">>>>RENEWING SUBSCRIPTION OPCO_TZ:  NAIROBI_TIME :::"+nowInNairobiTz+"  expiryDate:: "+expiryDate);
 				
 				try{
 					utx.begin();
