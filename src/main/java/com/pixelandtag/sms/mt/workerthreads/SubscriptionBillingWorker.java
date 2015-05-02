@@ -187,7 +187,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											}
 										}
 										
-									}else if(resp.toUpperCase().equalsIgnoreCase("Insufficient".toUpperCase())){
+									}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 										//Resume back to normal. No throttling
 										if(SubscriptionRenewal.isAdaptive_throttling()){
 											SubscriptionRenewal.setEnable_biller_random_throttling(false);
