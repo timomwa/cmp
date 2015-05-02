@@ -34,7 +34,7 @@ import com.pixelandtag.util.FileUtils;
 
 public class SubscriptionRenewal extends  Thread {
 	public static Logger logger = Logger.getLogger(SubscriptionRenewal.class);
-	private static Semaphore semaphore = new Semaphore(1, true);
+	private static Semaphore semaphore = null;
 	private StopWatch watch = new StopWatch();;
 	private boolean run = true;
 	private CMPResourceBeanRemote cmpbean;
@@ -123,6 +123,8 @@ public class SubscriptionRenewal extends  Thread {
 			logger.warn(e.getMessage(), e);
 		}
 
+		semaphore = new Semaphore(workers, true);
+		
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
 				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
