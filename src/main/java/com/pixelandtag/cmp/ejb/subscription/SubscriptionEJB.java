@@ -170,6 +170,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sub.setExpiryDate(timezoneEJB.stringToDate(expiryDate));
 					sub.setRenewal_count(sub.getRenewal_count()+1);
 					sub.setSubscription_status(SubscriptionStatus.confirmed);
+					sub.setRequest_medium(MediumType.sms);
 					sub = em.merge(sub);
 					
 					SubscriptionHistory sh = new SubscriptionHistory();
