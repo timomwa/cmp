@@ -160,7 +160,7 @@ public class Subscription implements Serializable {
 	}
 
 	public Long getRenewal_count() {
-		return renewal_count;
+		return ((renewal_count)==null ? 0L :renewal_count);
 	}
 
 	public void setRenewal_count(Long renewal_count) {

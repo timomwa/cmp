@@ -155,7 +155,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sub.setSms_service_id_fk(smsService.getId());
 				}
 				
-				Date nowInNairobiTz = timezoneEJB.convertDateToDestinationTimezone(new Date(), "Africa/Nairobi");
+				Date americaTZ = timezoneEJB.convertDateToDestinationTimezone(new Date(), "America/NewYork");
+				Date nowInNairobiTz = timezoneEJB.convertDateToDestinationTimezone(americaTZ, "Africa/Nairobi");
 				qry = em.createNativeQuery("select DATE_ADD(:curdate_local, INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
 				qry.setParameter("curdate_local", nowInNairobiTz);
 				qry.setParameter("sub_length", smsService.getSubscription_length());
@@ -175,7 +176,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
 					sh.setMsisdn(msisdn);
 					sh.setService_id(smsService.getId());
-					sh.setTimeStamp(new Date());
+					sh.setTimeStamp(americaTZ);
 					
 					sh = em.merge(sh);
 					
