@@ -85,6 +85,10 @@ public class MOReceiver extends HttpServlet {
 			
 			value = req.getParameter(paramName);
 			
+			String ip_addr = req.getRemoteAddr();
+			
+			logger.error("\t:::::: SMS REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
+			
 			logger.error("NOT AN ERROR. CELCOM_MO_RECEIVER!: paramName: "+paramName+ " value: "+value);
 			
 		}
