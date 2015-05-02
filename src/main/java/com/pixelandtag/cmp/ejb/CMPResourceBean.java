@@ -1271,7 +1271,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(27, mt.getAPIType());//APIType,
 			qry.setParameter(28, mt.getNewCMP_Txid());//new CMPTxid
 			
-			if(mt.getSms().startsWith(RM1))
+			if(mt.getSms()!=null && mt.getSms().startsWith(RM1))
 				qry.setParameter(29, TarrifCode.RM1.getCode());//CMP_SKeyword
 			else
 				qry.setParameter(29, mt.getCMP_SKeyword());//CMP_SKeyword

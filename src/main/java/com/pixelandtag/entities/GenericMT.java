@@ -36,7 +36,7 @@ public class GenericMT extends GenericMessage{
 		this.id_str = String.valueOf(id_);
 	}
 	public String getSms() {
-		return sms;
+		return sms==null ? "" : sms;
 	}
 	public void setSms(String sms) {
 		this.sms = sms;
