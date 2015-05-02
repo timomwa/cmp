@@ -1026,7 +1026,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				return false;
 			try{
 				BigDecimal bd = new BigDecimal(username);
-				return false;
+				if(username.length()<4)
+					return false;
 			}catch(Exception exp){}
 			
 			Query qry = em.createQuery("from PersonDatingProfile p WHERE (p.username=:username OR p.person.msisdn=:username)");
