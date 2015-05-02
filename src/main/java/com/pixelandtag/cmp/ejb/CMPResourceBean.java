@@ -2452,8 +2452,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								
 									return resp;
 								}
-							}
-							/*else{
+							}/*else{
 								sess.setSessionId(req.getSessionid());
 								clearUssdSesion(sess);
 								return "You can always purchase chat bundles any other time you like by dialing *329#";

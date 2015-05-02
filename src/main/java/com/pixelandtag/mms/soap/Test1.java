@@ -81,9 +81,7 @@ public class Test1 {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		
-		System.out.println("SLAClusterEnforcementMediation:mediate: Limit exceeded for requester: CONTENT360_KE".toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase()));
-		
+		System.out.println("*345".contains("*"));
 		if(true)
 			return;
 		

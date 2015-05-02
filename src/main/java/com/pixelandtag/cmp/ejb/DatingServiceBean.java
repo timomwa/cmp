@@ -279,10 +279,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				}
 				
 				if(attr.equals(ProfileAttribute.GENDER)){
-					if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")){ 
+					if(MESSAGE.equalsIgnoreCase("2") || MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")){ 
 						profile.setGender(Gender.MALE);
-					}else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
+						profile.setPreferred_gender(Gender.FEMALE);
+					}else if(MESSAGE.equalsIgnoreCase("1") || MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
 						profile.setGender(Gender.FEMALE);
+						profile.setPreferred_gender(Gender.MALE);
 					}else{
 						
 						try{
@@ -319,23 +321,24 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					
 					dob = calculateDobFromAge(age);
 					profile.setDob( dob );
+					profile.setPreferred_age(BigDecimal.valueOf(18L));
 				}
 				
-				if(attr.equals(ProfileAttribute.LOCATION)){
-					profile.setLocation(MESSAGE);
+				if(attr.equals(ProfileAttribute.LOCATION)){//The last one as per new version
 					
+					profile.setLocation(MESSAGE);
 					if((req.getCellid()!=null && !req.getCellid().isEmpty()) && (req.getLac()!=null && !req.getLac().isEmpty())){
-						
 						try{
 							location_ejb.findOrCreateLocation(Long.valueOf(req.getCellid()), Long.valueOf(req.getLac()), MESSAGE, profile);
 						}catch(Exception exp){
 							logger.error(exp.getMessage(), exp);
 						}
-						
-						
 					}
-					
+					profile.setProfileComplete(true);
+					person.setActive(true);
+					profile.setPerson(person);
 				}
+				
 				if(attr.equals(ProfileAttribute.PREFERRED_AGE)){
 					BigDecimal age = null;
 					try{
@@ -353,10 +356,11 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					}
 					profile.setPreferred_age(age);
 				}
+				
 				if(attr.equals(ProfileAttribute.PREFERRED_GENDER)){
-					if(MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")) {
+					if(MESSAGE.equalsIgnoreCase("2") || MESSAGE.equalsIgnoreCase("M") ||  MESSAGE.equalsIgnoreCase("MALE") ||  MESSAGE.equalsIgnoreCase("MAN") ||  MESSAGE.equalsIgnoreCase("BOY") ||  MESSAGE.equalsIgnoreCase("MUME") ||  MESSAGE.equalsIgnoreCase("MWANAMME")  ||  MESSAGE.equalsIgnoreCase("MWANAUME")) {
 						profile.setPreferred_gender(Gender.MALE);
-					}else if(MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
+					}else if(MESSAGE.equalsIgnoreCase("1") || MESSAGE.equalsIgnoreCase("F") ||  MESSAGE.equalsIgnoreCase("FEMALE") ||  MESSAGE.equalsIgnoreCase("LADY") ||  MESSAGE.equalsIgnoreCase("GIRL") ||  MESSAGE.equalsIgnoreCase("MKE") ||  MESSAGE.equalsIgnoreCase("MWANAMKE")  ||  MESSAGE.equalsIgnoreCase("MWANAMUKE")){ 
 						profile.setPreferred_gender(Gender.FEMALE);
 					}else{
 						try{
@@ -367,9 +371,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
 						return resp;
 					}
-					profile.setProfileComplete(true);
-					person.setActive(true);
-					profile.setPerson(person);
+					
 				}
 				
 				profile = saveOrUpdate(profile);
@@ -992,8 +994,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		ProfileQuestion nexqQ = null;
 		
 		try{
-			Query qry = em.createQuery("from ProfileQuestion pq WHERE pq.id NOT IN   (SELECT ql.question_id_fk FROM QuestionLog ql WHERE ql.profile_id_fk=:profile_id_fk ) ORDER BY pq.serial asc");
+			Query qry = em.createQuery("from ProfileQuestion pq WHERE pq.id NOT IN   (SELECT ql.question_id_fk FROM QuestionLog ql WHERE ql.profile_id_fk=:profile_id_fk ) AND pq.active=:active_ ORDER BY pq.serial asc");
 			qry.setParameter("profile_id_fk", profile_id);
+			qry.setParameter("active_", true);
 			List<ProfileQuestion> pq =  qry.getResultList();
 			if(pq.size()>0)
 				nexqQ = pq.get(0);
@@ -1016,7 +1019,11 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		boolean isunique = true;
 		
 		try{
+			if(username==null)
+				return false;
 			
+			if(username.contains("*"))
+				return false;
 			try{
 				BigDecimal bd = new BigDecimal(username);
 				return false;

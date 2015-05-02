@@ -195,7 +195,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 						}
 						
 					}catch(Exception e){
-						mo_processor_logger.error(e.getMessage(),e);
+						mo_processor_logger.warn(e.getMessage());
 					}
 					
 				}

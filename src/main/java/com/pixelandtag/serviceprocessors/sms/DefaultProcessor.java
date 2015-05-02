@@ -41,7 +41,7 @@ public class DefaultProcessor extends GenericServiceProcessor {
 	final Logger logger = Logger.getLogger(DefaultProcessor.class);
 	private Connection conn = null;
 	// boolean vervose_logging = false;
-	private MM7Api mm7API;
+	private MM7Api mm7API; 
 	
 	private static final String RM1 = "RM1 ";
 	private static final String RM0 = "RM0 ";
