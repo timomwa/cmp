@@ -255,7 +255,12 @@ public class SubscriptionRenewal extends  Thread {
 		
 		for (Subscription sub : subsl) {
 			
+			sub.setQueue_status(1L);
+			subscriptio_nejb.updateQueueStatus(1L,sub.getId());
+			
+			/*
 			int wait_time_mills = getRandomWaitTime();
+			
 			
 			try{
 				if(wait_time_mills>-1){
@@ -264,10 +269,9 @@ public class SubscriptionRenewal extends  Thread {
 				}
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
-			}
+			}*/
 			
-			sub.setQueue_status(1L);
-			subscriptio_nejb.updateQueueStatus(1L,sub.getId());
+			
 			
 			logger.info(" sub "+sub);
 			Long sms_service_id = sub.getSms_service_id_fk();
