@@ -177,7 +177,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
-						mo.setMt_Sent(dse.getMessage());
+						mo.setMt_Sent(null);//set nul so that we don't send it out..
 						mo.setPrice(BigDecimal.ZERO);
 					}
 					

@@ -299,42 +299,49 @@ public class MTHttpSender implements Runnable{
 					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+mtsms.getServiceid());
 					
 					
-					if(mtsms!=null)
-					if(mtsms.getId()>-1){
+					if(mtsms!=null){
 						
-						setSms_idx(0);//reset the sms index counter each time we get a brand new message to send.
-						//String originalTXID = mtsms.getCMP_Txid();
-						
-						
-						if(mtsms.getSms()!=null)
-						if(mtsms.getSms().length()>140 && mtsms.isSplit_msg()){
-						
-							Vector<String> msg = splitText(mtsms.getSms());
+						if(mtsms.getId()>-1 && (mtsms.getSms()==null || mtsms.getSms().trim().isEmpty())){//Don't send empty messages
 							
-							mtsms.setNumber_of_sms(msg.size());
+							mtsms.setMT_STATUS(ERROR.FailedToSend.toString());
+							cmpbean.logMT(mtsms);
+						
+						}else if(mtsms.getId()>-1){
+							
+							setSms_idx(0);//reset the sms index counter each time we get a brand new message to send.
+							//String originalTXID = mtsms.getCMP_Txid();
 							
 							
-							for(int x=0; x<msg.size();x++){
+							if(mtsms.getSms()!=null)
+							if(mtsms.getSms().length()>140 && mtsms.isSplit_msg()){
+							
+								Vector<String> msg = splitText(mtsms.getSms());
 								
-								mtsms.setMsg_part(sb.append((x+1)).append("/").append(msg.size()).append(" ").append(msg.get(x)).toString());
+								mtsms.setNumber_of_sms(msg.size());
 								
-								sb.setLength(0);
 								
-								sendMT(mtsms);//send SMS the way it is
+								for(int x=0; x<msg.size();x++){
+									
+									mtsms.setMsg_part(sb.append((x+1)).append("/").append(msg.size()).append(" ").append(msg.get(x)).toString());
+									
+									sb.setLength(0);
+									
+									sendMT(mtsms);//send SMS the way it is
+									
+								}
 								
+							}else{
+								
+								mtsms.setNumber_of_sms(1);
+								
+								sendMT(mtsms);
+							
 							}
 							
+							
 						}else{
-							
-							mtsms.setNumber_of_sms(1);
-							
-							sendMT(mtsms);
-						
+							setRun(false);
 						}
-						
-						
-					}else{
-						setRun(false);
 					}
 					
 				
@@ -522,16 +529,14 @@ public class MTHttpSender implements Runnable{
 				}
 				
 				//TODO when we launch, remove to save CPU.
-				if(mt.getNumber_of_sms()>1){
+				/*if(mt.getNumber_of_sms()>1){
 					
 					cmpbean.logResponse(mt.getMsisdn(),mt.getMsg_part());//log each segment of an SMS..
 					
 				}else{
 					cmpbean.logResponse(mt.getMsisdn(),mt.getSms());//log each segment of an SMS..
-				}
+				}*/
 					
-				//TODO and postponed - introduce postpone functionality
-				
 				watch.stop();
 				
 				
