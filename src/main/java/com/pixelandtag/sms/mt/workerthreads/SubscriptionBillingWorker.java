@@ -189,8 +189,8 @@ public class SubscriptionBillingWorker implements Runnable {
 										
 									}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 										
-										//we'll try again
-										subscriptionejb.updateQueueStatus(1L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+										//we'll try again. 2 means that we re-try again..
+										subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 										
 										//Resume back to normal. No throttling
 										if(SubscriptionRenewal.isAdaptive_throttling()){
