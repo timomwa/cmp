@@ -185,12 +185,13 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					try{
 						utx.rollback();
 					}catch(Exception expr){}
-					throw exp;
+					logger.error(exp.getMessage());
 				}
 				
 				
 			}catch(Exception exp){
-				throw exp;
+				//throw exp;
+				logger.error(exp.getMessage());
 			}
 			return sub;
 		}
