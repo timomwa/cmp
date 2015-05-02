@@ -198,10 +198,6 @@ public class SubscriptionBillingWorker implements Runnable {
 										billable.setSuccess(false);
 										billable.setResp_status_code(errMsg);
 										
-										if(SubscriptionRenewal.isAdaptive_throttling()){
-											//Resume back to normal. No throttling
-											SubscriptionRenewal.setEnable_biller_random_throttling(false);
-										}
 										
 									}else{
 										billable.setResp_status_code("Success");
@@ -291,6 +287,9 @@ public class SubscriptionBillingWorker implements Runnable {
 									setFinished(true);
 								}
 							}
+							
+							setBusy(false);
+							
 					}catch(Exception exp){
 						
 						logger.error(exp.getMessage(),exp);
@@ -298,8 +297,6 @@ public class SubscriptionBillingWorker implements Runnable {
 						subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 						
 					}
-						
-					setBusy(false);
 				
 				}catch (Exception e){
 					log(e);
