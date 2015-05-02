@@ -83,7 +83,11 @@ update hibernate_sequence set next_val=next_val+1;
 
 select count(*), date(timeStamp) ts, hour(now()) from messagelog WHERe hour(TimeStamp)<=hour(now()) group by ts order by ts asc;
 
+select count(*), date(timeStamp) ts from messagelog  group by ts order by ts asc;
+
 select count(distinct SUB_Mobtel) from messagelog;
+
+select cl.timeStamp, concat(sp.msisdn,' > ', dp.msisdn ,': ', cl.message) from dating_chatlog cl left join dating_person sp on sp.id=cl.source_person_id LEFT JOIN dating_person dp ON dp.id=cl.dest_person_id where date(timeStamp)>=date(now()) order by timeStamp asc limit 1000;
 
 
 /*add these when testing 14th April*/
@@ -92,3 +96,37 @@ INSERT INTO `pixeland_content360`.`sms_service_metadata` (`sms_service_id_fk`, `
 UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`=444 WHERE `id`='151';
 UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`=-1 WHERE `id`='151';
 UPDATE `pixeland_content360`.`smsmenu_levels` SET `serviceid`=444 WHERE `id`='151';
+
+
+
+
+DELIMITER $
+CREATE PROCEDURE unsubscribeAll(
+   msisdn_ varchar(64)
+ )
+BEGIN
+	DECLARE dp_id INT DEFAULT -1;
+	DECLARE prof_id INT DEFAULT -1;
+	SELECT dp_id as 'profile_id');
+    SELECT dp_id =  id from dating_person where msisdn=msisdn_;
+	SELECT dp_id as 'profile_id af');
+    SELECT prof_id = id from dating_profile where person_id_fk = dp_id;
+	update pixeland_content360.dating_person set active=0 where msisdn=msisdn_;
+	update pixeland_content360.subscription set subscription_status='unsubscribed' where msisdn=msisdn_;
+END;
+$
+DELIMITER ;
+
+
+DELIMITER $
+CREATE PROCEDURE showSubscribed(
+   msisdn_ varchar(64)
+ )
+BEGIN
+    select * from pixeland_content360.subscription s where s.msisdn=msisdn_;
+END;
+$
+DELIMITER ;
+
+
+select count(*),profileComplete from dating_profile group by profileComplete;

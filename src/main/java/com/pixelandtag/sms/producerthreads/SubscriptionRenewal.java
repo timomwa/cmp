@@ -251,7 +251,7 @@ public class SubscriptionRenewal extends  Thread {
 
 		List<Subscription> subsl = subscriptio_nejb.getExpiredSubscriptions(Long.valueOf(this.workers));
 
-		System.out.println("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
+		logger.debug("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
 		
 		for (Subscription sub : subsl) {
 			

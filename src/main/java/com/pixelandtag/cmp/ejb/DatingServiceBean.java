@@ -721,10 +721,6 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public PersonDatingProfile findMatch(PersonDatingProfile profile) throws DatingServiceException{
 	
 		PersonDatingProfile persondatingProfile = null;
-		int k =0;
-		k = 2;
-		if(k==2)
-			return null;
 		try {
 			
 			ProfileLocation profileLocation  = location_ejb.findProfileLocation(profile);
