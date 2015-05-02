@@ -175,6 +175,12 @@ public class SubscriptionBillingWorker implements Runnable {
 											//We've been throttled. Let's slow down a little bit.
 											logger.debug("Throttling! We've been capped.");
 											SubscriptionRenewal.setEnable_biller_random_throttling(true);
+											
+											long wait_time = SubscriptionRenewal.getRandomWaitTime();
+											logger.debug(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
+											if(wait_time>-1){
+												Thread.sleep(wait_time);
+											}
 										}
 										
 									}else if(resp.toUpperCase().equalsIgnoreCase("Insufficient".toUpperCase())){
