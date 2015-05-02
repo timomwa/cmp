@@ -168,9 +168,13 @@ public class SubscriptionBillingWorker implements Runnable {
 								billable.setProcessed(1L);
 								
 								if (RESP_CODE == HttpStatus.SC_OK) {
+									boolean throttled= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
+									String debug = "throttled\t\t ::"+throttled;
+									debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
 									
+									logger.debug("THROTTLING PARAMS :::::: "+debug);
 									if(resp!=null)
-									if(resp.toUpperCase().equalsIgnoreCase("SLAClusterEnforcementMediation".toUpperCase())){
+									if(throttled){
 										if(SubscriptionRenewal.isAdaptive_throttling()){
 											//We've been throttled. Let's slow down a little bit.
 											logger.debug("Throttling! We've been capped.");
