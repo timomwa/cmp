@@ -123,7 +123,7 @@ public class SubscriptionRenewal extends  Thread {
 			logger.warn(e.getMessage(), e);
 		}
 
-		semaphore = new Semaphore(workers, true);
+		semaphore = new Semaphore(1, true);
 		
 		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
 				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
