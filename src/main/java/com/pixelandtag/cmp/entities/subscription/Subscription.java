@@ -197,7 +197,7 @@ public class Subscription implements Serializable {
 	}
 
 	public Integer getCredibility_index() {
-		return credibility_index;
+		return credibility_index!=null?credibility_index : 0;
 	}
 
 	public void setCredibility_index(Integer credibility_index) {
