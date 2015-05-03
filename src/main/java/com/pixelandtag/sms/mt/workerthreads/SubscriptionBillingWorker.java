@@ -333,9 +333,10 @@ public class SubscriptionBillingWorker implements Runnable {
 			logger.info(getName()+": worker shut down safely!");
 			
 			try{
-				logger.info(">>>Mandatory throttling: sleeping "+mandatory_throttle+" ms");
+				logger.info(">>>Mandatory throttling: sleeping "+mandatory_throttle+"ms ");
 				Thread.sleep(mandatory_throttle);
 			}catch(InterruptedException e){
+				logger.error(e.getMessage(),e);
 				setRun(false);
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
