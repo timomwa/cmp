@@ -179,17 +179,17 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 			throw new ParameterException(
 					"Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
 		}
-		Date sheduledate = null;
+		Date sheduledate_server_time = null;
 
 		if (schedule == null || schedule.isEmpty())
-			sheduledate = new Date();
+			sheduledate_server_time = new Date();
 		try {
 			if (timezone == null || timezone.isEmpty())
 				throw new ParameterException(
 						"Scheule found without timezone. Please supply timezone. Timezone example : Africa/Nairobi");
 
-			sheduledate = timezoneBean.stringToDate(schedule);
-			boolean isinthepast = timezoneBean.isDateInThePast(sheduledate);
+			sheduledate_server_time =  timezoneBean.convertFromOneTimeZoneToAnother(timezoneBean.stringToDate(schedule), timezone,"America/New_York");
+			boolean isinthepast = timezoneBean.isDateInThePast(sheduledate_server_time);
 			if (isinthepast)
 				throw new ParameterException(
 						"The schedule date is in the past.");
@@ -203,7 +203,7 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 							+ "\n mm – the minute, e,g 03. between 0 and 59 ");
 		}
 
-		sb.append("sheduledate").append(" : ").append(sheduledate).append("\n");
+		sb.append("sheduledate").append(" : ").append(sheduledate_server_time).append("\n");
 
 		logger.info("\n\n incoming batch: " + sb.toString());
 
@@ -244,7 +244,7 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 		textb.setPlan(plan);
 		textb.setSenderid(senderid);
 		textb.setQueueSize(BigInteger.ONE);
-		textb.setSheduledate(sheduledate);
+		textb.setSheduledate(sheduledate_server_time);
 		textb.setTimezone(timezone);
 		textb.setPrice(new BigDecimal(price));
 		CMPSequence seq;
