@@ -78,7 +78,7 @@ public class Subscription implements Serializable {
 	@Column(name="queue_status")
 	private Long queue_status;
 	
-	@Column(name="queue_status")
+	@Column(name="credibility_index")
 	private Integer credibility_index;
 	
 	
