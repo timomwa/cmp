@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +50,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -58,7 +60,6 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 
@@ -79,6 +80,9 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
+	
+	@EJB
+	private TimezoneConverterI timeZoneEjb;
 	
 	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
         @Override
@@ -255,15 +259,18 @@ public class BaseEntityBean implements BaseEntityI {
 	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{
 		boolean subValid = false;
 		try{
-			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') ");
+			Date timeInNairobi = timeZoneEjb.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Query qry = em.createQuery("from Subscription sub WHERE sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :timeInNairobi ");
 			qry.setParameter("msisdn", msisdn);
-			qry.setParameter("serviceid", serviceid);
+			qry.setParameter("serviceid", SubscriptionStatus.confirmed);
+			qry.setParameter("subscription_status", serviceid);
+			qry.setParameter("timeInNairobi", timeInNairobi);
 			List<Subscription> sublist = qry.getResultList();
 			if(sublist.size()>0){
 				Subscription s = sublist.get(0);
 				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
 				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
-				subValid = (s.getSubscription_status() == SubscriptionStatus.confirmed);
+				subValid = true;//(s.getSubscription_status() == SubscriptionStatus.confirmed);
 			}
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());

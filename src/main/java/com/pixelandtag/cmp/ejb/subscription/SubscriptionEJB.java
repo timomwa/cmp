@@ -59,10 +59,10 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public List<Subscription> getExpiredSubscriptions(Long size) {
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
-			Date dt = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate AND s.queue_status = 0");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
-			qry.setParameter("todaydate", dt);
+			qry.setParameter("todaydate", timeInNairobi);
 			qry.setFirstResult(0);
 			qry.setMaxResults(size.intValue());
 			expired = qry.getResultList();
