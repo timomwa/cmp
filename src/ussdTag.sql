@@ -123,7 +123,7 @@ CREATE PROCEDURE showSubscribed(
    msisdn_ varchar(64)
  )
 BEGIN
-    select * from pixeland_content360.subscription s where s.msisdn=msisdn_;
+    select * from pixeland_content360.subscription s where s.subscription_status='confirmed' AND s.msisdn=msisdn_;
 END;
 $
 DELIMITER ;

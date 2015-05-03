@@ -579,7 +579,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			PersonDatingProfile destination_person = datingBean.getperSonUsingChatName(KEYWORD);
 			
 			if(destination_person==null){//Is a direct message, so we get last person they sent a message to
-				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.MINUTE);//last 30 minutes
+				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,0L,TimeUnit.SECOND);//last 30 minutes
 				if(destination_person!=null)
 					directMsg  = true;
 			}
@@ -628,7 +628,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				return mo;
 			}else{//destination person not found.. Check in their friends list. Ask them whom they want to chat to..
 				mo.setPrice(BigDecimal.ZERO);
-				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,1L,TimeUnit.MINUTE);//last 1 year
+				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,0L,TimeUnit.MINUTE);//last 1 year
 				String msg = "";
 				if(destination_person!=null){
 					Gender gender  = destination_person.getGender();

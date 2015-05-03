@@ -1258,11 +1258,17 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException{
+		
+		if(period==0)
+			return null;
+		
 		PersonDatingProfile datingperson_profile = null;
+		
 		try{
-			//Date date = getPastTime(period,timeUnit);
-			Query qry = em.createQuery("from ChatLog cl WHERE cl.source_person_id=:source_person_id  order by cl.timeStamp desc");///*AND cl.timeStamp>=:timeStamp*/
+			Date date = getPastTime(period,timeUnit);
+			Query qry = em.createQuery("from ChatLog cl WHERE cl.source_person_id=:source_person_id AND cl.timeStamp >= :pastTs  order by cl.timeStamp desc");///*AND cl.timeStamp>=:timeStamp*/
 			qry.setParameter("source_person_id", person.getId());
+			qry.setParameter("pastTs", date);
 			qry.setFirstResult(1);
 			qry.setMaxResults(10);
 			List<ChatLog> ps = qry.getResultList();
