@@ -2,10 +2,8 @@ package com.pixelandtag.sms.mt.workerthreads;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
@@ -26,10 +24,12 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.sms.producerthreads.BulkSMSProducer;
 import com.pixelandtag.sms.producerthreads.MTProducer;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
 
 public class GenericHTTPClientWorker implements Runnable{
 	
@@ -100,11 +100,44 @@ public class GenericHTTPClientWorker implements Runnable{
 				
 				try{
 					
-					final GenericHTTPParam httpparams = MTProducer.getGenericHttp();
+					final GenericHTTPParam httpparams = BulkSMSProducer.getGenericHttp();
+					
+					
+					final BulkSMSQueue bulksms = httpparams.getBulktext();
+					
+					
+					if(bulksms!=null){
+						
+						try{
+							
+							final int RESP_CODE_  = call(httpparams);//send SMS the way it is
+							
+							if(RESP_CODE_==HttpStatus.SC_OK){
+								bulksms.setStatus(MTStatus.SENT_SUCCESSFULLY);
+							}else{
+								bulksms.setStatus(MTStatus.FAILED_TEMPORARILY);
+							}
+						}catch(Exception exp){
+							logger.error(exp.getMessage(),exp);
+						}finally{
+							try{
+								cmpbean.saveOrUpdate(bulksms);
+							}catch(Exception exp){
+								logger.error(exp.getMessage(),exp);
+							}
+						}
+					}
+					
+					
+					
+					
+					
+					
+					
 					
 					final MTsms mtsms = httpparams.getMtsms()==null ? cmpbean.getMTsms(Long.valueOf(httpparams.getId()))  : httpparams.getMtsms();
 					
-					if(mtsms!=null)
+					if(mtsms!=null){
 						if(mtsms.getId()>-1){
 							
 							setSms_idx(0);//reset the sms index counter each time we get a brand new message to send.
@@ -156,7 +189,6 @@ public class GenericHTTPClientWorker implements Runnable{
 										}else{
 											
 											recursiveCounter = 0;
-											//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
 										}
 									}
 									
@@ -204,6 +236,7 @@ public class GenericHTTPClientWorker implements Runnable{
 								}
 							}
 						}
+					}
 					
 					
 					

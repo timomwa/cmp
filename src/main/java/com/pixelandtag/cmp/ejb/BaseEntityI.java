@@ -41,6 +41,7 @@ public interface BaseEntityI {
 	public void mimicMO(String keyword, String msisdn);
 	public boolean sendMT(MOSms mo) throws Exception;
 	public long generateNextTxId();
+	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
 
 
 }

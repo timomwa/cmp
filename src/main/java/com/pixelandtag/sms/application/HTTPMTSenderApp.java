@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.pixelandtag.entities.URLParams;
+import com.pixelandtag.sms.producerthreads.BulkSMSProducer;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class HTTPMTSenderApp extends Thread {
@@ -103,6 +104,9 @@ public class HTTPMTSenderApp extends Thread {
 		
 		MTProducer mt = new MTProducer(mtSender.constr, mtSender.workers, mtSender.throttle, mtSender.initialDBConnections, mtSender.maxDBConnections, mtSender.queueSize, mtSender.pollWait, mtSender.urlparams);
 		mt.start();
+		
+		BulkSMSProducer bp = new BulkSMSProducer(mtSender.constr, mtSender.workers, mtSender.throttle, mtSender.queueSize, mtSender.urlparams);
+		bp.start();
 		
 	}
 	

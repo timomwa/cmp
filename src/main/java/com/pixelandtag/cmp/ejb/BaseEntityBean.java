@@ -346,8 +346,41 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text,Integer priority) throws Exception{
+		boolean success = false;
+		try{
+			String insertQ = "insert into "
+					+ "ismpp.messages(smppid,msisdn,shortcode,content,priority,timestamp,received) "
+					+ "VALUES(?, ?, ?, ?, ?, now(), ?);";
+			utx.begin();
+			Query qry = em.createNativeQuery(insertQ);
+			qry.setParameter(1, sppid.intValue());
+			qry.setParameter(2, msisdn);
+			qry.setParameter(3, shortcode);
+			qry.setParameter(4, sms);
+			
+			qry.setParameter(5, priority.intValue());
+			qry.setParameter(6, mo_text);
+			
+			int num =  qry.executeUpdate();
+			utx.commit();
+			success = num>0;
+		
+		}catch(Exception e){
+			try {
+				utx.rollback();
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(),e1);
+			} 
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		 
+		return success;
+	}
 	/**
-	 * Logs in httptosend
+	 * Logs in smpp to send
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean sendMTSMPP(MOSms mo, Long sppid) throws Exception{

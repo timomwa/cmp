@@ -1,7 +1,10 @@
 package com.pixelandtag.cmp.ejb.bulksms;
 
+import java.util.List;
+
 import org.json.JSONException;
 
+import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.cmp.exceptions.CMPSequenceException;
 
 public interface BulkSmsMTI {
@@ -25,4 +28,11 @@ public interface BulkSmsMTI {
 	 */
 	public String enqueue(String sourceIp, String apiKey,String username, String password,String jsonString) throws APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException,QueueFullException,PlanBalanceException,CMPSequenceException;
 
+	/**
+	 * Gets a list of unprocessed
+	 * outgoing messaes
+	 * @param size
+	 * @return
+	 */
+	public List<BulkSMSQueue> getUnprocessed(Long size);
 }

@@ -3,7 +3,10 @@ package com.pixelandtag.cmp.ejb.bulksms;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -15,6 +18,7 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
@@ -55,7 +59,35 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 	
 	@EJB
 	private TimezoneConverterI timezoneBean;
+	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI#getUnprocessed(java.lang.Long)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<BulkSMSQueue> getUnprocessed(Long size){
+		List<BulkSMSQueue> unprocessed_queue = new ArrayList<BulkSMSQueue>();
+		
+		try{
+			Query qry = em.createNamedQuery(BulkSMSQueue.NAMED_QUERY);
+			Collection<MTStatus> names = new ArrayList<MTStatus>();
+			names.add(MTStatus.RECEIVED);
+			names.add(MTStatus.FAILED_TEMPORARILY);
+			qry.setParameter("statuses", names);
+			qry.setParameter("sheduledate", new Date());
+			unprocessed_queue = qry.getResultList();
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return unprocessed_queue;
+	}
+	
+	
 
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI#enqueue(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
 	public String enqueue(String sourceIp, String apiKey, String username,

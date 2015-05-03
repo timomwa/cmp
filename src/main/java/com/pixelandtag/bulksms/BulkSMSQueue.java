@@ -14,29 +14,45 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
 import com.pixelandtag.api.MTStatus;
 import com.pixelandtag.cmp.entities.TimeUnit;
 
+@NamedQueries({
+	@NamedQuery(
+	name = BulkSMSQueue.NAMED_QUERY,
+	query = "SELECT bs from BulkSMSQueue bs WHERE bs.retrycount<bs.max_retries AND bs.status IN  (:statuses) AND "
+			+ " year(bs.text.sheduledate)=year(:sheduledate) AND "
+			+ " month(bs.text.sheduledate)=month(:sheduledate) AND "
+			+ " day(bs.text.sheduledate)=day(:sheduledate) AND "
+			+ " hour(bs.text.sheduledate)>=hour(:sheduledate) AND "
+			+ " minute(bs.text.sheduledate)>=minute(:sheduledate) "
+			+ " ORDER BY bs.timelogged asc, bs.priority asc"
+	)
+})
 @Entity
 @Table(name = "bulksms_queue")
 public class BulkSMSQueue implements Serializable{
 
 	private static final long serialVersionUID = -5878865129157812878L;
+	@Transient
+	public static final String NAMED_QUERY = "bulksmsQueue.getByStatus";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	@JoinColumn(name = "txt_id_fk")
 	private BulkSMSText text;
 	
@@ -55,6 +71,13 @@ public class BulkSMSQueue implements Serializable{
 	@Column(name = "priority")
 	@Index(name="logstsidx")
 	private Integer priority;
+	
+	
+	@Column(name = "retrycount")
+	private Integer retrycount;
+	
+	@Column(name = "max_retries")
+	private Integer max_retries;
 	
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
@@ -84,6 +107,10 @@ public class BulkSMSQueue implements Serializable{
 			validity = 365;
 			timeunit = TimeUnit.DAY;
 		}
+		if(retrycount==null)
+			retrycount = Integer.valueOf(0);
+		if(max_retries==null)
+			max_retries = Integer.valueOf(5);
 		
 	}
 
@@ -94,15 +121,6 @@ public class BulkSMSQueue implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-	/*
-	public BulkSMSPlan getPlan() {
-		return plan;
-	}
-
-	public void setPlan(BulkSMSPlan plan) {
-		this.plan = plan;
-	}*/
 
 	public BulkSMSText getText() {
 		return text;
@@ -175,4 +193,21 @@ public class BulkSMSQueue implements Serializable{
 	public void setTimeunit(TimeUnit timeunit) {
 		this.timeunit = timeunit;
 	}
+
+	public Integer getRetrycount() {
+		return ((retrycount==null) ? 0 : retrycount);
+	}
+
+	public void setRetrycount(Integer retrycount) {
+		this.retrycount = retrycount;
+	}
+
+	public Integer getMax_retries() {
+		return max_retries;
+	}
+
+	public void setMax_retries(Integer max_retries) {
+		this.max_retries = max_retries;
+	}
+	
 }

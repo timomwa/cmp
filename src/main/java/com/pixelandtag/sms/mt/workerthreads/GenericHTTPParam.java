@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.http.NameValuePair;
 
+import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.producerthreads.Billable;
 /**
@@ -24,6 +25,7 @@ public class GenericHTTPParam implements Serializable{
 	private String url;
 	private Long id;
 	private MTsms mtsms;
+	private BulkSMSQueue bulktext;
 	
 	private List<NameValuePair> httpParams;
 	private Map<String,String> headerParams;
@@ -64,6 +66,12 @@ public class GenericHTTPParam implements Serializable{
 	}
 	public void setStringentity(String stringentity) {
 		this.stringentity = stringentity;
+	}
+	public BulkSMSQueue getBulktext() {
+		return bulktext;
+	}
+	public void setBulktext(BulkSMSQueue bulktext) {
+		this.bulktext = bulktext;
 	}
 	
 	

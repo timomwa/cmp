@@ -677,7 +677,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate asc");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("person_a_id", curPersonId);
@@ -700,7 +700,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate asc");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("dob", dob);
@@ -760,7 +760,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 											+ "                 )"
 											+ "   )"
 											+ " order by "
-											+ "    pl.timeStamp asc");
+											+ "    pl.timeStamp desc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				
@@ -796,7 +796,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			
 			Date dob = calculateDobFromAge(pref_age);
 			
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate asc");//:alreadyMatched)");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched)");//AND p.dob>=:dob
 			qry.setParameter("active", new Boolean(true));
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("location", "%"+location+"%");

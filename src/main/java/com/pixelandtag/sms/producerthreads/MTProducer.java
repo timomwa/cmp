@@ -187,28 +187,7 @@ public class MTProducer extends Thread {
 		
 		return null;
 	}
-	
-	
-	public static String generateNextTxId() throws InterruptedException{
 		
-		try{
-			
-			uniq.acquire();
-			try{
-				Thread.sleep(1);
-			}catch(Exception e){}
-			
-			String timestamp = String.valueOf(System.currentTimeMillis());
-			
-			return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
-		
-		}finally{
-			
-			uniq.release();
-		
-		}
-		
-	}	
 	
 	
 	/**
@@ -371,6 +350,13 @@ public class MTProducer extends Thread {
 	
 	public void myfinalize(){
 		
+		try {
+			if(context!=null)
+				context.close();
+		} catch (Exception e) {
+			log(e);
+		}
+		
 		try{
 			
 			conn.close();
@@ -451,6 +437,23 @@ public class MTProducer extends Thread {
 			}
 			
 		}
+		while(genericMT.size()>0){
+			
+			logger.info("MTProducer.genericMT.size() : "+genericMT.size());
+			
+			try {
+				
+				Thread.sleep(500);
+				
+			} catch (InterruptedException e) {
+				
+				log(e);
+			
+			}
+			
+		}
+		
+		
 		
 		logger.info("Queue is now empty, and all threads have been asked not to wait for elements in the queue!");
 		

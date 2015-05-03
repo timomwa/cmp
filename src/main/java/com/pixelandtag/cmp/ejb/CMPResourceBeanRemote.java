@@ -174,6 +174,15 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	
 	public MTsms convertToLegacyMt(HttpToSend httpTosend);
 	public void clearUssdSesion(USSDSession sess);
+	
+	/**
+	 * Marks a http to send record
+	 * to be in the queue
+	 * @param http_to_send_id
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean markInQueue(Long http_to_send_id) throws Exception;
 
 	
 	

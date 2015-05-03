@@ -6,7 +6,10 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,6 +87,30 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@EJB
 	private DatingServiceI datingBean;
 	
+	
+	
+
+	public boolean markInQueue(Long http_to_send_id) throws Exception {
+		
+		boolean success = false;
+		try {
+			utx.begin();
+			Query qry = em.createNativeQuery("UPDATE `"+database+"`.`httptosend` SET in_outgoing_queue = 1 WHERE id = :id_");
+			qry.setParameter("id_", String.valueOf(http_to_send_id));
+			qry.executeUpdate();
+			utx.commit();
+			success = true;
+		}catch(Exception e){
+			try{
+				utx.rollback();
+			}catch(Exception exp){
+			}
+			throw new Exception(e.getMessage());
+		
+		}finally{
+		}
+		return success;
+	}
 
 	public MTsms getMTsms(Long id){
 		MTsms mtsms = null;

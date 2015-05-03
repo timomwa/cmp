@@ -76,6 +76,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			final String MESSAGE = req.getMsg().trim();
 			final int serviceid = mo.getServiceid();
 			final String MSISDN = req.getMsisdn();
+			
 			if(serviceprocessor==null)
 				serviceprocessor = cmpbean.getServiceProcessor(mo.getProcessor_id());
 			
