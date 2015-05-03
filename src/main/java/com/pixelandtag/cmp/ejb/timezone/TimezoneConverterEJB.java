@@ -19,7 +19,33 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	
 	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
+	
+	public String convertToPrettyFormat(Date date){
+		int day = Integer.parseInt(formatDayOfMonth.format(date));
+		String suff  = getDayNumberSuffix(day);
+		DateFormat prettier_df = new SimpleDateFormat("d'"+suff+"' E MMM YYYY h:mm a ");
+	    return prettier_df.format(date);
+	}
 
+	
+	private static String getDayNumberSuffix(int day) {
+	    if (day >= 11 && day <= 13) {
+	        return "th";
+	    }
+	    switch (day % 10) {
+	    case 1:
+	        return "st";
+	    case 2:
+	        return "nd";
+	    case 3:
+	        return "rd";
+	    default:
+	        return "th";
+	    }
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#validateTimezone(java.lang.String)
 	 */

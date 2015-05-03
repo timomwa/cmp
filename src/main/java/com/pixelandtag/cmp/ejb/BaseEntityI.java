@@ -18,7 +18,6 @@ public interface BaseEntityI {
 	public static final String SERVICE_NAME_TAG = "<SERVICE_NAME>";
 	public static final String BILLING_FAILED = "BILLING_FAILED";
 	public static SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	public static DateFormat prettier_df = new SimpleDateFormat("d E MMM h:m a");
 	
 	public <T> T find(Class<T> entityClass, Long id) throws Exception;
 	public <T> Collection<T> find(Class<T> entityClass,	Map<String, Object> criteria, int start, int end)   throws Exception;

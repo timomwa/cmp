@@ -52,7 +52,7 @@ public class TestEJB {
 		 tzconvert =  (TimezoneConverterI) 
 		      		context.lookup("cmp/TimezoneConverterEJB!com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI");
 		 
-		 Date new_york = tzconvert.convertFromOneTimeZoneToAnother("2015-05-02 05:51:58","America/New_York","Africa/Nairobi"); 
+		 String new_york = tzconvert.convertToPrettyFormat(new Date());
 		 System.out.println(new_york);
 		 
 		 //com.pixelandtag.cmp.ejb.CMPResourceBean.getMenuByParentLevelId(int, int, int)

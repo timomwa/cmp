@@ -6,6 +6,14 @@ import java.util.TimeZone;
 
 public interface TimezoneConverterI {
 
+	
+	/**
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public String convertToPrettyFormat(Date date);
+	
 	/**
 	 * Validates the timezone.
 	 * Makes sure timezone is always word slash word e.g "America/New_York"

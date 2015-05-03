@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -76,12 +78,37 @@ public class Test1 {
     			(r.nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
 	}
 	
+	private static String getDayNumberSuffix(int day) {
+	    if (day >= 11 && day <= 13) {
+	        return "th";
+	    }
+	    switch (day % 10) {
+	    case 1:
+	        return "st";
+	    case 2:
+	        return "nd";
+	    case 3:
+	        return "rd";
+	    default:
+	        return "th";
+	    }
+	}
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		System.out.println("*345".contains("*"));
+		Date dt = new Date();
+		SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
+		 int day = Integer.parseInt(formatDayOfMonth.format(dt));
+		 String suff  = getDayNumberSuffix(day);
+		 //DateFormat dateFormat = new SimpleDateFormat(" d'" + suff + "' MMMM yyyy");
+		    
+		 
+		 DateFormat prettier_df = new SimpleDateFormat("h:mm a d'" + suff + "' E MMM YYYY");
+		System.out.println(prettier_df.format(dt));
+		//"+getDayNumberSuffix(day)+"
+		//System.out.println("*345".contains("*"));
 		if(true)
 			return;
 		

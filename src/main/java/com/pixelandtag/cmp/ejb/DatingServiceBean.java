@@ -31,6 +31,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
@@ -76,6 +77,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@EJB
 	private LocationBeanI location_ejb;
+	
+	@EJB
+	private TimezoneConverterI timezone_ejb;
 	
 	
 	@EJB
@@ -1170,7 +1174,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv);
 				
 				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
-				msg = msg.replaceAll(EXPIRY_DATE_TAG, prettier_df.format( sub.getExpiryDate() ));
+				msg = msg.replaceAll(EXPIRY_DATE_TAG, timezone_ejb.convertToPrettyFormat( sub.getExpiryDate() ));
 				msg = msg.replaceAll(SERVICE_NAME_TAG, smsserv.getService_name());
 				mo.setMt_Sent(msg);
 				mo.setPrice(mo.getPrice());//set price to subscription price
