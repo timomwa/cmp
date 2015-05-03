@@ -57,15 +57,20 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public void updateCredibilityIndex(String msisdn, Long service_id, int change){
 		try{
 			Subscription subsc = getSubscription(msisdn, service_id);
-			utx.begin();
+			
 			if(subsc!=null){
+				utx.begin();
 				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+				subsc = em.merge(subsc);
+				utx.commit();
 			}else{
+				utx.begin();
 				subsc = subscribe(msisdn,service_id);
 				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+				subsc = em.merge(subsc);
+				utx.commit();
 			}
-			subsc = em.merge(subsc);
-			utx.commit();
+			
 		}catch(Exception exp){
 			try{
 				utx.rollback();

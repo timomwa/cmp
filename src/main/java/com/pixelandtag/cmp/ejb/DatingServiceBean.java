@@ -96,7 +96,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	public String processDating(RequestObject ro) throws Exception{
 		
-		String resp = "Request received.";
+		String resp = "";
 		
 		final String MSISDN = ro.getMsisdn();
 		
