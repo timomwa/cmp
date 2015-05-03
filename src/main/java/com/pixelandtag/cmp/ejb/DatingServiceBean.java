@@ -54,6 +54,7 @@ import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.subscription.dto.MediumType;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -1145,6 +1146,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				language_id = profile.getLanguage_id();
 			
 			
+			
 			if(!billable.isSuccess()){
 				
 				
@@ -1163,6 +1165,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				mo.setMt_Sent(message);
 				mo.setPrice(BigDecimal.ZERO);//set price to subscription price
 				mo.setPriority(0);
+				
+				try{
+					subscriptionBean.updateQueueStatus(2L, mo.getMsisdn(), serviceid);
+				}catch(Exception exp){
+					logger.error("ERROR DURING SUBSCRIPTION RENEWAL:: "+exp.getMessage(),exp);
+				}
 				return mo;
 				
 			}else{
@@ -1170,8 +1178,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				billable = saveOrUpdate(billable);
 				
 				SMSService smsserv = find(SMSService.class, serviceid);
-			
-				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv);
+				
+				
+				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv,SubscriptionStatus.confirmed);
 				
 				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
 				msg = msg.replaceAll(EXPIRY_DATE_TAG, timezone_ejb.convertToPrettyFormat( sub.getExpiryDate() ));

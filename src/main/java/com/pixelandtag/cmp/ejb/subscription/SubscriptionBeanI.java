@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public interface SubscriptionBeanI {
 	
@@ -30,10 +31,11 @@ public interface SubscriptionBeanI {
 	 * Renews the subscription to this services for this msisdn
 	 * @param msisdn
 	 * @param smsService
+	 * @param substatus - com.pixelandtag.subscription.dto.SubscriptionStatus
 	 * @return
 	 * @throws Exception
 	 */
-	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception;
+	public Subscription renewSubscription(String msisdn, SMSService smsService,SubscriptionStatus substatus) throws Exception;
 	
 	
 	/**

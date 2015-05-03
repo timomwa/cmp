@@ -32,6 +32,7 @@ import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -446,7 +447,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 						SMSService smsservice = datingBean.getSMSService("DATE");
 						
-						subscriptionBean.renewSubscription(MSISDN, smsservice);
+						subscriptionBean.renewSubscription(MSISDN, smsservice, SubscriptionStatus.confirmed);
 					}
 				}
 				

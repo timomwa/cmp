@@ -84,7 +84,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		Subscription sub = null;
 		try{
 			SMSService service = em.find(SMSService.class, serviceid);
-			sub = renewSubscription(msisdn, service);
+			sub = renewSubscription(msisdn, service, SubscriptionStatus.confirmed);
 			updateQueueStatus(0L,sub.getId());
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
@@ -131,7 +131,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public Subscription renewSubscription(String msisdn, SMSService smsService) throws Exception{
+	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus) throws Exception{
 			Subscription sub = null;
 			try{
 				Query qry;
@@ -165,7 +165,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					utx.begin();
 					sub.setExpiryDate(timezoneEJB.stringToDate(expiryDate));
 					sub.setRenewal_count(sub.getRenewal_count()+1);
-					sub.setSubscription_status(SubscriptionStatus.confirmed);
+					sub.setSubscription_status(substatus);
 					sub.setRequest_medium(MediumType.sms);
 					sub = em.merge(sub);
 					
