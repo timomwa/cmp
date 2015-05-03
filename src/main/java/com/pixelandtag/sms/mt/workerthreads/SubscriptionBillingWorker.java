@@ -33,6 +33,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private boolean run = true;
 	private boolean finished = false;
 	private String name;
+	private int mandatory_throttle;
 	private boolean busy = false;
 	private volatile boolean success = true;
 	private volatile String message = "";
@@ -93,7 +94,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 	}
 
-	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_) throws Exception{
+	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, int mandatory_throttle_) throws Exception{
 		 
 		if(cmpbean_==null)
 			throw new Exception("CMP EJB is nulll");
@@ -105,6 +106,8 @@ public class SubscriptionBillingWorker implements Runnable {
 		this.watch = new StopWatch();
 		
 		this.name = name_;
+		
+		this.mandatory_throttle = mandatory_throttle_;
 		
 		watch.start();
 		
@@ -137,6 +140,9 @@ public class SubscriptionBillingWorker implements Runnable {
 			headerattrs.put("Content-Type","text/xml; charset=utf-8");
 
 			while(run){
+				
+				
+				
 				
 				
 				try {
@@ -325,6 +331,15 @@ public class SubscriptionBillingWorker implements Runnable {
 			setBusy(false);
 			
 			logger.info(getName()+": worker shut down safely!");
+			
+			try{
+				logger.info(">>>Mandatory throttling: sleeping "+mandatory_throttle+" ms");
+				Thread.sleep(mandatory_throttle);
+			}catch(InterruptedException e){
+				setRun(false);
+			}catch(Exception e){
+				logger.error(e.getMessage(),e);
+			}
 		
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
