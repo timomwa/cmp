@@ -44,7 +44,7 @@ public class SubscriptionRenewal extends  Thread {
 	private volatile static BlockingDeque<Billable> billableQ = new LinkedBlockingDeque<Billable>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
-	private int mandatory_throttle;
+	private int mandatory_throttle = 60112;
 	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 	private int queueSize = 1000;
 	private int workers = 1;
@@ -146,7 +146,7 @@ public class SubscriptionRenewal extends  Thread {
 		Thread t1;
 		for (int i = 0; i < this.workers; i++) {
 			SubscriptionBillingWorker worker;
-			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, httpsclient, cmpbean,subscriptio_nejb, mandatory_throttle);
+			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, httpsclient, cmpbean,subscriptio_nejb, mandatory_throttle); 
 			t1 = new Thread(worker);
 			t1.start();
 			billingsubscriptionWorkers.add(worker);
