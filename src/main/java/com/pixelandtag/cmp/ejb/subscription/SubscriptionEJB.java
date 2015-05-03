@@ -58,7 +58,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		try{
 			Subscription subsc = getSubscription(msisdn, service_id);
 			utx.begin();
-			subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+			if(subsc!=null){
+				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+			}else{
+				subsc = subscribe(msisdn,service_id);
+				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+			}
 			subsc = em.merge(subsc);
 			utx.commit();
 		}catch(Exception exp){
@@ -71,7 +76,30 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 	}
 	
-	//private StopWatch watch = new StopWatch();
+
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Override
+	public Subscription subscribe(String msisdn, Long service_id) {
+		Subscription subscription = null;
+		try{
+			utx.begin();
+			subscription = new Subscription();
+			subscription.setMsisdn(msisdn);
+			subscription.setSms_service_id_fk(service_id);
+			subscription.setSubActive(Boolean.TRUE);
+			subscription.setSmsmenu_levels_id_fk(-1);
+			subscription.setRenewal_count(0L);
+			subscription.setQueue_status(0L);
+			subscription = em.merge(subscription);
+			utx.commit();
+		}catch(Exception e){
+			try{
+				utx.rollback();
+			}catch(Exception exp){}
+			logger.error(e.getMessage());
+		}
+		return subscription;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#getExpiredSubscriptions(java.lang.Long)

@@ -81,5 +81,13 @@ public interface SubscriptionBeanI {
 	 * @param change
 	 */
 	public void updateCredibilityIndex(String msisdn, Long valueOf, int change);
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param service_id
+	 * @return
+	 */
+	public Subscription subscribe(String msisdn, Long service_id) ;
 
 }
