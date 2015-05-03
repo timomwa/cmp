@@ -49,6 +49,28 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	@EJB
 	TimezoneConverterI timezoneEJB;
 	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void updateCredibilityIndex(String msisdn, Long service_id, int change){
+		try{
+			Subscription subsc = getSubscription(msisdn, service_id);
+			utx.begin();
+			subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+			subsc = em.merge(subsc);
+			utx.commit();
+		}catch(Exception exp){
+			try{
+				utx.rollback();
+			}catch(Exception esp){
+			}
+			logger.error(exp.getMessage(),exp);
+		}
+		
+	}
+	
 	//private StopWatch watch = new StopWatch();
 
 	/* (non-Javadoc)
@@ -60,7 +82,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
-			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate AND s.queue_status = 0");
+			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate AND s.queue_status = 0 ORDER BY s.credibility_index desc");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
 			qry.setParameter("todaydate", timeInNairobi);
 			qry.setFirstResult(0);

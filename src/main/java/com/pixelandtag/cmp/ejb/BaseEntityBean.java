@@ -50,6 +50,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -83,6 +84,9 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	@EJB
 	private TimezoneConverterI timeZoneEjb;
+	
+	@EJB
+	private SubscriptionBeanI subscriptionEjb;
 	
 	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
         @Override
@@ -554,12 +558,19 @@ public class BaseEntityBean implements BaseEntityI {
 					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
 					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					billable.setResp_status_code(err);
+					
+					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+					}
+					
 				}else{
 					
 					billable.setResp_status_code("Success");
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-					
+					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
+					}
 					
 					
 				}

@@ -74,4 +74,12 @@ public interface SubscriptionBeanI {
 	 */
 	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id) throws Exception;
 
+	/**
+	 * 
+	 * @param msisdn
+	 * @param valueOf
+	 * @param change
+	 */
+	public void updateCredibilityIndex(String msisdn, Long valueOf, int change);
+
 }

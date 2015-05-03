@@ -98,17 +98,8 @@ public class Test1 {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		Date dt = new Date();
-		SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
-		 int day = Integer.parseInt(formatDayOfMonth.format(dt));
-		 String suff  = getDayNumberSuffix(day);
-		 //DateFormat dateFormat = new SimpleDateFormat(" d'" + suff + "' MMMM yyyy");
-		    
-		 
-		 DateFormat prettier_df = new SimpleDateFormat("h:mm a d'" + suff + "' E MMM YYYY");
-		System.out.println(prettier_df.format(dt));
-		//"+getDayNumberSuffix(day)+"
-		//System.out.println("*345".contains("*"));
+		
+		
 		if(true)
 			return;
 		

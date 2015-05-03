@@ -151,16 +151,11 @@ public class SubscriptionBillingWorker implements Runnable {
 					
 					try{
 						
-							logger.debug(getName()+" kujaribu kutafuta billable");
-							
-							logger.debug(getName()+":::: tumekamata moja hapa.."+billable);
 							if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 								setBusy(true);
 								logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
-								logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 								String xml = billable.getChargeXML(BillableI.plainchargeXML);
 								logger.info("BILLABLE: "+billable.toString());
-								logger.debug("XML SENT \n : "+xml + "\n");
 								param.setStringentity(xml);
 								param.setHeaderParams(headerattrs);
 								watch.start();
@@ -195,6 +190,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										
 									}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 										
+										subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
 										//we'll try again. 2 means that we re-try again..
 										subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 										
@@ -225,6 +221,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 										billable.setSuccess(true);
 										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+										subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
 										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
 									
 										if(SubscriptionRenewal.isAdaptive_throttling()){

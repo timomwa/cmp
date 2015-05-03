@@ -78,6 +78,9 @@ public class Subscription implements Serializable {
 	@Column(name="queue_status")
 	private Long queue_status;
 	
+	@Column(name="queue_status")
+	private Integer credibility_index;
+	
 	
 	@PrePersist
 	@PreUpdate
@@ -92,6 +95,8 @@ public class Subscription implements Serializable {
 			renewal_count = 0L;
 		if(queue_status==null)
 			queue_status = 0L;
+		if(credibility_index==null)
+			credibility_index = 0;
 		
 	}
 
@@ -189,6 +194,14 @@ public class Subscription implements Serializable {
 
 	public void setQueue_status(Long queue_status) {
 		this.queue_status = queue_status;
+	}
+
+	public Integer getCredibility_index() {
+		return credibility_index;
+	}
+
+	public void setCredibility_index(Integer credibility_index) {
+		this.credibility_index = credibility_index;
 	}
 	
 	

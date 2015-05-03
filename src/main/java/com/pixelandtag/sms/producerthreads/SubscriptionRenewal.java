@@ -88,6 +88,7 @@ public class SubscriptionRenewal extends  Thread {
 	private void initWorkers() throws Exception {
 		
 		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
+		
 		try{
 			enable_biller_random_throttling = mtsenderprops.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
 		}catch(Exception e){
@@ -151,7 +152,7 @@ public class SubscriptionRenewal extends  Thread {
 			t1.start();
 			billingsubscriptionWorkers.add(worker);
 		}
-		// wake all thread's because we're done initializing.
+		
 		for (SubscriptionBillingWorker worker : billingsubscriptionWorkers)
 			worker.rezume();
 	}
@@ -263,22 +264,7 @@ public class SubscriptionRenewal extends  Thread {
 			
 			sub.setQueue_status(1L);
 			subscriptio_nejb.updateQueueStatus(1L,sub.getId());
-			
-			/*
-			int wait_time_mills = getRandomWaitTime();
-			
-			
-			try{
-				if(wait_time_mills>-1){
-					logger.debug(":::::: TRYING_TO_BEHAVE LIKE A HUMAN BEING.. WAITING RANDOM NUMBER OF MILLISECONDS:: "+wait_time_mills);
-					Thread.sleep(wait_time_mills);
-				}
-			}catch(Exception e){
-				logger.error(e.getMessage(),e);
-			}*/
-			
-			
-			
+		
 			logger.info(" sub "+sub);
 			Long sms_service_id = sub.getSms_service_id_fk();
 			
