@@ -2327,7 +2327,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					if(sess!=null){
 						smsmenu_level_id_fk = sess.getSmsmenu_levels_id_fk().intValue();
 						language_id = sess.getLanguage_id().intValue();
-						if(smsmenu_level_id_fk>0){
+						if(smsmenu_level_id_fk>-1){
 							MenuItem mi = getMenuItem(Long.valueOf(smsmenu_level_id_fk+""));
 							sess.setMenu_item(mi);
 						}
@@ -2347,7 +2347,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					
 					MenuItem menu_from_session = null;
 					
-					if((smsmenu_level_id_fk>0) && (language_id >0))
+					if((smsmenu_level_id_fk>-1) && (language_id >-1))
 						menu_from_session = sess.getMenu_item();//menu_controller.getMenuById(smsmenu_level_id_fk,conn);
 					else
 						menu_from_session = getMenuByParentLevelId(language_id,smsmenu_level_id_fk,menuid);//get root menu
