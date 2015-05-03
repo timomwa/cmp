@@ -262,8 +262,8 @@ public class BaseEntityBean implements BaseEntityI {
 			Date timeInNairobi = timeZoneEjb.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			Query qry = em.createQuery("from Subscription sub WHERE sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :timeInNairobi ");
 			qry.setParameter("msisdn", msisdn);
-			qry.setParameter("serviceid", SubscriptionStatus.confirmed);
-			qry.setParameter("subscription_status", serviceid);
+			qry.setParameter("serviceid", serviceid);
+			qry.setParameter("subscription_status", SubscriptionStatus.confirmed);
 			qry.setParameter("timeInNairobi", timeInNairobi);
 			List<Subscription> sublist = qry.getResultList();
 			if(sublist.size()>0){
