@@ -274,7 +274,7 @@ public class BulkSMSUtilEJB implements BulkSMSUtilBeanI {
 			plan = (BulkSMSPlan) query.getSingleResult();
 		}catch(javax.persistence.NoResultException nr){
 			logger.warn("Couldn't find an plan with the given parameters planid:"+planid);
-			throw new PlanException("Couldn't find an plan with the given parameters planid:"+planid);
+			throw new PlanException("Couldn't find any plan with the given parameters planid:"+planid);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 			throw new PlanException("An error occurred while fetching plan. Please try again later");

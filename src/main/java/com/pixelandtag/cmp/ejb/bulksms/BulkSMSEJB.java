@@ -67,7 +67,7 @@ public class BulkSMSEJB implements BulkSMSI {
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
-	public void enqueue(String sourceIp, String apiKey,String username, String password,String jsonString) throws APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException,QueueFullException,PlanBalanceException{
+	public void enqueue(String sourceIp, String apiKey,String username, String password,String jsonString) throws  Exception{//PlanException, APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException,QueueFullException,PlanBalanceException{
 	
 		//boolean success = true;
 		JSONObject inJso  =  new JSONObject(jsonString);
@@ -147,10 +147,10 @@ public class BulkSMSEJB implements BulkSMSI {
 		if(!tz_valid){
 			throw new ParameterException("Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
 		}
-		Date sheduledate = null;
+		Date sheduledate_server_time = null;
 		try {
-			sheduledate = timezoneEJB.stringToDate(schedule);
-			boolean isinthepast = timezoneEJB.isDateInThePast(sheduledate,timezone);
+			sheduledate_server_time = timezoneEJB.convertFromOneTimeZoneToAnother(timezoneEJB.stringToDate(schedule), timezone,"America/New_York");
+			boolean isinthepast = timezoneEJB.isDateInThePast(sheduledate_server_time);
 			if(isinthepast)
 				throw new ParameterException("The schedule date is in the past.");
 		} catch (ParseException e) {
@@ -162,7 +162,7 @@ public class BulkSMSEJB implements BulkSMSI {
 									+"\n mm – the minute, e,g 03. between 0 and 59 ");
 		}
 		
-		sb.append("sheduledate").append(" : ").append(sheduledate).append("\n");
+		sb.append("sheduledate").append(" : ").append(sheduledate_server_time).append("\n");
 		
 		logger.info("\n\n incoming batch: "+sb.toString());
 		
@@ -197,7 +197,7 @@ public class BulkSMSEJB implements BulkSMSI {
 		textb.setPlan(plan);
 		textb.setSenderid(senderid);
 		textb.setQueueSize(BigInteger.valueOf(msisdnlist.length()));
-		textb.setSheduledate(sheduledate);
+		textb.setSheduledate(sheduledate_server_time);
 		textb.setTimezone(timezone);
 		textb.setPrice(new BigDecimal(price));
 		try{

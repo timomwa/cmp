@@ -1,6 +1,8 @@
 package com.pixelandtag.sms.mt.workerthreads;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Properties;
 
@@ -13,6 +15,8 @@ import org.jboss.naming.remote.client.InitialContextFactory;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
@@ -29,6 +33,7 @@ public class TestEJB {
 	private static InitialContext context;
 	private static Properties mtsenderprop;
 	private static CMPResourceBeanRemote cmpresourcebean;
+	private static TimezoneConverterI tzconvert;
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -44,9 +49,14 @@ public class TestEJB {
       		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		 cmpresourcebean =  (CMPResourceBeanRemote) 
 		      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-	
-		 //com.pixelandtag.cmp.ejb.CMPResourceBean.getMenuByParentLevelId(int, int, int)
+		 tzconvert =  (TimezoneConverterI) 
+		      		context.lookup("cmp/TimezoneConverterEJB!com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI");
 		 
+		 Date new_york = tzconvert.convertFromOneTimeZoneToAnother("2015-05-02 05:51:58","America/New_York","Africa/Nairobi"); 
+		 System.out.println(new_york);
+		 
+		 //com.pixelandtag.cmp.ejb.CMPResourceBean.getMenuByParentLevelId(int, int, int)
+		 /*
 		 Person person = datingBean.find(Person.class, 1560L);
 		 System.out.println(person);
 		 PersonDatingProfile thisPerson = datingBean.getProfile(person);
@@ -105,7 +115,7 @@ public class TestEJB {
 			}else{
 				System.out.println("MAtch: "+match);
 			}
-			
+			*/
 			
 		 context.close();
 		 

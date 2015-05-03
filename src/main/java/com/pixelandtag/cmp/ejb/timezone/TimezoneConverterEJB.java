@@ -60,6 +60,22 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 		return format.parse(time);
 	}
 	
+	public String dateToString(Date datestr) throws ParseException{
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:m:ss");
+		return format.format(datestr);
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#convertToThisTimezone(java.lang.String, java.lang.String, java.util.TimeZone)
+	 */
+	@Override
+	public Date convertToThisTimezone(Date date, String dateformat, TimeZone timezone) throws ParseException{
+		DateFormat format = new SimpleDateFormat(dateformat);
+		format.setTimeZone(timezone);
+		return format.parse( format.format(date) );
+	}
+	
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#convertToThisTimezone(java.lang.String, java.lang.String, java.lang.String)
@@ -69,12 +85,58 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 		return convertToThisTimezone(time,dateformat,TimeZone.getTimeZone(timeZone));
 	}
 	
+
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI#convertFromOneTimeZoneToAnother(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Date convertFromOneTimeZoneToAnother(String fromDates, String fromTimezone, String toTimeZone) throws ParseException{
+		Date fromDate = stringToDate(fromDates);
+		return convertFromOneTimeZoneToAnother(fromDate, fromTimezone, toTimeZone);
+		 
+	}
+	
+	
+	
+	@Override
+	public java.util.Date convertFromOneTimeZoneToAnother(java.util.Date date, TimeZone fromTZ , TimeZone toTZ){
+	    long fromTZDst = 0;
+	    if(fromTZ.inDaylightTime(date))
+	    {
+	        fromTZDst = fromTZ.getDSTSavings();
+	    }
+	    long fromTZOffset = fromTZ.getRawOffset() + fromTZDst;
+	 
+	    long toTZDst = 0;
+	    if(toTZ.inDaylightTime(date))
+	    {
+	        toTZDst = toTZ.getDSTSavings();
+	    }
+	    long toTZOffset = toTZ.getRawOffset() + toTZDst;
+	 
+	    return new java.util.Date(date.getTime() + (toTZOffset - fromTZOffset));
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI#convertFromOneTimeZoneToAnother(java.util.Date, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Date convertFromOneTimeZoneToAnother(Date fromDate, String fromTimezone, String toTimeZone) throws ParseException{
+		 return convertFromOneTimeZoneToAnother(fromDate,TimeZone.getTimeZone(fromTimezone), TimeZone.getTimeZone(toTimeZone));
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#convertToThisTimezone(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Date convertToThisTimezone(String time, String timeZone) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(timeZone));
+	public Date convertToHostTimezone(String time, String sourcetimeZone) throws ParseException {
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(sourcetimeZone));
+	}
+	
+	@Override
+	public Date convertToHostTimezone(Date time, String sourcetimeZone) throws ParseException {
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(sourcetimeZone));
 	}
 	
 	/* (non-Javadoc)
@@ -85,29 +147,9 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getDefault());
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#isDateInThePast(java.util.Date, java.lang.String)
-	 */
-	@Override
-	public boolean isDateInThePast(Date schedule, String timezone) throws ParseException {
-		StringBuffer sb = new StringBuffer();
-		DateFormat mdyFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		mdyFormat.setTimeZone(TimeZone.getTimeZone(timezone));
-		Date now = new Date();
-		String nowInOpcoTZ = mdyFormat.format(now);
-		mdyFormat.setTimeZone(TimeZone.getDefault());
-		Date now_to_opcotimezone = mdyFormat.parse(nowInOpcoTZ);
-		
-		boolean isinthepast = schedule.before(now_to_opcotimezone);
-		
-		sb.append("\n\n\t>>>>current timestamp to opco timezone: "+now_to_opcotimezone+" "+TimeZone.getTimeZone(timezone).getID());
-		sb.append("\n\n\t>>>>current timestamp in this timezone: "+now+" "+TimeZone.getDefault().getID());
-		sb.append("\n\n\t>>>>Schedule in opco timezone: "+schedule+" "+timezone);
-		sb.append("\n\n\t>>>> this date is in the past ?: "+isinthepast);
-		
-		logger.info(sb.toString());
-		
-		return isinthepast;
+	public boolean isDateInThePast(Date date){
+		Date d = new Date();
+		return date.before(d);
 	}
 	
 	/* (non-Javadoc)
@@ -123,5 +165,9 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 		
 		return now_to_opcotimezone;
 	}
+
+
+	
+	
 	
 }

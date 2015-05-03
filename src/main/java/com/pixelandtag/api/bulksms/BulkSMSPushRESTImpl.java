@@ -18,6 +18,7 @@ import com.pixelandtag.cmp.ejb.bulksms.BulkSMSI;
 import com.pixelandtag.cmp.ejb.bulksms.ParameterException;
 import com.pixelandtag.cmp.ejb.bulksms.PersistenceException;
 import com.pixelandtag.cmp.ejb.bulksms.PlanBalanceException;
+import com.pixelandtag.cmp.ejb.bulksms.PlanException;
 import com.pixelandtag.cmp.ejb.bulksms.QueueFullException;
 
 @Stateless
@@ -62,6 +63,15 @@ public class BulkSMSPushRESTImpl extends BaseRestImpl implements BulkSMSPushREST
 					.entity(jsob.toString()).build();
 			return response;
 			
+		}catch(PlanException pe){
+			try {
+				jsob.put("success", false);
+				jsob.put("message", pe.getMessage());
+			} catch (JSONException e1) {
+				logger.error(e1.getMessage(),e1);
+			}
+			response =  Response.status(Response.Status.NOT_ACCEPTABLE)
+				.entity(jsob.toString()).build();
 		}catch(QueueFullException qfe){
 			try {
 				jsob.put("success", false);

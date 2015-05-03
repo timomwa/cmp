@@ -189,8 +189,7 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 						"Scheule found without timezone. Please supply timezone. Timezone example : Africa/Nairobi");
 
 			sheduledate = timezoneBean.stringToDate(schedule);
-			boolean isinthepast = timezoneBean.isDateInThePast(sheduledate,
-					timezone);
+			boolean isinthepast = timezoneBean.isDateInThePast(sheduledate);
 			if (isinthepast)
 				throw new ParameterException(
 						"The schedule date is in the past.");
@@ -268,7 +267,7 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 			
 
 			utx.commit();
-		} catch (Exception exp) {
+		}catch (Exception exp) {
 			logger.error(exp.getMessage(), exp);
 			try {
 				utx.rollback();

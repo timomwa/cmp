@@ -57,7 +57,7 @@ public interface TimezoneConverterI {
 	 * @return
 	 * @throws ParseException
 	 */
-	public Date convertToThisTimezone(String time, String timeZone) throws ParseException;
+	public Date convertToHostTimezone(String time, String timeZone) throws ParseException;
 	
 	
 	
@@ -78,13 +78,67 @@ public interface TimezoneConverterI {
 	 */
 	public Date convertToThisTimezone(String time) throws ParseException;
 	
+
 	/**
 	 * 
-	 * @param schedule
-	 * @param timezone 
+	 * @param date
+	 * @param dateformat
+	 * @param timezone
 	 * @return
 	 * @throws ParseException
 	 */
-	public boolean isDateInThePast(Date schedule, String timezone) throws ParseException;
-
+	public Date convertToThisTimezone(Date date, String dateformat, TimeZone timezone) throws ParseException;
+	
+	/**
+	 * 
+	 * @param time
+	 * @param sourcetimeZone
+	 * @return
+	 * @throws ParseException
+	 */
+	public Date convertToHostTimezone(Date time, String sourcetimeZone) throws ParseException;
+	
+	/**
+	 * 
+	 * @param datestr
+	 * @return
+	 * @throws ParseException
+	 */
+	public String dateToString(Date date) throws ParseException;
+	
+	/**
+	 * 
+	 * @param fromDate
+	 * @param fromTimezone
+	 * @param toTimeZone
+	 * @return
+	 * @throws ParseException
+	 */
+	public Date convertFromOneTimeZoneToAnother(Date fromDate, String fromTimezone, String toTimeZone) throws ParseException;
+	
+	/**
+	 * 
+	 * @param fromDates
+	 * @param fromTimezone
+	 * @param toTimeZone
+	 * @return
+	 * @throws ParseException
+	 */
+	public Date convertFromOneTimeZoneToAnother(String fromDates, String fromTimezone, String toTimeZone) throws ParseException;
+	
+	/**
+	 * 
+	 * @param date
+	 * @param fromTZ
+	 * @param toTZ
+	 * @return
+	 */
+	public java.util.Date convertFromOneTimeZoneToAnother(java.util.Date date, TimeZone fromTZ , TimeZone toTZ);
+	
+	/**
+	 * 
+	 * @param sheduledate_server_time
+	 * @return
+	 */
+	public boolean isDateInThePast(Date sheduledate_server_time);
 }

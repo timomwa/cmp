@@ -1,6 +1,7 @@
 package com.pixelandtag.cmp.ejb.subscription;
 
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +49,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	@EJB
 	TimezoneConverterI timezoneEJB;
 	
-	private StopWatch watch = new StopWatch();
+	//private StopWatch watch = new StopWatch();
 
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#getExpiredSubscriptions(java.lang.Long)
@@ -58,21 +59,17 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public List<Subscription> getExpiredSubscriptions(Long size) {
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
-			Date dt = null;
-			try{
-				dt = timezoneEJB.convertDateToDestinationTimezone(new Date(), "Africa/Nairobi");
-			}catch(Exception e){
-				dt = new Date();
-			}
-			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<:todaydate AND s.queue_status = 0");
+			Date dt = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate AND s.queue_status = 0");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
 			qry.setParameter("todaydate", dt);
-			logger.info(" GUGAMUGA:::: EXPIRY CHECK CHECKING TO SEE IF WE HAVE DATES BEFORE dt"+dt);
 			qry.setFirstResult(0);
 			qry.setMaxResults(size.intValue());
 			expired = qry.getResultList();
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
 		}
 		
 		return expired;
@@ -155,8 +152,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sub.setSms_service_id_fk(smsService.getId());
 				}
 				
-				Date americaTZ = timezoneEJB.convertDateToDestinationTimezone(new Date(), "America/NewYork");
-				Date nowInNairobiTz = timezoneEJB.convertDateToDestinationTimezone(americaTZ, "Africa/Nairobi");
+				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 				qry = em.createNativeQuery("select DATE_ADD(:curdate_local, INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
 				qry.setParameter("curdate_local", nowInNairobiTz);
 				qry.setParameter("sub_length", smsService.getSubscription_length());
@@ -177,7 +173,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
 					sh.setMsisdn(msisdn);
 					sh.setService_id(smsService.getId());
-					sh.setTimeStamp(americaTZ);
+					sh.setTimeStamp(new Date());
 					
 					sh = em.merge(sh);
 					
@@ -206,7 +202,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		List<Subscription> msisdnL = new ArrayList<Subscription>();
 		try {
 			
-			Date nowInNairobiTz = timezoneEJB.convertDateToDestinationTimezone(new Date(), "Africa/Nairobi");
+			Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			
 			utx.begin();
 			String sql = "SELECT "
@@ -277,8 +273,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 		try{
 			
-			Date opcotime = timezoneEJB.convertDateToDestinationTimezone(new Date(), "Africa/Nairobi");
-			
+			Date opcotime = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :opcotime ");
 			qry.setParameter("opcotime", opcotime);
 			qry.setParameter("msisdn", msisdn);

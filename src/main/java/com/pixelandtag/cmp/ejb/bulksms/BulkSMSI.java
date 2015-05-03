@@ -18,7 +18,7 @@ public interface BulkSMSI {
 	 * @throws ParameterException
 	 * @throws JSONException
 	 */
-	public void enqueue(String sourceIp, String apiKey, String username, String password, String jsonString) throws APIAuthenticationException,PlanException,PersistenceException,ParameterException,JSONException,PlanBalanceException,QueueFullException;
+	public void enqueue(String sourceIp, String apiKey, String username, String password, String jsonString) throws Exception;// PlanException, APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException,QueueFullException,PlanBalanceException;
 
 	
 

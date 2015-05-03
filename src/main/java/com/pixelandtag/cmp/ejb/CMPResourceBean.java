@@ -125,6 +125,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 	}
 	public MTsms convertToLegacyMt(HttpToSend httpTosend) {
+		if(httpTosend==null)
+			return null;
 		MTsms mtsms = new MTsms();
 		mtsms.setId(httpTosend.getId());
 		mtsms.setSms(httpTosend.getSms());
