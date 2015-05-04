@@ -155,7 +155,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id) throws Exception{
 		try{
 			Subscription sub = getSubscription(msisdn, sms_service_id);
-			updateQueueStatus(status,sub.getId());
+			if(sub!=null)
+				sub = subscribe(msisdn, sms_service_id);
+				updateQueueStatus(status,sub.getId());
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}
