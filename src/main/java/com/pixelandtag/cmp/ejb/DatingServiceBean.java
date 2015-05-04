@@ -1137,6 +1137,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 			Billable billable = createBillable(mo);
 			
+			
 			billable = charge(billable);
 			
 			String msg = "";
@@ -1144,8 +1145,6 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			PersonDatingProfile profile = person!=null?  getProfile(person) : null;
 			if(profile!=null)
 				language_id = profile.getLanguage_id();
-			
-			
 			
 			if(!billable.isSuccess()){
 				
@@ -1175,7 +1174,6 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				
 			}else{
 				
-				billable = saveOrUpdate(billable);
 				
 				SMSService smsserv = find(SMSService.class, serviceid);
 				
@@ -1189,6 +1187,10 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				mo.setPrice(mo.getPrice());//set price to subscription price
 				mo.setPriority(0);
 			}
+			
+			billable.setIn_outgoing_queue(0L);
+			billable.setProcessed(1L);
+			billable = saveOrUpdate(billable);
 		
 		}catch(Exception exp){
 			throw new DatingServiceException("Sorry, something went wrong. Try again later.", exp);
