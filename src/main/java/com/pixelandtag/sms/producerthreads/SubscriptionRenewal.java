@@ -319,6 +319,7 @@ public class SubscriptionRenewal extends  Thread {
 						.get(service.getEvent_type())
 						: EventType.SUBSCRIPTION_PURCHASE));
 				billable.setPricePointKeyword(service.getPrice_point_keyword());
+				billable.setSuccess(false);
 				logger.debug(" before queue transaction_id" + transaction_id);
 
 				logger.info("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
@@ -343,9 +344,10 @@ public class SubscriptionRenewal extends  Thread {
 						// this method is generally preferable to the addLast
 						// method, which can fail
 						// to insert an element only by throwing an exception.
+						billable.setIn_outgoing_queue(1L);
+						billable = cmpbean.saveOrUpdate(billable);
 						billableQ.offerLast(billable);
 
-						billable.setIn_outgoing_queue(1L);
 						//cmpbean.saveOrUpdate(billable);
 						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
 						// March 2012 - I later realzed we still sending SMS
@@ -368,10 +370,11 @@ public class SubscriptionRenewal extends  Thread {
 					// The queue has space in it to add an element.
 					try {
 
+						billable.setIn_outgoing_queue(1L);
+						billable = cmpbean.saveOrUpdate(billable);
 						billableQ.putLast(billable);// if we've got a limit to
 													// the queue
 
-						billable.setIn_outgoing_queue(1L);
 						//cmpbean.saveOrUpdate(billable);
 						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
 						// March 2012 - I fucking later realzed we still sending
