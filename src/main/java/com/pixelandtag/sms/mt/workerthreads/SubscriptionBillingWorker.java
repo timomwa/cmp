@@ -147,7 +147,7 @@ public class SubscriptionBillingWorker implements Runnable {
 				
 				try {
 					
-					final Billable billable = SubscriptionRenewal.getBillable();
+					Billable billable = SubscriptionRenewal.getBillable();
 					
 					try{
 						
@@ -230,7 +230,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										}
 										
 									}
-									cmp_ejb.saveOrUpdate(billable);
+									
 									
 								}else if(RESP_CODE == 400){
 									this.success  = false;
@@ -305,6 +305,8 @@ public class SubscriptionBillingWorker implements Runnable {
 								}
 							}
 							
+							billable = cmp_ejb.saveOrUpdate(billable);
+							
 							setBusy(false);
 							
 					}catch(Exception exp){
@@ -318,7 +320,6 @@ public class SubscriptionBillingWorker implements Runnable {
 				}catch (Exception e){
 					log(e);
 				}finally{
-					
 				}
 				
 				
