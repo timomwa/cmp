@@ -91,6 +91,7 @@ select count(*) from subscription where subscription_status='confirmed' and date
 
 select cl.timeStamp, concat(sp.msisdn,' > ', dp.msisdn ,': ', cl.message) from dating_chatlog cl left join dating_person sp on sp.id=cl.source_person_id LEFT JOIN dating_person dp ON dp.id=cl.dest_person_id where date(timeStamp)>=date(now()) order by timeStamp asc limit 1000;
 
+select success,processed,in_outgoing_queue,count(*) c, price, count(*)*price as 'revenue' from billable_queue where date(timeStamp)=curdate() group by success,in_outgoing_queue,processed;
 
 /*add these when testing 14th April*/
 INSERT INTO `pixeland_content360`.`sms_service` (`mo_processorFK`, `cmd`, `push_unique`, `service_name`, `service_description`, `price`, `price_point_keyword`, `CMP_Keyword`, `CMP_SKeyword`, `enabled`, `split_mt`) VALUES (14, 'BUNDLES', 1, 'Chat bundles', 'Chat bundles', 0, '32329_MAPENZI', 'IOD', 'IOD0000', 1, 0);

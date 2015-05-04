@@ -96,6 +96,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			subscription.setRenewal_count(0L);
 			subscription.setQueue_status(0L);
 			subscription.setRequest_medium(medium);
+			subscription.setSubscription_status(SubscriptionStatus.confirmed);
 			subscription = em.merge(subscription);
 			utx.commit();
 		}catch(Exception e){
