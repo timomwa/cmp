@@ -295,6 +295,10 @@ public class SubscriptionBillingWorker implements Runnable {
 								
 								logger.debug("DONE! ");
 								
+								billable = cmp_ejb.saveOrUpdate(billable);
+								
+								setBusy(false);
+								
 							}else{
 								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
 									Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
@@ -305,9 +309,7 @@ public class SubscriptionBillingWorker implements Runnable {
 								}
 							}
 							
-							billable = cmp_ejb.saveOrUpdate(billable);
 							
-							setBusy(false);
 							
 					}catch(Exception exp){
 						
