@@ -2153,7 +2153,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@SuppressWarnings("unchecked")
 	public List<Billable> getBillable(int limit) throws Exception{
 		try{
-			Query qry =  em.createQuery("from Billable where in_outgoing_queue=0 AND (retry_count<maxRetriesAllowed) AND resp_status_code is null AND price>0 AND  processed=0 order by priority asc");
+			Query qry =  em.createQuery("from Billable where in_outgoing_queue=0 AND (retry_count<maxRetriesAllowed) AND resp_status_code is null AND price>0 AND  processed=0 and success=0 order by timeStamp desc,priority asc");
 			qry.setFirstResult(0);
 			qry.setMaxResults(limit);
 			return qry.getResultList();
