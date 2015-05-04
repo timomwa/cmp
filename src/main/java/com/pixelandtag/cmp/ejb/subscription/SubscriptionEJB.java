@@ -65,7 +65,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				utx.commit();
 			}else{
 				utx.begin();
-				subsc = subscribe(msisdn,service_id);
+				subsc = subscribe(msisdn,service_id,MediumType.ussd);
 				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
 				subsc = em.merge(subsc);
 				utx.commit();
@@ -84,7 +84,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
-	public Subscription subscribe(String msisdn, Long service_id) {
+	public Subscription subscribe(String msisdn, Long service_id,MediumType medium) {
 		Subscription subscription = null;
 		try{
 			utx.begin();
@@ -95,6 +95,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			subscription.setSmsmenu_levels_id_fk(-1);
 			subscription.setRenewal_count(0L);
 			subscription.setQueue_status(0L);
+			subscription.setRequest_medium(medium);
 			subscription = em.merge(subscription);
 			utx.commit();
 		}catch(Exception e){
@@ -156,7 +157,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		try{
 			Subscription sub = getSubscription(msisdn, sms_service_id);
 			if(sub!=null)
-				sub = subscribe(msisdn, sms_service_id);
+				sub = subscribe(msisdn, sms_service_id,MediumType.ussd);
 				updateQueueStatus(status,sub.getId());
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);

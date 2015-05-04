@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public interface SubscriptionBeanI {
@@ -88,6 +89,6 @@ public interface SubscriptionBeanI {
 	 * @param service_id
 	 * @return
 	 */
-	public Subscription subscribe(String msisdn, Long service_id) ;
+	public Subscription subscribe(String msisdn, Long service_id, MediumType medium) ;
 
 }
