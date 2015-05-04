@@ -35,7 +35,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private String name;
 	private int mandatory_throttle;
 	private boolean busy = false;
-	private volatile boolean success = true;
+	//private volatile boolean success = true;
 	private volatile String message = "";
 	private Alarm alarm = new Alarm();
 	private GenericHTTPClient genericHttpClient;
@@ -201,25 +201,30 @@ public class SubscriptionBillingWorker implements Runnable {
 									}
 									
 									billable.setRetry_count(billable.getRetry_count()+1);
-									this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
-									billable.setSuccess(this.success );
+									final Boolean success  = Boolean.valueOf(resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS"));
+									billable.setSuccess(Boolean.TRUE);
 									
 									
-									if(!this.success){
+									if(success.booleanValue()==false){
 										String err = getErrorCode(resp);
 										String errMsg = getErrorMessage(resp);
 										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
 										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
 										logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-										billable.setSuccess(false);
+										//billable.setSuccess(false);
 										billable.setResp_status_code(errMsg);
 										
 										
 									}else{
+										
+										String transactionId = getTransactionId(resp);
+										billable.setTransactionId(transactionId);
 										billable.setResp_status_code("Success");
+										
+										
 										logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 										logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-										billable.setSuccess(true);
+										billable.setSuccess(Boolean.TRUE);
 										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
 										subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
 										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
@@ -229,31 +234,28 @@ public class SubscriptionBillingWorker implements Runnable {
 											SubscriptionRenewal.setEnable_biller_random_throttling(false);
 										}
 										
+										cmp_ejb.createSuccesBillRec(billable);
+										
 									}
 									
 									
 								}else if(RESP_CODE == 400){
-									this.success  = false;
+									
 								}else if(RESP_CODE == 401){
-									this.success  = false;
 									logger.error("\n::::::::::::::::: Unauthorized! :::::::::::::::");
 									
 								}else if(RESP_CODE == 404 || RESP_CODE == 403){
 									
-									this.success  = false;
 									
 								}else if(RESP_CODE == 503){
 			
-									this.success  = false;
 									
 								}else if(RESP_CODE==0){
-									this.success = false;
 									logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
-									subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+									subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 								
 								}else{
 									
-									this.success  = false;
 								
 								}
 								
@@ -264,26 +266,26 @@ public class SubscriptionBillingWorker implements Runnable {
 									billable.setProcessed(1L);
 									billable.setIn_outgoing_queue(0L);
 									
-									if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+									if(billable.isSuccess() ||  "Success".equalsIgnoreCase(billable.getResp_status_code()) ){
 										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
 										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
 										billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
 									}
-									if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
+									if("TWSS_101".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_114".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_101".equalsIgnoreCase(billable.getResp_status_code())){
 										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
 										billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
 									}
-									if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
+									if("OL402".equalsIgnoreCase(billable.getResp_status_code()) || "OL404".equalsIgnoreCase(billable.getResp_status_code()) || "OL405".equalsIgnoreCase(billable.getResp_status_code())  || "OL406".equalsIgnoreCase(billable.getResp_status_code())){
 										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
 										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
 										billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 									}
 									
-									if("TWSS_109".equals(billable.getResp_status_code())){
+									if("TWSS_109".equalsIgnoreCase(billable.getResp_status_code())){
 										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
 										billable.setIn_outgoing_queue(0L);
-										billable.setProcessed(0L);
+										billable.setProcessed(1L);
 										billable.setRetry_count( (billable.getRetry_count()+1 ) );
 										billable.setMaxRetriesAllowed(5L);
 										billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
@@ -364,6 +366,11 @@ public class SubscriptionBillingWorker implements Runnable {
 		
 	}
 		
+	private String getTransactionId(String resp) {
+		int start = resp.indexOf("<transactionId>")+"<transactionId>".length();
+		int end  = resp.indexOf("</transactionId>");
+		return resp.substring(start, end);
+	}
 	private  String getErrorMessage(String resp) {
 		int start = resp.indexOf("<errorMessage>")+"<errorMessage>".length();
 		int end  = resp.indexOf("</errorMessage>");

@@ -17,6 +17,7 @@ import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
@@ -184,6 +185,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	 */
 	public boolean markInQueue(Long http_to_send_id) throws Exception;
 
+	
 	
 	
 

@@ -61,6 +61,7 @@ import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 
@@ -94,6 +95,34 @@ public class BaseEntityBean implements BaseEntityI {
             return true;
         }
     };
+    
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Override
+    public void createSuccesBillRec(Billable billable){
+    	try{
+    		utx.begin();
+    		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
+    		successfulBill.setCp_tx_id(billable.getCp_tx_id());
+    		successfulBill.setKeyword(billable.getKeyword());
+    		successfulBill.setMsisdn(billable.getMsisdn());
+    		successfulBill.setOperation(billable.getOperation());
+    		successfulBill.setPrice(billable.getPrice());
+    		successfulBill.setPricePointKeyword(billable.getPricePointKeyword());
+    		successfulBill.setResp_status_code(billable.getResp_status_code());
+    		successfulBill.setShortcode(billable.getShortcode());
+    		successfulBill.setSuccess(billable.getSuccess());
+    		successfulBill.setTimeStamp(billable.getTimeStamp());
+    		successfulBill.setTransactionId(billable.getTransactionId());
+    		successfulBill = em.merge(successfulBill);
+    		utx.commit();
+    	}catch(Exception exp){
+			try{
+				utx.rollback();
+			}catch(Exception e){}
+			logger.error(exp.getMessage(),exp);
+		}
+    }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void  mimicMO(String keyword, String msisdn){
@@ -564,13 +593,15 @@ public class BaseEntityBean implements BaseEntityI {
 					}
 					
 				}else{
-					
+					String transactionId = getTransactionId(resp);
+					billable.setTransactionId(transactionId);
 					billable.setResp_status_code("Success");
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
-						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
-					}
+					
+					subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
+					cmp_ejb.createSuccesBillRec(billable);
+					
 					
 					
 				}
@@ -1057,6 +1088,11 @@ public class BaseEntityBean implements BaseEntityI {
 	private String getErrorCode(String resp) {
 		int start = resp.indexOf("<errorCode>")+"<errorCode>".length();
 		int end  = resp.indexOf("</errorCode>");
+		return resp.substring(start, end);
+	}
+	private String getTransactionId(String resp) {
+		int start = resp.indexOf("<transactionId>")+"<transactionId>".length();
+		int end  = resp.indexOf("</transactionId>");
 		return resp.substring(start, end);
 	}
 	

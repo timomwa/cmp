@@ -93,12 +93,18 @@ public class Test1 {
 	        return "th";
 	    }
 	}
+	
+	public static String getTransactionId(String resp) {
+		int start = resp.indexOf("<transactionId>")+"<transactionId>".length();
+		int end  = resp.indexOf("</transactionId>");
+		return resp.substring(start, end);
+	}
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		
+		System.out.println(getTransactionId("<transactionId>twss_5158b3586aaf085</transactionId><asdfasdf> asdfasfs"));
 		
 		if(true)
 			return;

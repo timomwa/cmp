@@ -263,7 +263,8 @@ public class SubscriptionRenewal extends  Thread {
 		for (Subscription sub : subsl) {
 			
 			sub.setQueue_status(1L);
-			subscriptio_nejb.updateQueueStatus(1L,sub.getId());
+			sub = cmpbean.saveOrUpdate(sub);
+			//subscriptio_nejb.updateQueueStatus(1L,sub.getId());
 		
 			logger.info(" sub "+sub);
 			Long sms_service_id = sub.getSms_service_id_fk();
@@ -292,15 +293,13 @@ public class SubscriptionRenewal extends  Thread {
 					}
 				}
 
-				BigInteger transaction_id = BigInteger.valueOf(cmpbean
-						.generateNextTxId());
 				
 				
-				logger.info("\t\t\n\n\n:::::::TXID::::::transaction_id:"+transaction_id+"\n\n\n");
+				//logger.info("\t\t\n\n\n:::::::TXID::::::transaction_id:"+transaction_id+"\n\n\n");
 
 				Billable billable = new Billable();
 				billable.setCp_id("CONTENT360_KE");
-				billable.setCp_tx_id(transaction_id);
+				billable.setCp_tx_id(BigInteger.valueOf(cmpbean.generateNextTxId()));
 				billable.setDiscount_applied("0");
 				billable.setIn_outgoing_queue(0l);
 				billable.setKeyword(service.getCmd());
@@ -313,14 +312,14 @@ public class SubscriptionRenewal extends  Thread {
 				billable.setPrice(BigDecimal.valueOf(service.getPrice()));
 				billable.setPriority(0l);
 				billable.setProcessed(0L);
-				billable.setRetry_count(0L);
+				billable.setRetry_count(1L);
 				billable.setShortcode(processor.getShortcode());
 				billable.setEvent_type((EventType.get(service.getEvent_type()) != null ? EventType
 						.get(service.getEvent_type())
 						: EventType.SUBSCRIPTION_PURCHASE));
 				billable.setPricePointKeyword(service.getPrice_point_keyword());
-				billable.setSuccess(false);
-				logger.debug(" before queue transaction_id" + transaction_id);
+				billable.setSuccess(Boolean.FALSE);
+				logger.debug(" before queue transaction_id" + billable.getCp_tx_id());
 
 				logger.info("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
 				
@@ -345,7 +344,7 @@ public class SubscriptionRenewal extends  Thread {
 						// method, which can fail
 						// to insert an element only by throwing an exception.
 						billable.setIn_outgoing_queue(1L);
-						billable = cmpbean.saveOrUpdate(billable);
+						//billable = cmpbean.saveOrUpdate(billable);
 						billableQ.offerLast(billable);
 
 						//cmpbean.saveOrUpdate(billable);
@@ -371,7 +370,7 @@ public class SubscriptionRenewal extends  Thread {
 					try {
 
 						billable.setIn_outgoing_queue(1L);
-						billable = cmpbean.saveOrUpdate(billable);
+						//billable = cmpbean.saveOrUpdate(billable);
 						billableQ.putLast(billable);// if we've got a limit to
 													// the queue
 

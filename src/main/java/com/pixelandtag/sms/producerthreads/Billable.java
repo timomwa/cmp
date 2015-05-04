@@ -144,6 +144,8 @@ public class Billable implements Serializable {
 	private Long processed;
 	
 	
+	@Column(name = "transactionId")
+	private String transactionId;
 	
 	
 	public String getPricePointKeyword() throws PricePointException {
@@ -320,13 +322,13 @@ public class Billable implements Serializable {
 	
 	
 
-	public boolean isSuccess() {
+	public Boolean isSuccess() {
 		if(success==null)
 			return new Boolean(false);
 		return success;
 	}
 
-	public void setSuccess(boolean success) {
+	public void setSuccess(Boolean success) {
 		this.success = success;
 	}
 
@@ -360,6 +362,26 @@ public class Billable implements Serializable {
 				+ event_type + ", service_id=" + service_id
 				+ ", discount_applied=" + discount_applied + ", cp_tx_id="
 				+ cp_tx_id + ", tx_id=" + tx_id + "]";
+	}
+
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	public Boolean getSuccess() {
+		return success;
+	}
+
+	public Long getProcessed() {
+		return processed;
+	}
+
+	public void setMessage_id(Long message_id) {
+		this.message_id = message_id;
 	}
 	
 	

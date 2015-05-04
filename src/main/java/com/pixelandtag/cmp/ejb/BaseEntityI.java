@@ -12,6 +12,7 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 
 public interface BaseEntityI {
 	public static final String EXPIRY_DATE_TAG = "<EXPIRY_DATE>";
@@ -41,6 +42,7 @@ public interface BaseEntityI {
 	public boolean sendMT(MOSms mo) throws Exception;
 	public long generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
+	public void createSuccesBillRec(Billable billable);
 
 
 }

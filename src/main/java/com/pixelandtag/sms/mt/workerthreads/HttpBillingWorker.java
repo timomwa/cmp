@@ -43,6 +43,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 
 public class HttpBillingWorker implements Runnable {
 	
@@ -61,7 +62,7 @@ public class HttpBillingWorker implements Runnable {
 	private String name;
 	private boolean busy = false;
 	private List<NameValuePair> qparams = null;
-	private volatile boolean success = true;
+	//private volatile boolean success = true;
 	private volatile String message = "";
 	private volatile int sms_idx = 0;
 	private HttpPost httsppost = null;
@@ -206,7 +207,8 @@ public class HttpBillingWorker implements Runnable {
 			while(run){
 				
 				try {
-					final Billable billable = BillingService.getBillable();
+					
+					Billable billable = BillingService.getBillable();
 					
 					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 					
@@ -297,7 +299,7 @@ public class HttpBillingWorker implements Runnable {
 	 */
 	@SuppressWarnings("restriction")
 	private void charge(Billable  billable){
-		this.success  = true;
+		//this.success  = true;
 		
 		setBusy(true);
 		
@@ -342,16 +344,15 @@ public class HttpBillingWorker implements Runnable {
 			
 			
 			billable.setProcessed(1L);
-			
 			if (RESP_CODE == HttpStatus.SC_OK) {
 				
 				
 				billable.setRetry_count(billable.getRetry_count()+1);
 				
-				this.success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
-				billable.setSuccess(this.success );
+				Boolean success = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
+				billable.setSuccess(success );
 				
-				if(!this.success){
+				if(!success.booleanValue()){
 					
 					String err = getErrorCode(resp);
 					String errMsg = getErrorMessage(resp);
@@ -360,8 +361,10 @@ public class HttpBillingWorker implements Runnable {
 					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
 				}else{
-					
+					String transactionId = getTransactionId(resp);
+					billable.setTransactionId(transactionId);
 					billable.setResp_status_code("Success");
+					cmp_ejb.createSuccesBillRec(billable);
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
@@ -372,31 +375,31 @@ public class HttpBillingWorker implements Runnable {
 								
 			}else if(RESP_CODE == 400){
 				
-				this.success  = false;
+				//this.success  = false;
 				
 			}else if(RESP_CODE == 401){
-				this.success  = false;
+				//this.success  = false;
 				
 				logger.error("\nUnauthorized!");
 				
 			}else if(RESP_CODE == 404 || RESP_CODE == 403){
 				
-				this.success  = false;
+				//this.success  = false;
 				
 			}else if(RESP_CODE == 503){
 
-				this.success  = false;
+				//this.success  = false;
 				
 			}else{
 				
-				this.success = false;
+				//this.success = false;
 				
 			}
 			
 					
 			}catch(ConnectException ce){
 				
-				this.success  = false;
+				//this.success  = false;
 				
 				message = ce.getMessage();
 				
@@ -406,7 +409,7 @@ public class HttpBillingWorker implements Runnable {
 				
 			}catch(SocketTimeoutException se){
 				
-				this.success  = false;
+				//this.success  = false;
 				
 				message = se.getMessage();
 				
@@ -416,7 +419,7 @@ public class HttpBillingWorker implements Runnable {
 				
 			} catch (IOException ioe) {
 				
-				this.success  = false;
+				//this.success  = false;
 				
 				message = ioe.getMessage();
 				
@@ -426,7 +429,7 @@ public class HttpBillingWorker implements Runnable {
 				
 			} catch (Exception ioe) {
 				
-				this.success  = false;
+				//this.success  = false;
 				
 				message = ioe.getMessage();
 				
@@ -491,7 +494,7 @@ public class HttpBillingWorker implements Runnable {
 					
 					cmp_ejb.saveOrUpdate(billable);
 					
-					if(!this.success){//return back to queue if we did not succeed
+					if(billable.isSuccess()){//return back to queue if we did not succeed
 						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
 						//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 						
@@ -529,6 +532,11 @@ public class HttpBillingWorker implements Runnable {
 	private String getErrorCode(String resp) {
 		int start = resp.indexOf("<errorCode>")+"<errorCode>".length();
 		int end  = resp.indexOf("</errorCode>");
+		return resp.substring(start, end);
+	}
+	private String getTransactionId(String resp) {
+		int start = resp.indexOf("<transactionId>")+"<transactionId>".length();
+		int end  = resp.indexOf("</transactionId>");
 		return resp.substring(start, end);
 	}
 
