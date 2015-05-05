@@ -38,6 +38,7 @@ import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
+import com.pixelandtag.dating.entities.Location;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileAttribute;
@@ -202,7 +203,19 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				StringBuffer sb = new StringBuffer();
 				BigInteger age = calculateAgeFromDob(match.getDob());  
 				sb.append("\n").append("Age: ").append(age.toString()).append("\n");
-				sb.append("Location : ").append(match.getLocation()).append("\n");
+				String locationName = match.getLocation();
+				if(locationName==null || locationName.trim().isEmpty()){
+					ProfileLocation pl = location_ejb.findProfileLocation(match);
+					if(pl!=null && pl.getLocation()!=null){
+						locationName = pl.getLocation().getLocationName();
+						if(locationName==null || locationName.trim().isEmpty()){
+							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+							if(loc!=null)
+								locationName = loc.getLocationName();
+						}
+					}
+				}
+				sb.append("Location : ").append(locationName).append("\n");
 				sb.append("Gender : ").append(match.getGender()).append("\n");
 				String msg = getMessage(DatingMessages.MATCH_FOUND, language_id);
 				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
@@ -716,6 +729,11 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			ProfileLocation profileLocation  = location_ejb.findProfileLocation(profile);
 			
 			if(profileLocation!=null && profileLocation.getProfile()!=null){
+				
+				CellIdRanges cellidRanges = location_ejb.getCellIdRangesByLocationId(profileLocation.getLocation().getLocation_id());
+				
+				Long min_cell_id = cellidRanges!=null?cellidRanges.getMin_cell_id() : 0;
+				Long max_cell_id = cellidRanges!=null?cellidRanges.getMax_cell_id() : 0;
 			
 				//Date dob = calculateDobFromAge(profile.getPreferred_age());
 				
@@ -732,9 +750,15 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 											+ "    AND "
 											+ "        (  pl.location.location_id=:location_id "
 											+ "				OR "
-											+ "				   lower(pl.location.locationName)=lower(:locationName)  "
+											+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
 											+ "				OR  "
 											+ "					pl.location.cellid=:cellid"
+											+(max_cell_id.longValue()>0 ? (  
+											 "				OR  "
+											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
+													) : "")
+											+ "				OR "
+											+ "				   lower(pl.location.locationName) like lower(:locationName)  "
 											+ "		   ) "
 											+ "   )  AND "
 											+ "    (   pl.profile.person.id "
@@ -754,6 +778,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				
 				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
 				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-10));
+				qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+10));
+				if(max_cell_id.longValue()>0){
+					qry.setParameter("min_cell_id", min_cell_id);
+					qry.setParameter("max_cell_id", max_cell_id);
+				} 
 				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
 				qry.setParameter("prefGender", profile.getPreferred_gender());
 				qry.setParameter("person_a_id",profile.getPerson().getId());
@@ -762,6 +792,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				ProfileLocation pl = (ProfileLocation) qry.getSingleResult();
 				
 				persondatingProfile = pl.getProfile();
+				logger.info("REAL_LOCATION_SEARCH SUCCESS YAY!! we found tweo people in "+profileLocation.getLocation().getLocationName());
 			
 			}
 		

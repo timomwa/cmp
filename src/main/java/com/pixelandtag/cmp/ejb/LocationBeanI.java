@@ -61,5 +61,20 @@ public interface LocationBeanI extends BaseEntityI {
 	 */
 	public void updateSubscriberLocation(RequestObject ro);
 	
+	/**
+	 * Gets the cell id ranges for a given location id.
+	 * @param location_id
+	 * @return
+	 * @throws Exception
+	 */
+	public CellIdRanges getCellIdRangesByLocationId(Long location_id) throws Exception;
+	
+	/**
+	 * 
+	 * @param locationId
+	 * @return
+	 */
+	public Location getLastKnownLocationWithNameUsingLac(Long locationId) ;
+	
 }
 

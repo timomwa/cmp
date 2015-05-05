@@ -25,9 +25,11 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
+import com.pixelandtag.dating.entities.Location;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileAttribute;
+import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
@@ -158,7 +160,19 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					StringBuffer sb = new StringBuffer();
 					BigInteger age = datingBean.calculateAgeFromDob(match.getDob());  
 					sb.append("\n").append("Age: ").append(age.toString()).append("\n");
-					sb.append("Location : ").append(match.getLocation()).append("\n");
+					String locationName = match.getLocation();
+					if(locationName==null || locationName.trim().isEmpty()){
+						ProfileLocation pl = location_ejb.findProfileLocation(match);
+						if(pl!=null && pl.getLocation()!=null){
+							locationName = pl.getLocation().getLocationName();
+							if(locationName==null || locationName.trim().isEmpty()){
+								Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+								if(loc!=null)
+									locationName = loc.getLocationName();
+							}
+						}
+					}
+					sb.append("Location : ").append(locationName).append("\n");
 					sb.append("Gender : ").append(match.getGender()).append("\n");
 					String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id);
 					msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
@@ -561,7 +575,19 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						StringBuffer sb = new StringBuffer();
 						BigInteger age = datingBean.calculateAgeFromDob(match.getDob()); 
 						sb.append("\n").append("Age: ").append(age).append("\n");
-						sb.append("Location : ").append(match.getLocation()).append("\n");
+						String locationName = match.getLocation();
+						if(locationName==null || locationName.trim().isEmpty()){
+							ProfileLocation pl = location_ejb.findProfileLocation(match);
+							if(pl!=null && pl.getLocation()!=null){
+								locationName = pl.getLocation().getLocationName();
+								if(locationName==null || locationName.trim().isEmpty()){
+									Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+									if(loc!=null)
+										locationName = loc.getLocationName();
+								}
+							}
+						}
+						sb.append("Location : ").append(locationName).append("\n");
 						sb.append("Gender : ").append(match.getGender()).append("\n");
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
 						msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);

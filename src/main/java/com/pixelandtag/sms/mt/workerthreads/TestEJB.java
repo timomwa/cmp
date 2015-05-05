@@ -56,8 +56,8 @@ public class TestEJB {
 		 System.out.println(new_york);
 		 
 		 //com.pixelandtag.cmp.ejb.CMPResourceBean.getMenuByParentLevelId(int, int, int)
-		 /*
-		 Person person = datingBean.find(Person.class, 1560L);
+		 
+		 Person person = datingBean.find(Person.class, 324058L);
 		 System.out.println(person);
 		 PersonDatingProfile thisPerson = datingBean.getProfile(person);
 		 
@@ -103,7 +103,9 @@ public class TestEJB {
 				System.out.println(x +". match.getPerson().getId(): "+match.getPerson().getId()+" MAtch: "+match.getId()+" username: "+match.getUsername());
 				try{
 					System.out.println("PERSON A: "+person.getId());
+					System.out.println("PERSON A LOCATION: "+profile.getLocation());
 					System.out.println("PERSON B: "+match.getPerson().getId());
+					System.out.println("PERSON B LOCATION: "+match.getLocation());
 					SystemMatchLog sysmatchlog = new SystemMatchLog();
 					sysmatchlog.setPerson_a_id(person.getId());
 					sysmatchlog.setPerson_b_id(match.getPerson().getId());
@@ -115,7 +117,7 @@ public class TestEJB {
 			}else{
 				System.out.println("MAtch: "+match);
 			}
-			*/
+			
 			
 		 context.close();
 		 

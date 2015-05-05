@@ -59,6 +59,54 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 		super();
 	}
 	
+	public CellIdRanges getCellIdRangesByLocationId(Long location_id) throws Exception{
+		
+		CellIdRanges cellRanges = null;
+		
+		try{
+			Query query = null;
+			
+			try{
+				query = em.createQuery("from CellIdRanges r WHERE r.location_id=:location_id ");
+				query.setFirstResult(0);
+				query.setMaxResults(1);
+				query.setParameter("location_id", location_id);
+				cellRanges = (CellIdRanges) query.getSingleResult();
+			}catch(javax.persistence.NoResultException ex){
+				logger.warn(ex.getMessage());
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+			}
+			
+			if(cellRanges==null){
+				query = em.createQuery("SELECT coalesce(max(loc.cellid),0), coalesce(min(loc.cellid),0) from Location loc WHERE loc.location_id=:location_id ");
+				query.setFirstResult(0);
+				query.setMaxResults(1);
+				query.setParameter("location_id", location_id);
+				Object[] o =  (Object[]) query.getSingleResult();
+				
+				Long max_cell_id = (Long) o[0];
+				Long min_cell_id = (Long) o[1];
+				logger.info("MAX_CELL_ID :"+max_cell_id.intValue()+", MIN_CELL_ID : "+min_cell_id.intValue()+", LOCATION ID? "+location_id);
+				if(max_cell_id!=null){
+					cellRanges = new CellIdRanges();
+					cellRanges.setMax_cell_id(max_cell_id);
+					cellRanges.setMin_cell_id(min_cell_id);
+					cellRanges.setLocation_id(location_id);
+					cellRanges = saveOrUpdate(cellRanges);
+				}
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage());
+		}catch(Exception exp){
+			logger.error(exp.getMessage());
+			throw new Exception("Problem finding location",exp);
+		}
+		
+		return cellRanges;
+	}
+	
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#createLocation(java.lang.Long, java.lang.Long, java.lang.String, com.pixelandtag.dating.entities.PersonDatingProfile)
@@ -72,7 +120,13 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			location = new Location();
 			location.setCellid(cellid);
 			location.setLocation_id(locationId);
-			location.setLocationName(locationName);
+			if(locationName==null || locationName.trim().isEmpty()){
+				Location interimLoc = getLastKnownLocationWithNameUsingLac(locationId);
+				if(interimLoc!=null)
+					location.setLocationName(interimLoc.getLocationName());
+			}else{
+				location.setLocationName(locationName);
+			}
 			location = saveOrUpdate(location);
 		}
 		
@@ -85,6 +139,30 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			profLoc = saveOrUpdate(profLoc);
 		}
 		return profLoc;
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#getLastKnownLocationWithNameUsingLac(java.lang.Long)
+	 */
+	public Location getLastKnownLocationWithNameUsingLac(Long locationId) {
+		
+		Location location = null;
+		
+		try{
+			Query query = em.createQuery("from Location l WHERE l.locationName is not null AND l.locationName <> '' AND l.location_id=:location_id order by l.timeStamp desc");
+			query.setFirstResult(0);
+			query.setMaxResults(1);
+			query.setParameter("location_id", locationId);
+			location = (Location) query.getSingleResult();
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage());
+		}catch(Exception exp){
+			logger.error(exp.getMessage());
+		}
+		
+		return location;
 	}
 
 	/* (non-Javadoc)
