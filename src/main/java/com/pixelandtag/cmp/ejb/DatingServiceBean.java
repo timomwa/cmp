@@ -270,7 +270,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 						resp = "Ok. Bye";
 						return resp;
 					}else{
-						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id) + GenericServiceProcessor.SPACE +previousQuestion.getQuestion() ;
+						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id) + GenericServiceProcessor.SPACE +"Proceed?\n1. No\n2. Yes" ;
 						return resp;
 					}
 						
@@ -517,7 +517,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 			//throw new DatingServiceException("Something went Wrong. Kindly try again.",exp);
-			resp = "Request received, but something went wrong in that we couldn't process your request. Kindly try again later";
+			resp = "Could not process request. Kindly try again later";
 			
 		}
 		
