@@ -591,6 +591,12 @@ public class BaseEntityBean implements BaseEntityI {
 					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
 					}
+					try{
+						String transactionId = getTransactionId(resp);
+						billable.setTransactionId(transactionId);
+					}catch(Exception exp){
+						logger.warn("No transaction id found");
+					}
 					
 				}else{
 					String transactionId = getTransactionId(resp);

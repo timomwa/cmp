@@ -210,6 +210,13 @@ public class SubscriptionBillingWorker implements Runnable {
 										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
 										logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 										//billable.setSuccess(false);
+										try{
+											String transactionId = getTransactionId(resp);
+											billable.setTransactionId(transactionId);
+										}catch(Exception exp){
+											logger.warn("No transaction id found");
+										}
+										
 										billable.setResp_status_code(errMsg);
 										
 										
