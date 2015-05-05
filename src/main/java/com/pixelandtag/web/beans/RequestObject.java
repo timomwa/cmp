@@ -183,7 +183,7 @@ public class RequestObject implements Serializable{
 		
 	}
 
-	public RequestObject(HttpServletRequest request, Long nextTransactionid) throws Exception {
+	public RequestObject(HttpServletRequest request, Long nextTransactionid, boolean replace_illegal_xters) throws Exception {
 		
 		String telcoid, msisdn, msg, keyword,testBalance,tripWire = null, litmus = null;
 		int price,serviceid=-1;
@@ -265,6 +265,7 @@ public class RequestObject implements Serializable{
 				//msg = msg.toUpperCase();
 			}
 			
+			if(replace_illegal_xters)
 			if(keyword!=null){
 				keyword = keyword.trim();
 				

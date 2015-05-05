@@ -112,7 +112,7 @@ public class USSDReceiver extends HttpServlet {
 		
 		try{
 			Long tx_id = cmpBean.generateNextTxId();
-			final RequestObject ro = new RequestObject(req,tx_id);
+			final RequestObject ro = new RequestObject(req,tx_id,false);
 			
 			ro.setMediumType(MediumType.ussd);
 			

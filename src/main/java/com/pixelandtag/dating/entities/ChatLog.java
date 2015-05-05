@@ -45,10 +45,15 @@ public class ChatLog implements Serializable {
 	@Index(name="chltsmpidx")
 	private Date timeStamp;
 	
+	@Column(name = "offline_msg")
+	private Boolean offline_msg;
+	
 	@PrePersist
 	public void onCreate(){
 		if(timeStamp==null)
 			timeStamp = new Date();
+		if(offline_msg==null)
+			offline_msg = Boolean.FALSE;
 	}
 	
 	
@@ -91,6 +96,20 @@ public class ChatLog implements Serializable {
 
 	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
+	}
+
+
+
+	public Boolean getOffline_msg() {
+		if(offline_msg==null)
+			setOffline_msg(Boolean.FALSE);
+		return offline_msg;
+	}
+
+
+
+	public void setOffline_msg(Boolean offline_msg) {
+		this.offline_msg = offline_msg;
 	}
 	
 	

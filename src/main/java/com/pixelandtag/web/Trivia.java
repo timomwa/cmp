@@ -152,7 +152,7 @@ public class Trivia extends HttpServlet {
 		
 		try {
 			
-			final RequestObject ro = new RequestObject(request,cmpresource.generateNextTxId());
+			final RequestObject ro = new RequestObject(request,cmpresource.generateNextTxId(),true);
 			final String MSISDN = ro.getMsisdn();
 			final String MSG = ro.getMsg();
 			final String KEYWORD  = ro.getKeyword();

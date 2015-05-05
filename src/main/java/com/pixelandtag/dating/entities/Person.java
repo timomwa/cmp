@@ -43,11 +43,17 @@ public class Person implements Serializable {
 	private Boolean agreed_to_tnc;
 	
 	
+	@Column(name="loggedin")
+	private Boolean loggedin;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
 		if(agreed_to_tnc==null)
-			agreed_to_tnc = new Boolean(false);
+			agreed_to_tnc = Boolean.FALSE;
+		if(loggedin==null)
+			loggedin = Boolean.TRUE;
 	}
 
 	public Long getId() {
@@ -82,6 +88,14 @@ public class Person implements Serializable {
 
 	public void setAgreed_to_tnc(Boolean agreed_to_tnc) {
 		this.agreed_to_tnc = agreed_to_tnc;
+	}
+
+	public Boolean getLoggedin() {
+		return loggedin;
+	}
+
+	public void setLoggedin(Boolean loggedin) {
+		this.loggedin = loggedin;
 	}
 	
 	

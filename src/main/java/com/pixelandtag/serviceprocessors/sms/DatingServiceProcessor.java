@@ -95,6 +95,22 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				String submenustring = cmp_bean.getSubMenuString(KEYWORD,language_id);
 				mo.setMt_Sent(submenustring+cmp_bean.getMessage(MAIN_MENU_ADVICE,language_id));//get all the sub menus there.
 			
+			}else if(KEYWORD.equalsIgnoreCase("LOGIN")){
+				
+				person.setLoggedin(Boolean.TRUE);
+				person = datingBean.saveOrUpdate(person);
+				mo.setPrice(BigDecimal.ZERO);
+				mo.setMt_Sent("Welcome back "+profile.getUsername()+"! People missed you while you were away. You'll now be able to receive messages sent by other people. Dial *329# to find a friend to chat with, or reply with FIND");
+				return mo;
+				
+			}else if(KEYWORD.equalsIgnoreCase("LOGOUT")){
+				
+				person.setLoggedin(Boolean.FALSE);
+				person = datingBean.saveOrUpdate(person);
+				mo.setPrice(BigDecimal.ZERO);
+				mo.setMt_Sent("You've successfully been logged out."+profile.getUsername()+". You will not be able to receive messages from the chat service. To log back in, reply with LOGIN");
+				return mo;
+				
 			}else if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
 				
 				if(person.getId()>0 && profile==null){//Success registering/registered but no profile
@@ -184,7 +200,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 				}else{
 					mo.setPrice(BigDecimal.ZERO);
-					mo.setMt_Sent("You already have a valid subscription. To find a match, reply with FIND");
+					mo.setMt_Sent("You already have a valid subscription. Dial *329# to find a friend to chat with, or reply with FIND");
 				}
 				
 			}else if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
@@ -589,37 +605,44 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			if(destination_person!=null && destination_person.getPerson().getActive()){
 				
+				
 				String source_user = profile.getUsername();
-				//System.out.println(source_user+ CHAT_USERNAME_SEPERATOR + MESSAGE.replaceAll(KEYWORD, "").trim());
 				ChatLog log = new ChatLog();
 				log.setSource_person_id(person.getId());
 				log.setDest_person_id(destination_person.getPerson().getId());
 				String chatLog = (allow_number_sharing ? MESSAGE : MESSAGE.replaceAll("\\d{3,10}", "*"));
 				log.setMessage(directMsg ? (destination_person.getUsername() +CHAT_USERNAME_SEPERATOR_DIRECT+ chatLog) : chatLog);
-				datingBean.saveOrUpdate(log);
-				
-			
-				MOSms chatMo  = mo.clone();
-				chatMo.setMsisdn(destination_person.getPerson().getMsisdn());
-				Gender gender = profile.getGender();
-				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
-				//chatMo.setSMS_Message_String(source_user+CHAT_USERNAME_SEPERATOR+MESSAGE);
-				String msg = "";
-				if(!directMsg){//if it's not a direct message, then put advice
-					msg = source_user+CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{3,10}", "*")) ;
-					msg += NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-";
-				}else{
-			        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{3,10}", "*")) ;
-				}
-				chatMo.setMt_Sent(msg);
-				chatMo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
-				chatMo.setPriority(0);//highest priority possible
-				chatMo.setPrice(BigDecimal.ZERO);
-				chatMo.setCMP_AKeyword(mo.getCMP_AKeyword());
-				chatMo.setCMP_SKeyword(mo.getCMP_SKeyword());
-				sendMT(chatMo);
 				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent("Message sent to '"+destination_person.getUsername()+"'");
+				
+				
+				if(destination_person.getPerson().getLoggedin()==null || destination_person.getPerson().getLoggedin()==true){
+					log.setOffline_msg(Boolean.FALSE);
+					log = datingBean.saveOrUpdate(log);
+					
+					MOSms chatMT  = mo.clone();
+					chatMT.setMsisdn(destination_person.getPerson().getMsisdn());
+					Gender gender = profile.getGender();
+					String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
+					String msg = "";
+					if(!directMsg){//if it's not a direct message, then put advice
+						msg = source_user+CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
+						msg += NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-";
+					}else{
+				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
+					}
+					chatMT.setMt_Sent(msg);
+					chatMT.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+					chatMT.setPriority(0);//highest priority possible
+					chatMT.setPrice(BigDecimal.ZERO);
+					chatMT.setCMP_AKeyword(mo.getCMP_AKeyword());
+					chatMT.setCMP_SKeyword(mo.getCMP_SKeyword());
+					sendMT(chatMT);
+					mo.setMt_Sent("Message sent to '"+destination_person.getUsername()+"'");
+				}else{
+					log.setOffline_msg(Boolean.TRUE);
+					mo.setPrice(BigDecimal.ZERO);
+					mo.setMt_Sent("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with them when they get back online.");
+				}
 				return mo;
 			}else if(destination_person!=null && !destination_person.getPerson().getActive()){
 				Gender gender  = destination_person.getGender();
