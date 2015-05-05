@@ -1,6 +1,10 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +47,10 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	private ServiceProcessorDTO serviceprocessor;
 	
 
-	public ContentProxyProcessor() throws NamingException {
+	public ContentProxyProcessor() throws NamingException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
-		httpclient = new GenericHTTPClient();
+		httpclient = new GenericHTTPClient("http");
 		watch = new StopWatch();
 	}
 

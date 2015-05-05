@@ -41,22 +41,14 @@ public class SubscriptionRenewal extends  Thread {
 	private SubscriptionBeanI subscriptio_nejb;
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
 	private Map<Long, MOProcessorE> mo_processorCache = new HashMap<Long, MOProcessorE>();
-	private volatile static BlockingDeque<Billable> billableQ = new LinkedBlockingDeque<Billable>();
+	private volatile static BlockingDeque<Billable> billables = new LinkedBlockingDeque<Billable>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
 	private int mandatory_throttle = 60112;
-	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 	private int queueSize = 1000;
 	private int workers = 1;
-	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-        @Override
-        public boolean isTrusted(X509Certificate[] certificate, String authType) {
-            return true;
-        }
-    };
 	private int billables_per_batch = 1000;
 	private Properties mtsenderprops;
-	private HttpClient httpsclient;
 	private int idleWorkers;
 	public static int max_throttle_billing = 60000;
 	private static boolean enable_biller_random_throttling=false;
@@ -71,9 +63,9 @@ public class SubscriptionRenewal extends  Thread {
 		initWorkers();
 		
 		if (this.workers <= 0)
-			billableQ = new LinkedBlockingDeque<Billable>();
+			billables = new LinkedBlockingDeque<Billable>();
 		else
-			billableQ = new LinkedBlockingDeque<Billable>(this.workers);
+			billables = new LinkedBlockingDeque<Billable>(this.workers);
 		
 		instance = this;
 	}
@@ -132,22 +124,10 @@ public class SubscriptionRenewal extends  Thread {
 
 		semaphore = new Semaphore(1, true);
 		
-		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
-				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("https", 8443, sf));
-		cm = new ThreadSafeClientConnManager(schemeRegistry,60,TimeUnit.MINUTES);
-		cm.setDefaultMaxPerRoute(workers);
-		cm.setMaxTotal(workers*2);// http connections that are equal to the
-									// worker threads.
-
-		httpsclient = new DefaultHttpClient(cm);
-
 		Thread t1;
 		for (int i = 0; i < this.workers; i++) {
 			SubscriptionBillingWorker worker;
-			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, httpsclient, cmpbean,subscriptio_nejb, mandatory_throttle); 
+			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, cmpbean,subscriptio_nejb, mandatory_throttle); 
 			t1 = new Thread(worker);
 			t1.start();
 			billingsubscriptionWorkers.add(worker);
@@ -178,13 +158,15 @@ public class SubscriptionRenewal extends  Thread {
 			semaphore.acquire();//now lock out everybody else!
 			
 			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
-			logger.info("SIZE OF QUEUE ? "+billableQ.size());
+			logger.info("SIZE OF QUEUE ? "+billables.size());
 			
-			 final Billable billable = billableQ.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final Billable billable = billables.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
+				
 				logger.info("billable.getId():  "+billable.getId());
+				billables.remove(billable);//try double remove from this queue
 			
 			 } catch (Exception e) {
 				
@@ -204,6 +186,7 @@ public class SubscriptionRenewal extends  Thread {
 			logger.error(e1.getMessage(),e1);			
 			return null;
 		}finally{
+			
 			semaphore.release(); // then give way to the next thread trying to access this method..
 		}
 	}
@@ -301,18 +284,17 @@ public class SubscriptionRenewal extends  Thread {
 				billable.setCp_id("CONTENT360_KE");
 				billable.setCp_tx_id(BigInteger.valueOf(cmpbean.generateNextTxId()));
 				billable.setDiscount_applied("0");
-				billable.setIn_outgoing_queue(0l);
 				billable.setKeyword(service.getCmd());
 				billable.setService_id(service.getId().toString());
-				billable.setMaxRetriesAllowed(1L);
+				billable.setMaxRetriesAllowed(0L);
 				billable.setMsisdn(sub.getMsisdn());
 				billable.setOperation(BigDecimal.valueOf(service.getPrice())
 						.compareTo(BigDecimal.ZERO) > 0 ? Operation.debit
 						.toString() : Operation.credit.toString());
 				billable.setPrice(BigDecimal.valueOf(service.getPrice()));
 				billable.setPriority(0l);
-				billable.setProcessed(0L);
-				billable.setRetry_count(1L);
+				billable.setProcessed(1L);
+				billable.setRetry_count(0L);
 				billable.setShortcode(processor.getShortcode());
 				billable.setEvent_type((EventType.get(service.getEvent_type()) != null ? EventType
 						.get(service.getEvent_type())
@@ -344,8 +326,8 @@ public class SubscriptionRenewal extends  Thread {
 						// method, which can fail
 						// to insert an element only by throwing an exception.
 						billable.setIn_outgoing_queue(1L);
-						//billable = cmpbean.saveOrUpdate(billable);
-						billableQ.offerLast(billable);
+						billable = cmpbean.saveOrUpdate(billable);
+						billables.offerLast(billable);
 
 						//cmpbean.saveOrUpdate(billable);
 						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
@@ -370,8 +352,8 @@ public class SubscriptionRenewal extends  Thread {
 					try {
 
 						billable.setIn_outgoing_queue(1L);
-						//billable = cmpbean.saveOrUpdate(billable);
-						billableQ.putLast(billable);// if we've got a limit to
+						billable = cmpbean.saveOrUpdate(billable);
+						billables.putLast(billable);// if we've got a limit to
 													// the queue
 
 						//cmpbean.saveOrUpdate(billable);
@@ -463,7 +445,7 @@ public class SubscriptionRenewal extends  Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				billableQ.addLast(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				billables.addLast(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
@@ -492,7 +474,7 @@ public class SubscriptionRenewal extends  Thread {
 		
 		logger.info("We're shutting down, we put back any unprocessed message to the db queue so that they're picked next time we run..");
 		//Now, if we have a big queue of unprocessed messages, we return them back to the db (or rather set the necessary flags
-		for(Billable sms : billableQ){
+		for(Billable sms : billables){
 			sms.setIn_outgoing_queue(0L);//and its now not in the queue
 			sms.setProcessed(0L);//nope, we're not processing it
 			logger.info("Returned to db: "+ sms.toString());
@@ -506,7 +488,7 @@ public class SubscriptionRenewal extends  Thread {
 		
 		
 		
-		billableQ.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
+		billables.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
 		logger.info("workers: "+workers);
 		logger.info("idleWorkers: "+idleWorkers);
 		
@@ -517,9 +499,9 @@ public class SubscriptionRenewal extends  Thread {
 
 	private void waitForQueueToBecomeEmpty() {
 		
-		while(billableQ.size()>0){
-			logger.info("BillableQueu.size() : "+billableQ.size());
-			logger.info("BillableQueu.size() : "+billableQ.size());
+		while(billables.size()>0){
+			logger.info("BillableQueu.size() : "+billables.size());
+			logger.info("BillableQueu.size() : "+billables.size());
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {

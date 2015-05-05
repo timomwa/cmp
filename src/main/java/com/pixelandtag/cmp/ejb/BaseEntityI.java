@@ -43,6 +43,7 @@ public interface BaseEntityI {
 	public long generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
 	public void createSuccesBillRec(Billable billable);
+	
 
 
 }

@@ -1883,27 +1883,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	private String database = "pixeland_content360";
 	
 	
-	
-	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public <T> T saveOrUpdate(T t) throws Exception{
-		try{
-			utx.begin();
-			t = em.merge(t);
-			utx.commit();
-		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error(e.getMessage(),e);
-			throw e;
-		}
-		return t;
-	}
-	
-	
 	@SuppressWarnings("unchecked")
 	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception  {
 		T t = null;

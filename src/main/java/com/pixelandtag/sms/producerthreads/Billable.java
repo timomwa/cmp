@@ -145,6 +145,7 @@ public class Billable implements Serializable {
 	
 	
 	@Column(name = "transactionId")
+	@Index(name="optxididx")
 	private String transactionId;
 	
 	

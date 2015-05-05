@@ -94,7 +94,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 	}
 
-	public SubscriptionBillingWorker(String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, int mandatory_throttle_) throws Exception{
+	public SubscriptionBillingWorker(String name_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, int mandatory_throttle_) throws Exception{
 		 
 		if(cmpbean_==null)
 			throw new Exception("CMP EJB is nulll");
@@ -111,7 +111,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		
 		watch.start();
 		
-		genericHttpClient = new GenericHTTPClient(httpclient_);
+		genericHttpClient = new GenericHTTPClient("https");
 		
   
 	}
@@ -141,13 +141,11 @@ public class SubscriptionBillingWorker implements Runnable {
 
 			while(run){
 				
-				
-				
-				
-				
 				try {
 					
 					Billable billable = SubscriptionRenewal.getBillable();
+					
+					//if such a billable exists
 					
 					try{
 						
@@ -284,10 +282,10 @@ public class SubscriptionBillingWorker implements Runnable {
 									
 									if("TWSS_109".equalsIgnoreCase(billable.getResp_status_code())){
 										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
-										billable.setIn_outgoing_queue(0L);
+										billable.setIn_outgoing_queue(1L);
 										billable.setProcessed(1L);
 										billable.setRetry_count( (billable.getRetry_count()+1 ) );
-										billable.setMaxRetriesAllowed(5L);
+										billable.setMaxRetriesAllowed(0L);
 										billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 									}
 								

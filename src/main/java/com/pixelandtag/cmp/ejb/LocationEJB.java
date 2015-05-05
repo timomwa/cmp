@@ -59,24 +59,7 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 		super();
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public <T> T saveOrUpdate(T t) throws DatingServiceException{
-		try{
-			utx.begin();
-			t = em.merge(t);
-			utx.commit();
-		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error(e.getMessage(),e);
-			throw new DatingServiceException(e.getMessage(),e);
-		}
-		return t;
-	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#createLocation(java.lang.Long, java.lang.Long, java.lang.String, com.pixelandtag.dating.entities.PersonDatingProfile)
 	 */

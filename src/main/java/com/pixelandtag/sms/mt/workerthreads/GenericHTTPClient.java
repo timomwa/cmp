@@ -6,6 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +29,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -56,16 +63,37 @@ public class GenericHTTPClient implements Serializable{
 	private volatile boolean success = true;
 	private boolean finished = false;
 	private boolean busy = false;
+	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+        @Override
+        public boolean isTrusted(X509Certificate[] certificate, String authType) {
+            return true;
+        }
+    };
 
+	@SuppressWarnings("unused")
+	private GenericHTTPClient(){}
 	
-	
-	public GenericHTTPClient(){
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-	    cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-		cm.setDefaultMaxPerRoute(10);
-		cm.setMaxTotal(10);//http connections that are equal to the worker threads.
-		httpclient = new DefaultHttpClient(cm);
+	public GenericHTTPClient(String proto) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
+		if(proto.trim().equalsIgnoreCase("http")){
+			
+			SchemeRegistry schemeRegistry = new SchemeRegistry();
+		    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+		    cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
+			cm.setDefaultMaxPerRoute(2);
+			cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+			httpclient = new DefaultHttpClient(cm);
+		
+		}else{
+			
+			SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
+					SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+			SchemeRegistry schemeRegistry = new SchemeRegistry();
+			schemeRegistry.register(new Scheme("https", 8443, sf));
+			cm = new ThreadSafeClientConnManager(schemeRegistry,60,TimeUnit.MINUTES);
+			cm.setDefaultMaxPerRoute(2);
+			cm.setMaxTotal(2);
+			httpclient = new DefaultHttpClient(cm);
+		}
 		init();
 	}
 	

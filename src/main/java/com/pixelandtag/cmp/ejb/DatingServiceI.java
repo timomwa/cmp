@@ -19,7 +19,7 @@ import com.pixelandtag.web.beans.RequestObject;
 
 public interface DatingServiceI extends BaseEntityI {
 	
-	public Person register(String msisdn) throws DatingServiceException;
+	public Person register(String msisdn) throws DatingServiceException, Exception;
 
 	public Person getPerson(String msisdn)  throws DatingServiceException;
 	

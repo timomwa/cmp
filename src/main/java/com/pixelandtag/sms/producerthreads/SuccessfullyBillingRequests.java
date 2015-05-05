@@ -42,7 +42,7 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	@Column(name = "price")
 	private BigDecimal price;
 	
-	@Column(name = "transactionId")
+	@Column(name = "transactionId",unique=true)
 	private String transactionId;
 	
 	
