@@ -717,7 +717,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			
 			if(profileLocation!=null && profileLocation.getProfile()!=null){
 			
-				Date dob = calculateDobFromAge(profile.getPreferred_age());
+				//Date dob = calculateDobFromAge(profile.getPreferred_age());
 				
 				Query qry = em.createQuery("   FROM "
 											+ "	ProfileLocation pl "
@@ -726,15 +726,15 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 											+ "	   AND  "
 											+ "      pl.profile.person.active=:active "
 											+ "    AND "
-											+ "      pl.profile.dob<=:dob "
-											+ "    AND "
+											//+ "      pl.profile.dob<=:dob "
+											//+ "    AND "
 											+ "      pl.profile.gender=:prefGender "
 											+ "    AND "
-											+ "        ( pl.location.cellid=:cellid "
+											+ "        (  pl.location.location_id=:location_id "
 											+ "				OR "
-											+ "				    pl.location.location_id=:location_id "
+											+ "				   lower(pl.location.locationName)=lower(:locationName)  "
 											+ "				OR  "
-											+ "					lower(pl.location.locationName)=lower(:locationName)"
+											+ "					pl.location.cellid=:cellid"
 											+ "		   ) "
 											+ "   )  AND "
 											+ "    (   pl.profile.person.id "
@@ -748,7 +748,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 											+ "                 )"
 											+ "   )"
 											+ " order by "
-											+ "    pl.timeStamp desc");
+											+ "    pl.timeStamp desc, pl.profile.dob desc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				
@@ -757,7 +757,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
 				qry.setParameter("prefGender", profile.getPreferred_gender());
 				qry.setParameter("person_a_id",profile.getPerson().getId());
-				qry.setParameter("dob", dob);
+				//qry.setParameter("dob", dob);
 				qry.setParameter("active", new Boolean(true));
 				ProfileLocation pl = (ProfileLocation) qry.getSingleResult();
 				
