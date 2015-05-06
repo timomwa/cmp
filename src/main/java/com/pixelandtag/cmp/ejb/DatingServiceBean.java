@@ -789,8 +789,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				
 				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
 				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
-				qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-10));
-				qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+10));
+				qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
+				qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
 				if(max_cell_id.longValue()>0){
 					qry.setParameter("min_cell_id", min_cell_id);
 					qry.setParameter("max_cell_id", max_cell_id);
