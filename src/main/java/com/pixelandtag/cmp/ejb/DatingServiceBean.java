@@ -741,7 +741,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			
 			if(profileLocation!=null && profileLocation.getProfile()!=null){
 				
-				CellIdRanges cellidRanges = location_ejb.getCellIdRangesByLocationId(profileLocation.getLocation().getLocation_id());
+				CellIdRanges cellidRanges = null;//location_ejb.getCellIdRangesByLocationId(profileLocation.getLocation().getLocation_id());
 				
 				Long min_cell_id = cellidRanges!=null?cellidRanges.getMin_cell_id() : 0;
 				Long max_cell_id = cellidRanges!=null?cellidRanges.getMax_cell_id() : 0;
