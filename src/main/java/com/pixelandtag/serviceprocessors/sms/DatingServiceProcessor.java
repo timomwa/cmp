@@ -601,7 +601,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
-			throw new DatingServiceException("Something went Wrong. Kindly try again.",exp);
+			throw new DatingServiceException("Sorry, we couldn't process your request at this time. Kindly try again.",exp);
 			
 		}
 		
@@ -663,7 +663,12 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					chatMT.setCMP_AKeyword(mo.getCMP_AKeyword());
 					chatMT.setCMP_SKeyword(mo.getCMP_SKeyword());
 					sendMT(chatMT);
-					mo.setMt_Sent("Message sent to '"+destination_person.getUsername()+"'");
+					String tailmsg = "";
+					if(!person.getLoggedin()){
+						tailmsg = ". However, you're offline. This means you'll not be able to receive any messages from anyone or '"+destination_person.getUsername()+"'. Reply with the word LOGIN to log in.";
+					}
+					
+					mo.setMt_Sent("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					mo.setPrice(BigDecimal.ZERO);

@@ -343,6 +343,17 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				}
 				
 				if(attr.equals(ProfileAttribute.LOCATION)){//The last one as per new version
+					boolean location_is_only_number = false;
+					try{
+						new BigDecimal(MESSAGE);
+						location_is_only_number = true;
+					}catch(java.lang.NumberFormatException nfe){
+					}
+					if(KEYWORD.contains("*") || KEYWORD.equalsIgnoreCase(req.getCode()) || MESSAGE.equalsIgnoreCase(req.getCode()) || location_is_only_number){
+						resp = getMessage(DatingMessages.LOCATION_INVALID, language_id);
+						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+						return resp;
+					}
 					
 					profile.setLocation(MESSAGE);
 					if((req.getCellid()!=null && !req.getCellid().isEmpty()) && (req.getLac()!=null && !req.getLac().isEmpty())){
