@@ -110,7 +110,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				person.setLoggedin(Boolean.FALSE);
 				person = datingBean.saveOrUpdate(person);
 				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent("You've successfully been logged out."+profile.getUsername()+". You will not be able to receive messages from the chat service. To log back in, reply with LOGIN");
+				mo.setMt_Sent("You've successfully been logged out '"+profile.getUsername()+"'. You will not be able to receive messages from the chat service. To log back in, reply with LOGIN");
 				return mo;
 				
 			}else if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
