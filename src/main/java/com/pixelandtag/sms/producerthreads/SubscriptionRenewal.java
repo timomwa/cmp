@@ -154,11 +154,12 @@ public class SubscriptionRenewal extends  Thread {
 		
 		try{
 			
-			logger.info(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!
 			
-			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			if(billables.size()>0)
 			logger.info("SIZE OF QUEUE ? "+billables.size());
 			
 			 final Billable billable = billables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
@@ -166,7 +167,7 @@ public class SubscriptionRenewal extends  Thread {
 			 try {
 				 
 				if(billable!=null)
-					logger.info("billable.getId():  "+billable.getId());
+					logger.debug("billable.getId():  "+billable.getId());
 				//billables.remove(billable);//try double remove from this queue
 			
 			 } catch (Exception e) {

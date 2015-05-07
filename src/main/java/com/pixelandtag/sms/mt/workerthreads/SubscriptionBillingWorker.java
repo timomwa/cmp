@@ -4,6 +4,7 @@ package com.pixelandtag.sms.mt.workerthreads;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
@@ -40,6 +41,11 @@ public class SubscriptionBillingWorker implements Runnable {
 	private Alarm alarm = new Alarm();
 	private GenericHTTPClient genericHttpClient;
 	private SubscriptionBeanI subscriptionejb;
+	private static Random r = new Random();
+	
+	private int getRandom(){
+		return (r.nextInt(1000-0) + 0) ;
+	}
 	
 	public boolean isBusy() {
 		return busy;
@@ -327,7 +333,7 @@ public class SubscriptionBillingWorker implements Runnable {
 						}
 					}else{
 						try{
-							Thread.sleep(1000);
+							Thread.sleep(getRandom());
 						}catch(InterruptedException ie){
 							logger.warn(ie);
 						}

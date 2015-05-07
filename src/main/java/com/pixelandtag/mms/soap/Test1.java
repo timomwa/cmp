@@ -99,11 +99,23 @@ public class Test1 {
 		int end  = resp.indexOf("</transactionId>");
 		return resp.substring(start, end);
 	}
+	public static int getRandom(){
+		return (r.nextInt(1000-0) + 0) ;
+	}
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+		System.out.println(getRandom());
+		System.out.println(getRandom());
+		System.out.println(getRandom());
+		System.out.println(getRandom());
+		System.out.println(getRandom());
+		System.out.println(getRandom());
+		if(true)
+			return;
+		
 		System.out.println(getTransactionId("<transactionId>twss_5158b3586aaf085</transactionId><asdfasdf> asdfasfs"));
 		
 		if(true)

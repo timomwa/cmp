@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
@@ -95,6 +96,7 @@ public class MTHttpSender implements Runnable{
 	private volatile HttpResponse response;
 	private volatile int recursiveCounter = 0;
 	private Alarm alarm = new Alarm();
+	private static Random r = new Random();
 	
 	
 	
@@ -344,7 +346,7 @@ public class MTHttpSender implements Runnable{
 						}
 					}else{
 						try{
-							Thread.sleep(1000);
+							Thread.sleep(getRandom());
 						}catch(InterruptedException ie){
 							logger.warn(ie);
 						}
@@ -401,6 +403,9 @@ public class MTHttpSender implements Runnable{
 		
 	}
 	
+	private int getRandom(){
+		return (r.nextInt(1000-0) + 0) ;
+	}
 	
 	private synchronized void setSms_idx(int i) {
 		this.sms_idx = i;
