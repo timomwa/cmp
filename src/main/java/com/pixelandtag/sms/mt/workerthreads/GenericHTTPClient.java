@@ -141,8 +141,8 @@ public class GenericHTTPClient implements Serializable{
 				httppost.setEntity(se);
 			}
 			HttpParams params = new BasicHttpParams();
-			params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 10000);
-			params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
+			params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
+			params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
 			params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
 			httppost.setParams(params);
 			watch.start();
