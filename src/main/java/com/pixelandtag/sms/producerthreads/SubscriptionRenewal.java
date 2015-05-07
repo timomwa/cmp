@@ -154,6 +154,7 @@ public class SubscriptionRenewal extends  Thread {
 		
 		try{
 			
+			
 			logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!
@@ -247,6 +248,41 @@ public class SubscriptionRenewal extends  Thread {
 		
 		for (Subscription sub : subsl) {
 			
+			
+			if(isEnable_biller_random_throttling()){
+				
+				logger.info(">>>>> Asking all the worker threads to wait....");
+				for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
+					try{
+						tw.pauze();
+					}catch(Exception exp){
+						logger.error(exp);
+						
+					}
+				}
+				
+				
+				long wait_time = SubscriptionRenewal.getRandomWaitTime();
+				logger.info(" ::: PRODUCER_CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
+				if(wait_time>-1){
+					try{
+						Thread.sleep(wait_time);
+					}catch(InterruptedException ie){}
+				}
+				
+				
+				logger.info(">>>>> Asking all the worker threads to resume running ....");
+				
+				for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
+					try{
+						tw.rezume();
+					}catch(Exception exp){
+						logger.error(exp);
+						
+					}
+				}
+			}
+			
 			sub.setQueue_status(1L);
 			sub = cmpbean.saveOrUpdate(sub);
 			//subscriptio_nejb.updateQueueStatus(1L,sub.getId());
@@ -328,7 +364,7 @@ public class SubscriptionRenewal extends  Thread {
 						// method, which can fail
 						// to insert an element only by throwing an exception.
 						billable.setIn_outgoing_queue(1L);
-						billable = cmpbean.saveOrUpdate(billable);
+						//billable = cmpbean.saveOrUpdate(billable);
 						billables.offer(billable);
 
 						//cmpbean.saveOrUpdate(billable);
@@ -338,7 +374,6 @@ public class SubscriptionRenewal extends  Thread {
 
 					} catch (Exception e) {
 
-						e.printStackTrace();
 						logger.error(e.getMessage(), e);
 
 					}
@@ -354,7 +389,7 @@ public class SubscriptionRenewal extends  Thread {
 					try {
 
 						billable.setIn_outgoing_queue(1L);
-						billable = cmpbean.saveOrUpdate(billable);
+						//billable = cmpbean.saveOrUpdate(billable);
 						billables.offer(billable);// if we've got a limit to
 													// the queue
 
@@ -365,17 +400,13 @@ public class SubscriptionRenewal extends  Thread {
 
 						// addedToqueue = true;
 
-					} catch (InterruptedException e) {
+					} catch (Exception e) {
 
 						logger.error(e.getMessage(), e);
 						//setRun(false);
 						
 
-					} catch (Exception e) {
-
-						logger.error(e.getMessage(), e);
-
-					}
+					} 
 				}
 
 			}

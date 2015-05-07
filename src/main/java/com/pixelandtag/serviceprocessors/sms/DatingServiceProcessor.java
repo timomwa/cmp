@@ -42,7 +42,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 	final Logger logger = Logger.getLogger(DatingServiceProcessor.class);
 	private DatingServiceI datingBean;
-	private LocationBeanI location_ejb;
+	private LocationBeanI location_ejb; 
 	private CMPResourceBeanRemote cmp_bean;
 	private SubscriptionBeanI subscriptionBean;
 	private InitialContext context;

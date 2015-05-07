@@ -90,7 +90,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	
 	public synchronized void pauze(){
 		try {
-			
+			logger.info(getName()+" I've been told to wait. I will not run.");
 			this.wait();
 		
 		} catch (InterruptedException e) {
@@ -186,7 +186,7 @@ public class SubscriptionBillingWorker implements Runnable {
 												SubscriptionRenewal.setEnable_biller_random_throttling(true);
 												
 												long wait_time = SubscriptionRenewal.getRandomWaitTime();
-												logger.debug(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
+												logger.info(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
 												if(wait_time>-1){
 													Thread.sleep(wait_time);
 												}
