@@ -173,18 +173,18 @@ public class SubscriptionBillingWorker implements Runnable {
 									billable.setProcessed(1L);
 									
 									if (RESP_CODE == HttpStatus.SC_OK) {
-										boolean throttled= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
-										String debug = "throttled\t\t ::"+throttled;
+										boolean capped= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
+										String debug = "capped\t\t ::"+capped;
 										debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
 										
 										logger.debug("THROTTLING PARAMS :::::: "+debug);
 										if(resp!=null)
-										if(throttled){
+										if(capped){
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//We've been throttled. Let's slow down a little bit.
 												logger.debug("Throttling! We've been capped.");
 												SubscriptionRenewal.setEnable_biller_random_throttling(true);
-												
+												SubscriptionRenewal.setWe_ve_been_capped(true);
 												long wait_time = SubscriptionRenewal.getRandomWaitTime();
 												logger.info(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
 												if(wait_time>-1){
@@ -201,6 +201,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											//Resume back to normal. No throttling
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
+												SubscriptionRenewal.setWe_ve_been_capped(false);
 											}
 										}
 										
@@ -243,6 +244,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//Resume back to normal. No throttling
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
+												SubscriptionRenewal.setWe_ve_been_capped(false);
 											}
 											
 											cmp_ejb.createSuccesBillRec(billable);

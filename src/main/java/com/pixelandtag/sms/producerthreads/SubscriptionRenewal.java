@@ -55,6 +55,7 @@ public class SubscriptionRenewal extends  Thread {
 	private static boolean enable_biller_random_throttling=false;
 	public static int min_throttle_billing = 1000;
 	private static boolean adaptive_throttling  = false;
+	private static boolean we_ve_been_capped  = false;
 	
 	
 	public SubscriptionRenewal(CMPResourceBeanRemote cmpbean_,SubscriptionBeanI subscriptinoEJB_) throws Exception{
@@ -72,6 +73,16 @@ public class SubscriptionRenewal extends  Thread {
 	}
 	
 	
+	public static boolean isWe_ve_been_capped() {
+		return we_ve_been_capped;
+	}
+
+
+	public static void setWe_ve_been_capped(boolean we_ve_been_capped) {
+		SubscriptionRenewal.we_ve_been_capped = we_ve_been_capped;
+	}
+
+
 	public static int getRandomWaitTime(){
 	    	return isEnable_biller_random_throttling()
 	    			? 
@@ -249,7 +260,7 @@ public class SubscriptionRenewal extends  Thread {
 		for (Subscription sub : subsl) {
 			
 			
-			if(isEnable_biller_random_throttling()){
+			if(isWe_ve_been_capped()){
 				
 				logger.info(">>>>> Asking all the worker threads to wait....");
 				for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
