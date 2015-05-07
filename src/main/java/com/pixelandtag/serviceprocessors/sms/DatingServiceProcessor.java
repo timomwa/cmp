@@ -640,6 +640,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				log.setMessage(directMsg ? (destination_person.getUsername() +CHAT_USERNAME_SEPERATOR_DIRECT+ chatLog) : chatLog);
 				mo.setPrice(BigDecimal.ZERO);
 				
+				Gender gender = profile.getGender();
+				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 				
 				if(destination_person.getPerson().getLoggedin()==null || destination_person.getPerson().getLoggedin()==true){
 					log.setOffline_msg(Boolean.FALSE);
@@ -647,8 +649,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					MOSms chatMT  = mo.clone();
 					chatMT.setMsisdn(destination_person.getPerson().getMsisdn());
-					Gender gender = profile.getGender();
-					String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 					String msg = "";
 					if(!directMsg){//if it's not a direct message, then put advice
 						msg = source_user+CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
@@ -672,7 +672,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					mo.setPrice(BigDecimal.ZERO);
-					mo.setMt_Sent("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with them when they get back online.");
+					String pronoun2 = pronoun.equalsIgnoreCase("her") ? "she" : "he";
+					mo.setMt_Sent("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with "+pronoun+" when "+pronoun2+" gets back online.");
 				}
 				return mo;
 			}else if(destination_person!=null && !destination_person.getPerson().getActive()){
