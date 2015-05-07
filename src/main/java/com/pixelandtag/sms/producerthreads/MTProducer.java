@@ -272,8 +272,8 @@ public class MTProducer extends Thread {
 			 
 			 //celcomAPI.beingProcessedd(myMt.getId(), true);//mark it as being processed first before returning.
 			 try {
-				 
-				celcomAPI.markInQueue(myMt.getId());
+				 if(myMt!=null)
+					 celcomAPI.markInQueue(myMt.getId());
 			
 			 } catch (Exception e) {
 				

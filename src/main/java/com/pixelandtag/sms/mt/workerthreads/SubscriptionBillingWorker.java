@@ -146,184 +146,191 @@ public class SubscriptionBillingWorker implements Runnable {
 					Billable billable = SubscriptionRenewal.getBillable();
 					
 					//if such a billable exists
-					
-					try{
-						
-							if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
-								setBusy(true);
-								logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
-								String xml = billable.getChargeXML(BillableI.plainchargeXML);
-								logger.info("BILLABLE: "+billable.toString());
-								param.setStringentity(xml);
-								param.setHeaderParams(headerattrs);
-								watch.start();
-								final int RESP_CODE = genericHttpClient.call(param);
-								watch.stop();
-								logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
-								watch.reset();
-								final String resp = genericHttpClient.getRespose_msg();
-								logger.info("\n\n\t\t::::::SMPP::::RESP_CODE=["+RESP_CODE+"]:::::PROXY_RESPONSE: "+resp);
-								billable.setResp_status_code(String.valueOf(RESP_CODE));
-								billable.setProcessed(1L);
-								
-								if (RESP_CODE == HttpStatus.SC_OK) {
-									boolean throttled= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
-									String debug = "throttled\t\t ::"+throttled;
-									debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
+					if(billable!=null){
+						try{
+							
+								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
+									setBusy(true);
+									logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+									String xml = billable.getChargeXML(BillableI.plainchargeXML);
+									logger.info("BILLABLE: "+billable.toString());
+									param.setStringentity(xml);
+									param.setHeaderParams(headerattrs);
+									watch.start();
+									final int RESP_CODE = genericHttpClient.call(param);
+									watch.stop();
+									logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+									watch.reset();
+									final String resp = genericHttpClient.getRespose_msg();
+									logger.info("\n\n\t\t::::::SMPP::::RESP_CODE=["+RESP_CODE+"]:::::PROXY_RESPONSE: "+resp);
+									billable.setResp_status_code(String.valueOf(RESP_CODE));
+									billable.setProcessed(1L);
 									
-									logger.debug("THROTTLING PARAMS :::::: "+debug);
-									if(resp!=null)
-									if(throttled){
-										if(SubscriptionRenewal.isAdaptive_throttling()){
-											//We've been throttled. Let's slow down a little bit.
-											logger.debug("Throttling! We've been capped.");
-											SubscriptionRenewal.setEnable_biller_random_throttling(true);
+									if (RESP_CODE == HttpStatus.SC_OK) {
+										boolean throttled= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
+										String debug = "throttled\t\t ::"+throttled;
+										debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
+										
+										logger.debug("THROTTLING PARAMS :::::: "+debug);
+										if(resp!=null)
+										if(throttled){
+											if(SubscriptionRenewal.isAdaptive_throttling()){
+												//We've been throttled. Let's slow down a little bit.
+												logger.debug("Throttling! We've been capped.");
+												SubscriptionRenewal.setEnable_biller_random_throttling(true);
+												
+												long wait_time = SubscriptionRenewal.getRandomWaitTime();
+												logger.debug(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
+												if(wait_time>-1){
+													Thread.sleep(wait_time);
+												}
+											}
 											
-											long wait_time = SubscriptionRenewal.getRandomWaitTime();
-											logger.debug(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
-											if(wait_time>-1){
-												Thread.sleep(wait_time);
+										}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+											
+											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+											//we'll try again. 2 means that we re-try again..
+											subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+											
+											//Resume back to normal. No throttling
+											if(SubscriptionRenewal.isAdaptive_throttling()){
+												SubscriptionRenewal.setEnable_biller_random_throttling(false);
 											}
 										}
 										
-									}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+										billable.setRetry_count(billable.getRetry_count()+1);
+										final Boolean success  = Boolean.valueOf(resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS"));
+										billable.setSuccess(Boolean.TRUE);
 										
-										subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
-										//we'll try again. 2 means that we re-try again..
-										subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 										
-										//Resume back to normal. No throttling
-										if(SubscriptionRenewal.isAdaptive_throttling()){
-											SubscriptionRenewal.setEnable_biller_random_throttling(false);
-										}
-									}
-									
-									billable.setRetry_count(billable.getRetry_count()+1);
-									final Boolean success  = Boolean.valueOf(resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS"));
-									billable.setSuccess(Boolean.TRUE);
-									
-									
-									if(success.booleanValue()==false){
-										String err = getErrorCode(resp);
-										String errMsg = getErrorMessage(resp);
-										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-										logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
-										logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-										//billable.setSuccess(false);
-										try{
+										if(success.booleanValue()==false){
+											String err = getErrorCode(resp);
+											String errMsg = getErrorMessage(resp);
+											logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
+											logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
+											logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+											//billable.setSuccess(false);
+											try{
+												String transactionId = getTransactionId(resp);
+												billable.setTransactionId(transactionId);
+											}catch(Exception exp){
+												logger.warn("No transaction id found");
+											}
+											
+											billable.setResp_status_code(errMsg);
+											
+											
+										}else{
+											
 											String transactionId = getTransactionId(resp);
 											billable.setTransactionId(transactionId);
-										}catch(Exception exp){
-											logger.warn("No transaction id found");
+											billable.setResp_status_code("Success");
+											
+											
+											logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
+											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+											billable.setSuccess(Boolean.TRUE);
+											Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
+											logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
+										
+											if(SubscriptionRenewal.isAdaptive_throttling()){
+												//Resume back to normal. No throttling
+												SubscriptionRenewal.setEnable_biller_random_throttling(false);
+											}
+											
+											cmp_ejb.createSuccesBillRec(billable);
+											
 										}
 										
-										billable.setResp_status_code(errMsg);
+										
+									}else if(RESP_CODE == 400){
+										
+									}else if(RESP_CODE == 401){
+										logger.error("\n::::::::::::::::: Unauthorized! :::::::::::::::");
+										
+									}else if(RESP_CODE == 404 || RESP_CODE == 403){
 										
 										
+									}else if(RESP_CODE == 503){
+				
+										
+									}else if(RESP_CODE==0){
+										logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
+										subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+									
 									}else{
 										
-										String transactionId = getTransactionId(resp);
-										billable.setTransactionId(transactionId);
-										billable.setResp_status_code("Success");
-										
-										
-										logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
-										logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-										billable.setSuccess(Boolean.TRUE);
-										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
-										subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
-										logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
 									
-										if(SubscriptionRenewal.isAdaptive_throttling()){
-											//Resume back to normal. No throttling
-											SubscriptionRenewal.setEnable_biller_random_throttling(false);
+									}
+									
+									logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
+									
+									try{
+										
+										billable.setProcessed(1L);
+										billable.setIn_outgoing_queue(0L);
+										
+										if(billable.isSuccess() ||  "Success".equalsIgnoreCase(billable.getResp_status_code()) ){
+											cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
+											billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
+										}
+										if("TWSS_101".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_114".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_101".equalsIgnoreCase(billable.getResp_status_code())){
+											cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
+											billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
+										}
+										if("OL402".equalsIgnoreCase(billable.getResp_status_code()) || "OL404".equalsIgnoreCase(billable.getResp_status_code()) || "OL405".equalsIgnoreCase(billable.getResp_status_code())  || "OL406".equalsIgnoreCase(billable.getResp_status_code())){
+											cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
+											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
+											billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 										}
 										
-										cmp_ejb.createSuccesBillRec(billable);
-										
+										if("TWSS_109".equalsIgnoreCase(billable.getResp_status_code())){
+											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
+											billable.setIn_outgoing_queue(1L);
+											billable.setProcessed(1L);
+											billable.setRetry_count( (billable.getRetry_count()+1 ) );
+											billable.setMaxRetriesAllowed(0L);
+											billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
+										}
+									
+									}catch(Exception e){
+										logger.error(e.getMessage(),e);
 									}
 									
+									logger.debug("DONE! ");
 									
-								}else if(RESP_CODE == 400){
+									billable = cmp_ejb.saveOrUpdate(billable);
 									
-								}else if(RESP_CODE == 401){
-									logger.error("\n::::::::::::::::: Unauthorized! :::::::::::::::");
+									setBusy(false);
 									
-								}else if(RESP_CODE == 404 || RESP_CODE == 403){
-									
-									
-								}else if(RESP_CODE == 503){
-			
-									
-								}else if(RESP_CODE==0){
-									logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
-									subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
-								
 								}else{
-									
-								
+									if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
+										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+										logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
+									}else{
+										setRun(false);//Poison pill
+										setFinished(true);
+									}
 								}
 								
-								logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
 								
-								try{
-									
-									billable.setProcessed(1L);
-									billable.setIn_outgoing_queue(0L);
-									
-									if(billable.isSuccess() ||  "Success".equalsIgnoreCase(billable.getResp_status_code()) ){
-										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
-										billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
-									}
-									if("TWSS_101".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_114".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_101".equalsIgnoreCase(billable.getResp_status_code())){
-										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
-										billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
-									}
-									if("OL402".equalsIgnoreCase(billable.getResp_status_code()) || "OL404".equalsIgnoreCase(billable.getResp_status_code()) || "OL405".equalsIgnoreCase(billable.getResp_status_code())  || "OL406".equalsIgnoreCase(billable.getResp_status_code())){
-										cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
-										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
-										billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
-									}
-									
-									if("TWSS_109".equalsIgnoreCase(billable.getResp_status_code())){
-										cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
-										billable.setIn_outgoing_queue(1L);
-										billable.setProcessed(1L);
-										billable.setRetry_count( (billable.getRetry_count()+1 ) );
-										billable.setMaxRetriesAllowed(0L);
-										billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
-									}
 								
-								}catch(Exception e){
-									logger.error(e.getMessage(),e);
-								}
-								
-								logger.debug("DONE! ");
-								
-								billable = cmp_ejb.saveOrUpdate(billable);
-								
-								setBusy(false);
-								
-							}else{
-								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
-									Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
-									logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
-								}else{
-									setRun(false);//Poison pill
-									setFinished(true);
-								}
-							}
+						}catch(Exception exp){
 							
+							logger.error(exp.getMessage(),exp);
+							logger.info("SUBSCRIPTION_RENEWAL:::::::::SOMETHING WENT WRONG, WE TRY AGAIN ");
+							subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 							
-							
-					}catch(Exception exp){
-						
-						logger.error(exp.getMessage(),exp);
-						logger.info("SUBSCRIPTION_RENEWAL:::::::::SOMETHING WENT WRONG, WE TRY AGAIN ");
-						subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
-						
+						}
+					}else{
+						try{
+							Thread.sleep(1000);
+						}catch(InterruptedException ie){
+							logger.warn(ie);
+						}
 					}
 				
 				}catch (Exception e){

@@ -165,8 +165,8 @@ public class SubscriptionRenewal extends  Thread {
 			 
 			 try {
 				 
-				
-				logger.info("billable.getId():  "+billable.getId());
+				if(billable!=null)
+					logger.info("billable.getId():  "+billable.getId());
 				//billables.remove(billable);//try double remove from this queue
 			
 			 } catch (Exception e) {

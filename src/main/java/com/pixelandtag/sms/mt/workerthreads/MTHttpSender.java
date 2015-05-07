@@ -296,10 +296,10 @@ public class MTHttpSender implements Runnable{
 					//}
 					
 						
-					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+mtsms.getServiceid());
-					
-					
 					if(mtsms!=null){
+						
+						logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+mtsms.getServiceid());
+						
 						
 						if(mtsms.getId()>-1 && (mtsms.getSms()==null || mtsms.getSms().trim().isEmpty())){//Don't send empty messages
 							
@@ -341,6 +341,12 @@ public class MTHttpSender implements Runnable{
 							
 						}else{
 							setRun(false);
+						}
+					}else{
+						try{
+							Thread.sleep(1000);
+						}catch(InterruptedException ie){
+							logger.warn(ie);
 						}
 					}
 					
