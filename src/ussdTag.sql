@@ -87,6 +87,8 @@ select count(*), date(timeStamp) ts from messagelog  group by ts order by ts asc
 
 select count(distinct SUB_Mobtel) from messagelog;
 
+select count(*),profileComplete from dating_profile group by profileComplete;
+
 select count(*) from subscription where subscription_status='confirmed' and date(expiryDate)<=date(now()) and queue_status=2;
 
 select cl.timeStamp, concat(sp.msisdn,' > ', dp.msisdn ,': ', cl.message) from dating_chatlog cl left join dating_person sp on sp.id=cl.source_person_id LEFT JOIN dating_person dp ON dp.id=cl.dest_person_id where date(timeStamp)>=date(now()) order by timeStamp asc limit 1000;
