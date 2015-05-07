@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,7 @@ public class SubscriptionRenewal extends  Thread {
 	private SubscriptionBeanI subscriptio_nejb;
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
 	private Map<Long, MOProcessorE> mo_processorCache = new HashMap<Long, MOProcessorE>();
-	private volatile static BlockingDeque<Billable> billables = new LinkedBlockingDeque<Billable>();
+	private volatile static ConcurrentLinkedQueue<Billable> billables = new ConcurrentLinkedQueue<Billable>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
 	private int mandatory_throttle = 60112;
@@ -63,9 +64,9 @@ public class SubscriptionRenewal extends  Thread {
 		initWorkers();
 		
 		if (this.workers <= 0)
-			billables = new LinkedBlockingDeque<Billable>();
+			billables = new ConcurrentLinkedQueue<Billable>();
 		else
-			billables = new LinkedBlockingDeque<Billable>(this.workers);
+			billables = new ConcurrentLinkedQueue<Billable>();
 		
 		instance = this;
 	}
@@ -160,13 +161,13 @@ public class SubscriptionRenewal extends  Thread {
 			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
 			logger.info("SIZE OF QUEUE ? "+billables.size());
 			
-			 final Billable billable = billables.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final Billable billable = billables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
 				
 				logger.info("billable.getId():  "+billable.getId());
-				billables.remove(billable);//try double remove from this queue
+				//billables.remove(billable);//try double remove from this queue
 			
 			 } catch (Exception e) {
 				
@@ -327,7 +328,7 @@ public class SubscriptionRenewal extends  Thread {
 						// to insert an element only by throwing an exception.
 						billable.setIn_outgoing_queue(1L);
 						billable = cmpbean.saveOrUpdate(billable);
-						billables.offerLast(billable);
+						billables.offer(billable);
 
 						//cmpbean.saveOrUpdate(billable);
 						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
@@ -353,7 +354,7 @@ public class SubscriptionRenewal extends  Thread {
 
 						billable.setIn_outgoing_queue(1L);
 						billable = cmpbean.saveOrUpdate(billable);
-						billables.putLast(billable);// if we've got a limit to
+						billables.offer(billable);// if we've got a limit to
 													// the queue
 
 						//cmpbean.saveOrUpdate(billable);
@@ -445,7 +446,7 @@ public class SubscriptionRenewal extends  Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				billables.addLast(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				billables.offer(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;

@@ -19,6 +19,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -111,8 +112,8 @@ public class MTProducer extends Thread {
 	public static volatile Map<Integer,ArrayList<ServiceProcessorI>> processor_pool = new HashMap<Integer,ArrayList<ServiceProcessorI>>();
 	public static volatile Queue<ServiceProcessorDTO> serviceProcessors;
 	
-	private volatile static BlockingDeque<MTsms> mtMsgs = null;
-	private volatile static BlockingDeque<GenericHTTPParam> genericMT = null;
+	private volatile static ConcurrentLinkedQueue<MTsms> mtMsgs = null;
+	private volatile static ConcurrentLinkedQueue<GenericHTTPParam> genericMT = null;
 	public volatile  BlockingDeque<MTHttpSender> httpSenderWorkers = new LinkedBlockingDeque<MTHttpSender>();
 	public volatile  BlockingDeque<GenericHTTPClientWorker> generichttpSenderWorkers = new LinkedBlockingDeque<GenericHTTPClientWorker>();
 	private int idleWorkers;
@@ -213,7 +214,7 @@ public class MTProducer extends Thread {
 			instance.logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
 			
 			
-			 final GenericHTTPParam myMt = genericMT.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final GenericHTTPParam myMt = genericMT.poll();//takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 //celcomAPI.beingProcessedd(myMt.getId(), true);//mark it as being processed first before returning.
 			 try {
@@ -267,7 +268,7 @@ public class MTProducer extends Thread {
 			instance.logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
 			
 			
-			 final MTsms myMt = mtMsgs.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final MTsms myMt = mtMsgs.poll(); //.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 //celcomAPI.beingProcessedd(myMt.getId(), true);//mark it as being processed first before returning.
 			 try {
@@ -497,7 +498,7 @@ public class MTProducer extends Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				mtMsgs.addLast(new MTsms());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				mtMsgs.add(new MTsms());// //.addLast(new MTsms());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
@@ -513,7 +514,7 @@ public class MTProducer extends Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				genericMT.addLast(new GenericHTTPParam());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				genericMT.add(new GenericHTTPParam());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
@@ -873,15 +874,15 @@ public class MTProducer extends Thread {
 	    
 	    if(queueSize>0){
 	    	
-	    	mtMsgs = new LinkedBlockingDeque<MTsms>(queueSize);
-	    	genericMT = new LinkedBlockingDeque<GenericHTTPParam>(queueSize);
+	    	mtMsgs = new ConcurrentLinkedQueue<MTsms>();// new ConcurrentLinkedQueue<MTsms>(queueSize);
+	    	genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
 	    	
 	    	limitStr = " LIMIT "+queueSize;
 	   
 	    }else{
 	    	
-	    	mtMsgs = new LinkedBlockingDeque<MTsms>();
-	    	genericMT = new LinkedBlockingDeque<GenericHTTPParam>(queueSize);
+	    	mtMsgs = new ConcurrentLinkedQueue<MTsms>();//new LinkedBlockingDeque<MTsms>();
+	    	genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
 	    
 	    	limitStr = "";
 	    
@@ -1081,7 +1082,7 @@ public class MTProducer extends Thread {
 							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
 							
 							param.setHttpParams(qparams);
-							genericMT.offerLast(param);//if we've got a limit to the queue
+							genericMT.offer(param);//if we've got a limit to the queue
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 							
 						}else{
@@ -1091,7 +1092,7 @@ public class MTProducer extends Thread {
 							//space is currently available. When using a capacity-restricted deque, 
 							//this method is generally preferable to the addLast method, which can fail 
 							//to insert an element only by throwing an exception. 
-							mtMsgs.offerLast(mtsms);
+							mtMsgs.offer(mtsms);// .offerLast(mtsms);
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 							
 						}
@@ -1119,11 +1120,11 @@ public class MTProducer extends Thread {
 							qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
 							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
 							param.setHttpParams(qparams);
-							genericMT.putLast(param);//if we've got a limit to the queue
+							genericMT.offer(param);//if we've got a limit to the queue
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 							
 						}else{
-							mtMsgs.putLast(mtsms);//if we've got a limit to the queue
+							mtMsgs.offer(mtsms);//putLast(mtsms);//if we've got a limit to the queue
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 							
 						}

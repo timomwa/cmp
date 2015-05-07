@@ -91,6 +91,8 @@ select count(*) from subscription where subscription_status='confirmed' and date
 
 select cl.timeStamp, concat(sp.msisdn,' > ', dp.msisdn ,': ', cl.message) from dating_chatlog cl left join dating_person sp on sp.id=cl.source_person_id LEFT JOIN dating_person dp ON dp.id=cl.dest_person_id where date(timeStamp)>=date(now()) order by timeStamp asc limit 1000;
 
+select count(*), date(timeStamp) ts from dating_chatlog group by ts order by ts asc; 
+
 select success,processed,in_outgoing_queue,count(*) c, price, count(*)*price as 'revenue' from billable_queue where date(timeStamp)=curdate() group by success,in_outgoing_queue,processed;
 
 /*add these when testing 14th April*/
