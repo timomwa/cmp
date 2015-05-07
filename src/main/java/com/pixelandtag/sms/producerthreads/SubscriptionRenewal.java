@@ -272,7 +272,6 @@ public class SubscriptionRenewal extends  Thread {
 					}
 				}
 				
-				
 				long wait_time = SubscriptionRenewal.getRandomWaitTime();
 				logger.info(" ::: PRODUCER_CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
 				if(wait_time>-1){
