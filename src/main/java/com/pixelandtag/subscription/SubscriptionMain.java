@@ -47,7 +47,7 @@ public class SubscriptionMain extends Thread{
 		
 		
 		
-		//log4Jprops = FileUtils.getPropertyFile("log4jsub.properties");
+		log4Jprops = FileUtils.getPropertyFile("log4jsub.properties");
 		subscription_props = FileUtils.getPropertyFile("mtsender.properties");
 		
 		if(log4Jprops==null)
