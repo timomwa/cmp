@@ -87,6 +87,10 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	@EJB
 	SubscriptionBeanI subscriptionBean;
 	
+	
+	@EJB
+	TimezoneConverterI timezoneEJB;
+	
 	private StopWatch watch = new StopWatch();
 	
 	public DatingServiceBean() throws KeyManagementException,
@@ -1134,7 +1138,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException{
 		Date date = null;
 		try{
-			Query qry = em.createNativeQuery("select DATE_SUB(now(),INTERVAL :age YEAR) ");
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Query qry = em.createNativeQuery("select DATE_SUB(:timeInNairobi ,INTERVAL :age YEAR) ");
+			qry.setParameter("timeInNairobi", timeInNairobi);
 			qry.setParameter("age", age.longValue());
 			Object o = qry.getSingleResult();
 			date = (Date) o;

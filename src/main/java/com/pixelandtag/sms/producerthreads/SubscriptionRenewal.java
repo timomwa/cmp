@@ -40,9 +40,7 @@ public class SubscriptionRenewal extends  Thread {
 	private boolean run = true;
 	private CMPResourceBeanRemote cmpbean;
 	private SubscriptionBeanI subscriptio_nejb;
-	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
-	private Map<Long, MOProcessorE> mo_processorCache = new HashMap<Long, MOProcessorE>();
-	private volatile static ConcurrentLinkedQueue<Billable> billables = new ConcurrentLinkedQueue<Billable>();
+	private volatile static ConcurrentLinkedQueue<Subscription> renewables = new ConcurrentLinkedQueue<Subscription>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
 	private int mandatory_throttle = 60112;
@@ -65,9 +63,9 @@ public class SubscriptionRenewal extends  Thread {
 		initWorkers();
 		
 		if (this.workers <= 0)
-			billables = new ConcurrentLinkedQueue<Billable>();
+			renewables = new ConcurrentLinkedQueue<Subscription>();
 		else
-			billables = new ConcurrentLinkedQueue<Billable>();
+			renewables = new ConcurrentLinkedQueue<Subscription>();
 		
 		instance = this;
 	}
@@ -161,7 +159,7 @@ public class SubscriptionRenewal extends  Thread {
 	}
 
 
-	public static Billable getBillable() {
+	public static Subscription getBillable() {
 		
 		try{
 			
@@ -171,10 +169,10 @@ public class SubscriptionRenewal extends  Thread {
 			semaphore.acquire();//now lock out everybody else!
 			
 			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
-			if(billables.size()>0)
-			logger.info("SIZE OF QUEUE ? "+billables.size());
+			if(renewables.size()>0)
+			logger.info("SIZE OF QUEUE ? "+renewables.size());
 			
-			 final Billable billable = billables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final Subscription billable = renewables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
@@ -293,67 +291,7 @@ public class SubscriptionRenewal extends  Thread {
 				}
 			}
 			
-			sub.setQueue_status(1L);
-			sub = cmpbean.saveOrUpdate(sub);
-			//subscriptio_nejb.updateQueueStatus(1L,sub.getId());
-		
-			logger.info(" sub "+sub);
-			Long sms_service_id = sub.getSms_service_id_fk();
 			
-			SMSService service = sms_serviceCache.get(sms_service_id);
-			
-			if (service == null) {
-				try {
-					service = cmpbean.find(SMSService.class, sms_service_id);
-				} catch (Exception e) {
-					logger.warn("Couldn't find service with id "
-							+ sms_service_id);
-				}
-			}
-
-			logger.info(">>service :: "+service);
-			if (service != null) {
-				MOProcessorE processor = mo_processorCache.get(service.getMo_processorFK());
-				if (processor == null) {
-					try {
-						processor = cmpbean.find(MOProcessorE.class,
-								service.getMo_processorFK());
-					} catch (Exception exp) {
-						logger.warn("Could not find the processor with id : "
-								+service.getMo_processorFK());
-					}
-				}
-
-				
-				
-				//logger.info("\t\t\n\n\n:::::::TXID::::::transaction_id:"+transaction_id+"\n\n\n");
-
-				Billable billable = new Billable();
-				billable.setCp_id("CONTENT360_KE");
-				billable.setCp_tx_id(BigInteger.valueOf(cmpbean.generateNextTxId()));
-				billable.setDiscount_applied("0");
-				billable.setKeyword(service.getCmd());
-				billable.setService_id(service.getId().toString());
-				billable.setMaxRetriesAllowed(0L);
-				billable.setMsisdn(sub.getMsisdn());
-				billable.setOperation(BigDecimal.valueOf(service.getPrice())
-						.compareTo(BigDecimal.ZERO) > 0 ? Operation.debit
-						.toString() : Operation.credit.toString());
-				billable.setPrice(BigDecimal.valueOf(service.getPrice()));
-				billable.setPriority(0l);
-				billable.setProcessed(1L);
-				billable.setRetry_count(0L);
-				billable.setShortcode(processor.getShortcode());
-				billable.setEvent_type((EventType.get(service.getEvent_type()) != null ? EventType
-						.get(service.getEvent_type())
-						: EventType.SUBSCRIPTION_PURCHASE));
-				billable.setPricePointKeyword(service.getPrice_point_keyword());
-				billable.setSuccess(Boolean.FALSE);
-				logger.debug(" before queue transaction_id" + billable.getCp_tx_id());
-
-				logger.info("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
-				
-				logger.info("putting in queue....");
 				if (queueSize == 0) {// if we can add as many objects to the
 										// queue, then we just keep adding
 
@@ -373,9 +311,7 @@ public class SubscriptionRenewal extends  Thread {
 						// this method is generally preferable to the addLast
 						// method, which can fail
 						// to insert an element only by throwing an exception.
-						billable.setIn_outgoing_queue(1L);
-						//billable = cmpbean.saveOrUpdate(billable);
-						billables.offer(billable);
+						renewables.offer(sub);
 
 						//cmpbean.saveOrUpdate(billable);
 						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
@@ -398,9 +334,7 @@ public class SubscriptionRenewal extends  Thread {
 					// The queue has space in it to add an element.
 					try {
 
-						billable.setIn_outgoing_queue(1L);
-						//billable = cmpbean.saveOrUpdate(billable);
-						billables.offer(billable);// if we've got a limit to
+						renewables.offer(sub);// if we've got a limit to
 													// the queue
 
 						//cmpbean.saveOrUpdate(billable);
@@ -419,7 +353,7 @@ public class SubscriptionRenewal extends  Thread {
 					} 
 				}
 
-			}
+			
 
 		}
 
@@ -488,7 +422,7 @@ public class SubscriptionRenewal extends  Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				billables.offer(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				renewables.offer(new Subscription());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
@@ -517,9 +451,8 @@ public class SubscriptionRenewal extends  Thread {
 		
 		logger.info("We're shutting down, we put back any unprocessed message to the db queue so that they're picked next time we run..");
 		//Now, if we have a big queue of unprocessed messages, we return them back to the db (or rather set the necessary flags
-		for(Billable sms : billables){
-			sms.setIn_outgoing_queue(0L);//and its now not in the queue
-			sms.setProcessed(0L);//nope, we're not processing it
+		for(Subscription sms : renewables){
+			sms.setQueue_status(0L);//and its now not in the queue
 			logger.info("Returned to db: "+ sms.toString());
 			try {
 				sms = cmpbean.saveOrUpdate(sms);
@@ -531,7 +464,7 @@ public class SubscriptionRenewal extends  Thread {
 		
 		
 		
-		billables.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
+		renewables.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
 		logger.info("workers: "+workers);
 		logger.info("idleWorkers: "+idleWorkers);
 		
@@ -542,9 +475,9 @@ public class SubscriptionRenewal extends  Thread {
 
 	private void waitForQueueToBecomeEmpty() {
 		
-		while(billables.size()>0){
-			logger.info("BillableQueu.size() : "+billables.size());
-			logger.info("BillableQueu.size() : "+billables.size());
+		while(renewables.size()>0){
+			logger.info("BillableQueu.size() : "+renewables.size());
+			logger.info("BillableQueu.size() : "+renewables.size());
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {

@@ -2,6 +2,7 @@ package com.pixelandtag.sms.mt.workerthreads;
 
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -18,10 +19,14 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
+import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
 import com.pixelandtag.util.StopWatch;
 
@@ -42,6 +47,9 @@ public class SubscriptionBillingWorker implements Runnable {
 	private GenericHTTPClient genericHttpClient;
 	private SubscriptionBeanI subscriptionejb;
 	private static Random r = new Random();
+	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
+	private Map<Long, MOProcessorE> mo_processorCache = new HashMap<Long, MOProcessorE>();
+	
 	
 	private int getRandom(){
 		return (r.nextInt(1000-0) + 0) ;
@@ -149,7 +157,12 @@ public class SubscriptionBillingWorker implements Runnable {
 				
 				try {
 					
-					Billable billable = SubscriptionRenewal.getBillable();
+					Subscription sub = SubscriptionRenewal.getBillable();
+					
+					sub.setQueue_status(1L);
+					sub = cmp_ejb.saveOrUpdate(sub);
+					
+					Billable billable = createBillableFromSubscription(sub);
 					
 					//if such a billable exists
 					if(billable!=null){
@@ -237,7 +250,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
-											Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+											sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
 											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
 											logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
 										
@@ -316,7 +329,7 @@ public class SubscriptionBillingWorker implements Runnable {
 									
 								}else{
 									if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
-										Subscription sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+										sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
 										logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
 									}else{
 										setRun(false);//Poison pill
@@ -380,6 +393,72 @@ public class SubscriptionBillingWorker implements Runnable {
 		
 	}
 	
+	private Billable createBillableFromSubscription(Subscription sub) {
+		
+		Billable billable = null;
+		
+		//subscriptio_nejb.updateQueueStatus(1L,sub.getId());
+	
+		logger.info(" sub "+sub);
+		Long sms_service_id = sub.getSms_service_id_fk();
+		
+		SMSService service = sms_serviceCache.get(sms_service_id);
+		
+		if (service == null) {
+			try {
+				service = cmp_ejb.find(SMSService.class, sms_service_id);
+			} catch (Exception e) {
+				logger.warn("Couldn't find service with id "
+						+ sms_service_id);
+			}
+		}
+
+		logger.info(">>service :: "+service);
+		if (service != null) {
+			MOProcessorE processor = mo_processorCache.get(service.getMo_processorFK());
+			if (processor == null) {
+				try {
+					processor = cmp_ejb.find(MOProcessorE.class,
+							service.getMo_processorFK());
+				} catch (Exception exp) {
+					logger.warn("Could not find the processor with id : "
+							+service.getMo_processorFK());
+				}
+			}
+
+			//logger.info("\t\t\n\n\n:::::::TXID::::::transaction_id:"+transaction_id+"\n\n\n");
+
+			billable = new Billable();
+			billable.setCp_id("CONTENT360_KE");
+			billable.setCp_tx_id(BigInteger.valueOf(cmp_ejb.generateNextTxId()));
+			billable.setDiscount_applied("0");
+			billable.setKeyword(service.getCmd());
+			billable.setService_id(service.getId().toString());
+			billable.setMaxRetriesAllowed(0L);
+			billable.setMsisdn(sub.getMsisdn());
+			billable.setOperation(BigDecimal.valueOf(service.getPrice())
+					.compareTo(BigDecimal.ZERO) > 0 ? Operation.debit
+					.toString() : Operation.credit.toString());
+			billable.setPrice(BigDecimal.valueOf(service.getPrice()));
+			billable.setPriority(0l);
+			billable.setProcessed(1L);
+			billable.setRetry_count(0L);
+			billable.setShortcode(processor.getShortcode());
+			billable.setEvent_type((EventType.get(service.getEvent_type()) != null ? EventType
+					.get(service.getEvent_type())
+					: EventType.SUBSCRIPTION_PURCHASE));
+			billable.setPricePointKeyword(service.getPrice_point_keyword());
+			billable.setSuccess(Boolean.FALSE);
+			logger.debug(" before queue transaction_id" + billable.getCp_tx_id());
+
+			
+			logger.info("putting in queue....");
+		}
+		
+		
+		return billable;
+	}
+
 	private void log(Exception e) {
 		
 		logger.error(e.getMessage(),e);
