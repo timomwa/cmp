@@ -15,6 +15,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -55,39 +58,42 @@ public class SubscriptionRenewal extends  Thread {
 	private static boolean adaptive_throttling  = false;
 	private static boolean we_ve_been_capped  = false;
 	
+	private static Context context = null;
 	
-	public SubscriptionRenewal(CMPResourceBeanRemote cmpbean_,SubscriptionBeanI subscriptinoEJB_) throws Exception{
-		
-		this.cmpbean = cmpbean_;
-		this.subscriptio_nejb = subscriptinoEJB_;
+	
+	
+	public SubscriptionRenewal() throws Exception{
+		init();
+		initEJB();
 		initWorkers();
 		
 		if (this.workers <= 0)
 			renewables = new ConcurrentLinkedQueue<Subscription>();
 		else
 			renewables = new ConcurrentLinkedQueue<Subscription>();
-		
 		instance = this;
 	}
 	
 	
-	public static boolean isWe_ve_been_capped() {
-		return we_ve_been_capped;
+
+	
+	private void initEJB() throws Exception{
+    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
+		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
+		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put("jboss.naming.client.ejb.context", true);
+		 context = new InitialContext(props);
+		 cmpbean =  (CMPResourceBeanRemote) 
+       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 subscriptio_nejb =  (SubscriptionBeanI) 
+		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 	}
-
-
-	public static void setWe_ve_been_capped(boolean we_ve_been_capped) {
-		SubscriptionRenewal.we_ve_been_capped = we_ve_been_capped;
-	}
-
-
-	public static int getRandomWaitTime(){
-	    	return isEnable_biller_random_throttling()
-	    			? 
-	    			(new Random().nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
-	}
-	 
-	private void initWorkers() throws Exception {
+	
+	
+	private void init() {
 		
 		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
 		
@@ -133,6 +139,29 @@ public class SubscriptionRenewal extends  Thread {
 		}
 
 		semaphore = new Semaphore(1, true);
+		
+	}
+
+
+	public static boolean isWe_ve_been_capped() {
+		return we_ve_been_capped;
+	}
+
+
+	public static void setWe_ve_been_capped(boolean we_ve_been_capped) {
+		SubscriptionRenewal.we_ve_been_capped = we_ve_been_capped;
+	}
+
+
+	public static int getRandomWaitTime(){
+	    	return isEnable_biller_random_throttling()
+	    			? 
+	    			(new Random().nextInt(max_throttle_billing-min_throttle_billing) + min_throttle_billing) : -1;
+	}
+	 
+	private void initWorkers() throws Exception {
+		
+		
 		
 		Thread t1;
 		for (int i = 0; i < this.workers; i++) {
@@ -291,70 +320,9 @@ public class SubscriptionRenewal extends  Thread {
 				}
 			}
 			
-			
-				if (queueSize == 0) {// if we can add as many objects to the
-										// queue, then we just keep adding
-
-					// adds to the last of the queue.
-					// We don't have limitations of the size of the queue,
-					// so its least likely for there to be no space to add an
-					// element.
-					try {
-
-						// Inserts the specified element at the end of this
-						// deque if it is possible to do so immediately without
-						// violating
-						// capacity restrictions, returning true upon success
-						// and false if no
-						// space is currently available. When using a
-						// capacity-restricted deque,
-						// this method is generally preferable to the addLast
-						// method, which can fail
-						// to insert an element only by throwing an exception.
-						renewables.offer(sub);
-
-						//cmpbean.saveOrUpdate(billable);
-						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
-						// March 2012 - I later realzed we still sending SMS
-						// twice!!!!!!
-
-					} catch (Exception e) {
-
-						logger.error(e.getMessage(), e);
-
-					}
-					
-					logger.info("DONE putting in queue....");
-					
-
-				} else {// putLast waits for queue to have empty space before
-						// adding new elements.
-
-					// We have a restriction so we have to wait until
-					// The queue has space in it to add an element.
-					try {
-
-						renewables.offer(sub);// if we've got a limit to
-													// the queue
-
-						//cmpbean.saveOrUpdate(billable);
-						// celcomAPI.markInQueue(mtsms.getId());//change at 11th
-						// March 2012 - I fucking later realzed we still sending
-						// SMS twice!!!!!!
-
-						// addedToqueue = true;
-
-					} catch (Exception e) {
-
-						logger.error(e.getMessage(), e);
-						//setRun(false);
-						
-
-					} 
-				}
+			renewables.offer(sub);
 
 			
-
 		}
 
 	}
@@ -492,7 +460,8 @@ public class SubscriptionRenewal extends  Thread {
 
 		try {
 
-			
+			if(context!=null)
+				context.close();
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

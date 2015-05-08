@@ -95,10 +95,10 @@ public class SubscriptionMain extends Thread{
 		Thread ts = new Thread(subscriptionRenewal);
 		ts.start();
 		
-		/*SubscriptionMainTread subApp = new SubscriptionMainTread(submain.cmpbean,submain.subscriptinoEJB);
+		SubscriptionMainTread subApp = new SubscriptionMainTread(submain.cmpbean,submain.subscriptinoEJB);
 		Thread t = new Thread(subApp);
 		t.start();
-*/
+
 		
 		
 		

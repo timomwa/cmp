@@ -287,39 +287,8 @@ public class SubscriptionBillingWorker implements Runnable {
 									
 									logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
 									
-									try{
-										
-										billable.setProcessed(1L);
-										billable.setIn_outgoing_queue(0L);
-										
-										if(billable.isSuccess() ||  "Success".equalsIgnoreCase(billable.getResp_status_code()) ){
-											cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
-											billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
-										}
-										if("TWSS_101".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_114".equalsIgnoreCase(billable.getResp_status_code()) || "TWSS_101".equalsIgnoreCase(billable.getResp_status_code())){
-											cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
-											billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
-										}
-										if("OL402".equalsIgnoreCase(billable.getResp_status_code()) || "OL404".equalsIgnoreCase(billable.getResp_status_code()) || "OL405".equalsIgnoreCase(billable.getResp_status_code())  || "OL406".equalsIgnoreCase(billable.getResp_status_code())){
-											cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
-											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
-											billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
-										}
-										
-										if("TWSS_109".equalsIgnoreCase(billable.getResp_status_code())){
-											cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
-											billable.setIn_outgoing_queue(1L);
-											billable.setProcessed(1L);
-											billable.setRetry_count( (billable.getRetry_count()+1 ) );
-											billable.setMaxRetriesAllowed(0L);
-											billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
-										}
-									
-									}catch(Exception e){
-										logger.error(e.getMessage(),e);
-									}
+									billable.setProcessed(1L);
+									billable.setIn_outgoing_queue(0L);
 									
 									logger.debug("DONE! ");
 									
@@ -328,7 +297,7 @@ public class SubscriptionBillingWorker implements Runnable {
 									setBusy(false);
 									
 								}else{
-									if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty()){
+									if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice().compareTo(BigDecimal.ZERO)<=0){
 										sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
 										logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
 									}else{
@@ -396,8 +365,6 @@ public class SubscriptionBillingWorker implements Runnable {
 	private Billable createBillableFromSubscription(Subscription sub) {
 		
 		Billable billable = null;
-		
-		//subscriptio_nejb.updateQueueStatus(1L,sub.getId());
 	
 		logger.info(" sub "+sub);
 		Long sms_service_id = sub.getSms_service_id_fk();
