@@ -922,14 +922,8 @@ public class MTProducer extends Thread {
 			while(run){
 				
 				logger.info("MT_QUEUE : "+genericMT.size());
-				if(genericMT.size()==0){
+				if(genericMT.size()<queueSize){
 					populateQueue();
-				}else{
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						log(e);
-					}
 				}
 				
 				try {
@@ -1129,12 +1123,12 @@ public class MTProducer extends Thread {
 							qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
 							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
 							param.setHttpParams(qparams);
-							genericMT.offer(param);//if we've got a limit to the queue
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+							genericMT.offer(param);//if we've got a limit to the queue
 							
 						}else{
-							mtMsgs.offer(mtsms);//putLast(mtsms);//if we've got a limit to the queue
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+							mtMsgs.offer(mtsms);//putLast(mtsms);//if we've got a limit to the queue
 							
 						}
 						
