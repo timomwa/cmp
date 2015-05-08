@@ -87,7 +87,7 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	}
 	
 	public String dateToString(Date datestr) throws ParseException{
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:m:ss");
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return format.format(datestr);
 	}
 	
