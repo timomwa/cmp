@@ -242,7 +242,11 @@ public class SubscriptionRenewal extends  Thread {
 			while (run) {
 				watch.start();
 				try {
-					populateQueue();
+					if(renewables.size()<=0){
+						populateQueue();
+					}else{
+						Thread.sleep(5000);//sleep 5 seconds
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.error(e.getMessage(), e);
