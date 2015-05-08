@@ -921,7 +921,16 @@ public class MTProducer extends Thread {
 			
 			while(run){
 				
-				populateQueue();
+				logger.info("MT_QUEUE : "+genericMT.size());
+				if(genericMT.size()==0){
+					populateQueue();
+				}else{
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						log(e);
+					}
+				}
 				
 				try {
 					
@@ -1082,8 +1091,8 @@ public class MTProducer extends Thread {
 							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
 							
 							param.setHttpParams(qparams);
-							genericMT.offer(param);//if we've got a limit to the queue
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+							genericMT.offer(param);//if we've got a limit to the queue
 							
 						}else{
 							//Inserts the specified element at the end of this 
@@ -1092,8 +1101,8 @@ public class MTProducer extends Thread {
 							//space is currently available. When using a capacity-restricted deque, 
 							//this method is generally preferable to the addLast method, which can fail 
 							//to insert an element only by throwing an exception. 
-							mtMsgs.offer(mtsms);// .offerLast(mtsms);
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+							mtMsgs.offer(mtsms);// .offerLast(mtsms);
 							
 						}
 						

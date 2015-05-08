@@ -107,9 +107,9 @@ public class Test1 {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		Boolean b1 = new Boolean("false");
-		System.out.println(b1);
-		System.out.println(b1==false);
+		Long negative_one = new Long(-1);
+		Long poisonPill = new Long(-1);
+		System.out.println(poisonPill.compareTo(negative_one)>0);
 		
 		//System.out.println(("0"+"254737701674".substring(3)).contains(Integer.valueOf("0737701674").toString()));
 		//System.out.println("254737701674".contains(Integer.valueOf("0737701674").toString()));

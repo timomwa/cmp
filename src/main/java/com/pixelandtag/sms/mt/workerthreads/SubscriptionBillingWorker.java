@@ -154,6 +154,8 @@ public class SubscriptionBillingWorker implements Runnable {
 			headerattrs.put("SOAPAction","");
 			headerattrs.put("Content-Type","text/xml; charset=utf-8");
 
+			Long negative_one = new Long(-1);
+			
 			while(run){
 				
 				try {
@@ -162,7 +164,14 @@ public class SubscriptionBillingWorker implements Runnable {
 					Subscription sub = sub_id!=null ? cmp_ejb.find(Subscription.class, sub_id) : null;
 					Billable billable = null;
 					
-					if(sub!=null){
+					if(sub_id.compareTo(negative_one)==0){//poison pill
+						setRun(false);
+						setFinished(true);
+						setBusy(false);
+					}
+					
+					
+					if(sub!=null && sub_id.compareTo(negative_one)>0){
 						
 						
 						if(sub.getSubscription_status()==SubscriptionStatus.confirmed){
@@ -325,6 +334,8 @@ public class SubscriptionBillingWorker implements Runnable {
 				}catch(InterruptedException e){
 					logger.error(e.getMessage(),e);
 					setRun(false);
+					setFinished(true);
+					setBusy(false);
 				}catch(Exception e){
 					logger.error(e.getMessage(),e);
 				}
