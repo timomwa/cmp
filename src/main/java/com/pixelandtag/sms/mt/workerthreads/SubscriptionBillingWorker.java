@@ -158,11 +158,13 @@ public class SubscriptionBillingWorker implements Runnable {
 				try {
 					
 					Subscription sub = SubscriptionRenewal.getBillable();
+					Billable billable = null;
 					
-					sub.setQueue_status(1L);
-					sub = cmp_ejb.saveOrUpdate(sub);
-					
-					Billable billable = createBillableFromSubscription(sub);
+					if(sub!=null){
+						sub.setQueue_status(1L);
+						sub = cmp_ejb.saveOrUpdate(sub);
+						billable = createBillableFromSubscription(sub);
+					}
 					
 					//if such a billable exists
 					if(billable!=null){
@@ -312,7 +314,7 @@ public class SubscriptionBillingWorker implements Runnable {
 				
 				
 				try{
-					logger.info(">>>>:::Mandatory throttling: sleeping "+mandatory_throttle+"ms ");
+					logger.debug(">>>>:::Mandatory throttling: sleeping "+mandatory_throttle+"ms ");
 					Thread.sleep(mandatory_throttle);
 				}catch(InterruptedException e){
 					logger.error(e.getMessage(),e);
