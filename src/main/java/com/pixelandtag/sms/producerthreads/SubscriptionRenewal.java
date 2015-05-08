@@ -39,6 +39,7 @@ import com.pixelandtag.util.FileUtils;
 public class SubscriptionRenewal extends  Thread {
 	public static Logger logger = Logger.getLogger(SubscriptionRenewal.class);
 	private static Semaphore semaphore = null;
+	private static Semaphore serialsemaphore = null;
 	private StopWatch watch = new StopWatch();;
 	private boolean run = true;
 	private CMPResourceBeanRemote cmpbean;
@@ -139,6 +140,7 @@ public class SubscriptionRenewal extends  Thread {
 		}
 
 		semaphore = new Semaphore(1, true);
+		serialsemaphore = new Semaphore(1, true);
 		
 	}
 
@@ -465,6 +467,54 @@ public class SubscriptionRenewal extends  Thread {
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}
+	}
+
+
+
+
+	public static Long generateNextId() {
+		
+	try{
+			
+			
+			logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			
+			serialsemaphore.acquire();//now lock out everybody else!
+			
+			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			if(renewables.size()>0)
+			logger.info("SIZE OF QUEUE ? "+renewables.size());
+			
+			 final Long serial = instance.cmpbean.generateNextTxId();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 
+			 try {
+				 
+				if(serial!=null)
+					logger.debug("serial:  "+serial);
+				//billables.remove(billable);//try double remove from this queue
+			
+			 } catch (Exception e) {
+				
+				 logger.error("\nRootException: " + e.getMessage()+ ": " +
+				 		"\n Something happenned. We were not able to mark " +
+				 		"\n the message as being in queue. " +
+				 		"\n To prevent another thread re-taking the object, " +
+				 		"\n we've returned null to the thread/method requesting for " +
+				 		"\na n MT.",e);
+				 
+				 return null;
+			}
+			 
+			 return serial;
+		
+		} catch (Exception e1) {
+			logger.error(e1.getMessage(),e1);			
+			return null;
+		}finally{
+			
+			serialsemaphore.release(); // then give way to the next thread trying to access this method..
+		}
+		
 	}
 
 }
