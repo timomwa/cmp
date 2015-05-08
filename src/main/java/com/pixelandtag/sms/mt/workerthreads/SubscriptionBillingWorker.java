@@ -205,23 +205,20 @@ public class SubscriptionBillingWorker implements Runnable {
 												}
 											}
 											
-										}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+											billable.setSuccess(Boolean.FALSE);
 											
-											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
-											//we'll try again. 2 means that we re-try again..
-											subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+										}else if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 											
 											//Resume back to normal. No throttling
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
 												SubscriptionRenewal.setWe_ve_been_capped(false);
 											}
+											billable.setSuccess(Boolean.FALSE);
 										}
 										
 										billable.setRetry_count(billable.getRetry_count()+1);
 										final Boolean success  = Boolean.valueOf(resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS"));
-										billable.setSuccess(Boolean.TRUE);
-										
 										
 										if(success.booleanValue()==false){
 											String err = getErrorCode(resp);
@@ -238,50 +235,35 @@ public class SubscriptionBillingWorker implements Runnable {
 											}
 											
 											billable.setResp_status_code(errMsg);
+											billable.setSuccess(Boolean.FALSE);
 											
+											if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+												subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+												//we'll try again. 1 means that we let it sit there, but the cron will set it to 2 so that it's picked
+												subscriptionejb.updateQueueStatus(1L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+											}
 											
 										}else{
 											
 											String transactionId = getTransactionId(resp);
 											billable.setTransactionId(transactionId);
 											billable.setResp_status_code("Success");
-											
-											
-											logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
 											sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
 											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
-											logger.info(":::: SUBSCRIPTION RENEWED: "+sub.toString());
-										
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//Resume back to normal. No throttling
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
 												SubscriptionRenewal.setWe_ve_been_capped(false);
 											}
-											
 											cmp_ejb.createSuccesBillRec(billable);
-											
 										}
 										
-										
-									}else if(RESP_CODE == 400){
-										
-									}else if(RESP_CODE == 401){
-										logger.error("\n::::::::::::::::: Unauthorized! :::::::::::::::");
-										
-									}else if(RESP_CODE == 404 || RESP_CODE == 403){
-										
-										
-									}else if(RESP_CODE == 503){
-				
 										
 									}else if(RESP_CODE==0){
 										logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
 										subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
-									
-									}else{
-										
 									
 									}
 									

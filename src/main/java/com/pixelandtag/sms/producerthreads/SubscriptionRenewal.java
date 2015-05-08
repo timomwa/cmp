@@ -201,12 +201,12 @@ public class SubscriptionRenewal extends  Thread {
 			if(renewables.size()>0)
 			logger.info("SIZE OF QUEUE ? "+renewables.size());
 			
-			 final Subscription billable = renewables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final Subscription subscription = renewables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
-				if(billable!=null)
-					logger.debug("billable.getId():  "+billable.getId());
+				if(subscription!=null)
+					logger.debug("subscription.getId():  "+subscription.getId());
 				//billables.remove(billable);//try double remove from this queue
 			
 			 } catch (Exception e) {
@@ -221,7 +221,7 @@ public class SubscriptionRenewal extends  Thread {
 				 return null;
 			}
 			 
-			 return billable;
+			 return subscription;
 		
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(),e1);			
