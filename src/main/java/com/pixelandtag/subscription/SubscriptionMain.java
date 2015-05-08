@@ -91,7 +91,7 @@ public class SubscriptionMain extends Thread{
 		SubscriptionMain submain = new SubscriptionMain();
 		submain.initialize();
 		
-		SubscriptionRenewal subscriptionRenewal = new SubscriptionRenewal(submain.cmpbean,submain.subscriptinoEJB);
+		SubscriptionRenewal subscriptionRenewal = new SubscriptionRenewal();
 		Thread ts = new Thread(subscriptionRenewal);
 		ts.start();
 		
