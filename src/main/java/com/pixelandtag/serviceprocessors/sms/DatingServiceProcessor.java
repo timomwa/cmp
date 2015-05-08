@@ -99,19 +99,34 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			}else if(KEYWORD.equalsIgnoreCase("LOGIN")){
 				
-				person.setLoggedin(Boolean.TRUE);
-				person = datingBean.saveOrUpdate(person);
+				String msg = "";
+				
+				if(person.getLoggedin().booleanValue()==false){
+					person.setLoggedin(Boolean.TRUE);
+					person = datingBean.saveOrUpdate(person);
+					msg = "Welcome back "+profile.getUsername()+"! People missed you while you were away. You'll now be able to receive messages sent by other people. Dial *329# to find a friend to chat with, or reply with FIND";
+				}else{
+					msg = "You are already logged in. Reploy with FIND to find a friend near your area to chat with, or Dial *329#";
+				}
+				
 				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent("Welcome back "+profile.getUsername()+"! People missed you while you were away. You'll now be able to receive messages sent by other people. Dial *329# to find a friend to chat with, or reply with FIND");
+				mo.setMt_Sent(msg);
 				return mo;
 				
 			}else if(KEYWORD.equalsIgnoreCase("LOGOUT")){
+				String msg = "";
+				if(person.getLoggedin().booleanValue()==true){
+					person.setLoggedin(Boolean.FALSE);
+					person = datingBean.saveOrUpdate(person);
+					msg = "You've successfully been logged out '"+profile.getUsername()+"'. You will not be able to receive messages from the chat service. To log back in, reply with LOGIN";
+				}else{
+					msg = "You are already logged out. You will not be able to receive messages from the chat service. To log back in, reply with LOGIN";
+				}
 				
-				person.setLoggedin(Boolean.FALSE);
-				person = datingBean.saveOrUpdate(person);
 				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent("You've successfully been logged out '"+profile.getUsername()+"'. You will not be able to receive messages from the chat service. To log back in, reply with LOGIN");
+				mo.setMt_Sent(msg);
 				return mo;
+				
 				
 			}else if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
 				

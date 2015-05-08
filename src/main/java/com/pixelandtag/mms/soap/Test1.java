@@ -107,7 +107,11 @@ public class Test1 {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		System.out.println(("0"+"254737701674".substring(3)).contains(Integer.valueOf("0737701674").toString()));
+		Boolean b1 = new Boolean("false");
+		System.out.println(b1);
+		System.out.println(b1==false);
+		
+		//System.out.println(("0"+"254737701674".substring(3)).contains(Integer.valueOf("0737701674").toString()));
 		//System.out.println("254737701674".contains(Integer.valueOf("0737701674").toString()));
 		if(true)
 			return;

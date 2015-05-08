@@ -282,7 +282,7 @@ public class SubscriptionRenewal extends  Thread {
 
 	private void populateQueue() throws Exception {
 
-		List<Subscription> subsl = subscriptio_nejb.getExpiredSubscriptions(Long.valueOf(this.workers));
+		List<Subscription> subsl = subscriptio_nejb.getExpiredSubscriptions(Long.valueOf(billables_per_batch));
 
 		logger.debug("EXPIRED LIST SIZE? subscriptio_nejb : subsl.size():::: "+subsl.size()+" this.workers:: "+this.workers);
 		
