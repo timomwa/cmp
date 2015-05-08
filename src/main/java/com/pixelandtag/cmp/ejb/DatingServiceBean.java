@@ -1139,8 +1139,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		Date date = null;
 		try{
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
-			Query qry = em.createNativeQuery("select DATE_SUB(:timeInNairobi ,INTERVAL :age YEAR) ");
-			qry.setParameter("timeInNairobi", timeInNairobi);
+			String dateNbi = timezoneEJB.dateToString(timeInNairobi);
+			Query qry = em.createNativeQuery("select DATE_SUB('"+dateNbi+"' ,INTERVAL :age YEAR) ");
 			qry.setParameter("age", age.longValue());
 			Object o = qry.getSingleResult();
 			date = (Date) o;
