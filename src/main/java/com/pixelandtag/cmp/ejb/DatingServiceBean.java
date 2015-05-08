@@ -285,7 +285,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					boolean isunique = isUsernameUnique(KEYWORD);
 					
 					try{
-						isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(KEYWORD).toString()));
+						if(isunique)
+							isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(KEYWORD).toString()));
 					}catch(Exception exp){}
 					
 					if(isunique){
