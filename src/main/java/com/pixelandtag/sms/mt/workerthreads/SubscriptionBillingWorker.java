@@ -28,6 +28,7 @@ import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 
 public class SubscriptionBillingWorker implements Runnable {
@@ -157,13 +158,18 @@ public class SubscriptionBillingWorker implements Runnable {
 				
 				try {
 					
-					Subscription sub = SubscriptionRenewal.getBillable();
+					Long sub_id = SubscriptionRenewal.getBillable();
+					Subscription sub = sub_id!=null ? cmp_ejb.find(Subscription.class, sub_id) : null;
 					Billable billable = null;
 					
 					if(sub!=null){
-						sub.setQueue_status(1L);
-						sub = cmp_ejb.saveOrUpdate(sub);
-						billable = createBillableFromSubscription(sub);
+						
+						
+						if(sub.getSubscription_status()==SubscriptionStatus.confirmed){
+							sub.setQueue_status(1L);
+							sub = cmp_ejb.saveOrUpdate(sub);
+							billable = createBillableFromSubscription(sub);
+						}
 					}
 					
 					//if such a billable exists

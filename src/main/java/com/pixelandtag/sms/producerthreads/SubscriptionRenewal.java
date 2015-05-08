@@ -1,37 +1,21 @@
 package com.pixelandtag.sms.producerthreads;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
-import com.pixelandtag.cmp.entities.MOProcessorE;
-import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.sms.mt.workerthreads.SubscriptionBillingWorker;
 import com.pixelandtag.util.FileUtils;
@@ -44,11 +28,10 @@ public class SubscriptionRenewal extends  Thread {
 	private boolean run = true;
 	private CMPResourceBeanRemote cmpbean;
 	private SubscriptionBeanI subscriptio_nejb;
-	private volatile static ConcurrentLinkedQueue<Subscription> renewables = new ConcurrentLinkedQueue<Subscription>();
+	private volatile static ConcurrentLinkedQueue<Long> renewables_ids = new ConcurrentLinkedQueue<Long>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
 	private int mandatory_throttle = 60112;
-	private int queueSize = 1000;
 	private int workers = 1;
 	private int billables_per_batch = 1000;
 	private Properties mtsenderprops;
@@ -69,9 +52,9 @@ public class SubscriptionRenewal extends  Thread {
 		initWorkers();
 		
 		if (this.workers <= 0)
-			renewables = new ConcurrentLinkedQueue<Subscription>();
+			renewables_ids = new ConcurrentLinkedQueue<Long>();
 		else
-			renewables = new ConcurrentLinkedQueue<Subscription>();
+			renewables_ids = new ConcurrentLinkedQueue<Long>();
 		instance = this;
 	}
 	
@@ -186,11 +169,11 @@ public class SubscriptionRenewal extends  Thread {
 
 
 	public void setAdaptive_throttling(boolean adaptive_throttling) {
-		this.adaptive_throttling = adaptive_throttling;
+		SubscriptionRenewal.adaptive_throttling = adaptive_throttling;
 	}
 
 
-	public static Subscription getBillable() {
+	public static Long getBillable() {
 		
 		try{
 			
@@ -200,15 +183,15 @@ public class SubscriptionRenewal extends  Thread {
 			semaphore.acquire();//now lock out everybody else!
 			
 			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
-			if(renewables.size()>0)
-			logger.info("SIZE OF QUEUE ? "+renewables.size());
+			if(renewables_ids.size()>0)
+			logger.info("SIZE OF QUEUE ? "+renewables_ids.size());
 			
-			 final Subscription subscription = renewables.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final Long subscription_id = renewables_ids.poll();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
-				if(subscription!=null)
-					logger.debug("subscription.getId():  "+subscription.getId());
+				if(subscription_id!=null)
+					logger.debug("subscription_id:  "+subscription_id);
 				//billables.remove(billable);//try double remove from this queue
 			
 			 } catch (Exception e) {
@@ -223,7 +206,7 @@ public class SubscriptionRenewal extends  Thread {
 				 return null;
 			}
 			 
-			 return subscription;
+			 return subscription_id;
 		
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(),e1);			
@@ -242,7 +225,7 @@ public class SubscriptionRenewal extends  Thread {
 			while (run) {
 				watch.start();
 				try {
-					if(renewables.size()<=0){
+					if(renewables_ids.size()<=0){
 						populateQueue();
 					}else{
 						Thread.sleep(5000);//sleep 5 seconds
@@ -326,7 +309,7 @@ public class SubscriptionRenewal extends  Thread {
 				}
 			}
 			
-			renewables.offer(sub);
+			renewables_ids.offer(sub.getId());
 
 			
 		}
@@ -346,11 +329,11 @@ public class SubscriptionRenewal extends  Thread {
 				logger.info("Shutting down...");
 				instance.setRun(false);
 				logger.info("...");
-				instance.instance.waitForQueueToBecomeEmpty();
+				SubscriptionRenewal.instance.waitForQueueToBecomeEmpty();
 				logger.info("...");
-				instance.instance.waitForAllWorkersToFinish();
+				SubscriptionRenewal.instance.waitForAllWorkersToFinish();
 				logger.info("...");
-				instance.instance.myfinalize();
+				SubscriptionRenewal.instance.myfinalize();
 				logger.info("...");
 			
 			}else{
@@ -359,9 +342,9 @@ public class SubscriptionRenewal extends  Thread {
 			
 			}
 		}catch(Exception e){
-			instance.logger.error(e.getMessage(),e);
+			SubscriptionRenewal.logger.error(e.getMessage(),e);
 		}catch(Error e){
-			instance.logger.error(e.getMessage(),e);
+			SubscriptionRenewal.logger.error(e.getMessage(),e);
 		}
 		
 	}
@@ -396,7 +379,7 @@ public class SubscriptionRenewal extends  Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				renewables.offer(new Subscription());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				renewables_ids.offer(new Long(-1));//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
@@ -425,11 +408,11 @@ public class SubscriptionRenewal extends  Thread {
 		
 		logger.info("We're shutting down, we put back any unprocessed message to the db queue so that they're picked next time we run..");
 		//Now, if we have a big queue of unprocessed messages, we return them back to the db (or rather set the necessary flags
-		for(Subscription sms : renewables){
-			sms.setQueue_status(0L);//and its now not in the queue
-			logger.info("Returned to db: "+ sms.toString());
+		for(Long sms : renewables_ids){
+			//sms.setQueue_status(0L);//and its now not in the queue
+			logger.info("Returned to db?: "+ sms.toString());
 			try {
-				sms = cmpbean.saveOrUpdate(sms);
+				//sms = cmpbean.saveOrUpdate(sms);
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}
@@ -438,7 +421,7 @@ public class SubscriptionRenewal extends  Thread {
 		
 		
 		
-		renewables.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
+		renewables_ids.clear();//Nothing is useful in the queue now. Necessary? we will find out using test.. 
 		logger.info("workers: "+workers);
 		logger.info("idleWorkers: "+idleWorkers);
 		
@@ -449,9 +432,9 @@ public class SubscriptionRenewal extends  Thread {
 
 	private void waitForQueueToBecomeEmpty() {
 		
-		while(renewables.size()>0){
-			logger.info("BillableQueu.size() : "+renewables.size());
-			logger.info("BillableQueu.size() : "+renewables.size());
+		while(renewables_ids.size()>0){
+			logger.info("BillableQueu.size() : "+renewables_ids.size());
+			logger.info("BillableQueu.size() : "+renewables_ids.size());
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
@@ -486,8 +469,8 @@ public class SubscriptionRenewal extends  Thread {
 			serialsemaphore.acquire();//now lock out everybody else!
 			
 			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
-			if(renewables.size()>0)
-			logger.info("SIZE OF QUEUE ? "+renewables.size());
+			if(renewables_ids.size()>0)
+			logger.info("SIZE OF QUEUE ? "+renewables_ids.size());
 			
 			 final Long serial = instance.cmpbean.generateNextTxId();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
