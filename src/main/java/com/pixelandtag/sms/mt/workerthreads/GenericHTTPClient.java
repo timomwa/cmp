@@ -357,6 +357,11 @@ public class GenericHTTPClient implements Serializable{
 		this.respose_msg = respose_msg;
 	}
 	
-	
+	public void finalizeMe(){
+		try{
+			if(cm!=null)
+				cm.shutdown();
+		}catch(Exception e){}
+	}
 	
 }

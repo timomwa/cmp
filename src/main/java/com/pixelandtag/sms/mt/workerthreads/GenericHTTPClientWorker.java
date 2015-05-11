@@ -103,29 +103,32 @@ public class GenericHTTPClientWorker implements Runnable{
 					final GenericHTTPParam httpparams = BulkSMSProducer.getGenericHttp();
 					
 					
-					final BulkSMSQueue bulksms = httpparams.getBulktext();
+					final BulkSMSQueue bulksms = httpparams!=null ? httpparams.getBulktext() : null;
 					
 					
 					if(bulksms!=null){
-						
-						try{
-							
-							final int RESP_CODE_  = call(httpparams);//send SMS the way it is
-							
-							if(RESP_CODE_==HttpStatus.SC_OK){
-								bulksms.setStatus(MTStatus.SENT_SUCCESSFULLY);
-							}else{
-								bulksms.setStatus(MTStatus.FAILED_TEMPORARILY);
-							}
-						}catch(Exception exp){
-							logger.error(exp.getMessage(),exp);
-						}finally{
+						if(bulksms.getId()>-1){
 							try{
-								cmpbean.saveOrUpdate(bulksms);
-							}catch(Exception exp){
-								logger.error(exp.getMessage(),exp);
+								
+								final int RESP_CODE_  = call(httpparams);//send SMS the way it is
+								
+								if(RESP_CODE_==HttpStatus.SC_OK){
+									bulksms.setStatus(MTStatus.SENT_SUCCESSFULLY);
+								}else{
+									bulksms.setStatus(MTStatus.FAILED_TEMPORARILY);
+								}
+								}catch(Exception exp){
+									logger.error(exp.getMessage(),exp);
+								}finally{
+									try{
+										cmpbean.saveOrUpdate(bulksms);
+									}catch(Exception exp){
+										logger.error(exp.getMessage(),exp);
+									}
+								}
+							}else{
+								setRun(false);// we assume it's a poison pill
 							}
-						}
 					}
 					
 					
@@ -235,6 +238,8 @@ public class GenericHTTPClientWorker implements Runnable{
 									}
 								}
 							}
+						}else{
+							setRun(false);//we assume it's a poison pill
 						}
 					}
 					
@@ -572,4 +577,13 @@ public class GenericHTTPClientWorker implements Runnable{
   		}
   		return ret;
   }
+	
+
+	public void finalizeMe(){
+		try{
+			if(cm!=null)
+				cm.shutdown();
+		}catch(Exception e){}
+	}
+	
 }

@@ -7,6 +7,11 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,6 +36,13 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -97,7 +109,7 @@ public class MTHttpSender implements Runnable{
 	private volatile int recursiveCounter = 0;
 	private Alarm alarm = new Alarm();
 	private static Random r = new Random();
-	
+	private volatile static ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 	
 	
 	public boolean isBusy() {
@@ -164,8 +176,18 @@ public class MTHttpSender implements Runnable{
 		
 		}
 	}
+	
+	
+	private void initHttpClient() {
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+	    cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
+		cm.setDefaultMaxPerRoute(2);
+		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+		httpclient = new DefaultHttpClient(cm);
+	}
 
-	public MTHttpSender(CMPResourceBeanRemote cmpbean,int pollWait_, String name_,URLParams urlp_, String constr, HttpClient httpclient_) throws Exception{
+	public MTHttpSender(CMPResourceBeanRemote cmpbean,int pollWait_, String name_,URLParams urlp_, String constr) throws Exception{
 		
 		this.cmpbean = cmpbean;
 		
@@ -195,17 +217,7 @@ public class MTHttpSender implements Runnable{
 		
 		this.msg_part_wait = urlp_.getMsg_part_wait();
 		
-		//this.celcomAPI = new CelcomImpl(this.connStr,"THRD_"+name);
-		
-		this.httpclient = httpclient_;
-		
 		qparams = new LinkedList<NameValuePair>();
-		
-		//this.celcomAPI.setFr_tz(urlp.getSERVER_TZ());
-		//this.celcomAPI.setTo_tz(urlp.getCLIENT_TZ());
-		
-		
-		
 		
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
@@ -242,10 +254,7 @@ public class MTHttpSender implements Runnable{
 		
 		}finally{}
   
-		logger.info("urlp.getSERVER_TZ():::::: "+urlp.getSERVER_TZ());
-		logger.info("urlp.getCLIENT_TZ():::::: "+urlp.getCLIENT_TZ());
-		
-	
+		initHttpClient();
 	}
 	
 	
@@ -342,7 +351,7 @@ public class MTHttpSender implements Runnable{
 							
 							
 						}else{
-							setRun(false);
+							setRun(false);//poison pill
 						}
 					}else{
 						try{
@@ -399,6 +408,7 @@ public class MTHttpSender implements Runnable{
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}finally{
+			finalizeMe();
 		} 
 		
 	}
@@ -846,6 +856,14 @@ public class MTHttpSender implements Runnable{
 	    }
 		
 		return op;
+	}
+	
+	
+	public void finalizeMe(){
+		try{
+			if(cm!=null)
+				cm.shutdown();
+		}catch(Exception e){}
 	}
 	
 	

@@ -70,8 +70,6 @@ public class BillingService extends Thread{
 	static{
 		uniq = new Semaphore(1, true);
 	}
-	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
-	private HttpClient httpsclient;
 	
 	private CMPResourceBeanRemote cmpbean;
 	private  Context context = null;
@@ -90,12 +88,7 @@ public class BillingService extends Thread{
 			 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
 	 }
 	 
-	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-        @Override
-        public boolean isTrusted(X509Certificate[] certificate, String authType) {
-            return true;
-        }
-    };
+	
 	private int workers = 1;
 	private int billables_per_batch = 100;
     
@@ -157,21 +150,12 @@ public class BillingService extends Thread{
 			logger.warn(e.getMessage(),e);
 		}
 		
-		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
-		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-				    
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("https", 8443, sf));
-		cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-		cm.setDefaultMaxPerRoute(workers);
-		cm.setMaxTotal(workers*2);//http connections that are equal to the worker threads.
-						
-		httpsclient = new DefaultHttpClient(cm);
+		
 					
 		Thread t1;
 		for(int i = 0; i<this.workers ; i++){
 			HttpBillingWorker worker;
-			worker = new HttpBillingWorker(server_tz, client_tz, "THREAD_WORKER_#_"+i,httpsclient, cmpbean);
+			worker = new HttpBillingWorker(server_tz, client_tz, "THREAD_WORKER_#_"+i, cmpbean);
 			t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);
@@ -236,8 +220,15 @@ public class BillingService extends Thread{
 				
 				try{
 					
-					if(billableQ.size()<=0)
+					if(billableQ.size()<=0){
 						populateQueue();
+					}else{
+						try{
+							Thread.sleep(5000);//Sleep for 5 seconds
+						}catch(InterruptedException esp){
+							logger.error(esp.getMessage(),esp);
+						}
+					}
 					
 				}catch(Exception e){
 					
@@ -471,8 +462,10 @@ public class BillingService extends Thread{
 		//First and foremost, let all threads die if they finish to process what they're processing currently.
 		//We don't interrupt them still..
 		for(HttpBillingWorker tw : httpSenderWorkers){
-			if(tw.isRunning())
+			if(tw.isRunning()){
 				tw.setRun(false);
+				tw.finalizeMe();
+			}
 		}
 		
 		//all unprocessed messages in queue are put back to the db.
@@ -483,9 +476,10 @@ public class BillingService extends Thread{
 			
 			for(HttpBillingWorker tw : httpSenderWorkers){
 				
-				if(tw.isRunning())
+				if(tw.isRunning()){
 					tw.setRun(false);
-				
+					tw.finalizeMe();
+				}
 				
 				
 				//might not be necessary because we already set run to false for each thread.
@@ -654,21 +648,6 @@ public class BillingService extends Thread{
 		}catch (Exception e1) {
 			logger.error(e1.getMessage(),e1);
 		}
-		
-		try{
-			
-			cm.shutdown();
-		
-		}catch(Exception e){
-			
-			log(e);
-		
-		}
-		
-		//if(ds!=null)
-		//	ds.releaseConnectionPool();
-		
-		
 		
 	}
 }

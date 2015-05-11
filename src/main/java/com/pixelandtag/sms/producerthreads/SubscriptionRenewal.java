@@ -359,8 +359,10 @@ public class SubscriptionRenewal extends  Thread {
 		//First and foremost, let all threads die if they finish to process what they're processing currently.
 		//We don't interrupt them still..
 		for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
-			if(tw.isRunning())
+			if(tw.isRunning()){
 				tw.setRun(false);
+				tw.finalizeMe();
+			}
 		}
 		
 		//all unprocessed messages in queue are put back to the db.
@@ -371,9 +373,10 @@ public class SubscriptionRenewal extends  Thread {
 			
 			for(SubscriptionBillingWorker tw : billingsubscriptionWorkers){
 				
-				if(tw.isRunning())
+				if(tw.isRunning()){
 					tw.setRun(false);
-				
+					tw.finalizeMe();
+				}
 				
 				
 				//might not be necessary because we already set run to false for each thread.

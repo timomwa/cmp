@@ -4,21 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
@@ -31,7 +25,6 @@ import com.pixelandtag.bulksms.BulkSMSText;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI;
 import com.pixelandtag.entities.URLParams;
-import com.pixelandtag.sms.mo.MOProcessor;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClientWorker;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 
@@ -48,7 +41,6 @@ import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 public class BulkSMSProducer extends Thread {
 	
 	private static final boolean FAIR = true;
-	private String constr;
 	private int workers;
 	private StopWatch watch;
 	private boolean run = true;
@@ -56,7 +48,7 @@ public class BulkSMSProducer extends Thread {
 	public static volatile BulkSMSProducer instance;
 	private static Logger logger = Logger.getLogger(BulkSMSProducer.class);
 	
-	private volatile static BlockingDeque<GenericHTTPParam> genericMT = null;
+	private volatile static ConcurrentLinkedQueue<GenericHTTPParam> genericMT = null;
 	public volatile  BlockingDeque<GenericHTTPClientWorker> generichttpSenderWorkers = new LinkedBlockingDeque<GenericHTTPClientWorker>();
 	private int idleWorkers;
 	private String fr_tz;
@@ -66,8 +58,6 @@ public class BulkSMSProducer extends Thread {
 	
 	private static Semaphore semaphoreg;
 	private static Semaphore semaphore;//a semaphore because we might need to recover from a deadlock later.. listen for when we have many recs in the db but no msg is being sent out..
-	private volatile static ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
-	private volatile static HttpClient httpclient;
 	private Alarm alarm = new Alarm();
 	private CMPResourceBeanRemote cmpbean;
 	private BulkSmsMTI bulksmsBean;
@@ -117,7 +107,7 @@ public class BulkSMSProducer extends Thread {
 			instance.logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
 			
 			
-			 final GenericHTTPParam myMt = genericMT.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final GenericHTTPParam myMt = genericMT.poll();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 //celcomAPI.beingProcessedd(myMt.getId(), true);//mark it as being processed first before returning.
 			 try {
@@ -202,12 +192,6 @@ public class BulkSMSProducer extends Thread {
 		} catch (Exception e) {
 			log(e);
 		}
-		try{
-			cm.shutdown();
-		}catch(Exception e){
-			log(e);
-		}
-		
 	}
 	
 	
@@ -299,7 +283,7 @@ public class BulkSMSProducer extends Thread {
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				genericMT.addLast(new GenericHTTPParam());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				genericMT.offer(new GenericHTTPParam());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
@@ -360,7 +344,7 @@ public class BulkSMSProducer extends Thread {
 		
 		for(int i = 0; i<this.workers; i++){
 			GenericHTTPClientWorker genWorker;
-			genWorker = new GenericHTTPClientWorker(cmpbean,httpclient) ;
+			genWorker = new GenericHTTPClientWorker(cmpbean) ;
 			Thread t2 = new Thread(genWorker);
 			t2.start();
 			generichttpSenderWorkers.add(genWorker);
@@ -386,8 +370,6 @@ public class BulkSMSProducer extends Thread {
 		this.queueSize = queueSize_;
 		
 		this.urlparams = urlparams_;
-		
-		this.constr = connStr_;
 		
 		this.workers = workers_;
 		
@@ -419,9 +401,9 @@ public class BulkSMSProducer extends Thread {
 	    }
 	    
 	    if(queueSize>0){
-	    	genericMT = new LinkedBlockingDeque<GenericHTTPParam>(queueSize);
+	    	genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
 	    }else{
-	    	genericMT = new LinkedBlockingDeque<GenericHTTPParam>(queueSize);
+	    	genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
 	    }
 	    
 	    instance = this;
@@ -432,17 +414,7 @@ public class BulkSMSProducer extends Thread {
 			} catch (InterruptedException e) {
 			}
 	    }
-	    
-	    
-	    
-	    SchemeRegistry schemeRegistry = new SchemeRegistry();
-    	schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-    	cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-		cm.setDefaultMaxPerRoute((this.workers*2));
-		cm.setMaxTotal((this.workers*2));//http connections that are equal to the worker threads.
-		
-		httpclient = new DefaultHttpClient(cm);
-		
+	   
 	    initWorkers();
 	    
 	}
@@ -455,7 +427,13 @@ public class BulkSMSProducer extends Thread {
 			
 			while(run){
 				
-				populateQueue();
+				if(genericMT.size()==0){
+					populateQueue();
+				}else{
+					try{
+						Thread.sleep(60000);//1 minute sleep
+					}catch(Exception exp){}
+				}
 				
 				try {
 					
@@ -552,21 +530,13 @@ public class BulkSMSProducer extends Thread {
 								qparams.add(new BasicNameValuePair("sms",text.getContent()));
 								param.setHttpParams(qparams);
 								if(queueSize==0){
-									genericMT.offerLast(param);
+									genericMT.offer(param);
 								}else{
-									genericMT.putLast(param);
+									genericMT.offer(param);
 								}
 								bulktext.setStatus(MTStatus.SENDING);
-						 	} catch (InterruptedException e) {
 								
-						 		log(e);
-								
-						 		MTStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0) 
-										 ? MTStatus.FAILED_TEMPORARILY 
-												 : MTStatus.FAILED_PERMANENTLY;
-								bulktext.setStatus(status);
-								 
-							}catch(Exception e){
+						 	}catch(Exception e){
 								
 								log(e);
 								

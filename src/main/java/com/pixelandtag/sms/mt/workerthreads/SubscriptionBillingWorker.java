@@ -359,10 +359,16 @@ public class SubscriptionBillingWorker implements Runnable {
 		    	try { 
 		    		context.close(); 
 		    	}catch(Exception ex) { ex.printStackTrace(); }
+		    
+		    finalizeMe();
 		} 
 		
 	}
 	
+	public void finalizeMe() {
+		genericHttpClient.finalizeMe();
+	}
+
 	private Billable createBillableFromSubscription(Subscription sub) {
 		
 		Billable billable = null;

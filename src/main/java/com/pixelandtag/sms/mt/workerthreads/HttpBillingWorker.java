@@ -8,6 +8,11 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -23,7 +28,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.FlushMode;
@@ -69,6 +80,13 @@ public class HttpBillingWorker implements Runnable {
 	private volatile HttpResponse response;
 	private volatile int recursiveCounter = 0;
 	private Alarm alarm = new Alarm();
+	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
+	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+        @Override
+        public boolean isTrusted(X509Certificate[] certificate, String authType) {
+            return true;
+        }
+    };
 	
 	
 	public boolean isBusy() {
@@ -89,32 +107,6 @@ public class HttpBillingWorker implements Runnable {
 	}
 
 	private URLParams urlp;
-	//private static final ThreadLocal<Session> session = new ThreadLocal<Session>();
-	//private static String cannonicalPath = "";
-	//private static File ft = new File(".");
-	/*static{
-		try {
-			cannonicalPath = ft.getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}*/
-	/*private static File f = new File(cannonicalPath+ System.getProperty("file.separator") +"hibernate.cfg.xml");
-	private static  SessionFactory sessionFactory = new AnnotationConfiguration().configure(f).buildSessionFactory();
-	*/
-	/*public static Session getSession() {
-		Session session = (Session) HttpBillingWorker.session.get();
-		if (session == null) {
-			session = sessionFactory.openSession();
-			HttpBillingWorker.session.set(session);
-			getSession().setFlushMode(FlushMode.AUTO);
-		}
-		return session;
-	}*/
-
-
-	
-	
 	
 	
 	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
@@ -162,7 +154,7 @@ public class HttpBillingWorker implements Runnable {
 		}
 	}
 
-	public HttpBillingWorker(String server_tz,String client_tz, String name_, HttpClient httpclient_, CMPResourceBeanRemote cmpbean) throws Exception{
+	public HttpBillingWorker(String server_tz,String client_tz, String name_, CMPResourceBeanRemote cmpbean) throws Exception{
 		
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
@@ -184,12 +176,24 @@ public class HttpBillingWorker implements Runnable {
 		
 		watch.start();
 		
-		this.httpsclient = httpclient_;
-		
 		qparams = new LinkedList<NameValuePair>();
+		
+		initHttpClient();
   
 	}
 
+
+	private void initHttpClient() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
+		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+						    
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("https", 8443, sf));
+		cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
+		cm.setDefaultMaxPerRoute(1);
+		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
+		httpsclient = new DefaultHttpClient(cm);
+	}
 
 	public void run() {
 		
@@ -210,9 +214,14 @@ public class HttpBillingWorker implements Runnable {
 					
 					Billable billable = BillingService.getBillable();
 					
-					logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
-					
-					charge(billable);
+					if(billable!=null){
+						if(billable.getId()>-1){
+							logger.debug(":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+							charge(billable);
+						}else{
+							setRun(false);//poison pill
+						}
+					}
 					
 					
 				}catch (Exception e){
@@ -249,6 +258,8 @@ public class HttpBillingWorker implements Runnable {
 		    	try { 
 		    		context.close(); 
 		    	}catch(Exception ex) { ex.printStackTrace(); }
+		    
+		    finalizeMe();
 		    
 		} 
 		
@@ -641,6 +652,14 @@ public class HttpBillingWorker implements Runnable {
 		} else {
 			return "";
 		}
+	}
+	
+	
+	public void finalizeMe(){
+		try{
+			if(cm!=null)
+				cm.shutdown();
+		}catch(Exception e){}
 	}
 
 }

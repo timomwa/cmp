@@ -129,8 +129,6 @@ public class MTProducer extends Thread {
 	static{
 		uniq = new Semaphore(1, FAIR);
 	}
-	private volatile static ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
-	private volatile static HttpClient httpclient;
 	//private volatile static ConnectionPool pool;
 	//private static Semaphore dbSemaphore;
 	private static DBPoolDataSource ds;
@@ -368,16 +366,6 @@ public class MTProducer extends Thread {
 		
 		}
 		
-		try{
-			
-			cm.shutdown();
-		
-		}catch(Exception e){
-			
-			log(e);
-		
-		}
-		
 		if(ds!=null)
 			ds.releaseConnectionPool();
 		
@@ -474,13 +462,17 @@ public class MTProducer extends Thread {
 		//First and foremost, let all threads die if they finish to process what they're processing currently.
 		//We don't interrupt them still..
 		for(MTHttpSender tw : httpSenderWorkers){
-			if(tw.isRunning())
+			if(tw.isRunning()){
 				tw.setRun(false);
+				tw.finalizeMe();
+			}
 		}
 		
 		for(GenericHTTPClientWorker tw : generichttpSenderWorkers){
-			if(tw.isRunning())
+			if(tw.isRunning()){
 				tw.setRun(false);
+				tw.finalizeMe();
+			}
 		}
 		
 		
@@ -617,13 +609,13 @@ public class MTProducer extends Thread {
 		
 		for(int i = 0; i<this.workers; i++){
 			MTHttpSender worker;
-			worker = new MTHttpSender(cmpbean,pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr, httpclient);
+			worker = new MTHttpSender(cmpbean,pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr);
 			Thread t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);
 			
 			GenericHTTPClientWorker genWorker;
-			genWorker = new GenericHTTPClientWorker(cmpbean,httpclient) ;
+			genWorker = new GenericHTTPClientWorker(cmpbean) ;
 			Thread t2 = new Thread(genWorker);
 			t2.start();
 			generichttpSenderWorkers.add(genWorker);
@@ -898,16 +890,7 @@ public class MTProducer extends Thread {
 			} catch (InterruptedException e) {
 			}
 	    }
-	    
-	    
-	    
-	    SchemeRegistry schemeRegistry = new SchemeRegistry();
-    	schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-    	cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-		cm.setDefaultMaxPerRoute((this.workers*2));
-		cm.setMaxTotal((this.workers*2));//http connections that are equal to the worker threads.
-		
-		httpclient = new DefaultHttpClient(cm);
+	   
 		
 	    initWorkers();
 	    
