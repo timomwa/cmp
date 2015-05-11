@@ -170,19 +170,19 @@ public class BillingService extends Thread{
 		
 		try{
 			
-			logger.info(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!
 			
-			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
-			logger.info("SIZE OF QUEUE ? "+billableQ.size());
+			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
+			logger.debug("SIZE OF QUEUE ? "+billableQ.size());
 			
 			 final Billable billable = billableQ.poll();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
 				 if(billable!=null)
-					 logger.info("billable.getId():  "+billable.getId());
+					 logger.debug("billable.getId():  "+billable.getId());
 			
 			 } catch (Exception e) {
 				
