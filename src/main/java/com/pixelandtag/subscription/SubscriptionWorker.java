@@ -174,8 +174,7 @@ public class SubscriptionWorker extends Thread{
 			}
 			
 			
-			boolean success = cmpbean.updateServiceSubscription(this.subscription_service_id);
-			System.out.println(" success? "+success);
+			cmpbean.updateServiceSubscription(this.subscription_service_id);
 			//Shut down  your own processor here.
 			shutdownProcessors();
 			

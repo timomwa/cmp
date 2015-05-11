@@ -47,7 +47,7 @@ public class SubscribeProcessor extends GenericServiceProcessor {
 		 cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 
-		 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	public SubscribeProcessor(){
 		init_datasource();

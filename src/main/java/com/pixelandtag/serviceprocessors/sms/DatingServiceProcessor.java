@@ -639,7 +639,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			//If profile is complete, we allow chat
 			boolean directMsg  = false;
-			//System.out.println("profile complete ? "+profile.getProfileComplete());
 			PersonDatingProfile destination_person = datingBean.getperSonUsingChatName(KEYWORD);
 			
 			if(destination_person==null){//Is a direct message, so we get last person they sent a message to

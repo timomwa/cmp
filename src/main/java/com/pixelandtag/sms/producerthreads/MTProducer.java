@@ -149,7 +149,7 @@ public class MTProducer extends Thread {
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 			 
-			 System.out.println(getClass().getSimpleName()+": Successfully initialized EJB CMPResourceBeanRemote !!");
+			 logger.info(getClass().getSimpleName()+": Successfully initialized EJB CMPResourceBeanRemote !!");
 	 }
 	
 	

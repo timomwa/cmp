@@ -134,7 +134,7 @@ public class CMPSecurityManager extends J2EESecurityManager implements SecurityH
 				Class[] parameterTypes = method.getParameterTypes();
 				Class returnType = method.getReturnType();
 				 Object value = method.invoke(String.class, null);
-				 System.out.println("\n\n>>>>>>>>>>>>>> "+value);
+				 logger.debug("\n\n>>>>>>>>>>>>>> "+value);
 			} catch (NoSuchMethodException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

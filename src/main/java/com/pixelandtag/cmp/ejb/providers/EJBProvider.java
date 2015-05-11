@@ -8,6 +8,9 @@ import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.ws.rs.ext.Provider;
+
+import org.apache.log4j.Logger;
+
 import java.lang.reflect.Type;
  
 /**
@@ -15,6 +18,8 @@ import java.lang.reflect.Type;
  */
 @Provider
 public class EJBProvider implements InjectableProvider<EJB, Type> {
+	
+	Logger logger = Logger.getLogger(getClass());
 
     public ComponentScope getScope() {
         return ComponentScope.Singleton;
@@ -23,7 +28,7 @@ public class EJBProvider implements InjectableProvider<EJB, Type> {
     public Injectable getInjectable(ComponentContext cc, EJB ejb, Type t) {
     	
     	
-    	System.out.println("\n\n\t>>>>>>>>>>>>>>>>>>>>>>>>>> INJECTABLE");
+    	logger.info("\n\n\t>>>>>>>>>>>>>>>>>>>>>>>>>> INJECTABLE");
         if (!(t instanceof Class)) return null;
 
         try {

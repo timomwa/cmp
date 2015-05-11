@@ -54,7 +54,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 			 cr = new ContentRetriever(cmpbean);
-			 System.out.println(getClass().getSimpleName()+" : Successfully initialized EJB CMPResourceBeanRemote !!");
+			logger.info(getClass().getSimpleName()+" : Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 	
 	public StaticContentProcessor() throws NamingException{
@@ -100,7 +100,6 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 		
 		//Connection conn = null;
 		
-		//System.out.println("mo.toString():::: "+mo.toString());
 		
 		try {
 			

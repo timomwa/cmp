@@ -309,7 +309,6 @@ public class MsisdnController extends HttpServlet {
 				 count = rs.getString("count");
 				 statusCode = rs.getString("statusCode");
 				 price = rs.getString("price");
-				 System.out.println("count:::::::"+count);
 				 responseJSON.append("count", count);
 				 responseJSON.append("statusCode", statusCode);
 				 responseJSON.append("price", price);

@@ -47,7 +47,7 @@ private Logger logger = Logger.getLogger(getClass());
 			
 			String jsonString = readString(incomingData);
 			
-			System.out.println("jsonString >>> "+jsonString);
+			logger.info("jsonString >>> "+jsonString);
 			
 			String resp = bulkquery_api.query(ipAddress, apiKey,username,password,jsonString); 
 			

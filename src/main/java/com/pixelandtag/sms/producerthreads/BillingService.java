@@ -86,7 +86,7 @@ public class BillingService extends Thread{
 			 cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 			 
-			 System.out.println("Successfully initialized EJB CMPResourceBeanRemote !!");
+			 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
 	 }
 	 
 	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {

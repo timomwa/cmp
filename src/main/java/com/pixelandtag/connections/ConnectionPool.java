@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 /** A class for preallocating, recycling, and managing
  *  JDBC connections.
  *  <P>
@@ -23,6 +25,7 @@ public class ConnectionPool implements Runnable {
   private boolean waitIfBusy;
   private Vector<Connection> availableConnections, busyConnections;
   private boolean connectionPending = false;
+  private Logger logger = Logger.getLogger(getClass());
   
   
   public void reInitConnections() throws SQLException{
@@ -130,7 +133,7 @@ public class ConnectionPool implements Runnable {
     	oome.printStackTrace();
     }
     
-    System.out.println("Connection pool Stopped!");
+   logger.debug("Connection pool Stopped!");
   }
 
   public void run() {

@@ -45,7 +45,6 @@ public class ContentManagementAction extends BaseActionBean {
 		resp.put("size", test.size());
 		while(kws.hasNext()){
 			SMSService kw = kws.next();
-			System.out.println(kw);
 			log.info("kw : "+kw);
 			resp.append("keywords", kw.toJson());
 		}

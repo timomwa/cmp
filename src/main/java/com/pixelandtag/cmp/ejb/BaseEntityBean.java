@@ -546,8 +546,7 @@ public class BaseEntityBean implements BaseEntityI {
 			
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
 			logger.debug("BILLABLE: "+billable.toString());
-			System.out.println(" \n\n\n>> XML SENT \n : "+xml + "\n\n");
-			logger.info("XML SENT \n : "+xml + "\n");
+			logger.debug("XML SENT \n : "+xml + "\n");
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			

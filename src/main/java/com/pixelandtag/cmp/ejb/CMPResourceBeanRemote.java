@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.ejb;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,6 +185,16 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	 * @throws Exception
 	 */
 	public boolean markInQueue(Long http_to_send_id) throws Exception;
+	
+	/**
+	 * 
+	 * @param date
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Billable> getBillableSForCleanup(Date date) throws Exception;
+
+	public int invalidateSimilarBillables(Billable bill) throws Exception;
 
 	
 	

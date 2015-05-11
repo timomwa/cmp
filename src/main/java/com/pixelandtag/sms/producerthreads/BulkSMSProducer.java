@@ -89,7 +89,7 @@ public class BulkSMSProducer extends Thread {
 			 bulksmsBean = (BulkSmsMTI) 
 			       		context.lookup("cmp/BulkSmsMTEJB!com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI");
 			 
-			 System.out.println(getClass().getSimpleName()+": Successfully initialized EJB CMPResourceBeanRemote !!");
+			 logger.info(getClass().getSimpleName()+": Successfully initialized EJB BulkSmsMTI !!");
 	 }
 	
 	

@@ -700,7 +700,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		String op = tab + position+ ". " + menuItem.getName();
 		
-		System.out.println(op);
+		logger.debug(op);
 		LinkedHashMap<Integer,MenuItem> mis = getSubMenus(menuItem.getId());
 		if(mis!=null){
 			level++;
@@ -1237,7 +1237,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 			
 			
-			System.out.println("SQL:::: "+sql);
 			Query qry = em.createNativeQuery(sql);
 			
 			String txid = mt.getIdStr();
@@ -2068,7 +2067,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				+"LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` pro "
 				+"ON pro.id = sm.mo_processorFK WHERE pro.enabled=1 AND hour(`ss`.`schedule`)=hour(convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')) AND convert_tz(`ss`.`lastUpdated`,'"+getServerTz()+"','"+getClientTz()+"')<convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') AND `ss`.`ExpiryDate`>convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"')";
 	    logger.debug("\n\t"+sub+"\n");
-	  //  System.out.println("\n\t"+sub+"\n");
 		List<SubscriptionDTO> sub_services  = new ArrayList<SubscriptionDTO>();
 	
 		try {
@@ -2128,6 +2126,65 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return sub_services;
 	}
 
+	@SuppressWarnings("unchecked")
+	public int invalidateSimilarBillables(Billable bill) throws Exception{
+		int res = 0;
+		try{
+			utx.begin();
+			Query qry =  em.createQuery("update Billable b set b.valid=:valid where "//b.pricePointKeyword=:pricePointKeyword"
+					//+ " AND b.operation=:operation AND "
+					+ "b.msisdn=:msisdn "
+					//+ "AND b.shortcode=:shortcode AND b.keyword=:keyword AND "
+					//+ "b.price=:price AND b.cp_id=:cp_id AND b.event_type=:event_type "
+					+ "AND b.service_id=:service_id  "
+					+ "AND year(b.timeStamp)=year(:timestampC) AND month(b.timeStamp)=month(:timestampC) AND day(b.timeStamp)=day(:timestampC) AND b.success=1 "
+					+ " AND b.id <> :id order by b.id desc");
+			qry.setParameter("valid", Boolean.FALSE);
+			qry.setParameter("msisdn", bill.getMsisdn());
+			qry.setParameter("service_id", bill.getService_id());
+			qry.setParameter("timestampC", bill.getTimeStamp());
+			qry.setParameter("id", bill.getId());
+			
+			/*qry.setParameter("pricePointKeyword", bill.getPricePointKeyword());
+			qry.setParameter("operation", bill.getOperation());
+			qry.setParameter("shortcode", bill.getShortcode());
+			qry.setParameter("keyword", bill.getKeyword());
+			qry.setParameter("price", bill.getPrice());
+			qry.setParameter("cp_id", bill.getCp_id());
+			qry.setParameter("event_type", bill.getEvent_type());*/
+			res = qry.executeUpdate();
+			utx.commit();
+			return res;
+		}catch(javax.persistence.NoResultException ex){
+			try{
+				utx.rollback();
+			}catch(Exception exo){}
+			logger.error(ex.getMessage());
+			return 0;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<Billable> getBillableSForCleanup(Date date) throws Exception{
+		try{
+			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 order by timeStamp desc,priority asc");
+			qry.setParameter("timestampC", date);
+			return qry.getResultList();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return null;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+		}
+		
+	}
 
 	@SuppressWarnings("unchecked")
 	public List<Billable> getBillable(int limit) throws Exception{
@@ -2487,8 +2544,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
 							}else{
 								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//advice on how to subscribe
-								
-								System.out.println("\n\n\t\t about to make money>>>>>>>>>>>>>>>>>>>>> req.getMediumType() :: "+req.getMediumType());
 								
 								SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getId()+""));
 								
@@ -2921,8 +2976,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				qry.setParameter("sessionId", sess.getSessionId());
 				USSDSession s = (USSDSession) qry.getSingleResult();
 				
-				System.out.println(":::::::::::::::::::: Session : "+s);
-				//sess = em.find(USSDSession.class, sess.getId());
+				logger.debug(":::::::::::::::::::: Session : "+s);
 				em.remove(s);
 				utx.commit();
 			}catch(Exception e){

@@ -51,9 +51,6 @@ public class Billable implements Serializable {
 	private String pricePointKeyword;
 	
 	
-	/**
-	 * HTTP status code
-	 */
 	@Column(name = "success")
 	private Boolean success;
 	
@@ -72,15 +69,20 @@ public class Billable implements Serializable {
 	@Index(name="outq_idx")
 	private Long in_outgoing_queue;
 	
+	@Column(name = "valid")
+	private Boolean valid;
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
 		if(timeStamp==null)
 			timeStamp = new Date();
 		if(success==null)
-			success = new Boolean(false);
+			success = Boolean.FALSE;
 		if(processed==null)
 			processed = new Long(0);
+		if(valid==null)
+			valid = Boolean.FALSE;
 	}
 	
 	/**
@@ -113,6 +115,7 @@ public class Billable implements Serializable {
 	
 	
 	@Column(name = "keyword")
+	@Index(name="bilblmsisdidx")
 	private String keyword;
 	
 	@Column(name = "price")
@@ -383,6 +386,14 @@ public class Billable implements Serializable {
 
 	public void setMessage_id(Long message_id) {
 		this.message_id = message_id;
+	}
+
+	public Boolean getValid() {
+		return valid;
+	}
+
+	public void setValid(Boolean valid) {
+		this.valid = valid;
 	}
 	
 	

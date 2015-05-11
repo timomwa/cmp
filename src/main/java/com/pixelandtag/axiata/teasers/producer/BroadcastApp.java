@@ -187,7 +187,7 @@ public class BroadcastApp {
 		
 		this.conStr = conString;
 		
-		System.out.println(conString);
+		logger.info(conString);
 		
 		this.conn = getConnection(this.conStr);
 		

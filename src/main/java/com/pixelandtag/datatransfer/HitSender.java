@@ -79,7 +79,7 @@ public class HitSender {
 		
 		IBXClient client = new IBXClient();
 		client.setIbxServerURL(ibxServerURL);
-		System.out.println("usingURL: "+ibxServerURL);
+		logger.info("usingURL: "+ibxServerURL);
 		//Data Request from server/ Download
 		Command c = new Command();
 		c.setDataSourceSql("SELECT id,"+opcoID+" as 'country_id',msisdn,correct,question_idFK as 'question_id',timeStamp,answer,name,points,0 as 'isUSSD',CONVERT_TZ(CURRENT_TIMESTAMP,'+08:00','+08:00') as 'miami_timestamp', price as 'amount' FROM `axiata_trivia`.`trivia_log` WHERE dirty=1 LIMIT "+throttleSize);
@@ -103,7 +103,7 @@ public class HitSender {
 		
 		
 		boolean success = client.handle(c, conn);
-		System.out.println("THE QUERY was run, data uploaded to the server and  result: "+success);
+		logger.info("THE QUERY was run, data uploaded to the server and  result: "+success);
 		
 		
 		try {

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -107,10 +108,10 @@ public class Test1 {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		Long negative_one = new Long(-1);
-		Long poisonPill = new Long(-1);
-		System.out.println(poisonPill.compareTo(negative_one)>0);
-		
+		BigDecimal count = BigDecimal.valueOf(5000000000d);
+		BigDecimal size = BigDecimal.valueOf(100);
+		BigDecimal percentage = count.divide(size,1, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100).setScale(0));
+		System.out.println(count.toPlainString());
 		//System.out.println(("0"+"254737701674".substring(3)).contains(Integer.valueOf("0737701674").toString()));
 		//System.out.println("254737701674".contains(Integer.valueOf("0737701674").toString()));
 		if(true)

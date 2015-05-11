@@ -860,7 +860,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			
 			
-			System.out.println("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
+			logger.info("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
 			pstmt.setBigDecimal(1, new BigDecimal(mo.getCMP_Txid()));
 			pstmt.setString(2, mo.getSMS_Message_String());
 			pstmt.setString(3, mo.getSMS_SourceAddr());
@@ -1138,8 +1138,6 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				
 				return conn_;
 			}else{
-				//logger.info("************ TRYING TO GET DS from CONN POOL **********");
-				//System.out.println("************ TRYING TO GET DS from CONN POOL **********");
 				return getConnection();
 			}
 			
