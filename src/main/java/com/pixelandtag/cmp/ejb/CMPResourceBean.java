@@ -2487,6 +2487,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
+									logger.info(">>>>>>>>>>>> req: "+req);
+									logger.info(">>>>>>>>>>>> req.getMessageId(): "+req.getMessageId());
 									mosm_.setId(req.getMessageId());
 									mosm_.setProcessor_id(processor_fk);
 									

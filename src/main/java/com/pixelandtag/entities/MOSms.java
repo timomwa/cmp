@@ -14,8 +14,6 @@ import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 public class MOSms extends GenericMO{
 	
 	public static StringBuilder sb = new StringBuilder();
-	
-	public Logger logger = Logger.getLogger(getClass());
 
 	private static final String U_SCR = "_";
 
@@ -60,7 +58,7 @@ public class MOSms extends GenericMO{
 			
 			value = request.getParameter(paramName);
 			
-			logger.info("celcom : paramName: "+paramName+ " value: "+value);
+			System.out.println("celcom : paramName: "+paramName+ " value: "+value);
 			
 			attribz.put(paramName, request.getParameter(paramName));
 			

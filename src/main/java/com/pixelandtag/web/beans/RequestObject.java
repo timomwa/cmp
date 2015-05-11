@@ -30,7 +30,7 @@ public class RequestObject implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -697978310928640125L;
+	private static final  long serialVersionUID = -697978310928640125L;
 	private String lac,code, location,cellid,telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
 	private int serviceid = -1;
 	private Long messageId;

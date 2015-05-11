@@ -13,6 +13,7 @@ import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.Transient;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -48,7 +49,7 @@ import com.pixelandtag.web.beans.RequestObject;
  */
 public class USSDReceiver extends HttpServlet {
 	
-	private Logger logger = Logger.getLogger(USSDReceiver.class);
+	//private static final transient Logger logger = Logger.getLogger(USSDReceiver.class);
 	private StopWatch watch;
 	private DataSource ds;
 	private Context initContext;
@@ -100,7 +101,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			String ip_addr = req.getRemoteAddr();
 			
-			logger.debug("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
+			System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
 			
 		}
 		
@@ -129,7 +130,7 @@ public class USSDReceiver extends HttpServlet {
 				ro.setMessageId(messageID);
 				
 			}catch(Exception e){
-				logger.error(e.getMessage(),e);
+				e.printStackTrace();
 			}
 			
 			
@@ -160,7 +161,7 @@ public class USSDReceiver extends HttpServlet {
 				ro.setMessageId(messageID);
 				
 			}catch(Exception e){
-				logger.error(e.getMessage(),e);
+				e.printStackTrace();
 			}
 			
 			
@@ -168,11 +169,11 @@ public class USSDReceiver extends HttpServlet {
 			
 		}catch(Exception e){
 			//pw.write("");
-			logger.error(e.getMessage(),e);
+			e.printStackTrace();
 			try{
 				pw.close();
 			}catch(Exception ex){
-				logger.error(ex.getMessage(),ex);
+				e.printStackTrace();
 			}
 			
 		}finally{
@@ -180,7 +181,7 @@ public class USSDReceiver extends HttpServlet {
 			try{
 				pw.close();
 			}catch(Exception e){
-				logger.error(e.getMessage(),e);
+				e.printStackTrace();
 				//sOutStream.write("{\"status\": \"MO Request not understood\"}".getBytes());
 			}
 			
@@ -192,7 +193,7 @@ public class USSDReceiver extends HttpServlet {
 	@Override
 	public void destroy() {
 		
-		logger.info("CELCOM_MO_RECEIVER: in Destroy");
+		System.out.println("CELCOM_MO_RECEIVER: in Destroy");
 		
 		try {
 			
@@ -200,7 +201,7 @@ public class USSDReceiver extends HttpServlet {
 				initContext.close();
 		
 		} catch (NamingException e) {
-			logger.error(e.getMessage(),e);
+			e.printStackTrace();
 		}
 	
 	}
@@ -223,12 +224,12 @@ public class USSDReceiver extends HttpServlet {
 //				//celcomAPI = new CelcomImpl("jdbc:mysql://db/pixeland_content360?user=pixeland_content&password=D13@pixel&Tag","tasdf");
 			//	celcomAPI = new CelcomImpl(ds);
 			} catch (Exception e) {
-				logger.error(e.getMessage(),e);
+				e.printStackTrace();
 			}
 			
 		} catch (NamingException e) {
 			
-			logger.error(e.getMessage(),e);
+			e.printStackTrace();
 		
 		}
 		
@@ -240,7 +241,7 @@ public class USSDReceiver extends HttpServlet {
 	    String username = "root";
 	    String password = "";
 	    
-	    logger.info(url);
+	    System.out.println(url);
 	    
 	    try {
 	    	
@@ -249,7 +250,7 @@ public class USSDReceiver extends HttpServlet {
 	      
 	      watch.stop();
 	      
-	      logger.info(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to create the connection pool");
+	      System.out.println(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to create the connection pool");
 	      
 	      watch.reset();
 	      
