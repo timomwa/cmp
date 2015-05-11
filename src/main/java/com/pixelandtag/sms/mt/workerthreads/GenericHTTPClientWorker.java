@@ -138,7 +138,7 @@ public class GenericHTTPClientWorker implements Runnable{
 					
 					
 					
-					final MTsms mtsms = httpparams.getMtsms()==null ? cmpbean.getMTsms(Long.valueOf(httpparams.getId()))  : httpparams.getMtsms();
+					final MTsms mtsms = httpparams!=null ? (httpparams.getMtsms()==null ? cmpbean.getMTsms(Long.valueOf(httpparams.getId()))  : httpparams.getMtsms()) : null;
 					
 					if(mtsms!=null){
 						if(mtsms.getId()>-1){
