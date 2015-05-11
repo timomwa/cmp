@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
@@ -51,7 +52,7 @@ public class BillingService extends Thread{
 	private static int sentMT = 0;
 	private int queueSize = 0;
 	public volatile  BlockingQueue<HttpBillingWorker> httpSenderWorkers = new LinkedBlockingDeque<HttpBillingWorker>();
-	private volatile static BlockingDeque<Billable> billableQ = null;
+	private volatile static ConcurrentLinkedQueue<Billable> billableQ = null;
 	private static int max_throttle_billing = 60000;
 	private static boolean enable_biller_random_throttling=false;
 	private static int min_throttle_billing = 1000;
@@ -104,9 +105,9 @@ public class BillingService extends Thread{
     	watch = new StopWatch();
     	
     	if(queueSize<=0)
-    		billableQ =  new LinkedBlockingDeque<Billable>();
+    		billableQ =  new ConcurrentLinkedQueue<Billable>();
     	else	
-    		billableQ =  new LinkedBlockingDeque<Billable>(queueSize);
+    		billableQ =  new ConcurrentLinkedQueue<Billable>();
     	
     	initEJB();
     	initWorkers();
@@ -192,11 +193,12 @@ public class BillingService extends Thread{
 			logger.info(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
 			logger.info("SIZE OF QUEUE ? "+billableQ.size());
 			
-			 final Billable billable = billableQ.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final Billable billable = billableQ.poll();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 
-				logger.info("billable.getId():  "+billable.getId());
+				 if(billable!=null)
+					 logger.info("billable.getId():  "+billable.getId());
 			
 			 } catch (Exception e) {
 				
@@ -234,7 +236,8 @@ public class BillingService extends Thread{
 				
 				try{
 					
-					populateQueue();
+					if(billableQ.size()<=0)
+						populateQueue();
 					
 				}catch(Exception e){
 					
@@ -311,7 +314,7 @@ public class BillingService extends Thread{
 						//space is currently available. When using a capacity-restricted deque, 
 						//this method is generally preferable to the addLast method, which can fail 
 						//to insert an element only by throwing an exception. 
-						billableQ.offerLast(billable);
+						billableQ.offer(billable);
 						
 						billable.setIn_outgoing_queue(1L);
 						cmpbean.saveOrUpdate(billable);
@@ -329,7 +332,7 @@ public class BillingService extends Thread{
 					//The queue has space in it to add an element.
 					try {
 						
-						billableQ.putLast(billable);//if we've got a limit to the queue
+						billableQ.offer(billable);//if we've got a limit to the queue
 						
 						billable.setIn_outgoing_queue(1L);
 						cmpbean.saveOrUpdate(billable);
@@ -488,7 +491,7 @@ public class BillingService extends Thread{
 				//might not be necessary because we already set run to false for each thread.
 				//but in case we have an empty queue, then we add a poison pill that has id = -1 which forces the thread to run, then terminate
 				//because we already set run to false.
-				billableQ.addLast(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
+				billableQ.offer(new Billable());//poison pill...the threads will swallow it and surely die.. bwahahahaha!
 				
 				if(!tw.isBusy()){
 					idleWorkers++;
