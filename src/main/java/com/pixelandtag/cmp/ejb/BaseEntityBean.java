@@ -10,6 +10,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
@@ -25,6 +26,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -38,8 +40,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -194,10 +200,22 @@ public class BaseEntityBean implements BaseEntityI {
 		watch = new StopWatch();
 		builder.loadTrustMaterial(null, trustSelfSignedStrategy);
 		SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(builder.build());
-		cm = new PoolingHttpClientConnectionManager();
+		
+		SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+	        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+	            return true;
+	        }
+	    }).build();
+	 org.apache.http.conn.ssl.X509HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+	 SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+	    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+	            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+	            .register("https", sslSocketFactory)
+	            .build();
+		cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 		cm.setDefaultMaxPerRoute(1);
 		cm.setMaxTotal(1);
-		httpclient = HttpClientBuilder.create().setSSLSocketFactory(sf).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
+		httpclient = HttpClientBuilder.create().setSslcontext( sslContext).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 
 	}
 	@Override
