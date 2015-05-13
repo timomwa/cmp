@@ -455,12 +455,6 @@ public class HttpBillingWorker implements Runnable {
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}
-				
-			try {
-				httpsclient.close();//I don't think we're supposed to close the client
-			} catch (Exception e) {
-				logger.error(e.getMessage(),e);
-			}
 			
 			logger.debug("DONE! ");
 				

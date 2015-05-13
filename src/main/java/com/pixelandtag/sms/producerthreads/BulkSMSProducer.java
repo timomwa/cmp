@@ -48,7 +48,7 @@ public class BulkSMSProducer extends Thread {
 	public static volatile BulkSMSProducer instance;
 	private static Logger logger = Logger.getLogger(BulkSMSProducer.class);
 	
-	private volatile static ConcurrentLinkedQueue<GenericHTTPParam> genericMT = null;
+	private volatile static ConcurrentLinkedQueue<GenericHTTPParam> genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
 	public volatile  BlockingDeque<GenericHTTPClientWorker> generichttpSenderWorkers = new LinkedBlockingDeque<GenericHTTPClientWorker>();
 	private int idleWorkers;
 	private String fr_tz;
@@ -400,11 +400,7 @@ public class BulkSMSProducer extends Thread {
 	    
 	    }
 	    
-	    if(queueSize>0){
-	    	genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
-	    }else{
-	    	genericMT = new ConcurrentLinkedQueue<GenericHTTPParam>();
-	    }
+	   
 	    
 	    instance = this;
 	    

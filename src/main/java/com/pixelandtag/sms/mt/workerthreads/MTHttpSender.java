@@ -737,12 +737,6 @@ public class MTHttpSender implements Runnable{
 					logger.error(e.getMessage(),e);
 				}
 				
-				try {
-					httpclient.close();//I don't think we're supposed to close the client
-				} catch (Exception e) {
-					logger.error(e.getMessage(),e);
-				}
-	            
 			}
 	
 	}
