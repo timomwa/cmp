@@ -180,6 +180,7 @@ public class MOProcessor implements Runnable {
 								
 								if(servp!=null){
 									boolean success = servp.submit(moSms);
+									//mark in queue here?
 								}else{
 									logger.warn(":::::: COULD not get a free processor with processor id: "+moSms.getProcessor_id()+" at the moment");
 									//put sms back in queue?

@@ -1,6 +1,5 @@
 package com.pixelandtag.utilities;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -10,15 +9,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.sms.producerthreads.Billable;
 
 public class StatsCleaner {
 	
-	private static DatingServiceI datingBean;
 	private static InitialContext context;
-	private static Properties mtsenderprop;
 	private static CMPResourceBeanRemote cmpresourcebean;
 	private static TimezoneConverterI tzconvert;
 	
@@ -32,8 +28,6 @@ public class StatsCleaner {
 		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
 		 props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
-		 datingBean =  (DatingServiceI) 
-     		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		 cmpresourcebean =  (CMPResourceBeanRemote) 
 		      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 tzconvert =  (TimezoneConverterI) 
@@ -60,12 +54,14 @@ public class StatsCleaner {
 		List<Billable> billables = cmpresourcebean.getBillableSForCleanup(date);
 		int c = 0;
 		int billable_size = billables.size();
+		
 		for(Billable bill : billables){
-			int cleaned_Recs = cmpresourcebean.invalidateSimilarBillables(bill); 
 			
+			int cleaned_Recs = cmpresourcebean.invalidateSimilarBillables(bill); 
+			bill.setValid(Boolean.TRUE);
+			bill = cmpresourcebean.saveOrUpdate(bill);
 			
 			c++;
-			
 			System.out.println("cleaned="+cleaned_Recs+", progress : ("+c+"/"+ billable_size +")");
 		}
 	}

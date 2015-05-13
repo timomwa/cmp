@@ -1,11 +1,9 @@
 package com.pixelandtag.sms.mt.workerthreads;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.security.KeyManagementException;
@@ -13,82 +11,73 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
 
-import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
-import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.entities.URLParams;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.MTProducer;
-import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
+import com.pixelandtag.util.StopWatch;
 
 public class HttpBillingWorker implements Runnable {
 	
-	private static Logger logger = Logger.getLogger(HttpBillingWorker.class);
-	
-	private HttpClient httpsclient;
-	private int retry_per_msg = 1;
-	private int pollWait;
+	private Logger logger = Logger.getLogger(HttpBillingWorker.class);
+	private CloseableHttpClient httpsclient;
 	private  Context context;
-	private String server_tz;
-	private String client_tz;
-	//private DBPoolDataSource dbpds = null;
 	private StopWatch watch;
 	private boolean run = true;
 	private boolean finished = false;
 	private String name;
 	private boolean busy = false;
-	private List<NameValuePair> qparams = null;
-	//private volatile boolean success = true;
-	private volatile String message = "";
-	private volatile int sms_idx = 0;
+	//private List<NameValuePair> qparams = null;
+	private String message = "";
 	private HttpPost httsppost = null;
-	private volatile HttpResponse response;
-	private volatile int recursiveCounter = 0;
-	private Alarm alarm = new Alarm();
-	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
-	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-        @Override
+	private int recursiveCounter = 0;
+	private SSLContextBuilder builder = new SSLContextBuilder();
+	private PoolingHttpClientConnectionManager cm;
+	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
+		@Override
         public boolean isTrusted(X509Certificate[] certificate, String authType) {
             return true;
         }
-    };
+		
+	};
 	
-	
+    private void initHttpClient() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+    	RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
+    	builder.loadTrustMaterial(null, trustSelfSignedStrategy);
+		 SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(builder.build());
+		cm = new PoolingHttpClientConnectionManager();
+		cm.setDefaultMaxPerRoute(1);
+		cm.setMaxTotal(1);
+		httpsclient = HttpClientBuilder.create().setSSLSocketFactory(sf).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
+	}
+    
+    
 	public boolean isBusy() {
 		return busy;
 	}
@@ -106,21 +95,9 @@ public class HttpBillingWorker implements Runnable {
 		this.finished = finished;
 	}
 
-	private URLParams urlp;
-	
-	
 	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
-
-
-
-	private long msg_part_wait;
-
-	private String MINUS_ONE = "-1";
-
 	private CMPResourceBeanRemote cmp_ejb;
-	private final String FREE_TARRIF_CODE_CMP_SKEYWORD = "free_tarrif_code_cmp_SKeyword";
-	private final String FREE_TARRIF_CODE_CMP_AKEYWORD = "free_tarrif_code_cmp_AKeyword";
-
+	
 	
 	public String getName() {
 		return name;
@@ -166,41 +143,28 @@ public class HttpBillingWorker implements Runnable {
 		 context = new InitialContext(props);
 		 this.cmp_ejb  =  (CMPResourceBeanRemote) 
       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		 
-		this.server_tz = server_tz;
-		this.client_tz = client_tz;
 		
-		this.watch = new StopWatch();
+		 this.watch = new StopWatch();
 		
-		this.name = name_;
+		
+		 this.name = name_;
 		
 		watch.start();
 		
-		qparams = new LinkedList<NameValuePair>();
+		//qparams = new LinkedList<NameValuePair>();
 		
 		initHttpClient();
   
 	}
 
 
-	private void initHttpClient() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
-		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-						    
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("https", 8443, sf));
-		cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-		cm.setDefaultMaxPerRoute(1);
-		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
-		httpsclient = new DefaultHttpClient(cm);
-	}
+	
 
 	public void run() {
 		
 		try{
 			
 			pauze();//wait while producer gets ready
-			
 			
 			watch.stop();
 			
@@ -221,6 +185,10 @@ public class HttpBillingWorker implements Runnable {
 						}else{
 							setRun(false);//poison pill
 						}
+					}else{
+						try{
+							Thread.sleep(10000);//Wait 10 seconds before trying again
+						}catch(Exception esp){}
 					}
 					
 					
@@ -230,15 +198,13 @@ public class HttpBillingWorker implements Runnable {
 					
 				}finally{
 					
-					setSms_idx(0);
+					setFinished(true);
+					
+					setBusy(false);
 				
 				}
 				
 			}
-			
-			setFinished(true);
-			
-			setBusy(false);
 			
 			logger.info(getName()+": worker shut down safely!");
 		
@@ -265,39 +231,6 @@ public class HttpBillingWorker implements Runnable {
 		
 	}
 	
-	
-	private synchronized void setSms_idx(int i) {
-		this.sms_idx = i;
-		notify();
-	}
-
-	private synchronized int getSms_idx() {
-		return sms_idx;
-		
-	}
-
-	private Vector<String> splitText(String input){
-  		int maxSize = 136;
-		Vector<String> ret=new Vector<String>();
-  		
-  		while(true){
-  			input=input.trim();
-  			if (input.length()<=maxSize){
-  				ret.add(input);
-  				break;
-  			}
-  			int pos=maxSize;
-  			
-            while(input.charAt(pos)!=' ' && input.charAt(pos)!='\n')
-  				pos--;
-  			String tmp=input.substring(0,pos);
-  			ret.add(tmp);
-  			input=input.substring(pos);
-  			
-  		}
-  		return ret;
-  }
-	
 	private void log(Exception e) {
 		
 		logger.error(e.getMessage(),e);
@@ -308,15 +241,14 @@ public class HttpBillingWorker implements Runnable {
 	 * Sends the MT message
 	 * @param billable - com.pixelandtag.MTsms
 	 */
-	@SuppressWarnings("restriction")
 	private void charge(Billable  billable){
-		//this.success  = true;
 		
 		setBusy(true);
 		
 		httsppost = new HttpPost(this.mtUrl);
 
-		HttpEntity resEntity = null;;
+		HttpEntity resEntity = null;
+		CloseableHttpResponse response = null;
 		
 		
 		try {
@@ -337,7 +269,7 @@ public class HttpBillingWorker implements Runnable {
 			
 			
 			watch.start();
-			HttpResponse response = httpsclient.execute(httsppost);
+			response = httpsclient.execute(httsppost);
 			watch.stop();
 			logger.debug("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
@@ -357,9 +289,7 @@ public class HttpBillingWorker implements Runnable {
 			billable.setProcessed(1L);
 			if (RESP_CODE == HttpStatus.SC_OK) {
 				
-				
 				billable.setRetry_count(billable.getRetry_count()+1);
-				
 				Boolean success = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
 				billable.setSuccess(success );
 				
@@ -391,29 +321,22 @@ public class HttpBillingWorker implements Runnable {
 								
 			}else if(RESP_CODE == 400){
 				
-				//this.success  = false;
 				
 			}else if(RESP_CODE == 401){
-				//this.success  = false;
 				
 				logger.error("\nUnauthorized!");
 				
 			}else if(RESP_CODE == 404 || RESP_CODE == 403){
 				
-				//this.success  = false;
-				
 			}else if(RESP_CODE == 503){
 
-				//this.success  = false;
-				
 			}else{
-				
-				//this.success = false;
 				
 			}
 			
 					
-			}catch(ConnectException ce){
+			
+		}catch(ConnectException ce){
 				
 				//this.success  = false;
 				
@@ -423,119 +346,125 @@ public class HttpBillingWorker implements Runnable {
 				
 				httsppost.abort();
 				
-			}catch(SocketTimeoutException se){
+			
+		}catch(SocketTimeoutException se){
 				
-				//this.success  = false;
+			message = se.getMessage();
+			
+			httsppost.abort();
+			
+			logger.error(message, se);
 				
-				message = se.getMessage();
-				
-				httsppost.abort();
-				
-				logger.error(message, se);
-				
-			} catch (IOException ioe) {
-				
-				//this.success  = false;
-				
-				message = ioe.getMessage();
-				
-				httsppost.abort();
-				
-				logger.error("\n\n==============================================================\n\n"+message+" CONNECTION TO OPERATOR FAILED. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
-				
-			} catch (Exception ioe) {
-				
-				//this.success  = false;
-				
-				message = ioe.getMessage();
-				
-				httsppost.abort();
-				
-				logger.error(message, ioe);
-				
-			} finally{
-				
-				watch.reset();
-				
-				setBusy(false);
-				
-				logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
-				
-				removeAllParams(qparams);
-				
-				 // When HttpClient instance is no longer needed,
-	            // shut down the connection manager to ensure
-	            // immediate deallocation of all system resources
-				try {
-					
-					if(resEntity!=null)
-						EntityUtils.consume(resEntity);
-				
-				} catch (Exception e) {
-					
-					log(e);
-				
-				}
+			
+		} catch (IOException ioe) {
 				
 				
-				try{
-					
-					billable.setProcessed(1L);
-					billable.setIn_outgoing_queue(0L);
-					
-					if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
-						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
-						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
-						billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
-					}
-					if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
-						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
-						billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
-					}
-					if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
-						cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
-						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
-						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
-					}
-					
-					if("TWSS_109".equals(billable.getResp_status_code())){
-						cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
-						billable.setIn_outgoing_queue(0L);
-						billable.setProcessed(0L);
-						billable.setRetry_count( (billable.getRetry_count()+1 ) );
-						billable.setMaxRetriesAllowed(5L);
-						billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
-					}
-					
-					cmp_ejb.saveOrUpdate(billable);
-					
-					if(billable.isSuccess()){//return back to queue if we did not succeed
-						//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
-						//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
-						
-						//on third try, we abort
-						httsppost.abort();
-						
-						
-					}else{
-						
-						recursiveCounter = 0;
-						//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
-					}
-					
+			message = ioe.getMessage();
+			
+			httsppost.abort();
+			
+			logger.error("\n\n==============================================================\n\n"+message+" CONNECTION TO OPERATOR FAILED. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
 				
-					
-				}catch(Exception e){
-					logger.error(e.getMessage(),e);
-				}
+			
+		} catch (Exception ioe) {
 				
-				watch.reset();
+			message = ioe.getMessage();
+		
+			httsppost.abort();
+			
+			logger.error(message, ioe);
 				
+			
+		} finally{
 				
-				logger.debug("DONE! ");
+			watch.reset();
+				
+			setBusy(false);
+				
+			logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
+				
+			// When HttpClient instance is no longer needed,
+	        // shut down the connection manager to ensure
+	        // immediate deallocation of all system resources
+			
+			try {
+			
+				if(resEntity!=null)
+					EntityUtils.consume(resEntity);
+				
+			} catch (Exception e) {
+				
+				log(e);
 				
 			}
+				
+				
+			try{
+					
+				billable.setProcessed(1L);
+				billable.setIn_outgoing_queue(0L);
+					
+				if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+					cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
+					cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
+					billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
+				}
+				if("TWSS_101".equals(billable.getResp_status_code()) || "TWSS_114".equals(billable.getResp_status_code()) || "TWSS_101".equals(billable.getResp_status_code())){
+					cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+					cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.InvalidSubscriber);
+					billable.setResp_status_code(BillingStatus.BILLING_FAILED_PERMANENTLY.toString());
+				}
+				if("OL402".equals(billable.getResp_status_code()) || "OL404".equals(billable.getResp_status_code()) || "OL405".equals(billable.getResp_status_code())  || "OL406".equals(billable.getResp_status_code())){
+					cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.INSUFFICIENT_FUNDS);
+					cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAInsufficientBalance);
+					billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
+				}
+					
+				if("TWSS_109".equals(billable.getResp_status_code())){
+					cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.PSAChargeFailure);
+					billable.setIn_outgoing_queue(0L);
+					billable.setProcessed(0L);
+					billable.setRetry_count( (billable.getRetry_count()+1 ) );
+					billable.setMaxRetriesAllowed(5L);
+					billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
+				}
+					
+				cmp_ejb.saveOrUpdate(billable);
+					
+				if(billable.isSuccess()){//return back to queue if we did not succeed
+					//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
+					//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
+						
+					//on third try, we abort
+					httsppost.abort();
+						
+						
+				}else{
+						
+					recursiveCounter = 0;
+				}
+				
+			}catch(Exception e){
+					logger.error(e.getMessage(),e);
+			}
+				
+			watch.reset();
+			
+			try {
+				response.close();
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+				
+			try {
+				httpsclient.close();//I don't think we're supposed to close the client
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+			
+			logger.debug("DONE! ");
+				
+		}
 	
 	}
 	
@@ -556,7 +485,7 @@ public class HttpBillingWorker implements Runnable {
 		return resp.substring(start, end);
 	}
 
-	private void printHeader() {
+	public void printHeader() {
 		logger.debug("\n===================HEADER=========================\n");
 	
 	try{
@@ -595,12 +524,7 @@ public class HttpBillingWorker implements Runnable {
 		
 	}
 
-	private void removeAllParams(List<NameValuePair> params) {
-		params.clear();
-	}
-	
-
-	private void logAllParams(List<NameValuePair> params) {
+	public void logAllParams(List<NameValuePair> params) {
 		
 		for(NameValuePair np: params){
 			

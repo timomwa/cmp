@@ -224,7 +224,7 @@ public class BillingService extends Thread{
 						populateQueue();
 					}else{
 						try{
-							Thread.sleep(5000);//Sleep for 5 seconds
+							Thread.sleep(10000);//Sleep for 10 seconds
 						}catch(InterruptedException esp){
 							logger.error(esp.getMessage(),esp);
 						}

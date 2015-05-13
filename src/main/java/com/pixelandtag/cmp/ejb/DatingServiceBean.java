@@ -493,7 +493,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 							mo.setCMP_SKeyword(smsserv.getCmd());
 							
 							if(req.getTransactionID().compareTo(BigInteger.ONE)>0)
-								mo.setCMP_Txid(req.getTransactionID());
+								mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 							else
 								mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
 							

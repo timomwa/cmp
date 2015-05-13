@@ -234,60 +234,15 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			billable = getEJB().saveOrUpdate(billable);
 			
-			/*String sql = "INSERT INTO  billable_queue(`cp_id`,`cp_tx_id`,`discount_applied`,`event_type`,"
-					+ "`in_outgoing_queue`,`keyword`,`maxRetriesAllowed`,`message_id`,"
-					+ "`msisdn`,`operation`,`price`,`priority`,`processed`,`retry_count`,`service_id`,`shortcode`,`timeStamp`,`tx_id`,`price_point_keyword`)"
-					+ "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?) ";
-			
-			
-			pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			pstmt.setString(1, billable.getCp_id());
-			pstmt.setLong(2, billable.getCp_tx_id());
-			pstmt.setString(3, billable.getDiscount_applied());
-			pstmt.setString(4, billable.getEvent_type().toString());
-			pstmt.setLong(5, billable.getIn_outgoing_queue());
-			pstmt.setString(6, billable.getKeyword());
-			pstmt.setLong(7, billable.getMaxRetriesAllowed());
-			pstmt.setLong(8, billable.getMessage_id());
-			pstmt.setString(9, billable.getMsisdn());
-			pstmt.setString(10, billable.getOperation());
-			pstmt.setBigDecimal(11, billable.getPrice());
-			pstmt.setLong(12, billable.getPriority());
-			pstmt.setLong(13, billable.isProcessed());
-			pstmt.setLong(14, billable.getRetry_count());
-			pstmt.setString(15, billable.getService_id());
-			pstmt.setString(16, billable.getShortcode());
-			pstmt.setLong(17, billable.getTx_id());
-			pstmt.setString(18, billable.getPricePointKeyword());
-			
-			int n = pstmt.executeUpdate();
-			
-			rs = pstmt.getGeneratedKeys();
-			if(rs.next())
-				billable.setId(rs.getInt(1));*/
-			
-			
 			
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
-			/*try {
-				rs.close();
-			} catch (SQLException e) {
-			}
-			try {
-				pstmt.close();
-			} catch (SQLException e) {
-			}
-			try {
-				conn.close();
-			} catch (SQLException e) {
-			}*/
+			
 		}
 		
-		//billable = BillingService.saveOrUpdate(billable);
 		logger.debug(" after save "+billable.getId());
 		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
 		mo_.setPriority(0);

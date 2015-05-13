@@ -11,41 +11,28 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
-import com.pixelandtag.api.ERROR;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.producerthreads.MTProducer;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
 
 public class GenericHTTPClient implements Serializable{
 	
@@ -54,50 +41,51 @@ public class GenericHTTPClient implements Serializable{
 	 */
 	private static final long serialVersionUID = -6923599491151170899L;
 	private Logger logger = Logger.getLogger(getClass());
-	private HttpClient httpclient = null;
+	private CloseableHttpClient httpclient = null;
+	private SSLContextBuilder builder = new SSLContextBuilder();
 	private String name;
 	private StopWatch watch;
 	private String respose_msg = "";
 	private boolean run = true;
-	private volatile static ThreadSafeClientConnManager cm;
+	private static PoolingHttpClientConnectionManager cm;
 	private volatile boolean success = true;
 	private boolean finished = false;
 	private boolean busy = false;
-	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-        @Override
+	
+	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
+		@Override
         public boolean isTrusted(X509Certificate[] certificate, String authType) {
             return true;
         }
-    };
+		
+	};
 
 	@SuppressWarnings("unused")
 	private GenericHTTPClient(){}
 	
 	public GenericHTTPClient(String proto) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
+		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
+
 		if(proto.trim().equalsIgnoreCase("http")){
 			
-			SchemeRegistry schemeRegistry = new SchemeRegistry();
-		    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		    cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-			cm.setDefaultMaxPerRoute(2);
-			cm.setMaxTotal(2);//http connections that are equal to the worker threads.
-			httpclient = new DefaultHttpClient(cm);
+			cm = new PoolingHttpClientConnectionManager();
+			cm.setDefaultMaxPerRoute(1);
+			cm.setMaxTotal(1);
+			httpclient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 		
 		}else{
-			
-			SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
-					SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-			SchemeRegistry schemeRegistry = new SchemeRegistry();
-			schemeRegistry.register(new Scheme("https", 8443, sf));
-			cm = new ThreadSafeClientConnManager(schemeRegistry,60,TimeUnit.MINUTES);
-			cm.setDefaultMaxPerRoute(2);
-			cm.setMaxTotal(2);
-			httpclient = new DefaultHttpClient(cm);
+			 builder.loadTrustMaterial(null, trustSelfSignedStrategy);
+			 SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(
+			            builder.build());
+			cm = new PoolingHttpClientConnectionManager();
+			cm.setDefaultMaxPerRoute(1);
+			cm.setMaxTotal(1);
+			httpclient = HttpClientBuilder.create().setSSLSocketFactory(sf).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 		}
 		init();
 	}
 	
-	public GenericHTTPClient(HttpClient httpclient_){
+	public GenericHTTPClient(CloseableHttpClient httpclient_){
 		this.httpclient = httpclient_;
 		init();
 	}
@@ -122,7 +110,7 @@ public class GenericHTTPClient implements Serializable{
 		int resp_code = 0;
 		setBusy(true);
 		HttpPost httppost = null;
-		HttpResponse response = null;
+		CloseableHttpResponse response = null;
 		try {
 			httppost = new HttpPost(genericparams.getUrl());
 			
@@ -140,11 +128,6 @@ public class GenericHTTPClient implements Serializable{
 				StringEntity se = new StringEntity(genericparams.getStringentity());
 				httppost.setEntity(se);
 			}
-			HttpParams params = new BasicHttpParams();
-			params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
-			params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-			params.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true);
-			httppost.setParams(params);
 			watch.start();
 			response = httpclient.execute(httppost);
 			watch.stop();
@@ -181,6 +164,17 @@ public class GenericHTTPClient implements Serializable{
 			this.success = false;
 		}finally{
 			setBusy(false);
+			try {
+				response.close();
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+			
+			try {
+				httpclient.close();//I don't think we're supposed to close the client
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
 			
 		}
 		return resp_code;
@@ -192,7 +186,7 @@ public class GenericHTTPClient implements Serializable{
 		notify();
 	}
 	
-	private void printHeader(HttpPost httppost) {
+	public void printHeader(HttpPost httppost) {
 		logger.debug("\n===================HEADER=========================\n");
 		try{
 			
@@ -240,7 +234,7 @@ public class GenericHTTPClient implements Serializable{
 		this.name = name;
 	}
 
-	private void logAllParams(List<NameValuePair> params) {
+	public void logAllParams(List<NameValuePair> params) {
 		
 		for(NameValuePair np: params){
 			
@@ -286,31 +280,8 @@ public class GenericHTTPClient implements Serializable{
 		return finished;
 	}
 
-	private void setFinished(boolean finished) {
-		this.finished = finished;
-	}
 
-	private Vector<String> splitText(String input){
-  		int maxSize = 136;
-		Vector<String> ret=new Vector<String>();
-  		
-  		while(true){
-  			input=input.trim();
-  			if (input.length()<=maxSize){
-  				ret.add(input);
-  				break;
-  			}
-  			int pos=maxSize;
-  			
-            while(input.charAt(pos)!=' ' && input.charAt(pos)!='\n')
-  				pos--;
-  			String tmp=input.substring(0,pos);
-  			ret.add(tmp);
-  			input=input.substring(pos);
-  			
-  		}
-  		return ret;
-  }
+	
 	
 	
 	/**
@@ -358,6 +329,10 @@ public class GenericHTTPClient implements Serializable{
 	}
 	
 	public void finalizeMe(){
+		try{
+			if(httpclient!=null)
+				httpclient.close();
+		}catch(Exception e){}
 		try{
 			if(cm!=null)
 				cm.shutdown();

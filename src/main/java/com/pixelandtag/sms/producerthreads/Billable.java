@@ -82,7 +82,7 @@ public class Billable implements Serializable {
 		if(processed==null)
 			processed = new Long(0);
 		if(valid==null)
-			valid = Boolean.FALSE;
+			valid = Boolean.TRUE;
 	}
 	
 	/**

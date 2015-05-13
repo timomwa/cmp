@@ -11,12 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javax.naming.Context;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.api.BillingStatus;
-import com.pixelandtag.api.ERROR;
-import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
@@ -42,9 +38,6 @@ public class SubscriptionBillingWorker implements Runnable {
 	private String name;
 	private int mandatory_throttle;
 	private boolean busy = false;
-	//private volatile boolean success = true;
-	private volatile String message = "";
-	private Alarm alarm = new Alarm();
 	private GenericHTTPClient genericHttpClient;
 	private SubscriptionBeanI subscriptionejb;
 	private static Random r = new Random();

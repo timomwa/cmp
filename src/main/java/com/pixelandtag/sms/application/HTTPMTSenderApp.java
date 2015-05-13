@@ -36,7 +36,7 @@ public class HTTPMTSenderApp extends Thread {
 	public void initialize(){
 		
 		props = getPropertyFile("mtsender.properties");
-		log4J = getPropertyFile("log4j.properties");
+		//log4J = getPropertyFile("log4j.properties");
 		
 		
 		urlparams = new URLParams(props);
@@ -65,8 +65,6 @@ public class HTTPMTSenderApp extends Thread {
 			PropertyConfigurator.configure(log4J);
 		else
 			BasicConfigurator.configure();
-		//PropertyConfigurator.configureAndWatch(getPath("log4j.properties"));
-		//BasicConfigurator.configure();
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("\nmturl: ").append(mturl)

@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
 import javax.naming.InitialContext;
@@ -22,6 +24,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
+
+
 
 
 
@@ -1534,7 +1538,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	public Queue<MOSms> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword) {
-		Queue<MOSms> moSMS = null;//new ArrayList<MOSms>();
+		ConcurrentLinkedQueue<MOSms> moSMS = null;//new ArrayList<MOSms>();
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -1564,7 +1568,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			while(rs.next()){
 				
 				if(rs.isFirst()){
-					moSMS = new LinkedList<MOSms>();
+					moSMS = new ConcurrentLinkedQueue<MOSms>();
 					//TODO use a collections object that maintains order!
 				}
 				

@@ -2126,16 +2126,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return sub_services;
 	}
 
-	@SuppressWarnings("unchecked")
 	public int invalidateSimilarBillables(Billable bill) throws Exception{
 		int res = 0;
 		try{
 			utx.begin();
-			Query qry =  em.createQuery("update Billable b set b.valid=:valid where "//b.pricePointKeyword=:pricePointKeyword"
-					//+ " AND b.operation=:operation AND "
+			Query qry =  em.createQuery("update Billable b set b.valid=:valid where "
 					+ "b.msisdn=:msisdn "
-					//+ "AND b.shortcode=:shortcode AND b.keyword=:keyword AND "
-					//+ "b.price=:price AND b.cp_id=:cp_id AND b.event_type=:event_type "
 					+ "AND b.service_id=:service_id  "
 					+ "AND year(b.timeStamp)=year(:timestampC) AND month(b.timeStamp)=month(:timestampC) AND day(b.timeStamp)=day(:timestampC) AND b.success=1 "
 					+ " AND b.id <> :id order by b.id desc");
@@ -2144,14 +2140,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter("service_id", bill.getService_id());
 			qry.setParameter("timestampC", bill.getTimeStamp());
 			qry.setParameter("id", bill.getId());
-			
-			/*qry.setParameter("pricePointKeyword", bill.getPricePointKeyword());
-			qry.setParameter("operation", bill.getOperation());
-			qry.setParameter("shortcode", bill.getShortcode());
-			qry.setParameter("keyword", bill.getKeyword());
-			qry.setParameter("price", bill.getPrice());
-			qry.setParameter("cp_id", bill.getCp_id());
-			qry.setParameter("event_type", bill.getEvent_type());*/
 			res = qry.executeUpdate();
 			utx.commit();
 			return res;
@@ -2172,7 +2160,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@SuppressWarnings("unchecked")
 	public List<Billable> getBillableSForCleanup(Date date) throws Exception{
 		try{
-			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 order by timeStamp desc,priority asc");
+			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 AND valid=0 order by timeStamp desc,priority asc");
 			qry.setParameter("timestampC", date);
 			return qry.getResultList();
 		}catch(javax.persistence.NoResultException ex){

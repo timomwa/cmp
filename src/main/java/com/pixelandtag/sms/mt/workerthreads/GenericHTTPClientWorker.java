@@ -7,18 +7,16 @@ import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
@@ -35,12 +33,12 @@ public class GenericHTTPClientWorker implements Runnable{
 	
 	private static final int msg_part_wait = 0;//Time to wait in mills before sending broken message
 	private Logger logger = Logger.getLogger(getClass());
-	private HttpClient httpclient = null;
+	private CloseableHttpClient httpclient = null;
 	private String MINUS_ONE = "-1";
 	private String name;
 	private StopWatch watch;
 	private boolean run = true;
-	private volatile static ThreadSafeClientConnManager cm;
+	private volatile PoolingHttpClientConnectionManager cm;
 	private volatile int sms_idx = 0;
 	private CMPResourceBeanRemote cmpbean;
 	private volatile boolean success = true;
@@ -53,16 +51,15 @@ public class GenericHTTPClientWorker implements Runnable{
 	
 	public GenericHTTPClientWorker(CMPResourceBeanRemote cmpbean){
 		this.cmpbean = cmpbean;
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-	    cm = new ThreadSafeClientConnManager(schemeRegistry);
-		cm.setDefaultMaxPerRoute(2);
-		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
-		httpclient = new DefaultHttpClient(cm);
+		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
+		cm = new PoolingHttpClientConnectionManager();
+		cm.setDefaultMaxPerRoute(1);
+		cm.setMaxTotal(1);
+		httpclient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 		init();
 	}
 	
-	public GenericHTTPClientWorker(CMPResourceBeanRemote cmpbean, HttpClient httpclient_){
+	public GenericHTTPClientWorker(CMPResourceBeanRemote cmpbean, CloseableHttpClient httpclient_){
 		this.cmpbean = cmpbean;
 		this.httpclient = httpclient_;
 		init();
@@ -129,6 +126,12 @@ public class GenericHTTPClientWorker implements Runnable{
 							}else{
 								setRun(false);// we assume it's a poison pill
 							}
+					}else{
+						try{
+							Thread.sleep(2500);//sleep 2.5 seconds
+						}catch(Exception exp){
+							
+						}
 					}
 					
 					
@@ -241,6 +244,12 @@ public class GenericHTTPClientWorker implements Runnable{
 						}else{
 							setRun(false);//we assume it's a poison pill
 						}
+					}else{
+						try{
+							Thread.sleep(2500);//sleep 2.5 seconds
+						}catch(Exception exp){
+							
+						}
 					}
 					
 					
@@ -298,11 +307,8 @@ public class GenericHTTPClientWorker implements Runnable{
 				Thread.sleep(msg_part_wait);
 			}
 			
-			//TODO when we launch, remove to save CPU.
 			if(mt.getNumber_of_sms()>1){
-				
 				cmpbean.logResponse(mt.getMsisdn(),mt.getMsg_part());//log each segment of an SMS..
-				
 			}else{
 				cmpbean.logResponse(mt.getMsisdn(),mt.getSms());//log each segment of an SMS..
 			}
@@ -411,11 +417,12 @@ public class GenericHTTPClientWorker implements Runnable{
 		setSms_idx((getSms_idx()+1));
 		int status = 200;
 		HttpPost httppost = null;
+		CloseableHttpResponse response = null;
 		try {
 			httppost = new HttpPost(genericparams.getUrl());
 			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(genericparams.getHttpParams(), "UTF-8");
 			httppost.setEntity(entity);
-			HttpResponse response = httpclient.execute(httppost);
+			response = httpclient.execute(httppost);
 			HttpEntity resEntity = response.getEntity();
 			printHeader(httppost);
 			status =  response.getStatusLine().getStatusCode();
@@ -447,7 +454,17 @@ public class GenericHTTPClientWorker implements Runnable{
 			status = 500;
 			httppost.abort();
 		}finally{
+			try {
+				response.close();
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
 			
+			try {
+				httpclient.close();//I don't think we're supposed to close the client
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
 		}
 		return status;
 	}

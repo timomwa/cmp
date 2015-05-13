@@ -34,14 +34,19 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -83,7 +88,7 @@ public class MTHttpSender implements Runnable{
 	private Logger logger = Logger.getLogger(MTHttpSender.class);
 	
 	private int http_timeout;
-	private HttpClient httpclient;
+	private CloseableHttpClient httpclient;
 	private int retry_per_msg;
 	private int pollWait;
 	private CMPResourceBeanRemote cmpbean;
@@ -105,11 +110,10 @@ public class MTHttpSender implements Runnable{
 	private HttpPost httppost = null;
 	private volatile UrlEncodedFormEntity entity;
 	private volatile HttpEntity resEntity;
-	private volatile HttpResponse response;
 	private volatile int recursiveCounter = 0;
 	private Alarm alarm = new Alarm();
 	private static Random r = new Random();
-	private volatile static ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
+	private volatile static PoolingHttpClientConnectionManager cm = null;
 	
 	
 	public boolean isBusy() {
@@ -179,12 +183,13 @@ public class MTHttpSender implements Runnable{
 	
 	
 	private void initHttpClient() {
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-	    schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-	    cm = new ThreadSafeClientConnManager(schemeRegistry,10,TimeUnit.SECONDS);
-		cm.setDefaultMaxPerRoute(2);
-		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
-		httpclient = new DefaultHttpClient(cm);
+	
+		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
+		cm = new PoolingHttpClientConnectionManager();
+		cm.setDefaultMaxPerRoute(1);
+		cm.setMaxTotal(1);
+		httpclient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
+
 	}
 
 	public MTHttpSender(CMPResourceBeanRemote cmpbean,int pollWait_, String name_,URLParams urlp_, String constr) throws Exception{
@@ -474,6 +479,8 @@ public class MTHttpSender implements Runnable{
 		}
 		
 		httppost = new HttpPost(this.mtUrl);
+
+		CloseableHttpResponse response = null;
 		
 		setSms_idx((getSms_idx()+1));
 		
@@ -549,15 +556,6 @@ public class MTHttpSender implements Runnable{
 					Thread.sleep(this.msg_part_wait);
 				}
 				
-				//TODO when we launch, remove to save CPU.
-				/*if(mt.getNumber_of_sms()>1){
-					
-					cmpbean.logResponse(mt.getMsisdn(),mt.getMsg_part());//log each segment of an SMS..
-					
-				}else{
-					cmpbean.logResponse(mt.getMsisdn(),mt.getSms());//log each segment of an SMS..
-				}*/
-					
 				watch.stop();
 				
 				
@@ -680,12 +678,6 @@ public class MTHttpSender implements Runnable{
 				
 			} finally{
 				
-				
-				
-				
-				//postMethod.;
-				//client.executeMethod(postMethod);
-				
 				if(!this.success){//return back to queue if we did not succeed
 					
 					
@@ -738,6 +730,18 @@ public class MTHttpSender implements Runnable{
 				}
 				
 				setBusy(false);
+				
+				try {
+					response.close();
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+				}
+				
+				try {
+					httpclient.close();//I don't think we're supposed to close the client
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+				}
 	            
 			}
 	
@@ -860,6 +864,11 @@ public class MTHttpSender implements Runnable{
 	
 	
 	public void finalizeMe(){
+		try {
+			if(httpclient!=null)
+				httpclient.close();//I don't think we're supposed to close the client
+		} catch (Exception e) {
+		}
 		try{
 			if(cm!=null)
 				cm.shutdown();
