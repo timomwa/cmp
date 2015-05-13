@@ -35,13 +35,21 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -77,8 +85,17 @@ public class BaseEntityBean implements BaseEntityI {
 	private StopWatch watch;
 	private volatile int recursiveCounter = 0;
 	private List<NameValuePair> qparams = null;
-	private ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
-	private HttpClient httpsclient;
+	private SSLContextBuilder builder = new SSLContextBuilder();
+	private static PoolingHttpClientConnectionManager cm;
+	private CloseableHttpClient httpclient = null;
+	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
+		@Override
+        public boolean isTrusted(X509Certificate[] certificate, String authType) {
+            return true;
+        }
+		
+	};
+	
 	
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
@@ -171,16 +188,17 @@ public class BaseEntityBean implements BaseEntityI {
 	}
   
 	public BaseEntityBean() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
+		
+		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
+
 		watch = new StopWatch();
-		SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy, 
-		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-						    
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("https", 8443, sf));
-		cm = new ThreadSafeClientConnManager(schemeRegistry);
-		cm.setDefaultMaxPerRoute(2);
-		cm.setMaxTotal(2);//http connections that are equal to the worker threads.
-		httpsclient = new DefaultHttpClient(cm);
+		builder.loadTrustMaterial(null, trustSelfSignedStrategy);
+		SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(builder.build());
+		cm = new PoolingHttpClientConnectionManager();
+		cm.setDefaultMaxPerRoute(1);
+		cm.setMaxTotal(1);
+		httpclient = HttpClientBuilder.create().setSSLSocketFactory(sf).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
+
 	}
 	@Override
 	public EntityManager getEM() {
@@ -532,7 +550,8 @@ public class BaseEntityBean implements BaseEntityI {
 		HttpEntity resEntity = null;;
 		
 		boolean success = false;
-		String message = "";
+		
+		CloseableHttpResponse response = null;
 		
 		try {
 			
@@ -552,7 +571,7 @@ public class BaseEntityBean implements BaseEntityI {
 			
 			
 			watch.start();
-			HttpResponse response = httpsclient.execute(httsppost);
+			response = httpclient.execute(httsppost);
 			watch.stop();
 			logger.debug("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
@@ -640,8 +659,6 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				success  = false;
 				
-				message = ioe.getMessage();
-				
 				httsppost.abort();
 				
 				throw ioe;
@@ -725,6 +742,17 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				watch.reset();
 				
+				try {
+					response.close();
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+				}
+				
+				try {
+					httpclient.close();//I don't think we're supposed to close the client
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+				}
 				
 				logger.debug("DONE! ");
 				

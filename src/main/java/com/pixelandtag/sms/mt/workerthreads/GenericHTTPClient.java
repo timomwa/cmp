@@ -64,6 +64,7 @@ public class GenericHTTPClient implements Serializable{
 	private GenericHTTPClient(){}
 	
 	public GenericHTTPClient(String proto) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
+		
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
 
 		if(proto.trim().equalsIgnoreCase("http")){
