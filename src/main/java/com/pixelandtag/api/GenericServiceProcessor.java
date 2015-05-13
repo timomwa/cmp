@@ -517,22 +517,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 */
 	public boolean acknowledge(long message_log_id) {
 		
-		//PreparedStatement pst = null;
-		
 		boolean success = false;
-		
-		//Connection conn = null;
 		
 		try {
 			
 			success = getEJB().acknowledge(message_log_id);
-			/*conn = getCon();
 			
-			pst = conn.prepareStatement(ACK_SQL,Statement.RETURN_GENERATED_KEYS);
-			
-			pst.setString(1, String.valueOf(message_log_id));
-			
-			success = pst.executeUpdate()>0;*/
 		
 		} catch (Exception e) {
 			
@@ -540,27 +530,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		}finally{
 			
-			try {
-				
-				/*if(pst!=null)
-					pst.close();*/
 			
-			} catch (Exception e) {
-				
-				logger.error(e.getMessage(),e);
-			
-			}
-			
-			try {
-				
-				//if(conn!=null)
-				//	conn.close();
-			
-			} catch (Exception e) {
-				
-				logger.error(e.getMessage(),e);
-			
-			}
 		}
 		
 		return success;

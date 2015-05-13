@@ -14,6 +14,7 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -39,6 +40,7 @@ public class MOProcessor implements Runnable {
 	private boolean finished = false;
 	private boolean busy = false;
 	private String connStr;
+	private  CMPResourceBeanRemote cmpejb;
 	// private volatile ServiceProcessorI procesor = null;
 	// private volatile Queue<MOSms> moSMSSes;
 	private final Logger logger = Logger.getLogger(MOProcessor.class);
@@ -96,11 +98,9 @@ public class MOProcessor implements Runnable {
 		ds.release();
 	
 	}
-	public MOProcessor(String connstr, String name) throws Exception {
+	public MOProcessor(String connstr, String name, CMPResourceBeanRemote cmpejb_) throws Exception {
 
-		//this.split_msg_map = split_msg_map_;
-
-		//this.serviceMap = serviceMap;
+		this.cmpejb = cmpejb_;
 
 		this.name = name;
 		
@@ -179,8 +179,17 @@ public class MOProcessor implements Runnable {
 								logger.debug(MTProducer.processor_pool+" gugamuga_processor : \n\n"+servp);
 								
 								if(servp!=null){
+									
 									boolean success = servp.submit(moSms);
-									//mark in queue here?
+									
+									if(success){
+										try{
+											cmpejb.acknowledge(moSms.getId());
+										}catch(Exception exp){
+											logger.error(exp.getMessage(),exp);
+										}
+									}
+										
 								}else{
 									logger.warn(":::::: COULD not get a free processor with processor id: "+moSms.getProcessor_id()+" at the moment");
 									//put sms back in queue?

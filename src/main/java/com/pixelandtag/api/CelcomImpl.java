@@ -1068,7 +1068,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	 * @see com.pixelandtag.CelcomHTTPAPI#acknowledgeReceipt(com.pixelandtag.MO)
 	 */
 	public void acknowledgeReceipt(MOSms mo) {
-		PreparedStatement pstmt = null;
+		
 		
 		
 	}

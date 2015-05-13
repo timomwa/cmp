@@ -36,7 +36,7 @@ public class HTTPMTSenderApp extends Thread {
 	public void initialize(){
 		
 		props = getPropertyFile("mtsender.properties");
-		//log4J = getPropertyFile("log4j.properties");
+		log4J = getPropertyFile("log4j.properties");
 		
 		
 		urlparams = new URLParams(props);

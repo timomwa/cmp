@@ -19,6 +19,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
@@ -109,7 +110,7 @@ public class MTProducer extends Thread {
 	/**
 	 * This will hold a processor pool.
 	 */
-	public static volatile Map<Integer,ArrayList<ServiceProcessorI>> processor_pool = new HashMap<Integer,ArrayList<ServiceProcessorI>>();
+	public static volatile Map<Integer,ArrayList<ServiceProcessorI>> processor_pool = new ConcurrentHashMap<Integer,ArrayList<ServiceProcessorI>>();
 	public static volatile Queue<ServiceProcessorDTO> serviceProcessors;
 	
 	private volatile static ConcurrentLinkedQueue<MTsms> mtMsgs = null;
@@ -654,20 +655,21 @@ public class MTProducer extends Thread {
 				synchronized(processor_pool){
 					processor_pool.put(servicep.getId(), processor_array);
 				}
-				
-				
-			
 			}
+			
 		}else{
 			
 			logger.error(" ************  THERE ARE NO SERVICE PROCESSORS ************ ");
 		}
+		
+		logger.debug(processorThreadsStarted+" processor threads started");
+		
 			
 		
 		//Then we start the mo processor thread(s)
 		try {
 			
-			moProcessor = new MOProcessor(constr, "MO_PROCESSOR_1");
+			moProcessor = new MOProcessor(constr, "MO_PROCESSOR_1",cmpbean);
 			
 			Thread t1 = new Thread(moProcessor);
 			
