@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
@@ -66,6 +67,7 @@ public class HttpBillingWorker implements Runnable {
 	private int recursiveCounter = 0;
 	private SSLContextBuilder builder = new SSLContextBuilder();
 	private PoolingHttpClientConnectionManager cm;
+	private SubscriptionBeanI subscriptionejb;
 	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
 		@Override
         public boolean isTrusted(X509Certificate[] certificate, String authType) {
@@ -161,6 +163,9 @@ public class HttpBillingWorker implements Runnable {
 		 context = new InitialContext(props);
 		 this.cmp_ejb  =  (CMPResourceBeanRemote) 
       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
+		 this.subscriptionejb =  (SubscriptionBeanI) 
+		      		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		
 		 this.watch = new StopWatch();
 		
@@ -324,6 +329,9 @@ public class HttpBillingWorker implements Runnable {
 					}catch(Exception exp){
 						logger.warn("No transaction id found");
 					}
+					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+						subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+					}
 				}else{
 					String transactionId = getTransactionId(resp);
 					billable.setTransactionId(transactionId);
@@ -331,6 +339,8 @@ public class HttpBillingWorker implements Runnable {
 					cmp_ejb.createSuccesBillRec(billable);
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+					
+					subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
 					
 					
 					

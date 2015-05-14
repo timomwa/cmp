@@ -57,16 +57,25 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	public void updateCredibilityIndex(String msisdn, Long service_id, int change){
 		try{
 			Subscription subsc = getSubscription(msisdn, service_id);
-			
 			if(subsc!=null){
 				utx.begin();
-				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+				if(change>=1){
+					int prev_index = subsc.getCredibility_index().intValue();
+					subsc.setCredibility_index(prev_index>=0 ? (change+prev_index) : 0);//we re-set their index if they previously had a bad record, but now they have credit
+				}else{
+					subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);//keep sinking deep into bad credit
+				}
 				subsc = em.merge(subsc);
 				utx.commit();
 			}else{
 				utx.begin();
 				subsc = subscribe(msisdn,service_id,MediumType.ussd);
-				subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);
+				if(change>=1){
+					int prev_index = subsc.getCredibility_index().intValue();
+					subsc.setCredibility_index(prev_index>=0 ? (change+prev_index) : 0);//we re-set their index if they previously had a bad record, but now they have credit
+				}else{
+					subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);//keep sinking deep into bad credit
+				}
 				subsc = em.merge(subsc);
 				utx.commit();
 			}

@@ -106,7 +106,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					person = datingBean.saveOrUpdate(person);
 					msg = "Welcome back "+profile.getUsername()+"! People missed you while you were away. You'll now be able to receive messages sent by other people. Dial *329# to find a friend to chat with, or reply with FIND";
 				}else{
-					msg = "You are already logged in. Reploy with FIND to find a friend near your area to chat with, or Dial *329#";
+					msg = "You are already logged in. Reply with FIND to find a friend near your area to chat with, or Dial *329#";
 				}
 				
 				mo.setPrice(BigDecimal.ZERO);

@@ -157,7 +157,7 @@ public class SubscriptionBillingWorker implements Runnable {
 					Subscription sub = sub_id!=null ? cmp_ejb.find(Subscription.class, sub_id) : null;
 					Billable billable = null;
 					
-					if(sub_id.compareTo(negative_one)==0){//poison pill
+					if(sub_id!=null && sub_id.compareTo(negative_one)==0){//poison pill
 						setRun(false);
 						setFinished(true);
 						setBusy(false);
@@ -250,7 +250,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 												subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
 												//we'll try again. 1 means that we let it sit there, but the cron will set it to 2 so that it's picked
-												subscriptionejb.updateQueueStatus(1L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+												//subscriptionejb.updateQueueStatus(1L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 											}
 											
 										}else{
@@ -273,7 +273,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										
 									}else if(RESP_CODE==0){
 										logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
-										subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
+										//subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 									
 									}
 									
