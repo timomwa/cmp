@@ -662,8 +662,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				Gender gender = profile.getGender();
 				Gender dest_gender = destination_person.getGender();
-				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
-				String dest_pronoun = dest_gender == Gender.FEMALE ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
+				String pronoun = (gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
+				String dest_pronoun = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 				if(destination_person.getPerson().getLoggedin()==null || destination_person.getPerson().getLoggedin()==true){
 					log.setOffline_msg(Boolean.FALSE);
 					
@@ -693,7 +693,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					log.setOffline_msg(Boolean.TRUE);
 					mo.setPrice(BigDecimal.ZERO);
 					String pronoun2 = dest_pronoun.equalsIgnoreCase("her") ? "she" : "he";
-					logger.info("pronoun2 >>>>>>>>>>>>>>>> "+pronoun2);
 					mo.setMt_Sent("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with "+dest_pronoun+" when "+pronoun2+" gets back online.");
 				}
 				
