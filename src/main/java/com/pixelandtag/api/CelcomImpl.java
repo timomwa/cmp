@@ -1655,14 +1655,14 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		try{
 			if(connectionObjIsCached){
 				
-				pstmt = getConn().prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_processor_id_fk>0 AND (mo_ack = 0 AND processing=0 AND (CMP_Keyword IS NOT NULL) AND (CMP_SKeyword IS NOT NULL) AND (MT_Sent IS NULL) OR (MT_STATUS in ('PSANumberBarred','PSAInsufficientBalance','WaitingForDLR') AND re_try=1 AND MT_SendTime between timestamp(DATE_SUB(CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"'), INTERVAL 0 DAY)) AND ((CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"') + INTERVAL 1 DAY) - INTERVAL 1 SECOND)) ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
+				pstmt = getConn().prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_processor_id_fk>0 AND (mo_ack = 0 AND processing=0 AND (MT_Sent IS NULL) OR (MT_STATUS in ('PSANumberBarred','PSAInsufficientBalance','WaitingForDLR') AND re_try=1 AND MT_SendTime between timestamp(DATE_SUB(CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"'), INTERVAL 0 DAY)) AND ((CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"') + INTERVAL 1 DAY) - INTERVAL 1 SECOND)) ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
 				
 					
 			}else{
 				
 				conn = getConn();
 				
-				     pstmt = conn.prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_processor_id_fk>0 AND (mo_ack = 0 AND processing=0 AND (CMP_Keyword IS NOT NULL) AND (CMP_SKeyword IS NOT NULL) AND (MT_Sent IS NULL) ) OR (MT_STATUS in ('PSANumberBarred','PSAInsufficientBalance','WaitingForDLR') AND re_try=1  AND MT_SendTime between timestamp(DATE_SUB(CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"'), INTERVAL 0 DAY)) AND ((CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"') + INTERVAL 1 DAY) - INTERVAL 1 SECOND)) ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
+				     pstmt = conn.prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_processor_id_fk>0 AND (mo_ack = 0 AND processing=0 AND (MT_Sent IS NULL) ) OR (MT_STATUS in ('PSANumberBarred','PSAInsufficientBalance','WaitingForDLR') AND re_try=1  AND MT_SendTime between timestamp(DATE_SUB(CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"'), INTERVAL 0 DAY)) AND ((CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"') + INTERVAL 1 DAY) - INTERVAL 1 SECOND)) ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
 				
 			}
 			

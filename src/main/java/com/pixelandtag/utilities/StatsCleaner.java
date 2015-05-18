@@ -66,12 +66,13 @@ public class StatsCleaner {
 				cleaned_Recs = cmpresourcebean.invalidateSimilarBillables(bill); 
 				bill.setValid(Boolean.TRUE);
 				bill = cmpresourcebean.saveOrUpdate(bill);
+				prevMsisdn = bill.getMsisdn();
 			}
 			
-			prevMsisdn = bill.getMsisdn();
+			
 			
 			c++;
-			System.out.println("Date = "+dateStr+" ,cleaned="+cleaned_Recs+", progress : ("+c+"/"+ billable_size +")");
+			System.out.println("Date = "+dateStr+", cleaned="+cleaned_Recs+", progress : ("+c+"/"+ billable_size +")");
 		}
 	}
 	
