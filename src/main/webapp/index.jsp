@@ -1,1 +1,1 @@
-<jsp:forward page="/Desktop.action"/>
+<jsp:forward page="/LoginPage.action"/>

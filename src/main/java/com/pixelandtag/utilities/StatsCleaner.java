@@ -38,7 +38,8 @@ public class StatsCleaner {
 		try{
 			if(args!=null && args.length >0){
 				initEJB();
-				cleanStats(args[0]);
+				for(int i = 0; i<args.length; i++)
+					cleanStats(args[i]);
 			}else{
 				System.out.println("Please supply the date you want to clean the stats for. date format e.g 2015-05-05");
 			}
@@ -55,14 +56,22 @@ public class StatsCleaner {
 		int c = 0;
 		int billable_size = billables.size();
 		
+		String prevMsisdn = "";
+		
 		for(Billable bill : billables){
 			
-			int cleaned_Recs = cmpresourcebean.invalidateSimilarBillables(bill); 
-			bill.setValid(Boolean.TRUE);
-			bill = cmpresourcebean.saveOrUpdate(bill);
+			int cleaned_Recs = 0;
+			
+			if(!prevMsisdn.equals(bill.getMsisdn())){//We're still in the same msisdn, don't process
+				cleaned_Recs = cmpresourcebean.invalidateSimilarBillables(bill); 
+				bill.setValid(Boolean.TRUE);
+				bill = cmpresourcebean.saveOrUpdate(bill);
+			}
+			
+			prevMsisdn = bill.getMsisdn();
 			
 			c++;
-			System.out.println("cleaned="+cleaned_Recs+", progress : ("+c+"/"+ billable_size +")");
+			System.out.println("Date = "+dateStr+" ,cleaned="+cleaned_Recs+", progress : ("+c+"/"+ billable_size +")");
 		}
 	}
 	

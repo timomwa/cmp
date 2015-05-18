@@ -1,6 +1,6 @@
 var INIT_PARAMS = {
 		
-		mainAPP :'mainapp.jsp'
+		mainAPP :'Desktop.action'
 }
 
 Ext.onReady(function(){
@@ -14,7 +14,7 @@ Ext.onReady(function(){
         frame:true, 
         title:'Please Login', 
         defaultType:'textfield',
-	monitorValid:true,
+        monitorValid:true,
 	// Specific attributes for the text fields for username / password. 
 	// The "name" attribute defines the name of variables sent to the server.
         items:[{ 

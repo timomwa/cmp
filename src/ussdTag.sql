@@ -87,6 +87,8 @@ select count(*), date(timeStamp) ts from messagelog  group by ts order by ts asc
 
 select count(distinct SUB_Mobtel) from messagelog;
 
+select count(*),profileComplete ,date(creationDate) dt from dating_profile group by profileComplete,dt;
+
 select count(*),profileComplete from dating_profile group by profileComplete;
 
 select count(*) from subscription where subscription_status='confirmed' and date(expiryDate)<=date(now()) and queue_status=2;

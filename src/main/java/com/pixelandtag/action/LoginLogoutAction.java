@@ -47,29 +47,38 @@ public class LoginLogoutAction extends BaseActionBean  {
 	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	public Resolution login() throws JSONException {
-		
-		logger.info("loginUsername: "+loginUsername);
-		logger.info("loginPassword: "+loginPassword);
-		Query qry = cmp_dao.resource_bean.getEM().createQuery("from User where username= :username AND password= :password");
-		qry.setParameter("username", loginUsername);
-		qry.setParameter("password", loginPassword);
-		User user = (User) qry.getSingleResult();
-		//String resp = "";
 		JSONObject resp = new JSONObject();
-		if(user!=null){
-			for(Role r : user.getRoles()){
-				logger.info(">>>>>>> role "+r.getName());
+		
+		try{
+			logger.info("loginUsername: "+loginUsername);
+			logger.info("loginPassword: "+loginPassword);
+			Query qry = cmp_dao.resource_bean.getEM().createQuery("from User where username= :username AND password= :password");
+			qry.setParameter("username", loginUsername);
+			qry.setParameter("password", loginPassword);
+			User user = (User) qry.getSingleResult();
+			//String resp = "";
+			if(user!=null){
+				for(Role r : user.getRoles()){
+					logger.info(">>>>>>> role "+r.getName());
+				}
+				
+				getContext().getRequest().getSession().setAttribute(AppProperties.CURR_USER_OBJ_NAME, user);
+				//getContext().setUser(user);
+				resp.put("success", true);
+				resp.put("message", "Successful Login");
+			}else{
+				resp.put("success", false);
+				resp.put("message", "Wrong username and password");
 			}
-			
-			getContext().getRequest().getSession().setAttribute(AppProperties.CURR_USER_OBJ_NAME, user);
-			//getContext().setUser(user);
-			resp.put("success", true);
-			resp.put("message", "Successful Login");
-		}else{
+			logger.info("user: "+user);
+		}catch(javax.persistence.NoResultException e){
 			resp.put("success", false);
-			resp.put("message", "Wrong username and password");
+			resp.put("message", "Can't find user with the provided name and password.");
+		}catch(Exception e){
+			resp.put("success", false);
+			resp.put("message", "Can't log in right now.");
+			logger.error(e.getMessage(),e);
 		}
-		logger.info("user: "+user);
 		
 		return sendResponse(resp.toString());
 	}

@@ -107,6 +107,7 @@ public class Billable implements Serializable {
 	private String operation;
 	
 	@Column(name = "msisdn")
+	@Index(name="msisdnIdx")
 	private String msisdn;
 	
 	
@@ -129,6 +130,7 @@ public class Billable implements Serializable {
 	private EventType event_type;//very important
 	
 	@Column(name = "service_id")
+	@Index(name="msisdnIdx")
 	private String service_id;
 	
 	@Column(name = "discount_applied")

@@ -71,8 +71,8 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	private Connection conn = null;
 	private String conStr = null;
 	private boolean connectionObjIsCached = true;
-	private String fr_tz;
-	private String to_tz;
+	private String fr_tz = "-04:00";
+	private String to_tz = "+03:00";
 	
 	private Semaphore semaphore;
 	private String BIGSPACER = ", ";

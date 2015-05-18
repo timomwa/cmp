@@ -2160,7 +2160,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@SuppressWarnings("unchecked")
 	public List<Billable> getBillableSForCleanup(Date date) throws Exception{
 		try{
-			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 AND valid=0 order by timeStamp desc,priority asc");
+			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 AND valid=0 order by msisdn desc");
 			qry.setParameter("timestampC", date);
 			return qry.getResultList();
 		}catch(javax.persistence.NoResultException ex){
