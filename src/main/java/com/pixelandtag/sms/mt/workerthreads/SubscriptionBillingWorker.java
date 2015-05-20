@@ -211,7 +211,9 @@ public class SubscriptionBillingWorker implements Runnable {
 												long wait_time = SubscriptionRenewal.getRandomWaitTime();
 												logger.info(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
 												if(wait_time>-1){
+													genericHttpClient.releaseConnection();
 													Thread.sleep(wait_time);
+													genericHttpClient.initHttpClient();
 												}
 											}
 											

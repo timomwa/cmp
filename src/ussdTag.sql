@@ -97,6 +97,8 @@ select cl.timeStamp, concat(sp.msisdn,' > ', dp.msisdn ,': ', cl.message) from d
 
 select count(*), date(timeStamp) ts from dating_chatlog group by ts order by ts asc; 
 
+select count(*), date(timeStamp) ts from dating_chatlog where hour(timeStamp)<=hour(now()) group by ts order by ts asc;
+
 select success,processed,in_outgoing_queue,count(*) c, price, count(*)*price as 'revenue' from billable_queue where date(timeStamp)=curdate() group by success,in_outgoing_queue,processed;
 
 /*add these when testing 14th April*/

@@ -60,7 +60,8 @@ public class GenericHTTPClient implements Serializable{
 	private volatile boolean success = true;
 	private boolean finished = false;
 	private boolean busy = false;
-	
+	private String protocol;
+	private RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
 	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
 		@Override
         public boolean isTrusted(X509Certificate[] certificate, String authType) {
@@ -73,10 +74,24 @@ public class GenericHTTPClient implements Serializable{
 	private GenericHTTPClient(){}
 	
 	public GenericHTTPClient(String proto) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
+		this.protocol = proto;
+		initHttpClient();
+		init();
+	}
+	
+	/**
+	 * When we've been throttled
+	 * we release all resources, close
+	 * the connection and client
+	 */
+	public void releaseConnection(){
+		finalizeMe();
+	}
+	
+	
+	public void initHttpClient() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		
-		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
-
-		if(proto.trim().equalsIgnoreCase("http")){
+		if(protocol.trim().equalsIgnoreCase("http")){
 			
 			cm = new PoolingHttpClientConnectionManager();
 			cm.setDefaultMaxPerRoute(1);
@@ -84,6 +99,7 @@ public class GenericHTTPClient implements Serializable{
 			httpclient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 		
 		}else{
+			
 			 SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
 			        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
 			            return true;
@@ -103,9 +119,10 @@ public class GenericHTTPClient implements Serializable{
 			cm.setMaxTotal(1);
 			httpclient = HttpClientBuilder.create().setSslcontext( sslContext).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 		}
-		init();
+		
 	}
 	
+
 	public GenericHTTPClient(CloseableHttpClient httpclient_){
 		this.httpclient = httpclient_;
 		init();
@@ -344,6 +361,10 @@ public class GenericHTTPClient implements Serializable{
 		this.respose_msg = respose_msg;
 	}
 	
+	/**
+	 * Releases resources, never throws
+	 * an exception
+	 */
 	public void finalizeMe(){
 		try{
 			if(httpclient!=null)
