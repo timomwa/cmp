@@ -214,6 +214,7 @@ public class SubscriptionBillingWorker implements Runnable {
 													genericHttpClient.releaseConnection();
 													Thread.sleep(wait_time);
 													genericHttpClient.initHttpClient();
+													Thread.sleep(15000);//wait for client to be initialized
 												}
 											}
 											

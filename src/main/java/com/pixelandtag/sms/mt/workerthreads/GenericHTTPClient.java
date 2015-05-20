@@ -203,7 +203,8 @@ public class GenericHTTPClient implements Serializable{
 		}finally{
 			setBusy(false);
 			try {
-				response.close();
+				if(response!=null)
+					response.close();
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}
@@ -369,10 +370,12 @@ public class GenericHTTPClient implements Serializable{
 		try{
 			if(httpclient!=null)
 				httpclient.close();
+			httpclient = null;
 		}catch(Exception e){}
 		try{
 			if(cm!=null)
 				cm.shutdown();
+			cm = null;
 		}catch(Exception e){}
 	}
 	
