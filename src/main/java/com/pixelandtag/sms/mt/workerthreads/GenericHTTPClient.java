@@ -373,6 +373,11 @@ public class GenericHTTPClient implements Serializable{
 			httpclient = null;
 		}catch(Exception e){}
 		try{
+			cm.close();
+			if(cm!=null)
+				cm.close();
+		}catch(Exception e){}
+		try{
 			if(cm!=null)
 				cm.shutdown();
 			cm = null;
