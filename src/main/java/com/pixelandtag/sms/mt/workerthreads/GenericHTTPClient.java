@@ -188,6 +188,16 @@ public class GenericHTTPClient implements Serializable{
 				logger.error(e);
 			
 			}
+		}catch(java.lang.IllegalStateException ise){
+			try {
+				initHttpClient();
+			} catch (KeyManagementException e) {
+				logger.error(e.getMessage(),e);
+			} catch (NoSuchAlgorithmException e) {
+				logger.error(e.getMessage(),e);
+			} catch (KeyStoreException e) {
+				logger.error(e.getMessage(),e);
+			}
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e.getMessage(),e);
 			httppost.abort();
