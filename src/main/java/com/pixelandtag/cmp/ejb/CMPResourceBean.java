@@ -52,6 +52,7 @@ import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.CleanupDTO;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.TopUpNumber;
 import com.pixelandtag.sms.producerthreads.USSDSession;
@@ -2158,9 +2159,62 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	@SuppressWarnings("unchecked")
+	public List<CleanupDTO> getCleanupDtos(Date date) throws Exception{
+		
+		List<CleanupDTO> cleanupDtos = new ArrayList<CleanupDTO>();
+		
+		try{
+			Query qry =  em.createNativeQuery("select count(*) c, msisdn from billable_queue where date(timeStamp)=:dateS and success=1 and price>0 group by msisdn,service_id order by c desc");
+			qry.setParameter("dateS", date);
+			List<Object[]> dtoList = qry.getResultList();
+			
+			for(Object[] dtoObject : dtoList ){
+				Long count = (Long) dtoObject[0];
+				String msisdn = (String) dtoObject[1];
+				Long service_id = (Long) dtoObject[2];
+				
+				CleanupDTO dto = new CleanupDTO();
+				dto.setCount(count);
+				dto.setMsisdn(msisdn);
+				dto.setServiceid(service_id);
+				cleanupDtos.add(dto);
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return null;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+		}
+		
+		return cleanupDtos;
+		
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<Billable> getBillableSForTransfer(Date date) throws Exception{
+		try{
+			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 AND valid=1 AND price>0 order by msisdn desc");
+			qry.setParameter("timestampC", date);
+			return qry.getResultList();
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return null;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}finally{
+		}
+		
+	}
+	
+	@SuppressWarnings("unchecked")
 	public List<Billable> getBillableSForCleanup(Date date) throws Exception{
 		try{
-			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 AND valid=0 order by msisdn desc");
+			Query qry =  em.createQuery("from Billable where year(timeStamp)=year(:timestampC) AND month(timeStamp)=month(:timestampC) AND day(timeStamp)=day(:timestampC) AND success=1 AND price>0 order by msisdn desc");
 			qry.setParameter("timestampC", date);
 			return qry.getResultList();
 		}catch(javax.persistence.NoResultException ex){

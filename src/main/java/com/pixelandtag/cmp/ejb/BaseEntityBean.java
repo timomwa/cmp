@@ -59,6 +59,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.criterion.Example;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
@@ -124,7 +125,7 @@ public class BaseEntityBean implements BaseEntityI {
     @Override
     public void createSuccesBillRec(Billable billable){
     	try{
-    		utx.begin();
+    		
     		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
     		successfulBill.setCp_tx_id(billable.getCp_tx_id());
     		successfulBill.setKeyword(billable.getKeyword());
@@ -137,8 +138,15 @@ public class BaseEntityBean implements BaseEntityI {
     		successfulBill.setSuccess(billable.getSuccess());
     		successfulBill.setTimeStamp(billable.getTimeStamp());
     		successfulBill.setTransactionId(billable.getTransactionId());
-    		successfulBill = em.merge(successfulBill);
-    		utx.commit();
+    		successfulBill.setTransferin(billable.getTransferIn());
+    		
+    		//boolean exists = checkIfExists(successfulBill);
+    		
+    		//if(!exists){
+    			utx.begin();
+    			successfulBill = em.merge(successfulBill);
+    			utx.commit();
+    		//}
     	}catch(Exception exp){
 			try{
 				utx.rollback();
@@ -147,7 +155,27 @@ public class BaseEntityBean implements BaseEntityI {
 		}
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @SuppressWarnings("unchecked")
+	private boolean checkIfExists(SuccessfullyBillingRequests successfulBill) {
+		boolean exists = false;
+    	try{
+			Query qry = em.createQuery("from SuccessfullyBillingRequests sb WHERE sb.msisdn=:msisdn AND sb.transactionId:=transactionId"
+					+ " AND sb.cp_tx_id=:cp_tx_id");
+			qry.setParameter("msisdn", successfulBill.getMsisdn());
+			qry.setParameter("transactionId", successfulBill.getTransactionId());
+			qry.setParameter("cp_tx_id", successfulBill.getCp_tx_id());
+			List<SuccessfullyBillingRequests> sb = qry.getResultList();
+			
+			if(sb.size()>0)
+				exists = true;
+			
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+    	return exists;
+	}
+
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void  mimicMO(String keyword, String msisdn){
 		try {
 			SMSService smsserv = getSMSService(keyword);

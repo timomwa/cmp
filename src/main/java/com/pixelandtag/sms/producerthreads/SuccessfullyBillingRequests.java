@@ -74,6 +74,9 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date timeStamp;
 	
+	@Column(name = "transferin")
+	private Boolean transferin;
+	
 	
 	@PrePersist
 	@PreUpdate
@@ -81,7 +84,9 @@ public class SuccessfullyBillingRequests  implements Serializable {
 		if(timeStamp==null)
 			timeStamp = new Date();
 		if(success==null)
-			success = new Boolean(false);
+			success = Boolean.FALSE;
+		if(transferin==null)
+			transferin = Boolean.FALSE;
 	}
 
 
@@ -203,6 +208,17 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
 	}
+
+
+	public Boolean getTransferin() {
+		return transferin;
+	}
+
+
+	public void setTransferin(Boolean transferin) {
+		this.transferin = transferin;
+	}
+
 	
 	
 	

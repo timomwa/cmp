@@ -18,6 +18,7 @@ import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.CleanupDTO;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
@@ -195,6 +196,10 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public List<Billable> getBillableSForCleanup(Date date) throws Exception;
 
 	public int invalidateSimilarBillables(Billable bill) throws Exception;
+
+	public List<CleanupDTO> getCleanupDtos(Date date) throws Exception;
+	
+	public List<Billable> getBillableSForTransfer(Date date) throws Exception;
 
 	
 	

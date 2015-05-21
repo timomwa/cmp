@@ -11,6 +11,8 @@ import javax.naming.NamingException;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.CleanupDTO;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 
 public class StatsCleaner {
 	
@@ -52,25 +54,20 @@ public class StatsCleaner {
 
 	private static void cleanStats(String dateStr) throws Exception{
 		Date date = tzconvert.stringToDate(dateStr+" 00:00:00");
-		List<Billable> billables = cmpresourcebean.getBillableSForCleanup(date);
+		List<Billable> cleanupDtos = cmpresourcebean.getBillableSForTransfer(date);
+		
 		int c = 0;
-		int billable_size = billables.size();
+		int billable_size = cleanupDtos.size();
 		
-		String prevMsisdn = "";
-		
-		for(Billable bill : billables){
+		for(Billable bill : cleanupDtos){
 			
 			int cleaned_Recs = 0;
 			
-			if(!prevMsisdn.equals(bill.getMsisdn())){//We're still in the same msisdn, don't process
-				cleaned_Recs = cmpresourcebean.invalidateSimilarBillables(bill); 
-				bill.setValid(Boolean.TRUE);
-				bill = cmpresourcebean.saveOrUpdate(bill);
-				prevMsisdn = bill.getMsisdn();
-			}
+			bill.setTransferIn(Boolean.TRUE);
 			
+			cmpresourcebean.createSuccesBillRec(bill);
 			
-			
+				
 			c++;
 			System.out.println("Date = "+dateStr+", cleaned="+cleaned_Recs+", progress : ("+c+"/"+ billable_size +")");
 		}

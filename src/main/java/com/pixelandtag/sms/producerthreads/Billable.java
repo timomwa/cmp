@@ -17,6 +17,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
@@ -71,6 +72,10 @@ public class Billable implements Serializable {
 	
 	@Column(name = "valid")
 	private Boolean valid;
+	
+	
+	@Transient
+	private Boolean transferIn;
 	
 	@PrePersist
 	@PreUpdate
@@ -396,6 +401,14 @@ public class Billable implements Serializable {
 
 	public void setValid(Boolean valid) {
 		this.valid = valid;
+	}
+
+	public Boolean getTransferIn() {
+		return transferIn==null? Boolean.FALSE : transferIn;
+	}
+
+	public void setTransferIn(Boolean transferIn) {
+		this.transferIn = transferIn;
 	}
 	
 	
