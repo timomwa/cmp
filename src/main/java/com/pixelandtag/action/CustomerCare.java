@@ -1,8 +1,10 @@
 package com.pixelandtag.action;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -17,8 +19,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.security.UserSessionI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.User;
+import com.pixelandtag.cmp.entities.audit.UserAction;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dao.SMSServiceDAO;
 import com.pixelandtag.model.GenericDao;
@@ -40,6 +45,9 @@ public class CustomerCare extends BaseActionBean {
 	@EJB(mappedName =  "java:global/cmp/CMPResourceBean")
 	private CMPResourceBeanRemote cmpBean;
 	
+	@EJB(mappedName =  "java:global/cmp/UserSessionEJB")
+    private UserSessionI usersessionEJB;
+	
 	private Logger logger = Logger.getLogger(getClass());
 	
 	
@@ -51,16 +59,35 @@ public class CustomerCare extends BaseActionBean {
 		
 		JSONObject jsob = new JSONObject();
 		
-		logger.debug("subscription_id : "+subscription_id);
-		logger.debug("msisdn : "+msisdn);
-		logger.debug("status : "+status);
-		logger.debug("SubscriptionStatus.get(status) : "+SubscriptionStatus.get(status));
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("subscription_id : "+subscription_id);
+		sb.append(" msisdn : "+msisdn);
+		sb.append(" status : "+status);
+		sb.append(" SubscriptionStatus.get(status) : "+SubscriptionStatus.get(status));
 		
 		if ( currentUser.isAuthenticated() ) {
 			boolean success = subscriptionBean.updateSubscription(subscription_id.intValue(), msisdn, SubscriptionStatus.get(status)); 
 			
 			jsob.put("success", success);
 			jsob.put("message", "Successfully "+(status.equalsIgnoreCase("confirmed") ? "renewed subscription for":"unsubscribed")+" "+msisdn);
+			
+			
+			try{
+				UserAction action = new UserAction.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
+										.module("customerCare")
+										.objectAffected(Subscription.class.getCanonicalName())
+										.process("changeSubscriptionStatus")
+										.timeStamp(new Date())
+										.timeZone(TimeZone.getDefault().getID())
+										.data(sb.toString())
+										.remoteHost(getRemoteHost())
+										.build();
+				usersessionEJB.createAuditTrail(action);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+			}
+			
 			
 		}else{
 			jsob.put("success", false);
@@ -117,11 +144,29 @@ public class CustomerCare extends BaseActionBean {
 			subscription_root.put("subscriptions",subscriptions);
 			subscription_root.put("totalCount",size);
 			
+			
+			try{
+				UserAction action = new UserAction.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
+										.module("customerCare")
+										.objectAffected(Subscription.class.getCanonicalName())
+										.process("viewsubscriptions")
+										.timeStamp(new Date())
+										.timeZone(TimeZone.getDefault().getID())
+										.remoteHost(getRemoteHost())
+										.data(subscription_root.toString())
+										.build();
+				usersessionEJB.createAuditTrail(action);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+			}
+			
 			if(callback!= null) {
 			    return sendResponse(callback + "("+subscription_root.toString()+")","text/javascript");
 			} else {
 				return sendResponse(subscription_root.toString(),"application/x-json");
 			}
+			
+			
 		}else{
 			
 			return loginPage;

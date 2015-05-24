@@ -1,8 +1,12 @@
 package com.pixelandtag.action;
 
+import java.util.Date;
+import java.util.TimeZone;
+
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
 import javax.persistence.Query;
 
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -21,8 +25,10 @@ import org.apache.shiro.subject.Subject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.pixelandtag.cmp.ejb.security.UserSessionI;
 import com.pixelandtag.cmp.entities.Role;
 import com.pixelandtag.cmp.entities.User;
+import com.pixelandtag.cmp.entities.audit.UserAction;
 import com.pixelandtag.cmp.handlers.AppProperties;
 @RolesAllowed("tester")
 public class LoginLogoutAction extends BaseActionBean  {
@@ -32,6 +38,8 @@ public class LoginLogoutAction extends BaseActionBean  {
 	private String loginUsername;
 	private String loginPassword;
 	
+    @EJB(mappedName =  "java:global/cmp/UserSessionEJB")
+    private UserSessionI usersessionEJB;
     
 	@DenyAll
 	@RolesAllowed("tester")
@@ -44,8 +52,26 @@ public class LoginLogoutAction extends BaseActionBean  {
 	
 	@PermitAll
 	public Resolution logout() throws JSONException{
+		
 		Subject currentUser = SecurityUtils.getSubject();
+		
+		try{
+			UserAction action = new UserAction.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
+			.module("authentication")
+			.objectAffected(User.class.getCanonicalName())
+			.process("logout")
+			.timeStamp(new Date())
+			.timeZone(TimeZone.getDefault().getID())
+			.remoteHost(getRemoteHost())
+			.data("-")
+			.build();
+			usersessionEJB.createAuditTrail(action);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+
 		currentUser.logout();
+		
 		return loginPage ;
 	}
 	
@@ -66,9 +92,27 @@ public class LoginLogoutAction extends BaseActionBean  {
 		    token.setRememberMe(true);
 		    
 		    try {
-		        currentUser.login( token );
+		        
+		    	currentUser.login( token );
 		        resp.put("success", true);
 				resp.put("message", "Successful Login");
+				User user = usersessionEJB.getUser(loginUsername, loginPassword);
+				currentUser.getSession().setAttribute("user", user);
+				
+				try{
+					UserAction action = new UserAction.UserActionBuilder(user)
+											.module("authentication")
+											.objectAffected(User.class.getCanonicalName())
+											.process("login")
+											.timeStamp(new Date())
+											.timeZone(TimeZone.getDefault().getID())
+											.remoteHost(getRemoteHost())
+											.data("loginUsername "+loginUsername)
+											.build();
+					usersessionEJB.createAuditTrail(action);
+				}catch(Exception exp){
+					logger.error(exp.getMessage(),exp);
+				}
 				
 		    } catch ( UnknownAccountException uae ) {
 		    	resp.put("success", false);

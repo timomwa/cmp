@@ -31,7 +31,7 @@ Ext.onReady(function(){
 	// All the magic happens after the user clicks the button     
         buttons:[{ 
                 text:'Login',
-                formBind: true,	 
+                //formBind: true,	 
                 // Function that fires when user clicks the button 
                 handler:function(){ 
                     login.getForm().submit({ 

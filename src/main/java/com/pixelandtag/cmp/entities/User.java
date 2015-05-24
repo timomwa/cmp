@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.entities;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -15,9 +16,13 @@ import org.hibernate.annotations.Index;
 
 @Entity
 @Table(name = "user")
-public class User {
-
+public class User implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -448537639844526971L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;

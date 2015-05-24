@@ -141,6 +141,10 @@ public class BaseActionBean implements ActionBean {
 	protected void setUser(User user) {
 		getContext().setUser(user); 
 	}
+	
+	public String getRemoteHost(){
+		return getContext().getRequest().getRemoteHost();
+	}
 	  /*protected AttachmentDao attachmentDao = new AttachmentDaoImpl();
 	  protected ContactDao contactDao = new ContactDaoImpl(); protected
 	  protected MessageDao	 messageDao = new MessageDaoImpl(); */
