@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="WebApp_ID" version="2.4"
-	xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+<web-app id="WebApp_ID" version="3.0"
+	xmlns="http://java.sun.com/xml/ns/javaee"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 	<display-name>CMP_HOME</display-name>
+	 <session-config>
+	     <tracking-mode>COOKIE</tracking-mode>
+	</session-config>
 	<listener>
     	<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
 	</listener>
@@ -58,8 +61,8 @@
 	</init-param>
 	
 	<init-param>
-        <param-name>Extension.Packages</param-name>
-        <param-value>org.stripesstuff.plugin,com.ext,com.pixelandtag.cmp,com.pixelandtag.ext,org.stripesstuff.plugin.security,com.samaxes.stripes.inject</param-value>
+        <param-name>Extension.Packages</param-name><!-- com.pixelandtag.cmp,com.pixelandtag.ext, -->
+        <param-value>org.stripesstuff.plugin,com.ext,com.pixelandtag.cmp,com.pixelandtag.ext,com.samaxes.stripes.inject</param-value>
     </init-param>
      <init-param>
          <param-name>UnauthorizedResolutionURL</param-name>

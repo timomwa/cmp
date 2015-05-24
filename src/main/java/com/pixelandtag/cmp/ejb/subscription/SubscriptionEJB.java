@@ -329,7 +329,95 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public Long countsearchSubscription(String msisdn) throws Exception{
+		
+		Long count = 0L;
+		
+		
+		try{
+			
+			Query qry = em.createQuery("SELECT count(*) from Subscription sub WHERE lower(sub.msisdn) like lower(:msisdn) ");
+			qry.setParameter("msisdn", "%"+msisdn+"%");
+			count = (Long) qry.getSingleResult();
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		return count;
+	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Subscription> searchSubscription(String msisdn) throws Exception{
+		
+		List<Subscription> sublist = new ArrayList<Subscription>();
+		
+		try{
+			
+			Query qry = em.createQuery("from Subscription sub WHERE lower(sub.msisdn) like lower(:msisdn) ");
+			qry.setParameter("msisdn", "%"+msisdn+"%");
+			sublist = qry.getResultList();
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		return sublist;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Subscription> searchSubscription(String msisdn, int start, int limit) throws Exception{
+		
+		List<Subscription> sublist = new ArrayList<Subscription>();
+		
+		try{
+			
+			Query qry = em.createQuery("from Subscription sub WHERE lower(sub.msisdn) like lower(:msisdn) ");
+			qry.setParameter("msisdn", "%"+msisdn+"%");
+			qry.setFirstResult(start);
+			qry.setMaxResults(limit);
+			sublist = qry.getResultList();
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		return sublist;
+		
+	}
+	
+	
+	@Override
+	public List<Subscription> getSubscription(String msisdn) throws Exception{
+		
+		return searchSubscription(msisdn);
+		
+		/*List<Subscription> sublist = new ArrayList<Subscription>();
+		
+		try{
+			
+			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn ");
+			qry.setParameter("msisdn", msisdn);
+			sublist = qry.getResultList();
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		return sublist;*/
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -368,6 +456,90 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			
 		}
 		return subscr;
+	}
+	
+	/**
+	 * Updates a subscriber's subscription status
+	 * @param conn
+	 * @param subscription_id
+	 * @param status - com.inmobia.celcom.subscription.dto.SubscriptionStatus
+	 * @return
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateSubscription(int subscription_id, String msisdn, SubscriptionStatus status) throws Exception {
+		
+		boolean success = false;
+		
+		try{
+			
+			Query qry = em.createQuery("from Subscription where id = :id AND msisdn = :msisdn");
+			qry.setParameter("id", Long.valueOf(subscription_id));
+			qry.setParameter("msisdn", msisdn);
+			Subscription sub = (Subscription) qry.getSingleResult();
+			sub.setSubscription_status(status);
+			
+			SubscriptionHistory sbh = new SubscriptionHistory();
+			sbh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
+			sbh.setMsisdn(msisdn);
+			sbh.setService_id(sub.getSms_service_id_fk());//TODO get the destination timezone from the country object
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			sbh.setTimeStamp(timeInNairobi);
+			
+			utx.begin();
+			sub = em.merge(sub);
+			sbh = em.merge(sbh);
+			success = true;
+			utx.commit();
+		}catch(Exception e){
+			try{
+			utx.rollback();
+			}catch(Exception ee){}
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		
+		return success;
+	}
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception{
+
+		boolean success = false;
+		
+		try{
+			
+			Query qry = em.createQuery("from Subscription where id = :id AND msisdn = :msisdn");
+			qry.setParameter("id", Long.valueOf(subscription_id));
+			Subscription sub = (Subscription) qry.getSingleResult();
+			sub.setSubscription_status(status);
+			
+			SubscriptionHistory sbh = new SubscriptionHistory();
+			sbh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
+			sbh.setMsisdn(sub.getMsisdn());
+			sbh.setService_id(sub.getSms_service_id_fk());//TODO get the destination timezone from the country object
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			sbh.setTimeStamp(timeInNairobi);
+			
+			utx.begin();
+			sub = em.merge(sub);
+			sbh = em.merge(sbh);
+			success = true;
+			utx.commit();
+		}catch(Exception e){
+			try{
+			utx.rollback();
+			}catch(Exception ee){}
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		
+		return success;
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.pixelandtag.action;
 
-import javax.annotation.security.RolesAllowed;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
@@ -8,11 +9,15 @@ import net.sourceforge.stripes.action.Resolution;
 
 public class Desktop extends BaseActionBean {
 	
-	private static final String VIEW = "/WEB-INF/jsp/desktop.jsp";
-	
 	@DefaultHandler
 	public Resolution showDesktop(){
-		return new ForwardResolution(VIEW);
+		
+		Subject currentUser = SecurityUtils.getSubject();
+		
+		if(currentUser.isAuthenticated())
+			return desktop;
+		else
+			return loginPage;
 	}
 
 }

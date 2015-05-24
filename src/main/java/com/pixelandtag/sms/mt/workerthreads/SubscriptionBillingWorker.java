@@ -204,6 +204,8 @@ public class SubscriptionBillingWorker implements Runnable {
 										if(resp!=null)
 										if(capped){
 											if(SubscriptionRenewal.isAdaptive_throttling()){
+												
+												SubscriptionRenewal.putPackToQueue(sub_id);
 												//We've been throttled. Let's slow down a little bit.
 												logger.debug("Throttling! We've been capped.");
 												SubscriptionRenewal.setEnable_biller_random_throttling(true);

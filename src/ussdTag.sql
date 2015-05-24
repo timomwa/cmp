@@ -80,6 +80,9 @@ insert into dating_disallowedwords select next_val+1,'HOW' from hibernate_sequen
 update hibernate_sequence set next_val=next_val+1;
 
 
+insert into subscription_history select next_val+1,2,'254736338689','439','2015-05-02 08:49:27' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+
+
 
 select count(*), date(timeStamp) ts, hour(now()) from messagelog WHERe hour(TimeStamp)<=hour(now()) group by ts order by ts asc;
 
@@ -141,3 +144,10 @@ DELIMITER ;
 
 
 select count(*),profileComplete from dating_profile group by profileComplete;
+
+insert into role select next_val+1, 'superuser' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+insert into role select next_val+1, 'usermanagement' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+insert into role select next_val+1, 'contentmanagement' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+insert into role select next_val+1, 'customercare' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+insert into role select next_val+1, 'subscriptionmanagement' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+insert into role select next_val+1, 'statistics' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;

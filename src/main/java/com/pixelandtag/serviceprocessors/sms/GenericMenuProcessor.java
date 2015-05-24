@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -23,6 +24,7 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -61,6 +63,8 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
+	
+	private SubscriptionBeanI subscriptionBean;
     
     public void initEJB() throws NamingException{
     	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
@@ -73,6 +77,8 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 		 context = new InitialContext(props);
 		 cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 subscriptionBean = (SubscriptionBeanI) 
+    		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 
 		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
@@ -466,7 +472,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				if(sub!=null){
 					
-					cmpbean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+					subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
 					
 					MenuItem menu = menu_controller.getMenuById(sub.getSmsmenu_levels_id_fk());
 					
@@ -523,7 +529,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 							SMSServiceDTO toUnsubscribe = allsubscribed.get(stop_number);
 							
 							//if(subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-							cmpbean.updateSubscription(toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							subscriptionBean.updateSubscription(toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 								msg = msg.replaceAll(SERVICENAME_TAG, toUnsubscribe.getService_name());
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
@@ -534,7 +540,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 							SMSServiceDTO smsservice = cmpbean.getSMSservice(second_keyword);
 							
 							//if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-							cmpbean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							subscriptionBean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 								msg = msg.replaceAll(SERVICENAME_TAG, smsservice.getService_name());
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again

@@ -5,6 +5,7 @@
  * http://www.sencha.com/license
  */
 
+
 // Sample desktop configuration
 MyDesktop = new Ext.app.App({
 	init :function(){
@@ -12,17 +13,39 @@ MyDesktop = new Ext.app.App({
 	},
 
 	getModules : function(){
-		return [
-			new MyDesktop.GridWindow(),
-            new MyDesktop.TabWindow(),
+		
+		console.log('getting modules');
+		
+		var modules = [];
+		
+		if(hasRole('administrator'))
+			modules.push(new MyDesktop.AccordionWindow());
+		
+		if(hasRole('administrator'))
+			modules.push(new MyDesktop.ContentManagementModule());
+		
+		if(hasRole('customercare'))
+			modules.push(new MyDesktop.CustomerCareModule());
+		
+		if(hasRole('administrator'))	
+			modules.push(new MyDesktop.SubscriptionManagementModule());
+		
+		if(hasRole('administrator'))
+			modules.push(new MyDesktop.StatisticsModule());
+		
+		return modules;
+		
+		/*return [
+			//new MyDesktop.GridWindow(),
+            //new MyDesktop.TabWindow(),
             new MyDesktop.AccordionWindow(),
-            new MyDesktop.BogusMenuModule(),
-            new MyDesktop.BogusModule(), 
+            //new MyDesktop.BogusMenuModule(),
+            //new MyDesktop.BogusModule(), 
             new MyDesktop.ContentManagementModule(),
             new MyDesktop.CustomerCareModule(),
             new MyDesktop.SubscriptionManagementModule(),
             new MyDesktop.StatisticsModule()
-		];
+		];*/
 	},
 
     // config for the start menu
@@ -37,7 +60,13 @@ MyDesktop = new Ext.app.App({
             },'-',{
                 text:'Logout',
                 iconCls:'logout',
-                scope:this
+                scope:this,
+                listeners : {
+                	click : function(){
+                		window.location = '/LoginLogout.action?logout';
+                	}
+            
+                } 
             }]
         };
     }

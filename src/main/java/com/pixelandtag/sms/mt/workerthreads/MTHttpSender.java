@@ -107,7 +107,7 @@ public class MTHttpSender implements Runnable{
 	private volatile boolean success = true;
 	private volatile String message = "";
 	private volatile int sms_idx = 0;
-	private HttpPost httppost = null;
+	//private HttpPost httppost = null;
 	private volatile UrlEncodedFormEntity entity;
 	private volatile HttpEntity resEntity;
 	private volatile int recursiveCounter = 0;
@@ -478,7 +478,7 @@ public class MTHttpSender implements Runnable{
 			logger.debug(getName()+" Sending message "+(getSms_idx()+1)+ " of "+mt.getNumber_of_sms() + " sms: "+mt.getMsg_part());
 		}
 		
-		httppost = new HttpPost(this.mtUrl);
+		HttpPost httppost = new HttpPost(this.mtUrl);
 
 		CloseableHttpResponse response = null;
 		
@@ -746,7 +746,7 @@ public class MTHttpSender implements Runnable{
 	
 
 	private void printHeader() {
-		logger.debug("\n===================HEADER=========================\n");
+		/*logger.debug("\n===================HEADER=========================\n");
 	
 	try{
 			for(org.apache.http.Header h : httppost.getAllHeaders()){
@@ -781,7 +781,7 @@ public class MTHttpSender implements Runnable{
 	}
 	
 	logger.debug("\n===================HEADER END======================\n");
-		
+		*/
 	}
 
 	private void removeAllParams(List<NameValuePair> params) {

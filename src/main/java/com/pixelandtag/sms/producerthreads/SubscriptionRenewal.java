@@ -507,4 +507,17 @@ public class SubscriptionRenewal extends  Thread {
 		
 	}
 
+
+
+
+	public static void putPackToQueue(Long billable) {
+		try{
+			if(billable!=null)
+				renewables_ids.add(billable);
+		}catch(Exception exp){
+			
+		}
+		
+	}
+
 }

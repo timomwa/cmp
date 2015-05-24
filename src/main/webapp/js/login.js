@@ -89,10 +89,10 @@ Ext.onReady(function(){
  
                         failure:function(form, action){ 
                             if(action.failureType == 'server'){ 
-                                obj = Ext.util.JSON.decode(action.response.responseText); 
-                                Ext.Msg.alert('Login Failed!', obj.errors.reason); 
+                                var resp = Ext.util.JSON.decode(action.response.responseText); 
+                                Ext.Msg.alert('Login Failed!', resp.message); 
                             }else{ 
-                                Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + action.response.responseText); 
+                                Ext.Msg.alert('Warning!', 'Authentication server is unreachable : ' + resp.message); 
                             } 
                             login.getForm().reset(); 
                         } 

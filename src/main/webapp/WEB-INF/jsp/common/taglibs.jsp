@@ -17,4 +17,6 @@
 
 <%@taglib prefix="security" uri="http://www.stripes-stuff.org/security.tld"%>
 
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
+
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />

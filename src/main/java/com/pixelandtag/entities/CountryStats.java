@@ -7,7 +7,7 @@ package com.pixelandtag.entities;
  * 
  * 
  */
-public class Country {
+public class CountryStats {
 
 	String name;
 	int columnPosition;
@@ -186,7 +186,7 @@ public class Country {
 	 * @param revenuePerMonth
 	 * @param inmobia
 	 */
-	public Country(String name, int customerBase, int titalSubscribed,
+	public CountryStats(String name, int customerBase, int titalSubscribed,
 			int avgActivePlayers, double smsRate, double avgNumSMSinMama,
 			double percentPeopleParticipatingInMamas,
 			double activeParticipantPerDayInMama, double ARPU,

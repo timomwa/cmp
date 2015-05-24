@@ -41,6 +41,7 @@ public class Billable implements Serializable {
 	 * HTTP status code
 	 */
 	@Column(name = "resp_status_code")
+	@Index(name="bilblidx")
 	private String resp_status_code;
 	
 	
@@ -53,12 +54,15 @@ public class Billable implements Serializable {
 	
 	
 	@Column(name = "success")
+	@Index(name="bilblidx")
 	private Boolean success;
 	
 	/**
 	 * the message id
 	 */
+	
 	@Column(name = "message_id")
+	@Index(name="bilblidx")
 	private Long message_id;
 	
 	
@@ -103,9 +107,10 @@ public class Billable implements Serializable {
 	private Date timeStamp;
 	
 	@Column(name = "maxRetriesAllowed")
-	private Long maxRetriesAllowed;
+		private Long maxRetriesAllowed;
 	
 	@Column(name = "retry_count")
+	@Index(name="bilblidx")
 	private Long retry_count;
 	
 	@Column(name = "operation")
@@ -125,6 +130,7 @@ public class Billable implements Serializable {
 	private String keyword;
 	
 	@Column(name = "price")
+	@Index(name="bilblidx")
 	private BigDecimal price;
 	
 	@Column(name = "cp_id")

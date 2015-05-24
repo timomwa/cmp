@@ -56,6 +56,14 @@ public interface SubscriptionBeanI {
 	 * @throws Exception
 	 */
 	public Subscription getSubscription(String msisdn, Long serviceid) throws Exception;
+	
+	/**
+	 * Gets a list of subscriptions
+	 * @param msisdn
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Subscription> getSubscription(String msisdn) throws Exception;
 
 
 	/**
@@ -90,5 +98,51 @@ public interface SubscriptionBeanI {
 	 * @return
 	 */
 	public Subscription subscribe(String msisdn, Long service_id, MediumType medium) ;
+	
+	/**
+	 * 
+	 * @param id
+	 * @param msisdn
+	 * @param status
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean updateSubscription(int id, String msisdn,SubscriptionStatus status) throws Exception;
+	
+	/**
+	 * 
+	 * @param subscription_id
+	 * @param status
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception;
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Subscription> searchSubscription(String msisdn) throws Exception;
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param start
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Subscription> searchSubscription(String msisdn, int start, int limit) throws Exception;
+	
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @return
+	 * @throws Exception
+	 */
+	public Long countsearchSubscription(String msisdn) throws Exception;
 
 }

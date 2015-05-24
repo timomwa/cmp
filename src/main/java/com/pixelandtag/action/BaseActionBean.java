@@ -5,10 +5,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.UserTransaction;
 
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
+import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.LocalizableMessage;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.StreamingResolution;
@@ -25,7 +30,13 @@ import com.pixelandtag.model.FolderDao;
 
 
 public class BaseActionBean implements ActionBean {
-
+	
+	
+	protected static final String VIEW_LOGIN_PAGE = "/WEB-INF/jsp/login.jsp";
+	protected static final String VIEW_DESKTOP = "/WEB-INF/jsp/desktop.jsp";
+	protected ForwardResolution desktop = new ForwardResolution(VIEW_DESKTOP);
+	protected ForwardResolution loginPage = new ForwardResolution(VIEW_LOGIN_PAGE);
+	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a E MMM d y");
 	public static final SimpleDateFormat sdf2 = new SimpleDateFormat("E MMM d y");
 	public static final String PREFERED_DATE_FORMAT_0 = "yyyy-MM-dd";
@@ -49,6 +60,15 @@ public class BaseActionBean implements ActionBean {
 		// res.replaceAll(",\n]}", "]}").replaceAll(",}", "}"); 
 		 return new StreamingResolution("application/json", res); 
 	 }
+	 
+	 
+	 public Resolution sendResponse(final String res, String resptype){ 
+			// res.replaceAll(",\n]}", "]}").replaceAll(",}", "}"); 
+			 return new StreamingResolution(resptype, res); 
+	 }
+	 
+	 
+	 
 	 
 	protected CMPDao cmp_dao = CMPDao.getInstance();
 	protected FolderDao folderDao = new FolderDaoImpl();

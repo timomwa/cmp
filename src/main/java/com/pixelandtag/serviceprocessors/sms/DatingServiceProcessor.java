@@ -723,6 +723,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			}
 		
 		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
 			throw new DatingServiceException("Sorry, something went wrong. Please try again",exp);
 		}
 	}

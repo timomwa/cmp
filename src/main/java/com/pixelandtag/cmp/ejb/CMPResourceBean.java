@@ -38,6 +38,7 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.ProcessorType;
@@ -87,6 +88,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private DatingServiceI datingBean;
+	
+	@EJB
+	private SubscriptionBeanI subscriptionBean;
 	
 	
 	
@@ -336,73 +340,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return services;
 	}
 	
-	/**
-	 * Updates a subscriber's subscription status
-	 * @param conn
-	 * @param subscription_id
-	 * @param status - com.inmobia.celcom.subscription.dto.SubscriptionStatus
-	 * @return
-	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateSubscription(int subscription_id, String msisdn, SubscriptionStatus status) throws Exception {
-		
-		boolean success = false;
-		
-		try{
-			utx.begin();
-			String sql = "UPDATE `"+CelcomImpl.database+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE id=? ANd msisdn=?";
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, status.getStatus());
-			qry.setParameter(2, subscription_id);
-			qry.setParameter(3, msisdn);
-			success = qry.executeUpdate()>0;
-			utx.commit();
-		}catch(Exception e){
-			try{
-			utx.rollback();
-			}catch(Exception ee){}
-			logger.error(e.getMessage(),e);
-			
-			throw e;
-			
-		}finally{}
-		
-		
-		return success;
-	}
-	/**
-	 * Updates a subscriber's subscription status
-	 * @param conn
-	 * @param subscription_id
-	 * @param status - com.inmobia.celcom.subscription.dto.SubscriptionStatus
-	 * @return
-	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception {
-		
-		boolean success = false;
-		
-		try{
-			utx.begin();
-			String sql = "UPDATE `"+CelcomImpl.database+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE id=?";
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, status.getStatus());
-			qry.setParameter(2, subscription_id);
-			success = qry.executeUpdate()>0;
-			utx.commit();
-		}catch(Exception e){
-			try{
-			utx.rollback();
-			}catch(Exception ee){}
-			logger.error(e.getMessage(),e);
-			
-			throw e;
-			
-		}finally{}
-		
-		
-		return success;
-	}
+	
+	
 	
 	
 	
@@ -2857,7 +2796,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						if(sub!=null){
 							
-							updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+							subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
 							//subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
 							
 							MenuItem menu = getMenuById(sub.getSmsmenu_levels_id_fk());
@@ -2924,7 +2863,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									com.pixelandtag.subscription.dto.SubscriptionDTO subscription =  getSubscriptionDTO(MSISDN, toUnsubscribe.getId());
 								   
 									if(subscription!=null){
-										updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+										subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
 										msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, toUnsubscribe.getService_name());
 									}else{
 										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
@@ -2941,7 +2880,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										com.pixelandtag.subscription.dto.SubscriptionDTO  subscription =  getSubscriptionDTO(MSISDN, smsservice.getId());
 									    if(subscription!=null){
 										    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-										    updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+									    	subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 										}else{
 											msg1 = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
 											}

@@ -695,3 +695,12 @@ td.ux-taskButtons-edge {
     filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/customer_care.png', sizingMethod='scale');
 	
 }
+
+.search-item {
+  font: normal 11px tahoma, arial, helvetica, sans-serif;
+  padding: 3px 10px 3px 10px;
+  border: 1px solid #fff;
+  border-bottom: 1px solid #eeeeee;
+  white-space: normal;
+  color: #555;
+}

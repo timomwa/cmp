@@ -28,7 +28,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
 
 import com.inmobia.util.CurrencyExchange;
 import com.pixelandtag.autodraw.Alarm;
-import com.pixelandtag.entities.Country;
+import com.pixelandtag.entities.CountryStats;
 import com.pixelandtag.util.POI;
 import com.pixelandtag.web.draw.TriviaStats2;
 

@@ -144,15 +144,11 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public com.pixelandtag.subscription.dto.SubscriptionDTO checkAnyPending(
 			String msisdn) throws Exception ;
 
-	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception;
-
 	public LinkedHashMap<Integer, SMSServiceDTO> getAllSubscribedServices(
 			String msisdn) throws Exception;
 
 	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status) throws Exception;
 
-	public boolean updateSubscription(int id, String mSISDN,
-			SubscriptionStatus unsubscribed) throws Exception;
 
 	public SMSServiceDTO getSMSservice(String keyword) throws Exception;
 	

@@ -25,6 +25,7 @@ import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.MOSms;
@@ -61,6 +62,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 	private CelcomHTTPAPI celcomAPI = null;
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
+	private SubscriptionBeanI subscriptionBean;
     
     public void initEJB() throws NamingException{
     	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
@@ -73,6 +75,8 @@ public class MoreProcessor extends GenericServiceProcessor {
 		 context = new InitialContext(props);
 		 this.cmpbean =  (CMPResourceBeanRemote) 
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 this.subscriptionBean = (SubscriptionBeanI) 
+		    		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 
 		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
@@ -530,7 +534,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				if(sub!=null){
 					
-					cmpbean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+					subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
 					//subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
 					
 					MenuItem menu = menu_controller.getMenuById(sub.getSmsmenu_levels_id_fk());
@@ -592,7 +596,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 							SubscriptionDTO subscription =  cmpbean.getSubscriptionDTO(MSISDN, toUnsubscribe.getId());
 						   
 							if(subscription!=null){
-								cmpbean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+								subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
 								msg = msg.replaceAll(SERVICENAME_TAG, toUnsubscribe.getService_name());
 							}else{
 								msg = cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
@@ -607,7 +611,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 							    SubscriptionDTO subscription =  cmpbean.getSubscriptionDTO(MSISDN, smsservice.getId());
 							    if(subscription!=null){
 								    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-								    cmpbean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							    	subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 								}else{
 									msg = cmpbean.getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
 									}

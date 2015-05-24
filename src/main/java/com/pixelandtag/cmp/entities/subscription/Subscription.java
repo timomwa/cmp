@@ -3,13 +3,17 @@ package com.pixelandtag.cmp.entities.subscription;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -19,6 +23,8 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.customer.Operator;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
@@ -80,6 +86,12 @@ public class Subscription implements Serializable {
 	
 	@Column(name="credibility_index")
 	private Integer credibility_index;
+	
+	
+	@JoinColumn(name="opco_id_fk")
+	@Index(name="oprtfkidx")
+	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	private OperatorCountry opco;
 	
 	
 	@PrePersist
@@ -202,6 +214,14 @@ public class Subscription implements Serializable {
 
 	public void setCredibility_index(Integer credibility_index) {
 		this.credibility_index = credibility_index;
+	}
+
+	public OperatorCountry getOpco() {
+		return opco;
+	}
+
+	public void setOpco(OperatorCountry opco) {
+		this.opco = opco;
 	}
 	
 	

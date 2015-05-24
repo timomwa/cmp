@@ -6,10 +6,18 @@ import javax.annotation.security.RolesAllowed;
 import javax.persistence.Query;
 
 import net.sourceforge.stripes.action.DefaultHandler;
+import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 
 import org.apache.commons.collections.SetUtils;
 import org.apache.log4j.Logger;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.LockedAccountException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,7 +27,6 @@ import com.pixelandtag.cmp.handlers.AppProperties;
 @RolesAllowed("tester")
 public class LoginLogoutAction extends BaseActionBean  {
 	
-	public static final String VIEW = "/WEB-INF/jsp/login.jsp";
 	private Logger logger = Logger.getLogger(LoginLogoutAction.class);
 
 	private String loginUsername;
@@ -35,84 +42,72 @@ public class LoginLogoutAction extends BaseActionBean  {
 		return  sendResponse(resp.toString());
 	}
 	
-	@DenyAll
+	@PermitAll
 	public Resolution logout() throws JSONException{
-		JSONObject resp = new JSONObject();
-		resp.put("success", true);
-		resp.put("message", "Sucessfully logged out!");
-		return  sendResponse(resp.toString());
+		Subject currentUser = SecurityUtils.getSubject();
+		currentUser.logout();
+		return loginPage ;
 	}
 	
 	@PermitAll
-	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	public Resolution login() throws JSONException {
-		JSONObject resp = new JSONObject();
 		
-		try{
-			logger.info("loginUsername: "+loginUsername);
-			logger.info("loginPassword: "+loginPassword);
-			Query qry = cmp_dao.resource_bean.getEM().createQuery("from User where username= :username AND password= :password");
-			qry.setParameter("username", loginUsername);
-			qry.setParameter("password", loginPassword);
-			User user = (User) qry.getSingleResult();
-			//String resp = "";
-			if(user!=null){
-				for(Role r : user.getRoles()){
-					logger.info(">>>>>>> role "+r.getName());
-				}
-				
-				getContext().getRequest().getSession().setAttribute(AppProperties.CURR_USER_OBJ_NAME, user);
-				//getContext().setUser(user);
-				resp.put("success", true);
+		JSONObject resp = new JSONObject();
+		 
+		Subject currentUser = SecurityUtils.getSubject();
+		
+		logger.info("B4: currentUser.isAuthenticated(): "+currentUser.isAuthenticated());
+		
+		if ( !currentUser.isAuthenticated() ) {
+		    
+			UsernamePasswordToken token = new UsernamePasswordToken(loginUsername, loginPassword);
+		    
+		    token.setRememberMe(true);
+		    
+		    try {
+		        currentUser.login( token );
+		        resp.put("success", true);
 				resp.put("message", "Successful Login");
-			}else{
-				resp.put("success", false);
+				
+		    } catch ( UnknownAccountException uae ) {
+		    	resp.put("success", false);
+				resp.put("message", "No user with that name");
+			} catch ( IncorrectCredentialsException ice ) {
+		    	resp.put("success", false);
+				resp.put("message", "Incorrect password");
+			} catch ( LockedAccountException lae ) {
+		    	resp.put("success", false);
+				resp.put("message", "Your account is locked");
+			} catch ( AuthenticationException ae ) {
+		    	resp.put("success", false);
 				resp.put("message", "Wrong username and password");
+			}catch(Exception e){
+				resp.put("success", false);
+				resp.put("message", "Can't log in right now.");
+				logger.error(e.getMessage(),e);
 			}
-			logger.info("user: "+user);
-		}catch(javax.persistence.NoResultException e){
-			resp.put("success", false);
-			resp.put("message", "Can't find user with the provided name and password.");
-		}catch(Exception e){
-			resp.put("success", false);
-			resp.put("message", "Can't log in right now.");
-			logger.error(e.getMessage(),e);
 		}
+		
+		logger.info("AFTA: currentUser.isAuthenticated(): "+currentUser.isAuthenticated());
 		
 		return sendResponse(resp.toString());
 	}
-
-
 
 	public String getLoginUsername() {
 		return loginUsername;
 	}
 
-
-
 	public void setLoginUsername(String loginUsername) {
 		this.loginUsername = loginUsername;
 	}
-
-
 
 	public String getLoginPassword() {
 		return loginPassword;
 	}
 
-
-
 	public void setLoginPassword(String loginPassword) {
 		this.loginPassword = loginPassword;
 	}
-
-
-
-	
-
-	
-	
-	
 
 }

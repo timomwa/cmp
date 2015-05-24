@@ -13,10 +13,10 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import com.pixelandtag.cmp.entities.User;
-import com.pixelandtag.model.Dao;
+import com.pixelandtag.model.GenericDao;
 
 public abstract class BaseDaoImpl<T, ID extends Serializable> implements
-		Dao<T, ID> {
+		GenericDao<T, ID> {
 	private Class<T> entityClass;
 
 	@SuppressWarnings("unchecked")
