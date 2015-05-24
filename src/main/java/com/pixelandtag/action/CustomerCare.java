@@ -22,11 +22,14 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dao.SMSServiceDAO;
 import com.pixelandtag.model.GenericDao;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public class CustomerCare extends BaseActionBean {
 	
 	private String msisdn;
 	private String query;
+	private String status;
+	private Long subscription_id;
 	private String callback;
 	private int start = 0;
 	private int limit = 10;
@@ -37,17 +40,47 @@ public class CustomerCare extends BaseActionBean {
 	@EJB(mappedName =  "java:global/cmp/CMPResourceBean")
 	private CMPResourceBeanRemote cmpBean;
 	
-	//@Inject
-	//private SMSServiceDAO dao;
-	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	
+	
+	public Resolution changeSubscriptionStatus() throws Exception{
+		
+		Subject currentUser = SecurityUtils.getSubject();
+		
+		
+		JSONObject jsob = new JSONObject();
+		
+		logger.debug("subscription_id : "+subscription_id);
+		logger.debug("msisdn : "+msisdn);
+		logger.debug("status : "+status);
+		logger.debug("SubscriptionStatus.get(status) : "+SubscriptionStatus.get(status));
+		
+		if ( currentUser.isAuthenticated() ) {
+			boolean success = subscriptionBean.updateSubscription(subscription_id.intValue(), msisdn, SubscriptionStatus.get(status)); 
+			
+			jsob.put("success", success);
+			jsob.put("message", "Successfully "+(status.equalsIgnoreCase("confirmed") ? "renewed subscription for":"unsubscribed")+" "+msisdn);
+			
+		}else{
+			jsob.put("success", false);
+			jsob.put("message", "You're not logged in. Please log in first.");
+			
+		}
+		
+		return sendResponse(jsob.toString());
+		
+	}
 	
 	@DefaultHandler
 	public Resolution getSubscriptions() throws Exception {
 		
-		logger.info("query : "+query);
-		logger.info("callback : "+callback);
 		Subject currentUser = SecurityUtils.getSubject();
+		
+		if(query !=null && !query.isEmpty())
+			currentUser.getSession().setAttribute("query",query);
+		else
+			setQuery((String)currentUser.getSession().getAttribute("query"));
 		
 		Map<Long,SMSService> servicecache = new HashMap<Long,SMSService>();
 		
@@ -74,6 +107,9 @@ public class CustomerCare extends BaseActionBean {
 				subscr.put("msisdn", sub.getMsisdn());
 				subscr.put("servicename", smsservice.getService_name());
 				subscr.put("subscriptionDate", sub.getSubscription_timeStamp());
+				subscr.put("pricepointkeyword", smsservice.getPrice_point_keyword());
+				subscr.put("status", sub.getSubscription_status().toString());
+				subscr.put("price", smsservice.getPrice());
 				
 				subscriptions.put(subscr);
 				
@@ -131,6 +167,22 @@ public class CustomerCare extends BaseActionBean {
 
 	public void setLimit(int limit) {
 		this.limit = limit;
+	}
+
+	public Long getSubscription_id() {
+		return subscription_id;
+	}
+
+	public void setSubscription_id(Long subscription_id) {
+		this.subscription_id = subscription_id;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	
 	
