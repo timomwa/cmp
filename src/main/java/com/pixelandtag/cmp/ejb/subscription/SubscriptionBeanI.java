@@ -64,7 +64,17 @@ public interface SubscriptionBeanI {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Subscription> getSubscription(String msisdn) throws Exception;
+	public List<Subscription> searchSubscriptions(String msisdn) throws Exception;
+	
+	
+	/**
+	 * Gets a list of subscriptions
+	 * @param msisdn
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Subscription> listSubscriptions(String msisdn) throws Exception;
+
 
 
 	/**
@@ -73,7 +83,7 @@ public interface SubscriptionBeanI {
 	 * @param id - subscription id
 	 * @throws Exception
 	 */
-	public void updateQueueStatus(Long status, Long id) throws Exception;
+	public void updateQueueStatus(Long status, Long id, AlterationMethod method) throws Exception;
 	
 	/**
 	 * 
@@ -82,7 +92,7 @@ public interface SubscriptionBeanI {
 	 * @param sms_service_id
 	 * @throws Exception
 	 */
-	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id) throws Exception;
+	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id, AlterationMethod method) throws Exception;
 
 	/**
 	 * 
@@ -98,7 +108,7 @@ public interface SubscriptionBeanI {
 	 * @param service_id
 	 * @return
 	 */
-	public Subscription subscribe(String msisdn, Long service_id, MediumType medium) ;
+	public Subscription subscribe(String msisdn, Long service_id, MediumType medium, AlterationMethod method) ;
 	
 	/**
 	 * 

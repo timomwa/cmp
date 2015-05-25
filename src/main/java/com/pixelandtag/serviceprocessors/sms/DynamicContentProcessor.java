@@ -17,6 +17,7 @@ import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.staticcontent.ContentRetriever;
@@ -108,7 +109,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 						 
 				if(tailMsg==null || tailMsg.equals(additionalInfo.get("tailText_notsubscribed"))){
 					SMSService smsService = cmpbean.find(SMSService.class, new Long(serviceid));
-					cmpbean.subscribe(MSISDN, smsService, -1);
+					cmpbean.subscribe(MSISDN, smsService, -1,AlterationMethod.self_via_sms);
 				}
 				
 			}else{

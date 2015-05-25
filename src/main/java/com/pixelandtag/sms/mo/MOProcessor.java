@@ -32,7 +32,7 @@ import com.pixelandtag.web.triviaI.MechanicsI;
  */
 
 public class MOProcessor implements Runnable {
-
+	
 	private volatile boolean run = true;
 	private volatile String name;
 	private CelcomHTTPAPI celcomAPI;

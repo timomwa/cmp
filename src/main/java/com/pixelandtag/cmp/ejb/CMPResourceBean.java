@@ -44,7 +44,10 @@ import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.dating.entities.SubscriptionEvent;
+import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -72,8 +75,6 @@ import com.pixelandtag.web.beans.RequestObject;
 @Remote
 @TransactionManagement(TransactionManagementType.BEAN)
 public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRemote {
-	
-	
 	
 	
 	public CMPResourceBean() throws KeyManagementException,
@@ -251,21 +252,28 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		return sm;
 	}
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status)  throws Exception {
-		boolean success = false;
+	
+	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status, AlterationMethod method)  throws Exception {
+		
+		boolean success = true;
 		
 		try{
-			utx.begin();
-			String sql = "UPDATE `"+CelcomImpl.database+"`.`subscription` SET subscription_status=?, subscription_timeStamp=CURRENT_TIMESTAMP WHERE MSISDN=?";
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, status.getStatus());
-			qry.setParameter(2, msisdn);
+			
+			List<Subscription> subscriptions = subscriptionBean.listSubscriptions(msisdn);
+			
+			for(Subscription subscr : subscriptions){
+				try{
+					subscr.setSubscription_status(status);
+					subscriptionBean.updateSubscription(subscr.getId().intValue(), status, method);
+				}catch(Exception exp){
+					logger.error(exp.getMessage());
+					success = false;
+				}
 				
-			success = qry.executeUpdate()>0;
-			utx.commit();
+			}
+			
+			
 		}catch(Exception e){
-			try{utx.rollback();}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
 		}finally{
@@ -1408,7 +1416,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk, SubscriptionStatus status,SubscriptionSource source) throws Exception{
+	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk, SubscriptionStatus status,SubscriptionSource source, AlterationMethod method ) throws Exception{
 		
 		boolean success = false;
 		
@@ -1461,10 +1469,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk) throws Exception {
+	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk, MediumType medium, AlterationMethod method) throws Exception {
 		boolean success = false;
 		
 		try{
+			
 			utx.begin();
 			if(smsService!=null && smsService.getId()>-1){
 				final String TIMEUNIT = smsService.getSubscription_length_time_unit().toString();
@@ -1481,8 +1490,16 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				//qry.setParameter(8, smsService.getSubscription_length_time_unit());
 				
 				
-				if(qry.executeUpdate()>0)
+				if(qry.executeUpdate()>0){
 					success = true;
+					SubscriptionHistory sh = new SubscriptionHistory();
+					sh.setAlteration_method(method);
+					sh.setEvent(SubscriptionEvent.subscrition.getCode() );
+					sh.setService_id(smsService.getId());
+					sh.setTimeStamp(new Date());
+					
+					sh = em.merge(sh);
+				}
 				
 			}else{
 				success = false;
@@ -2536,7 +2553,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								}else if(req.getMediumType()==MediumType.ussd){
 									resp = "THIS IS USSD";
 								}
-								subscribe(MSISDN, smsserv, chosenMenu.getId());
+								subscribe(MSISDN, smsserv, chosenMenu.getId(), AlterationMethod.self_via_ussd);
 								
 							}
 							
@@ -2730,14 +2747,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								return resp;
 								
 							}else{
-							
+								
 								if(subdto==null || (subdto!=null && !subdto.getSubscription_status().equals(SubscriptionStatus.confirmed.toString()))){
 									
 									int service_id = chosenMenu.getService_id();
 									
 									SMSService smsService = find(SMSService.class, new Long(service_id));
 									
-									subscribe( MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+									subscribe( MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS,AlterationMethod.self_via_sms);//subscribe but marks as "confirmed"
 									//subscription.subscribe(conn, MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
 									
 									String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
@@ -2849,7 +2866,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						if(allsubscribed!=null){
 						
 							if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
-								unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed);
+								unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_ussd);
 								//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
 								msg1 = getMessage(GenericServiceProcessor.UNSUBSCRIBED_ALL_ADVICE, language_id);
 								msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, getMessage(MessageType.ALL_SERVICES, language_id));
@@ -3421,6 +3438,19 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			item = getMenuByParentLevelId(language_id,topMenu.getId(),topMenu.getMenu_id());
 		return item!=null ? item.enumerate() : null;
 	}
+
+	@Override
+	public boolean subscribe(String mSISDN, SMSService smsService,
+			int smsmenu_levels_id_fk, AlterationMethod method) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	
+
+	
+
+	
 
 
 }

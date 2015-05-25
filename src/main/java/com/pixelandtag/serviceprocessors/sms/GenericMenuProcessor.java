@@ -519,7 +519,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				if(allsubscribed!=null){
 				
 					if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
-						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed);
+						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_sms);
 						msg = cmpbean.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id);
 						msg = msg.replaceAll(SERVICENAME_TAG, cmpbean.getMessage(MessageType.ALL_SERVICES, language_id));
 						mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+SPACE+msg);
@@ -535,7 +535,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
 							}*/
-										
+										 
 						}else if(second_keyword!=null){
 										
 							SMSServiceDTO smsservice = cmpbean.getSMSservice(second_keyword);
@@ -649,7 +649,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				if(subdto==null || (subdto!=null && !subdto.getSubscription_status().equals(SubscriptionStatus.confirmed.toString()))){
 				
 					SMSService smsService = cmpbean.find(SMSService.class, new Long(chosenMenu.getService_id()));
-					cmpbean.subscribe(MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+					cmpbean.subscribe(MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS,AlterationMethod.self_via_sms);//subscribe but marks as "confirmed"
 					
 					
 					String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;

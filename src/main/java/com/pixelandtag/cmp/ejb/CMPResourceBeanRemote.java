@@ -13,6 +13,7 @@ import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
@@ -58,7 +59,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public com.pixelandtag.subscription.dto.SubscriptionDTO getSubscriptionDTO(
 			String mSISDN, int serviceid)  throws Exception;
 
-	public boolean subscribe(String mSISDN, SMSService smsService, int smsmenu_levels_id_fk) throws Exception ;
+	public boolean subscribe(String mSISDN, SMSService smsService, int smsmenu_levels_id_fk, AlterationMethod method) throws Exception ;
 
 	/**
 	 * 
@@ -139,7 +140,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
 
 	public boolean subscribe(String mSISDN, SMSService smsService, int id,
-			SubscriptionStatus confirmed, SubscriptionSource sms) throws Exception;
+			SubscriptionStatus confirmed, SubscriptionSource sms, AlterationMethod method) throws Exception;
 
 	public com.pixelandtag.subscription.dto.SubscriptionDTO checkAnyPending(
 			String msisdn) throws Exception ;
@@ -147,7 +148,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public LinkedHashMap<Integer, SMSServiceDTO> getAllSubscribedServices(
 			String msisdn) throws Exception;
 
-	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status) throws Exception;
+	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status, AlterationMethod method) throws Exception;
 
 
 	public SMSServiceDTO getSMSservice(String keyword) throws Exception;

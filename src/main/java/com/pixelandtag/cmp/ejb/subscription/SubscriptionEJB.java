@@ -69,7 +69,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				utx.commit();
 			}else{
 				utx.begin();
-				subsc = subscribe(msisdn,service_id,MediumType.ussd);
+				subsc = subscribe(msisdn,service_id,MediumType.ussd,AlterationMethod.system_autorenewal);
 				if(change>=1){
 					int prev_index = subsc.getCredibility_index().intValue();
 					subsc.setCredibility_index(prev_index>=0 ? (change+prev_index) : 0);//we re-set their index if they previously had a bad record, but now they have credit
@@ -93,7 +93,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
-	public Subscription subscribe(String msisdn, Long service_id,MediumType medium) {
+	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method) {
 		Subscription subscription = null;
 		try{
 			utx.begin();
@@ -106,6 +106,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			subscription.setQueue_status(0L);
 			subscription.setRequest_medium(medium);
 			subscription.setSubscription_status(SubscriptionStatus.confirmed);
+			
+			
+			
 			subscription = em.merge(subscription);
 			utx.commit();
 		}catch(Exception e){
@@ -151,7 +154,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		try{
 			SMSService service = em.find(SMSService.class, serviceid);
 			sub = renewSubscription(msisdn, service, SubscriptionStatus.confirmed, method);
-			updateQueueStatus(0L,sub.getId());
+			updateQueueStatus(0L,sub.getId(),method);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}
@@ -163,12 +166,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateQueueStatus(java.lang.String, java.lang.String, java.lang.Long)
 	 */
 	@Override
-	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id) throws Exception{
+	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id, AlterationMethod method) throws Exception{
 		try{
 			Subscription sub = getSubscription(msisdn, sms_service_id);
 			if(sub==null)
-				sub = subscribe(msisdn, sms_service_id,MediumType.ussd);
-			updateQueueStatus(status,sub.getId());
+				sub = subscribe(msisdn, sms_service_id,MediumType.ussd,method);
+			updateQueueStatus(status,sub.getId(), method);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}
@@ -177,7 +180,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void updateQueueStatus(Long status, Long id) throws Exception{
+	public void updateQueueStatus(Long status, Long id, AlterationMethod method) throws Exception{
 		try{
 			utx.begin();
 			Query qry = em.createQuery("UPDATE Subscription s SET s.queue_status=:queue_status WHERE s.id=:id");
@@ -397,15 +400,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<Subscription> getSubscription(String msisdn) throws Exception{
+	public List<Subscription> listSubscriptions(String msisdn) throws Exception{
 		
-		return searchSubscription(msisdn);
-		
-		/*List<Subscription> sublist = new ArrayList<Subscription>();
-		
+		List<Subscription> sublist = new ArrayList<Subscription>();
 		try{
-			
 			Query qry = em.createQuery("from Subscription sub WHERE sub.msisdn=:msisdn ");
 			qry.setParameter("msisdn", msisdn);
 			sublist = qry.getResultList();
@@ -416,7 +416,17 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
-		return sublist;*/
+		return sublist;
+	}
+	
+	
+	
+	@Override
+	public List<Subscription> searchSubscriptions(String msisdn) throws Exception{
+		
+		return searchSubscription(msisdn);
+		
+		
 	}
 	
 	@SuppressWarnings("unchecked")

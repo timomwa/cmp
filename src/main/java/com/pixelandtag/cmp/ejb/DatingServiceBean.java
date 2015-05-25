@@ -1204,7 +1204,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				mo.setPriority(0);
 				
 				try{
-					subscriptionBean.updateQueueStatus(2L, mo.getMsisdn(), serviceid);
+					subscriptionBean.updateQueueStatus(2L, mo.getMsisdn(), serviceid,method);
 				}catch(Exception exp){
 					logger.error("ERROR DURING SUBSCRIPTION RENEWAL:: "+exp.getMessage(),exp);
 				}

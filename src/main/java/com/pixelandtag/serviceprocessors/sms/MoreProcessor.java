@@ -471,7 +471,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 							
 							SMSService smsService = cmpbean.find(SMSService.class, new Long(service_id));
 							
-							cmpbean.subscribe( MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
+							cmpbean.subscribe( MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS,AlterationMethod.self_via_sms);//subscribe but marks as "confirmed"
 							//subscription.subscribe(conn, MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
 							
 							String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
@@ -584,7 +584,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				if(allsubscribed!=null){
 				
 					if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
-						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed);
+						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_sms); 
 						//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
 						msg = cmpbean.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id);
 						msg = msg.replaceAll(SERVICENAME_TAG, cmpbean.getMessage(MessageType.ALL_SERVICES, language_id));
