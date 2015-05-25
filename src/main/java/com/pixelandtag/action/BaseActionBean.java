@@ -143,7 +143,15 @@ public class BaseActionBean implements ActionBean {
 	}
 	
 	public String getRemoteHost(){
-		return getContext().getRequest().getRemoteHost();
+		String host = null;
+		
+		try{
+			host = getContext().getRequest().getRemoteHost();
+		}catch(Exception exp){
+			
+		}
+		
+		return host==null ? "..." : host;
 	}
 	  /*protected AttachmentDao attachmentDao = new AttachmentDaoImpl();
 	  protected ContactDao contactDao = new ContactDaoImpl(); protected

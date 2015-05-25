@@ -525,6 +525,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			Query qry = em.createQuery("from Subscription where id = :id AND msisdn = :msisdn");
 			qry.setParameter("id", Long.valueOf(subscription_id));
 			Subscription sub = (Subscription) qry.getSingleResult();
+			utx.begin();
 			sub.setSubscription_status(status);
 			
 			SubscriptionHistory sbh = new SubscriptionHistory();
@@ -535,7 +536,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			sbh.setTimeStamp(timeInNairobi);
 			
-			utx.begin();
+			
 			sub = em.merge(sub);
 			sbh = em.merge(sbh);
 			success = true;

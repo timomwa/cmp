@@ -253,6 +253,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return sm;
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status, AlterationMethod method)  throws Exception {
 		
 		boolean success = true;
@@ -263,9 +264,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			for(Subscription subscr : subscriptions){
 				try{
-					subscr.setSubscription_status(status);
 					subscriptionBean.updateSubscription(subscr.getId().intValue(), status, method);
+					utx.begin();	
+					subscr.setSubscription_status(status);
+					utx.commit();
 				}catch(Exception exp){
+					try{
+						utx.rollback();
+					}catch(Exception ex){}
 					logger.error(exp.getMessage());
 					success = false;
 				}

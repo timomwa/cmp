@@ -58,7 +58,7 @@ update hibernate_sequence set next_val=next_val+1;
 insert into dating_disallowedwords select next_val+1,'STOP' from hibernate_sequence;
 update hibernate_sequence set next_val=next_val+1;
 
-insert into dating_disallowedwords select next_val+1,'WHERE' from hibernate_sequence;
+insert into dating_disallowedwords select next_val+1,'WHERE' from hibernatde_sequence;
 update hibernate_sequence set next_val=next_val+1;
 
 insert into dating_disallowedwords select next_val+1,'WANT' from hibernate_sequence;

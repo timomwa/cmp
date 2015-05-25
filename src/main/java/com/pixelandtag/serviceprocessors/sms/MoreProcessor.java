@@ -375,8 +375,6 @@ public class MoreProcessor extends GenericServiceProcessor {
 					}
 				}else{
 					
-					
-					
 					if(chosenMenu.getService_id()==-1){//if there are other items under this, update session
 						
 						menu_controller.updateSession(language_id,MSISDN, chosenMenu.getId());//update session
