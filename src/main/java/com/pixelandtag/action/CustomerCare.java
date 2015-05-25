@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.security.UserSessionI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -26,6 +27,9 @@ import com.pixelandtag.cmp.entities.User;
 import com.pixelandtag.cmp.entities.audit.UserAction;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dao.SMSServiceDAO;
+import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.dating.entities.Person;
+import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.model.GenericDao;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
@@ -48,6 +52,9 @@ public class CustomerCare extends BaseActionBean {
 	@EJB(mappedName =  "java:global/cmp/UserSessionEJB")
     private UserSessionI usersessionEJB;
 	
+	@EJB(mappedName = "java:global/cmp/DatingServiceBean")
+	private DatingServiceI datingServiceI;
+	
 	private Logger logger = Logger.getLogger(getClass());
 	
 	
@@ -67,7 +74,32 @@ public class CustomerCare extends BaseActionBean {
 		sb.append(" SubscriptionStatus.get(status) : "+SubscriptionStatus.get(status));
 		
 		if ( currentUser.isAuthenticated() ) {
-			boolean success = subscriptionBean.updateSubscription(subscription_id.intValue(), msisdn, SubscriptionStatus.get(status)); 
+			
+			boolean success = subscriptionBean.updateSubscription(subscription_id.intValue(), msisdn, SubscriptionStatus.get(status), AlterationMethod.customer_care_interface); 
+			
+			try{
+				Subscription subscr = cmpBean.find(Subscription.class,subscription_id);
+				SMSService smsserv = subscr!=null ? cmpBean.find(SMSService.class, subscr.getSms_service_id_fk()) : null;
+				if(smsserv!=null){
+					
+					if((smsserv.getService_description()!=null && !smsserv.getService_description().isEmpty()
+							&& smsserv.getService_description().toLowerCase().contains("dating"))
+							||
+							(smsserv.getService_name()!=null && !smsserv.getService_name().isEmpty()
+							&& smsserv.getService_name().toLowerCase().contains("dating"))
+							){
+						
+						datingServiceI.deactivate(msisdn);
+						
+					}
+						
+				
+						
+				}
+				
+			}catch(Exception exp){
+				logger.warn(exp.getMessage(),exp);
+			}
 			
 			jsob.put("success", success);
 			jsob.put("message", "Successfully "+(status.equalsIgnoreCase("confirmed") ? "renewed subscription for":"unsubscribed")+" "+msisdn);

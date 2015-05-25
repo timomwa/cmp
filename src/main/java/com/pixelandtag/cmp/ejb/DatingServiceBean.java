@@ -36,6 +36,7 @@ import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Location;
@@ -1154,7 +1155,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	}
 	
 	
-	public MOSms renewSubscription(MOSms mo, Long serviceid) throws DatingServiceException{
+	public MOSms renewSubscription(MOSms mo, Long serviceid, AlterationMethod method) throws DatingServiceException{
 		
 		
 		try{
@@ -1215,7 +1216,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				SMSService smsserv = find(SMSService.class, serviceid);
 				
 				
-				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv,SubscriptionStatus.confirmed);
+				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv,SubscriptionStatus.confirmed,method);
 				
 				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
 				msg = msg.replaceAll(EXPIRY_DATE_TAG, timezone_ejb.convertToPrettyFormat( sub.getExpiryDate() ));
@@ -1338,6 +1339,30 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			logger.error(exp.getMessage(), exp);
 		}
 		return datingperson_profile;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.pixelandtag.cmp.ejb.DatingServiceI#deactivate(java.lang.String)
+	 */
+	@Override
+	public boolean deactivate(String msisdn) {
+		boolean success = false;
+		try{
+			PersonDatingProfile profile = getProfile(msisdn);
+			if(profile!=null){
+				Person person = profile.getPerson();
+				if(person!=null){
+					person.setActive(Boolean.FALSE);
+					person.setLoggedin(Boolean.FALSE);
+					person = saveOrUpdate(person);
+				}
+					
+			}
+			success = true;
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return success;
 	}
 	
 	

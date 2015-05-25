@@ -27,6 +27,7 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
@@ -472,7 +473,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				if(sub!=null){
 					
-					subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+					subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed, AlterationMethod.self_via_sms);
 					
 					MenuItem menu = menu_controller.getMenuById(sub.getSmsmenu_levels_id_fk());
 					
@@ -529,7 +530,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 							SMSServiceDTO toUnsubscribe = allsubscribed.get(stop_number);
 							
 							//if(subscription.updateSubscription(conn, toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-							subscriptionBean.updateSubscription(toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							subscriptionBean.updateSubscription(toUnsubscribe.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_sms);
 								msg = msg.replaceAll(SERVICENAME_TAG, toUnsubscribe.getService_name());
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again
@@ -540,7 +541,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 							SMSServiceDTO smsservice = cmpbean.getSMSservice(second_keyword);
 							
 							//if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-							subscriptionBean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+							subscriptionBean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_sms);
 								msg = msg.replaceAll(SERVICENAME_TAG, smsservice.getService_name());
 							/*}else{
 								msg = UtilCelcom.getMessage(MessageType.UNABLE_TO_UNSUBSCRIBE_ADVICE, conn, language_id);//try again

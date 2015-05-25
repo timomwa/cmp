@@ -5,6 +5,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -40,6 +42,10 @@ public class SubscriptionHistory implements Serializable {
 
 	@Column(name = "event")
 	private Long event;
+	
+	@Column(name = "alteration_method")
+	@Enumerated(EnumType.STRING)
+	private AlterationMethod alteration_method;
 
 	@PrePersist
 	public void onCreate() {
@@ -47,6 +53,8 @@ public class SubscriptionHistory implements Serializable {
 			timeStamp = new Date();
 		if (event == null)
 			event = 0L;
+		if (alteration_method == null)
+			alteration_method = AlterationMethod.self_via_ussd;
 	}
 
 	public Long getId() {
@@ -87,6 +95,14 @@ public class SubscriptionHistory implements Serializable {
 
 	public void setEvent(Long event) {
 		this.event = event;
+	}
+
+	public AlterationMethod getAlteration_method() {
+		return alteration_method;
+	}
+
+	public void setAlteration_method(AlterationMethod alteration_method) {
+		this.alteration_method = alteration_method;
 	}
 	
 	

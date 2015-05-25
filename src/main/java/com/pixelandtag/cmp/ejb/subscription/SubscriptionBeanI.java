@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
@@ -25,7 +26,7 @@ public interface SubscriptionBeanI {
 	 * @return
 	 * @throws Exception
 	 */
-	public Subscription renewSubscription(String msisdn, Long serviceId) throws Exception;
+	public Subscription renewSubscription(String msisdn, Long serviceId, AlterationMethod method) throws Exception;
 	
 	
 	/**
@@ -36,7 +37,7 @@ public interface SubscriptionBeanI {
 	 * @return
 	 * @throws Exception
 	 */
-	public Subscription renewSubscription(String msisdn, SMSService smsService,SubscriptionStatus substatus) throws Exception;
+	public Subscription renewSubscription(String msisdn, SMSService smsService,SubscriptionStatus substatus, AlterationMethod method) throws Exception;
 	
 	
 	/**
@@ -107,7 +108,7 @@ public interface SubscriptionBeanI {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean updateSubscription(int id, String msisdn,SubscriptionStatus status) throws Exception;
+	public boolean updateSubscription(int id, String msisdn,SubscriptionStatus status, AlterationMethod method) throws Exception;
 	
 	/**
 	 * 
@@ -116,7 +117,7 @@ public interface SubscriptionBeanI {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception;
+	public boolean updateSubscription(int subscription_id, SubscriptionStatus status, AlterationMethod method) throws Exception;
 	
 	/**
 	 * 

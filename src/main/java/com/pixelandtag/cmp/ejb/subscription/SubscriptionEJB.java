@@ -26,11 +26,11 @@ import com.pixelandtag.cmp.ejb.DatingServiceBean;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
 import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
-import com.pixelandtag.util.StopWatch;
 
 @Stateless
 @Remote
@@ -146,11 +146,11 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#renewSubscription(java.lang.String, java.lang.Long)
 	 */
 	@Override
-	public Subscription renewSubscription(String msisdn, Long serviceid) throws Exception{
+	public Subscription renewSubscription(String msisdn, Long serviceid, AlterationMethod method) throws Exception{
 		Subscription sub = null;
 		try{
 			SMSService service = em.find(SMSService.class, serviceid);
-			sub = renewSubscription(msisdn, service, SubscriptionStatus.confirmed);
+			sub = renewSubscription(msisdn, service, SubscriptionStatus.confirmed, method);
 			updateQueueStatus(0L,sub.getId());
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
@@ -199,7 +199,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus) throws Exception{
+	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus,  AlterationMethod method) throws Exception{
 			Subscription sub = null;
 			try{
 				Query qry;
@@ -242,7 +242,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sh.setMsisdn(msisdn);
 					sh.setService_id(smsService.getId());
 					sh.setTimeStamp(new Date());
-					
+					sh.setAlteration_method(method);
 					sh = em.merge(sh);
 					
 					utx.commit();
@@ -466,7 +466,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	 * @return
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateSubscription(int subscription_id, String msisdn, SubscriptionStatus status) throws Exception {
+	public boolean updateSubscription(int subscription_id, String msisdn, SubscriptionStatus status, AlterationMethod method) throws Exception {
 		
 		boolean success = false;
 		
@@ -481,6 +481,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			SubscriptionHistory sbh = new SubscriptionHistory();
 			sbh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
 			sbh.setMsisdn(msisdn);
+			sbh.setAlteration_method(method);
 			sbh.setService_id(sub.getSms_service_id_fk());//TODO get the destination timezone from the country object
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			sbh.setTimeStamp(timeInNairobi);
@@ -505,7 +506,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	}
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateSubscription(int subscription_id, SubscriptionStatus status) throws Exception{
+	public boolean updateSubscription(int subscription_id, SubscriptionStatus status, AlterationMethod method) throws Exception{
 
 		boolean success = false;
 		
@@ -519,6 +520,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			SubscriptionHistory sbh = new SubscriptionHistory();
 			sbh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
 			sbh.setMsisdn(sub.getMsisdn());
+			sbh.setAlteration_method(method);
 			sbh.setService_id(sub.getSms_service_id_fk());//TODO get the destination timezone from the country object
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			sbh.setTimeStamp(timeInNairobi);

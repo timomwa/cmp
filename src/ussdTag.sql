@@ -151,3 +151,8 @@ insert into role select next_val+1, 'contentmanagement' from hibernate_sequence;
 insert into role select next_val+1, 'customercare' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 insert into role select next_val+1, 'subscriptionmanagement' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 insert into role select next_val+1, 'statistics' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+
+insert into user select next_val+1,'csd@airtel.co.ke',1,'csd@airtel.co.ke','csd@airtel.co.ke','Csd123' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+
+insert into user select next_val+1,'francis@content360.co.ke',1,'francis@content360.co.ke','francis@content360.co.ke','Francis123' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+

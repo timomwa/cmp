@@ -44,6 +44,7 @@ import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -2796,7 +2797,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						if(sub!=null){
 							
-							subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed);
+							subscriptionBean.updateSubscription(sub.getId(), SubscriptionStatus.confirmed, AlterationMethod.self_via_ussd);
 							//subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
 							
 							MenuItem menu = getMenuById(sub.getSmsmenu_levels_id_fk());
@@ -2863,7 +2864,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									com.pixelandtag.subscription.dto.SubscriptionDTO subscription =  getSubscriptionDTO(MSISDN, toUnsubscribe.getId());
 								   
 									if(subscription!=null){
-										subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed); 
+										subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_ussd); 
 										msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, toUnsubscribe.getService_name());
 									}else{
 										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
@@ -2880,7 +2881,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										com.pixelandtag.subscription.dto.SubscriptionDTO  subscription =  getSubscriptionDTO(MSISDN, smsservice.getId());
 									    if(subscription!=null){
 										    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
-									    	subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed);
+									    	subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_ussd);
 										}else{
 											msg1 = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
 											}

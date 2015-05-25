@@ -18,6 +18,7 @@ import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
@@ -265,7 +266,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											billable.setResp_status_code("Success");
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
-											sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+											sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id()), AlterationMethod.system_autorenewal); 
 											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//Resume back to normal. No throttling
@@ -295,7 +296,7 @@ public class SubscriptionBillingWorker implements Runnable {
 									
 								}else{
 									if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice().compareTo(BigDecimal.ZERO)<=0){
-										sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id())); 
+										sub = subscriptionejb.renewSubscription(billable.getMsisdn(), Long.valueOf(billable.getService_id()), AlterationMethod.system_autorenewal); 
 										logger.info("No billing requred :::: SUBSCRIPTION RENEWED: "+sub.toString());
 									}else{
 										setRun(false);//Poison pill

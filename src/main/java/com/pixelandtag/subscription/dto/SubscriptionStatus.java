@@ -29,8 +29,4 @@ public enum SubscriptionStatus {
 	public static SubscriptionStatus get(String status) {
 		return lookup.get(status);
 	}
-	
-	public static void main(String[] args){
-		System.out.println(SubscriptionStatus.waiting_confirmation.getStatus());
-	}
 }

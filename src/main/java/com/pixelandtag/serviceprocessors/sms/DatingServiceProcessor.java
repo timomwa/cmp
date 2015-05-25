@@ -23,6 +23,7 @@ import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Location;
@@ -219,7 +220,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(!subvalid || allow_multiple_plans  ){
 					
 					try{
-						mo = datingBean.renewSubscription(mo,smsservice0.getId());
+						mo = datingBean.renewSubscription(mo,smsservice0.getId(),AlterationMethod.self_via_sms);
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
@@ -498,7 +499,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 						SMSService smsservice = datingBean.getSMSService("DATE");
 						
-						subscriptionBean.renewSubscription(MSISDN, smsservice, SubscriptionStatus.confirmed);
+						subscriptionBean.renewSubscription(MSISDN, smsservice, SubscriptionStatus.confirmed,AlterationMethod.self_via_sms);
 					}
 				}
 				
