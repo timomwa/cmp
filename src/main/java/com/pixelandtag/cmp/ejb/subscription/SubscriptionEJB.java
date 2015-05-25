@@ -241,7 +241,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 					sub = em.merge(sub);
 					
 					SubscriptionHistory sh = new SubscriptionHistory();
-					sh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
+					sh.setEvent(  (substatus ==  SubscriptionStatus.confirmed && sub.getRenewal_count()<=0) ? SubscriptionEvent.subscrition.getCode() : 
+						(substatus ==  SubscriptionStatus.unsubscribed ? SubscriptionEvent.unsubscrition.getCode() : SubscriptionEvent.renewal.getCode() ));
 					sh.setMsisdn(msisdn);
 					sh.setService_id(smsService.getId());
 					sh.setTimeStamp(new Date());
@@ -489,7 +490,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			sub.setSubscription_status(status);
 			
 			SubscriptionHistory sbh = new SubscriptionHistory();
-			sbh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
+			sbh.setEvent(  (status ==  SubscriptionStatus.confirmed && sub.getRenewal_count()<=0) ? SubscriptionEvent.subscrition.getCode() : 
+				(status ==  SubscriptionStatus.unsubscribed ? SubscriptionEvent.unsubscrition.getCode() : SubscriptionEvent.renewal.getCode() ));
 			sbh.setMsisdn(msisdn);
 			sbh.setAlteration_method(method);
 			sbh.setService_id(sub.getSms_service_id_fk());//TODO get the destination timezone from the country object
@@ -529,7 +531,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			sub.setSubscription_status(status);
 			
 			SubscriptionHistory sbh = new SubscriptionHistory();
-			sbh.setEvent(sub.getRenewal_count()<=0 ? SubscriptionEvent.subscrition.getCode() : SubscriptionEvent.renewal.getCode());
+			sbh.setEvent(  (status ==  SubscriptionStatus.confirmed && sub.getRenewal_count()<=0) ? SubscriptionEvent.subscrition.getCode() : 
+				(status ==  SubscriptionStatus.unsubscribed ? SubscriptionEvent.unsubscrition.getCode() : SubscriptionEvent.renewal.getCode() ));
 			sbh.setMsisdn(sub.getMsisdn());
 			sbh.setAlteration_method(method);
 			sbh.setService_id(sub.getSms_service_id_fk());//TODO get the destination timezone from the country object
