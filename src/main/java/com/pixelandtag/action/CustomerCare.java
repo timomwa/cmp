@@ -80,6 +80,7 @@ public class CustomerCare extends BaseActionBean {
 			try{
 				Subscription subscr = cmpBean.find(Subscription.class,subscription_id);
 				SMSService smsserv = subscr!=null ? cmpBean.find(SMSService.class, subscr.getSms_service_id_fk()) : null;
+				
 				if(smsserv!=null){
 					
 					if((smsserv.getService_description()!=null && !smsserv.getService_description().isEmpty()
@@ -88,8 +89,15 @@ public class CustomerCare extends BaseActionBean {
 							(smsserv.getService_name()!=null && !smsserv.getService_name().isEmpty()
 							&& smsserv.getService_name().toLowerCase().contains("dating"))
 							){
-						
-						datingServiceI.deactivate(msisdn);
+					
+						if(SubscriptionStatus.get(status) == SubscriptionStatus.unsubscribed){
+
+							datingServiceI.deactivate(msisdn);
+							
+						}else{
+							
+							datingServiceI.reactivate(msisdn);
+						}
 						
 					}
 						

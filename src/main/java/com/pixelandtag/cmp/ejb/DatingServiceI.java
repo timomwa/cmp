@@ -57,6 +57,8 @@ public interface DatingServiceI extends BaseEntityI {
 	 * @return
 	 */
 	public boolean deactivate(String msisdn);
+	
+	public boolean reactivate(String msisdn);
 
 	
 

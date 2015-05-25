@@ -1366,6 +1366,28 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	}
 	
 	
+	@Override
+	public boolean reactivate(String msisdn) {
+		boolean success = false;
+		try{
+			PersonDatingProfile profile = getProfile(msisdn);
+			if(profile!=null){
+				Person person = profile.getPerson();
+				if(person!=null){
+					person.setActive(Boolean.TRUE);
+					person.setLoggedin(Boolean.TRUE);
+					person = saveOrUpdate(person);
+				}
+					
+			}
+			success = true;
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return success;
+	}
+	
+	
 
 	
 }
