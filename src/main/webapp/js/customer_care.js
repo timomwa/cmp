@@ -297,7 +297,7 @@ grid = new Ext.grid.GridPanel({
 		title: 'Subscriptions ',
 		autoScroll: true,
 		 // config options for stateful behavior
-        stateful: true,
+        stateful: false,
         stateId: 'grid'
     });
 //}
