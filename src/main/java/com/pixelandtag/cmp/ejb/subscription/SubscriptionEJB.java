@@ -522,7 +522,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 		try{
 			
-			Query qry = em.createQuery("from Subscription where id = :id AND msisdn = :msisdn");
+			Query qry = em.createQuery("from Subscription where id = :id ");
 			qry.setParameter("id", Long.valueOf(subscription_id));
 			Subscription sub = (Subscription) qry.getSingleResult();
 			utx.begin();
