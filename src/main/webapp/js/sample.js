@@ -18,19 +18,19 @@ MyDesktop = new Ext.app.App({
 		
 		var modules = [];
 		
-		if(hasRole('administrator'))
+		if(hasRole('administrator') || hasRole('superuser') || hasRole('usermanagement'))
 			modules.push(new MyDesktop.AccordionWindow());
 		
-		if(hasRole('administrator'))
+		if(hasRole('administrator') || hasRole('superuser') || hasRole('contentmanagement'))
 			modules.push(new MyDesktop.ContentManagementModule());
 		
-		if(hasRole('customercare'))
+		if(hasRole('administrator') || hasRole('superuser') || hasRole('customercare'))
 			modules.push(new MyDesktop.CustomerCareModule());
 		
-		if(hasRole('administrator'))	
+		if(hasRole('administrator') || hasRole('superuser') || hasRole('subscriptionmanagement'))	
 			modules.push(new MyDesktop.SubscriptionManagementModule());
 		
-		if(hasRole('administrator'))
+		if(hasRole('administrator') || hasRole('superuser') || hasRole('statistics'))
 			modules.push(new MyDesktop.StatisticsModule());
 		
 		return modules;

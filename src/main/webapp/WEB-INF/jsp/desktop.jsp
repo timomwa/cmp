@@ -33,21 +33,21 @@
 <script type="text/javascript" src="js/ext-all-debug.js"></script>
 
 <!-- DESKTOP -->
-<script type="text/javascript" src="js/permissions.js?v=3.0"></script>
-<script type="text/javascript" src="js/StartMenu.js?v=3.0"></script>
-<script type="text/javascript" src="js/TaskBar.js?v=3.0"></script>
-<script type="text/javascript" src="js/Desktop.js?v=3.0"></script>
-<script type="text/javascript" src="js/App.js?v=3.0"></script>
-<script type="text/javascript" src="js/Module.js?v=3.0"></script>
-<script type="text/javascript" src="js/sample.js?v=3.0"></script>
-<script type="text/javascript" src="js/content_manager.js?v=3.0"></script>
-<script type="text/javascript" src="js/subscription_management.js?v=3.0"></script>
-<script type="text/javascript" src="js/statistics.js?v=2.0"></script>
-<script type="text/javascript" src="js/customer_care.js?v=3.0"></script>
+<script type="text/javascript" src="js/permissions.js?v=3.1"></script>
+<script type="text/javascript" src="js/StartMenu.js?v=3.1"></script>
+<script type="text/javascript" src="js/TaskBar.js?v=3.1"></script>
+<script type="text/javascript" src="js/Desktop.js?v=3.1"></script>
+<script type="text/javascript" src="js/App.js?v=3.1"></script>
+<script type="text/javascript" src="js/Module.js?v=3.1"></script>
+<script type="text/javascript" src="js/sample.js?v=3.1"></script>
+<script type="text/javascript" src="js/content_manager.js?v=3.1"></script>
+<script type="text/javascript" src="js/subscription_management.js?v=3.1"></script>
+<script type="text/javascript" src="js/statistics.js?v=2.1"></script>
+<script type="text/javascript" src="js/customer_care.js?v=3.1"></script>
 
 
 
-<script type="text/javascript" src="js/livebilling_graph.js?v=3.0"></script>
+<script type="text/javascript" src="js/livebilling_graph.js?v=3.1"></script>
 
 
 </head>
@@ -64,7 +64,7 @@
             <div>Grid Window</div></a>
         </dt -->
 			
-			<shiro:hasAnyRoles name="superuser,usermanagement">
+			<shiro:hasAnyRoles name="superuser, usermanagement">
 				<dt id="acc-win-shortcut">
 					<a href="#"><img src="images/s.gif" />
 						<div>User Management</div></a>
@@ -72,7 +72,7 @@
 			</shiro:hasAnyRoles>
 			
 			
-			<shiro:hasAnyRoles name="superuser,contentmanagement">
+			<shiro:hasAnyRoles name="superuser, contentmanagement">
 				<dt id="content-win-shortcut">
 					<a href="#"><img src="images/s.gif" />
 						<div>Content Management</div></a>
@@ -80,14 +80,14 @@
 			</shiro:hasAnyRoles>
 			
 			
-			<shiro:hasAnyRoles name="superuser,subscriptionmanagement">
+			<shiro:hasAnyRoles name="superuser, subscriptionmanagement">
 				<dt id="subscription-win-shortcut">
 					<a href="#"><img src="images/s.gif" />
 						<div>Subscription Management</div></a>
 				</dt>
 			</shiro:hasAnyRoles>
 			
-			<shiro:hasAnyRoles name="superuser,statistics">
+			<shiro:hasAnyRoles name="superuser, statistics">
 				<dt id="statistics-win-shortcut">
 					<a href="#"><img src="images/s.gif" />
 						<div>Statistics</div></a>
@@ -95,7 +95,7 @@
 			</shiro:hasAnyRoles>
 			
 			
-			<shiro:hasAnyRoles name="superuser,customercare">
+			<shiro:hasAnyRoles name="superuser, customercare">
 				<dt id="customer_care-win-shortcut">
 					<a href="#"><img src="images/s.gif" />
 						<div>Customer Care</div></a>
