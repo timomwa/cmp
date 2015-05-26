@@ -23,6 +23,13 @@ import com.pixelandtag.sms.producerthreads.EventType;
 @Table(name = "sms_service")
 public class SMSService implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 23934386067699630L;
+
+
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;

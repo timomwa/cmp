@@ -13,7 +13,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -33,33 +32,24 @@ import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.criterion.Example;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
@@ -90,8 +80,7 @@ public class BaseEntityBean implements BaseEntityI {
 	private String client_tz = "+03:00";//TODO externalize
 	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";//TODO externalize this
 	private StopWatch watch;
-	private volatile int recursiveCounter = 0;
-	private List<NameValuePair> qparams = null;
+	private int recursiveCounter = 0;
 	private SSLContextBuilder builder = new SSLContextBuilder();
 	private static PoolingHttpClientConnectionManager cm;
 	private CloseableHttpClient httpclient = null;
@@ -113,13 +102,6 @@ public class BaseEntityBean implements BaseEntityI {
 	@EJB
 	private SubscriptionBeanI subscriptionEjb;
 	
-	private  TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-        @Override
-        public boolean isTrusted(X509Certificate[] certificate, String authType) {
-            return true;
-        }
-    };
-    
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     @Override
@@ -155,25 +137,6 @@ public class BaseEntityBean implements BaseEntityI {
 		}
     }
     
-    @SuppressWarnings("unchecked")
-	private boolean checkIfExists(SuccessfullyBillingRequests successfulBill) {
-		boolean exists = false;
-    	try{
-			Query qry = em.createQuery("from SuccessfullyBillingRequests sb WHERE sb.msisdn=:msisdn AND sb.transactionId:=transactionId"
-					+ " AND sb.cp_tx_id=:cp_tx_id");
-			qry.setParameter("msisdn", successfulBill.getMsisdn());
-			qry.setParameter("transactionId", successfulBill.getTransactionId());
-			qry.setParameter("cp_tx_id", successfulBill.getCp_tx_id());
-			List<SuccessfullyBillingRequests> sb = qry.getResultList();
-			
-			if(sb.size()>0)
-				exists = true;
-			
-		}catch(Exception exp){
-			logger.error(exp.getMessage(),exp);
-		}
-    	return exists;
-	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void  mimicMO(String keyword, String msisdn){
@@ -205,6 +168,36 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 		
 	}
+	
+	
+	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status) {
+		
+		boolean success = false;
+		
+		if(msisdn==null || services==null || services.size()<1 )
+			return false;
+		
+		try{
+			
+			for(String kwd: services){
+				Subscription subscription = subscriptionEjb.getSubscription(msisdn, kwd);
+				if(subscription!=null){
+					subscription.setSubscription_status(status);
+					cmp_ejb.saveOrUpdate(subscription);
+				}
+				
+			}
+		
+		}catch(Exception exp){
+			
+			logger.error(exp.getMessage(),exp);
+		
+		}
+		
+		return success;
+	}
+
+
     public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception{
 		
 		boolean isAtive = false;
@@ -214,7 +207,7 @@ public class BaseEntityBean implements BaseEntityI {
 		
 		for(String kwd: services){
 			SMSService smsservice = getSMSService(kwd);
-			if(subscriptionValid(msisdn, smsservice.getId()))
+			if(subscriptionEjb.subscriptionValid(msisdn, smsservice.getId()))
 				return true;
 			
 		}
@@ -227,7 +220,6 @@ public class BaseEntityBean implements BaseEntityI {
 
 		watch = new StopWatch();
 		builder.loadTrustMaterial(null, trustSelfSignedStrategy);
-		SSLConnectionSocketFactory sf = new SSLConnectionSocketFactory(builder.build());
 		
 		SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
 	        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
@@ -352,33 +344,7 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{
-		boolean subValid = false;
-		try{
-			Date timeInNairobi = timeZoneEjb.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
-			Query qry = em.createQuery("from Subscription sub WHERE sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :timeInNairobi ");
-			qry.setParameter("msisdn", msisdn);
-			qry.setParameter("serviceid", serviceid);
-			qry.setParameter("subscription_status", SubscriptionStatus.confirmed);
-			qry.setParameter("timeInNairobi", timeInNairobi);
-			List<Subscription> sublist = qry.getResultList();
-			if(sublist.size()>0){
-				Subscription s = sublist.get(0);
-				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
-				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
-				subValid = true;//(s.getSubscription_status() == SubscriptionStatus.confirmed);
-			}
-		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
-			return false;
-		}catch(Exception e){
-			logger.error(e.getMessage(),e);
-			throw e;
-			
-		}
-		return subValid;
-	}
+	
 
 	/**
 	 * To statslog
@@ -805,9 +771,6 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	
 	
-	private void removeAllParams(List<NameValuePair> params) {
-		params.clear();
-	}
 	/**
 	 * Utility method for converting Stream To String
 	 * To convert the InputStream to String we use the
@@ -1187,7 +1150,6 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 		return System.currentTimeMillis();
 	}
-	
-	
 
+	
 }

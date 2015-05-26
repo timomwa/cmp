@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public enum SubscriptionStatus {
 	
-	waiting_confirmation("waiting_confirmation"),confirmed("confirmed"),unsubscribed("unsubscribed");
+	temporarily_suspended("temporarily_suspended"),waiting_confirmation("waiting_confirmation"),confirmed("confirmed"),unsubscribed("unsubscribed");
 	
 	private final String status;
 	

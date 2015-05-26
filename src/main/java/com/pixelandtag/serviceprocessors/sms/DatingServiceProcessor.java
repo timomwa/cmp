@@ -110,6 +110,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					msg = "You are already logged in. Reply with FIND to find a friend near your area to chat with, or Dial *329#";
 				}
 				
+				List<String> services = new ArrayList<String>();
+				services.add("BILLING_SERV5");
+				services.add("BILLING_SERV15");
+				services.add("BILLING_SERV30");
+				
+				datingBean.changeStatusIfSubscribed(MSISDN, services, SubscriptionStatus.confirmed);
+				
+				
 				mo.setPrice(BigDecimal.ZERO);
 				mo.setMt_Sent(msg);
 				return mo;
@@ -123,6 +131,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}else{
 					msg = "You are already logged out. You will not be able to receive messages from the chat service. To log back in, reply with LOGIN";
 				}
+				
+				
+				List<String> services = new ArrayList<String>();
+				services.add("BILLING_SERV5");
+				services.add("BILLING_SERV15");
+				services.add("BILLING_SERV30");
+				
+				datingBean.changeStatusIfSubscribed(MSISDN, services, SubscriptionStatus.temporarily_suspended);
+				
 				
 				mo.setPrice(BigDecimal.ZERO);
 				mo.setMt_Sent(msg);

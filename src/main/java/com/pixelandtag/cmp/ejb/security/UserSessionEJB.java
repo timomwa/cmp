@@ -14,7 +14,7 @@ import javax.transaction.UserTransaction;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.entities.User;
-import com.pixelandtag.cmp.entities.audit.UserAction;
+import com.pixelandtag.cmp.entities.audit.AuditTrail;
 
 
 @Stateless
@@ -64,7 +64,7 @@ public class UserSessionEJB implements UserSessionI {
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void createAuditTrail(UserAction useraction){
+	public void createAuditTrail(AuditTrail useraction){
 		try{
 			//utx.begin();
 			em.merge(useraction);

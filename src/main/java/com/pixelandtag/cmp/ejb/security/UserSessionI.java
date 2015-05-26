@@ -1,7 +1,7 @@
 package com.pixelandtag.cmp.ejb.security;
 
 import com.pixelandtag.cmp.entities.User;
-import com.pixelandtag.cmp.entities.audit.UserAction;
+import com.pixelandtag.cmp.entities.audit.AuditTrail;
 
 /**
  * 
@@ -25,6 +25,6 @@ public interface UserSessionI {
 	 * com.pixelandtag.cmp.entities.audit.UserAction
 	 * @param useraction
 	 */
-	public void createAuditTrail(UserAction useraction);
+	public void createAuditTrail(AuditTrail useraction);
 
 }

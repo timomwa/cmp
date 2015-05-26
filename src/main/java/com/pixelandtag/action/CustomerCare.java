@@ -1,13 +1,14 @@
 package com.pixelandtag.action;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.inject.Inject;
 
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.Resolution;
@@ -24,13 +25,9 @@ import com.pixelandtag.cmp.ejb.security.UserSessionI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.User;
-import com.pixelandtag.cmp.entities.audit.UserAction;
+import com.pixelandtag.cmp.entities.audit.AuditTrail;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
-import com.pixelandtag.dao.SMSServiceDAO;
 import com.pixelandtag.dating.entities.AlterationMethod;
-import com.pixelandtag.dating.entities.Person;
-import com.pixelandtag.dating.entities.PersonDatingProfile;
-import com.pixelandtag.model.GenericDao;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public class CustomerCare extends BaseActionBean {
@@ -57,6 +54,14 @@ public class CustomerCare extends BaseActionBean {
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
+	private List<String> services = new ArrayList<String>();
+	
+	@PostConstruct
+	public void init(){
+		services.add("BILLING_SERV5");
+		services.add("BILLING_SERV15");
+		services.add("BILLING_SERV30");
+	}
 	
 	
 	public Resolution changeSubscriptionStatus() throws Exception{
@@ -78,10 +83,14 @@ public class CustomerCare extends BaseActionBean {
 			boolean success = subscriptionBean.updateSubscription(subscription_id.intValue(), msisdn, SubscriptionStatus.get(status), AlterationMethod.customer_care_interface); 
 			
 			try{
+				
 				Subscription subscr = cmpBean.find(Subscription.class,subscription_id);
+				
 				SMSService smsserv = subscr!=null ? cmpBean.find(SMSService.class, subscr.getSms_service_id_fk()) : null;
 				
-				if(smsserv!=null){
+				boolean noMoreDating =  subscriptionBean.hasSubscribedToAnyOfTheseServices(msisdn, services);
+				
+				if(smsserv!=null && noMoreDating){
 					
 					if((smsserv.getService_description()!=null && !smsserv.getService_description().isEmpty()
 							&& smsserv.getService_description().toLowerCase().contains("dating"))
@@ -98,23 +107,20 @@ public class CustomerCare extends BaseActionBean {
 							
 							datingServiceI.reactivate(msisdn);
 						}
-						
 					}
-						
-				
-						
 				}
 				
 			}catch(Exception exp){
 				logger.warn(exp.getMessage(),exp);
 			}
 			
+			
 			jsob.put("success", success);
 			jsob.put("message", "Successfully "+(status.equalsIgnoreCase("confirmed") ? "renewed subscription for":"unsubscribed")+" "+msisdn);
 			
 			
 			try{
-				UserAction action = new UserAction.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
+				AuditTrail action = new AuditTrail.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
 										.module("customerCare")
 										.objectAffected(Subscription.class.getCanonicalName())
 										.process("changeSubscriptionStatus")
@@ -186,7 +192,7 @@ public class CustomerCare extends BaseActionBean {
 			
 			
 			try{
-				UserAction action = new UserAction.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
+				AuditTrail action = new AuditTrail.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
 										.module("customerCare")
 										.objectAffected(Subscription.class.getCanonicalName())
 										.process("viewsubscriptions")

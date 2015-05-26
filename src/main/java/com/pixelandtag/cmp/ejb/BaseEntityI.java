@@ -13,6 +13,7 @@ import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
+import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public interface BaseEntityI {
 	public static final String EXPIRY_DATE_TAG = "<EXPIRY_DATE>";
@@ -29,7 +30,6 @@ public interface BaseEntityI {
 	public boolean sendMT(MOSms mo, String sql) throws Exception;
 	public boolean sendMTSMPP(MOSms mo,Long smppid) throws Exception;
 	public EntityManager getEM();
-	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception;
 	public Billable charge(Billable billable) throws Exception;
 	public SMSService getSMSService(String cmd)  throws Exception;
 	public MOSms logMO(MOSms mo) throws TransactionIDGenException;
@@ -43,6 +43,7 @@ public interface BaseEntityI {
 	public long generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
 	public void createSuccesBillRec(Billable billable);
+	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	
 
 

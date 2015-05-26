@@ -50,6 +50,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	TimezoneConverterI timezoneEJB;
 	
 	
+	
+	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
 	 */
@@ -430,6 +432,37 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 	}
 	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Subscription getSubscription(String msisdn, String cmd) throws Exception{
+		
+		Subscription subscr = null;
+		
+		try{
+			
+			Query qry = em.createQuery("SELECT "
+					+ "sub "
+					+ "from Subscription sub, SMSService smss "
+					+ "WHERE smss.id = sub.sms_service_id_fk AND sub.msisdn=:msisdn AND smss.cmd=:cmd");
+			
+			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("cmd", cmd);
+			List<Subscription> sublist = qry.getResultList();
+			if(sublist.size()>0){
+				subscr = sublist.get(0);
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}
+		return subscr;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Subscription getSubscription(String msisdn, Long serviceid) throws Exception{
@@ -556,6 +589,67 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 		
 		return success;
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean hasSubscribedToAnyOfTheseServices(String msisdn, List<String> keywords) throws Exception{
+		boolean subValid = false;
+		try{
+			Query qry = em.createQuery("SELECT sub from Subscription sub, SMSService smss WHERE "
+					+ "smss.id = sub.sms_service_id_fk AND sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND "
+					+ "smss.cmd in (:keywords)");
+			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("keywords", keywords);
+			qry.setParameter("subscription_status", SubscriptionStatus.confirmed);
+			List<Subscription> sublist = qry.getResultList();
+			if(sublist.size()>0){
+				Subscription s = sublist.get(0);
+				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
+				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
+				subValid = true;//(s.getSubscription_status() == SubscriptionStatus.confirmed);
+			}
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return false;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}
+		return subValid;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{
+		boolean subValid = false;
+		try{
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Query qry = em.createQuery("from Subscription sub WHERE sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :timeInNairobi ");
+			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("serviceid", serviceid);
+			qry.setParameter("subscription_status", SubscriptionStatus.confirmed);
+			qry.setParameter("timeInNairobi", timeInNairobi);
+			List<Subscription> sublist = qry.getResultList();
+			if(sublist.size()>0){
+				Subscription s = sublist.get(0);
+				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
+				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
+				subValid = true;//(s.getSubscription_status() == SubscriptionStatus.confirmed);
+			}
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+			return false;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+			
+		}
+		return subValid;
 	}
 
 }

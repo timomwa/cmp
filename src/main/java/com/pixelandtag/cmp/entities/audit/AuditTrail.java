@@ -25,13 +25,13 @@ import com.pixelandtag.cmp.entities.User;
 
 @Entity
 @Table(name = "audit_trail")
-public class UserAction implements Serializable{
+public class AuditTrail implements Serializable{
 	
-	public UserAction(){
+	public AuditTrail(){
 		
 	}
 	
-	private UserAction(UserActionBuilder builder){
+	private AuditTrail(UserActionBuilder builder){
 		this.user = builder.user;
 		this.username = builder.username;
 		this.module = builder.module;
@@ -230,8 +230,8 @@ public class UserAction implements Serializable{
 			return this;
 		}
 		
-		public UserAction build(){
-			return new UserAction(this);
+		public AuditTrail build(){
+			return new AuditTrail(this);
 		}
 	}
 	

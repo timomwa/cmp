@@ -28,7 +28,7 @@ import org.json.JSONObject;
 import com.pixelandtag.cmp.ejb.security.UserSessionI;
 import com.pixelandtag.cmp.entities.Role;
 import com.pixelandtag.cmp.entities.User;
-import com.pixelandtag.cmp.entities.audit.UserAction;
+import com.pixelandtag.cmp.entities.audit.AuditTrail;
 import com.pixelandtag.cmp.handlers.AppProperties;
 @RolesAllowed("tester")
 public class LoginLogoutAction extends BaseActionBean  {
@@ -56,7 +56,7 @@ public class LoginLogoutAction extends BaseActionBean  {
 		Subject currentUser = SecurityUtils.getSubject();
 		
 		try{
-			UserAction action = new UserAction.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
+			AuditTrail action = new AuditTrail.UserActionBuilder((User)currentUser.getSession().getAttribute("user"))
 			.module("authentication")
 			.objectAffected(User.class.getCanonicalName())
 			.process("logout")
@@ -100,7 +100,7 @@ public class LoginLogoutAction extends BaseActionBean  {
 				currentUser.getSession().setAttribute("user", user);
 				
 				try{
-					UserAction action = new UserAction.UserActionBuilder(user)
+					AuditTrail action = new AuditTrail.UserActionBuilder(user)
 											.module("authentication")
 											.objectAffected(User.class.getCanonicalName())
 											.process("login")

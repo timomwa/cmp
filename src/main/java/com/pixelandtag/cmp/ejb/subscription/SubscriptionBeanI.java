@@ -155,5 +155,32 @@ public interface SubscriptionBeanI {
 	 * @throws Exception
 	 */
 	public Long countsearchSubscription(String msisdn) throws Exception;
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param cmd
+	 * @return
+	 * @throws Exception
+	 */
+	public Subscription getSubscription(String msisdn, String cmd) throws Exception;
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param serviceid
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception;
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param keywords
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean hasSubscribedToAnyOfTheseServices(String msisdn, List<String> keywords) throws Exception;
 
 }
