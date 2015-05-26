@@ -66,7 +66,7 @@ public class TestEJB {
 		 services.add("BILLING_SERV15");
 		 services.add("BILLING_SERV30");
 		 
-		 boolean hasAnyOfThese = subscriptionBean.hasSubscribedToAnyOfTheseServices("254734606096", services);
+		 boolean hasAnyOfThese = subscriptionBean.hasSubscribedToAnyOfTheseServices("254739408838", services);
 		 
 		 System.out.println(">>>>>>>> hasAnyOfThese :: "+hasAnyOfThese);
 		 

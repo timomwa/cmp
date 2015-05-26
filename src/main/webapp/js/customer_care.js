@@ -12,7 +12,9 @@ var ds = new Ext.data.Store({
         {name: 'subscriptionDate', mapping: 'subscriptionDate'},
 	    {name: 'pricepointkeyword', mapping: 'pricepointkeyword'},
 		{name: 'status', mapping: 'status'},
-		{name: 'price', mapping: 'price', type: 'float'}
+		{name: 'price', mapping: 'price', type: 'float'},
+		{name: 'expiryDate', mapping: 'expiryDate'},
+		{name: 'renewal_count', mapping: 'renewal_count', type: 'float'}
         ])
 });
 	
@@ -30,7 +32,9 @@ var grid_datasource = new Ext.data.Store({
         {name: 'subscriptionDate', mapping: 'subscriptionDate'},
 		{name: 'pricepointkeyword', mapping: 'pricepointkeyword'},
 		{name: 'status', mapping: 'status'},
-		{name: 'price', mapping: 'price', type: 'float'}
+		{name: 'price', mapping: 'price', type: 'float'},
+		{name: 'expiryDate', mapping: 'expiryDate'},
+		{name: 'renewal_count', mapping: 'renewal_count', type: 'float'}
     ])
 });		
 var resultTpl = new Ext.XTemplate(
@@ -69,7 +73,7 @@ MyDesktop.CustomerCareModule = Ext.extend(Ext.app.Module, {
             win = desktop.createWindow({
 				id: 'customer_care_win',
                 title: 'Customer Care',
-                width:640,
+                width:680,
                 height:480,
                 items : [],
                 iconCls: 'customer-care-win',
@@ -167,40 +171,53 @@ grid = new Ext.grid.GridPanel({
             {
                 id       :'id',
                 header   : 'ID', 
-                width    : 100, 
+                width    : 10, 
                 sortable : true, 
 				hidden: true,
                 dataIndex: 'id'
             },{
                 id       :'servicename',
                 header   : 'Service Name', 
-                width    : 100, 
+                width    : 105, 
                 sortable : true, 
                 dataIndex: 'servicename'
             },
             {
-                header   : 'Subscription Date', 
-                width    : 105, 
+                header   : 'Sub. Date', 
+                width    : 80, 
                 sortable : true, 
-                renderer : Ext.util.Format.dateRenderer('m/d/Y'), 
+                renderer : Ext.util.Format.dateRenderer('d/m/Y'), 
                 dataIndex: 'subscriptionDate'
             },
             {
+                header   : 'Expiry Date', 
+                width    : 80, 
+                sortable : true, 
+                renderer : Ext.util.Format.dateRenderer('d/m/Y'), 
+                dataIndex: 'expiryDate'
+            },
+            {
+                header   : 'Renewal count', 
+                width    : 80, 
+                sortable : true, 
+                dataIndex: 'renewal_count'
+            },
+            {
                 header   : 'Price', 
-                width    : 75, 
+                width    : 65, 
                 sortable : true, 
                 renderer : pctChange, 
                 dataIndex: 'price'
             },
             {
                 header   : 'Status', 
-                width    : 95, 
+                width    : 75, 
                 sortable : true, 
                 renderer : change, 
                 dataIndex: 'status'
             },
             {
-                header   : 'Price point keywrd', 
+                header   : 'Price P keyword', 
                 width    : 95, 
                 sortable : true, 
                 dataIndex: 'pricepointkeyword'
@@ -208,7 +225,7 @@ grid = new Ext.grid.GridPanel({
             {
                 header   : 'Sub/Unsub',
 				xtype: 'actioncolumn',
-                width: 50,
+                width: 70,
                 items: [{
                     icon   : '../shared/icons/fam/delete.gif',  // Use a URL in the icon config
                     tooltip: 'Unsubscribe',

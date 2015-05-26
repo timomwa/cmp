@@ -88,9 +88,9 @@ public class CustomerCare extends BaseActionBean {
 				
 				SMSService smsserv = subscr!=null ? cmpBean.find(SMSService.class, subscr.getSms_service_id_fk()) : null;
 				
-				boolean noMoreDating =  subscriptionBean.hasSubscribedToAnyOfTheseServices(msisdn, services);
+				boolean isstilldating =  subscriptionBean.hasSubscribedToAnyOfTheseServices(msisdn, services);
 				
-				if(smsserv!=null && noMoreDating){
+				if(smsserv!=null && !(isstilldating)){
 					
 					if((smsserv.getService_description()!=null && !smsserv.getService_description().isEmpty()
 							&& smsserv.getService_description().toLowerCase().contains("dating"))
@@ -183,6 +183,8 @@ public class CustomerCare extends BaseActionBean {
 				subscr.put("pricepointkeyword", smsservice.getPrice_point_keyword());
 				subscr.put("status", sub.getSubscription_status().toString());
 				subscr.put("price", smsservice.getPrice());
+				subscr.put("expiryDate", sub.getExpiryDate());
+				subscr.put("renewal_count", sub.getRenewal_count());
 				
 				subscriptions.put(subscr);
 				
