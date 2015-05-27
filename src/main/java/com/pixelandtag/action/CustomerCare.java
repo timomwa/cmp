@@ -1,5 +1,6 @@
 package com.pixelandtag.action;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +40,8 @@ public class CustomerCare extends BaseActionBean {
 	private String callback;
 	private int start = 0;
 	private int limit = 10;
+	
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	@EJB(mappedName =  "java:global/cmp/SubscriptionEJB")
 	private SubscriptionBeanI subscriptionBean;
@@ -179,11 +182,11 @@ public class CustomerCare extends BaseActionBean {
 				subscr.put("id", sub.getId());
 				subscr.put("msisdn", sub.getMsisdn());
 				subscr.put("servicename", smsservice.getService_name());
-				subscr.put("subscriptionDate", sub.getSubscription_timeStamp());
+				subscr.put("subscriptionDate", sdf.format(sub.getSubscription_timeStamp()));
 				subscr.put("pricepointkeyword", smsservice.getPrice_point_keyword());
 				subscr.put("status", sub.getSubscription_status().toString());
 				subscr.put("price", smsservice.getPrice());
-				subscr.put("expiryDate", sub.getExpiryDate());
+				subscr.put("expiryDate", sdf.format(sub.getExpiryDate()));
 				subscr.put("renewal_count", sub.getRenewal_count());
 				
 				subscriptions.put(subscr);

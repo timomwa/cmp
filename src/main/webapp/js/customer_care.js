@@ -9,11 +9,11 @@ var ds = new Ext.data.Store({
         id: 'id'
     }, [{name: 'msisdn', mapping: 'msisdn'},
         {name: 'servicename', mapping: 'servicename'},
-        {name: 'subscriptionDate', mapping: 'subscriptionDate'},
+        {name: 'subscriptionDate',  mapping: 'subscriptionDate', type: 'date', dateFormat: 'Y-m-d H:i:s'},
 	    {name: 'pricepointkeyword', mapping: 'pricepointkeyword'},
 		{name: 'status', mapping: 'status'},
 		{name: 'price', mapping: 'price', type: 'float'},
-		{name: 'expiryDate', mapping: 'expiryDate'},
+		{name: 'expiryDate', mapping: 'expiryDate', type: 'date', dateFormat: 'Y-m-d H:i:s'},
 		{name: 'renewal_count', mapping: 'renewal_count', type: 'float'}
         ])
 });
@@ -29,12 +29,12 @@ var grid_datasource = new Ext.data.Store({
     }, [{name: 'id', mapping: 'id'},
 		{name: 'msisdn', mapping: 'msisdn'},
         {name: 'servicename', mapping: 'servicename'},
-        {name: 'subscriptionDate', mapping: 'subscriptionDate'},
+        {name: 'subscriptionDate', mapping: 'subscriptionDate', type: 'date', dateFormat:'Y-m-d H:i:s'},
 		{name: 'pricepointkeyword', mapping: 'pricepointkeyword'},
 		{name: 'status', mapping: 'status'},
 		{name: 'price', mapping: 'price', type: 'float'},
-		{name: 'expiryDate', mapping: 'expiryDate'},
-		{name: 'renewal_count', mapping: 'renewal_count', type: 'float'}
+		{name: 'expiryDate', mapping: 'expiryDate', type: 'date', dateFormat:'Y-m-d H:i:s'},
+		{name: 'renewal_count', type: 'float', mapping: 'renewal_count'}
     ])
 });		
 var resultTpl = new Ext.XTemplate(
@@ -73,7 +73,7 @@ MyDesktop.CustomerCareModule = Ext.extend(Ext.app.Module, {
             win = desktop.createWindow({
 				id: 'customer_care_win',
                 title: 'Customer Care',
-                width:680,
+                width:750,
                 height:480,
                 items : [],
                 iconCls: 'customer-care-win',
@@ -171,14 +171,14 @@ grid = new Ext.grid.GridPanel({
             {
                 id       :'id',
                 header   : 'ID', 
-                width    : 10, 
+                width    : 5, 
                 sortable : true, 
 				hidden: true,
                 dataIndex: 'id'
             },{
                 id       :'servicename',
                 header   : 'Service Name', 
-                width    : 105, 
+                width    : 155, 
                 sortable : true, 
                 dataIndex: 'servicename'
             },
@@ -191,14 +191,14 @@ grid = new Ext.grid.GridPanel({
             },
             {
                 header   : 'Expiry Date', 
-                width    : 80, 
+                width    : 110, 
                 sortable : true, 
-                renderer : Ext.util.Format.dateRenderer('d/m/Y'), 
+                renderer : Ext.util.Format.dateRenderer('d/m/Y g:i a'), 
                 dataIndex: 'expiryDate'
             },
             {
-                header   : 'Renewal count', 
-                width    : 80, 
+                header   : 'Renewals', 
+                width    : 60, 
                 sortable : true, 
                 dataIndex: 'renewal_count'
             },
@@ -218,7 +218,7 @@ grid = new Ext.grid.GridPanel({
             },
             {
                 header   : 'Price P keyword', 
-                width    : 95, 
+                width    : 105, 
                 sortable : true, 
                 dataIndex: 'pricepointkeyword'
             },
@@ -256,7 +256,7 @@ grid = new Ext.grid.GridPanel({
                 }, {
 					icon   : '../shared/icons/fam/accept.png',
 					tooltip: 'Renew subscription',
-                    getClass: function(v, meta, rec) {
+					getClass: function(v, meta, rec) {
 					    if(rec.get('status') == 'subscribed'){
 							 this.items[0].tooltip = ('Unsubscribe ' +  rec.get('msisdn') + ' from '+ rec.get('servicename') );
                         }
@@ -433,4 +433,3 @@ var handleAction = function(action){
 			icon: Ext.Msg.INFO
 	   });
 };	
-
