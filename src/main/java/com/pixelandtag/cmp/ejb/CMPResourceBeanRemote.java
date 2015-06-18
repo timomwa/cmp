@@ -136,8 +136,6 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	//public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription)  throws Exception;
 	
 	public SMSServiceDTO getSMSservice(int service_id) throws Exception;
-	
-	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
 
 	public boolean subscribe(String mSISDN, SMSService smsService, int id,
 			SubscriptionStatus confirmed, SubscriptionSource sms, AlterationMethod method) throws Exception;

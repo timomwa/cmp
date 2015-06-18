@@ -156,6 +156,8 @@ insert into user select next_val+1,'csd@airtel.co.ke',1,'csd@airtel.co.ke','csd@
 
 insert into user select next_val+1,'francis@content360.co.ke',1,'francis@content360.co.ke','francis@content360.co.ke','Francis123' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 
+insert into user select next_val+1,'janet.murithi@gmail.com',1,'janet.murithi@gmail.com','janet.murithi@gmail.com','Janet123' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
+
 
 
 DELIMITER $

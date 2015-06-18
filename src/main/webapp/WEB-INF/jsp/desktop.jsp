@@ -77,7 +77,7 @@
 					<a href="#"><img src="images/s.gif" />
 						<div>Content Management</div></a>
 				</dt>
-			</shiro:hasAnyRoles>
+			</shiro:hasAnyRoles> 
 			
 			
 			<shiro:hasAnyRoles name="superuser, subscriptionmanagement">

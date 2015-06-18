@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
@@ -20,6 +22,7 @@ import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
+import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillingService;
 import com.pixelandtag.sms.producerthreads.EventType;
@@ -89,7 +92,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	protected String unsubscriptionText;
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
-	
+	private Map<Long, ServiceProcessorDTO> serviceProcessorCache = new HashMap<Long,ServiceProcessorDTO>();
 	
 	
 	public String getSubscriptionText() {
@@ -549,26 +552,54 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		BaseEntityI cmpBean = getEJB();
 		
+		
+		
 		try {
+			
+			ServiceProcessorDTO serviceprocessor = serviceProcessorCache.get(mo.getProcessor_id());
+			
+			if(serviceprocessor==null){
+				serviceprocessor = cmpBean.getServiceProcessor(mo.getProcessor_id());
+				if(serviceprocessor!=null)
+				serviceProcessorCache.put(mo.getProcessor_id(), serviceprocessor);
+			}
+			
+			if(serviceprocessor==null)
+				logger.warn("::: Service processor not found for  mo.getProcessor_id() >>  "+mo.getProcessor_id());
+			
+			final String PROTOCOL = serviceprocessor!=null ? serviceprocessor.getProtocol() : "smpp";
+			
+			logger.debug("::: PROTOCOL >>> "+PROTOCOL);
 			
 			int max_retry = 5;
 			int count = 0;
 			
 			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 			
-				boolean success = cmpBean.sendMT(mo,SEND_MT_1);
-				while(!success && count<=max_retry){
-					success  = cmpBean.sendMT(mo,SEND_MT_1);
-					count++;
+				if(PROTOCOL.equalsIgnoreCase("http")){
+					boolean success = cmpBean.sendMT(mo,SEND_MT_1);
+					while(!success && count<=max_retry){
+						success  = cmpBean.sendMT(mo,SEND_MT_1);
+						count++;
+					}
+				}
+				
+				if(PROTOCOL.equalsIgnoreCase("smpp")){
+					cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
 				}
 			
 			}else{
 				
-			//	pstmt = conn.prepareStatement(SEND_MT_2, Statement.RETURN_GENERATED_KEYS);
-				boolean success = cmpBean.sendMT(mo,SEND_MT_2);
-				while(!success && count<=max_retry){
-					success  = cmpBean.sendMT(mo,SEND_MT_1);
-					count++;
+				if(PROTOCOL.equalsIgnoreCase("http")){
+					boolean success = cmpBean.sendMT(mo,SEND_MT_2);
+					while(!success && count<=max_retry){
+						success  = cmpBean.sendMT(mo,SEND_MT_1);
+						count++;
+					}
+				}
+				
+				if(PROTOCOL.equalsIgnoreCase("smpp")){
+					cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
 				}
 					
 			}

@@ -37,6 +37,31 @@ insert into bulksms_plan select z.next_val,1,'2014-06-25 04:15:20',100000,'TESTP
 update hibernate_sequence set next_val=next_val+1;
 set foreign_key_checks=1;
 
+delete from `pixeland_content360`.`dating_profileloc` where profile_id_fk = (select id from dating_profile where person_id_fk = (select id from dating_person where msisdn='254735594326'));
+delete from dating_profile where person_id_fk = (select id from dating_person where msisdn='254735594326');
+delete from dating_person where msisdn='254735594326';
+delete from subscription  where msisdn='254735594326';
+
+
+
+DELIMITER $
+CREATE PROCEDURE unsubscribeAll(
+   msisdn_ varchar(64)
+ )
+BEGIN
+	DECLARE dp_id INT DEFAULT -1;
+	DECLARE prof_id INT DEFAULT -1;
+	SELECT dp_id as 'profile_id');
+    SELECT dp_id =  id from dating_person where msisdn=msisdn_;
+	SELECT dp_id as 'profile_id af');
+    SELECT prof_id = id from dating_profile where person_id_fk = dp_id;
+	
+	update pixeland_content360.dating_person set active=0 where msisdn=msisdn_;
+	update pixeland_content360.subscription set subscription_status='unsubscribed' where msisdn=msisdn_;
+END;
+$
+DELIMITER ;
+
 
 
 

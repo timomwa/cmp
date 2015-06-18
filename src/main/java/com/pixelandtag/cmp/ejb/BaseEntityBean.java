@@ -58,11 +58,13 @@ import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
+import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
@@ -103,8 +105,55 @@ public class BaseEntityBean implements BaseEntityI {
 	private SubscriptionBeanI subscriptionEjb;
 	
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    @Override
+	@SuppressWarnings("unchecked")
+	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception{
+
+		ServiceProcessorDTO service = null;
+		
+		try {
+			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`mo_processors` WHERE `id`=?";
+			Query qry = em.createNativeQuery(sql);
+			
+			qry.setParameter(1, processor_id_fk);
+			
+			List<Object[]> rs = qry.getResultList();
+			
+			for(Object[] o : rs){
+				
+				service = new ServiceProcessorDTO();
+				
+				service.setId((Integer) o[0] );//rs.getInt("id"));//0
+				service.setServiceName((String) o[1] );//rs.getString("ServiceName"));//1
+				service.setShortcode((String) o[2] );//rs.getString("shortcode"));//2
+				service.setThreads((Integer) o[3] );//rs.getInt("threads"));//3
+				service.setProcessorClass((String) o[4] );//rs.getString("ProcessorClass"));//4
+				service.setActive(((Boolean) o[5]));//rs.getBoolean("enabled"));//5
+				service.setClass_status((String) o[6] );//rs.getString("class_status"));//6
+				service.setForwarding_url((o[8]!=null ? (String) o[8] : ""));
+				service.setProcessor_type(ProcessorType.fromString((String)o[9]));
+				//private String protocol;
+				//private Long smppid;
+				service.setProtocol((String) o[10] );
+				service.setSmppid(Long.valueOf(  ((Integer) o[3]) ));
+				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
+				
+				
+			}
+			
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}catch (Exception e) {
+			
+			logger.error(e.getMessage(),e);
+			
+			throw e;
+			
+		}finally{}
+		
+		return service;
+	}
+	
+	@Override
     public void createSuccesBillRec(Billable billable){
     	try{
     		

@@ -94,9 +94,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@EJB
 	private SubscriptionBeanI subscriptionBean;
 	
-	
-	
-
 	public boolean markInQueue(Long http_to_send_id) throws Exception {
 		
 		boolean success = false;
@@ -452,53 +449,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 
 	
-	@SuppressWarnings("unchecked")
-	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception{
-
-		ServiceProcessorDTO service = null;
-		
-		try {
-			String sql = "SELECT * FROM `"+CelcomImpl.database+"`.`mo_processors` WHERE `id`=?";
-			Query qry = em.createNativeQuery(sql);
-			
-			qry.setParameter(1, processor_id_fk);
-			
-			List<Object[]> rs = qry.getResultList();
-			
-			for(Object[] o : rs){
-				
-				service = new ServiceProcessorDTO();
-				
-				service.setId((Integer) o[0] );//rs.getInt("id"));//0
-				service.setServiceName((String) o[1] );//rs.getString("ServiceName"));//1
-				service.setShortcode((String) o[2] );//rs.getString("shortcode"));//2
-				service.setThreads((Integer) o[3] );//rs.getInt("threads"));//3
-				service.setProcessorClass((String) o[4] );//rs.getString("ProcessorClass"));//4
-				service.setActive(((Boolean) o[5]));//rs.getBoolean("enabled"));//5
-				service.setClass_status((String) o[6] );//rs.getString("class_status"));//6
-				service.setForwarding_url((o[8]!=null ? (String) o[8] : ""));
-				service.setProcessor_type(ProcessorType.fromString((String)o[9]));
-				//private String protocol;
-				//private Long smppid;
-				service.setProtocol((String) o[10] );
-				service.setSmppid(Long.valueOf(  ((Integer) o[3]) ));
-				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
-				
-				
-			}
-			
-		}catch(javax.persistence.NoResultException ex){
-			logger.error(ex.getMessage());
-		}catch (Exception e) {
-			
-			logger.error(e.getMessage(),e);
-			
-			throw e;
-			
-		}finally{}
-		
-		return service;
-	}
+	
 	
 	
 	/*public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription)  throws Exception{
