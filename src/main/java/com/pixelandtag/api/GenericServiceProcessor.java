@@ -585,6 +585,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				}
 				
 				if(PROTOCOL.equalsIgnoreCase("smpp")){
+					logger.info("::: PROTOCOL >>> "+serviceprocessor.getSmppid());
 					cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
 				}
 			
@@ -599,6 +600,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				}
 				
 				if(PROTOCOL.equalsIgnoreCase("smpp")){
+					logger.info("::: PROTOCOL >>> "+serviceprocessor.getSmppid());
 					cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
 				}
 					
