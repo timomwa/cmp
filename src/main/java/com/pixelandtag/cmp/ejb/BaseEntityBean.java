@@ -135,7 +135,7 @@ public class BaseEntityBean implements BaseEntityI {
 				//private Long smppid;
 				service.setProtocol((String) o[10] );
 				if((o[10])!=null)
-					service.setSmppid(Long.valueOf(  ((Integer) o[10]) ));
+					service.setSmppid(Long.valueOf(  ((String) o[10]) ));
 				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
 				
 				
