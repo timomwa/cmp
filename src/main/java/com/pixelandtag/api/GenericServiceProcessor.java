@@ -230,20 +230,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setPricePointKeyword(mo_.getPricePointKeyword());
 		logger.debug(" before save "+billable.getId());
 		
-		
-		
 		try{
-			
-			
 			billable = getEJB().saveOrUpdate(billable);
-			
-			
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
 			logger.error(e.getMessage(),e);
 		}finally{
-			
 		}
 		
 		logger.debug(" after save "+billable.getId());
@@ -561,7 +554,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			if(serviceprocessor==null){
 				serviceprocessor = cmpBean.getServiceProcessor(mo.getProcessor_id());
 				if(serviceprocessor!=null)
-				serviceProcessorCache.put(mo.getProcessor_id(), serviceprocessor);
+					serviceProcessorCache.put(mo.getProcessor_id(), serviceprocessor);
 			}
 			
 			if(serviceprocessor==null)
@@ -576,33 +569,33 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 			
-				if(PROTOCOL.equalsIgnoreCase("http")){
+				//if(PROTOCOL.equalsIgnoreCase("http")){
 					boolean success = cmpBean.sendMT(mo,SEND_MT_1);
 					while(!success && count<=max_retry){
 						success  = cmpBean.sendMT(mo,SEND_MT_1);
 						count++;
 					}
-				}
+				//}
 				
-				if(PROTOCOL.equalsIgnoreCase("smpp")){
-					logger.info("::: SMPPID >>> "+serviceprocessor.getSmppid());
-					cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
-				}
+				//if(PROTOCOL.equalsIgnoreCase("smpp")){
+				//	logger.info("::: SMPPID >>> "+serviceprocessor.getSmppid());
+				//	cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
+				//}
 			
 			}else{
 				
-				if(PROTOCOL.equalsIgnoreCase("http")){
+				//if(PROTOCOL.equalsIgnoreCase("http")){
 					boolean success = cmpBean.sendMT(mo,SEND_MT_2);
 					while(!success && count<=max_retry){
 						success  = cmpBean.sendMT(mo,SEND_MT_1);
 						count++;
 					}
-				}
+				//}
 				
-				if(PROTOCOL.equalsIgnoreCase("smpp")){
-					logger.info("::: SMPPID >>> "+serviceprocessor.getSmppid());
-					cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
-				}
+				//if(PROTOCOL.equalsIgnoreCase("smpp")){
+				//	logger.info("::: SMPPID >>> "+serviceprocessor.getSmppid());
+				//	cmpBean.sendMTSMPP(mo,serviceprocessor.getSmppid());
+				//}
 					
 			}
 			

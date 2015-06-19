@@ -63,6 +63,7 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
@@ -499,10 +500,46 @@ public class BaseEntityBean implements BaseEntityI {
 		 
 		return success;
 	}
+	
 	/**
 	 * Logs in smpp to send
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Override
+	public boolean sendMTSMPP(MTsms mt, Long sppid) throws Exception{
+		boolean success = false;
+		try{
+			String insertQ = "insert into "
+					+ "ismpp.messages(smppid,msisdn,shortcode,content,priority,timestamp,received) "
+					+ "VALUES(?, ?, ?, ?, 0, now(), ?);";
+			utx.begin();
+			Query qry = em.createNativeQuery(insertQ);
+			qry.setParameter(1, sppid.intValue());
+			qry.setParameter(2, mt.getMsisdn());
+			qry.setParameter(3, mt.getSendFrom());
+			qry.setParameter(4, mt.getMsg_part());
+			
+			qry.setParameter(5, mt.getSms());
+			
+			int num =  qry.executeUpdate();
+			utx.commit();
+			success = num>0;
+		
+		}catch(Exception e){
+			try {
+				utx.rollback();
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(),e1);
+			} 
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+		 
+		return success;
+	}
+	/**
+	 * Logs in smpp to send
+	 */
+	@Override
 	public boolean sendMTSMPP(MOSms mo, Long sppid) throws Exception{
 		boolean success = false;
 		try{
@@ -562,7 +599,6 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(12, mo.getSMS_DataCodingId());
 			qry.setParameter(13, mo.getProcessor_id());
 			qry.setParameter(14, mo.getBillingStatus().toString());
-			logger.info("\n\n\n\n\n\t\t\t\t\t\t:::::: mo.getBillingStatus().toString() ::: "+mo.getBillingStatus().toString());
 			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
 			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
 			qry.setParameter(17, ( mo.isSubscription() ? 1 : 0 ));

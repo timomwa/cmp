@@ -29,7 +29,7 @@ import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.producerthreads.BulkSMSProducer;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 
-public class GenericHTTPClientWorker implements Runnable{
+public class SMPPClientWorker implements Runnable{
 	
 	private static final int msg_part_wait = 0;//Time to wait in mills before sending broken message
 	private Logger logger = Logger.getLogger(getClass());
@@ -49,7 +49,7 @@ public class GenericHTTPClientWorker implements Runnable{
 	private volatile int recursiveCounter = 0;
 	
 	
-	public GenericHTTPClientWorker(CMPResourceBeanRemote cmpbean){
+	public SMPPClientWorker(CMPResourceBeanRemote cmpbean){
 		this.cmpbean = cmpbean;
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
 		cm = new PoolingHttpClientConnectionManager();
@@ -59,7 +59,7 @@ public class GenericHTTPClientWorker implements Runnable{
 		init();
 	}
 	
-	public GenericHTTPClientWorker(CMPResourceBeanRemote cmpbean, CloseableHttpClient httpclient_){
+	public SMPPClientWorker(CMPResourceBeanRemote cmpbean, CloseableHttpClient httpclient_){
 		this.cmpbean = cmpbean;
 		this.httpclient = httpclient_;
 		init();

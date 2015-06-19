@@ -55,6 +55,7 @@ import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
+import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.api.Settings;
@@ -112,7 +113,7 @@ public class MTProducer extends Thread {
 	 */
 	public static volatile Map<Integer,ArrayList<ServiceProcessorI>> processor_pool = new ConcurrentHashMap<Integer,ArrayList<ServiceProcessorI>>();
 	public static volatile Queue<ServiceProcessorDTO> serviceProcessors;
-	
+	private static Map<Long,ServiceProcessorDTO> serviceProcessoorCache = new HashMap<Long, ServiceProcessorDTO>();
 	private volatile static ConcurrentLinkedQueue<MTsms> mtMsgs = null;
 	private volatile static ConcurrentLinkedQueue<GenericHTTPParam> genericMT = null;
 	public volatile  BlockingDeque<MTHttpSender> httpSenderWorkers = new LinkedBlockingDeque<MTHttpSender>();
@@ -122,6 +123,8 @@ public class MTProducer extends Thread {
 	private String to_tz;
 	private Connection conn;
 	public static final String DEFLT = "DEFAULT_DEFAULT";
+	private static final String HTTP = "http";
+	private static final String SMPP = "smpp";
 	private static int sentMT = 0;
 	
 	private static Semaphore semaphoreg;
@@ -1044,10 +1047,15 @@ public class MTProducer extends Thread {
 				mtsms.setSplit_msg(rs.getBoolean("split"));//whether to split msg or not..
 				
 				
-				ServiceProcessorDTO processor =  findProcessorDto(mtsms.getProcessor_id().intValue());
+				ServiceProcessorDTO processor = serviceProcessoorCache.get(mtsms.getProcessor_id()) ;
+				if(processor==null){
+					processor = findProcessorDto(mtsms.getProcessor_id().intValue());
+					serviceProcessoorCache.put(mtsms.getProcessor_id(), processor);
+				}
+				
+				String protocol = processor.getProtocol();
 				
 				logger.debug("\n\n\n\n\n :::::::::::::::::::::: processor.getProcessor_type()::: "+processor.getProcessor_type());
-				
 				
 				if(queueSize==0){//if we can add as many objects to the queue, then we just keep adding
 					
@@ -1058,31 +1066,43 @@ public class MTProducer extends Thread {
 					//so its least likely for there to be no space to add an element.
 					try {
 						
-						if(processor.getProcessor_type()==ProcessorType.MT_ROUTER){
-							GenericHTTPParam param = new GenericHTTPParam();
-							param.setUrl(processor.getForwarding_url());
-							param.setMtsms(mtsms);
-							param.setId(mtsms.getId());
-							List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-							qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
-							qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
-							qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
-							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
-							
-							param.setHttpParams(qparams);
+						if(protocol.equalsIgnoreCase(HTTP)){
+							if(processor.getProcessor_type()==ProcessorType.MT_ROUTER){
+								GenericHTTPParam param = new GenericHTTPParam();
+								param.setUrl(processor.getForwarding_url());
+								param.setMtsms(mtsms);
+								param.setId(mtsms.getId());
+								List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+								qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
+								qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
+								qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
+								qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
+								
+								param.setHttpParams(qparams);
+								celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+								genericMT.offer(param);//if we've got a limit to the queue
+								
+							//}else if(processor.getProcessor_type()==ProcessorType.LOCAL){
+								
+							}else{
+								//Inserts the specified element at the end of this 
+								//deque if it is possible to do so immediately without violating 
+								//capacity restrictions, returning true upon success and false if no 
+								//space is currently available. When using a capacity-restricted deque, 
+								//this method is generally preferable to the addLast method, which can fail 
+								//to insert an element only by throwing an exception. 
+								celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+								mtMsgs.offer(mtsms);// .offerLast(mtsms);
+								
+							}
+						}else if(protocol.equalsIgnoreCase(SMPP)){
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
-							genericMT.offer(param);//if we've got a limit to the queue
-							
-						}else{
-							//Inserts the specified element at the end of this 
-							//deque if it is possible to do so immediately without violating 
-							//capacity restrictions, returning true upon success and false if no 
-							//space is currently available. When using a capacity-restricted deque, 
-							//this method is generally preferable to the addLast method, which can fail 
-							//to insert an element only by throwing an exception. 
-							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
-							mtMsgs.offer(mtsms);// .offerLast(mtsms);
-							
+							boolean success = cmpbean.sendMTSMPP(mtsms,processor.getSmppid());
+							if(success){
+								cmpbean.deleteMT(mtsms.getId());
+								mtsms.setMT_STATUS(ERROR.WaitingForDLR.toString());
+								cmpbean.logMT(mtsms);
+							}
 						}
 						
 					}catch(Exception e){
@@ -1097,24 +1117,36 @@ public class MTProducer extends Thread {
 					//The queue has space in it to add an element.
 					try {
 						
-						if(processor.getProcessor_type()==ProcessorType.MT_ROUTER){
-							GenericHTTPParam param = new GenericHTTPParam();
-							param.setUrl(processor.getForwarding_url());
-							param.setMtsms(mtsms);
-							param.setId(mtsms.getId());
-							List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-							qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
-							qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
-							qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
-							qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
-							param.setHttpParams(qparams);
+						if(protocol.equalsIgnoreCase(HTTP)){
+							if(processor.getProcessor_type()==ProcessorType.MT_ROUTER){
+								
+								GenericHTTPParam param = new GenericHTTPParam();
+								param.setUrl(processor.getForwarding_url());
+								param.setMtsms(mtsms);
+								param.setId(mtsms.getId());
+								List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+								qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
+								qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
+								qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
+								qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
+								param.setHttpParams(qparams);
+								celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+								genericMT.offer(param);//if we've got a limit to the queue
+								
+							}else{
+								
+								celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
+								mtMsgs.offer(mtsms);//putLast(mtsms);//if we've got a limit to the queue
+								
+							}
+						}else if(protocol.equalsIgnoreCase(SMPP)){
 							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
-							genericMT.offer(param);//if we've got a limit to the queue
-							
-						}else{
-							celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
-							mtMsgs.offer(mtsms);//putLast(mtsms);//if we've got a limit to the queue
-							
+							boolean success = cmpbean.sendMTSMPP(mtsms,processor.getSmppid());
+							if(success){
+								cmpbean.deleteMT(mtsms.getId());
+								mtsms.setMT_STATUS(ERROR.WaitingForDLR.toString());
+								cmpbean.logMT(mtsms);
+							}
 						}
 						
 						//addedToqueue = true;

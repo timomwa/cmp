@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
@@ -46,6 +47,7 @@ public interface BaseEntityI {
 	public void createSuccesBillRec(Billable billable);
 	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
+	public boolean sendMTSMPP(MTsms mt, Long sppid) throws Exception;
 	
 
 
