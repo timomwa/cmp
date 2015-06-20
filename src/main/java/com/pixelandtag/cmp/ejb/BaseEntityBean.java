@@ -516,9 +516,9 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(1, sppid.intValue());
 			qry.setParameter(2, mt.getMsisdn());
 			qry.setParameter(3, mt.getSendFrom());
-			qry.setParameter(4, mt.getMsg_part());
+			qry.setParameter(4, mt.getSms());
 			
-			qry.setParameter(5, mt.getSms());
+			qry.setParameter(5, mt.getMsg_part());
 			
 			int num =  qry.executeUpdate();
 			utx.commit();
