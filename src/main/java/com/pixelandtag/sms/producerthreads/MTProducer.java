@@ -1101,7 +1101,7 @@ public class MTProducer extends Thread {
 							if(success){
 								cmpbean.deleteMT(mtsms.getId());
 								mtsms.setMT_STATUS(ERROR.WaitingForDLR.toString());
-								cmpbean.logMT(mtsms);
+								cmpbean.logMT(mtsms); 
 							}
 						}
 						
