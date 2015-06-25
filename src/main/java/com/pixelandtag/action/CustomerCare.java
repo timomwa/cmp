@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.content.ContentManagementI;
 import com.pixelandtag.cmp.ejb.security.UserSessionI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -34,10 +35,11 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 public class CustomerCare extends BaseActionBean {
 	
 	private String msisdn;
-	private String query;
+	
 	private String status;
 	private Long subscription_id;
 	private String callback;
+	private String query;
 	private int start = 0;
 	private int limit = 10;
 	

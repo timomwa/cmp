@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.EJB;
 import javax.persistence.Query;
 
 import net.sourceforge.stripes.action.Before;
@@ -21,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.pixelandtag.cmp.ejb.content.ContentManagementI;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSServiceMetaData;
 
@@ -29,8 +31,14 @@ public class SMSMenuManagementAction extends BaseActionBean {
 	@org.stripesstuff.plugin.session.Session(key = "smsmenu")
 	private SMSMenuLevels smsmenu;
 	private String sms;
-	private int start;
+	private int start = 0;
 	private int limit = 20;
+	private String query;
+	private Long contentid;
+	private String callback;
+	
+	@EJB(mappedName =  "java:global/cmp/ContentManagementImpl")
+	private ContentManagementI contentManagementBean;
 	
 	
 	@Before(on = {"saveOrUpdate","listContent"}, stages = LifecycleStage.BindingAndValidation)
@@ -122,6 +130,7 @@ public class SMSMenuManagementAction extends BaseActionBean {
 				smsrec.put("id", id);
 				smsrec.put("sms",sms);
 				smsrec.put("date", date);
+				smsrec.put("serviceid", smsmenu.getServiceid());
 				
 				data.put(smsrec);
 			}
@@ -134,8 +143,34 @@ public class SMSMenuManagementAction extends BaseActionBean {
 			resp.put("msg", "Problem occurred");
 		}	
 		
-		return sendResponse(resp.toString());
+		if(callback!= null) {
+			return sendResponse(callback + "("+resp.toString()+")","text/javascript");
+		}else{
+			return sendResponse(resp.toString(),"application/json");
+		}
 		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Resolution deleteContent() throws JSONException{
+		
+		JSONObject jsob = new JSONObject();
+		
+		try{
+			
+			contentManagementBean.deleteContent( smsmenu.getServiceid(), contentid);
+			
+			jsob.put("success", true);
+			jsob.put("message", "Content piece deleted successfully");
+			
+		}catch(Exception exp){
+		
+			log.error(exp.getMessage(),exp);
+			jsob.put("success", false);
+			jsob.put("message", "Problem deleting content :( Contact admin.");
+		}
+		
+		return sendResponse(jsob.toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -238,32 +273,11 @@ public class SMSMenuManagementAction extends BaseActionBean {
 			
 		}
 		
-		
-		
-		
-		//Get children
-		
-		
-		/*List<SMSMenuLevels> test;
-		qry = cmp_dao.resource_bean.getEM().createQuery("from SMSMenuLevels sm WHERE sm.parent_level_id=-1");
-		test = qry.getResultList();
-		Iterator<SMSMenuLevels> kws = test.iterator();
-		
-		while(kws.hasNext()){
-			SMSMenuLevels kw = kws.next();
-			try {
-				List<SMSMenuLevels> children  = cmp_dao.resource_bean.listChildren(kw.getId());
-				if(children!=null && children.size()>0)
-					kw.setChildren(children);
-			} catch (Exception e) {
-				log.error(e.getMessage(),e);
-			}
-			
-			log.info("kw : "+kw.toJson());
-			resp.append("menuitem", kw.toJson());
-		}*/
 		return sendResponse(resp.toString());
 	}
+	
+	
+	
 
 	public SMSMenuLevels getSmsmenu() {
 		return smsmenu;
@@ -309,6 +323,36 @@ public class SMSMenuManagementAction extends BaseActionBean {
 
 	public void setLimit(int limit) {
 		this.limit = limit;
+	}
+
+
+	public String getQuery() {
+		return query;
+	}
+
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
+
+	public String getCallback() {
+		return callback;
+	}
+
+
+	public void setCallback(String callback) {
+		this.callback = callback;
+	}
+
+
+	public Long getContentid() {
+		return contentid;
+	}
+
+
+	public void setContentid(Long contentid) {
+		this.contentid = contentid;
 	}
 
 	

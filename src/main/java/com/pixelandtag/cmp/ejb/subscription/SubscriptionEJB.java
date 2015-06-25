@@ -37,7 +37,8 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class SubscriptionEJB implements SubscriptionBeanI {
 	
-public Logger logger = Logger.getLogger(DatingServiceBean.class);
+
+	public Logger logger = Logger.getLogger(getClass());
 	
 	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")

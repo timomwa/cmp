@@ -1,3 +1,101 @@
+var resultTpl = new Ext.XTemplate(
+     '<tpl for="."><div class="search-item">',
+        '<h3><span>{id}<br /> </h3>    {date}</span> ',
+        '<b>subscription date:</b> {sms}',
+    '</div></tpl>'
+); 
+var sms_content_grid_datasource = new Ext.data.Store({
+	proxy: new Ext.data.ScriptTagProxy({
+        url: 'SMSMenuManagement.action?listContent=&'
+    }),
+	reader: new Ext.data.JsonReader({
+        root: 'data',
+        totalProperty: 'total',
+        id: 'id'
+    },
+    [{name: 'id', mapping: 'id'},
+		{name: 'date', mapping: 'date'},
+        {name: 'sms', mapping: 'sms'},
+        {name: 'serviceid', mapping: 'serviceid'}  
+    ])
+});	
+//grid_datasource.load();
+var contentgrid = new Ext.grid.GridPanel({
+		xtype: 'grid',
+		id : 'smsContentGrid',
+        store: sms_content_grid_datasource,
+        columns: [
+            {
+                id       :'id',
+                header   : 'ID', 
+                width    : 15, 
+                sortable : true, 
+				hidden: true,
+                dataIndex: 'id'
+            },{
+                id       :'date',
+                header   : 'Upload Date', 
+                width    : 155, 
+                sortable : true, 
+                dataIndex: 'date'
+            },
+            {
+                id       :'sms',
+                header   : 'SMS', 
+                width    : 80, 
+                sortable : true, 
+                dataIndex: 'sms'
+            },
+            {
+                id       :'serviceid',
+                header   : 'Service id', 
+                width    : 80, 
+                sortable : true, 
+				hidden: true,
+                dataIndex: 'serviceid'
+            },
+            {
+                header   : 'Disable/Enable',
+				xtype: 'actioncolumn',
+                width: 70,
+                items: [{
+                    icon   : '../shared/icons/fam/delete.gif',  // Use a URL in the icon config
+                    tooltip: 'Delete',
+                    handler: function(grid, rowIndex, colIndex) {
+                        var rec = sms_content_grid_datasource.getAt(rowIndex);
+						    Ext.Msg.show({
+							   title:'Confurm action',
+							   msg: "Delete " +  rec.get('sms') + " from "+ rec.get('date'),
+							   buttons: Ext.Msg.OKCANCEL,
+							   fn: function(btn, text){
+								   if (btn == 'ok'){
+										deleteSMS(rec);
+									}
+								},
+							   animEl: 'elId',
+							   icon: Ext.MessageBox.QUESTION
+							});
+						
+                    }
+                }]
+            }
+        ],
+		 // paging bar on the bottom
+        bbar: new Ext.PagingToolbar({
+            pageSize: 10,
+            store: sms_content_grid_datasource,
+            displayInfo: true,
+            displayMsg: 'Displaying content {0} - {1} of {2}',
+            emptyMsg: "No content"
+        }),
+        stripeRows: true,
+        autoExpandColumn: 'sms',
+        autoWidth : 'auto',
+		height: 270,
+		title: 'Content items ',
+		autoScroll: true
+    });
+	
 var smsForm = new Ext.FormPanel({
 							id : 'contentUploadForm',
 							labelWidth: 50,
@@ -47,6 +145,7 @@ var smsForm = new Ext.FormPanel({
 																					_eventName: 'saveOrUpdate'
 																				},
 																				success: function (form, action) {
+																					sms_content_grid_datasource.reload();
 																					//form.findField('membership.id')
 																					//	.setValue(action.result.id);
 																					successAction(form, action);
@@ -402,12 +501,15 @@ function loadLeftPanel(e){
 
 	var l = e.autoEl.cn.length;
 	var content_id = e.id.split('_')[1];
-	console.log('content_id : '+content_id); 
+	sms_content_grid_datasource.reload({
+		params : {
+			'smsmenu.serviceid' : e.serviceid
+		}
+	});
 	var uploadpannel = Ext.getCmp('uploadpannel');
 	uploadpannel.setTitle('SMS Content Upload ['+e.autoEl.cn.substring(0,l-6)+']');
 	var form = Ext.getCmp('contentUploadForm').getForm();
 	form.findField('smsmenu.id').setValue(content_id);
-	
 
 }						
 		
@@ -445,12 +547,13 @@ function loadLeftPanel(e){
 				if(menuitem.reader.jsonData.menuitem[k].children.length>0)
 				for(var i = 0; i<menuitem.reader.jsonData.menuitem[k].children.length; i++){
 				   var child = menuitem.reader.jsonData.menuitem[k].children[i];
-					console.log(child.name + ".. " + child.id);
+					//console.log(child.name + ".. " + child.id);
 					subList[i] = 
 					           {
 								    xtype:'box',
 									isFormField: true,
 									id: "link_"+child.id,
+									serviceid: child.serviceid,
 									style: "padding: 5px",
 									autoEl:{
 										tag: 'a',
@@ -468,7 +571,7 @@ function loadLeftPanel(e){
 //					+= "<button class='x-menu-item' id='"+child.id+"'>"+child.name+"</button><br/>";
 				}
 				
-				console.log('subList.length: '+subList.length);
+				//console.log('subList.length: '+subList.length);
 				
 				smsmenuNavPanel.add({
 					title: menuitem.reader.jsonData.menuitem[k].name,
@@ -659,7 +762,7 @@ MyDesktop.ContentManagementModule = Ext.extend(Ext.app.Module, {
 									    id: 'uploadpannel',
 										title: 'SMS Content Upload',
 										items : [
-										smsForm
+										smsForm,{html:'<br/><br/>'},contentgrid
 										]
 									}]
 								}]
@@ -760,4 +863,45 @@ function successAction(form, action){
 	//$('.notification').addClass('notification').slideUp(200)
 	//console.log('not ' + $('.notification'))
 	//alert('alert')
+}
+
+function deleteSMS(rec){
+	Ext.Ajax.request({
+		url :  '/SMSMenuManagement.action?deleteContent=&contentid='+rec.get('id')+'&smsmenu.serviceid='+rec.get('serviceid'),
+		scope : this,
+		success : function(response, opts) {
+					var pg = response.responseText;
+					var resp = eval( '('+pg+')' );
+					if(resp.success){
+						sms_content_grid_datasource.reload();
+						//alert(rec.index);
+						rec.remove(rec.index);
+						Ext.Msg.show({
+							title:'Status : '+rec.get('id')+' Deleted',
+							msg: resp.message,
+							buttons: Ext.Msg.OK,
+							animEl: 'elId',
+							icon: Ext.MessageBox.INFO
+						});
+						
+					}else{
+						Ext.Msg.show({
+							title:'Status : '+rec.get('id')+' Deleted',
+							msg: resp.message,
+							buttons: Ext.Msg.OK,
+							animEl: 'elId',
+							icon: Ext.MessageBox.ERROR
+						});
+					}
+			
+			//Ext.getCmp('subscriptionsgrid').setTitle('Subscriptions status');
+			//Ext.getCmp('customer_care_win').setTitle('Customer care');
+
+				},
+		failure : function() {
+				Ext.Msg.alert('Failed complete action!');
+				//Ext.getCmp('subscriptionsgrid').setTitle('Subscriptions status');
+				//Ext.getCmp('customer_care_win').setTitle('Customer care');
+		}
+	});
 }
