@@ -12,7 +12,13 @@ function plotGraph(){
 						var ctx = document.getElementById("canvas").getContext("2d");
 						window.myBar = new Chart(ctx).Bar(resp, {
 							responsive : true,
-							tooltipTemplate : "<%if (label){%> <%=label%> Revenue : <%}%>KES. <%=formatD(value)%>"
+							tooltipTemplate : "<%if (label){%> <%=label%> Revenue : <%}%>KES. <%=formatD(value)%>",
+							scaleBeginAtZero: false,
+							scaleBackdropPaddingY: 15,
+							scaleBackdropPaddingX: 15,
+							scaleShowLine: false,
+							segmentStrokeColor: "#fff",
+							legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
 						});
 					},
 			failure : function() {
@@ -30,11 +36,11 @@ function populate(){
 			items: [{
 			    id : 'billing_stats',
 				title: 'Billing Stats',
-				width:630,
-				height:550,
+				width:530,
+				height:580,
 				items : [{
 					title: 'Live Billing & Revenue Statistics',
-					html: '<div> <canvas id="canvas" height="190" width="auto"></canvas></div>'
+					html: '<div style="width: 98%; height: 86%; padding:5px;"> <canvas id="canvas" height="410" width="590"></canvas></div>'
 				}]
 			},{
 				title: 'Tab 2',

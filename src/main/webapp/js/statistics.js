@@ -33,13 +33,15 @@ MyDesktop.StatisticsModule = Ext.extend(Ext.app.Module, {
             win = desktop.createWindow({
                 id: 'statistics_win',
                 title: 'Statistics',
-                width:640,
-                height:480,
+                width:760,
+                height:600,
 				items :  [],
                 iconCls: 'statistics-win',
                 shim:false,
                 animCollapse:false,
-                constrainHeader:true
+                constrainHeader:true,
+				bodyStyle:'padding:5px;background: transparent; border: none; ',
+				border:false
             });
         }
         win.show();
