@@ -20,12 +20,13 @@
 <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
 <meta name="theme-color" content="#ffffff">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>CMP</title>
+<title>PRSP CMP: PRSP Content Management Platform</title>
 
 <link rel="stylesheet" type="text/css" href="css/ext-all.css" />
 <link rel="stylesheet" type="text/css" href="css/desktop.css" />
 
-<!-- GC -->
+<!-- Chart.js -->
+<script type="text/javascript" src="js/Chart.min.js"></script>
 <!-- LIBS -->
 <script type="text/javascript" src="js/adapter/ext/ext-base.js"></script>
 <!-- ENDLIBS -->
