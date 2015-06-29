@@ -13,6 +13,7 @@ import java.util.Random;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
@@ -20,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.pixelandtag.cmp.ejb.stats.LinkLatencyStatEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
 
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -31,6 +33,9 @@ public class StatsAction extends BaseActionBean {
 	private final String to_tz  = "+03:00";
 	private Logger logger = Logger.getLogger(getClass());
 	private Random rand = new Random();
+	
+	@EJB(mappedName =  "java:global/cmp/LinkLatencyStatEJBImpl")
+	private LinkLatencyStatEJBI statsLinkLatEJB;
 
 	SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
 	
@@ -41,11 +46,24 @@ public class StatsAction extends BaseActionBean {
 	    return prettier_df.format(date);
 	}
 	
+	
+	public Resolution getLinksLatencyStats(){
+		String resp = "";
+		try {
+			resp = statsLinkLatEJB.getLinksLatencyStats();
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		logger.info("\n\n\nSTATS RESP:::: "+resp+"\n\n\n");
+		return sendResponse(resp);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	@RolesAllowed({"admin"})
 	public Resolution getStats() throws JSONException{
-		Query qry = cmp_dao.resource_bean.getEM().createNativeQuery("select date(convert_tz(timeStamp,'"+from_tz+"','"+to_tz+"')) dt, count(*) count, price, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 20");
+		
+		Query qry = cmp_dao.resource_bean.getEM().createNativeQuery("select date(convert_tz(timeStamp,'"+from_tz+"','"+to_tz+"')) dt, count(*) count, price, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 31");
 		
 		List<Object[]> recs = qry.getResultList();
 		
@@ -79,6 +97,8 @@ public class StatsAction extends BaseActionBean {
 		mainObject.put("labels", labels);
 		return sendResponse(mainObject.toString());
 	}
+	
+	
 	
 	
 	
