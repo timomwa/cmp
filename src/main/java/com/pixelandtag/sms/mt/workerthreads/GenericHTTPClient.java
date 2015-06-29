@@ -40,7 +40,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
+import sun.font.CreatedFontTracker;
+
 import com.inmobia.util.StopWatch;
+import com.pixelandtag.cmp.entities.audittools.LatencyLog;
+import com.pixelandtag.cmp.entities.audittools.LatencyLogBuilder;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class GenericHTTPClient implements Serializable{
@@ -54,7 +58,7 @@ public class GenericHTTPClient implements Serializable{
 	private SSLContextBuilder builder = new SSLContextBuilder();
 	private String name;
 	private StopWatch watch;
-	private String respose_msg = "";
+	//private String respose_msg = "";
 	private boolean run = true;
 	private static PoolingHttpClientConnectionManager cm;
 	private volatile boolean success = true;
@@ -142,10 +146,10 @@ public class GenericHTTPClient implements Serializable{
 	 * Sends the MT message
 	 * @param mt - com.pixelandtag.MTsms
 	 */
-	public int call(GenericHTTPParam genericparams){
-		this.respose_msg = "";
+	public GenericHttpResp call(GenericHTTPParam genericparams){
+		//this.respose_msg = "";
 		this.success = true;
-		int resp_code = 0;
+		GenericHttpRespBuilder respBuilder = GenericHttpRespBuilder.create();
 		setBusy(true);
 		HttpPost httppost = null;
 		CloseableHttpResponse response = null;
@@ -169,15 +173,24 @@ public class GenericHTTPClient implements Serializable{
 			watch.start();
 			response = httpclient.execute(httppost);
 			watch.stop();
-			logger.info(getName()+" :::: LINK_LATENCY : ("+genericparams.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+			try{
+				String link = genericparams.getUrl();
+				Long latency = watch.elapsedTime(TimeUnit.MILLISECONDS);
+				LatencyLog latencyLog = LatencyLogBuilder.create().latency(latency).link(link).build();
+				respBuilder.latencyLog(latencyLog);
+				logger.info(getName()+" :::: LINK_LATENCY : ("+link+")::::::::::  "+ latency.longValue() + " mili-seconds");
+			}catch(Exception exp){
+				logger.error(exp.getMessage());
+			}
 			watch.reset();
 			
-			resp_code = response.getStatusLine().getStatusCode();
+			int resp_code = response.getStatusLine().getStatusCode();
+			respBuilder = respBuilder.respCode(resp_code);
 			
 			setBusy(false);
 			
-			this.respose_msg  = convertStreamToString(response.getEntity().getContent());
-			
+			String respose_msg  = convertStreamToString(response.getEntity().getContent());
+			respBuilder.body(respose_msg);
 			logger.info(getName()+" PROXY ::::::: finished attempt to deliver SMS via HTTP :::: RESP::: "+respose_msg);
 			try {
 				
@@ -218,10 +231,8 @@ public class GenericHTTPClient implements Serializable{
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}
-			
-			
 		}
-		return resp_code;
+		return respBuilder.build();
 	}
 	
 	
@@ -362,14 +373,6 @@ public class GenericHTTPClient implements Serializable{
 		} else {
 			return "";
 		}
-	}
-
-	public String getRespose_msg() {
-		return respose_msg;
-	}
-
-	public void setRespose_msg(String respose_msg) {
-		this.respose_msg = respose_msg;
 	}
 	
 	/**

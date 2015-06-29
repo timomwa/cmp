@@ -31,6 +31,7 @@ import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClientWorker;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
+import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
@@ -99,13 +100,14 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			
 			param.setHttpParams(qparams);
 			watch.start();
-			final int RESP_CODE = httpclient.call(param);
+			final GenericHttpResp resp = httpclient.call(param);
+			final int RESP_CODE = resp.getResp_code();
 			watch.stop();
 			logger.info(getName()+" PROXY_LATENCY_ON forwarding url ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 			watch.reset();
-			final String message = httpclient.getRespose_msg();
-			logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESP_CODE: "+RESP_CODE);
-			logger.info("\n\n\t\t::::::SMPP:::::::::PROXY_RESPONSE: "+message);
+			final String message = resp.getBody();
+			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESP_CODE: "+RESP_CODE);
+			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESPONSE: "+message);
 			
 			if(RESP_CODE==HttpStatus.SC_OK){
 				mo.setMt_Sent(message);
@@ -117,7 +119,9 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 				//mo.setMt_Sent("External application is down.");
 			}
 			
-
+			if(resp!=null && resp.getLatencyLog()!=null)
+				cmpbean.saveOrUpdate(resp.getLatencyLog());
+			
 			if(serviceprocessor.getProtocol().equalsIgnoreCase("smpp")){
 				cmpbean.sendMTSMPP(mo,serviceprocessor.getSmppid());
 			}

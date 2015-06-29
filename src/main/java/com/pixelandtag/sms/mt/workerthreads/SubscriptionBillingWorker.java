@@ -186,12 +186,13 @@ public class SubscriptionBillingWorker implements Runnable {
 									param.setStringentity(xml);
 									param.setHeaderParams(headerattrs);
 									watch.start();
-									final int RESP_CODE = genericHttpClient.call(param);
+									final GenericHttpResp genresp = genericHttpClient.call(param);
+									final int RESP_CODE = genresp.getResp_code();
 									watch.stop();
 									logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
-									final String resp = genericHttpClient.getRespose_msg();
-									logger.info("\n\n\t\t::::::SMPP::::RESP_CODE=["+RESP_CODE+"]:::::PROXY_RESPONSE: "+resp);
+									final String resp = genresp.getBody();
+									logger.info("\n\n\t\t::::::BILLING::::RESP_CODE=["+RESP_CODE+"]:::::PROXY_RESPONSE: "+resp);
 									billable.setResp_status_code(String.valueOf(RESP_CODE));
 									billable.setProcessed(1L);
 									
@@ -290,6 +291,9 @@ public class SubscriptionBillingWorker implements Runnable {
 									logger.debug("DONE! ");
 									
 									billable = cmp_ejb.saveOrUpdate(billable);
+									
+									if(genresp.getLatencyLog()!=null && RESP_CODE>0)
+										cmp_ejb.saveOrUpdate(genresp.getLatencyLog());
 									
 									setBusy(false);
 									

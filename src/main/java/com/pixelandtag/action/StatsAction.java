@@ -91,60 +91,6 @@ public class StatsAction extends BaseActionBean {
 		JSONObject data = new JSONObject();
 		JSONArray dataArray = new JSONArray();
 		
-		
-		Queue<String> colorQueue = new PriorityQueue<String>();
-		colorQueue.add("#FDB45C");
-		colorQueue.add("#F7464A");
-		colorQueue.add("#46BFBD");
-		colorQueue.add("#886A08");
-		colorQueue.add("#CC2EFA");
-		colorQueue.add("#FF0040");
-		colorQueue.add("#04B4AE");
-		colorQueue.add("#DBA901");
-		colorQueue.add("#08298A");
-		colorQueue.add("#610B5E");
-		colorQueue.add("#74DF00");
-		colorQueue.add("#086A87");
-		colorQueue.add("#FDB10C");
-		colorQueue.add("#F7450A");
-		colorQueue.add("#46BFBD");
-		colorQueue.add("#870A08");
-		colorQueue.add("#CCCEFA");
-		colorQueue.add("#FF1140");
-		colorQueue.add("#04B4AE");
-		colorQueue.add("#DBA922");
-		colorQueue.add("#08298A");
-		colorQueue.add("#615B5E");
-		colorQueue.add("#74DF00");
-		colorQueue.add("#086A70");
-		
-		
-		Queue<String> highlightQueue = new PriorityQueue<String>();
-		highlightQueue.add("#FFC870");
-		highlightQueue.add("#FF5A5E");
-		highlightQueue.add("#5AD3D1");
-		highlightQueue.add("#F5DA81");
-		highlightQueue.add("#AC58FA");
-		highlightQueue.add("#FA5882");
-		highlightQueue.add("#01DFA5");
-		highlightQueue.add("#FACC2E");
-		highlightQueue.add("#013ADF");
-		highlightQueue.add("#B404AE");
-		highlightQueue.add("#80FF00");
-		highlightQueue.add("#00BFFF");
-		highlightQueue.add("#FFC860");
-		highlightQueue.add("#FF2A2E");
-		highlightQueue.add("#5AD0D0");
-		highlightQueue.add("#F5DA70");
-		highlightQueue.add("#AC40FA");
-		highlightQueue.add("#FA5702");
-		highlightQueue.add("#22DFA5");
-		highlightQueue.add("#FABB2E");
-		highlightQueue.add("#033ADF");
-		highlightQueue.add("#B440AE");
-		highlightQueue.add("#80FF22");
-		highlightQueue.add("#00BFEE");
-		
 		for(Object[] o : recs){
 			
 			BigInteger count = (BigInteger) o[0];
