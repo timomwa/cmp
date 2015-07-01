@@ -29,8 +29,6 @@ import net.sourceforge.stripes.action.Resolution;
 
 public class StatsAction extends BaseActionBean {
 	
-	private final String from_tz = "-04:00";
-	private final String to_tz  = "+03:00";
 	private Logger logger = Logger.getLogger(getClass());
 	private Random rand = new Random();
 	

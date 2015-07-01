@@ -35,6 +35,9 @@ public class BaseActionBean implements ActionBean {
 	protected static final String VIEW_LOGIN_PAGE = "/WEB-INF/jsp/login.jsp";
 	protected static final String VIEW_DESKTOP = "/WEB-INF/jsp/desktop.jsp";
 	protected static final String STATS_MONITOR = "/WEB-INF/jsp/billingmonitor.jsp";
+	public static final String from_tz = "-04:00";
+	public static final String to_tz  = "+03:00";
+	
 	protected ForwardResolution desktop = new ForwardResolution(VIEW_DESKTOP);
 	protected ForwardResolution loginPage = new ForwardResolution(VIEW_LOGIN_PAGE);
 	protected ForwardResolution statsMonitorPage = new ForwardResolution(STATS_MONITOR);

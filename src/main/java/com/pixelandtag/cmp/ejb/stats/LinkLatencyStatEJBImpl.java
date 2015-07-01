@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.pixelandtag.action.BaseActionBean;
+
 @Stateless
 @Remote
 public class LinkLatencyStatEJBImpl implements LinkLatencyStatEJBI {
@@ -29,7 +31,7 @@ public Logger logger = Logger.getLogger(getClass());
 	@Override
 	public String getLinksLatencyStats() throws Exception{
 		try{
-			Query query  = em.createNativeQuery("select link, count(*) count, avg(latency) avgLat, date_format(timeStamp,'%Y-%m-%d %H:%i') ts  from latency_log where date(timestamp)=curdate() group by link, ts order by ts desc limit 10000");
+			Query query  = em.createNativeQuery("select link, count(*) count, avg(latency) avgLat, date_format(convert_tz(timeStamp,'"+BaseActionBean.from_tz+"','"+BaseActionBean.to_tz+"'),'%Y-%m-%d %H:%i') ts  from latency_log where date(timestamp)=curdate() group by link, ts order by ts desc limit 10000");
 		
 			List<Object[]> recs = query.getResultList();
 			
