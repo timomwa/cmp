@@ -34,8 +34,10 @@ public class BaseActionBean implements ActionBean {
 	
 	protected static final String VIEW_LOGIN_PAGE = "/WEB-INF/jsp/login.jsp";
 	protected static final String VIEW_DESKTOP = "/WEB-INF/jsp/desktop.jsp";
+	protected static final String STATS_MONITOR = "/WEB-INF/jsp/billingmonitor.jsp";
 	protected ForwardResolution desktop = new ForwardResolution(VIEW_DESKTOP);
 	protected ForwardResolution loginPage = new ForwardResolution(VIEW_LOGIN_PAGE);
+	protected ForwardResolution statsMonitorPage = new ForwardResolution(STATS_MONITOR);
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a E MMM d y");
 	public static final SimpleDateFormat sdf2 = new SimpleDateFormat("E MMM d y");

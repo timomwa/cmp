@@ -41,6 +41,7 @@ public class LatencyLog implements Serializable {
 	private OperatorCountry opco;
 	
 	@Column(name="link", nullable=false)
+	@Index(name="lnkidx")
 	private String link;
 	
 	@Column(name = "latency")

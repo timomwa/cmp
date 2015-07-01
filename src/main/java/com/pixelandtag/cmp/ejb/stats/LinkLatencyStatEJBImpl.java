@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.ejb.stats;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Remote;
@@ -10,9 +11,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import net.sf.json.JSONArray;
-
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 @Stateless
@@ -29,7 +29,7 @@ public Logger logger = Logger.getLogger(getClass());
 	@Override
 	public String getLinksLatencyStats() throws Exception{
 		try{
-			Query query  = em.createNativeQuery("select link, count(*) count, avg(latency) avgLat, second(timeStamp) sec, minute(timeStamp) min from latency_log where date(timestamp)=curdate() group by link, sec , min");
+			Query query  = em.createNativeQuery("select link, count(*) count, avg(latency) avgLat, date_format(timeStamp,'%Y-%m-%d %H:%i') ts  from latency_log where date(timestamp)=curdate() group by link, ts order by ts desc limit 10000");
 		
 			List<Object[]> recs = query.getResultList();
 			
@@ -39,11 +39,9 @@ public Logger logger = Logger.getLogger(getClass());
 			for(Object[] o : recs){
 				String link = (String) o[0];
 				BigDecimal averageLatencyPerSecond = (BigDecimal)  o[2];
-				BigInteger second = (BigInteger) o[3];
-				BigInteger minute = (BigInteger) o[4];
-				String label = minute+":"+second;
-				labels.add(label);
-				data.add(averageLatencyPerSecond.doubleValue());
+				String timeStamp = (String) o[3];
+				labels.put(timeStamp);
+				data.put(averageLatencyPerSecond.doubleValue());
 			}
 			
 			JSONObject mainObject = new JSONObject();
@@ -51,14 +49,15 @@ public Logger logger = Logger.getLogger(getClass());
 			
 			JSONObject dataset = new JSONObject();
 			dataset.put("label", "Link Latency");
-			dataset.put("fillColor", "rgba(220,220,220,0.2)");
+			dataset.put("fillColor", "#0080FF");
 			dataset.put("strokeColor", "rgba(220,220,220,1)");
 			dataset.put("pointColor", "rgba(220,220,220,1)");
 			dataset.put("pointStrokeColor", "#fff");
 			dataset.put("pointHighlightFill", "#fff");
 			dataset.put("pointHighlightStroke", "rgba(220,220,220,1)");
 			dataset.put("data",data);
-			mainObject.put("datasets",dataset);
+			datasets.put(dataset);
+			mainObject.put("datasets",datasets);
 			
 			return mainObject.toString();
 			
