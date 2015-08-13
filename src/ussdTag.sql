@@ -171,3 +171,8 @@ BEGIN
 END;
 $
 DELIMITER ;
+
+
+select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
+and timeStamp between  convert_tz('2015-06-30 00:00:00','-04:00','+03:00') AND convert_tz('2015-07-31 23:59:59','-04:00','+03:00')
+group by dt order by dt desc limit 35;

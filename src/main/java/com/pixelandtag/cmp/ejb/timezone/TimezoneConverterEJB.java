@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 public class TimezoneConverterEJB implements TimezoneConverterI {
 	
 	
-	private Logger logger = Logger.getLogger(getClass());
+	//private Logger logger = Logger.getLogger(getClass());
 	
 	SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
 	

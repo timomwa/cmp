@@ -3,18 +3,24 @@ package com.pixelandtag.dating.entities;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
+
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
 @Table(name = "dating_person")
@@ -45,6 +51,11 @@ public class Person implements Serializable {
 	
 	@Column(name="loggedin")
 	private Boolean loggedin;
+	
+	@ManyToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
+	@JoinColumn(name = "opco_id_fk")
+	@Index(name="popcoidx")
+	private OperatorCountry opco;
 	
 	
 	@PrePersist
@@ -96,6 +107,14 @@ public class Person implements Serializable {
 
 	public void setLoggedin(Boolean loggedin) {
 		this.loggedin = loggedin;
+	}
+
+	public OperatorCountry getOpco() {
+		return opco;
+	}
+
+	public void setOpco(OperatorCountry opco) {
+		this.opco = opco;
 	}
 	
 	

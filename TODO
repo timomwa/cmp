@@ -1,0 +1,14 @@
+- multi operator functionality
+
+- include opco identifier in required tables
+    - httptosend - Done
+    - billable - Done
+    - success billing - Done
+    - messagelog - <<<this necessary??
+    - mo_processors  - Done
+
+- adjust beans to use these opco identifier
+
+- Figure a way to exchange messages between operators for the dating chat
+
+- adjust statistics & bi to report per operator or combined

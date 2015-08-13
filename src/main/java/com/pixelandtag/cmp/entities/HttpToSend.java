@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +13,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -19,6 +22,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Index;
 
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.sms.mt.ACTION;
 import com.pixelandtag.sms.mt.CONTENTTYPE;
 
@@ -127,6 +131,12 @@ public class HttpToSend implements Serializable{
 	@Column(name="billing_status")
 	@Enumerated(EnumType.STRING)
 	private BillingStatus billing_status;
+	
+	
+	@ManyToOne(cascade=CascadeType.MERGE)
+	@JoinColumn(name = "opco_id_fk", nullable=false)
+	@Index(name="httsopcoidx")
+	private OperatorCountry opco;
 	
 	
 	@PrePersist
@@ -454,7 +464,17 @@ public class HttpToSend implements Serializable{
 				+ newCMP_Txid + ", apiType=" + apiType + ", action=" + action
 				+ ", split=" + split + ", mo_processorFK=" + mo_processorFK
 				+ ", SMS_DataCodingId=" + SMS_DataCodingId
-				+ ", billing_status=" + billing_status + "]";
+				+ ", billing_status=" + billing_status + ", opco="+opco+"]";
+	}
+
+
+	public OperatorCountry getOpco() {
+		return opco;
+	}
+
+
+	public void setOpco(OperatorCountry opco) {
+		this.opco = opco;
 	}
 	
 	

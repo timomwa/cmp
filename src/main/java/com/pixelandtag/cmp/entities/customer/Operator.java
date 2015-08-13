@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id; 
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Index;
+
 
 @Entity
 @Table(name = "operator")
@@ -24,6 +26,11 @@ public class Operator implements Serializable{
 	
 	@Column(name="name")
 	private String name;
+	
+	
+	@Column(name="code", nullable=false, unique=true)
+	@Index(name="ortorcodidx")
+	private String code;
 
 	public Long getId() {
 		return id;
@@ -40,9 +47,13 @@ public class Operator implements Serializable{
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	
-	
-	
 
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+	
 }
