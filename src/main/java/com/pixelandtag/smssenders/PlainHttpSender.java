@@ -66,11 +66,14 @@ public class PlainHttpSender implements Sender {
 		GenericHTTPParam generic_http_parameters = new GenericHTTPParam();
 		generic_http_parameters.setUrl(this.configuration.get("url").getValue());
 		generic_http_parameters.setId(mtsms.getId());
+		
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), mtsms.getCMP_Txid().toString()));//"cptxid"
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),mtsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),mtsms.getMsisdn()));//"msisdn"
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),mtsms.getSms()));//"sms"
+
+		
 		
 		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("true")){
 			
@@ -178,8 +181,14 @@ public class PlainHttpSender implements Sender {
 				}
 			}
 			
+			for(NameValuePair valuep : qparams)
+				payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", valuep.getValue());
+			
 			generic_http_parameters.setStringentity(payload_template);
 			
+		}else{
+			
+			generic_http_parameters.setHttpParams(qparams);
 		}
 		
 		String url = this.configuration.get(HTTP_BASE_URL).getValue();
@@ -189,7 +198,7 @@ public class PlainHttpSender implements Sender {
 				
 				String key = config.getKey();
 				if(key.trim().toLowerCase().startsWith(HTTP_REST_PATH_PARAM_PREFIX)){
-					String param_name = key.split(HTTP_PAYLOAD_PARAM_PREFIX)[1];
+					String param_name = key.split(HTTP_REST_PATH_PARAM_PREFIX)[1];
 					try {
 						url = url.replaceAll("\\$\\{"+param_name+"\\}", URLEncoder.encode(getValueFromqparams(qparams,param_name),"UTF-8"));
 					} catch (UnsupportedEncodingException e) {
@@ -201,7 +210,6 @@ public class PlainHttpSender implements Sender {
 		}
 		
 		generic_http_parameters.setUrl(url);
-		generic_http_parameters.setHttpParams(qparams);
 		
 		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
