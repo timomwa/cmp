@@ -1,6 +1,9 @@
-package com.pixelandtag.api.sms;
+package com.pixelandtag.cmp.ejb.api.sms;
+
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -9,9 +12,13 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.cmp.dao.opco.OpcoConfigsDAOI;
 import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.smssenders.SMSSenderFactory;
+import com.pixelandtag.smssenders.Sender;
 
 @Stateless
 @Remote
@@ -24,6 +31,10 @@ public class SMSGatewayImpl implements SMSGatewayI {
 	
 	@Inject
 	private OperatorCountryDAOI opcoDAO;
+	
+	
+	@EJB
+	private ConfigsEJBI configsEJB;
 	
 	@PostConstruct
 	public void init(){
@@ -50,7 +61,20 @@ public class SMSGatewayImpl implements SMSGatewayI {
 		if(opco==null)
 			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" was not found!");
 		
+		Map<String,OpcoConfigs> configurations = configsEJB.getAllConfigs(opco);
 		
+		
+		OpcoConfigs config  = configurations.get("protocol");
+		
+		if(config==null)
+			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" has no protocol set. Please set this.");
+		
+		try {
+			Sender sender = SMSSenderFactory.getSenderInstance(configurations);
+		} catch (Exception exp) {
+			logger.error(exp.getMessage(),exp);
+			throw new SMSGatewayException("Problem occurred trying to instantiate sender!",exp);
+		}
 		// Determine the protocol (smpp, http rest SOAP/json)
 		
 		return false;

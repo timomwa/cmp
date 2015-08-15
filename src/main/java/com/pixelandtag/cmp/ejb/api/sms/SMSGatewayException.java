@@ -1,4 +1,4 @@
-package com.pixelandtag.api.sms;
+package com.pixelandtag.cmp.ejb.api.sms;
 
 public class SMSGatewayException extends Exception {
 	

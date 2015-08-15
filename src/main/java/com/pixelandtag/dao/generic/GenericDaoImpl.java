@@ -184,6 +184,21 @@ public class GenericDaoImpl<T, ID extends Serializable> implements GenericDAO<T,
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	public List<T> findByNamedQuery(final String queryName, final Map<String, ?extends Object> params, int start, int limit){
+		
+		javax.persistence.Query query = em.createNamedQuery(queryName);
+
+		for (final Map.Entry<String, ? extends Object> param : params.entrySet()) {
+			query.setParameter(param.getKey(), param.getValue());
+		}
+		query.setFirstResult(start);
+		query.setMaxResults(limit);
+
+		return query.getResultList();
+	}
+	
+	
 	
 	@SuppressWarnings("unchecked")
 	public List<T> list(final int firstResult,final int maxResults){

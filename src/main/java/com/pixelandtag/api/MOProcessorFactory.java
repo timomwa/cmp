@@ -37,7 +37,7 @@ public class MOProcessorFactory {
 		GenericServiceProcessor c  = null;
 		
 		try {
-			c = MOProcessorFactory.getProcessorClass("com.inmobia.celcom.serviceprocessors.AxiataTriviaProcessor", GenericServiceProcessor.class);
+			c = MOProcessorFactory.getProcessorClass("com.pixelandtag.serviceprocessors.sms.AxiataTriviaProcessor", GenericServiceProcessor.class);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

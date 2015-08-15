@@ -1,4 +1,4 @@
-package com.pixelandtag.api.sms;
+package com.pixelandtag.cmp.ejb.api.sms;
 
 import com.pixelandtag.entities.MTsms;
 /**
