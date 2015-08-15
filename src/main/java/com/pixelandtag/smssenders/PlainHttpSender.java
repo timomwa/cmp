@@ -72,7 +72,6 @@ public class PlainHttpSender implements Sender {
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),mtsms.getMsisdn()));//"msisdn"
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),mtsms.getSms()));//"sms"
 		
-		
 		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("true")){
 			
 			Map<String,String> headerParams = new HashMap<String,String>();
