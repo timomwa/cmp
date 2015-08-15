@@ -30,7 +30,16 @@ public interface Sender{
 	public final String HTTP_HEADER_AUTH_PARAM_PREFIX = "http_header_auth_param_";
 	public final String HTTP_HEADER_PREFIX = "http_header_param_";
 	public final String HTTP_PAYLOAD_PARAM_PREFIX = "http_payload_param_";
+	public final String HTTP_REST_PATH_PARAM_PREFIX = "http_rest_path_param_";
 	
-	public boolean sendSMS(MTsms mtsms) throws MessageSenderException;
+	public final String HTTP_RESP_JSON_REF_VALUE_KEY = "http_resp_json_ref_value_key";
+	public final String HTTP_RESP_JSON_RESP_MSG_KEY = "http_resp_json_resp_msg_key";
+	public final String HTTP_RESP_JSON_RESPCODE_KEY = "http_resp_json_respcode_key";
+	
+	public final String HTTP_RESP_XML_REF_VALUE_KEY = "http_resp_xml_ref_value_key";
+	public final String HTTP_RESP_XML_RESP_MSG_KEY = "http_resp_xml_resp_msg_key";
+	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
+	
+	public SenderResp sendSMS(MTsms mtsms) throws MessageSenderException;
 
 }

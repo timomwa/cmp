@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -173,12 +174,23 @@ public class GenericHTTPClient implements Serializable{
 			watch.start();
 			response = httpclient.execute(httppost);
 			watch.stop();
+			
+			
 			try{
 				String link = genericparams.getUrl();
 				Long latency = watch.elapsedTime(TimeUnit.MILLISECONDS);
 				LatencyLog latencyLog = LatencyLogBuilder.create().latency(latency).link(link).build();
 				respBuilder.latencyLog(latencyLog);
 				logger.info(getName()+" :::: LINK_LATENCY : ("+link+")::::::::::  "+ latency.longValue() + " mili-seconds");
+				
+				Header[] headers = response.getAllHeaders();
+				if(headers!=null)
+					for(int i=0;i<headers.length; i++){
+						Header header = headers[i];
+						if(header.getName().toLowerCase().contains("content")){
+							respBuilder.contenttype(header.getValue());
+						}
+					}
 			}catch(Exception exp){
 				logger.error(exp.getMessage());
 			}

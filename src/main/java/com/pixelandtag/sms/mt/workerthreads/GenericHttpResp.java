@@ -17,6 +17,8 @@ public class GenericHttpResp implements Serializable{
 	private String body;
 	
 	private LatencyLog latencyLog;
+	
+	private String contenttype;
 
 	public int getResp_code() {
 		return resp_code;
@@ -40,6 +42,14 @@ public class GenericHttpResp implements Serializable{
 
 	public void setBody(String body) {
 		this.body = body;
+	}
+
+	public String getContenttype() {
+		return contenttype;
+	}
+
+	public void setContenttype(String contenttype) {
+		this.contenttype = contenttype;
 	}
 	
 	

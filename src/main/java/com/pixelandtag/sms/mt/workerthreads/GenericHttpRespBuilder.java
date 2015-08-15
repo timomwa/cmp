@@ -19,6 +19,11 @@ public class GenericHttpRespBuilder {
 		return this;
 	}
 	
+	public  GenericHttpRespBuilder contenttype(String contenttype){
+		instance.setContenttype(contenttype);
+		return this;
+	}
+	
 	public GenericHttpResp build(){
 		assert instance.getResp_code() >-1;
 		assert instance.getLatencyLog() != null;
