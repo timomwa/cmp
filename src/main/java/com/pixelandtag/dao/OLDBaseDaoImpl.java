@@ -13,14 +13,15 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import com.pixelandtag.cmp.entities.User;
-import com.pixelandtag.model.GenericDao;
+import com.pixelandtag.model.OLDGenericDao;
 
-public abstract class BaseDaoImpl<T, ID extends Serializable> implements
-		GenericDao<T, ID> {
+@Deprecated
+public abstract class OLDBaseDaoImpl<T, ID extends Serializable> implements
+		OLDGenericDao<T, ID> {
 	private Class<T> entityClass;
 
 	@SuppressWarnings("unchecked")
-	public BaseDaoImpl() {
+	public OLDBaseDaoImpl() {
 		entityClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 

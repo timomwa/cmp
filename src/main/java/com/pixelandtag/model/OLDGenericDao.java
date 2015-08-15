@@ -5,7 +5,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-public interface GenericDao<T,ID extends Serializable> {
+@Deprecated
+public interface OLDGenericDao<T,ID extends Serializable> {
 	public List<T> read();
     public T read(ID id);
     public void save(T t);

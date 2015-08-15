@@ -43,6 +43,8 @@ public abstract class GenericMessage implements Serializable{
 	private Long processor_id;
 	private String pricePointKeyword;
 	private Long subscription_id;
+	private Long opcoid;
+	private String opcocode;
 	private boolean subscription;
 	
 	private EventType eventType;
@@ -172,11 +174,33 @@ public abstract class GenericMessage implements Serializable{
 		this.subscription_id = subscription_id;
 	}
 	
+	
+	
+	public Long getOpcoid() {
+		return opcoid;
+	}
+
+
+	public void setOpcoid(Long opcoid) {
+		this.opcoid = opcoid;
+	}
+
+
 	@Override
 	public String toString() {
 		return "GenericMessage [CMP_Txid=" + CMP_Txid + ", priority="
 				+ priority + ", number_of_sms=" + number_of_sms
 				+ ", split_msg=" + split_msg + "]";
+	}
+
+
+	public String getOpcocode() {
+		return opcocode;
+	}
+
+
+	public void setOpcocode(String opcocode) {
+		this.opcocode = opcocode;
 	}
 	
 	

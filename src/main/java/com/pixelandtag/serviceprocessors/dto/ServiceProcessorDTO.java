@@ -38,7 +38,7 @@ public class ServiceProcessorDTO implements Serializable{
 	private String forwarding_url;
 	private String protocol;
 	private Long smppid;
-	
+	private Long opcoid;
 	
 	
 	public String getSubscriptionText() {
@@ -225,4 +225,16 @@ public class ServiceProcessorDTO implements Serializable{
 	public void setSmppid(Long smppid) {
 		this.smppid = smppid;
 	}
+
+
+	public Long getOpcoid() {
+		return opcoid;
+	}
+
+
+	public void setOpcoid(Long opcoid) {
+		this.opcoid = opcoid;
+	}
+	
+	
 }

@@ -1,11 +1,16 @@
 package com.pixelandtag.entities;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import com.pixelandtag.api.GenericMessage;
 
-public class GenericMT extends GenericMessage{
+public class GenericMT extends GenericMessage implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6339919955662002172L;
 	protected long id = -1;
 	protected String sms = "",id_str =  "";
 	protected String msisdn = "";

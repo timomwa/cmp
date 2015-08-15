@@ -3,6 +3,7 @@ package com.pixelandtag.cmp.entities.customer;
 import java.io.Serializable;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -37,6 +38,10 @@ public class OperatorCountry implements Serializable  {
 	@JoinColumn(name = "coutry_id_fk")
 	@Index(name="opcoidx")
 	private Country country;
+	
+	
+	@Column(name="code", unique=true)
+	private String code;
 
 
 	public Long getId() {
@@ -67,10 +72,16 @@ public class OperatorCountry implements Serializable  {
 	public void setCountry(Country country) {
 		this.country = country;
 	}
-	
-	
-	
-	
+
+
+	public String getCode() {
+		return code;
+	}
+
+
+	public void setCode(String code) {
+		this.code = code;
+	}
 	
 
 }
