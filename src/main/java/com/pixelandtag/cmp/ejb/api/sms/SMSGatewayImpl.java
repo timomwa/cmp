@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -12,11 +13,13 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.cmp.dao.opco.OpcoTemplatesDAOI;
+import com.pixelandtag.cmp.dao.opco.ProfileTemplatesDAOI;
 import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoTemplates;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
+import com.pixelandtag.cmp.entities.customer.configs.SenderProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.smssenders.SMSSenderFactory;
@@ -63,8 +66,15 @@ public class SMSGatewayImpl implements SMSGatewayI {
 		if(opco==null)
 			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" was not found!");
 		
-		Map<String,OpcoConfigs> opcoconfigs = configsEJB.getAllConfigs(opco);
-		Map<String,OpcoTemplates> opcotemplates = configsEJB.getAllTemplates(opco,TemplateType.PAYLOAD);
+		OpcoSenderProfile senderProfiles = configsEJB.getActiveOpcoSenderProfile(opco);
+		
+		if(senderProfiles==null)
+			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" has no active or valid sender profiles set!");
+		
+		SenderProfile profile = senderProfiles.getProfile();
+		
+		Map<String,ProfileConfigs> opcoconfigs = configsEJB.getAllConfigs(profile);
+		Map<String,ProfileTemplate> opcotemplates = configsEJB.getAllTemplates(profile,TemplateType.PAYLOAD);
 		
 		SenderConfiguration senderconfigs = new SenderConfiguration();
 		senderconfigs.setOpcoconfigs(opcoconfigs);
@@ -73,13 +83,11 @@ public class SMSGatewayImpl implements SMSGatewayI {
 		try {
 			Sender sender = SMSSenderFactory.getSenderInstance(senderconfigs);
 			sender.sendSMS(mtsms);
+			return true;
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);
 			throw new SMSGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());
 		}
-		// Determine the protocol (smpp, http rest SOAP/json)
-		
-		return false;
 	}
 
 }

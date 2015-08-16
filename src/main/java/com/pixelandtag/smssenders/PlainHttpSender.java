@@ -16,7 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
@@ -32,7 +32,7 @@ public class PlainHttpSender extends GenericSender {
 	@Inject
 	private static JsonUtilI jsonutil;
 	
-	private Map<String,OpcoConfigs> configuration;
+	private Map<String,ProfileConfigs> configuration;
 	private GenericHTTPClient httpclient;
 	
 	
@@ -80,7 +80,7 @@ public class PlainHttpSender extends GenericSender {
 			
 			Map<String,String> headerParams = new HashMap<String,String>();
 			
-			OpcoConfigs headerhasunameandpwd = this.configuration.get(HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD);
+			ProfileConfigs headerhasunameandpwd = this.configuration.get(HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD);
 			
 			if(headerhasunameandpwd==null || headerhasunameandpwd.getValue()==null || headerhasunameandpwd.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD+"\" for this opco");
@@ -88,15 +88,15 @@ public class PlainHttpSender extends GenericSender {
 			
 			if(headerhasunameandpwd.getValue().equalsIgnoreCase("yes")){
 				
-				OpcoConfigs headerauthusernameparam = this.configuration.get(HTTP_HEADER_AUTH_USERNAME_PARAM_NAME);
+				ProfileConfigs headerauthusernameparam = this.configuration.get(HTTP_HEADER_AUTH_USERNAME_PARAM_NAME);
 				if(headerauthusernameparam==null || headerauthusernameparam.getValue()==null || headerauthusernameparam.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_USERNAME_PARAM_NAME+"\" for this opco");
 				}
-				OpcoConfigs headerauthpasswordparam = this.configuration.get(HTTP_HEADER_AUTH_PASSWORD_PARAM_NAME);
+				ProfileConfigs headerauthpasswordparam = this.configuration.get(HTTP_HEADER_AUTH_PASSWORD_PARAM_NAME);
 				if(headerauthpasswordparam==null || headerauthpasswordparam.getValue()==null || headerauthpasswordparam.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_PASSWORD_PARAM_NAME+"\" for this opco");
 				}
-				OpcoConfigs encryptionmode = this.configuration.get(HTTP_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE);
+				ProfileConfigs encryptionmode = this.configuration.get(HTTP_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE);
 				if(encryptionmode==null || encryptionmode.getValue()==null || encryptionmode.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE+"\" for this opco");
 				}
@@ -115,7 +115,7 @@ public class PlainHttpSender extends GenericSender {
 					throw new MessageSenderException("Could not encrypt header params",e);
 				}
 				
-				OpcoConfigs authmethodparamname = this.configuration.get(HTTP_HEADER_AUTH_METHOD_PARAM_NAME);
+				ProfileConfigs authmethodparamname = this.configuration.get(HTTP_HEADER_AUTH_METHOD_PARAM_NAME);
 				if(authmethodparamname==null || authmethodparamname.getValue()==null || authmethodparamname.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_METHOD_PARAM_NAME+"\" for this opco");
 				}
@@ -125,7 +125,7 @@ public class PlainHttpSender extends GenericSender {
 				
 				if(this.configuration.get(HTTP_HEADER_AUTH_HAS_MULTIPLE_KV_PAIRS).getValue().equalsIgnoreCase("yes")){
 					
-					for(Map.Entry<String,OpcoConfigs> config : this.configuration.entrySet()){
+					for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){
 						
 						String key = config.getKey();
 						
@@ -146,7 +146,7 @@ public class PlainHttpSender extends GenericSender {
 				
 				logger.info("\n\n\n auth_header_value = "+auth_header_value);
 				
-				for(Map.Entry<String,OpcoConfigs> config : this.configuration.entrySet()){//Any other header param must start with the value HTTP_HEADER_PREFIX
+				for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){//Any other header param must start with the value HTTP_HEADER_PREFIX
 					
 					String key = config.getKey();
 					if(key.trim().toLowerCase().startsWith(HTTP_HEADER_PREFIX)){
@@ -155,7 +155,7 @@ public class PlainHttpSender extends GenericSender {
 					}
 				}
 				
-				OpcoConfigs httpheaderauthparam = this.configuration.get(HTTP_HEADERAUTH_PARAM_NAME);
+				ProfileConfigs httpheaderauthparam = this.configuration.get(HTTP_HEADERAUTH_PARAM_NAME);
 				if(httpheaderauthparam==null || httpheaderauthparam.getValue()==null || httpheaderauthparam.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_HEADERAUTH_PARAM_NAME+"\" for this opco");
 				}
@@ -171,7 +171,7 @@ public class PlainHttpSender extends GenericSender {
 		
 		if(this.configuration.get(HTTP_HAS_PAYLOAD).getValue().equalsIgnoreCase("yes")){
 			
-			OpcoConfigs httppayloadtemplate = this.configuration.get(HTTP_PAYLOAD_TEMPLATE);
+			ProfileConfigs httppayloadtemplate = this.configuration.get(HTTP_PAYLOAD_TEMPLATE);
 			if(httppayloadtemplate==null || httppayloadtemplate.getValue()==null || httppayloadtemplate.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_PAYLOAD_TEMPLATE+"\" for this opco");
 			}
@@ -181,13 +181,13 @@ public class PlainHttpSender extends GenericSender {
 			
 			if(payload_template==null || payload_template.isEmpty())
 				throw new MessageSenderException("Template with name \""
-						+http_payload_template_name+"\" for this opco ("+httppayloadtemplate.getOpco().toString()+") "
+						+http_payload_template_name+"\" for this profile ("+httppayloadtemplate.getProfile().toString()+") "
 						+ "hasn't been found. First check if the name is "
 						+ "correct in the opco_configs table and matches in the opco_templates table");
 			
 			
 			
-			for(Map.Entry<String,OpcoConfigs> config : this.configuration.entrySet()){//Any other header param
+			for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){//Any other header param
 				
 				String key = config.getKey();
 				if(key.trim().toLowerCase().startsWith(HTTP_PAYLOAD_PARAM_PREFIX)){
@@ -210,7 +210,7 @@ public class PlainHttpSender extends GenericSender {
 		String url = this.configuration.get(HTTP_BASE_URL).getValue();
 		
 		if(this.configuration.get(HTTP_IS_RESTFUL).getValue().equalsIgnoreCase("yes")){
-			for(Map.Entry<String,OpcoConfigs> config : this.configuration.entrySet()){
+			for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){
 				
 				String key = config.getKey();
 				if(key.trim().toLowerCase().startsWith(HTTP_REST_PATH_PARAM_PREFIX)){
@@ -239,17 +239,17 @@ public class PlainHttpSender extends GenericSender {
 			try {
 				JSONObject jsonobject = new JSONObject(resp.getBody());
 				
-				OpcoConfigs pathtorefval = this.configuration.get(HTTP_RESP_JSON_REF_VALUE_KEY);
+				ProfileConfigs pathtorefval = this.configuration.get(HTTP_RESP_JSON_REF_VALUE_KEY);
 				if(pathtorefval==null || pathtorefval.getValue()==null || pathtorefval.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_RESP_JSON_REF_VALUE_KEY+"\" for this opco");
 				}
 				
-				OpcoConfigs respmsgcnf = this.configuration.get(HTTP_RESP_JSON_RESP_MSG_KEY);
+				ProfileConfigs respmsgcnf = this.configuration.get(HTTP_RESP_JSON_RESP_MSG_KEY);
 				if(respmsgcnf==null || respmsgcnf.getValue()==null || respmsgcnf.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_RESP_JSON_RESP_MSG_KEY+"\" for this opco");
 				}
 				
-				OpcoConfigs respcodeconfg = this.configuration.get(HTTP_RESP_JSON_RESPCODE_KEY);
+				ProfileConfigs respcodeconfg = this.configuration.get(HTTP_RESP_JSON_RESPCODE_KEY);
 				if(respcodeconfg==null || respcodeconfg.getValue()==null || respcodeconfg.getValue().isEmpty()){
 					throw new MessageSenderException("No configuration set for \""+HTTP_RESP_JSON_RESPCODE_KEY+"\" for this opco");
 				}
@@ -268,17 +268,17 @@ public class PlainHttpSender extends GenericSender {
 		}else if(resp.getContenttype()!=null &&  resp.getContenttype().toLowerCase().contains("xml")){
 			
 			
-			OpcoConfigs pathtorefval = this.configuration.get(HTTP_RESP_XML_REF_VALUE_KEY);
+			ProfileConfigs pathtorefval = this.configuration.get(HTTP_RESP_XML_REF_VALUE_KEY);
 			if(pathtorefval==null || pathtorefval.getValue()==null || pathtorefval.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_RESP_XML_REF_VALUE_KEY+"\" for this opco");
 			}
 			
-			OpcoConfigs respmsgcnf = this.configuration.get(HTTP_RESP_XML_RESP_MSG_KEY);
+			ProfileConfigs respmsgcnf = this.configuration.get(HTTP_RESP_XML_RESP_MSG_KEY);
 			if(respmsgcnf==null || respmsgcnf.getValue()==null || respmsgcnf.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_RESP_XML_RESP_MSG_KEY+"\" for this opco");
 			}
 			
-			OpcoConfigs respcodeconfg = this.configuration.get(HTTP_RESP_XML_RESPCODE_KEY);
+			ProfileConfigs respcodeconfg = this.configuration.get(HTTP_RESP_XML_RESPCODE_KEY);
 			if(respcodeconfg==null || respcodeconfg.getValue()==null || respcodeconfg.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_RESP_XML_RESPCODE_KEY+"\" for this opco");
 			}
@@ -321,7 +321,7 @@ public class PlainHttpSender extends GenericSender {
 	
 	
 
-	public void setConfiguration(Map<String, OpcoConfigs> configs) {
+	public void setConfiguration(Map<String, ProfileConfigs> configs) {
 		this.configuration = configs;
 	}
 	

@@ -27,38 +27,38 @@ import org.hibernate.annotations.Index;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
-@Table(name = "opco_templates")
+@Table(name = "profile_templates")
 @NamedQueries({
 	@NamedQuery(
-			name = OpcoTemplates.NQ_FIND_BY_OPCO_AND_NAME,
-			query = "select oc from OpcoTemplates oc where oc.type=:type AND oc.name=:name AND oc.opco=:opco  order by oc.effectiveDate desc"
+			name = ProfileTemplate.NQ_FIND_BY_PROFILE_AND_NAME,
+			query = "select oc from ProfileTemplate oc where oc.type=:type AND oc.name=:name AND oc.profile=:profile  order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = OpcoTemplates.NQ_FIND_BY_OPCOID_AND_NAME,
-			query = "select oc from OpcoTemplates oc where oc.type=:type AND oc.name=:name AND oc.opco.id=:opcoid order by oc.effectiveDate desc"
+			name = ProfileTemplate.NQ_FIND_BY_PROFILEID_AND_NAME,
+			query = "select oc from ProfileTemplate oc where oc.type=:type AND oc.name=:name AND oc.profile.id=:profileid order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = OpcoTemplates.NQ_FIND_BY_OPCO,
-			query = "select oc from OpcoTemplates oc where oc.type=:type AND oc.opco=:opco order by oc.effectiveDate desc"
+			name = ProfileTemplate.NQ_FIND_BY_PROFILE,
+			query = "select oc from ProfileTemplate oc where oc.type=:type AND oc.profile=:profile order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = OpcoTemplates.NQ_FIND_BY_OPCOID,
-			query = "select oc from OpcoTemplates oc where oc.type=:type AND oc.opco.id=:opcoid order by oc.effectiveDate desc"
+			name = ProfileTemplate.NQ_FIND_BY_PROFILEID,
+			query = "select oc from ProfileTemplate oc where oc.type=:type AND oc.profile.id=:profileid order by oc.effectiveDate desc"
 	)
 })
-public class OpcoTemplates implements Serializable{
+public class ProfileTemplate implements Serializable{
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCO_AND_NAME = "opcotemplates.byopcoandname";
+	public static final String NQ_FIND_BY_PROFILE_AND_NAME = "profiletemplates.byprofileandname";
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCOID_AND_NAME = "opcotemplates.byopcoidandname";
+	public static final String NQ_FIND_BY_PROFILEID_AND_NAME = "profiletemplates.byprofileidandname";
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCO = "opcotemplates.byopco";
+	public static final String NQ_FIND_BY_PROFILE = "profiletemplates.byprofile";
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCOID = "opcotemplates.byopcoid";
+	public static final String NQ_FIND_BY_PROFILEID = "profiletemplates.byprofileid";
 
 	/**
 	 * 
@@ -69,10 +69,10 @@ public class OpcoTemplates implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@ManyToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
-	@JoinColumn(name = "opco_id_fk")
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "profile_id_fk")
 	@Index(name="opctpltfidx")
-	private OperatorCountry opco;
+	private SenderProfile profile;
 	
 	@Column(name="type")
 	@Enumerated(EnumType.STRING)
@@ -102,14 +102,6 @@ public class OpcoTemplates implements Serializable{
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public OperatorCountry getOpco() {
-		return opco;
-	}
-
-	public void setOpco(OperatorCountry opco) {
-		this.opco = opco;
 	}
 
 	public TemplateType getType() {
@@ -143,6 +135,15 @@ public class OpcoTemplates implements Serializable{
 	public void setEffectiveDate(Date effectiveDate) {
 		this.effectiveDate = effectiveDate;
 	}
+
+	public SenderProfile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(SenderProfile profile) {
+		this.profile = profile;
+	}
 	
 	
+
 }

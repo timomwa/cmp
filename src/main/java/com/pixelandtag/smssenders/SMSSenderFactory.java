@@ -7,14 +7,14 @@ import java.util.Map;
 
 import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayException;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 
 public class SMSSenderFactory {
 	
 	@SuppressWarnings("unchecked")
 	public static Sender getSenderInstance(SenderConfiguration senderConfigs) throws Exception {
-		Map<String,OpcoConfigs> configurations = senderConfigs.getOpcoconfigs();
-		OpcoConfigs senderimplclass = configurations.get("senderimpl");
+		Map<String,ProfileConfigs> configurations = senderConfigs.getOpcoconfigs();
+		ProfileConfigs senderimplclass = configurations.get("senderimpl");
 		if(senderimplclass==null)
 			throw new SMSGatewayException("\"senderimpl\" FQN that should implement com.pixelandtag.smssenders.Sender isn't not found");
 		Class<GenericSender> theClass;
@@ -28,8 +28,8 @@ public class SMSSenderFactory {
 	
 	public static void main(String[] args) throws Exception {
 		
-		Map<String,OpcoConfigs> configurations = new HashMap<String,OpcoConfigs>();
-		OpcoConfigs opcoconfig = new OpcoConfigs();
+		Map<String,ProfileConfigs> configurations = new HashMap<String,ProfileConfigs>();
+		ProfileConfigs opcoconfig = new ProfileConfigs();
 		opcoconfig.setName("senderimpl");
 		opcoconfig.setValue("com.pixelandtag.smssenders.PlainHttpSender");
 		configurations.put("senderimpl", opcoconfig);

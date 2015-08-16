@@ -11,12 +11,14 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import com.pixelandtag.cmp.dao.opco.OpcoConfigsDAOI;
-import com.pixelandtag.cmp.dao.opco.OpcoTemplatesDAOI;
-import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
+import com.pixelandtag.cmp.dao.opco.OpcoSenderProfileDAOI;
+import com.pixelandtag.cmp.dao.opco.ProfileConfigsDAOI;
+import com.pixelandtag.cmp.dao.opco.ProfileTemplatesDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoTemplates;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
+import com.pixelandtag.cmp.entities.customer.configs.SenderProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
 @Stateless
@@ -27,25 +29,27 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	private EntityManager em;
 	
 	@Inject
-	private OpcoConfigsDAOI opcoconfigsDAO;
+	private ProfileConfigsDAOI profileconfigsDAO;
 	
 	@Inject
-	private OperatorCountryDAOI opcoDAO;
+	private OpcoSenderProfileDAOI opcoprofilesDAO;
 	
-	@Inject OpcoTemplatesDAOI opcoTemlatesDAO;
+	
+	@Inject 
+	ProfileTemplatesDAOI profileTemlatesDAO;
 	
 	@PostConstruct
 	public void init(){
-		//opcoconfigsDAO.setEm(em);
+		//profileconfigsDAO.setEm(em);
 		//opcoDAO.setEm(em);
 	}
 
 	@Override
-	public OpcoConfigs getConfig(Long opcoid, String name) {
+	public ProfileConfigs getConfig(Long opcoid, String name) {
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("opcoid", opcoid);
 		params.put("name", name);
-		List<OpcoConfigs> configs =  opcoconfigsDAO.findByNamedQuery(OpcoConfigs.NQ_FIND_BY_OPCOID_AND_NAME, params);
+		List<ProfileConfigs> configs =  profileconfigsDAO.findByNamedQuery(ProfileConfigs.NQ_FIND_BY_PROFILEID_AND_NAME, params);
 		if(configs!=null && configs.size()>0)
 			return configs.get(0);
 		else
@@ -53,11 +57,11 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	}
 
 	@Override
-	public OpcoConfigs getConfig(OperatorCountry opco, String name) {
+	public ProfileConfigs getConfig(SenderProfile profile, String name) {
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("opco", opco);
+		params.put("profile", profile);
 		params.put("name", name);
-		List<OpcoConfigs> configs =  opcoconfigsDAO.findByNamedQuery(OpcoConfigs.NQ_FIND_BY_OPCO_AND_NAME, params);
+		List<ProfileConfigs> configs =  profileconfigsDAO.findByNamedQuery(ProfileConfigs.NQ_FIND_BY_PROFILE_AND_NAME, params);
 		if(configs!=null && configs.size()>0)
 			return configs.get(0);
 		else
@@ -66,15 +70,15 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	
 	
 	@Override
-	public Map<String,OpcoConfigs> getAllConfigs(OperatorCountry opco){
+	public Map<String,ProfileConfigs> getAllConfigs(SenderProfile profile){
 		
-		Map<String,OpcoConfigs> configs = new HashMap<String,OpcoConfigs>();
+		Map<String,ProfileConfigs> configs = new HashMap<String,ProfileConfigs>();
 		
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("opco", opco);
-		List<OpcoConfigs> configlist =  opcoconfigsDAO.findByNamedQuery(OpcoConfigs.NQ_FIND_BY_OPCO, params);
+		params.put("profile", profile);
+		List<ProfileConfigs> configlist =  profileconfigsDAO.findByNamedQuery(ProfileConfigs.NQ_FIND_BY_PROFILE, params);
 		if(configlist!=null && configlist.size()>0){
-			for(OpcoConfigs config :configlist)
+			for(ProfileConfigs config :configlist)
 				configs.put(config.getName(), config);
 			return configs;
 		}else{
@@ -84,15 +88,15 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	
 	
 	@Override
-	public Map<String,OpcoConfigs> getAllConfigs(Long opcoid){
+	public Map<String,ProfileConfigs> getAllConfigs(Long profileid){
 		
-		Map<String,OpcoConfigs> configs = new HashMap<String,OpcoConfigs>();
+		Map<String,ProfileConfigs> configs = new HashMap<String,ProfileConfigs>();
 		
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("opcoid", opcoid);
-		List<OpcoConfigs> configlist =  opcoconfigsDAO.findByNamedQuery(OpcoConfigs.NQ_FIND_BY_OPCOID, params);
+		params.put("profileid", profileid);
+		List<ProfileConfigs> configlist =  profileconfigsDAO.findByNamedQuery(ProfileConfigs.NQ_FIND_BY_PROFILEID, params);
 		if(configlist!=null && configlist.size()>0){
-			for(OpcoConfigs config :configlist)
+			for(ProfileConfigs config :configlist)
 				configs.put(config.getName(), config);
 			return configs;
 		}else{
@@ -101,39 +105,64 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	}
 
 	@Override
-	public Map<String, OpcoTemplates> getAllTemplates(OperatorCountry opco, TemplateType type) {
+	public Map<String, ProfileTemplate> getAllTemplates(SenderProfile profile, TemplateType type) {
 		
-		Map<String,OpcoTemplates> configs = new HashMap<String,OpcoTemplates>();
+		Map<String,ProfileTemplate> configs = new HashMap<String,ProfileTemplate>();
+		
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("profile", profile);
+		params.put("type", type);
+		List<ProfileTemplate> configlist =  profileTemlatesDAO.findByNamedQuery(ProfileTemplate.NQ_FIND_BY_PROFILE, params);
+		if(configlist!=null && configlist.size()>0){
+			for(ProfileTemplate config :configlist)
+				configs.put(config.getName(), config);
+			return configs;
+		}else{
+			return configs;
+		}
+	}
+
+	@Override
+	public Map<String, ProfileTemplate> getAllTemplates(Long profileid, TemplateType type) {
+
+		Map<String,ProfileTemplate> configs = new HashMap<String,ProfileTemplate>();
+		
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("profileid", profileid);
+		params.put("type", type);
+		List<ProfileTemplate> configlist =  profileTemlatesDAO.findByNamedQuery(ProfileTemplate.NQ_FIND_BY_PROFILEID, params);
+		if(configlist!=null && configlist.size()>0){
+			for(ProfileTemplate config :configlist)
+				configs.put(config.getName(), config);
+			return configs;
+		}else{
+			return configs;
+		}
+	}
+	
+	@Override
+	public List<OpcoSenderProfile> getOpcoSenderProfiles(OperatorCountry opco, Boolean active){
 		
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("opco", opco);
-		params.put("type", type);
-		List<OpcoTemplates> configlist =  opcoTemlatesDAO.findByNamedQuery(OpcoTemplates.NQ_FIND_BY_OPCO, params);
-		if(configlist!=null && configlist.size()>0){
-			for(OpcoTemplates config :configlist)
-				configs.put(config.getName(), config);
-			return configs;
-		}else{
-			return configs;
-		}
+		params.put("active", active);
+		return  opcoprofilesDAO.findByNamedQuery(OpcoSenderProfile.NQ_FIND_BY_OPCO, params);
+		
 	}
-
+	
+	
 	@Override
-	public Map<String, OpcoTemplates> getAllTemplates(Long opcoid, TemplateType type) {
-
-		Map<String,OpcoTemplates> configs = new HashMap<String,OpcoTemplates>();
+	public OpcoSenderProfile getActiveOpcoSenderProfile(OperatorCountry opco){
 		
 		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("opcoid", opcoid);
-		params.put("type", type);
-		List<OpcoTemplates> configlist =  opcoTemlatesDAO.findByNamedQuery(OpcoTemplates.NQ_FIND_BY_OPCOID, params);
-		if(configlist!=null && configlist.size()>0){
-			for(OpcoTemplates config :configlist)
-				configs.put(config.getName(), config);
-			return configs;
-		}else{
-			return configs;
-		}
+		params.put("opco", opco);
+		params.put("active", Boolean.TRUE);
+		List<OpcoSenderProfile> senderprofiles =  opcoprofilesDAO.findByNamedQuery(OpcoSenderProfile.NQ_FIND_BY_OPCO, params,0,1);
+		if(senderprofiles!=null && senderprofiles.size()>0)
+			return senderprofiles.get(0);
+		else
+			return null;
+		
 	}
 
 }

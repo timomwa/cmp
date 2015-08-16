@@ -3,7 +3,6 @@ package com.pixelandtag.cmp.entities.customer.configs;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,30 +21,28 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
-import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-
 
 @Entity
-@Table(name = "opco_configs")
+@Table(name = "profile_configs")
 @NamedQueries({
 	@NamedQuery(
-			name = OpcoConfigs.NQ_FIND_BY_OPCO_AND_NAME,
-			query = "select oc from OpcoConfigs oc where oc.name=:name AND oc.opco=:opco  order by oc.effectiveDate desc"
+			name = ProfileConfigs.NQ_FIND_BY_PROFILE_AND_NAME,
+			query = "select oc from ProfileConfigs oc where oc.name=:name AND oc.profile=:profile  order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = OpcoConfigs.NQ_FIND_BY_OPCOID_AND_NAME,
-			query = "select oc from OpcoConfigs oc where oc.name=:name AND oc.opco.id=:opcoid order by oc.effectiveDate desc"
+			name = ProfileConfigs.NQ_FIND_BY_PROFILEID_AND_NAME,
+			query = "select oc from ProfileConfigs oc where oc.name=:name AND oc.profile.id=:profileid order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = OpcoConfigs.NQ_FIND_BY_OPCO,
-			query = "select oc from OpcoConfigs oc where oc.opco=:opco order by oc.effectiveDate desc"
+			name = ProfileConfigs.NQ_FIND_BY_PROFILE,
+			query = "select oc from ProfileConfigs oc where oc.profile=:profile order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = OpcoConfigs.NQ_FIND_BY_OPCOID,
-			query = "select oc from OpcoConfigs oc where oc.opco.id=:opcoid order by oc.effectiveDate desc"
+			name = ProfileConfigs.NQ_FIND_BY_PROFILEID,
+			query = "select oc from ProfileConfigs oc where oc.profile.id=:profileid order by oc.effectiveDate desc"
 	)
 })
-public class OpcoConfigs implements Serializable{
+public class ProfileConfigs implements Serializable{
 
 	/**
 	 * 
@@ -53,33 +50,28 @@ public class OpcoConfigs implements Serializable{
 	private static final long serialVersionUID = -7403355329478440828L;
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCO_AND_NAME = "opcoconfigs.byopcoandname";
+	public static final String NQ_FIND_BY_PROFILE_AND_NAME = "profileconfigs.byprofileandname";
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCOID_AND_NAME = "opcoconfigs.byopcoidandname";
+	public static final String NQ_FIND_BY_PROFILEID_AND_NAME = "profileconfigs.byprofileidandname";
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCO = "opcoconfigs.byopco";
+	public static final String NQ_FIND_BY_PROFILE = "profileconfigs.byprofile";
 	
 	@Transient
-	public static final String NQ_FIND_BY_OPCOID = "opcoconfigs.byopcoid";
+	public static final String NQ_FIND_BY_PROFILEID = "profileconfigs.byprofileid";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@ManyToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
-	@JoinColumn(name = "opco_id_fk")
-	@Index(name="opcconfidx")
-	private OperatorCountry opco;
-	
 	@Column(name="name")
-	@Index(name="opcconfidx")
+	@Index(name="proflconfidx")
 	private String name;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "effectiveDate", nullable = false)
-	@Index(name="opcconfidx")
+	@Index(name="proflconfidx")
 	private Date effectiveDate;
 	
 	
@@ -88,6 +80,12 @@ public class OpcoConfigs implements Serializable{
 	
 	@Column(name="data_type")
 	private String data_type;
+	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "profile_id_fk")
+	@Index(name="proflconfidx")
+	private SenderProfile profile;
+	
 	
 	
 	@PrePersist
@@ -104,14 +102,6 @@ public class OpcoConfigs implements Serializable{
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public OperatorCountry getOpco() {
-		return opco;
-	}
-
-	public void setOpco(OperatorCountry opco) {
-		this.opco = opco;
 	}
 
 	public String getName() {
@@ -144,6 +134,14 @@ public class OpcoConfigs implements Serializable{
 
 	public void setEffectiveDate(Date effectiveDate) {
 		this.effectiveDate = effectiveDate;
+	}
+
+	public SenderProfile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(SenderProfile profile) {
+		this.profile = profile;
 	}
 	
 	
