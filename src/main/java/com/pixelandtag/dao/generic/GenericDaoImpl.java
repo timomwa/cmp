@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.ManagedBean;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
@@ -22,13 +24,16 @@ import com.pixelandtag.cmp.entities.User;
  * @param <ID>
  *            The primary key type
  */
+@ManagedBean
 public class GenericDaoImpl<T, ID extends Serializable> implements GenericDAO<T, ID> {
 
 	private final Class<T> persistentClass;
 	
 	private Logger log = Logger.getLogger(getClass());
 	
-	protected EntityManager em;
+	@PersistenceContext(unitName = "EjbComponentPU4")
+	private EntityManager em;
+	//protected EntityManager em;
 	
 	public void setEm(EntityManager em){
 		this.em = em;

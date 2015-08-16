@@ -15,37 +15,39 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 
-public class PlainHttpSender implements Sender {
+public class PlainHttpSender extends GenericSender {
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
 	@Inject
-	private Encryptor encryptor;
+	private Encryptor encryptor = new EncryptorImpl();
 	
 	@Inject
 	private static JsonUtilI jsonutil;
 	
 	private Map<String,OpcoConfigs> configuration;
 	private GenericHTTPClient httpclient;
-	private List<String> mandatoryparams = new ArrayList<String>();
 	
 	
-	public PlainHttpSender(Map<String,OpcoConfigs> configuration_) throws Exception{
-		setConfiguration(configuration_);
-		validateMandatory();
-		httpclient = new GenericHTTPClient(configuration_.get(HTTP_PROTOCOL).getValue());
+	
+	public PlainHttpSender(SenderConfiguration configs) throws Exception{
+		super(configs);
+		httpclient = new GenericHTTPClient(configs.getOpcoconfigs().get(HTTP_PROTOCOL).getValue());
 	}
-
-	private void validateMandatory() throws MessageSenderException{
+	
+	
+	@Override
+	public void validateMandatory() throws MessageSenderException{
+		List<String> mandatoryparams = new ArrayList<String>();
 		mandatoryparams.add(HTTP_PROTOCOL);
 		mandatoryparams.add(HTTP_BASE_URL);
-		mandatoryparams.add(HTTP_TRANSACTION_ID_PARAM_NAME);
 		mandatoryparams.add(HTTP_SHORTCODE_PARAM_NAME);
 		mandatoryparams.add(HTTP_MSISDN_PARAM_NAME);
 		mandatoryparams.add(HTTP_SMS_MSG_PARAM_NAME);
@@ -64,18 +66,17 @@ public class PlainHttpSender implements Sender {
 		SenderResp response = new SenderResp();
 		
 		GenericHTTPParam generic_http_parameters = new GenericHTTPParam();
-		generic_http_parameters.setUrl(this.configuration.get("url").getValue());
 		generic_http_parameters.setId(mtsms.getId());
 		
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), mtsms.getCMP_Txid().toString()));//"cptxid"
+		if(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), mtsms.getCMP_Txid().toString()));//"cptxid"
+		
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),mtsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),mtsms.getMsisdn()));//"msisdn"
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),mtsms.getSms()));//"sms"
-
 		
-		
-		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("true")){
+		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("yes")){
 			
 			Map<String,String> headerParams = new HashMap<String,String>();
 			
@@ -85,7 +86,7 @@ public class PlainHttpSender implements Sender {
 				throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD+"\" for this opco");
 			}
 			
-			if(headerhasunameandpwd.getValue().equalsIgnoreCase("true")){
+			if(headerhasunameandpwd.getValue().equalsIgnoreCase("yes")){
 				
 				OpcoConfigs headerauthusernameparam = this.configuration.get(HTTP_HEADER_AUTH_USERNAME_PARAM_NAME);
 				if(headerauthusernameparam==null || headerauthusernameparam.getValue()==null || headerauthusernameparam.getValue().isEmpty()){
@@ -103,7 +104,6 @@ public class PlainHttpSender implements Sender {
 				String username_param_name = headerauthusernameparam.getValue();
 				String password_param_name = headerauthpasswordparam.getValue();
 				String encryptionmethod = encryptionmode.getValue();
-				
 				String username = this.configuration.get(username_param_name).getValue();
 				String password = this.configuration.get(password_param_name).getValue();
 				
@@ -144,6 +144,8 @@ public class PlainHttpSender implements Sender {
 					
 				}
 				
+				logger.info("\n\n\n auth_header_value = "+auth_header_value);
+				
 				for(Map.Entry<String,OpcoConfigs> config : this.configuration.entrySet()){//Any other header param must start with the value HTTP_HEADER_PREFIX
 					
 					String key = config.getKey();
@@ -152,13 +154,16 @@ public class PlainHttpSender implements Sender {
 						headerParams.put(param_name, config.getValue().getValue());
 					}
 				}
-				OpcoConfigs httpheaderauthparam = this.configuration.get(HTTP_HEADER_AUTH_PARAM_NAME);
+				
+				OpcoConfigs httpheaderauthparam = this.configuration.get(HTTP_HEADERAUTH_PARAM_NAME);
 				if(httpheaderauthparam==null || httpheaderauthparam.getValue()==null || httpheaderauthparam.getValue().isEmpty()){
-					throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_PARAM_NAME+"\" for this opco");
+					throw new MessageSenderException("No configuration set for \""+HTTP_HEADERAUTH_PARAM_NAME+"\" for this opco");
 				}
-				headerParams.put(httpheaderauthparam.getValue(),auth_header_value.trim());
+				headerParams.put(httpheaderauthparam.getValue(), auth_header_value.trim());
 				
 			}
+			
+			generic_http_parameters.setHeaderParams(headerParams);
 			
 		}
 			
@@ -170,7 +175,17 @@ public class PlainHttpSender implements Sender {
 			if(httppayloadtemplate==null || httppayloadtemplate.getValue()==null || httppayloadtemplate.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_PAYLOAD_TEMPLATE+"\" for this opco");
 			}
-			String payload_template = httppayloadtemplate.getValue();
+			String http_payload_template_name = httppayloadtemplate.getValue();
+			
+			String payload_template = getTemplates().get(http_payload_template_name).getValue();
+			
+			if(payload_template==null || payload_template.isEmpty())
+				throw new MessageSenderException("Template with name \""
+						+http_payload_template_name+"\" for this opco ("+httppayloadtemplate.getOpco().toString()+") "
+						+ "hasn't been found. First check if the name is "
+						+ "correct in the opco_configs table and matches in the opco_templates table");
+			
+			
 			
 			for(Map.Entry<String,OpcoConfigs> config : this.configuration.entrySet()){//Any other header param
 				
@@ -181,8 +196,9 @@ public class PlainHttpSender implements Sender {
 				}
 			}
 			
-			for(NameValuePair valuep : qparams)
+			for(NameValuePair valuep : qparams){
 				payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", valuep.getValue());
+			}
 			
 			generic_http_parameters.setStringentity(payload_template);
 			
@@ -211,6 +227,7 @@ public class PlainHttpSender implements Sender {
 		
 		generic_http_parameters.setUrl(url);
 		
+		System.out.println("\nurl : "+url+"\n");
 		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
 		response.setRespcode(String.valueOf(resp.getResp_code()));
@@ -318,4 +335,7 @@ public class PlainHttpSender implements Sender {
 		System.out.println("ref = "+jsonutil.getValue("respobj.ref"));
 		jsonutil.reset();
 	}
+	
+	
+	
 }

@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoTemplates;
+import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
 public interface ConfigsEJBI {
 	
@@ -37,5 +39,19 @@ public interface ConfigsEJBI {
 	 * @return
 	 */
 	public Map<String,OpcoConfigs> getAllConfigs(Long opcoid);
+	
+	/**
+	 * 
+	 * @param opco
+	 * @return
+	 */
+	public Map<String,OpcoTemplates> getAllTemplates(OperatorCountry opco, TemplateType templateType);
+	
+	/**
+	 * 
+	 * @param opcoid
+	 * @return
+	 */
+	public Map<String,OpcoTemplates> getAllTemplates(Long opcoid, TemplateType templateType);
 
 }

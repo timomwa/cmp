@@ -12,10 +12,12 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.cmp.dao.opco.OpcoConfigsDAOI;
+import com.pixelandtag.cmp.dao.opco.OpcoTemplatesDAOI;
 import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoTemplates;
+import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.smssenders.SMSSenderFactory;
 import com.pixelandtag.smssenders.Sender;
@@ -31,14 +33,14 @@ public class SMSGatewayImpl implements SMSGatewayI {
 	
 	@Inject
 	private OperatorCountryDAOI opcoDAO;
-	
-	
+		
 	@EJB
 	private ConfigsEJBI configsEJB;
 	
 	@PostConstruct
 	public void init(){
-		opcoDAO.setEm(em);
+		//opcoDAO.setEm(em);
+		//opcotemplateDAO.setEm(em);
 	}
 	
 
@@ -61,19 +63,19 @@ public class SMSGatewayImpl implements SMSGatewayI {
 		if(opco==null)
 			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" was not found!");
 		
-		Map<String,OpcoConfigs> configurations = configsEJB.getAllConfigs(opco);
+		Map<String,OpcoConfigs> opcoconfigs = configsEJB.getAllConfigs(opco);
+		Map<String,OpcoTemplates> opcotemplates = configsEJB.getAllTemplates(opco,TemplateType.PAYLOAD);
 		
-		
-		OpcoConfigs config  = configurations.get("protocol");
-		
-		if(config==null)
-			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" has no protocol set. Please set this.");
+		SenderConfiguration senderconfigs = new SenderConfiguration();
+		senderconfigs.setOpcoconfigs(opcoconfigs);
+		senderconfigs.setOpcotemplates(opcotemplates);
 		
 		try {
-			Sender sender = SMSSenderFactory.getSenderInstance(configurations);
+			Sender sender = SMSSenderFactory.getSenderInstance(senderconfigs);
+			sender.sendSMS(mtsms);
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);
-			throw new SMSGatewayException("Problem occurred trying to instantiate sender!",exp);
+			throw new SMSGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());
 		}
 		// Determine the protocol (smpp, http rest SOAP/json)
 		

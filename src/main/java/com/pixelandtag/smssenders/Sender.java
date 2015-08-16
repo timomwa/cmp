@@ -15,14 +15,14 @@ public interface Sender{
 	
 	public final String HTTP_HAS_PAYLOAD = "http_haspayload";
 	
-	public final String HTTP_PAYLOAD_TEMPLATE = "http_payload_template";
+	public final String HTTP_PAYLOAD_TEMPLATE = "http_payload_template_name";
 	
 	
-	public final String HTTP_HEADER_AUTH_PARAM_NAME = "http_header_auth_param_name";
+	public final String HTTP_HEADERAUTH_PARAM_NAME = "http_headerauth_param_name";
 	public final String HTTP_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE = "http_header_auth_password_encryptionmode";
 	public final String HTTP_HEADER_AUTH_METHOD_PARAM_NAME = "http_header_auth_method_param_name";//e.g Basic
 	
-	public final String HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD = "http_header_auth_username_param_name";
+	public final String HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD = "http_header_auth_has_username_and_password";
 	public final String HTTP_HEADER_AUTH_USERNAME_PARAM_NAME = "http_header_auth_username_param_name";
 	public final String HTTP_HEADER_AUTH_PASSWORD_PARAM_NAME = "http_header_auth_password_param_name";
 	
@@ -41,5 +41,6 @@ public interface Sender{
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
 	
 	public SenderResp sendSMS(MTsms mtsms) throws MessageSenderException;
+	public void validateMandatory()  throws MessageSenderException;
 
 }

@@ -82,6 +82,13 @@ public class OperatorCountry implements Serializable  {
 	public void setCode(String code) {
 		this.code = code;
 	}
+
+
+	@Override
+	public String toString() {
+		return "OperatorCountry [id=" + id + ", operator=" + operator
+				+ ", country=" + country + ", code=" + code + "]";
+	}
 	
 
 }

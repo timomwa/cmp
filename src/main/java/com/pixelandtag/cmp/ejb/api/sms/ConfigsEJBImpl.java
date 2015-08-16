@@ -12,9 +12,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import com.pixelandtag.cmp.dao.opco.OpcoConfigsDAOI;
+import com.pixelandtag.cmp.dao.opco.OpcoTemplatesDAOI;
 import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoTemplates;
+import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
 @Stateless
 @Remote
@@ -29,10 +32,12 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	@Inject
 	private OperatorCountryDAOI opcoDAO;
 	
+	@Inject OpcoTemplatesDAOI opcoTemlatesDAO;
+	
 	@PostConstruct
 	public void init(){
-		opcoconfigsDAO.setEm(em);
-		opcoDAO.setEm(em);
+		//opcoconfigsDAO.setEm(em);
+		//opcoDAO.setEm(em);
 	}
 
 	@Override
@@ -88,6 +93,42 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 		List<OpcoConfigs> configlist =  opcoconfigsDAO.findByNamedQuery(OpcoConfigs.NQ_FIND_BY_OPCOID, params);
 		if(configlist!=null && configlist.size()>0){
 			for(OpcoConfigs config :configlist)
+				configs.put(config.getName(), config);
+			return configs;
+		}else{
+			return configs;
+		}
+	}
+
+	@Override
+	public Map<String, OpcoTemplates> getAllTemplates(OperatorCountry opco, TemplateType type) {
+		
+		Map<String,OpcoTemplates> configs = new HashMap<String,OpcoTemplates>();
+		
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("opco", opco);
+		params.put("type", type);
+		List<OpcoTemplates> configlist =  opcoTemlatesDAO.findByNamedQuery(OpcoTemplates.NQ_FIND_BY_OPCO, params);
+		if(configlist!=null && configlist.size()>0){
+			for(OpcoTemplates config :configlist)
+				configs.put(config.getName(), config);
+			return configs;
+		}else{
+			return configs;
+		}
+	}
+
+	@Override
+	public Map<String, OpcoTemplates> getAllTemplates(Long opcoid, TemplateType type) {
+
+		Map<String,OpcoTemplates> configs = new HashMap<String,OpcoTemplates>();
+		
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("opcoid", opcoid);
+		params.put("type", type);
+		List<OpcoTemplates> configlist =  opcoTemlatesDAO.findByNamedQuery(OpcoTemplates.NQ_FIND_BY_OPCOID, params);
+		if(configlist!=null && configlist.size()>0){
+			for(OpcoTemplates config :configlist)
 				configs.put(config.getName(), config);
 			return configs;
 		}else{
