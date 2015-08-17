@@ -53,7 +53,7 @@ public class TestEJB {
 			 
 			 
 			 MTsms mtsms = new MTsms();
-			 mtsms.setMsisdn("254770178979");
+			 mtsms.setMsisdn("254770178979");//0770178979
 			 mtsms.setSms("Test sms from new platform reloaded");
 			 mtsms.setShortcode("32329");
 			 mtsms.setNewCMP_Txid(String.valueOf(4654534354L));
@@ -72,7 +72,7 @@ public class TestEJB {
 			exp.printStackTrace();
 		}finally{
 		 try{
-			 context.close();
+			 //context.close();
 		 }catch(Exception exp){
 			 
 		 }

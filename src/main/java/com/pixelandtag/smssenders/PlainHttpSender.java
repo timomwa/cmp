@@ -104,8 +104,18 @@ public class PlainHttpSender extends GenericSender {
 				String username_param_name = headerauthusernameparam.getValue();
 				String password_param_name = headerauthpasswordparam.getValue();
 				String encryptionmethod = encryptionmode.getValue();
-				String username = this.configuration.get(username_param_name).getValue();
-				String password = this.configuration.get(password_param_name).getValue();
+				
+				ProfileConfigs usernamevalue = this.configuration.get(username_param_name);
+				if(usernamevalue==null)
+					throw new MessageSenderException("You''ve not set the value for\""+username_param_name+"\" as the username param");
+				
+				ProfileConfigs passwordvalue = this.configuration.get(password_param_name);
+				if(passwordvalue==null)
+					throw new MessageSenderException("You''ve not set value for \""+password_param_name+"\" as the password param");
+				
+				
+				String username = usernamevalue.getValue();
+				String password = passwordvalue.getValue();
 				
 				String digest = "";
 				try {
