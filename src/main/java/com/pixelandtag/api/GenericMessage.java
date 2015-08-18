@@ -36,7 +36,8 @@ public abstract class GenericMessage implements Serializable{
 	
 	private int serviceid;
 	private BigDecimal price;
-	private BigInteger CMP_Txid;
+	private String cmp_tx_id;
+	private String opco_tx_id;
 	private int priority = 1;
 	private int number_of_sms = 1;
 	private boolean split_msg;
@@ -49,7 +50,8 @@ public abstract class GenericMessage implements Serializable{
 	private EventType eventType;
 	private BillingStatus billingStatus;
 	private boolean charged;
-	private Long opcoprofile;
+	private Long opcoprofileid;
+	private String destSenderAddress;
 	
 	
 	public boolean isCharged() {
@@ -153,15 +155,25 @@ public abstract class GenericMessage implements Serializable{
 		this.priority = priority;
 	}
 
-	public void setCMP_Txid(BigInteger CMP_Txid_) {
-		this.CMP_Txid = CMP_Txid_;
+	public String getCmp_tx_id() {
+		return cmp_tx_id;
 	}
-	
-	public BigInteger getCMP_Txid() {
-		if(CMP_Txid==null)
-			CMP_Txid = BigInteger.valueOf(-1L);
-		return CMP_Txid;
+
+
+	public void setCmp_tx_id(String cmp_tx_id) {
+		this.cmp_tx_id = cmp_tx_id;
 	}
+
+
+	public String getOpco_tx_id() {
+		return opco_tx_id;
+	}
+
+
+	public void setOpco_tx_id(String opco_tx_id) {
+		this.opco_tx_id = opco_tx_id;
+	}
+
 
 	public Long getSubscription_id() {
 		return subscription_id;
@@ -183,12 +195,20 @@ public abstract class GenericMessage implements Serializable{
 		this.opcoid = opcoid;
 	}
 
+	
 
 	@Override
 	public String toString() {
-		return "GenericMessage [CMP_Txid=" + CMP_Txid + ", priority="
-				+ priority + ", number_of_sms=" + number_of_sms
-				+ ", split_msg=" + split_msg + "]";
+		return "GenericMessage [serviceid=" + serviceid + ", price=" + price
+				+ ", cmp_tx_id=" + cmp_tx_id + ", opco_tx_id=" + opco_tx_id
+				+ ", priority=" + priority + ", number_of_sms=" + number_of_sms
+				+ ", split_msg=" + split_msg + ", processor_id=" + processor_id
+				+ ", pricePointKeyword=" + pricePointKeyword
+				+ ", subscription_id=" + subscription_id + ", opcoid=" + opcoid
+				+ ", opcocode=" + opcocode + ", subscription=" + subscription
+				+ ", eventType=" + eventType + ", billingStatus="
+				+ billingStatus + ", charged=" + charged + ", opcoprofile="
+				+ opcoprofileid + "]";
 	}
 
 
@@ -202,13 +222,23 @@ public abstract class GenericMessage implements Serializable{
 	}
 
 
-	public Long getOpcoprofile() {
-		return opcoprofile;
+	public Long getOpcoprofileId() {
+		return opcoprofileid;
 	}
 
 
-	public void setOpcoprofile(Long opcoprofile) {
-		this.opcoprofile = opcoprofile;
+	public void setOpcoprofileId(Long opcoprofileid) {
+		this.opcoprofileid = opcoprofileid;
+	}
+
+
+	public String getDestSenderAddress() {
+		return destSenderAddress;
+	}
+
+
+	public void setDestSenderAddress(String destSenderAddress) {
+		this.destSenderAddress = destSenderAddress;
 	}
 	
 	

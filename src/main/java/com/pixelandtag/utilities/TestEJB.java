@@ -51,7 +51,7 @@ public class TestEJB {
 	
 			 subscriptionBean =  (SubscriptionBeanI) 
 			      		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
-			 
+			  
 			 smsgw = (SMSGatewayI) context.lookup("cmp/SMSGatewayImpl!com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI");
 			 
 			 

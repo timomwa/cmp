@@ -167,7 +167,10 @@ public class Consumer extends Thread {
 			
 			ticket_draw_msg = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_draw_msg;
 			
-			MechanicsS.insertIntoHttpToSend(dto.getMsisdn(), ticket_draw_msg, MechanicsS.generateNextTxId(), -1, 0d, UtilCelcom.getConfigValue("default_free_shortcode",  getConnection()), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  getConnection()), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword",  getConnection()), false,getConnection());
+			MechanicsS.insertIntoHttpToSend(dto.getMsisdn(), ticket_draw_msg, MechanicsS.generateNextTxId(), -1, 0d, 
+					UtilCelcom.getConfigValue("default_free_shortcode",  getConnection()), 
+					UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  getConnection()), 
+					UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword",  getConnection()), false,getConnection());
 			
 			
 			pstmt = getConnection().prepareStatement("INSERT INTO `voucher_system`.`voucher`(voucherNumber,msisdn,prize_id_fk,promotion_id_fk,winning,timeStamp_awarded) VALUES(?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);

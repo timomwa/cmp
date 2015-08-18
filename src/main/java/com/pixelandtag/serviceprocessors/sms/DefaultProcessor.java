@@ -198,7 +198,7 @@ public class DefaultProcessor extends GenericServiceProcessor {
 				if (!mo.getMt_Sent().isEmpty()) {
 	
 					mo.setMt_Sent(RM0+MALAY_INVALID_KEYWORD);
-					mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+					mo.setCmp_tx_id(generateNextTxId());
 					sendMT(mo);
 	
 				}
@@ -320,8 +320,8 @@ public class DefaultProcessor extends GenericServiceProcessor {
 									if(mms!=null){
 										
 										mms.setPaidFor(false);
-										mms.setLinked_id(""+mo.getCMP_Txid());
-										mms.setWait_for_txId(""+mo.getCMP_Txid());
+										mms.setLinked_id(mo.getCmp_tx_id());
+										mms.setWait_for_txId(mo.getCmp_tx_id());
 										
 										if(mm7API.queueMMSForSending(mms)){
 											logger.debug("queued mms to be sent : "+mms.toString());

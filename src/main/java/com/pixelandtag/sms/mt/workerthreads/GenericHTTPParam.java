@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.HttpMethod;
+
 import org.apache.http.NameValuePair;
 
 import com.pixelandtag.bulksms.BulkSMSQueue;
@@ -30,6 +32,7 @@ public class GenericHTTPParam implements Serializable{
 	private List<NameValuePair> httpParams;
 	private Map<String,String> headerParams;
 	private String stringentity;
+	private String httpmethod;
 	
 	public String getUrl() {
 		return url;
@@ -73,8 +76,11 @@ public class GenericHTTPParam implements Serializable{
 	public void setBulktext(BulkSMSQueue bulktext) {
 		this.bulktext = bulktext;
 	}
+	public String getHttpmethod() {
+		return httpmethod==null ? HttpMethod.POST : httpmethod;
+	}
+	public void setHttpmethod(String httpmethod) {
+		this.httpmethod = httpmethod;
+	}
 	
-	
-	
-
 }

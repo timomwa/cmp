@@ -331,7 +331,7 @@ public class MMSProducer extends Thread  {
 				
 				mtmms = new MMS();
 				mtmms.setId(rs.getString("id"));
-				mtmms.setCMP_Txid(BigInteger.valueOf(rs.getLong("id")));
+				mtmms.setCmp_tx_id(String.valueOf(rs.getLong("id")));
 				mtmms.setTransactionID(rs.getString("id"));
 				mtmms.setMsisdn(rs.getString("msisdn"));
 				mtmms.setSubject(rs.getString("subject"));

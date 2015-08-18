@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
@@ -25,7 +24,9 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -40,8 +41,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-
-import sun.font.CreatedFontTracker;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.entities.audittools.LatencyLog;
@@ -59,7 +58,6 @@ public class GenericHTTPClient implements Serializable{
 	private SSLContextBuilder builder = new SSLContextBuilder();
 	private String name;
 	private StopWatch watch;
-	//private String respose_msg = "";
 	private boolean run = true;
 	private static PoolingHttpClientConnectionManager cm;
 	private volatile boolean success = true;
@@ -148,33 +146,39 @@ public class GenericHTTPClient implements Serializable{
 	 * @param mt - com.pixelandtag.MTsms
 	 */
 	public GenericHttpResp call(GenericHTTPParam genericparams){
-		//this.respose_msg = "";
 		this.success = true;
 		GenericHttpRespBuilder respBuilder = GenericHttpRespBuilder.create();
 		setBusy(true);
-		HttpPost httppost = null;
+		HttpRequestBase httpmethod = null;
 		CloseableHttpResponse response = null;
 		try {
-			httppost = new HttpPost(genericparams.getUrl());
+			
+			httpmethod = HttpMethodFactory.getMethod(genericparams);
 			
 			Map<String,String> headerparams = genericparams.getHeaderParams();
 			
 			if(headerparams!=null && headerparams.size()>0)
 				for(String key : headerparams.keySet()){
-					httppost.setHeader(key, headerparams.get(key));
+					httpmethod.setHeader(key, headerparams.get(key));
 				}
 			
 			if(genericparams.getStringentity()==null || genericparams.getStringentity().isEmpty()){
 				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(genericparams.getHttpParams(), "UTF-8");
-				httppost.setEntity(entity);
-			}else{
+				HttpEntityEnclosingRequestBase method = (HttpEntityEnclosingRequestBase) httpmethod;
+				method.setEntity(entity);
+				watch.start();
+				response = httpclient.execute(method);
+				watch.stop();
+				httpmethod = (HttpRequestBase) method;
+			}else if(genericparams.getStringentity()!=null){
 				StringEntity se = new StringEntity(genericparams.getStringentity());
-				httppost.setEntity(se);
+				HttpEntityEnclosingRequestBase method = (HttpEntityEnclosingRequestBase) httpmethod;
+				method.setEntity(se);
+				watch.start();
+				response = httpclient.execute(method);
+				watch.stop();
+				httpmethod = (HttpRequestBase) method;
 			}
-			watch.start();
-			response = httpclient.execute(httppost);
-			watch.stop();
-			
 			
 			try{
 				String link = genericparams.getUrl();
@@ -225,15 +229,15 @@ public class GenericHTTPClient implements Serializable{
 			}
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e.getMessage(),e);
-			httppost.abort();
+			httpmethod.abort();
 			this.success = false;
 		} catch (ClientProtocolException e) {
 			logger.error(e.getMessage(),e);
-			httppost.abort();
+			httpmethod.abort();
 			this.success = false;
 		} catch (IOException e) {
 			logger.error(e.getMessage(),e);
-			httppost.abort();
+			httpmethod.abort();
 			this.success = false;
 		}finally{
 			setBusy(false);

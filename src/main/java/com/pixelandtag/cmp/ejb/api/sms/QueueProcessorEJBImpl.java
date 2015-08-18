@@ -55,8 +55,21 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	
 	@Override
 	public boolean deleteFromQueue(OutgoingSMS sms)  throws Exception{
+		sms = em.merge(sms);
 		smsoutDAO.delete(sms);
 		return true;
+	}
+	
+	@Override
+	public void updateQueueStatus(Long id, Boolean inqueue){
+		try{
+			Query qry = em.createNamedQuery(OutgoingSMS.NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID);
+			qry.setParameter("id", id);
+			qry.setParameter("in_outgoing_queue", inqueue);
+			qry.executeUpdate();
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
 	}
 	
 	
@@ -64,7 +77,7 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	public OutgoingSMS saveOrUpdate(OutgoingSMS queue) throws Exception{
 		return smsoutDAO.save(queue);
 	}
-	
+	 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<OutgoingSMS> getUnsent(Long size){

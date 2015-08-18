@@ -136,7 +136,7 @@ public class SubscriptionWorker extends Thread{
 					
 					MOSms mo = new MOSms();
 					
-					mo.setCMP_Txid(BigInteger.valueOf(cmpbean.generateNextTxId()));
+					mo.setCmp_tx_id(cmpbean.generateNextTxId());
 					mo.setMsisdn(sub.getMsisdn());
 					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
 					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
@@ -217,7 +217,7 @@ public class SubscriptionWorker extends Thread{
 			
 			try{
 				MOSms mo = new MOSms();
-				mo.setCMP_Txid(BigInteger.valueOf(-1L));
+				mo.setCmp_tx_id("-1");
 				dto.getProcessor().submit(mo);
 			}catch(Exception e){
 				log(e);

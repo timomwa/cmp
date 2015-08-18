@@ -52,7 +52,7 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	
 	
 	@Column(name = "cp_tx_id", unique=true)
-	private BigInteger cp_tx_id;
+	private String cp_tx_id;
 	
 	@Column(name = "operation")
 	private String operation;
@@ -150,12 +150,12 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	}
 
 
-	public BigInteger getCp_tx_id() {
+	public String getCp_tx_id() {
 		return cp_tx_id;
 	}
 
 
-	public void setCp_tx_id(BigInteger cp_tx_id) {
+	public void setCp_tx_id(String cp_tx_id) {
 		this.cp_tx_id = cp_tx_id;
 	}
 

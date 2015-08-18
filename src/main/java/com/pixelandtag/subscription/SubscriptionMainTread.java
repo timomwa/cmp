@@ -415,7 +415,7 @@ public class SubscriptionMainTread extends Thread{
 				
 				try{
 					MOSms mo = new MOSms();
-					mo.setCMP_Txid(BigInteger.valueOf(-1l)); 
+					mo.setCmp_tx_id("-1"); 
 					dto.getProcessor().submit(mo);
 				}catch(Exception e){
 					log(e);

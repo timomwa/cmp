@@ -9,5 +9,7 @@ public interface OpcoSenderProfileEJBI {
 	public List<OpcoSenderProfile> getAllActiveProfiles();
 
 	public OpcoSenderProfile getActiveProfileForOpco(String opcocode);
+	
+	public OpcoSenderProfile getActiveProfileForOpco(Long opcoid);
 
 }

@@ -32,7 +32,7 @@ import com.pixelandtag.web.beans.RequestObject;
 
 public interface CMPResourceBeanRemote extends BaseEntityI {
 	
-	public boolean updateMessageInQueue(BigInteger cp_tx_id, BillingStatus billstatus) throws Exception;
+	public boolean updateMessageInQueue(String cp_tx_id, BillingStatus billstatus) throws Exception;
 	
 	public <T> Collection<T> find(Class<T> entityClass,Map<String, Object> criteria, int start, int end)  throws Exception ;
 	
@@ -151,7 +151,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public SMSServiceDTO getSMSservice(String keyword) throws Exception;
 	
-	public boolean updateSMSStatLog(BigInteger transaction_id, ERROR errorcode) throws Exception;
+	public boolean updateSMSStatLog(String transaction_id, ERROR errorcode) throws Exception;
 
 	public List<SMSMenuLevels> listChildren(Long id)  throws Exception ;
 

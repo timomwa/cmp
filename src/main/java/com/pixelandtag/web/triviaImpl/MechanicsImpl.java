@@ -30,7 +30,7 @@ import com.pixelandtag.web.triviaI.MechanicsI;
  * @author Timothy Mwangi Gikonyo
  *
  */
-public class MechanicsImpl implements MechanicsI {
+public class MechanicsImpl implements MechanicsI { 
 	
 	public static final String INMOBIA = "IIIIIIIIIIIIIIIIIII";
 	private String type;
@@ -806,7 +806,7 @@ public class MechanicsImpl implements MechanicsI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.web.triviaI.MechanicsI#insertIntoVasSMPPToSend(java.lang.String, java.lang.String)
 	 */
-	public boolean insertIntoHTTPToSend(String msisdn, String message, BigInteger txId) {
+	public boolean insertIntoHTTPToSend(String msisdn, String message, String txId) {
 		
 		
 			/*if(mo.getMt_Sent().trim().startsWith(RM1)){
@@ -848,7 +848,7 @@ public class MechanicsImpl implements MechanicsI {
 				
 				//pstmt.setString(10, String.valueOf(mo.getCMP_Txid()));
 				pstmt.setInt(8, 1);
-				pstmt.setBigDecimal(9, new BigDecimal(txId));
+				pstmt.setString(9, txId);
 				
 				pstmt.executeUpdate();
 				

@@ -112,12 +112,10 @@ public class USSDReceiver extends HttpServlet {
 		String response =""; 
 		
 		try{
-			Long tx_id = cmpBean.generateNextTxId();
+			String tx_id = cmpBean.generateNextTxId();
 			final RequestObject ro = new RequestObject(req,tx_id,false);
 			
 			ro.setMediumType(MediumType.ussd);
-			
-			
 			
 			long messageID = -1;
 			

@@ -695,11 +695,12 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
 					chatMT.setMt_Sent(msg);
-					chatMT.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+					chatMT.setCmp_tx_id(generateNextTxId());
 					chatMT.setPriority(0);//highest priority possible
 					chatMT.setPrice(BigDecimal.ZERO);
 					chatMT.setCMP_AKeyword(mo.getCMP_AKeyword());
 					chatMT.setCMP_SKeyword(mo.getCMP_SKeyword());
+					chatMT.setOpcoid(destination_person.getPerson().getOpco().getId());
 					sendMT(chatMT);
 					String tailmsg = "";
 					if(!person.getLoggedin()){

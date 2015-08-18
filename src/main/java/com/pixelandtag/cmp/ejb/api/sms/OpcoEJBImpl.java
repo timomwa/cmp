@@ -28,5 +28,10 @@ public Logger logger = Logger.getLogger(getClass());
 	public OperatorCountry findOpcoByCode(String opcocode){
 		return opcoDAO.findbyOpcoCode(opcocode);
 	}
+	
+	@Override
+	public OperatorCountry findOpcoById(Long opcoid){
+		return opcoDAO.findById(opcoid);
+	}
 
 }

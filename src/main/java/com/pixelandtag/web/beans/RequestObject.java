@@ -34,7 +34,7 @@ public class RequestObject implements Serializable{
 	private String lac,code, location,cellid,telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
 	private int serviceid = -1;
 	private Long messageId;
-	private BigInteger transactionID = null;
+	private String transactionID = null;
 	private BigInteger sessionid = null;
 	private MediumType mediumType;
 	
@@ -183,7 +183,7 @@ public class RequestObject implements Serializable{
 		
 	}
 
-	public RequestObject(HttpServletRequest request, Long nextTransactionid, boolean replace_illegal_xters) throws Exception {
+	public RequestObject(HttpServletRequest request, String nextTransactionid, boolean replace_illegal_xters) throws Exception {
 		
 		String telcoid, msisdn, msg, keyword,testBalance,tripWire = null, litmus = null;
 		int price,serviceid=-1;
@@ -216,9 +216,9 @@ public class RequestObject implements Serializable{
 			tripWire = request.getParameter("tripWire").trim();
 		}
 		if (request.getParameter("tid") != null){
-			transactionID = new BigInteger("-1");
+			transactionID = "-1";
 			try{
-				transactionID  = BigInteger.valueOf(nextTransactionid);//Too big to handle in db for now.. request.getParameter("tid").trim());
+				transactionID  = nextTransactionid;//Too big to handle in db for now.. request.getParameter("tid").trim());
 			}catch(Exception exp){}
 		}
 		if (request.getParameter("sessionid") != null){
@@ -390,10 +390,10 @@ public class RequestObject implements Serializable{
 	public int getPrice() {
 		return price;
 	}
-	public BigInteger getTransactionID() {
+	public String getTransactionID() {
 		return transactionID;
 	}
-	public void setTransactionID(BigInteger transactionID) {
+	public void setTransactionID(String transactionID) {
 		this.transactionID = transactionID;
 	}
 	public BigInteger getSessionid() {

@@ -74,7 +74,6 @@ public class MMSenderProducer {
 		   source.addAttribute(envelope.createName("href"), "cid:" + attachment.getContentId());
 		   percent.addTextNode("20");
 		   
-		   
 		   message.writeTo(System.out);
 		   System.out.println();
 

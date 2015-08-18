@@ -106,7 +106,7 @@ public class HttpToSend implements Serializable{
 	private String sub_c_mobtel;
 	
 	@Index(name="CMP_TxID")
-	private BigInteger CMP_TxID;
+	private String CMP_TxID;
 
 	@Column(name="newCMP_Txid")
 	private String newCMP_Txid;
@@ -367,12 +367,12 @@ public class HttpToSend implements Serializable{
 	}
 
 
-	public BigInteger getCMP_TxID() {
+	public String getCMP_TxID() {
 		return CMP_TxID;
 	}
 
 
-	public void setCMP_TxID(BigInteger cMP_TxID) {
+	public void setCMP_TxID(String cMP_TxID) {
 		CMP_TxID = cMP_TxID;
 	}
 

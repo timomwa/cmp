@@ -20,7 +20,11 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.Settings;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.CacheResetCue;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -87,13 +91,16 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 
 	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword, price, subscription) " +
 						"VALUES(?,?,?,?,?,?,?)";
+	private int cacherefresh_frequency = 100;
 
 
 	protected String subscriptionText;
 	protected String unsubscriptionText;
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
-	private Map<Long, ServiceProcessorDTO> serviceProcessorCache = new HashMap<Long,ServiceProcessorDTO>();
+	//private Map<Long, ServiceProcessorDTO> serviceProcessorCache = new HashMap<Long,ServiceProcessorDTO>();
+	private Map<Long, MOProcessor> serviceProcessorCache = new HashMap<Long,MOProcessor>();
+	private Map<Long, OpcoSenderProfile> opcosenderProfileCache = new HashMap<Long,OpcoSenderProfile>();
 	
 	
 	public String getSubscriptionText() {
@@ -193,7 +200,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		try{
 			
-			billable = getEJB().find(Billable.class, "cp_tx_id",mo_.getCMP_Txid());
+			billable = getEJB().find(Billable.class, "cp_tx_id",mo_.getCmp_tx_id());
 			
 			
 		}catch(Exception e){
@@ -211,7 +218,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(mo_.getCMP_Txid());
+		billable.setCp_tx_id(mo_.getCmp_tx_id());
 		billable.setDiscount_applied("0");
 		billable.setEvent_type(mo_.getEventType());
 		billable.setIn_outgoing_queue(0l);
@@ -226,7 +233,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setRetry_count(0L);
 		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo_.getSMS_SourceAddr());		
-		billable.setTx_id(mo_.getCMP_Txid());
+		billable.setCp_tx_id(mo_.getCmp_tx_id());
 		billable.setEvent_type(mo_.getEventType()!=null ? mo_.getEventType() : EventType.SUBSCRIPTION_PURCHASE);
 		billable.setPricePointKeyword(mo_.getPricePointKeyword());
 		logger.debug(" before save "+billable.getId());
@@ -371,42 +378,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
 	protected void toStatsLog(MOSms mo, Connection conn) {
 		
-		
-		
 		try {
 			
 			getEJB().toStatsLog(mo,TO_STATS_LOG);	
-			/*pstmt = conn.prepareStatement(TO_STATS_LOG,Statement.RETURN_GENERATED_KEYS);
-			
-			pstmt.setInt(1, mo.getServiceid());
-			pstmt.setString(2, mo.getMsisdn());
-			pstmt.setLong(3, mo.getCMP_Txid());
-			pstmt.setString(4, mo.getCMP_AKeyword());
-			pstmt.setString(5, mo.getCMP_SKeyword());
-			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
-				pstmt.setDouble(6, 1d);
-			else
-				pstmt.setDouble(6, mo.getPrice().doubleValue());
-			
-			pstmt.setBoolean(7, mo.isSubscriptionPush());
-			pstmt.executeUpdate();*/
 			
 		} catch (Exception e) {
-			
 			log(e);
-		
 		}finally{
-			
-			try {
-				
-			//	if(pstmt!=null)
-				//	pstmt.close();
-				
-			} catch (Exception e) {
-				
-				log(e);
-				
-			}
 		}
 		
 	}
@@ -415,18 +393,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.error(e.getMessage(),e);
 	}
 
-	public long generateNextTxId(){
-		
-		/*String timestamp = String.valueOf(System.currentTimeMillis());
-		
-		return Settings.INMOBIA.substring(0, (19-timestamp.length())) + timestamp;//(String.valueOf(Long.MAX_VALUE).length()-timestamp.length())) + timestamp;
-*/		
+	public String generateNextTxId(){
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			logger.warn(e.getMessage());
 		}
-		return System.currentTimeMillis();
+		return String.valueOf(System.currentTimeMillis());
 	}
 	
 	
@@ -448,7 +421,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 					
 					acknowledge(mo.getId());
 					
-					if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
+					if(!(mo.getCmp_tx_id().isEmpty())){
 						
 						setBusy(true);//set to busy so that it's not picked from the pool.
 					
@@ -520,7 +493,6 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			
 			success = getEJB().acknowledge(message_log_id);
 			
-		
 		} catch (Exception e) {
 			
 			logger.error(e.getMessage(),e);
@@ -546,37 +518,36 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		BaseEntityI cmpBean = getEJB();
 		
-		
-		
 		try {
-			
 			
 			int max_retry = 5;
 			int count = 0;
 			
-			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
 			
-					boolean success = cmpBean.sendMT(mo,SEND_MT_1);
-					while(!success && count<=max_retry){
-						success  = cmpBean.sendMT(mo,SEND_MT_1);
-						count++;
-					}
+			//CacheResetCue cachequeue = cmpBean.find(CacheResetCue.class);
 			
-			}else{
-				
-					boolean success = cmpBean.sendMT(mo,SEND_MT_2);
-					while(!success && count<=max_retry){
-						success  = cmpBean.sendMT(mo,SEND_MT_1);
-						count++;
-					}
-				
-					
+			//TODO have a config to reset the caches when they change.
+			MOProcessor processor = serviceProcessorCache.get(mo.getProcessor_id());
+			if(processor==null){
+				processor = cmpBean.find(MOProcessor.class, mo.getProcessor_id());
+				serviceProcessorCache.put(mo.getProcessor_id(), processor);
 			}
 			
-		
-		} catch (SQLException e) {
+			OpcoSenderProfile opcoprofile = opcosenderProfileCache.get(mo.getOpcoid());
+			if(opcoprofile==null){
+				opcoprofile = cmpBean.getopcosenderProfileFromOpcoId(mo.getOpcoid());
+				opcosenderProfileCache.put(mo.getOpcoid(), opcoprofile);
+			}
 			
-			logger.error(e.getMessage(),e);
+			OutgoingSMS outgoing  = mo.converttoOutgoingSMS();
+			outgoing.setMoprocessor(processor);
+			outgoing.setOpcosenderprofile(opcoprofile);
+			
+			boolean success = cmpBean.saveOrUpdate(outgoing).getId().compareTo(0L)>0;
+			while(!success && count<=max_retry){
+				success = cmpBean.saveOrUpdate(outgoing).getId().compareTo(0L)>0;
+			}
+			
 			
 		}catch (Exception e) {
 			

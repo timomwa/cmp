@@ -40,14 +40,22 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 	}
 	
 	
+	@Override
 	public List<OpcoSenderProfile> getAllActiveProfiles(){
 		Map<String, Object> params = new HashMap<String,Object>();
 		params.put("active", Boolean.TRUE);
 		return opcosenderprofDAO.findByNamedQuery(OpcoSenderProfile.NQ_LIST_ACTIVE, params);
 	}
 	
+	@Override
 	public OpcoSenderProfile getActiveProfileForOpco(String opcocode){
 		OperatorCountry opco = opcoEJB.findOpcoByCode(opcocode);
+		return opcosenderprofDAO.findBy("opco", opco);
+	}
+	
+	@Override
+	public OpcoSenderProfile getActiveProfileForOpco(Long opcoid){
+		OperatorCountry opco = opcoEJB.findOpcoById(opcoid);
 		return opcosenderprofDAO.findBy("opco", opco);
 	}
 	

@@ -160,11 +160,11 @@ public class Billable implements Serializable {
 	
 	@Column(name = "cp_tx_id", unique=true)
 	@Index(name="cp_idtxid_idx")
-	private BigInteger cp_tx_id;
+	private String cp_tx_id;
 	
-	@Deprecated
-	@Column(name = "tx_id")
-	private BigInteger tx_id;
+	@Column(name = "opco_tx_id")
+	@Index(name="opcotxid_idx")
+	private String opco_tx_id;
 	
 	@Column(name = "processed")
 	@Index(name="processed_idx")
@@ -322,23 +322,15 @@ public class Billable implements Serializable {
 		this.discount_applied = discount_applied;
 	}
 
-	public BigInteger getCp_tx_id() {
+	public String getCp_tx_id() {
 		return cp_tx_id;
 	}
 
-	public void setCp_tx_id(BigInteger cp_tx_id) {
+	public void setCp_tx_id(String cp_tx_id) {
 		this.cp_tx_id = cp_tx_id;
 	}
 
-	@Deprecated
-	public BigInteger getTx_id() {
-		return tx_id;
-	}
-
-	@Deprecated
-	public void setTx_id(BigInteger tx_id) {
-		this.tx_id = tx_id;
-	}
+	
 
 	public Long isProcessed() {
 		return processed;
@@ -378,7 +370,7 @@ public class Billable implements Serializable {
 				.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()))
 				.replaceAll("\\{CP_ID\\}", getCp_id())
 				.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName())
-				.replaceAll("\\{TX_ID\\}", String.valueOf(getTx_id()))
+				.replaceAll("\\{TX_ID\\}",getOpco_tx_id())
 				.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()))
 				.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
 	}
@@ -389,7 +381,7 @@ public class Billable implements Serializable {
 				+ ", price=" + price + ", cp_id=" + cp_id + ", event_type="
 				+ event_type + ", service_id=" + service_id
 				+ ", discount_applied=" + discount_applied + ", cp_tx_id="
-				+ cp_tx_id + ", tx_id=" + tx_id + "]";
+				+ cp_tx_id + ", tx_id=" + opco_tx_id + "]";
 	}
 
 	public String getTransactionId() {
@@ -435,5 +427,15 @@ public class Billable implements Serializable {
 	public void setOpco(OperatorCountry opco) {
 		this.opco = opco;
 	}
+
+	public String getOpco_tx_id() {
+		return opco_tx_id;
+	}
+
+	public void setOpco_tx_id(String opco_tx_id) {
+		this.opco_tx_id = opco_tx_id;
+	}
+	
+	
 	
 }

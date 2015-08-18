@@ -1516,7 +1516,7 @@ public class UtilCelcom {
 			try {
 				pstmt = conn.prepareStatement("INSERT INTO `voucher_system`.`unprocessed_participant_batch`(`msisdn`,`cmp_txid_fk`) VALUES(?,?)", Statement.RETURN_GENERATED_KEYS);
 				pstmt.setString(1, mt.getMsisdn());
-				pstmt.setBigDecimal(2, new BigDecimal(mt.getCMP_Txid()));
+				pstmt.setString(2, mt.getCmp_tx_id());
 				pstmt.executeUpdate();
 				
 			} catch (Exception e) {

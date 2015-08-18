@@ -480,12 +480,11 @@ public class BulkSMSProducer extends Thread {
 			
 			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L);
 			
-			logger.info(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size());
+			logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size());
 			for(BulkSMSQueue bulktext : queue){
 				
 				try{
-				
-					 Long cpTxId = cmpbean.generateNextTxId();
+					 String cpTxId = cmpbean.generateNextTxId();
 					 bulktext.setCptxId(cpTxId.toString());
 					 bulktext.setRetrycount(bulktext.getRetrycount().intValue() + 1);
 					 bulktext.setStatus(MTStatus.IN_QUEUE);

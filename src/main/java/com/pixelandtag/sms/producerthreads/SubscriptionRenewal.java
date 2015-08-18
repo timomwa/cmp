@@ -462,7 +462,7 @@ public class SubscriptionRenewal extends  Thread {
 
 
 
-	public static Long generateNextId() {
+	public static String generateNextId() {
 		
 	try{
 			
@@ -475,7 +475,7 @@ public class SubscriptionRenewal extends  Thread {
 			if(renewables_ids.size()>0)
 			logger.info("SIZE OF QUEUE ? "+renewables_ids.size());
 			
-			 final Long serial = instance.cmpbean.generateNextTxId();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
+			 final String serial = instance.cmpbean.generateNextTxId();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
 			 
 			 try {
 				 

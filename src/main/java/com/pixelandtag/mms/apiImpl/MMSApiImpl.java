@@ -123,7 +123,7 @@ public class MMSApiImpl implements MM7Api {
 			if(rs.next()){
 				mms = new MMS();
 				mms.setId(rs.getString("id"));
-				mms.setCMP_Txid(new BigInteger(rs.getString("txID")));
+				mms.setCmp_tx_id(rs.getString("txID"));
 				mms.setMsisdn(rs.getString("msisdn"));
 				mms.setSubject(rs.getString("subject"));
 				mms.setMms_text(rs.getString("mms_text"));
@@ -541,7 +541,7 @@ public class MMSApiImpl implements MM7Api {
 			
 			}
 			
-			pstmt.setString(1, String.valueOf(report.getCMP_Txid()));
+			pstmt.setString(1, report.getCmp_tx_id());
 			
 			rs = pstmt.executeQuery();
 			
@@ -550,11 +550,11 @@ public class MMSApiImpl implements MM7Api {
 			if(rs.next()){
 				
 				recExists = true;
-				logger.debug("SMS FOUND: CMP_Txid = "+report.getCMP_Txid());
+				logger.debug("SMS FOUND: CMP_Txid = "+report.getCmp_tx_id());
 			
 			}else{
 				
-				logger.warn("SMS with CMP_Txid = "+report.getCMP_Txid()+ " NOT found!");
+				logger.warn("SMS with CMP_Txid = "+report.getCmp_tx_id()+ " NOT found!");
 				
 			}
 			
@@ -576,11 +576,11 @@ public class MMSApiImpl implements MM7Api {
 				
 				pstmt.setString(1, report.getStatusText()+"_"+report.getStatusCode());
 				
-				pstmt.setBigDecimal(2, new BigDecimal(report.getCMP_Txid()));
+				pstmt.setBigDecimal(2, new BigDecimal(report.getCmp_tx_id()));
 				
 				success = pstmt.executeUpdate()>0;
 				
-				logger.debug("MT (CMP_Txid = "+report.getCMP_Txid()+ ") " + (success ? "successfully acknowledged" : "acknowledging failed!"));
+				logger.debug("MT (CMP_Txid = "+report.getCmp_tx_id()+ ") " + (success ? "successfully acknowledged" : "acknowledging failed!"));
 				
 			}
 			
@@ -978,7 +978,7 @@ public class MMSApiImpl implements MM7Api {
 			}
 			
 			
-			pstmt.setString(1,String.valueOf(mms.getCMP_Txid()));
+			pstmt.setString(1,String.valueOf(mms.getCmp_tx_id()));
 			pstmt.setString(2,mms.getMsisdn());
 			pstmt.setString(3,mms.getSubject());
 			pstmt.setString(4,mms.getMms_text());

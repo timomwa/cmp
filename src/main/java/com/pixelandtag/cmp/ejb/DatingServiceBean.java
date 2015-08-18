@@ -138,10 +138,10 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				mo.setCMP_AKeyword(smsserv.getCmd());
 				mo.setCMP_SKeyword(smsserv.getCmd());
 				
-				if(ro.getTransactionID().compareTo(BigInteger.ONE)>0)
-					mo.setCMP_Txid(ro.getTransactionID());
+				if(!ro.getTransactionID().equals("1"))
+					mo.setCmp_tx_id(ro.getTransactionID());
 				else
-					mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+					mo.setCmp_tx_id(generateNextTxId());
 				
 				mo.setSplit_msg(false);
 				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
@@ -493,10 +493,12 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 							mo.setCMP_AKeyword(smsserv.getCmd());
 							mo.setCMP_SKeyword(smsserv.getCmd());
 							
-							if(req.getTransactionID().compareTo(BigInteger.ONE)>0)
-								mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+							
+							
+							if(!req.getTransactionID().equals("1"))
+								mo.setCmp_tx_id(generateNextTxId());
 							else
-								mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+								mo.setCmp_tx_id(generateNextTxId());
 							
 							mo.setSplit_msg(false);
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
@@ -967,7 +969,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			Query qry = em.createNativeQuery(presql);
 			qry.setParameter(1, mo.getServiceid());
 			qry.setParameter(2, mo.getMsisdn());
-			qry.setParameter(3, mo.getCMP_Txid());
+			qry.setParameter(3, mo.getCmp_tx_id());
 			qry.setParameter(4, mo.getCMP_AKeyword());
 			qry.setParameter(5, mo.getCMP_SKeyword());
 			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
@@ -1243,7 +1245,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		Billable billable =  new Billable();
 			
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(mo.getCMP_Txid());
+		billable.setCp_tx_id(mo.getCmp_tx_id());
 		billable.setDiscount_applied("0");
 		billable.setEvent_type(mo.getEventType());
 		billable.setIn_outgoing_queue(0l);
@@ -1261,7 +1263,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		else
 			billable.setService_id(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
 		billable.setShortcode(mo.getSMS_SourceAddr());		
-		billable.setTx_id(mo.getCMP_Txid());
+		billable.setCp_tx_id(mo.getCmp_tx_id());
 		billable.setEvent_type((mo.getEventType()!=null ? mo.getEventType() :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(mo.getPricePointKeyword());
 			

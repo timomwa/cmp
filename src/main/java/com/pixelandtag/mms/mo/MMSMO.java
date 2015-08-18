@@ -158,7 +158,7 @@ public class MMSMO extends HttpServlet {
 	      SOAPEnvelope env = soapPart.getEnvelope();
 	      SOAPHeader header = msg.getSOAPHeader();
 	      SOAPBody body = env.getBody();
-	      header.addTextNode(String.valueOf(report.getCMP_Txid()));
+	      header.addTextNode(report.getCmp_tx_id());
 	      SOAPElement elem = body.addChildElement( env.createName( "SubmitRsp", "mm7", "http://www.3gpp.org/ftp/Specs/archive/23_series/23.140/schema/REL-5-MM7-1-2" ) );//.addTextNode( "This is a response" );
 	      SOAPElement mm7Version = elem.addChildElement( env.createName( "MM7Version", "mm7", "http://www.3gpp.org/ftp/Specs/archive/23_series/23.140/schema/REL-5-MM7-1-2") );
 	      mm7Version.addTextNode(GenericMessage.MM7_VERSION);

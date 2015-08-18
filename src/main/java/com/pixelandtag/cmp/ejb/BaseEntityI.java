@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
@@ -42,12 +43,13 @@ public interface BaseEntityI {
 	public void updateMO(String msg, Long msgId) throws TransactionIDGenException;
 	public void mimicMO(String keyword, String msisdn);
 	public boolean sendMT(MOSms mo) throws Exception;
-	public long generateNextTxId();
+	public String generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
 	public void createSuccesBillRec(Billable billable);
 	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
 	public boolean sendMTSMPP(MTsms mt, Long sppid) throws Exception;
+	public OpcoSenderProfile getopcosenderProfileFromOpcoId(Long opcoid);
 	
 
 

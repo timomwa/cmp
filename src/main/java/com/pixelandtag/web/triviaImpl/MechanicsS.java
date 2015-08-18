@@ -112,7 +112,7 @@ public class MechanicsS{
 	}
 
 	
-	public static long generateNextTxId(){
+	public static String generateNextTxId(){
 		
 		
 		try {
@@ -130,7 +130,7 @@ public class MechanicsS{
 			*/
 			
 			
-			return System.currentTimeMillis();
+			return String.valueOf(System.currentTimeMillis());
 			
 		}finally{
 			semaphore.release();
@@ -181,7 +181,7 @@ public class MechanicsS{
 			
 			//pstmt.setString(10, String.valueOf(mo.getCMP_Txid()));
 			pstmt.setInt(8, 1);
-			pstmt.setLong(9, generateNextTxId());
+			pstmt.setString(9, generateNextTxId());
 			
 			pstmt.executeUpdate();
 			
@@ -790,9 +790,6 @@ public class MechanicsS{
 				pstmt = conn.prepareStatement("insert into `celcom`.`httptosend`" +
 				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,CMP_TxID,serviceid,price) " +
 				"VALUES(?,?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-				////cmp_a_keyword,cmp_s_keyword
-			
-			
 			
 			pstmt.setString(1, message);
 			pstmt.setString(2, msisdn);
@@ -848,7 +845,7 @@ public class MechanicsS{
 	 * @param tx_id
 	 * @return
 	 */
-	public static MTsms getMTsmsFromMessageLog(BigInteger tx_id, Connection conn){
+	public static MTsms getMTsmsFromMessageLog(String tx_id, Connection conn){
 		
 		MTsms mtsms = null;
 		PreparedStatement pstmt = null;
@@ -864,7 +861,7 @@ public class MechanicsS{
 			if(rs.next()){
 				mtsms = new MTsms();
 				mtsms.setId(rs.getInt("id"));
-				mtsms.setCMP_Txid(new BigInteger(rs.getString("CMP_Txid")));
+				mtsms.setCmp_tx_id(rs.getString("CMP_Txid"));
 				//mtsms.setSms(rs.getString("MO_Received"));
 				mtsms.setShortcode(rs.getString("SMS_SourceAddr"));
 				mtsms.setSUB_R_Mobtel(rs.getString("SUB_Mobtel"));
@@ -907,10 +904,9 @@ public class MechanicsS{
 	 * @param conn
 	 * @return true if tx successful, false if not.
 	 */
-	public static boolean insertIntoHttpToSend(String msisdn, String message,long txid, int serviceid, double price, String shortcode,
+	public static boolean insertIntoHttpToSend(String msisdn, String message,String txid, int serviceid, double price, String shortcode,
 			String CMP_Keyword, String CMP_SKeyword, Connection conn) {
 		
-
 		PreparedStatement pstmt = null;
 	
 		boolean success = false;
@@ -944,7 +940,7 @@ public class MechanicsS{
 			pstmt.setInt(7, 1);
 			
 			pstmt.setInt(8, 1);
-			pstmt.setLong(9, txid);
+			pstmt.setString(9, txid);
 			pstmt.setInt(10, serviceid);
 			pstmt.setDouble(11, price);
 			
@@ -982,7 +978,7 @@ public class MechanicsS{
 	
 	
 	
-	public static boolean insertIntoHttpToSend(String msisdn, String message,long txid, int serviceid, double price, String shortcode,
+	public static boolean insertIntoHttpToSend(String msisdn, String message,String txid, int serviceid, double price, String shortcode,
 			String CMP_Keyword, String CMP_SKeyword, Boolean split,Connection conn) {
 		
 
@@ -1019,7 +1015,7 @@ public class MechanicsS{
 			pstmt.setInt(7, 1);
 			
 			pstmt.setBoolean(8, split);
-			pstmt.setLong(9, txid);
+			pstmt.setString(9, txid);
 			pstmt.setInt(10, serviceid);
 			pstmt.setDouble(11, price);
 			
@@ -1065,7 +1061,7 @@ public class MechanicsS{
 	 * @param conn
 	 * @return
 	 */
-	public static boolean insertIntoHttpToSend(String msisdn, String message,long newCMPTxid, int serviceid, double price, String cmpTxid, Connection conn) {
+	public static boolean insertIntoHttpToSend(String msisdn, String message,String newCMPTxid, int serviceid, double price, String cmpTxid, Connection conn) {
 		
 
 		PreparedStatement pstmt = null;
@@ -1103,7 +1099,7 @@ public class MechanicsS{
 			pstmt.setString(9, cmpTxid);
 			pstmt.setInt(10, serviceid);
 			pstmt.setDouble(11, price);
-			pstmt.setLong(12, newCMPTxid);//for CMP_Txid
+			pstmt.setString(12, newCMPTxid);//for CMP_Txid
 			
 			
 			pstmt.executeUpdate();
@@ -4023,7 +4019,7 @@ public class MechanicsS{
 			
 			pstmt.setInt(1, mo.getServiceid());
 			pstmt.setString(2, mo.getMsisdn());
-			pstmt.setBigDecimal(3, new BigDecimal(mo.getCMP_Txid()));
+			pstmt.setString(3, mo.getCmp_tx_id());
 			pstmt.setString(4, mo.getCMP_AKeyword());
 			pstmt.setString(5, mo.getCMP_SKeyword());
 			pstmt.setDouble(6, mo.getPrice().doubleValue());
@@ -4102,7 +4098,7 @@ public class MechanicsS{
 	 * @param setRetryLater
 	 * @param isReTry
 	 */
-	public static void toggleRetry(BigInteger cmp_Txid, boolean reTry, Connection conn) {
+	public static void toggleRetry(String cmp_Txid, boolean reTry, Connection conn) {
 		
 		
 		
@@ -4112,7 +4108,7 @@ public class MechanicsS{
 		
 			pstmt = conn.prepareStatement("UPDATE `celcom`.`messagelog` SET re_try="+(reTry ? "1" : "0") +" WHERE CMP_Txid  = ?");
 		
-			pstmt.setBigDecimal(1, new BigDecimal(cmp_Txid));
+			pstmt.setString(1, cmp_Txid);
 			
 			int rec = pstmt.executeUpdate();
 			

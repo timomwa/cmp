@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -16,6 +17,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 
 /**
@@ -27,20 +29,41 @@ import com.pixelandtag.sms.producerthreads.MTProducer;
  */
 public class OutgoingQueueRouter extends Thread {
 
-	private int workers = 10;
 	private boolean run = true;
 	private Logger logger = Logger.getLogger(getClass());
 	private volatile static Queue<OutgoingSMS> outqueue = null;
-	private int queuefetchsize = 1000;//TODO externalize
 	private int maxsizeofqueue = 100000;//TODO externalize
 	private  Context context = null;
-	private QueueProcessorEJBI queueprocEJB;
+	private static QueueProcessorEJBI queueprocEJB;
 	private OpcoSenderProfileEJBI opcosenderprofEJB;
 	private static List<SenderThreadWorker> senderworkers = new ArrayList<SenderThreadWorker>();
+	private static Semaphore queueSemaphore;
+	static{
+		queueSemaphore = new Semaphore(1, true);
+	}
+	
+	public static OutgoingSMS poll() throws InterruptedException{
+		
+		try{
+			
+			queueSemaphore.acquire();
+			 
+			final OutgoingSMS myMt = outqueue.poll();
+				 
+			if(myMt!=null && myMt.getId()>-1)
+				queueprocEJB.updateQueueStatus(myMt.getId(), Boolean.TRUE);
+			
+			return myMt;
+		
+		}finally{
+			queueSemaphore.release(); 
+		}
+	}
 	
 	public OutgoingQueueRouter() throws Exception{
 		initialize();
 	}
+	
 	
 	private void initialize() throws Exception {
 		outqueue = new ConcurrentLinkedQueue<OutgoingSMS>();
@@ -89,6 +112,7 @@ public class OutgoingQueueRouter extends Thread {
        		context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
 		 opcosenderprofEJB = (OpcoSenderProfileEJBI) 
     		context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
+		 	
 		 logger.info(getClass().getSimpleName()+": Successfully initialized EJB QueueProcessorEJBImpl !!");
  	}
 
@@ -101,7 +125,7 @@ public class OutgoingQueueRouter extends Thread {
 				
 				logger.info("NEW_MT_QUEUE : "+outqueue.size());
 				
-				if(outqueue.size()<queuefetchsize){
+				if(outqueue.size()<1){
 					populateQueue();
 				}
 				

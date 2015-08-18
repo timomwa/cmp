@@ -10,9 +10,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.pixelandtag.entities.URLParams;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.sms.producerthreads.BulkSMSProducer;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class SenderPlatform {
 

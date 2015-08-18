@@ -89,7 +89,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			param.setUrl(serviceprocessor.getForwarding_url());
 			param.setId(mo.getId());
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-			qparams.add(new BasicNameValuePair("cptxid", mo.getCMP_Txid().toString()));
+			qparams.add(new BasicNameValuePair("cptxid", mo.getCmp_tx_id()));
 			qparams.add(new BasicNameValuePair("sourceaddress",mo.getSMS_SourceAddr()));	
 			qparams.add(new BasicNameValuePair("msisdn",mo.getMsisdn()));
 			

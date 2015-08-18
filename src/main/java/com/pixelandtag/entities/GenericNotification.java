@@ -11,7 +11,7 @@ public abstract class GenericNotification extends GenericMessage {
 	
 	
 	public GenericNotification(HttpServletRequest request){
-		setCMP_Txid(new BigInteger(request.getParameter("CMP_Txid")));
+		setCmp_tx_id(request.getParameter("CMP_Txid"));
 		setErrorCode(ERROR.get(request.getParameter("ERRORCODE")));
 	}
 	
@@ -32,7 +32,7 @@ public abstract class GenericNotification extends GenericMessage {
 	@Override
 	public String toString() {
 		return "Notification [ERRORCODE=" + errorCode.toString() + ", cMP_Txid="
-				+ super.getCMP_Txid() + "]";
+				+ super.getCmp_tx_id() + "]";
 	}
 	
 	

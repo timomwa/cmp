@@ -31,12 +31,12 @@ public abstract class GenericMO extends GenericMessage {
 	public GenericMO(){
 	}
 	
-	public GenericMO(HttpServletRequest request, Long nextTxnId) throws TransactionIDGenException{
+	public GenericMO(HttpServletRequest request, String nextTxnId) throws TransactionIDGenException{
 		
 		//setCMP_Txid(request.getParameter("tid"));
 		if(request.getParameter("tid")!=null && !request.getParameter("tid").isEmpty()){
 			try{
-				setCMP_Txid(BigInteger.valueOf(nextTxnId));//Too big to handle in db for now..new BigInteger(request.getParameter("tid")));
+				setCmp_tx_id(nextTxnId);
 			}catch(Exception exp){
 				exp.printStackTrace();
 				throw new TransactionIDGenException("The tid (transaction id) passed to us from the operator isn't an integer! "+exp.getMessage());

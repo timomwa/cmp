@@ -46,6 +46,10 @@ import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC,
 			query = "select que from OutgoingSMS que where que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc"
+	),
+	@NamedQuery(
+			name = OutgoingSMS.NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID,
+			query = "update OutgoingSMS set  in_outgoing_queue=:in_outgoing_queue where id=:id"
 	)
 })
 public class OutgoingSMS implements Serializable {
@@ -57,6 +61,9 @@ public class OutgoingSMS implements Serializable {
 	
 	@Transient
 	public static final String NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC = "smsqueue.listunsent";
+
+	@Transient
+	public static final String NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID = "smsqueue.updatequeuestatusbyid";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -132,11 +139,11 @@ public class OutgoingSMS implements Serializable {
 		if(sent==null)
 			sent = Boolean.FALSE;
 		if(priority==null)
-			priority = 0;
+			priority = 3;
 		if(re_tries==null)
 			re_tries = 0L;
 		if(ttl==null)
-			ttl = 0L;
+			ttl = 1L;
 		if(timestamp==null)
 			timestamp = new Date();
 		if(charged==null)

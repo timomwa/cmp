@@ -38,13 +38,13 @@ public class MM7DeliveryReport extends GenericMessage implements Serializable {
 			SOAPFault fault = body.getFault();
 			Detail fd = fault.getDetail();
 			
-			System.out.println("fault.getTextContent(): "+fault.getTextContent());
+			//System.out.println("fault.getTextContent(): "+fault.getTextContent());
 			System.out.println(fd.getNodeName() + " : " + fd.getNodeValue());
 			
 		}else{
 			
 			String transactionID = header.getTextContent();
-			this.setCMP_Txid(new BigInteger(header.getTextContent()));
+			this.setCmp_tx_id(header.getTextContent());
 			//System.out.println("header.getTextContent(): "+header.getTextContent());
 			
 			

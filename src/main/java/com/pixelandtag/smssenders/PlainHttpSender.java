@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.ws.rs.HttpMethod;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -66,6 +67,9 @@ public class PlainHttpSender extends GenericSender {
 		
 		SenderResp response = new SenderResp();
 		
+		String auth_header_value = "";
+		String payload_template = "";
+		
 		GenericHTTPParam generic_http_parameters = new GenericHTTPParam();
 		generic_http_parameters.setId(outgoingsms.getId());
 		
@@ -86,6 +90,8 @@ public class PlainHttpSender extends GenericSender {
 			if(headerhasunameandpwd==null || headerhasunameandpwd.getValue()==null || headerhasunameandpwd.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD+"\" for this opco");
 			}
+			
+			
 			
 			if(headerhasunameandpwd.getValue().equalsIgnoreCase("yes")){
 				
@@ -132,7 +138,7 @@ public class PlainHttpSender extends GenericSender {
 				}
 				String authmethod = authmethodparamname.getValue();//e.g Basic
 				
-				String auth_header_value = "";
+				
 				
 				if(this.configuration.get(HTTP_HEADER_AUTH_HAS_MULTIPLE_KV_PAIRS).getValue().equalsIgnoreCase("yes")){
 					
@@ -154,8 +160,6 @@ public class PlainHttpSender extends GenericSender {
 					auth_header_value =  authmethod+" "+digest;
 					
 				}
-				
-				logger.info("\n\n\n auth_header_value = "+auth_header_value);
 				
 				for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){//Any other header param must start with the value HTTP_HEADER_PREFIX
 					
@@ -188,7 +192,7 @@ public class PlainHttpSender extends GenericSender {
 			}
 			String http_payload_template_name = httppayloadtemplate.getValue();
 			
-			String payload_template = getTemplates().get(http_payload_template_name).getValue();
+			payload_template = getTemplates().get(http_payload_template_name).getValue();
 			
 			if(payload_template==null || payload_template.isEmpty())
 				throw new MessageSenderException("Template with name \""
@@ -212,8 +216,6 @@ public class PlainHttpSender extends GenericSender {
 			}
 			
 			generic_http_parameters.setStringentity(payload_template);
-			
-			logger.info("\n>>>payload>>> : "+payload_template+"\n");
 			
 		}else{
 			
@@ -240,11 +242,27 @@ public class PlainHttpSender extends GenericSender {
 		
 		generic_http_parameters.setUrl(url);
 		
+		ProfileConfigs httpmethod = this.configuration.get(HTTP_REQUEST_METHOD);
 		
-		logger.info("\n>>>url>>> : "+url+"\n");
+		if(httpmethod!=null)
+			generic_http_parameters.setHttpmethod(HttpMethod.POST);
+		else
+			logger.warn("No configuration for \""+HTTP_REQUEST_METHOD
+					+"\" has been provided, so we will use "
+					+ "HTTP POST as default. If you wish to override this, "
+					+ "provide this config in db");
+		
 		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
+		
+		logger.info("\n\n\t\t>>>url>>> : "+url
+				+"\n\t\tauth_header_value = "+auth_header_value+
+				"\n\t\t>>>payload>>> : "+payload_template+
+				"\n\t\t>>>response>>> : "+resp.getBody()+"\n\n");
+		
 		response.setRespcode(String.valueOf(resp.getResp_code()));
+		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success
+			response.setSuccess(Boolean.TRUE);
 		
 		
 		

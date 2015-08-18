@@ -185,7 +185,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		
 		if(httpTosend.getCMP_TxID()!=null){// && !rs.getString("CMP_TxID").equalsIgnoreCase("NULL") )
-			mtsms.setCMP_Txid(httpTosend.getCMP_TxID());
+			mtsms.setCmp_tx_id(httpTosend.getCMP_TxID()); 
 			logger.debug(">>>>>>>>>>>>>>>>>>>>>>: CMP_Txid "+httpTosend.getCMP_TxID());
 		}
 		
@@ -1146,10 +1146,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			Query qry = em.createNativeQuery(sql);
 			
 			String txid = mt.getIdStr();
-			if(mt.getCMP_Txid().compareTo(BigInteger.ZERO)>0){
+			if(!mt.getCmp_tx_id().isEmpty()){
 				
-				if(!(mt.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
-					txid = String.valueOf(mt.getCMP_Txid());
+				if(!(mt.getCmp_tx_id().equalsIgnoreCase("-1"))){
+					txid = String.valueOf(mt.getCmp_tx_id());
 					qry.setParameter(1, txid);//Since we're starting the transaction, what is in the httptosend as id now becomes the value of CMP_Txid.
 				}else{
 					txid = mt.getIdStr();
@@ -1820,7 +1820,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateMessageInQueue(BigInteger cp_tx_id, BillingStatus billstatus) throws Exception{
+	public boolean updateMessageInQueue(String cp_tx_id, BillingStatus billstatus) throws Exception{
 		boolean success = false;
 		try{
 			 utx.begin();
@@ -1864,8 +1864,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(6, mo.getCMP_SKeyword());
 			qry.setParameter(7, mo.getPriority());
 			
-			if(!(mo.getCMP_Txid().compareTo(BigInteger.valueOf(-1))==0)){
-				qry.setParameter(8, String.valueOf(mo.getCMP_Txid()));
+			if(!(mo.getCmp_tx_id().equalsIgnoreCase("-1"))){
+				qry.setParameter(8, String.valueOf(mo.getCmp_tx_id()));
 			}
 			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
 			qry.setParameter(10, mo.getServiceid());
@@ -1932,7 +1932,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			Query qry = em.createNativeQuery(presql);
 			qry.setParameter(1, mo.getServiceid());
 			qry.setParameter(2, mo.getMsisdn());
-			qry.setParameter(3, mo.getCMP_Txid());
+			qry.setParameter(3, mo.getCmp_tx_id());
 			qry.setParameter(4, mo.getCMP_AKeyword());
 			qry.setParameter(5, mo.getCMP_SKeyword());
 			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
@@ -2439,7 +2439,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setCMP_AKeyword(smsserv.getCmd());
 									mosm_.setCMP_SKeyword(smsserv.getCmd());
 									mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-									mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+									mosm_.setCmp_tx_id(generateNextTxId());
 									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
@@ -2596,7 +2596,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									mosm_.setCMP_AKeyword(smsserv.getCmd());
 									mosm_.setCMP_SKeyword(smsserv.getCmd());
 									mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-									mosm_.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+									mosm_.setCmp_tx_id(generateNextTxId());
 									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
 									mosm_.setServiceid(smsserv.getId().intValue());
 									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
@@ -3083,14 +3083,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@SuppressWarnings("unchecked")
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean updateSMSStatLog(BigInteger transaction_id, ERROR errorcode) throws Exception {
+	public boolean updateSMSStatLog(String transaction_id, ERROR errorcode) throws Exception {
 		
 		boolean success = false;
 		
 		
 		try {
-			
-			long cmpTxid = transaction_id.longValue();
 			
 			String sql;
 			
@@ -3102,12 +3100,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				sql = "SELECT price,CMP_SKeyword FROM `"+CelcomImpl.database+"`.`SMSStatLog` WHERE transactionID = ?";
 			  
 				Query qry2 = em.createNativeQuery(sql);
-				qry2.setParameter(1, cmpTxid);
+				qry2.setParameter(1, transaction_id);
 				
 				rs2 = qry2.getResultList();
 			
 			}catch(javax.persistence.NoResultException ex){
-				logger.warn(ex.getMessage() + " COULD NOT FIND SMSStatLog record with transactionID = "+cmpTxid+")");
+				logger.warn(ex.getMessage() + " COULD NOT FIND SMSStatLog record with transactionID = "+transaction_id+")");
 				
 			}
 			
@@ -3118,11 +3116,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					wasInLog  = true;
 				}
 				
-				logger.debug("Statlog rec found transactionID = "+cmpTxid);
+				logger.debug("Statlog rec found transactionID = "+transaction_id);
 			
 			}else{
 				
-				logger.warn("Statlog rec with transactionID = "+cmpTxid+ " NOT found! Try search celcom.messagelog");
+				logger.warn("Statlog rec with transactionID = "+transaction_id+ " NOT found! Try search celcom.messagelog");
 				
 				
 				try {
@@ -3136,8 +3134,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							+ "from `"+CelcomImpl.database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)";
 					Query qry3 = em.createNativeQuery(sql);
 					
-					qry3.setParameter(1, cmpTxid);
-					qry3.setParameter(2, cmpTxid);
+					qry3.setParameter(1, transaction_id);
+					qry3.setParameter(2, transaction_id);
 					
 					List<Object[]> rezults = qry3.getResultList();
 					
@@ -3161,7 +3159,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						qry4.setParameter(1, serviceid);
 						qry4.setParameter(2, msisdn);
-						qry4.setParameter(3, cmpTxid);
+						qry4.setParameter(3, transaction_id);
 						qry4.setParameter(4, CMP_Keyword);
 						qry4.setParameter(5, CMP_SKeyword);
 						qry4.setParameter(6, priceTbc);
@@ -3170,7 +3168,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						success = qry4.executeUpdate()>0;
 						
-						logger.debug("______CMP_SKeyword="+CMP_SKeyword+"________cmpTxid = "+cmpTxid+"________priceTbc = "+priceTbc+"_________________did not find in smsStatLog but no problem, we found in messagelog__________________________________________SUCCESSFULLY_INSERTED_INTO_SMSStatLog___________________________________________________________________________________");
+						logger.debug("______CMP_SKeyword="+CMP_SKeyword+"________cmpTxid = "+transaction_id+"________priceTbc = "+priceTbc+"_________________did not find in smsStatLog but no problem, we found in messagelog__________________________________________SUCCESSFULLY_INSERTED_INTO_SMSStatLog___________________________________________________________________________________");
 						
 						utx.commit();
 					
@@ -3211,11 +3209,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				qry5.setParameter(1, errorcode.toString());
 				qry5.setParameter(2, (((priceTbc>0.0) && errorcode.equals(ERROR.Success)) ? 1: 0 )   );
 				qry5.setParameter(3, billStatus.toString() );
-				qry5.setParameter(4, cmpTxid);
+				qry5.setParameter(4, transaction_id);
 				//ERROR.PSAInsufficientBalance
 				success = qry5.executeUpdate()>0;
 				
-				logger.debug("MT (transactionID = "+cmpTxid+ ") " + (success ? "successfully logged into SMSStatLog" : "failed to log into SMSStatLog"));
+				logger.debug("MT (transactionID = "+transaction_id+ ") " + (success ? "successfully logged into SMSStatLog" : "failed to log into SMSStatLog"));
 				utx.commit();
 			}
 			
@@ -3303,7 +3301,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				mo = new MOSms();
-				mo.setCMP_Txid(BigInteger.valueOf(generateNextTxId()));
+				mo.setCmp_tx_id(generateNextTxId());
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());
 				mo.setCMP_SKeyword(sm.getCmp_skeyword());

@@ -12,5 +12,6 @@ public interface QueueProcessorEJBI  {
 	public OutgoingSMS saveOrUpdate(OutgoingSMS queue) throws Exception;
 	public boolean deleteFromQueue(OutgoingSMS sms)  throws Exception;
 	public boolean updateMessageLog(String cmp_tx_id, MTStatus status)  throws Exception;
+	public void updateQueueStatus(Long id, Boolean inqueue);
 
 }

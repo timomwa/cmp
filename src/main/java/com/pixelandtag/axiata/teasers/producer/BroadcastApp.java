@@ -464,7 +464,7 @@ public class BroadcastApp {
 		
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
-			mo.setCMP_Txid(BigInteger.valueOf(MechanicsS.generateNextTxId()));
+			mo.setCmp_tx_id(MechanicsS.generateNextTxId()); 
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0100");
 			mo.setPrice(BigDecimal.valueOf(1.0d));
@@ -493,7 +493,7 @@ public class BroadcastApp {
 		
 		
 		
-		logger.debug("MSISDN : ["+sub.getMsisdn()+"] sms Queued to be sent ? "+mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg, mo.getCMP_Txid()));
+		logger.debug("MSISDN : ["+sub.getMsisdn()+"] sms Queued to be sent ? "+mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg, mo.getCmp_tx_id()));
 		
 		//send content
 		
@@ -508,11 +508,11 @@ public class BroadcastApp {
 					if(mms!=null){
 						
 						mms.setPaidFor(false);
-						mms.setLinked_id(String.valueOf(mo.getCMP_Txid()));
-						mms.setWait_for_txId(String.valueOf(mo.getCMP_Txid()));
+						mms.setLinked_id(String.valueOf(mo.getCmp_tx_id()));
+						mms.setWait_for_txId(String.valueOf(mo.getCmp_tx_id()));
 						
 						if(queueMMSForSending(mms,  getConnection(this.conStr))){
-							logger.info("mo.getCMP_Txid():::::::::::::: "+mo.getCMP_Txid()+" queued mms to be sent : "+mms.toString());
+							logger.info("mo.getCMP_Txid():::::::::::::: "+mo.getCmp_tx_id()+" queued mms to be sent : "+mms.toString());
 							MechanicsS.logMMSAsSent(mms, conn);
 							
 						}else{
@@ -564,10 +564,10 @@ public class BroadcastApp {
 			
 			MOSms mo = new MOSms();
 			
-			BigInteger txid =BigInteger.valueOf( MechanicsS.generateNextTxId());
+			String txid =  MechanicsS.generateNextTxId() ;
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
-			mo.setCMP_Txid(txid);
+			mo.setCmp_tx_id(txid);
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0000");
 			mo.setPrice(BigDecimal.valueOf(0d));
@@ -587,10 +587,10 @@ public class BroadcastApp {
 				
 				mo = new MOSms();
 				
-				txid = BigInteger.valueOf(MechanicsS.generateNextTxId());
+				txid =  MechanicsS.generateNextTxId() ;
 				mo.setServiceid(2);
 				mo.setMsisdn(sub.getMsisdn());
-				mo.setCMP_Txid(txid);
+				mo.setCmp_tx_id(txid);
 				mo.setCMP_AKeyword("TRIVIA");
 				mo.setCMP_SKeyword("IOD0000");
 				mo.setPrice(BigDecimal.valueOf(0d));
@@ -655,17 +655,17 @@ public class BroadcastApp {
 			
 			MOSms mo = new MOSms();
 			
-			BigInteger txid = BigInteger.valueOf(MechanicsS.generateNextTxId());
+			String txid = MechanicsS.generateNextTxId() ;
 			mo.setServiceid(2);
 			mo.setMsisdn(sub.getMsisdn());
-			mo.setCMP_Txid(txid);
+			mo.setCmp_tx_id(txid);
 			mo.setCMP_AKeyword("TRIVIA");
 			mo.setCMP_SKeyword("IOD0000");
 			mo.setPrice(BigDecimal.valueOf(0d));
 			
 			MechanicsS.toStatsLog(mo, conn);
 			
-			mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg, BigInteger.valueOf(MechanicsS.generateNextTxId()));
+			mechanics.insertIntoHTTPToSend(sub.getMsisdn(), msg, MechanicsS.generateNextTxId());
 			
 			mechanics.setTeased(sub.getMsisdn());
 		

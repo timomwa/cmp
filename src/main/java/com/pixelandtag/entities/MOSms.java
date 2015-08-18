@@ -1,5 +1,7 @@
 package com.pixelandtag.entities;
 
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 
 public class MOSms extends GenericMO{
@@ -22,7 +25,7 @@ public class MOSms extends GenericMO{
 	
 	private long id;
 	
-	private String timeStamp;
+	private Date timeStamp;
 	
 	private String mo_ack;
 	
@@ -43,7 +46,7 @@ public class MOSms extends GenericMO{
 	}
 	
 
-	public MOSms(HttpServletRequest request, Long txid) throws TransactionIDGenException {
+	public MOSms(HttpServletRequest request, String txid) throws TransactionIDGenException {
 		
 		super(request,txid);
 		
@@ -110,12 +113,12 @@ public class MOSms extends GenericMO{
 	}
 
 
-	public String getTimeStamp() {
+	public Date getTimeStamp() {
 		return timeStamp;
 	}
 
 
-	public void setTimeStamp(String timeStamp) {
+	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 
@@ -165,7 +168,7 @@ public class MOSms extends GenericMO{
 				+ getProcessor_id() + ", getServiceid()=" + getServiceid()
 				+ ", isSplit_msg()=" + isSplit_msg() + ", getNumber_of_sms()="
 				+ getNumber_of_sms() + ", getPriority()=" + getPriority()
-				+ ", getCMP_Txid()=" + getCMP_Txid()
+				+ ", getCmp_tx_id()=" + getCmp_tx_id()
 				+ ", getSubscription_id()=" + getSubscription_id()
 				+ ", getClass()=" + getClass() + ", hashCode()=" + hashCode()
 				+ "]";
@@ -176,7 +179,7 @@ public class MOSms extends GenericMO{
 		MOSms moC = new MOSms();
 		moC.setAPIType(mo.getAPIType());
 		moC.setCMP_AKeyword(mo.getCMP_AKeyword());
-		moC.setCMP_Txid(mo.getCMP_Txid());
+		moC.setCmp_tx_id(mo.getCmp_tx_id());
 		moC.setCMPResponse(mo.getCMPResponse());
 		moC.setId(mo.getId());
 		moC.setMo_ack(mo.getMo_ack());
@@ -202,7 +205,7 @@ public class MOSms extends GenericMO{
 		MOSms moC = new MOSms();
 		moC.setAPIType(getAPIType());
 		moC.setCMP_AKeyword(getCMP_AKeyword());
-		moC.setCMP_Txid(getCMP_Txid());
+		moC.setCmp_tx_id(getCmp_tx_id());
 		moC.setCMPResponse(getCMPResponse());
 		moC.setId(getId());
 		moC.setMo_ack(getMo_ack());
@@ -227,6 +230,27 @@ public class MOSms extends GenericMO{
 	public String getServKey() {
 		sb.setLength(0);
 		return MOSms.sb.append(getCMP_AKeyword()).append(U_SCR).append(getCMP_SKeyword()).append(U_SCR).append(getSMS_SourceAddr()).toString();
+	}
+
+
+	public OutgoingSMS converttoOutgoingSMS() {
+		OutgoingSMS outgoing = new OutgoingSMS();
+		outgoing.setBilling_status(getBillingStatus());
+		outgoing.setCharged(Boolean.FALSE);
+		outgoing.setCmp_tx_id(this.getCmp_tx_id());
+		outgoing.setIn_outgoing_queue(Boolean.FALSE);
+		outgoing.setMsisdn(getMsisdn());
+		outgoing.setOpco_tx_id(getOpco_tx_id());
+		outgoing.setPrice(getPrice());
+		outgoing.setPriority(getPriority());
+		outgoing.setRe_tries(0L);
+		outgoing.setSent(Boolean.FALSE);
+		outgoing.setServiceid(Long.valueOf(getServiceid()));
+		outgoing.setSms(getMt_Sent());
+		outgoing.setSplit(isSplit_msg());
+		outgoing.setTimestamp(getTimeStamp());
+		outgoing.setTtl(2L);
+		return outgoing;
 	}
 	
 

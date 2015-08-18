@@ -1033,7 +1033,7 @@ public class MTProducer extends Thread {
 				
 				
 				if(rs.getString("CMP_Txid")!=null){// && !rs.getString("CMP_TxID").equalsIgnoreCase("NULL") )
-					mtsms.setCMP_Txid(new BigInteger(rs.getString("CMP_Txid")));
+					mtsms.setCmp_tx_id(rs.getString("CMP_Txid"));
 					logger.debug(">>>>>>>>>>>>>>>>>>>>>>: CMP_Txid "+rs.getString("CMP_Txid"));
 				}
 				
@@ -1072,7 +1072,7 @@ public class MTProducer extends Thread {
 								param.setMtsms(mtsms);
 								param.setId(mtsms.getId());
 								List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-								qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
+								qparams.add(new BasicNameValuePair("cptxid", mtsms.getCmp_tx_id()));
 								qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
 								qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
 								qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));
@@ -1124,7 +1124,7 @@ public class MTProducer extends Thread {
 								param.setMtsms(mtsms);
 								param.setId(mtsms.getId());
 								List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-								qparams.add(new BasicNameValuePair("cptxid", mtsms.getCMP_Txid().toString()));
+								qparams.add(new BasicNameValuePair("cptxid", mtsms.getCmp_tx_id().toString()));
 								qparams.add(new BasicNameValuePair("sourceaddress",mtsms.getShortcode()));	
 								qparams.add(new BasicNameValuePair("msisdn",mtsms.getMsisdn()));
 								qparams.add(new BasicNameValuePair("sms",mtsms.getSms()));

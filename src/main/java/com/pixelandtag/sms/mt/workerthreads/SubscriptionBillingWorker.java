@@ -406,7 +406,7 @@ public class SubscriptionBillingWorker implements Runnable {
 
 			billable = new Billable();
 			billable.setCp_id("CONTENT360_KE");
-			billable.setCp_tx_id(BigInteger.valueOf(SubscriptionRenewal.generateNextId()));
+			billable.setCp_tx_id(SubscriptionRenewal.generateNextId());
 			billable.setDiscount_applied("0");
 			billable.setKeyword(service.getCmd());
 			billable.setService_id(service.getId().toString());
