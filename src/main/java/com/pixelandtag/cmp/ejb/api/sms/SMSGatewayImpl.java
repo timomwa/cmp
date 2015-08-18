@@ -2,16 +2,15 @@ package com.pixelandtag.cmp.ejb.api.sms;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
@@ -29,12 +28,10 @@ public class SMSGatewayImpl implements SMSGatewayI {
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
-	
-	@Inject
-	private OperatorCountryDAOI opcoDAO;
 		
 	@EJB
 	private ConfigsEJBI configsEJB;
+	
 	
 	@Override
 	public boolean sendMT(OutgoingSMS outgoingsms) throws SMSGatewayException {

@@ -45,7 +45,7 @@ public class GenericDaoImpl<T, ID extends Serializable> implements GenericDAO<T,
 	
 	@Override
 	public T findBy(String fieldName, Object value) {
-		Query query = Stripersist.getEntityManager()
+		Query query = em
 				.createQuery(getQuery(fieldName, null))
 				.setParameter(fieldName, value);
 		return getSingleResult(query);

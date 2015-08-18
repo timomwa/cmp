@@ -9,9 +9,12 @@ import org.apache.log4j.BasicConfigurator;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 import com.pixelandtag.entities.MTsms;
 
 public class TestEJB {
@@ -24,6 +27,7 @@ public class TestEJB {
 	private static SubscriptionBeanI subscriptionBean;
 	private static TimezoneConverterI tzconvert;
 	private static SMSGatewayI smsgw;
+	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
 	
 	public static void main(String[] args) throws Exception {
 		try{
@@ -51,21 +55,36 @@ public class TestEJB {
 			 smsgw = (SMSGatewayI) context.lookup("cmp/SMSGatewayImpl!com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI");
 			 
 			 
+			 opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 			 
-			 MTsms mtsms = new MTsms();
+			 
+			 
+			/* MTsms mtsms = new MTsms();
 			 mtsms.setMsisdn("254770178979");//0770178979
 			 mtsms.setSms("Test sms from new platform reloaded");
 			 mtsms.setShortcode("32329");
 			 mtsms.setNewCMP_Txid(String.valueOf(4654534354L));
 			 mtsms.setOpcoid(79497164L);
+			 */
 			 
+			 OutgoingSMS mtsms = new OutgoingSMS();
+			 mtsms.setMsisdn("254770178979");//0770178979
+			 mtsms.setSms("Test sms from new platform reloaded");
+			 mtsms.setShortcode("32329");
+			 mtsms.setCmp_tx_id(String.valueOf(4654534354L));
+			 
+			 OpcoSenderProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-7");
+			 
+			 mtsms.setOpcosenderprofile(opcosenderprofile);
+			
 			 
 			 smsgw.sendMT(mtsms);
 			 
 			 //TODO - Have different configurations - Done!
 			 //TODO - Have Default configurations Airtel HTTP, parlayx, oneapi - introduce a profile field or something like that - Done!
+			//TODO - Create threads that will proccess these incoming messages - in progress
 			 //TODO - Have a way to determine a successful MT (maybe http response code, or parsing response)
-			 //TODO - Create threads that will proccess these incoming messages
+			 
 			 
 			 
 	}catch(Exception exp){
