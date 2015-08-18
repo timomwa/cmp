@@ -73,8 +73,8 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 			
 			Query qry = em.createNamedQuery(OutgoingSMS.NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC);
 			qry.setParameter("billstatus", billingstatuses);
-			qry.setParameter("in_outgoing_queue", Boolean.FALSE);
-			qry.setParameter("sent", Boolean.FALSE);
+			//qry.setParameter("in_outgoing_queue", Boolean.FALSE);
+			//qry.setParameter("sent", Boolean.FALSE);
 			qry.setFirstResult(0);
 			qry.setMaxResults(size.intValue());
 			return qry.getResultList();

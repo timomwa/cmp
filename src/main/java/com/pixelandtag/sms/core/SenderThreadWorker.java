@@ -51,7 +51,6 @@ public class SenderThreadWorker implements Runnable{
 	}
 	
 	private void initEJBs() throws NamingException {
-	
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 	 	Properties props = new Properties();
 	 	props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
@@ -63,11 +62,9 @@ public class SenderThreadWorker implements Runnable{
 	 	configsEJB =  (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");
 	 	queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
 	 	logger.info(getClass().getSimpleName()+": Successfully initialized EJB QueueProcessorEJBImpl !!");
-		
 	}
 
 	private void initsender() throws Exception{
-		
 		SenderProfile profile = opcosenderprofile.getProfile();
 		Map<String,ProfileConfigs> opcoconfigs = configsEJB.getAllConfigs(profile);
 		Map<String,ProfileTemplate> opcotemplates = configsEJB.getAllTemplates(profile,TemplateType.PAYLOAD);
@@ -76,7 +73,6 @@ public class SenderThreadWorker implements Runnable{
 		senderconfigs.setOpcotemplates(opcotemplates);
 		sender = SMSSenderFactory.getSenderInstance(senderconfigs);
 		sender.validateMandatory();//Validates mandatory configs.
-		
 	}
 
 	@Override
@@ -109,6 +105,7 @@ public class SenderThreadWorker implements Runnable{
 							sms.setSent(Boolean.FALSE);
 							sms.setIn_outgoing_queue(Boolean.FALSE);
 							sms.setRe_tries(sms.getRe_tries().longValue()+1L);
+							sms.setPriority(sms.getPriority()+1);
 							sms = queueprocbean.saveOrUpdate(sms);
 							
 							if(sms.getRe_tries().intValue()<=sms.getTtl())
@@ -173,8 +170,6 @@ public class SenderThreadWorker implements Runnable{
 	private void setStopped(boolean stopped) {
 		this.stopped = stopped;
 	}
-	
-	
 	
 
 }

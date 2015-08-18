@@ -55,7 +55,10 @@ public class OutgoingQueueRouter extends Thread {
 		
 		for(OpcoSenderProfile opcoprofile : profiles){
 			Integer threads = opcoprofile.getWorkers();
-			logger.info(" About to initialize "+threads+" sender threads for opco with code "+opcoprofile.getOpco().getCode());
+			logger.info("\n\nAbout to initialize "+threads+" sender threads for opco with code "
+					+opcoprofile.getOpco().getCode()
+					+" Operator name : "+opcoprofile.getOpco().getOperator().getName()+", country="
+					+opcoprofile.getOpco().getCountry().getName()+"\n");
 			int success = 0;
 			for(int i = 0; i<threads; i++){
 				try{
@@ -63,6 +66,7 @@ public class OutgoingQueueRouter extends Thread {
 					Thread t1 = new Thread(worker);
 					t1.start();
 					senderworkers.add(worker);
+					success++;
 				}catch(Exception exp){
 					logger.error(exp.getMessage(),exp);
 				}

@@ -64,7 +64,7 @@ public class SenderPlatform {
 			this.pollWait = Integer.valueOf(props.getProperty("pollWait"));
 		
 		if(log4J!=null)
-			PropertyConfigurator.configure(log4J);
+			PropertyConfigurator.configure(log4J); 
 		else
 			BasicConfigurator.configure();
 		
@@ -94,25 +94,21 @@ public class SenderPlatform {
 		    }
 		});
 		
+		BasicConfigurator.configure();
 		
 		OutgoingQueueRouter outgoingqueuRouter = new OutgoingQueueRouter();
 		outgoingqueuRouter.start();
 		
-		
-		
-		
 	}
-	
-	
-	
 	
 	
 	
 	private String getPath(String filename){
 		return System.getProperty("user.dir")
 		+ System.getProperty("file.separator") + filename;
-	
 	}
+	
+	
 	/**
 	 * Creates a java.util.Properties object from 
 	 * the file specified by the param filename
