@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
-import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
@@ -43,7 +43,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private SubscriptionBeanI subscriptionejb;
 	private static Random r = new Random();
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
-	private Map<Long, MOProcessorE> mo_processorCache = new HashMap<Long, MOProcessorE>();
+	private Map<Long, MOProcessor> mo_processorCache = new HashMap<Long, MOProcessor>();
 	
 	
 	private int getRandom(){
@@ -391,10 +391,10 @@ public class SubscriptionBillingWorker implements Runnable {
 
 		logger.info(">>service :: "+service);
 		if (service != null) {
-			MOProcessorE processor = mo_processorCache.get(service.getMo_processorFK());
+			MOProcessor processor = mo_processorCache.get(service.getMo_processorFK());
 			if (processor == null) {
 				try {
-					processor = cmp_ejb.find(MOProcessorE.class,
+					processor = cmp_ejb.find(MOProcessor.class,
 							service.getMo_processorFK());
 				} catch (Exception exp) {
 					logger.warn("Could not find the processor with id : "

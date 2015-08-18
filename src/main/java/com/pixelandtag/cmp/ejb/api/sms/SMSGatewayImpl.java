@@ -1,9 +1,7 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
-import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -13,15 +11,13 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.cmp.dao.opco.ProfileTemplatesDAOI;
 import com.pixelandtag.cmp.dao.opco.OperatorCountryDAOI;
-import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
 import com.pixelandtag.cmp.entities.customer.configs.SenderProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
-import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.smssenders.SMSSenderFactory;
 import com.pixelandtag.smssenders.Sender;
 
@@ -40,38 +36,18 @@ public class SMSGatewayImpl implements SMSGatewayI {
 	@EJB
 	private ConfigsEJBI configsEJB;
 	
-	@PostConstruct
-	public void init(){
-		//opcoDAO.setEm(em);
-		//opcotemplateDAO.setEm(em);
-	}
-	
-
 	@Override
-	public boolean sendMT(MTsms mtsms) throws SMSGatewayException {
+	public boolean sendMT(OutgoingSMS outgoingsms) throws SMSGatewayException {
 		
-		if(mtsms==null)
-			throw new SMSGatewayException("MT SMS object passed is null!");
+		if(outgoingsms==null)
+			throw new SMSGatewayException("OutgoingSMS object passed is null!");
 		
-		Long opcoid = mtsms.getOpcoid();
+		OpcoSenderProfile opcosenderProfile =  outgoingsms.getOpcosenderprofile();
 		
-		if(opcoid==null || opcoid.compareTo(-1L)<=0)
-			throw new SMSGatewayException("Opco id not provided in the MTSMS object. Specify this.");
+		if(opcosenderProfile==null)
+			throw new SMSGatewayException("No sender profile set. Please finish this configuration and try agian.!");
 		
-		OperatorCountry opco = opcoDAO.findById(opcoid);
-		
-		if(opco==null)
-			opco = opcoDAO.findbyOpcoCode(mtsms.getOpcocode());
-		
-		if(opco==null)
-			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" was not found!");
-		
-		OpcoSenderProfile senderProfiles = configsEJB.getActiveOpcoSenderProfile(opco);
-		
-		if(senderProfiles==null)
-			throw new SMSGatewayException("The operator with the opcoid = "+opcoid+" has no active or valid sender profiles set!");
-		
-		SenderProfile profile = senderProfiles.getProfile();
+		SenderProfile profile = opcosenderProfile.getProfile();
 		
 		Map<String,ProfileConfigs> opcoconfigs = configsEJB.getAllConfigs(profile);
 		Map<String,ProfileTemplate> opcotemplates = configsEJB.getAllTemplates(profile,TemplateType.PAYLOAD);
@@ -82,7 +58,7 @@ public class SMSGatewayImpl implements SMSGatewayI {
 		
 		try {
 			Sender sender = SMSSenderFactory.getSenderInstance(senderconfigs);
-			sender.sendSMS(mtsms);
+			sender.sendSMS(outgoingsms);
 			return true;
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);

@@ -46,13 +46,11 @@ public abstract class GenericMessage implements Serializable{
 	private Long opcoid;
 	private String opcocode;
 	private boolean subscription;
-	
 	private EventType eventType;
-	
-	
 	private BillingStatus billingStatus;
-	
 	private boolean charged;
+	private Long opcoprofile;
+	
 	
 	public boolean isCharged() {
 		return charged;
@@ -201,6 +199,16 @@ public abstract class GenericMessage implements Serializable{
 
 	public void setOpcocode(String opcocode) {
 		this.opcocode = opcocode;
+	}
+
+
+	public Long getOpcoprofile() {
+		return opcoprofile;
+	}
+
+
+	public void setOpcoprofile(Long opcoprofile) {
+		this.opcoprofile = opcoprofile;
 	}
 	
 	

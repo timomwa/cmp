@@ -30,6 +30,10 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 	@NamedQuery(
 			name = OpcoSenderProfile.NQ_FIND_BY_OPCO,
 			query = "select osp from OpcoSenderProfile osp where osp.opco=:opco AND osp.active=:active  order by osp.pickorder desc"
+	),
+	@NamedQuery(
+			name = OpcoSenderProfile.NQ_LIST_ACTIVE,
+			query = "select osp from OpcoSenderProfile osp where osp.active=:active  order by osp.pickorder desc"
 	)
 })
 public class OpcoSenderProfile implements Serializable{
@@ -42,6 +46,8 @@ public class OpcoSenderProfile implements Serializable{
 	
 	@Transient
 	public static final String NQ_FIND_BY_OPCO = "opcosenderprofile.byopco";
+	@Transient
+	public static final String NQ_LIST_ACTIVE = "opcosenderprofile.listactive";
 	
 	
 	@Id
@@ -72,9 +78,15 @@ public class OpcoSenderProfile implements Serializable{
 	@Column(name = "active", nullable = false)
 	private Boolean active;
 	
+	@Column(name="workers", nullable=false)
+	private Integer workers;
+	
+	
 	
 	@PrePersist
 	public void onCreate(){
+		if(workers==null)
+			workers = 1;
 		if(pickorder==null)
 			pickorder = 0;
 		if(effectiveDate==null)
@@ -141,6 +153,16 @@ public class OpcoSenderProfile implements Serializable{
 
 	public void setActive(Boolean active) {
 		this.active = active;
+	}
+
+
+	public Integer getWorkers() {
+		return workers;
+	}
+
+
+	public void setWorkers(Integer workers) {
+		this.workers = workers;
 	}
 
 	

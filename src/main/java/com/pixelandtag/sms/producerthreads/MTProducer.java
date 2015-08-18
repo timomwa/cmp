@@ -65,7 +65,7 @@ import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.URLParams;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.sms.mo.MOProcessor;
+import com.pixelandtag.sms.mo.MOProcessorThread;
 import com.pixelandtag.sms.mt.ACTION;
 import com.pixelandtag.sms.mt.CONTENTTYPE;
 import com.inmobia.util.StopWatch;
@@ -104,7 +104,7 @@ public class MTProducer extends Thread {
 	public static volatile MTProducer instance;
 	private static Logger logger = Logger.getLogger(MTProducer.class);
 	private String limitStr;
-	private MOProcessor moProcessor;
+	private MOProcessorThread moProcessor;
 	//private volatile Map<String,ServiceProcessorI> serviceMap = new HashMap<String,ServiceProcessorI>();
 	//private volatile Map<String,ServiceProcessorI> runningServiceClasses = new HashMap<String,ServiceProcessorI>();
 	//private volatile Map<String,Boolean> split_msg_map = new HashMap<String,Boolean>();
@@ -612,8 +612,7 @@ public class MTProducer extends Thread {
 		
 		
 		for(int i = 0; i<this.workers; i++){
-			MTHttpSender worker;
-			worker = new MTHttpSender(cmpbean,pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr);
+			MTHttpSender worker = new MTHttpSender(cmpbean,pollWait,"THREAD_WORKER_#_"+i,urlparams, this.constr);
 			Thread t1 = new Thread(worker);
 			t1.start();
 			httpSenderWorkers.add(worker);
@@ -672,7 +671,7 @@ public class MTProducer extends Thread {
 		//Then we start the mo processor thread(s)
 		try {
 			
-			moProcessor = new MOProcessor(constr, "MO_PROCESSOR_1",cmpbean);
+			moProcessor = new MOProcessorThread(constr, "MO_PROCESSOR_1",cmpbean);
 			
 			Thread t1 = new Thread(moProcessor);
 			

@@ -15,6 +15,7 @@ public class SenderResp implements Serializable{
 	private String responseMsg;
 	private String refvalue;//can be transaction id from operator, or just our internal unique identifier for this message that has been sent out
 	private Map<String,String> othervalues = new HashMap<String,String>();
+	private Boolean success;//General success determined by the success criteria
 	
 	
 	public String getRespcode() {
@@ -40,6 +41,12 @@ public class SenderResp implements Serializable{
 	}
 	public void setOthervalues(Map<String, String> othervalues) {
 		this.othervalues = othervalues;
+	}
+	public Boolean getSuccess() {
+		return success;
+	}
+	public void setSuccess(Boolean success) {
+		this.success = success;
 	}
 	
 	

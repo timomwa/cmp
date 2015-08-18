@@ -24,7 +24,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
 @Table(name = "mo_processors")
-public class MOProcessorE implements Serializable {
+public class MOProcessor implements Serializable {
 
 	/**
 	 * 
@@ -60,7 +60,7 @@ public class MOProcessorE implements Serializable {
 	
 	@Column(name="processor_type")
 	@Enumerated(EnumType.STRING)
-	ProcessorType processor_type;
+	private ProcessorType processor_type;
 	
 	@Column(name="forwarding_url")
 	private String forwarding_url;

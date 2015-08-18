@@ -40,7 +40,7 @@ import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.HttpToSend;
-import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -2429,7 +2429,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										smsserv.getCmd().equals("FIND")) ){
 									
 									Long processor_fk = smsserv.getMo_processorFK();
-									MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+									MOProcessor proc = find(MOProcessor.class, processor_fk);
 									
 									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
 									mosm_.setMsisdn(MSISDN);
@@ -2583,7 +2583,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								}else{
 									
 									Long processor_fk = smsserv.getMo_processorFK();
-									MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+									MOProcessor proc = find(MOProcessor.class, processor_fk);
 									
 									//subscribe(MSISDN, smsserv, chosenMenu.getId());
 									
@@ -2655,7 +2655,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						 
 							SMSService smsserv = find(SMSService.class, Long.parseLong(chosenMenu.getService_id()+""));
 							Long processor_fk = smsserv.getMo_processorFK();
-							MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+							MOProcessor proc = find(MOProcessor.class, processor_fk);
 							
 							MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
 							mosm_.setMsisdn(MSISDN);

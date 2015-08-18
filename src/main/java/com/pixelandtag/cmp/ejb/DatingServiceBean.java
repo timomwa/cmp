@@ -32,7 +32,7 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
-import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -123,7 +123,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			
 			SMSService smsserv = getSMSService("DATE");
 			Long processor_fk = smsserv.getMo_processorFK();
-			MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+			MOProcessor proc = find(MOProcessor.class, processor_fk);
 			
 			if(smsserv!=null && processor_fk!=null && proc!=null){
 				MOSms mo = new MOSms();
@@ -478,7 +478,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 						
 						SMSService smsserv = getSMSService("DATE");
 						Long processor_fk = smsserv.getMo_processorFK();
-						MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+						MOProcessor proc = find(MOProcessor.class, processor_fk);
 						
 						if(smsserv!=null && processor_fk!=null && proc!=null){
 							MOSms mo = new MOSms();

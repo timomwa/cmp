@@ -31,7 +31,7 @@ import com.pixelandtag.web.triviaI.MechanicsI;
  * 
  */
 
-public class MOProcessor implements Runnable {
+public class MOProcessorThread implements Runnable {
 	
 	private volatile boolean run = true;
 	private volatile String name;
@@ -43,7 +43,7 @@ public class MOProcessor implements Runnable {
 	private  CMPResourceBeanRemote cmpejb;
 	// private volatile ServiceProcessorI procesor = null;
 	// private volatile Queue<MOSms> moSMSSes;
-	private final Logger logger = Logger.getLogger(MOProcessor.class);
+	private final Logger logger = Logger.getLogger(MOProcessorThread.class);
 	private volatile int size;
 	//private Map<String, ServiceProcessorI> serviceMap;
 	//private volatile Map<String, Boolean> split_msg_map;
@@ -98,7 +98,7 @@ public class MOProcessor implements Runnable {
 		ds.release();
 	
 	}
-	public MOProcessor(String connstr, String name, CMPResourceBeanRemote cmpejb_) throws Exception {
+	public MOProcessorThread(String connstr, String name, CMPResourceBeanRemote cmpejb_) throws Exception {
 
 		this.cmpejb = cmpejb_;
 

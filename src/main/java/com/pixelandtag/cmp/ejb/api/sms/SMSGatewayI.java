@@ -1,6 +1,6 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
-import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 /**
  * 
  * @author Timothy Mwangi
@@ -11,10 +11,10 @@ public interface SMSGatewayI {
 
 	/**
 	 * Sends an mt sms using the 
-	 * parameters in the com.pixelandtag.entities.MTsms object
-	 * @param mtsms - com.pixelandtag.entities.MTsms
+	 * parameters in the com.pixelandtag.cmp.entities.OutgoingSMS object
+	 * @param outgoingsms - com.pixelandtag.cmp.entities.OutgoingSMS
 	 * @return true if successfully queued for sending, false if not
 	 * @throws SMSGatewayException
 	 */
-	public boolean sendMT(MTsms mtsms) throws SMSGatewayException;
+	public boolean sendMT(OutgoingSMS outgoingsms) throws SMSGatewayException;
 }

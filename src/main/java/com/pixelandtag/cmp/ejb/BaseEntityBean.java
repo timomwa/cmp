@@ -57,7 +57,7 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericMessage;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
-import com.pixelandtag.cmp.entities.MOProcessorE;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -194,7 +194,7 @@ public class BaseEntityBean implements BaseEntityI {
 		try {
 			SMSService smsserv = getSMSService(keyword);
 			Long processor_fk = smsserv.getMo_processorFK();
-			MOProcessorE proc = find(MOProcessorE.class, processor_fk);
+			MOProcessor proc = find(MOProcessor.class, processor_fk);
 			
 			MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
 			mosm_.setMsisdn(msisdn);

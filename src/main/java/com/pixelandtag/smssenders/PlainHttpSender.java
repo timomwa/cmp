@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
@@ -61,20 +62,20 @@ public class PlainHttpSender extends GenericSender {
 	}
 
 	@Override
-	public SenderResp sendSMS(MTsms mtsms) throws MessageSenderException {
+	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException {
 		
 		SenderResp response = new SenderResp();
 		
 		GenericHTTPParam generic_http_parameters = new GenericHTTPParam();
-		generic_http_parameters.setId(mtsms.getId());
+		generic_http_parameters.setId(outgoingsms.getId());
 		
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		if(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME)!=null)
-			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), mtsms.getCMP_Txid().toString()));//"cptxid"
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), outgoingsms.getCmp_tx_id().toString()));//"cptxid"
 		
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),mtsms.getShortcode()));//"sourceaddress"	
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),mtsms.getMsisdn()));//"msisdn"
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),mtsms.getSms()));//"sms"
+		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),outgoingsms.getShortcode()));//"sourceaddress"	
+		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),outgoingsms.getMsisdn()));//"msisdn"
+		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
 		
 		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("yes")){
 			
@@ -212,6 +213,8 @@ public class PlainHttpSender extends GenericSender {
 			
 			generic_http_parameters.setStringentity(payload_template);
 			
+			logger.info("\n>>>payload>>> : "+payload_template+"\n");
+			
 		}else{
 			
 			generic_http_parameters.setHttpParams(qparams);
@@ -237,7 +240,8 @@ public class PlainHttpSender extends GenericSender {
 		
 		generic_http_parameters.setUrl(url);
 		
-		System.out.println("\nurl : "+url+"\n");
+		
+		logger.info("\n>>>url>>> : "+url+"\n");
 		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
 		response.setRespcode(String.valueOf(resp.getResp_code()));
@@ -299,7 +303,7 @@ public class PlainHttpSender extends GenericSender {
 			
 		}else{
 			
-			response.setRefvalue(String.valueOf(mtsms.getCMP_Txid()));
+			response.setRefvalue(String.valueOf(outgoingsms.getCmp_tx_id()));
 			response.setResponseMsg(resp.getBody());
 		}
 		

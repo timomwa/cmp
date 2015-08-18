@@ -1,5 +1,6 @@
 package com.pixelandtag.smssenders;
 
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.entities.MTsms;
 
 public interface Sender{
@@ -40,7 +41,7 @@ public interface Sender{
 	public final String HTTP_RESP_XML_RESP_MSG_KEY = "http_resp_xml_resp_msg_key";
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
 	
-	public SenderResp sendSMS(MTsms mtsms) throws MessageSenderException;
+	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException;
 	public void validateMandatory()  throws MessageSenderException;
 
 }

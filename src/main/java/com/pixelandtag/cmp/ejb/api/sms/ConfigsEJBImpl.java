@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -38,11 +37,6 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	@Inject 
 	ProfileTemplatesDAOI profileTemlatesDAO;
 	
-	@PostConstruct
-	public void init(){
-		//profileconfigsDAO.setEm(em);
-		//opcoDAO.setEm(em);
-	}
 
 	@Override
 	public ProfileConfigs getConfig(Long opcoid, String name) {
