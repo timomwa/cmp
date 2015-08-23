@@ -49,7 +49,6 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
@@ -124,31 +123,27 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			
 			
 			SMSService smsserv = getSMSService("DATE");
-			Long processor_fk = smsserv.getMo_processorFK();
-			MOProcessor proc = find(MOProcessor.class, processor_fk);
+			MOProcessor proc = smsserv.getMoprocessor();
 			
-			if(smsserv!=null && processor_fk!=null && proc!=null){
-				IncomingSMS mo = new IncomingSMS();
-				mo.setMsisdn(MSISDN);
-				mo.setPrice(BigDecimal.ZERO);
-				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED); 
-				mo.setMt_Sent(msg);
-				mo.setServiceid(smsserv.getId().intValue());
-				mo.setProcessor_id(processor_fk);
-				mo.setSMS_SourceAddr(proc.getShortcode());
-				mo.setPriority(0);
-				mo.setCMP_AKeyword(smsserv.getCmd());
-				mo.setCMP_SKeyword(smsserv.getCmd());
+			if(smsserv!=null  && proc!=null){
+				IncomingSMS incomingsms = new IncomingSMS();
+				incomingsms.setMsisdn(MSISDN);
+				incomingsms.setPrice(BigDecimal.ZERO);
+				incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED); 
+				incomingsms.setSms(msg);
+				incomingsms.setServiceid(smsserv.getId());
+				incomingsms.setMoprocessor(proc);
+				incomingsms.setShortcode(proc.getShortcode());
 				
 				if(!ro.getTransactionID().equals("1"))
-					mo.setCmp_tx_id(ro.getTransactionID());
+					incomingsms.setCmp_tx_id(ro.getTransactionID());
 				else
-					mo.setCmp_tx_id(generateNextTxId());
+					incomingsms.setCmp_tx_id(generateNextTxId());
 				
-				mo.setSplit_msg(false);
-				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
-				mo.setSubscription(false);
-				sendMT(mo);
+				incomingsms.setSplit(false);
+				incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+				incomingsms.setIsSubscription(false);
+				sendMT(incomingsms);
 			}
 			
 		
@@ -479,34 +474,23 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 						msg = msg.replaceAll(GenericServiceProcessor.PROFILE_TAG, sb.toString());
 						
 						SMSService smsserv = getSMSService("DATE");
-						Long processor_fk = smsserv.getMo_processorFK();
-						MOProcessor proc = find(MOProcessor.class, processor_fk);
+						MOProcessor proc = smsserv.getMoprocessor();
 						
-						if(smsserv!=null && processor_fk!=null && proc!=null){
-							IncomingSMS mo = new IncomingSMS();
-							mo.setMsisdn(MSISDN);
-							mo.setPrice(BigDecimal.ZERO);
-							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
-							mo.setMt_Sent(msg);
-							mo.setServiceid(smsserv.getId().intValue());
-							mo.setProcessor_id(processor_fk);
-							mo.setSMS_SourceAddr(proc.getShortcode());
-							mo.setPriority(0);
-							mo.setCMP_AKeyword(smsserv.getCmd());
-							mo.setCMP_SKeyword(smsserv.getCmd());
+						if(smsserv!=null && proc!=null){
+							IncomingSMS incomingsms = new IncomingSMS();
+							incomingsms.setMsisdn(MSISDN);
+							incomingsms.setPrice(BigDecimal.ZERO);
+							incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+							incomingsms.setSms(msg);
+							incomingsms.setServiceid(smsserv.getId());
+							incomingsms.setMoprocessor(proc);
+							incomingsms.setShortcode(proc.getShortcode());
+							incomingsms.setCmp_tx_id(generateNextTxId());
 							
-							
-							
-							if(!req.getTransactionID().equals("1"))
-								mo.setCmp_tx_id(generateNextTxId());
-							else
-								mo.setCmp_tx_id(generateNextTxId());
-							
-							mo.setSplit_msg(false);
-							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
-							mo.setSubscription(false);
-							mo.setProcessor_id(processor_fk);
-							sendMT(mo);
+							incomingsms.setSplit(false);
+							incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+							incomingsms.setIsSubscription(false);
+							sendMT(incomingsms);
 							//resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 							//resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 							
@@ -972,13 +956,8 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			qry.setParameter(1, mo.getServiceid());
 			qry.setParameter(2, mo.getMsisdn());
 			qry.setParameter(3, mo.getCmp_tx_id());
-			qry.setParameter(4, mo.getCMP_AKeyword());
-			qry.setParameter(5, mo.getCMP_SKeyword());
-			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
-				qry.setParameter(6, 1d);
-			else
-				qry.setParameter(6, mo.getPrice().doubleValue());
-			qry.setParameter(7, mo.isSubscriptionPush());
+			qry.setParameter(4, mo.getPrice().doubleValue());
+			qry.setParameter(5, mo.getIsSubscription());
 			
 			int num =  qry.executeUpdate();
 			utx.commit();
