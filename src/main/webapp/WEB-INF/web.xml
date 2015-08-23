@@ -424,6 +424,10 @@
 		<servlet-name>giant</servlet-name>
 		<url-pattern>/giant</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>MOreceiver2</servlet-name>
+		<url-pattern>/MOreceiver2</url-pattern>
+	</servlet-mapping>
 	
 	
 	
@@ -434,6 +438,13 @@
 		<display-name>report</display-name>
 		<servlet-name>report</servlet-name>
 		<servlet-class>com.pixelandtag.reports.Report</servlet-class>
+	</servlet>
+	<servlet>
+		<description>
+		</description>
+		<display-name>MOreceiver2</display-name>
+		<servlet-name>MOreceiver2</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.MOreceiver2</servlet-class>
 	</servlet>
 	
 	

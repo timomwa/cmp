@@ -15,10 +15,12 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.AlterationMethod;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.staticcontent.ContentRetriever;
 import com.pixelandtag.subscription.SubscriptionOld;
@@ -81,7 +83,9 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 	}
 
 	@Override
-	public MOSms process(MOSms mo){
+	public OutgoingSMS process(IncomingSMS incomingsms){
+		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		Connection conn = null;
 		
@@ -89,21 +93,21 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 			
 			conn = getCon();
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			final String KEYWORD = req.getKeyword().trim();
 			final String MSISDN = req.getMsisdn();
-			final int serviceid = mo.getServiceid();
-			final Map<String,String> additionalInfo = cmpbean.getAdditionalServiceInfo(serviceid);
-			final int content_id = Integer.valueOf(UtilCelcom.getServiceMetaData(conn,serviceid,"dynamic_contentid"));
+			final Long serviceid = incomingsms.getServiceid();
+			final Map<String,String> additionalInfo = cmpbean.getAdditionalServiceInfo(serviceid.intValue());
+			final int content_id = Integer.valueOf(UtilCelcom.getServiceMetaData(conn,serviceid.intValue(),"dynamic_contentid"));
 			
 			dynamic_content_processorLogger.info("KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 			dynamic_content_processorLogger.info("SERVICEID ::::::::::::::::::::::::: ["+serviceid+"]");
 			
 			String tailMsg = "";
 			
-			if(!mo.isSubscriptionPush()){//If this is a subscription push, then don't check if sub is subscribed.
+			if(!incomingsms.getIsSubscription()){//If this is a subscription push, then don't check if sub is subscribed.
 				
-				SubscriptionDTO sub = cmpbean.getSubscriptionDTO(MSISDN, serviceid);
+				SubscriptionDTO sub = cmpbean.getSubscriptionDTO(MSISDN, serviceid.intValue());
 				
 				tailMsg = (sub==null ? additionalInfo.get("tailText_notsubscribed") : (SubscriptionStatus.confirmed==SubscriptionStatus.get(sub.getSubscription_status()) ? additionalInfo.get("tailText_subscribed") : additionalInfo.get("tailText_notsubscribed")));
 						 
@@ -121,11 +125,11 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 			final String content = cr.getDynamicContent(content_id, conn);
 					
 			if(content!=null)
-				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+content+SPACE+tailMsg);
+				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+content+SPACE+tailMsg);
 			else
-				mo.setMt_Sent(RM.replaceAll(PRICE_TG, String.valueOf(mo.getPrice()))+"Dummy subscription content for "+additionalInfo.get("service_name")+SPACE+".");//No content! Send blank msg.
+				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+"Dummy subscription content for "+additionalInfo.get("service_name")+SPACE+".");//No content! Send blank msg.
 					
-			dynamic_content_processorLogger.info("CONTENT FOR MSISDN["+MSISDN+"] ::::::::::::::::::::::::: ["+mo.toString()+"]");
+			dynamic_content_processorLogger.info("CONTENT FOR MSISDN["+MSISDN+"] ::::::::::::::::::::::::: ["+incomingsms.toString()+"]");
 			
 		}catch(Exception e){
 			
@@ -139,7 +143,7 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 		
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

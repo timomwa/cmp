@@ -16,8 +16,10 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
@@ -79,13 +81,15 @@ public class SubscribeProcessor extends GenericServiceProcessor {
 	}
 	
 	@Override
-	public MOSms process(MOSms mo){
+	public OutgoingSMS process(IncomingSMS incomingsms){
+		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		Connection conn = null;
 		
 		try {
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			
 			final String KEYWORD = req.getKeyword().trim();
 			final String MSISDN = req.getMsisdn();
@@ -99,14 +103,14 @@ public class SubscribeProcessor extends GenericServiceProcessor {
 				
 				if(sub!=null){
 					subscription.updateSubscription(conn, sub.getId(), SubscriptionStatus.confirmed);
-					mo.setMt_Sent("You've successfully subscribed");
+					outgoingsms.setSms("You've successfully subscribed");
 				}else{
-					mo.setMt_Sent("You don't have any pending subscriptions");
+					outgoingsms.setSms("You don't have any pending subscriptions");
 				}
 				
 			}
 			
-			logger.info(mo.toString());
+			logger.info(incomingsms.toString());
 			
 		}catch(Exception e){
 			
@@ -121,7 +125,7 @@ public class SubscribeProcessor extends GenericServiceProcessor {
 		
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

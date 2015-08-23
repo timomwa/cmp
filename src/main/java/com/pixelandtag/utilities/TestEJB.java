@@ -14,7 +14,7 @@ import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.entities.MTsms;
 
 public class TestEJB {
@@ -73,7 +73,7 @@ public class TestEJB {
 			 mtsms.setShortcode("32329");
 			 mtsms.setCmp_tx_id(String.valueOf(4654534354L));
 			 
-			 OpcoSenderProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-7");
+			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-7");
 			 
 			 mtsms.setOpcosenderprofile(opcosenderprofile);
 			

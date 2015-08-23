@@ -12,13 +12,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import com.pixelandtag.cmp.dao.opco.OpcoSenderProfileDAOI;
+import com.pixelandtag.cmp.dao.opco.OpcoIPAddressMapDAOI;
 import com.pixelandtag.cmp.dao.opco.ProfileConfigsDAOI;
 import com.pixelandtag.cmp.dao.opco.ProfileTemplatesDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoIPAddressMap;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
-import com.pixelandtag.cmp.entities.customer.configs.SenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
 @Stateless
@@ -35,14 +37,20 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	private OpcoSenderProfileDAOI opcoprofilesDAO;
 	
 	
+	@Inject
+	private OpcoIPAddressMapDAOI opcoipAddressMapDAO;
+	
+	
 	@Inject 
 	ProfileTemplatesDAOI profileTemlatesDAO;
 	
 	@PostConstruct
 	private void init() {
-		profileconfigsDAO.setEm(em);
-		opcoprofilesDAO.setEm(em);
-		profileTemlatesDAO.setEm(em);
+		//profileconfigsDAO.setEm(em);
+		//opcoprofilesDAO.setEm(em);
+		//profileTemlatesDAO.setEm(em);
+		//opcoipAddressMapDAO.setEm(em);
+		
 	}
 	
 
@@ -59,7 +67,7 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	}
 
 	@Override
-	public ProfileConfigs getConfig(SenderProfile profile, String name) {
+	public ProfileConfigs getConfig(SenderReceiverProfile profile, String name) {
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("profile", profile);
 		params.put("name", name);
@@ -72,7 +80,7 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	
 	
 	@Override
-	public Map<String,ProfileConfigs> getAllConfigs(SenderProfile profile){
+	public Map<String,ProfileConfigs> getAllConfigs(SenderReceiverProfile profile){
 		
 		Map<String,ProfileConfigs> configs = new HashMap<String,ProfileConfigs>();
 		
@@ -107,7 +115,7 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	}
 
 	@Override
-	public Map<String, ProfileTemplate> getAllTemplates(SenderProfile profile, TemplateType type) {
+	public Map<String, ProfileTemplate> getAllTemplates(SenderReceiverProfile profile, TemplateType type) {
 		
 		Map<String,ProfileTemplate> configs = new HashMap<String,ProfileTemplate>();
 		
@@ -143,28 +151,40 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	}
 	
 	@Override
-	public List<OpcoSenderProfile> getOpcoSenderProfiles(OperatorCountry opco, Boolean active){
+	public List<OpcoSenderReceiverProfile> getOpcoSenderProfiles(OperatorCountry opco, Boolean active){
 		
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("opco", opco);
 		params.put("active", active);
-		return  opcoprofilesDAO.findByNamedQuery(OpcoSenderProfile.NQ_FIND_BY_OPCO, params);
+		return  opcoprofilesDAO.findByNamedQuery(OpcoSenderReceiverProfile.NQ_FIND_BY_OPCO, params);
 		
 	}
 	
 	
 	@Override
-	public OpcoSenderProfile getActiveOpcoSenderProfile(OperatorCountry opco){
+	public OpcoSenderReceiverProfile getActiveOpcoSenderReceiverProfile(OperatorCountry opco){
 		
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("opco", opco);
 		params.put("active", Boolean.TRUE);
-		List<OpcoSenderProfile> senderprofiles =  opcoprofilesDAO.findByNamedQuery(OpcoSenderProfile.NQ_FIND_BY_OPCO, params,0,1);
+		List<OpcoSenderReceiverProfile> senderprofiles =  opcoprofilesDAO.findByNamedQuery(OpcoSenderReceiverProfile.NQ_FIND_BY_OPCO, params,0,1);
 		if(senderprofiles!=null && senderprofiles.size()>0)
 			return senderprofiles.get(0);
 		else
 			return null;
 		
+	}
+	
+	
+	
+	public OperatorCountry getOperatorByIpAddress(String ip_address){
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("ipaddress", ip_address);
+		List<OpcoIPAddressMap> ipaddressmap = opcoipAddressMapDAO.findByNamedQuery(OpcoIPAddressMap.NQ_FIND_BY_IP_ADDRESS, params);
+		if(ipaddressmap!=null && ipaddressmap.size()>0)
+			return ipaddressmap.get(0).getOpco();
+		else
+			return null;
 	}
 
 }

@@ -32,7 +32,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.exceptions.MessageNotSetException;
 import com.pixelandtag.mms.api.MMS;
 import com.pixelandtag.mms.api.ServiceCode;
@@ -459,7 +459,7 @@ public class BroadcastApp {
 		
 		MechanicsS.logPlay(record,conn);//we capture the 5 points earned plus the revenue we get.
 		
-		MOSms mo = new MOSms();
+		IncomingSMS mo = new IncomingSMS();
 		
 		
 			mo.setServiceid(2);
@@ -562,7 +562,7 @@ public class BroadcastApp {
 			
 			
 			
-			MOSms mo = new MOSms();
+			IncomingSMS mo = new IncomingSMS();
 			
 			String txid =  MechanicsS.generateNextTxId() ;
 			mo.setServiceid(2);
@@ -585,7 +585,7 @@ public class BroadcastApp {
 				MechanicsS.logAsSentButNotAnswered(sub.getMsisdn(), question.getId(), getConnection(conStr));
 				msg = RM0+MechanicsS.perSonalizeMessage(msg, sub, 0,  getConnection(this.conStr));
 				
-				mo = new MOSms();
+				mo = new IncomingSMS();
 				
 				txid =  MechanicsS.generateNextTxId() ;
 				mo.setServiceid(2);
@@ -653,7 +653,7 @@ public class BroadcastApp {
 			}
 			
 			
-			MOSms mo = new MOSms();
+			IncomingSMS mo = new IncomingSMS();
 			
 			String txid = MechanicsS.generateNextTxId() ;
 			mo.setServiceid(2);

@@ -24,7 +24,7 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.util.StopWatch;
 
 /**
@@ -107,7 +107,7 @@ public class MOReceiver extends HttpServlet {
 				return;
 			}
 			
-			final MOSms moMessage = new MOSms(req,cmpBean.generateNextTxId());
+			final IncomingSMS moMessage = new IncomingSMS(req,cmpBean.generateNextTxId());
 			
 			if(ds==null){
 				init();
@@ -128,6 +128,8 @@ public class MOReceiver extends HttpServlet {
 					}
 				}
 			}
+			
+			//TODO - Do away with this receiver or modify it to use new
 			
 			celcomAPI.logMO(moMessage);
 			

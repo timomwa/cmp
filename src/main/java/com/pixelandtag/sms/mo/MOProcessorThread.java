@@ -16,7 +16,7 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.sms.producerthreads.MTProducer;
@@ -154,7 +154,7 @@ public class MOProcessorThread implements Runnable {
 		while (run) {
 
 			try {
-				final Queue<MOSms> moSMSSes = celcomAPI.getLatestMO(1000);
+				final Queue<IncomingSMS> moSMSSes = celcomAPI.getLatestMO(1000);
 				// TODO - externalize the number of MO's we can fetch from db.
 				// we might need to change this during high traffic.
 
@@ -168,7 +168,7 @@ public class MOProcessorThread implements Runnable {
 
 						watch.start();
 						
-						for (MOSms moSms : moSMSSes) {
+						for (IncomingSMS moSms : moSMSSes) {
 							
 							logger.debug(">>>>>>>>>>> moSms.getProcessor_id() : "+moSms.getProcessor_id());
 							

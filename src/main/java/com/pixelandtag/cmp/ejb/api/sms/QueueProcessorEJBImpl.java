@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.MTStatus;
-import com.pixelandtag.cmp.dao.core.SMSOutQueueDAOI;
+import com.pixelandtag.cmp.dao.core.OutgoingSMSDAOI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 
 @Stateless
@@ -38,7 +38,7 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	}
 	
 	@Inject
-	private SMSOutQueueDAOI smsoutDAO;
+	private OutgoingSMSDAOI smsoutDAO;
 	
 	@Override
 	public boolean updateMessageLog(String cmp_tx_id, MTStatus status)  throws Exception{

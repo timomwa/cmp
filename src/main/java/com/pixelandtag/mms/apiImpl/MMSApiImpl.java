@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 
 import snaq.db.ConnectionPool;
 
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.mms.api.MM7Api;
 import com.pixelandtag.mms.api.MM7DeliveryReport;
 import com.pixelandtag.mms.api.MMS;

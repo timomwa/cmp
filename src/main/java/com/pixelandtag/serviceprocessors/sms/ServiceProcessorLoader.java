@@ -29,10 +29,6 @@ public class ServiceProcessorLoader implements Runnable {
 	}
 	
 	
-	
-	
-	
-	
 	public void run() {
 		
 		services = celcomAPI.getServiceProcessors();//.getServiceProcessors();

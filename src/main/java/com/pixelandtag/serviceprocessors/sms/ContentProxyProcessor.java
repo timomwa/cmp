@@ -26,7 +26,9 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.HelloWorldI;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClientWorker;
@@ -45,7 +47,6 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	private StopWatch watch;
 	private CMPResourceBeanRemote cmpbean;
 	private GenericHTTPClient httpclient;
-	private ServiceProcessorDTO serviceprocessor;
 	
 
 	public ContentProxyProcessor() throws NamingException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
@@ -73,28 +74,29 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	}
 
 	@Override
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
+		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
+		
 		try {
 			// TODO Auto-generated method stub
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			final String KEYWORD = req.getKeyword().trim();
 			final String MESSAGE = req.getMsg().trim();
-			final int serviceid = mo.getServiceid();
+			final Long serviceid = incomingsms.getServiceid();
 			final String MSISDN = req.getMsisdn();
 			
-			if(serviceprocessor==null)
-				serviceprocessor = cmpbean.getServiceProcessor(mo.getProcessor_id());
-			
 			GenericHTTPParam param = new GenericHTTPParam();
-			param.setUrl(serviceprocessor.getForwarding_url());
-			param.setId(mo.getId());
+			param.setUrl(incomingsms.getMoprocessor().getForwarding_url());
+			param.setId(incomingsms.getId());
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-			qparams.add(new BasicNameValuePair("cptxid", mo.getCmp_tx_id()));
-			qparams.add(new BasicNameValuePair("sourceaddress",mo.getSMS_SourceAddr()));	
-			qparams.add(new BasicNameValuePair("msisdn",mo.getMsisdn()));
+			qparams.add(new BasicNameValuePair("cptxid", incomingsms.getCmp_tx_id()));
+			qparams.add(new BasicNameValuePair("sourceaddress",incomingsms.getSms()));	
+			qparams.add(new BasicNameValuePair("msisdn",incomingsms.getMsisdn()));
+			//incomingsms.getMoprocessor()
 			
-			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+mo.getSMS_Message_String());
-			qparams.add(new BasicNameValuePair("sms",mo.getSMS_Message_String()));
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms());
+			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
 			
@@ -110,11 +112,11 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESPONSE: "+message);
 			
 			if(RESP_CODE==HttpStatus.SC_OK){
-				mo.setMt_Sent(message);
+				outgoingsms.setSms(message);
 			}else if(RESP_CODE==HttpStatus.SC_CREATED || RESP_CODE==HttpStatus.SC_NO_CONTENT){
 				//mo.setMt_Sent("Request received.");
 			}else if(RESP_CODE==HttpStatus.SC_INTERNAL_SERVER_ERROR){
-				mo.setMt_Sent("External application Error. Kindly try again");
+				outgoingsms.setSms("External application Error. Kindly try again");
 			}else if(RESP_CODE ==HttpStatus.SC_NOT_FOUND){
 				//mo.setMt_Sent("External application is down.");
 			}
@@ -122,15 +124,15 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			if(resp!=null && resp.getLatencyLog()!=null)
 				cmpbean.saveOrUpdate(resp.getLatencyLog());
 			
-			if(serviceprocessor.getProtocol().equalsIgnoreCase("smpp")){
-				cmpbean.sendMTSMPP(mo,serviceprocessor.getSmppid());
+			if(incomingsms.getMoprocessor().getProtocol().equalsIgnoreCase("smpp")){
+				cmpbean.sendMTSMPP(outgoingsms,incomingsms.getMoprocessor().getSmppid());
 			}
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

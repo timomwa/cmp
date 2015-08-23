@@ -17,8 +17,10 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.web.beans.RequestObject;
 import com.pixelandtag.web.triviaI.MechanicsI;
@@ -71,8 +73,9 @@ public class NewsProcessor extends GenericServiceProcessor{
 		
 	}
 	
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
 		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		Connection conn = null;
 		ResultSet rs = null;
@@ -80,12 +83,12 @@ public class NewsProcessor extends GenericServiceProcessor{
 		
 		try {
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			
 			final String KEYWORD = req.getKeyword().trim();
-			final int serviceid = 	mo.getServiceid();
+			final Long serviceid = 	incomingsms.getServiceid();
 			conn = getCon();
-			final int content_id =  Integer.valueOf(UtilCelcom.getServiceMetaData(conn,serviceid,"dynamic_contentid"));
+			final int content_id =  Integer.valueOf(UtilCelcom.getServiceMetaData(conn,serviceid.intValue(),"dynamic_contentid"));
 			final String sql = "SELECT c.`ID`, c.`Text` FROM `celcom`.`dynamiccontent_content` c WHERE c.`contentid`=? ORDER BY c.`timestamp` DESC LIMIT 0,1";
 			
 			logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
@@ -101,7 +104,7 @@ public class NewsProcessor extends GenericServiceProcessor{
 				if(rs.next()){
 					
 					String news = rs.getString("Text").trim();
-					mo.setMt_Sent(news);
+					outgoingsms.setSms(news);
 					//int newsID = rs.getInt("ID");
 				}
 				
@@ -111,10 +114,10 @@ public class NewsProcessor extends GenericServiceProcessor{
 				
 				if(unknown_keyword==null)
 					unknown_keyword = "Unknown Keyword.";
-					mo.setMt_Sent(unknown_keyword);
+				outgoingsms.setSms(unknown_keyword);
 			}
 			
-			logger.info(mo.toString());
+			logger.info(incomingsms.toString());
 		
 		} catch (Exception e) {
 			
@@ -133,7 +136,7 @@ public class NewsProcessor extends GenericServiceProcessor{
 			}catch(Exception e){}
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
 

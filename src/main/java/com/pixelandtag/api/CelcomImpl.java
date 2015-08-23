@@ -55,7 +55,7 @@ import com.pixelandtag.web.beans.MessageType;
 import com.pixelandtag.web.beans.Subscriber;
 import com.pixelandtag.web.triviaI.MechanicsI;
 import com.pixelandtag.web.triviaImpl.MechanicsS;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.Notification;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -746,12 +746,12 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#retrieveMO(java.lang.String)
 	 */
-	public MOSms retrieveMO(String cMP_Txid) {
+	public IncomingSMS retrieveMO(String cMP_Txid) {
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		MOSms mo =  null;
+		IncomingSMS mo =  null;
 		
 		try {
 			
@@ -772,7 +772,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()){
-				mo = new MOSms();
+				mo = new IncomingSMS();
 				mo.setId(rs.getInt("id"));
 				mo.setCmp_tx_id(cMP_Txid);
 				mo.setSMS_Message_String(rs.getString("MO_received"));
@@ -835,7 +835,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
-	public void logMO(MOSms mo) {
+	public void logMO(IncomingSMS mo) {
 		
 		logger.debug("LOGGING_MO_CELCOM_");
 		
@@ -1081,7 +1081,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#acknowledgeReceipt(com.pixelandtag.MO)
 	 */
-	public void acknowledgeReceipt(MOSms mo) {
+	public void acknowledgeReceipt(IncomingSMS mo) {
 		
 		
 		
@@ -1090,7 +1090,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#findMO(java.lang.String)
 	 */
-	public MOSms findMO(String cpm_txId) {
+	public IncomingSMS findMO(String cpm_txId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1551,13 +1551,13 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 	}
 
-	public Queue<MOSms> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword) {
-		ConcurrentLinkedQueue<MOSms> moSMS = null;//new ArrayList<MOSms>();
+	public Queue<IncomingSMS> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword) {
+		ConcurrentLinkedQueue<IncomingSMS> moSMS = null;//new ArrayList<MOSms>();
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		MOSms mo = null;
+		IncomingSMS mo = null;
 		
 		
 		try{
@@ -1582,11 +1582,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			while(rs.next()){
 				
 				if(rs.isFirst()){
-					moSMS = new ConcurrentLinkedQueue<MOSms>();
+					moSMS = new ConcurrentLinkedQueue<IncomingSMS>();
 					//TODO use a collections object that maintains order!
 				}
 				
-				mo = new MOSms();
+				mo = new IncomingSMS();
 				mo.setId(rs.getInt("id"));
 				mo.setOpco_tx_id(rs.getString("CMP_Txid"));
 				mo.setSMS_Message_String(rs.getString("MO_Received"));
@@ -1665,14 +1665,14 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#getLatestMO(int)
 	 */
-	public synchronized Queue<MOSms> getLatestMO(int limit) {
+	public synchronized Queue<IncomingSMS> getLatestMO(int limit) {
 		
-		Queue<MOSms> moSMS = null;//new ArrayList<MOSms>();
+		Queue<IncomingSMS> moSMS = null;//new ArrayList<MOSms>();
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		MOSms mo = null;
+		IncomingSMS mo = null;
 		
 		
 		try{
@@ -1695,11 +1695,11 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			while(rs.next()){
 				
 				if(rs.isFirst()){
-					moSMS = new LinkedList<MOSms>();
+					moSMS = new LinkedList<IncomingSMS>();
 					//TODO use a collections object that maintains order!
 				}
 				
-				mo = new MOSms();
+				mo = new IncomingSMS();
 				mo.setId(rs.getInt("id"));
 				mo.setCmp_tx_id(rs.getString("CMP_Txid"));
 				mo.setSMS_Message_String(rs.getString("MO_Received"));
@@ -1802,7 +1802,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		return null;
 	}
 
-	public void updateMessageLog(MOSms mo) {
+	public void updateMessageLog(IncomingSMS mo) {
 
 		
 		/*String sql = "insert into `celcom`.`httptosend`" +
@@ -2066,7 +2066,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 
-	public MOSms resolveKeywords(MOSms mo, Connection conn) {
+	public IncomingSMS resolveKeywords(IncomingSMS mo, Connection conn) {
 		
 		logger.info(">>>>>>V.5>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
 		

@@ -330,7 +330,11 @@ public class HttpBillingWorker implements Runnable {
 						logger.warn("No transaction id found");
 					}
 					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
-						subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+						try{
+							subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+						}catch(NumberFormatException nfe){
+							logger.warn("Number format exception. billable.getService_id() : "+billable.getService_id()+ " billable : "+billable.toString());
+						}
 					}
 				}else{
 					String transactionId = getTransactionId(resp);

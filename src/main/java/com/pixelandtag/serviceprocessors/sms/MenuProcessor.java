@@ -15,8 +15,10 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.web.beans.RequestObject;
 import com.pixelandtag.web.triviaI.MechanicsI;
@@ -71,17 +73,19 @@ public class MenuProcessor extends GenericServiceProcessor{
 	}
 
 	@Override
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
+		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		Connection conn = null;
 		
 		
 		try {
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			
 			final String KEYWORD = req.getKeyword().trim();
-			final int serviceid = 	mo.getServiceid();
+			final Long serviceid = 	incomingsms.getServiceid();
 			
 			conn = getCon();
 			
@@ -99,7 +103,7 @@ public class MenuProcessor extends GenericServiceProcessor{
 								"5. Fun & Inspiration\n"+
 								"6. Love & Family\n"+
 								"7. Sports";
-				mo.setMt_Sent(more);
+				outgoingsms.setSms(more);
 				
 			
 				
@@ -109,11 +113,11 @@ public class MenuProcessor extends GenericServiceProcessor{
 				
 				if(unknown_keyword==null)
 					unknown_keyword = "Unknown Keyword.";
-					mo.setMt_Sent(unknown_keyword);
+				outgoingsms.setSms(unknown_keyword);
 			
 			}
 			
-			logger.info(mo.toString());
+			logger.info(outgoingsms.toString());
 			
 		}catch(Exception e){
 			
@@ -127,7 +131,7 @@ public class MenuProcessor extends GenericServiceProcessor{
 		
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

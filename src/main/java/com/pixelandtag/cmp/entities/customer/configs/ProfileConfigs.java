@@ -84,7 +84,7 @@ public class ProfileConfigs implements Serializable{
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name = "profile_id_fk")
 	@Index(name="proflconfidx")
-	private SenderProfile profile;
+	private SenderReceiverProfile profile;
 	
 	
 	
@@ -136,11 +136,11 @@ public class ProfileConfigs implements Serializable{
 		this.effectiveDate = effectiveDate;
 	}
 
-	public SenderProfile getProfile() {
+	public SenderReceiverProfile getProfile() {
 		return profile;
 	}
 
-	public void setProfile(SenderProfile profile) {
+	public void setProfile(SenderReceiverProfile profile) {
 		this.profile = profile;
 	}
 	

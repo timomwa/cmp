@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.Settings;
 import com.pixelandtag.axiata.teasers.producer.BroadcastApp;
 import com.pixelandtag.customAnnotations.ReVisit;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.MessageNotSetException;
 import com.pixelandtag.exceptions.NoSettingException;
@@ -4007,7 +4007,7 @@ public class MechanicsS{
 		
 
 
-	public static void toStatsLog(MOSms mo, Connection conn) {
+	public static void toStatsLog(IncomingSMS mo, Connection conn) {
 		
 		PreparedStatement pstmt = null;
 		

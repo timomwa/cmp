@@ -20,12 +20,13 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.Settings;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.CacheResetCue;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
@@ -79,28 +80,18 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String SUBSCRIPTION_CONFIRMATION = "ON";
 	public static final String SUBSCRIPTION_ADVICE = "SUBSCRIPTION_ADVICE";
 
-	private static final String ACK_SQL = "UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?";
-
-	private static final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
-
-	private static final String SEND_MT_2 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?,  re_tries=re_tries+1";
-
-	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword, price, subscription) " +
-						"VALUES(?,?,?,?,?,?,?)";
-	private int cacherefresh_frequency = 100;
-
+	
+	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, price, subscription) " +
+						"VALUES(?,?,?,?,?)";
+	
 
 	protected String subscriptionText;
 	protected String unsubscriptionText;
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
 	//private Map<Long, ServiceProcessorDTO> serviceProcessorCache = new HashMap<Long,ServiceProcessorDTO>();
-	private Map<Long, MOProcessor> serviceProcessorCache = new HashMap<Long,MOProcessor>();
-	private Map<Long, OpcoSenderProfile> opcosenderProfileCache = new HashMap<Long,OpcoSenderProfile>();
+	//private Map<Long, MOProcessor> serviceProcessorCache = new HashMap<Long,MOProcessor>();
+	//private Map<Long, OpcoSenderReceiverProfile> opcosenderProfileCache = new HashMap<Long,OpcoSenderReceiverProfile>();
 	
 	
 	public String getSubscriptionText() {
@@ -146,9 +137,9 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		this.max_queue_size = size;
 		
 		if(this.max_queue_size>0)
-			moMsgs = new LinkedBlockingDeque<MOSms>(this.max_queue_size);
+			moMsgs = new LinkedBlockingDeque<IncomingSMS>(this.max_queue_size);
 		else
-			moMsgs = new LinkedBlockingDeque<MOSms>();
+			moMsgs = new LinkedBlockingDeque<IncomingSMS>();
 		
 		
 	}
@@ -158,7 +149,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	/**
 	 * internal message queue
 	 */
-	private volatile BlockingDeque<MOSms> moMsgs = null;
+	private volatile BlockingDeque<IncomingSMS> moMsgs = null;
 	
 	
 	protected boolean run = true;
@@ -173,7 +164,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.api.ServiceProcessorI#enqueue(com.pixelandtag.celcom.entities.MOSms)
 	 */
-	public boolean submit(MOSms mo_){
+	public boolean submit(IncomingSMS mo_){
 		boolean success = false;
 		try{
 			success =  this.moMsgs.offerLast(mo_);
@@ -184,23 +175,23 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	}
 	
 	
-	private MOSms bill(MOSms mo_) {
+	private OutgoingSMS bill(OutgoingSMS outgoingsms) {
 		
-		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
-		logger.debug("mo_.getPrice().doubleValue() "+mo_.getPrice().doubleValue());
-		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+mo_.getPrice().compareTo(BigDecimal.ZERO));
-		if(mo_.getPrice().compareTo(BigDecimal.ZERO)<=0){//if price is zero
-			mo_.setCharged(true);
-			mo_.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
+		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(OutgoingSMS) ");
+		logger.debug("mo_.getPrice().doubleValue() "+outgoingsms.getPrice().doubleValue());
+		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+outgoingsms.getPrice().compareTo(BigDecimal.ZERO));
+		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0){//if price is zero
+			outgoingsms.setCharged(true);
+			outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
 			logger.debug(" returning.... price is zero ");
-			return mo_;
+			return outgoingsms;
 		}
 		
 		Billable billable = null;
 		
 		try{
 			
-			billable = getEJB().find(Billable.class, "cp_tx_id",mo_.getCmp_tx_id());
+			billable = getEJB().find(Billable.class, "cp_tx_id",outgoingsms.getCmp_tx_id());
 			
 			
 		}catch(Exception e){
@@ -213,29 +204,28 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		if(billable==null)
 			billable  = new Billable();
 		else
-			return mo_;
+			return outgoingsms;
 		
 		
 
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(mo_.getCmp_tx_id());
+		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
 		billable.setDiscount_applied("0");
-		billable.setEvent_type(mo_.getEventType());
 		billable.setIn_outgoing_queue(0l);
-		billable.setKeyword(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		billable.setKeyword(outgoingsms.getSms().split("\\s")[0].toUpperCase());
 		billable.setMaxRetriesAllowed(1L);
-		billable.setMessage_id(mo_.getId());
-		billable.setMsisdn(mo_.getMsisdn());
-		billable.setOperation(mo_.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
-		billable.setPrice(mo_.getPrice());
+		billable.setMessage_id(outgoingsms.getId());
+		billable.setMsisdn(outgoingsms.getMsisdn());
+		billable.setOperation(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+		billable.setPrice(outgoingsms.getPrice());
 		billable.setPriority(0l);
 		billable.setProcessed(0L);
 		billable.setRetry_count(0L);
-		billable.setService_id(mo_.getSMS_Message_String().split("\\s")[0].toUpperCase());
-		billable.setShortcode(mo_.getSMS_SourceAddr());		
-		billable.setCp_tx_id(mo_.getCmp_tx_id());
-		billable.setEvent_type(mo_.getEventType()!=null ? mo_.getEventType() : EventType.SUBSCRIPTION_PURCHASE);
-		billable.setPricePointKeyword(mo_.getPricePointKeyword());
+		billable.setService_id(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setShortcode(outgoingsms.getShortcode());		
+		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
+		billable.setEvent_type(outgoingsms.getEvent_type()!=null ? EventType.get(outgoingsms.getEvent_type()) : EventType.SUBSCRIPTION_PURCHASE);
+		billable.setPricePointKeyword(outgoingsms.getPrice_point_keyword());
 		logger.debug(" before save "+billable.getId());
 		
 		try{
@@ -248,10 +238,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		}
 		
 		logger.debug(" after save "+billable.getId());
-		mo_.setBillingStatus(BillingStatus.WAITING_BILLING);
-		mo_.setPriority(0);
+		outgoingsms.setBilling_status(BillingStatus.WAITING_BILLING);
+		outgoingsms.setPriority(0);
 		logger.debug(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
-		return mo_;
+		return outgoingsms;
 		
 		
 	}
@@ -372,15 +362,15 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
 	/**
 	 * TODO turn all connection objects to CMPResourceBean
-	 * @param mo
+	 * @param incomingsms
 	 * @param conn
 	 */
 	
-	protected void toStatsLog(MOSms mo, Connection conn) {
+	protected void toStatsLog(IncomingSMS incomingsms, Connection conn) {
 		
 		try {
 			
-			getEJB().toStatsLog(mo,TO_STATS_LOG);	
+			getEJB().toStatsLog(incomingsms,TO_STATS_LOG);	
 			
 		} catch (Exception e) {
 			log(e);
@@ -417,19 +407,20 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 				
 				try{
 					
-					final MOSms mo = this.moMsgs.takeFirst();//will block here while the queue is empty
+					IncomingSMS mo = this.moMsgs.takeFirst();//will block here while the queue is empty
 					
-					acknowledge(mo.getId());
+					mo.setMo_ack(Boolean.TRUE);
+					mo = getEJB().saveOrUpdate(mo);
 					
 					if(!(mo.getCmp_tx_id().isEmpty())){
 						
 						setBusy(true);//set to busy so that it's not picked from the pool.
 					
-						final MOSms mo_tmp = process(mo);//this will actually process the stuff.. uses the subclass to process..
+						final OutgoingSMS outgoingsms = process(mo);//this will actually process the stuff.. uses the subclass to process..
 						
-						logger.debug("\n\n\n\n\n\n>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> "+mo_tmp.toString()+"\n\n\n\n");
+						logger.debug("\n\n\n\n\n\n>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> "+outgoingsms.toString()+"\n\n\n\n");
 						
-						sendMT(mo_tmp);
+						sendMT(outgoingsms);
 					
 						setBusy(false);
 					
@@ -485,13 +476,15 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 * to implement it because the function is just the same no matter the kind
 	 * of processor
 	 */
-	public boolean acknowledge(long message_log_id) {
+	@Override
+	public boolean acknowledge(IncomingSMS incomingsms) {
 		
 		boolean success = false;
 		
 		try {
 			
-			success = getEJB().acknowledge(message_log_id);
+			incomingsms.setMo_ack(Boolean.TRUE);
+			success = getEJB().saveOrUpdate(incomingsms).getId().compareTo(0L)>0;
 			
 		} catch (Exception e) {
 			
@@ -510,11 +503,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
 	/**
 	 * Insert into http to send
-	 * @param mo
+	 * @param outgoingSMS
 	 */
-	public void  sendMT(MOSms mo) {
+	@Override
+	public void  sendMT(OutgoingSMS outgoingSMS) {
 		
-		mo  = bill(mo);
+		outgoingSMS  = bill(outgoingSMS);
 		
 		BaseEntityI cmpBean = getEJB();
 		
@@ -523,29 +517,9 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			int max_retry = 5;
 			int count = 0;
 			
-			
-			//CacheResetCue cachequeue = cmpBean.find(CacheResetCue.class);
-			
-			//TODO have a config to reset the caches when they change.
-			MOProcessor processor = serviceProcessorCache.get(mo.getProcessor_id());
-			if(processor==null){
-				processor = cmpBean.find(MOProcessor.class, mo.getProcessor_id());
-				serviceProcessorCache.put(mo.getProcessor_id(), processor);
-			}
-			
-			OpcoSenderProfile opcoprofile = opcosenderProfileCache.get(mo.getOpcoid());
-			if(opcoprofile==null){
-				opcoprofile = cmpBean.getopcosenderProfileFromOpcoId(mo.getOpcoid());
-				opcosenderProfileCache.put(mo.getOpcoid(), opcoprofile);
-			}
-			
-			OutgoingSMS outgoing  = mo.converttoOutgoingSMS();
-			outgoing.setMoprocessor(processor);
-			outgoing.setOpcosenderprofile(opcoprofile);
-			
-			boolean success = cmpBean.saveOrUpdate(outgoing).getId().compareTo(0L)>0;
+			boolean success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
 			while(!success && count<=max_retry){
-				success = cmpBean.saveOrUpdate(outgoing).getId().compareTo(0L)>0;
+				success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
 			}
 			
 			

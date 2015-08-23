@@ -28,15 +28,15 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 @Table(name = "opco_senderprofiles")
 @NamedQueries({
 	@NamedQuery(
-			name = OpcoSenderProfile.NQ_FIND_BY_OPCO,
-			query = "select osp from OpcoSenderProfile osp where osp.opco=:opco AND osp.active=:active  order by osp.pickorder desc"
+			name = OpcoSenderReceiverProfile.NQ_FIND_BY_OPCO,
+			query = "select osp from OpcoSenderReceiverProfile osp where osp.opco=:opco AND osp.active=:active  order by osp.pickorder desc"
 	),
 	@NamedQuery(
-			name = OpcoSenderProfile.NQ_LIST_ACTIVE,
-			query = "select osp from OpcoSenderProfile osp where osp.active=:active  order by osp.pickorder desc"
+			name = OpcoSenderReceiverProfile.NQ_LIST_ACTIVE,
+			query = "select osp from OpcoSenderReceiverProfile osp where osp.active=:active  order by osp.pickorder desc"
 	)
 })
-public class OpcoSenderProfile implements Serializable{
+public class OpcoSenderReceiverProfile implements Serializable{
 	
 
 	/**
@@ -64,7 +64,7 @@ public class OpcoSenderProfile implements Serializable{
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name = "profile_id_fk", nullable=false)
 	@Index(name="opcproflidx")
-	private SenderProfile profile;
+	private SenderReceiverProfile profile;
 	
 	@Column(name="pickorder", nullable=false)
 	@Index(name="opcproflidx")
@@ -116,12 +116,12 @@ public class OpcoSenderProfile implements Serializable{
 	}
 
 
-	public SenderProfile getProfile() {
+	public SenderReceiverProfile getProfile() {
 		return profile;
 	}
 
 
-	public void setProfile(SenderProfile profile) {
+	public void setProfile(SenderReceiverProfile profile) {
 		this.profile = profile;
 	}
 

@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.producerthreads.MTProducer;
 
@@ -74,9 +74,9 @@ public class OutgoingQueueRouter extends Thread {
 	
 	private void startWorkers() {
 		
-		List<OpcoSenderProfile> profiles = opcosenderprofEJB.getAllActiveProfiles();
+		List<OpcoSenderReceiverProfile> profiles = opcosenderprofEJB.getAllActiveProfiles();
 		
-		for(OpcoSenderProfile opcoprofile : profiles){
+		for(OpcoSenderReceiverProfile opcoprofile : profiles){
 			Integer threads = opcoprofile.getWorkers();
 			logger.info("\n\nAbout to initialize "+threads+" sender threads for opco with code "
 					+opcoprofile.getOpco().getCode()

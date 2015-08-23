@@ -5,6 +5,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,8 +18,8 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name = "sender_profiles")
-public class SenderProfile implements Serializable{
+@Table(name = "sender_receiver_profile")
+public class SenderReceiverProfile implements Serializable{
 	
 	
 	/**
@@ -36,8 +38,12 @@ public class SenderProfile implements Serializable{
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "effectiveDate", nullable = false)
-	@Index(name="opcconfidx")
+	@Index(name="opccoefdidx")
 	private Date effectiveDate;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "type", nullable = false)
+	private ProfileType profiletype;
 	
 	
 	@Column(name = "active", nullable = false)
@@ -95,11 +101,9 @@ public class SenderProfile implements Serializable{
 
 	@Override
 	public String toString() {
-		return "SenderProfile [id=" + id + ", name=" + name
-				+ ", effectiveDate=" + effectiveDate + ", active=" + active
-				+ "]";
+		return "SenderReceiverProfile [id=" + id + ", name=" + name
+				+ ", effectiveDate=" + effectiveDate + ", profiletype="
+				+ profiletype + ", active=" + active + "]";
 	}
-	
-	
 	
 }

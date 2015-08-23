@@ -15,8 +15,10 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.mms.apiImpl.MMSApiImpl;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.web.beans.MessageType;
@@ -88,20 +90,22 @@ public class UnknownKeyword extends GenericServiceProcessor {
 	}
 
 	@Override
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
+		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		Connection conn = null;
 		try {
 			conn = getCon();
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			final String MSISDN = req.getMsisdn();
 		
 			int language_id = UtilCelcom.getSubscriberLanguage(MSISDN, conn);
 			
 			String response = UtilCelcom.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, conn, language_id) ;
 			
-			mo.setMt_Sent(response);
+			outgoingsms.setSms(response);
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -111,7 +115,7 @@ public class UnknownKeyword extends GenericServiceProcessor {
 				conn.close();
 			}catch(Exception e){}
 		}
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

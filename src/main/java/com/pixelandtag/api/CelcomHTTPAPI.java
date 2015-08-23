@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Queue;
 
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.Notification;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -51,14 +51,14 @@ public interface CelcomHTTPAPI extends Settings {
 	 * 
 	 * @param mo - com.inmobia.celcom.MO
 	 */
-	public void logMO(MOSms mo);
+	public void logMO(IncomingSMS mo);
 	
 	
 	/**
 	 * Retrieves an mo message from the database.
 	 * @return
 	 */
-	public MOSms retrieveMO(String cMP_Txid);
+	public IncomingSMS retrieveMO(String cMP_Txid);
 	
 	
 	/**
@@ -73,7 +73,7 @@ public interface CelcomHTTPAPI extends Settings {
 	 * We should send to the operator
 	 * @param mo - com.inmobia.celcom.MO
 	 */
-	public void acknowledgeReceipt(MOSms mo);
+	public void acknowledgeReceipt(IncomingSMS mo);
 	
 	
 	
@@ -99,7 +99,7 @@ public interface CelcomHTTPAPI extends Settings {
 	 * @param cpm_txId - java.lang.String
 	 * @return com.inmobia.celcom.MO if found, null if none is found.
 	 */
-	public MOSms findMO(String cpm_txId);
+	public IncomingSMS findMO(String cpm_txId);
 	
 	
 	/**
@@ -161,17 +161,17 @@ public interface CelcomHTTPAPI extends Settings {
 	public boolean containsUnicode(String sms);
 	
 	
-	public Queue<MOSms> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword);
+	public Queue<IncomingSMS> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword);
 	
 	
-	public Queue<MOSms> getLatestMO(int limit);
+	public Queue<IncomingSMS> getLatestMO(int limit);
 	
 	
-	public void updateMessageLog(MOSms mo);
+	public void updateMessageLog(IncomingSMS mo);
 	
 	public Queue<ServiceProcessorDTO> getServiceProcessors();
 	
-	public MOSms resolveKeywords(MOSms mo, Connection conn);
+	public IncomingSMS resolveKeywords(IncomingSMS mo, Connection conn);
 	
 	public void closeConnectionIfNecessary();
 	

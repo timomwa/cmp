@@ -20,9 +20,13 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
@@ -34,7 +38,6 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
-import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
@@ -46,6 +49,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private LocationBeanI location_ejb; 
 	private CMPResourceBeanRemote cmp_bean;
 	private SubscriptionBeanI subscriptionBean;
+	private OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private InitialContext context;
 	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = false;
@@ -69,35 +73,37 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
 		cmp_bean = (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
-		 logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
+		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
+		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
 	@Override
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
 		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
-		logger.info("\n\n\tIS SUBSCRIPTION?? "+mo.isSubscription());
+		logger.info("\n\n\tIS SUBSCRIPTION?? "+incomingsms.getIsSubscription());
 		
 		try {
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			final String KEYWORD = req.getKeyword().trim();
 			final String MESSAGE = req.getMsg().trim();
-			final int serviceid = 	mo.getServiceid();
+			final Long serviceid = 	incomingsms.getServiceid();
 			final String MSISDN = req.getMsisdn();
 			
 			int language_id = 1;
 		
-			Person person = datingBean.getPerson(mo.getMsisdn());
+			Person person = datingBean.getPerson(incomingsms.getMsisdn());
 			if(person==null)
-				person = datingBean.register(mo.getMsisdn());
+				person = datingBean.register(incomingsms.getMsisdn());
 			
 			PersonDatingProfile profile = datingBean.getProfile(person);
 			
 			if(KEYWORD.equalsIgnoreCase("BUNDLES")){
 				String submenustring = cmp_bean.getSubMenuString(KEYWORD,language_id);
-				mo.setMt_Sent(submenustring+cmp_bean.getMessage(MAIN_MENU_ADVICE,language_id));//get all the sub menus there.
-			
+				outgoingsms.setSms(submenustring+cmp_bean.getMessage(MAIN_MENU_ADVICE,language_id));//get all the sub menus there.
+				
 			}else if(KEYWORD.equalsIgnoreCase("LOGIN")){
 				
 				String msg = "";
@@ -118,9 +124,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				datingBean.changeStatusIfSubscribed(MSISDN, services, SubscriptionStatus.confirmed);
 				
 				
-				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent(msg);
-				return mo;
+				outgoingsms.setPrice(BigDecimal.ZERO);
+				outgoingsms.setSms(msg);
+				return outgoingsms;
 				
 			}else if(KEYWORD.equalsIgnoreCase("LOGOUT")){
 				String msg = "";
@@ -141,18 +147,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				datingBean.changeStatusIfSubscribed(MSISDN, services, SubscriptionStatus.temporarily_suspended);
 				
 				
-				mo.setPrice(BigDecimal.ZERO);
-				mo.setMt_Sent(msg);
-				return mo;
+				outgoingsms.setPrice(BigDecimal.ZERO);
+				outgoingsms.setSms(msg);
+				return outgoingsms;
 				
 				
 			}else if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
 				
 				if(person.getId()>0 && profile==null){//Success registering/registered but no profile
 					
-					mo = startProfileQuestions(mo,person);
+					outgoingsms = startProfileQuestions(incomingsms,person);
 					
-					return mo;
+					return outgoingsms;
 				}
 				
 				Gender pref_gender = profile.getPreferred_gender();
@@ -177,7 +183,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
 					String msg = datingBean.getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id);
-					mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+					outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
 				}else{
 					try{
 						SystemMatchLog sysmatchlog = new SystemMatchLog();
@@ -213,9 +219,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					msg = msg.replaceAll(GENDER_PRONOUN_TAG2, gender_pronoun2);
 					msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
 					msg = msg.replaceAll(PROFILE_TAG, sb.toString());
-					mo.setMt_Sent(msg);
+					outgoingsms.setSms(msg);
 					
-					//notify person b?
 				}
 				
 				
@@ -237,25 +242,25 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(!subvalid || allow_multiple_plans  ){
 					
 					try{
-						mo = datingBean.renewSubscription(mo,smsservice0.getId(),AlterationMethod.self_via_sms);
+						outgoingsms = datingBean.renewSubscription(incomingsms,smsservice0.getId(),AlterationMethod.self_via_sms);
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
-						mo.setMt_Sent(null);//set nul so that we don't send it out..
-						mo.setPrice(BigDecimal.ZERO);
+						outgoingsms.setSms(null);//set nul so that we don't send it out..
+						outgoingsms.setPrice(BigDecimal.ZERO);
 					}
 					
 				}else{
-					mo.setPrice(BigDecimal.ZERO);
-					mo.setMt_Sent("You already have a valid subscription. Dial *329# to find a friend to chat with, or reply with FIND");
+					outgoingsms.setPrice(BigDecimal.ZERO);
+					outgoingsms.setSms("You already have a valid subscription. Dial *329# to find a friend to chat with, or reply with FIND");
 				}
 				
 			}else if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
 				
-				if(mo.isSubscription()){//if it's subscription push, for this service we return no message.
-					mo.setMt_Sent(null);
-					mo.setPrice(BigDecimal.ZERO);
-					return mo;
+				if(outgoingsms.getIsSubscription()){//if it's subscription push, for this service we return no message.
+					outgoingsms.setSms(null);
+					outgoingsms.setPrice(BigDecimal.ZERO);
+					return outgoingsms;
 				}
 				
 				List<String> services = new ArrayList<String>();
@@ -271,7 +276,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
 					
-					mo = processDating(mo,person);
+					outgoingsms = processDating(incomingsms,person);
 						
 				}else if((profile==null || !profile.getProfileComplete() || !subvalid) ){//No profile or incomplete profile
 					
@@ -294,59 +299,61 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						logger.info("\n\n\n\tmsg::::>>> "+msg);
 						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
 						msg = msg.replaceAll(SERVICENAME_TAG, dating.getService_name());
-						mo.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
-						mo.setMt_Sent(msg);//tell them to renew
-						mo.setPriority(3);
-					}else{//No profile, so they create
-						//(profile!=null &&  !profile.getProfileComplete() ){//if they've got a profile but not a complet
-						mo = processDating(mo,person);
+						outgoingsms.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
+						outgoingsms.setSms(msg);//tell them to renew
+						outgoingsms.setPriority(3);
+					}else{
+						outgoingsms = processDating(incomingsms,person);
 					}
 				}
 			}else{
 				String msg = datingBean.getMessage(UNKNOWN_KEYWORD_ADVICE, language_id);
-				mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
+				outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, KEYWORD));
 			}
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
-		return mo;
+		return outgoingsms;
 	}
 
 
 
-	private MOSms processDating(MOSms mo, Person person) throws Exception { 
+	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person) throws Exception { 
 					
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		if(person==null)
-			person = datingBean.register(mo.getMsisdn());
+			person = datingBean.register(incomingsms.getMsisdn());
 		
 		
 		PersonDatingProfile profile = datingBean.getProfile(person);
 		
 		if(profile!=null && profile.getProfileComplete()){
-			mo = chat(mo,profile,person);
+			outgoingsms = chat(incomingsms,profile,person);
 		}
 				
 		if(person.getId()>0 && profile==null){//Success registering/registered but no profile
 			
-			mo = startProfileQuestions(mo,person);
+			outgoingsms = startProfileQuestions(incomingsms,person);
 		
 		}else{
 			
 			if(!profile.getProfileComplete()){
 				
-				mo = completeProfile(mo,person,profile);
+				outgoingsms = completeProfile(incomingsms,person,profile);
 			
 			}
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
-	private MOSms startProfileQuestions(MOSms mo, Person person) throws DatingServiceException {
+	private OutgoingSMS startProfileQuestions(IncomingSMS incomingsms, Person person) throws DatingServiceException {
 
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
+		
 		try{
-				final RequestObject req = new RequestObject(mo);
+				final RequestObject req = new RequestObject(incomingsms);
 				final String MSISDN = req.getMsisdn();
 				int language_id = 1;
 				
@@ -365,7 +372,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
 				logger.debug("QUESTION::: "+question.getQuestion());
-				mo.setMt_Sent(msg+ SPACE +question.getQuestion());
+				outgoingsms.setSms(msg+ SPACE +question.getQuestion());
 				
 				QuestionLog ql = new QuestionLog();
 				
@@ -376,15 +383,17 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			throw new DatingServiceException("Sorry, problem occurred, please try again.",exp);
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
-	private MOSms completeProfile(MOSms mo, Person person,
+	private OutgoingSMS completeProfile(IncomingSMS incomingSMS, Person person,
 			PersonDatingProfile profile) throws DatingServiceException {
+		
+		OutgoingSMS outgoingsms = incomingSMS.convertToOutgoing();
 		
 		try{
 			
-				final RequestObject req = new RequestObject(mo);
+				final RequestObject req = new RequestObject(incomingSMS);
 				final String KEYWORD = req.getKeyword().trim();
 				final String MESSAGE = req.getMsg().trim();
 				final String MSISDN = req.getMsisdn();
@@ -410,12 +419,12 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						person.setAgreed_to_tnc(Boolean.TRUE);
 						person = datingBean.saveOrUpdate(person);
 					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
-						mo.setMt_Sent("Ok. Bye");
-						return mo;
+						outgoingsms.setSms("Ok. Bye");
+						return outgoingsms;
 					}else{
 						String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id);
-						mo.setMt_Sent(msg+SPACE+previousQuestion.getQuestion());
-						return mo;
+						outgoingsms.setSms(msg+SPACE+previousQuestion.getQuestion());
+						return outgoingsms;
 					}
 						
 				}
@@ -432,13 +441,13 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						profile.setUsername(KEYWORD);
 					}else{
 						String msg = "";
-						if(KEYWORD.equalsIgnoreCase(mo.getSMS_SourceAddr())){
+						if(KEYWORD.equalsIgnoreCase(incomingSMS.getShortcode())){
 							msg = datingBean.getMessage(DatingMessages.REPLY_WITH_USERNAME, language_id);
 						}else{
 							msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
 						}
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, KEYWORD));
+						return outgoingsms;
 					
 					}
 					
@@ -459,8 +468,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						}catch(DatingServiceException dse){
 							logger.error(dse.getMessage(), dse);
 						}
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, KEYWORD));
+						return outgoingsms;
 					}
 				}
 				
@@ -473,22 +482,22 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
 						msg = msg.replaceAll(AGE_TAG, age.intValue()+"");
-						mo.setMt_Sent(msg);
-						return mo;
+						outgoingsms.setSms(msg);
+						return outgoingsms;
 					}
 					
 					if(age.compareTo(new BigDecimal(100l))>=0){
 						String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, language_id);
 						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
 						msg = msg.replaceAll(AGE_TAG, age.intValue()+"");
-						mo.setMt_Sent(msg);
-						return mo;
+						outgoingsms.setSms(msg);
+						return outgoingsms;
 					}
 					
 					if(age.compareTo(new BigDecimal(18l))<0){
 						String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
+						return outgoingsms;
 					}
 					
 					dob = datingBean.calculateDobFromAge(age);
@@ -503,10 +512,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						location_is_only_number = true;
 					}catch(java.lang.NumberFormatException nfe){
 					}
-					if(KEYWORD.contains("*") || KEYWORD.equalsIgnoreCase(mo.getSMS_SourceAddr()) || MESSAGE.equalsIgnoreCase(mo.getSMS_SourceAddr()) || location_is_only_number){
+					if(KEYWORD.contains("*") || KEYWORD.equalsIgnoreCase(incomingSMS.getShortcode()) || MESSAGE.equalsIgnoreCase(incomingSMS.getShortcode()) || location_is_only_number){
 						String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
+						return outgoingsms;
 					}else{
 						profile.setLocation(MESSAGE);
 						
@@ -526,14 +535,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						age = new BigDecimal(KEYWORD);
 					}catch(java.lang.NumberFormatException nfe){
 						String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+						return outgoingsms;
 					}
 					
 					if(age.compareTo(new BigDecimal(18l))<0){
 						String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG,  profile.getUsername()));
+						return outgoingsms;
 					}
 					profile.setPreferred_age(age);
 				}
@@ -550,8 +559,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						}catch(DatingServiceException dse){
 							logger.error(dse.getMessage(), dse);
 						}
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, KEYWORD));
-						return mo;
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, KEYWORD));
+						return outgoingsms;
 					}
 					
 				}
@@ -563,7 +572,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				if(question!=null){
 					logger.debug("QUESTION::: "+question.getQuestion());
-					mo.setMt_Sent(question.getQuestion().replaceAll(USERNAME_TAG, profile.getUsername()));
+					outgoingsms.setSms(question.getQuestion().replaceAll(USERNAME_TAG, profile.getUsername()));
 					
 					QuestionLog ql = new QuestionLog();
 					
@@ -593,7 +602,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					if(match==null){
 						
 						String msg = datingBean.getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
-						mo.setMt_Sent(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
+						outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
 						
 					}else{
 						try{
@@ -633,7 +642,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						msg = msg.replaceAll(GENDER_PRONOUN_TAG2, gender_pronoun2);
 						msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
 						msg = msg.replaceAll(PROFILE_TAG, sb.toString());
-						mo.setMt_Sent(msg);
+						outgoingsms.setSms(msg);
 					}
 					
 				}
@@ -644,14 +653,16 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
-	private MOSms chat(MOSms mo, PersonDatingProfile profile, Person person) throws DatingServiceException {
-				
+	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person) throws DatingServiceException {
+			
+		OutgoingSMS outgoingsms = incomingSMS.convertToOutgoing();
+		
 		try{
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingSMS);
 			final String KEYWORD = req.getKeyword().trim();
 			final String MESSAGE = req.getMsg().trim();
 			
@@ -676,7 +687,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				log.setDest_person_id(destination_person.getPerson().getId());
 				String chatLog = (allow_number_sharing ? MESSAGE : MESSAGE.replaceAll("\\d{3,10}", "*"));
 				log.setMessage(directMsg ? (destination_person.getUsername() +CHAT_USERNAME_SEPERATOR_DIRECT+ chatLog) : chatLog);
-				mo.setPrice(BigDecimal.ZERO);
+				incomingSMS.setPrice(BigDecimal.ZERO);
 				
 				Gender gender = profile.getGender();
 				Gender dest_gender = destination_person.getGender();
@@ -685,7 +696,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(destination_person.getPerson().getLoggedin()==null || destination_person.getPerson().getLoggedin()==true){
 					log.setOffline_msg(Boolean.FALSE);
 					
-					MOSms chatMT  = mo.clone();
+					OutgoingSMS chatMT  = incomingSMS.convertToOutgoing();
 					chatMT.setMsisdn(destination_person.getPerson().getMsisdn());
 					String msg = "";
 					if(!directMsg){//if it's not a direct message, then put advice
@@ -694,37 +705,36 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}else{
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
-					chatMT.setMt_Sent(msg);
+					chatMT.setSms(msg);
 					chatMT.setCmp_tx_id(generateNextTxId());
 					chatMT.setPriority(0);//highest priority possible
 					chatMT.setPrice(BigDecimal.ZERO);
-					chatMT.setCMP_AKeyword(mo.getCMP_AKeyword());
-					chatMT.setCMP_SKeyword(mo.getCMP_SKeyword());
-					chatMT.setOpcoid(destination_person.getPerson().getOpco().getId());
+					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
+					chatMT.setOpcosenderprofile(opcotrxprofile);
 					sendMT(chatMT);
 					String tailmsg = "";
 					if(!person.getLoggedin()){
 						tailmsg = ". However, you're offline. This means you'll not be able to receive any messages from anyone or '"+destination_person.getUsername()+"'. Reply with the word LOGIN to log in.";
 					}
 					
-					mo.setMt_Sent("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
+					outgoingsms.setSms("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
-					mo.setPrice(BigDecimal.ZERO);
+					incomingSMS.setPrice(BigDecimal.ZERO);
 					String pronoun2 = dest_pronoun.equalsIgnoreCase("her") ? "she" : "he";
-					mo.setMt_Sent("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with "+dest_pronoun+" when "+pronoun2+" gets back online.");
+					outgoingsms.setSms("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with "+dest_pronoun+" when "+pronoun2+" gets back online.");
 				}
 				
 				log = datingBean.saveOrUpdate(log);
-				return mo;
+				return outgoingsms;
 			}else if(destination_person!=null && !destination_person.getPerson().getActive()){
 				Gender gender  = destination_person.getGender();
 				String pronoun = gender.equals(Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_INCHAT_F, language_id) : datingBean.getMessage(GENDER_PRONOUN_INCHAT_M, language_id);
 				String msg = "Sorry, \""+destination_person.getUsername()+"\" has unsubcribed from the chat service and you cannot chat with "+pronoun+". To find a different person to chat with, reply with \"FIND\" and the system will find a match for you based on your profile.";
-				mo.setMt_Sent(msg);
-				return mo;
+				outgoingsms.setSms(msg);
+				return outgoingsms;
 			}else{//destination person not found.. Check in their friends list. Ask them whom they want to chat to..
-				mo.setPrice(BigDecimal.ZERO);
+				incomingSMS.setPrice(BigDecimal.ZERO);
 				destination_person = datingBean.getProfileOfLastPersonIsentMessageTo(person,0L,TimeUnit.MINUTE);//last 1 year
 				String msg = "";
 				if(destination_person!=null){
@@ -736,8 +746,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}else{
 					msg = "Sorry, no user with the username \""+KEYWORD+"\". ";
 				}
-				mo.setMt_Sent(msg);//get their friendslist/match
-				return mo;
+				outgoingsms.setSms(msg);//get their friendslist/match
+				return outgoingsms;
 				
 			}
 		

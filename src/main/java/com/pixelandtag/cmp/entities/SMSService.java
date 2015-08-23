@@ -7,9 +7,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -35,9 +38,9 @@ public class SMSService implements Serializable {
 	private Long id;
 	
 	
-	
-	@Column(name="mo_processorFK")
-	private Long mo_processorFK;
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="mo_processorFK", nullable=false)
+	private MOProcessor moprocessor;
 	
 	@Column(name="cmd")
 	private String cmd;
@@ -115,12 +118,12 @@ public class SMSService implements Serializable {
 		this.id = id;
 	}
 
-	public Long getMo_processorFK() {
-		return mo_processorFK;
+	public MOProcessor getMoprocessor() {
+		return moprocessor;
 	}
 
-	public void setMo_processorFK(Long mo_processorFK) {
-		this.mo_processorFK = mo_processorFK;
+	public void setMoprocessor(MOProcessor moprocessor) {
+		this.moprocessor = moprocessor;
 	}
 
 	public String getCmd() {
@@ -215,7 +218,7 @@ public class SMSService implements Serializable {
 		return tailText_notsubscribed;
 	}
 
-	public void setTailText_notsubscribed(String tailText_notsubscribed) {
+	public void setTailText_notsubscribed(String tailText_notsubscribed) {	
 		this.tailText_notsubscribed = tailText_notsubscribed;
 	}
 
@@ -268,7 +271,7 @@ public class SMSService implements Serializable {
 		JSONObject jsonObj = new JSONObject();
 		try{
 			jsonObj.put("id", getId());
-			jsonObj.put("mo_processorFK", getMo_processorFK());
+			jsonObj.put("mo_processorFK", getMoprocessor().getId());
 			jsonObj.put("cmd", getCmd());
 			jsonObj.put("keyword", getCmd());
 			jsonObj.put("push_unique", getPush_unique());

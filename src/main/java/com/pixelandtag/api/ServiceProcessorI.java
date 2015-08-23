@@ -4,7 +4,9 @@ import java.sql.Connection;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.entities.IncomingSMS;
 
 public interface ServiceProcessorI extends Runnable{
 	
@@ -15,9 +17,9 @@ public interface ServiceProcessorI extends Runnable{
 	 * @param mo
 	 * @return
 	 */
-	public MOSms process(MOSms mo);
+	public OutgoingSMS process(IncomingSMS incomingSMS);
 	
-	public boolean acknowledge(long message_log_id);
+	public boolean acknowledge(IncomingSMS incomingsms);
 	
 	
 	public void run();
@@ -43,7 +45,7 @@ public interface ServiceProcessorI extends Runnable{
 	 * @return true if the MOSms object was added to the queue successfully, 
 	 * else return false
 	 */
-	public boolean submit(MOSms mo);
+	public boolean submit(IncomingSMS mo);
 	
 	/**
 	 * Cache a connection object.
@@ -75,7 +77,7 @@ public interface ServiceProcessorI extends Runnable{
 	 * the MT should be sent.
 	 * @param mo - com.pixelandtag.celcom.entities.MOSms
 	 */
-	public void sendMT(MOSms mo);
+	public void sendMT(OutgoingSMS mo);
 	
 	
 	public int getQueueSize();

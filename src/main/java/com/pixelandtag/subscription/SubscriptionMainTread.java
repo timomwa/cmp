@@ -34,8 +34,9 @@ import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.api.Settings;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
@@ -414,9 +415,9 @@ public class SubscriptionMainTread extends Thread{
 				dto = it.next();
 				
 				try{
-					MOSms mo = new MOSms();
-					mo.setCmp_tx_id("-1"); 
-					dto.getProcessor().submit(mo);
+					IncomingSMS incomingsms = new IncomingSMS();
+					incomingsms.setCmp_tx_id("-1"); 
+					dto.getProcessor().submit(incomingsms);
 				}catch(Exception e){
 					log(e);
 				}

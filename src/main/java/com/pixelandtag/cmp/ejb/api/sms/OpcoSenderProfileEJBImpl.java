@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.dao.opco.OpcoSenderProfileDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 
 
 @Stateless
@@ -41,20 +41,20 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 	
 	
 	@Override
-	public List<OpcoSenderProfile> getAllActiveProfiles(){
+	public List<OpcoSenderReceiverProfile> getAllActiveProfiles(){
 		Map<String, Object> params = new HashMap<String,Object>();
 		params.put("active", Boolean.TRUE);
-		return opcosenderprofDAO.findByNamedQuery(OpcoSenderProfile.NQ_LIST_ACTIVE, params);
+		return opcosenderprofDAO.findByNamedQuery(OpcoSenderReceiverProfile.NQ_LIST_ACTIVE, params);
 	}
 	
 	@Override
-	public OpcoSenderProfile getActiveProfileForOpco(String opcocode){
+	public OpcoSenderReceiverProfile getActiveProfileForOpco(String opcocode){
 		OperatorCountry opco = opcoEJB.findOpcoByCode(opcocode);
 		return opcosenderprofDAO.findBy("opco", opco);
 	}
 	
 	@Override
-	public OpcoSenderProfile getActiveProfileForOpco(Long opcoid){
+	public OpcoSenderReceiverProfile getActiveProfileForOpco(Long opcoid){
 		OperatorCountry opco = opcoEJB.findOpcoById(opcoid);
 		return opcosenderprofDAO.findBy("opco", opco);
 	}

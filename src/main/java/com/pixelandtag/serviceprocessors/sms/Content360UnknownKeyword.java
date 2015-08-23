@@ -18,8 +18,10 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.web.beans.MessageType;
 import com.pixelandtag.web.beans.RequestObject;
@@ -75,13 +77,15 @@ public class Content360UnknownKeyword extends GenericServiceProcessor {
 	}
 	
 	@Override
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
+		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		Connection conn = null;
 		try {
 			conn = getCon();
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			
 			final String MSISDN = req.getMsisdn();
 		
@@ -90,7 +94,7 @@ public class Content360UnknownKeyword extends GenericServiceProcessor {
 			String response = UtilCelcom.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, conn, language_id) ;
 			
 			
-			mo.setMt_Sent(response + " "+ getTailTextNotSubecribed().replaceAll("<KEYWORD>", req.getKeyword()).replaceAll("<PRICE>", mo.getPrice().toEngineeringString()));
+			outgoingsms.setSms(response + " "+ getTailTextNotSubecribed().replaceAll("<KEYWORD>", req.getKeyword()).replaceAll("<PRICE>", incomingsms.getPrice().toEngineeringString()));
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -100,7 +104,7 @@ public class Content360UnknownKeyword extends GenericServiceProcessor {
 				conn.close();
 			}catch(Exception e){}
 		}
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBean;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.dynamic.dbutils.DBConnection;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.sms.ServiceProcessorLoader;
 import com.pixelandtag.subscription.SubscriptionOld;
@@ -363,13 +363,13 @@ public class ContentRetriever {
 	 * @param conn
 	 * @return
 	 */
-	public MOSms getContentFromServiceId(int service_id, String msisdn, Connection conn) {
+	public IncomingSMS getContentFromServiceId(int service_id, String msisdn, Connection conn) {
 		
 		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
 		log.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
 		SMSServiceDTO sm = sub.getSMSservice(service_id, conn);
 		log.info(s+sm);
-		MOSms mo = null;
+		IncomingSMS mo = null;
 		
 		if(sm!=null){
 			
@@ -379,7 +379,7 @@ public class ContentRetriever {
 				
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
-				mo = new MOSms();
+				mo = new IncomingSMS();
 				mo.setCmp_tx_id(cmpresource.generateNextTxId());
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());

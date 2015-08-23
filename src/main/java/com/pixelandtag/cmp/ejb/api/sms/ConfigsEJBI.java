@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
-import com.pixelandtag.cmp.entities.customer.configs.SenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
 public interface ConfigsEJBI {
@@ -26,7 +26,7 @@ public interface ConfigsEJBI {
 	 * @param configname
 	 * @return
 	 */
-	public ProfileConfigs getConfig(SenderProfile profile, String configname);
+	public ProfileConfigs getConfig(SenderReceiverProfile profile, String configname);
 	
 	
 	/**
@@ -34,7 +34,7 @@ public interface ConfigsEJBI {
 	 * @param profile
 	 * @return
 	 */
-	public Map<String,ProfileConfigs> getAllConfigs(SenderProfile profile);
+	public Map<String,ProfileConfigs> getAllConfigs(SenderReceiverProfile profile);
 	
 	/**
 	 * 
@@ -48,7 +48,7 @@ public interface ConfigsEJBI {
 	 * @param profile
 	 * @return
 	 */
-	public Map<String,ProfileTemplate> getAllTemplates(SenderProfile profile, TemplateType templateType);
+	public Map<String,ProfileTemplate> getAllTemplates(SenderReceiverProfile profile, TemplateType templateType);
 	
 	/**
 	 * 
@@ -62,13 +62,21 @@ public interface ConfigsEJBI {
 	 * @param opco
 	 * @return
 	 */
-	public List<OpcoSenderProfile> getOpcoSenderProfiles(OperatorCountry opco,Boolean active);
+	public List<OpcoSenderReceiverProfile> getOpcoSenderProfiles(OperatorCountry opco,Boolean active);
 	
 	/**
 	 * 
 	 * @param opco
 	 * @return
 	 */
-	public OpcoSenderProfile getActiveOpcoSenderProfile(OperatorCountry opco);
+	public OpcoSenderReceiverProfile getActiveOpcoSenderReceiverProfile(OperatorCountry opco);
+
+	/**
+	 * 
+	 * @param ip_address
+	 * @return
+	 */
+	public OperatorCountry getOperatorByIpAddress(String ip_address);
+	
 
 }

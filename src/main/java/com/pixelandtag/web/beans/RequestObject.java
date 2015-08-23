@@ -5,7 +5,8 @@ import java.math.BigInteger;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.MediumType;
 
@@ -32,16 +33,17 @@ public class RequestObject implements Serializable{
 	 */
 	private static final  long serialVersionUID = -697978310928640125L;
 	private String lac,code, location,cellid,telcoid, msisdn, msg, keyword,countryCode,testBalance,litmus, tripWire = null, serviceActive="1";
-	private int serviceid = -1;
+	private Long serviceid = -1L;
 	private Long messageId;
 	private String transactionID = null;
 	private BigInteger sessionid = null;
 	private MediumType mediumType;
 	
-	public RequestObject(MOSms request) throws Exception {
+	public RequestObject(IncomingSMS incomingsms) throws Exception {
 		
 		String telcoid, msisdn, msg = "", keyword,testBalance,tripWire = null, litmus = null;
-		int price, serviceid;
+		int price;
+		Long serviceid;
 		telcoid = null;
 		msisdn = null;
 		msg = null;
@@ -49,14 +51,14 @@ public class RequestObject implements Serializable{
 		price=0;
 		testBalance=null;
 		
-		serviceid = request.getServiceid();
+		serviceid = incomingsms.getServiceid();
 		
 		
-		if (request.getMsisdn() != null)
-			msisdn = request.getMsisdn();
+		if (incomingsms.getMsisdn() != null)
+			msisdn = incomingsms.getMsisdn();
 		
-		if (request.getSMS_Message_String() != null){
-			msg = request.getSMS_Message_String().trim();
+		if (incomingsms.getSms() != null){
+			msg = incomingsms.getSms().trim();
 		}
 		
 		if (keyword == null && msg !=null){
@@ -186,7 +188,8 @@ public class RequestObject implements Serializable{
 	public RequestObject(HttpServletRequest request, String nextTransactionid, boolean replace_illegal_xters) throws Exception {
 		
 		String telcoid, msisdn, msg, keyword,testBalance,tripWire = null, litmus = null;
-		int price,serviceid=-1;
+		int price;
+		Long serviceid=-1L;
 		telcoid = null;
 		msisdn = null;
 		msg = "";
@@ -196,7 +199,7 @@ public class RequestObject implements Serializable{
 		
 		if (request.getParameter("serviceid") != null){
 			try{
-				serviceid = Integer.valueOf(request.getParameter("serviceid"));
+				serviceid = Long.valueOf(request.getParameter("serviceid"));
 			}catch(Exception e){e.printStackTrace();}
 		}
 		if (request.getParameter("litmus") != null)
@@ -322,11 +325,11 @@ public class RequestObject implements Serializable{
 
 	private int price;
 
-	public int getServiceid() {
+	public Long getServiceid() {
 		return serviceid;
 	}
 
-	public void setServiceid(int serviceid) {
+	public void setServiceid(Long serviceid) {
 		this.serviceid = serviceid;
 	}
 

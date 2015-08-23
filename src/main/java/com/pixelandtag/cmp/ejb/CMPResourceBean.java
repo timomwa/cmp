@@ -40,7 +40,9 @@ import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.HttpToSend;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -49,7 +51,6 @@ import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
 import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
-import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
 import com.pixelandtag.mms.api.TarrifCode;
@@ -82,7 +83,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			KeyStoreException {
 		super();
 	}
-
+	
 	private static int DEFAULT_LANGUAGE_ID = 1;
 	private String MINUS_ONE = "-1";
 	private final String RM1 = "RM1";
@@ -1845,57 +1846,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	
-	/**
-	 * Logs in httptosend
-	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean sendMT(MOSms mo, String sql) throws Exception{
-		boolean success = false;
-		try{
-		 
-			utx.begin();
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, mo.getMt_Sent());
-			qry.setParameter(2, mo.getMsisdn());
-			qry.setParameter(3, mo.getSMS_SourceAddr());
-			qry.setParameter(4, mo.getSMS_SourceAddr());
-			
-			qry.setParameter(5, mo.getCMP_AKeyword());
-			qry.setParameter(6, mo.getCMP_SKeyword());
-			qry.setParameter(7, mo.getPriority());
-			
-			if(!(mo.getCmp_tx_id().equalsIgnoreCase("-1"))){
-				qry.setParameter(8, String.valueOf(mo.getCmp_tx_id()));
-			}
-			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
-			qry.setParameter(10, mo.getServiceid());
-			qry.setParameter(11, String.valueOf(mo.getPrice()));
-			qry.setParameter(12, mo.getSMS_DataCodingId());
-			qry.setParameter(13, mo.getProcessor_id());
-			qry.setParameter(14, mo.getBillingStatus().toString());
-			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
-			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
-			qry.setParameter(17, ( mo.isSubscription() ? 1 : 0 ));
-			
-			int num =  qry.executeUpdate();
-			utx.commit();
-			success = num>0;
-		
-		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error(e.getMessage(),e);
-			throw e;
-		}
-		 
-		return success;
-	}
-	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Override
 	public boolean  acknowledge(long message_log_id) throws Exception{
 		boolean success = false;
 		try{
@@ -1924,7 +1877,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	 * To statslog
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean toStatsLog(MOSms mo, String presql)  throws Exception {
+	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
 		boolean success = false;
 		try{
 		 
@@ -2428,28 +2381,25 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										||
 										smsserv.getCmd().equals("FIND")) ){
 									
-									Long processor_fk = smsserv.getMo_processorFK();
-									MOProcessor proc = find(MOProcessor.class, processor_fk);
+									MOProcessor proc = smsserv.getMoprocessor();
 									
-									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-									mosm_.setMsisdn(MSISDN);
-									mosm_.setServiceid(menu_from_session.getService_id());
-									mosm_.setSMS_Message_String(smsserv.getCmd());
-									mosm_.setSMS_SourceAddr(proc.getShortcode());
-									mosm_.setCMP_AKeyword(smsserv.getCmd());
-									mosm_.setCMP_SKeyword(smsserv.getCmd());
-									mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-									mosm_.setCmp_tx_id(generateNextTxId());
-									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
-									mosm_.setServiceid(smsserv.getId().intValue());
-									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
+									IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+									incomingsms.setMsisdn(MSISDN);
+									incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
+									incomingsms.setSms(smsserv.getCmd());
+									incomingsms.setShortcode(proc.getShortcode());
+									incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+									incomingsms.setCmp_tx_id(generateNextTxId());
+									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
+									incomingsms.setServiceid( Long.valueOf(smsserv.getId().intValue()));
+									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
 									logger.info(">>>>>>>>>>>> req: "+req);
 									logger.info(">>>>>>>>>>>> req.getMessageId(): "+req.getMessageId());
-									mosm_.setId(req.getMessageId());
-									mosm_.setProcessor_id(processor_fk);
+									incomingsms.setId(req.getMessageId());
+									incomingsms.setMoprocessor(smsserv.getMoprocessor());
 									
 									
-									logMO(mosm_); 
+									logMO(incomingsms); 
 									
 									if(smsserv.getCmd().equals("BILLING_SERV5")
 											||
@@ -2582,29 +2532,23 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									
 								}else{
 									
-									Long processor_fk = smsserv.getMo_processorFK();
-									MOProcessor proc = find(MOProcessor.class, processor_fk);
+									MOProcessor proc = smsserv.getMoprocessor();
 									
-									//subscribe(MSISDN, smsserv, chosenMenu.getId());
+									IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+									incomingsms.setMsisdn(MSISDN);
+									incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
+									incomingsms.setSms(smsserv.getCmd());
+									incomingsms.setShortcode(proc.getShortcode());
+									incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+									incomingsms.setCmp_tx_id(generateNextTxId());
+									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
+									incomingsms.setServiceid(smsserv.getId());
+									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
+									incomingsms.setId(req.getMessageId());
+									incomingsms.setMoprocessor(proc);
+									logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
 									
-									
-									MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-									mosm_.setMsisdn(MSISDN);
-									mosm_.setServiceid(menu_from_session.getService_id());
-									mosm_.setSMS_Message_String(smsserv.getCmd());
-									mosm_.setSMS_SourceAddr(proc.getShortcode());
-									mosm_.setCMP_AKeyword(smsserv.getCmd());
-									mosm_.setCMP_SKeyword(smsserv.getCmd());
-									mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-									mosm_.setCmp_tx_id(generateNextTxId());
-									mosm_.setEventType(EventType.get(smsserv.getEvent_type()));
-									mosm_.setServiceid(smsserv.getId().intValue());
-									mosm_.setPricePointKeyword(smsserv.getPrice_point_keyword());
-									mosm_.setId(req.getMessageId());
-									mosm_.setProcessor_id(processor_fk);
-									logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
-									
-									logMO(mosm_);
+									logMO(incomingsms);
 									
 									if(smsserv.getCmd().equals("FIND")){
 										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
@@ -2654,21 +2598,18 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							//final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
 						 
 							SMSService smsserv = find(SMSService.class, Long.parseLong(chosenMenu.getService_id()+""));
-							Long processor_fk = smsserv.getMo_processorFK();
-							MOProcessor proc = find(MOProcessor.class, processor_fk);
+							MOProcessor proc = smsserv.getMoprocessor();
 							
-							MOSms mosm_ =  new MOSms();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-							mosm_.setMsisdn(MSISDN);
-							mosm_.setServiceid(chosenMenu.getService_id());
-							mosm_.setSMS_Message_String(smsserv.getCmd());
-							mosm_.setSMS_SourceAddr(proc.getShortcode());
-							mosm_.setCMP_AKeyword(smsserv.getCmd());
-							mosm_.setCMP_SKeyword(smsserv.getCmd());
-							mosm_.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
-							mosm_.setProcessor_id(processor_fk);
-							logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+processor_fk.intValue()+"::::::::::::::\n\n\n");
+							IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+							incomingsms.setMsisdn(MSISDN);
+							incomingsms.setServiceid(Long.valueOf(chosenMenu.getService_id()));
+							incomingsms.setSms(smsserv.getCmd());
+							incomingsms.setShortcode(proc.getShortcode());
+							incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+							incomingsms.setMoprocessor(proc);
+							logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
 							
-							logMO(mosm_);
+							logMO(incomingsms);
 							//Mimic an MO
 							
 							final com.pixelandtag.subscription.dto.SubscriptionDTO subdto = getSubscriptionDTO(MSISDN, chosenMenu.getService_id());
@@ -2718,9 +2659,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
 										response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
 									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
-										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(mosm_.getPrice()));
+										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(incomingsms.getPrice()));
 									if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
-										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, mosm_.getSMS_Message_String());
+										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, incomingsms.getSMS_Message_String());
 									
 									
 									//this is sent out normally
@@ -2740,9 +2681,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
 										response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
 									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
-										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(mosm_.getPrice()));
+										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(incomingsms.getPrice()));
 									if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
-										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, mosm_.getSMS_Message_String());
+										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, incomingsms.getSMS_Message_String());
 									
 									if(submenus_have_sub_menus)
 										resp = response;//get all the sub menus there.
@@ -2779,7 +2720,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							language_id = menu.getLanguage_id();
 							
 							logger.info("::::::::::::::::::::::::: serviceid:: "+menu.getService_id() + "\n\nmenu.toString():\n "+menu.toString()+"\n");
-							final MOSms mosm_  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
+							final IncomingSMS mosm_  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
 							//final MOSms mosm_ =  cr.getContentFromServiceId(menu.getService_id(),MSISDN,conn);
 							
 							String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
@@ -3284,13 +3225,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 
-	public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription) throws Exception {
+	public IncomingSMS getContentFromServiceId(int service_id, String msisdn, boolean isSubscription) throws Exception {
 		
 		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
 		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
 		SMSServiceDTO sm = getSMSservice(service_id);
 		logger.info(s+sm);
-		MOSms mo = null;
+		IncomingSMS mo = null;
 		
 		if(sm!=null){
 			
@@ -3300,7 +3241,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
-				mo = new MOSms();
+				mo = new IncomingSMS();
 				mo.setCmp_tx_id(generateNextTxId());
 				mo.setMsisdn(msisdn);
 				mo.setCMP_AKeyword(sm.getCmp_keyword());

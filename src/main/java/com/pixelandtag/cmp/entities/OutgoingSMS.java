@@ -24,7 +24,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Index;
 
 import com.pixelandtag.api.BillingStatus;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 
 /**
  * An improvement of com.pixelandtag.cmp.entities.HttpToSend
@@ -52,7 +52,7 @@ import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
 			query = "update OutgoingSMS set  in_outgoing_queue=:in_outgoing_queue where id=:id"
 	)
 })
-public class OutgoingSMS implements Serializable {
+public class OutgoingSMS extends GenericMessage implements Serializable {
 	
 	/**
 	 * 
@@ -65,43 +65,25 @@ public class OutgoingSMS implements Serializable {
 	@Transient
 	public static final String NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID = "smsqueue.updatequeuestatusbyid";
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="opco_profile_id")
-	private OpcoSenderProfile opcosenderprofile;
+	private OpcoSenderReceiverProfile opcosenderprofile;
 	
-	@Column(name="in_outgoing_queue")
+	@Column(name="in_outgoing_queue", nullable=false)
 	private Boolean in_outgoing_queue;
-	
-	@Column(name="sms",length=1000)
-	private String sms;
 
-	@Column(name="msisdn")
-	private String msisdn;
-	
-	@Column(name="shortcode")
-	private String shortcode;
-	
-	@Column(name="price")
-	private BigDecimal price;
 	
 	@Column(name="priority")
 	private Integer priority;
 	
-	@Column(name="serviceid")
-	private Long serviceid;
-
 	@Column(name="re_tries")
 	private Long re_tries;
 
 	@Column(name="ttl")
 	private Long ttl;
-	
-	@Index(name="timestamp")
-	private Date timestamp;
+		
 	
 	@Column(name="charged")
 	private Boolean charged;
@@ -109,33 +91,13 @@ public class OutgoingSMS implements Serializable {
 	@Column(name="sent")
 	private Boolean sent;
 	
-	@Index(name="osmcmp_tx_id")
-	@Column(name="cmp_tx_id")
-	private String cmp_tx_id;
+
 	
-	@Index(name="osmopco_tx_id")
-	@Column(name="opco_tx_id")
-	private String opco_tx_id;
-	
-	@Column(name="split")
-	private Boolean split;
-	
-	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="processor_id")
-	private MOProcessor moprocessor;
-	
-	@Column(name="billing_status")
-	@Enumerated(EnumType.STRING)
-	private BillingStatus billing_status;
 	
 	@PrePersist
 	public void onCreate(){
-		if(split==null)
-			split = Boolean.FALSE;
 		if(in_outgoing_queue==null)
 			in_outgoing_queue = Boolean.FALSE;
-		if(price==null)
-			price = BigDecimal.ZERO;
 		if(sent==null)
 			sent = Boolean.FALSE;
 		if(priority==null)
@@ -144,28 +106,16 @@ public class OutgoingSMS implements Serializable {
 			re_tries = 0L;
 		if(ttl==null)
 			ttl = 1L;
-		if(timestamp==null)
-			timestamp = new Date();
 		if(charged==null)
 			charged = Boolean.FALSE;
-		if(billing_status==null)
-			billing_status = BillingStatus.NO_BILLING_REQUIRED;
 		
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public OpcoSenderProfile getOpcosenderprofile() {
+	
+	public OpcoSenderReceiverProfile getOpcosenderprofile() {
 		return opcosenderprofile;
 	}
 
-	public void setOpcosenderprofile(OpcoSenderProfile opcosenderprofile) {
+	public void setOpcosenderprofile(OpcoSenderReceiverProfile opcosenderprofile) {
 		this.opcosenderprofile = opcosenderprofile;
 	}
 
@@ -177,37 +127,6 @@ public class OutgoingSMS implements Serializable {
 		this.in_outgoing_queue = in_outgoing_queue;
 	}
 
-	public String getSms() {
-		return sms;
-	}
-
-	public void setSms(String sms) {
-		this.sms = sms;
-	}
-
-	public String getMsisdn() {
-		return msisdn;
-	}
-
-	public void setMsisdn(String msisdn) {
-		this.msisdn = msisdn;
-	}
-
-	public String getShortcode() {
-		return shortcode;
-	}
-
-	public void setShortcode(String shortcode) {
-		this.shortcode = shortcode;
-	}
-
-	public BigDecimal getPrice() {
-		return price;
-	}
-
-	public void setPrice(BigDecimal price) {
-		this.price = price;
-	}
 
 	public Integer getPriority() {
 		return priority;
@@ -217,13 +136,6 @@ public class OutgoingSMS implements Serializable {
 		this.priority = priority;
 	}
 
-	public Long getServiceid() {
-		return serviceid;
-	}
-
-	public void setServiceid(Long serviceid) {
-		this.serviceid = serviceid;
-	}
 
 	public Long getRe_tries() {
 		return re_tries;
@@ -239,14 +151,6 @@ public class OutgoingSMS implements Serializable {
 
 	public void setTtl(Long ttl) {
 		this.ttl = ttl==null || ttl.intValue()<0 ? 1 : ttl;
-	}
-
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
 	}
 
 	public Boolean getCharged() {
@@ -265,47 +169,7 @@ public class OutgoingSMS implements Serializable {
 		this.sent = sent;
 	}
 
-	public String getCmp_tx_id() {
-		return cmp_tx_id;
-	}
-
-	public void setCmp_tx_id(String cmp_tx_id) {
-		this.cmp_tx_id = cmp_tx_id;
-	}
-
-	public String getOpco_tx_id() {
-		return opco_tx_id;
-	}
-
-	public void setOpco_tx_id(String opco_tx_id) {
-		this.opco_tx_id = opco_tx_id;
-	}
-
-	public Boolean getSplit() {
-		return split;
-	}
-
-	public void setSplit(Boolean split) {
-		this.split = split;
-	}
-
-	public MOProcessor getMoprocessor() {
-		return moprocessor;
-	}
-
-	public void setMoprocessor(MOProcessor moprocessor) {
-		this.moprocessor = moprocessor;
-	}
-
-	public BillingStatus getBilling_status() {
-		return billing_status;
-	}
-
-	public void setBilling_status(BillingStatus billing_status) {
-		this.billing_status = billing_status;
-	}
 	
-	
-	
+
 
 }

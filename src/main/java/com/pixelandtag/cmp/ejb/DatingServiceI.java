@@ -5,13 +5,15 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.smsmenu.MenuItem;
@@ -43,7 +45,7 @@ public interface DatingServiceI extends BaseEntityI {
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(PersonDatingProfile profile) throws DatingServiceException;
-	public MOSms renewSubscription(MOSms mo, Long serviceId, AlterationMethod method) throws DatingServiceException;
+	public OutgoingSMS renewSubscription(IncomingSMS icomingsms, Long serviceId, AlterationMethod method) throws DatingServiceException;
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException;
 
 	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException;

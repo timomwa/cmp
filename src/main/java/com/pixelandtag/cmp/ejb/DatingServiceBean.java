@@ -32,7 +32,9 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -47,7 +49,7 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
@@ -126,7 +128,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			MOProcessor proc = find(MOProcessor.class, processor_fk);
 			
 			if(smsserv!=null && processor_fk!=null && proc!=null){
-				MOSms mo = new MOSms();
+				IncomingSMS mo = new IncomingSMS();
 				mo.setMsisdn(MSISDN);
 				mo.setPrice(BigDecimal.ZERO);
 				mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED); 
@@ -481,7 +483,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 						MOProcessor proc = find(MOProcessor.class, processor_fk);
 						
 						if(smsserv!=null && processor_fk!=null && proc!=null){
-							MOSms mo = new MOSms();
+							IncomingSMS mo = new IncomingSMS();
 							mo.setMsisdn(MSISDN);
 							mo.setPrice(BigDecimal.ZERO);
 							mo.setBillingStatus(BillingStatus.NO_BILLING_REQUIRED);
@@ -961,7 +963,7 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	 * To statslog
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean toStatsLog(MOSms mo, String presql)  throws Exception {
+	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
 		boolean success = false;
 		try{
 		 
@@ -1157,13 +1159,14 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	}
 	
 	
-	public MOSms renewSubscription(MOSms mo, Long serviceid, AlterationMethod method) throws DatingServiceException{
+	public OutgoingSMS renewSubscription(IncomingSMS incomingsms, Long serviceid, AlterationMethod method) throws DatingServiceException{
 		
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		try{
 			
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			final String KEYWORD = req.getKeyword().trim();
 			final String MESSAGE = req.getMsg().trim();
 			//final int serviceid = 	mo.getServiceid();
@@ -1172,10 +1175,10 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 		
 			int language_id = 1;
 	
-			final Person person = getPerson(mo.getMsisdn());
+			final Person person = getPerson(incomingsms.getMsisdn());
 			
 		
-			Billable billable = createBillable(mo);
+			Billable billable = createBillable(incomingsms);
 			
 			
 			billable = charge(billable);
@@ -1201,16 +1204,16 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				
 				String message = getMessage(message_key, language_id);
 				
-				mo.setMt_Sent(message);
-				mo.setPrice(BigDecimal.ZERO);//set price to subscription price
-				mo.setPriority(0);
+				outgoingsms.setSms(message);
+				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price
+				outgoingsms.setPriority(0);
 				
 				try{
-					subscriptionBean.updateQueueStatus(2L, mo.getMsisdn(), serviceid,method);
+					subscriptionBean.updateQueueStatus(2L, incomingsms.getMsisdn(), serviceid,method);
 				}catch(Exception exp){
 					logger.error("ERROR DURING SUBSCRIPTION RENEWAL:: "+exp.getMessage(),exp);
 				}
-				return mo;
+				return outgoingsms;
 				
 			}else{
 				
@@ -1223,9 +1226,9 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
 				msg = msg.replaceAll(EXPIRY_DATE_TAG, timezone_ejb.convertToPrettyFormat( sub.getExpiryDate() ));
 				msg = msg.replaceAll(SERVICE_NAME_TAG, smsserv.getService_name());
-				mo.setMt_Sent(msg);
-				mo.setPrice(mo.getPrice());//set price to subscription price
-				mo.setPriority(0);
+				outgoingsms.setSms(msg);
+				outgoingsms.setPrice(incomingsms.getPrice());//set price to subscription price
+				outgoingsms.setPriority(0);
 			}
 			
 			billable.setIn_outgoing_queue(0L);
@@ -1236,36 +1239,35 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			throw new DatingServiceException("Sorry, something went wrong. Try again later.", exp);
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 	
 	
 
-	private Billable createBillable(MOSms mo) {
+	private Billable createBillable(IncomingSMS incomingsms) {
 		Billable billable =  new Billable();
 			
 		billable.setCp_id("CONTENT360_KE");
-		billable.setCp_tx_id(mo.getCmp_tx_id());
+		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
 		billable.setDiscount_applied("0");
-		billable.setEvent_type(mo.getEventType());
 		billable.setIn_outgoing_queue(0l);
-		billable.setKeyword(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
+		billable.setKeyword(incomingsms.getSms().split("\\s")[0].toUpperCase());
 		billable.setMaxRetriesAllowed(1L);
-		billable.setMessage_id(mo.getId());
-		billable.setMsisdn(mo.getMsisdn());
-		billable.setOperation(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
-		billable.setPrice(mo.getPrice());
+		billable.setMessage_id(incomingsms.getId());
+		billable.setMsisdn(incomingsms.getMsisdn());
+		billable.setOperation(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+		billable.setPrice(incomingsms.getPrice());
 		billable.setPriority(0l);
 		billable.setProcessed(0L);
 		billable.setRetry_count(0L);
-		if(mo.getServiceid()>0)
-			billable.setService_id(mo.getServiceid()+"");
+		if(incomingsms.getServiceid()>0)
+			billable.setService_id(incomingsms.getServiceid()+"");
 		else
-			billable.setService_id(mo.getSMS_Message_String().split("\\s")[0].toUpperCase());
-		billable.setShortcode(mo.getSMS_SourceAddr());		
-		billable.setCp_tx_id(mo.getCmp_tx_id());
-		billable.setEvent_type((mo.getEventType()!=null ? mo.getEventType() :  EventType.SUBSCRIPTION_PURCHASE));
-		billable.setPricePointKeyword(mo.getPricePointKeyword());
+			billable.setService_id(incomingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setShortcode(incomingsms.getShortcode());		
+		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
+		billable.setEvent_type((incomingsms.getEvent_type()!=null ?  EventType.get(incomingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
+		billable.setPricePointKeyword(incomingsms.getPrice_point_keyword());
 			
 		return billable;
 	}

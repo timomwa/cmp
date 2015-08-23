@@ -15,10 +15,10 @@ import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
-import com.pixelandtag.cmp.entities.customer.configs.SenderProfile;
+import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.smssenders.SMSSenderFactory;
 import com.pixelandtag.smssenders.Sender;
@@ -36,14 +36,14 @@ public class SenderThreadWorker implements Runnable{
 	
 	private Queue<OutgoingSMS> outqueue;
 	private Sender sender;
-	private OpcoSenderProfile opcosenderprofile;
+	private OpcoSenderReceiverProfile opcosenderprofile;
 	private ConfigsEJBI configsEJB;
 	private QueueProcessorEJBI queueprocbean;
 	private Context context;
 	private boolean run = true;
 	private boolean stopped  = false;
 	
-	public SenderThreadWorker(Queue<OutgoingSMS> outqueue_, OpcoSenderProfile opcosenderprofile_) throws Exception{
+	public SenderThreadWorker(Queue<OutgoingSMS> outqueue_, OpcoSenderReceiverProfile opcosenderprofile_) throws Exception{
 		this.outqueue = outqueue_;
 		this.opcosenderprofile = opcosenderprofile_;
 		initEJBs();
@@ -65,7 +65,7 @@ public class SenderThreadWorker implements Runnable{
 	}
 
 	private void initsender() throws Exception{
-		SenderProfile profile = opcosenderprofile.getProfile();
+		SenderReceiverProfile profile = opcosenderprofile.getProfile();
 		Map<String,ProfileConfigs> opcoconfigs = configsEJB.getAllConfigs(profile);
 		Map<String,ProfileTemplate> opcotemplates = configsEJB.getAllTemplates(profile,TemplateType.PAYLOAD);
 		SenderConfiguration senderconfigs = new SenderConfiguration();
@@ -89,7 +89,9 @@ public class SenderThreadWorker implements Runnable{
 					try{
 					
 						sms.setIn_outgoing_queue(Boolean.TRUE);
-						sms = queueprocbean.saveOrUpdate(sms);//Lock out anyone.
+						
+						if(sms.getIn_outgoing_queue()==Boolean.FALSE)
+							sms = queueprocbean.saveOrUpdate(sms);//Lock out anyone.
 						
 						SenderResp response = sender.sendSMS(sms);
 						
@@ -105,7 +107,7 @@ public class SenderThreadWorker implements Runnable{
 							sms.setSent(Boolean.FALSE);
 							sms.setIn_outgoing_queue(Boolean.FALSE);
 							sms.setRe_tries(sms.getRe_tries().longValue()+1L);
-							sms.setPriority(sms.getPriority()+1);
+							sms.setPriority(sms.getPriority()+1);//keep decreasing the priority if we have a problem sending this message.
 							sms = queueprocbean.saveOrUpdate(sms);
 							
 							if(sms.getRe_tries().intValue()<=sms.getTtl())

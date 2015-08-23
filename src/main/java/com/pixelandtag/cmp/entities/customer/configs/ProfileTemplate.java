@@ -72,7 +72,7 @@ public class ProfileTemplate implements Serializable{
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name = "profile_id_fk")
 	@Index(name="opctpltfidx")
-	private SenderProfile profile;
+	private SenderReceiverProfile profile;
 	
 	@Column(name="type")
 	@Enumerated(EnumType.STRING)
@@ -136,11 +136,11 @@ public class ProfileTemplate implements Serializable{
 		this.effectiveDate = effectiveDate;
 	}
 
-	public SenderProfile getProfile() {
+	public SenderReceiverProfile getProfile() {
 		return profile;
 	}
 
-	public void setProfile(SenderProfile profile) {
+	public void setProfile(SenderReceiverProfile profile) {
 		this.profile = profile;
 	}
 	

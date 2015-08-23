@@ -18,10 +18,12 @@ import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.AlterationMethod;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.staticcontent.ContentRetriever;
 import com.pixelandtag.subscription.SubscriptionOld;
@@ -97,25 +99,25 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 	}
 
 	@Override
-	public MOSms process(MOSms mo) {
+	public OutgoingSMS process(IncomingSMS incomingsms) {
 		
-		//Connection conn = null;
+		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		
 		try {
 			
 			//conn = getCon();
 			
-			final RequestObject req = new RequestObject(mo);
+			final RequestObject req = new RequestObject(incomingsms);
 			final String KEYWORD = req.getKeyword().trim();
-			final int serviceid = 	mo.getServiceid();
+			final Long serviceid = 	incomingsms.getServiceid();
 			final String MSISDN = req.getMsisdn();
-			final Map<String,String> additionalInfo = cmpbean.getAdditionalServiceInfo(serviceid);
+			final Map<String,String> additionalInfo = cmpbean.getAdditionalServiceInfo(serviceid.intValue());
 			
 			
 			
-			final String static_categoryvalue = cmpbean.getServiceMetaData(serviceid,"static_categoryvalue");//UtilCelcom.getServiceMetaData(conn,serviceid,"static_categoryvalue");
-			final String table =  cmpbean.getServiceMetaData(serviceid,"table");
+			final String static_categoryvalue = cmpbean.getServiceMetaData(serviceid.intValue(),"static_categoryvalue");//UtilCelcom.getServiceMetaData(conn,serviceid,"static_categoryvalue");
+			final String table =  cmpbean.getServiceMetaData(serviceid.intValue(),"table");
 			
 			static_content_processor_logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 			static_content_processor_logger.info(" SERVICEID ::::::::::::::::::::::::: ["+serviceid+"]");
@@ -140,15 +142,15 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 				"13. Teka-teki (Riddles)\n"+
 				"14. Ucapan Hari Lahir (Bday Wishes)\n"+
 				"15. Salam Pengantin (Marriage Wishes)";*/
-				mo.setMt_Sent(more);
+				outgoingsms.setSms(more);
 
 			}else if(!static_categoryvalue.equals("-1")){
 				
 				String tailMsg = "";
 				
-				if(!mo.isSubscriptionPush()){//If this is a subscription push, then don't check if sub is subscribed.
+				if(!incomingsms.getIsSubscription()){//If this is a subscription push, then don't check if sub is subscribed.
 					
-					SubscriptionDTO sub = cmpbean.getSubscriptionDTO(MSISDN, serviceid);
+					SubscriptionDTO sub = cmpbean.getSubscriptionDTO(MSISDN, serviceid.intValue());
 					
 					tailMsg = (sub==null ? additionalInfo.get("tailText_notsubscribed") : (SubscriptionStatus.confirmed==SubscriptionStatus.get(sub.getSubscription_status()) ? additionalInfo.get("tailText_subscribed") : additionalInfo.get("tailText_notsubscribed")));
 							 
@@ -161,27 +163,27 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 				}else{
 					tailMsg = additionalInfo.get("tailText_subscribed");
 				}
-				final String content = cmpbean.getUniqueFromCategory("pixeland_content360", table, "Text", "id", "Category", static_categoryvalue, MSISDN, serviceid, 1, mo.getProcessor_id());
+				final String content = cmpbean.getUniqueFromCategory("pixeland_content360", table, "Text", "id", "Category", static_categoryvalue, MSISDN, serviceid.intValue(), 1, incomingsms.getMoprocessor().getId());
 				
 				if(content!=null)
-					mo.setMt_Sent(content+SPACE+tailMsg);
+					outgoingsms.setSms(content+SPACE+tailMsg);
 				else
-					mo.setMt_Sent(SPACE);//No content! Send blank msg.
+					outgoingsms.setSms(SPACE);//No content! Send blank msg.
 						
 				
-				toStatsLog(mo, null);
-				static_content_processor_logger.debug("CONTENT FOR MSISDN["+MSISDN+"] ::::::::::::::::::::::::: ["+mo.toString()+"]");
+				toStatsLog(incomingsms, null);
+				static_content_processor_logger.debug("CONTENT FOR MSISDN["+MSISDN+"] ::::::::::::::::::::::::: ["+incomingsms.toString()+"]");
 				
 			}else{
 				String unknown_keyword = cmpbean.getServiceMetaData(-1,"unknown_keyword");
 				
 				if(unknown_keyword==null)
 					unknown_keyword = "Unknown Keyword.";
-					mo.setMt_Sent(unknown_keyword);
+					outgoingsms.setSms(unknown_keyword);
 			
 			}
 			
-			static_content_processor_logger.debug(mo.toString());
+			static_content_processor_logger.debug(incomingsms.toString());
 			
 		}catch(Exception e){
 			
@@ -195,7 +197,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 		
 		}
 		
-		return mo;
+		return outgoingsms;
 	}
 
 	@Override

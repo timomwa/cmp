@@ -33,7 +33,7 @@ import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.web.beans.RequestObject;
@@ -119,7 +119,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			long messageID = -1;
 			
-			final MOSms moMessage = new MOSms(req,tx_id);
+			final IncomingSMS moMessage = new IncomingSMS(req,tx_id);
 			
 			try{
 				moMessage.setMediumType(MediumType.ussd);

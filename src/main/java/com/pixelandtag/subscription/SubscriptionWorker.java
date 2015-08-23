@@ -17,7 +17,7 @@ import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
-import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
 import com.pixelandtag.sms.producerthreads.SubscriptionLog;
 
@@ -134,7 +134,7 @@ public class SubscriptionWorker extends Thread{
 					
 					SubscriptionDTO dto = getFreeDTOWithProcessor();
 					
-					MOSms mo = new MOSms();
+					IncomingSMS mo = new IncomingSMS();
 					
 					mo.setCmp_tx_id(cmpbean.generateNextTxId());
 					mo.setMsisdn(sub.getMsisdn());
@@ -216,7 +216,7 @@ public class SubscriptionWorker extends Thread{
 			dto = it.next();
 			
 			try{
-				MOSms mo = new MOSms();
+				IncomingSMS mo = new IncomingSMS();
 				mo.setCmp_tx_id("-1");
 				dto.getProcessor().submit(mo);
 			}catch(Exception e){
