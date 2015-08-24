@@ -1,9 +1,9 @@
 package com.pixelandtag.cmp.ejb.sequences;
 
 import javax.ejb.Remote;
-import javax.inject.Singleton;
+import javax.ejb.Stateless;
 
-@Singleton
+@Stateless
 @Remote
 public class TimeStampSequenceEJBImpl implements TimeStampSequenceEJBI {
 

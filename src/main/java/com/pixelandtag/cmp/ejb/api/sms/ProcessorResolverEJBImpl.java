@@ -1,7 +1,6 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
 import java.math.BigDecimal;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,18 +21,14 @@ import org.json.JSONObject;
 import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
 import com.pixelandtag.cmp.dao.core.MessageExtraParamsDAOI;
 import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
-import com.pixelandtag.cmp.ejb.sequences.SequenceGenEJB;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
-import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.MessageExtraParams;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
-import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.smssenders.JsonUtilI;
-import com.pixelandtag.smssenders.MessageSenderException;
 import com.pixelandtag.smssenders.Receiver;
 
 @Stateless

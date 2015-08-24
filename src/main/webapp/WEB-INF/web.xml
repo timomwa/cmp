@@ -132,19 +132,7 @@
 		<servlet-name>CMPHome</servlet-name>
 		<url-pattern>/cmp</url-pattern>
 	</servlet-mapping>
-	<servlet>
-		<description>
-		</description>
-		<display-name>Trivia</display-name>
-		<servlet-name>Trivia</servlet-name>
-		<servlet-class>com.pixelandtag.web.Trivia
-		</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>Trivia</servlet-name>
-		<url-pattern>/Trivia</url-pattern>
-	</servlet-mapping>
+	
 
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
@@ -262,59 +250,6 @@
 		<servlet-name>DNReceiver</servlet-name>
 		<url-pattern>/dn</url-pattern>
 	</servlet-mapping>
-
-
-
-
-
-
-
-	<servlet>
-		<description>
-		</description>
-		<display-name>MMSMO</display-name>
-		<servlet-name>MMSMO</servlet-name>
-		<servlet-class>com.pixelandtag.mms.mo.MMSMO
-		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>MMSMO</servlet-name>
-		<url-pattern>/mmsmo</url-pattern>
-	</servlet-mapping>
-
-
-	<servlet>
-		<description>
-		</description>
-		<display-name>MMSDN</display-name>
-		<servlet-name>MMSDN</servlet-name>
-		<servlet-class>com.pixelandtag.mms.mo.MMSDN
-		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>MMSDN</servlet-name>
-		<url-pattern>/mmsdn</url-pattern>
-	</servlet-mapping>
-
-
-
-
-	<servlet>
-		<description>
-		</description>
-		<display-name>mm7</display-name>
-		<servlet-name>mm7</servlet-name>
-		<servlet-class>com.pixelandtag.mms.api.SoapReceiver
-		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>mm7</servlet-name>
-		<url-pattern>/mm7/mm7.sh</url-pattern>
-	</servlet-mapping>
-
-
-
-
 
 
 	<servlet>
