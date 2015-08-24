@@ -45,10 +45,10 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.util.StopWatch;
 
 public class HttpBillingWorker implements Runnable {
@@ -238,7 +238,7 @@ public class HttpBillingWorker implements Runnable {
 			
 		}catch(OutOfMemoryError e){
 			
-			logger.fatal("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
+			logger.fatal("NEEDS RESTART: MEM_USAGE: "+OutgoingQueueRouter.getMemoryUsage() +" >> "+e.getMessage(),e);
 			
 			
 		}finally{
@@ -561,7 +561,7 @@ public class HttpBillingWorker implements Runnable {
 			
 		}
 		
-		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + MTProducer.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
+		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + OutgoingQueueRouter.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
 	}
 	
 	

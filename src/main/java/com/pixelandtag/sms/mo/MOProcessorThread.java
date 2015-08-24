@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -18,15 +17,13 @@ import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
-import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.NoServiceProcessorException;
 import com.pixelandtag.util.StopWatch;
 
@@ -38,7 +35,6 @@ import com.pixelandtag.util.StopWatch;
  */
 
 public class MOProcessorThread implements Runnable {
-	
 	
 	private volatile boolean run = true;
 	private volatile StopWatch watch;
@@ -190,7 +186,7 @@ public class MOProcessorThread implements Runnable {
 								
 								final ServiceProcessorI servp = getFreeProcessor(incomingsms.getMoprocessor().getId());
 								
-								logger.debug(MTProducer.processor_pool+" gugamuga_processor : \n\n"+servp);
+								logger.debug(processor_pool+" gugamuga_processor : \n\n"+servp);
 								
 								if(servp!=null){
 

@@ -14,7 +14,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 
-public class IncomingSMS extends GenericMO{
+public class MOSms extends GenericMO{
 	
 	public static StringBuilder sb = new StringBuilder();
 
@@ -46,7 +46,7 @@ public class IncomingSMS extends GenericMO{
 	}
 	
 
-	public IncomingSMS(HttpServletRequest request, String txid) throws TransactionIDGenException {
+	public MOSms(HttpServletRequest request, String txid) throws TransactionIDGenException {
 		
 		super(request,txid);
 		
@@ -141,7 +141,7 @@ public class IncomingSMS extends GenericMO{
 		this.id = id;
 	}
 
-	public IncomingSMS(){
+	public MOSms(){
 		
 	}
 	
@@ -175,8 +175,8 @@ public class IncomingSMS extends GenericMO{
 	}
 
 
-	public static IncomingSMS clone(IncomingSMS mo) {
-		IncomingSMS moC = new IncomingSMS();
+	public static MOSms clone(MOSms mo) {
+		MOSms moC = new MOSms();
 		moC.setAPIType(mo.getAPIType());
 		moC.setCMP_AKeyword(mo.getCMP_AKeyword());
 		moC.setCmp_tx_id(mo.getCmp_tx_id());
@@ -201,8 +201,8 @@ public class IncomingSMS extends GenericMO{
 	}
 
 	
-	public IncomingSMS clone() {
-		IncomingSMS moC = new IncomingSMS();
+	public MOSms clone() {
+		MOSms moC = new MOSms();
 		moC.setAPIType(getAPIType());
 		moC.setCMP_AKeyword(getCMP_AKeyword());
 		moC.setCmp_tx_id(getCmp_tx_id());
@@ -229,7 +229,7 @@ public class IncomingSMS extends GenericMO{
 
 	public String getServKey() {
 		sb.setLength(0);
-		return IncomingSMS.sb.append(getCMP_AKeyword()).append(U_SCR).append(getCMP_SKeyword()).append(U_SCR).append(getSMS_SourceAddr()).toString();
+		return MOSms.sb.append(getCMP_AKeyword()).append(U_SCR).append(getCMP_SKeyword()).append(U_SCR).append(getSMS_SourceAddr()).toString();
 	}
 
 

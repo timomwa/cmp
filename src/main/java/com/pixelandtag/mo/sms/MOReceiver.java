@@ -25,7 +25,7 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.IncomingSMS;
+import com.pixelandtag.entities.MOSms;
 import com.pixelandtag.util.StopWatch;
 
 /**
@@ -112,7 +112,7 @@ public class MOReceiver extends HttpServlet {
 				return;
 			}
 			
-			final IncomingSMS moMessage = new IncomingSMS(req,cmpBean.generateNextTxId());
+			final MOSms moMessage = new MOSms(req,cmpBean.generateNextTxId());
 			
 			if(ds==null){
 				init();

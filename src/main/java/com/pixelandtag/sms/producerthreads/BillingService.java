@@ -31,6 +31,7 @@ import org.apache.log4j.PropertyConfigurator;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker;
 import com.pixelandtag.util.FileUtils;
 
@@ -254,7 +255,7 @@ public class BillingService extends Thread{
 			
 		}catch(OutOfMemoryError e){
 			
-			logger.error("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
+			logger.error("NEEDS RESTART: MEM_USAGE: "+OutgoingQueueRouter.getMemoryUsage() +" >> "+e.getMessage(),e);
 			
 		
 		}finally{
