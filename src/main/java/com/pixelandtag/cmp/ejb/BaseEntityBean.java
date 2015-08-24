@@ -56,6 +56,7 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -65,8 +66,6 @@ import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
-import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
@@ -113,6 +112,9 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
+	
+	@EJB
+	private QueueProcessorEJBI queueprocEJB;
 	
 	@Override
 	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid){
@@ -205,7 +207,9 @@ public class BaseEntityBean implements BaseEntityI {
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void  mimicMO(String keyword, String msisdn){
+		
 		try {
+			
 			SMSService smsserv = getSMSService(keyword);
 			
 			MOProcessor proc = smsserv.getMoprocessor();
@@ -545,56 +549,7 @@ public class BaseEntityBean implements BaseEntityI {
 		return success;
 	}
 	
-    /**
-	 * Logs in httptosend
-	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public boolean sendMT(IncomingSMS mo, String sql) throws Exception{
-		boolean success = false;
-		try{
-		 
-			utx.begin();
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, mo.getMt_Sent());
-			qry.setParameter(2, mo.getMsisdn());
-			qry.setParameter(3, mo.getSMS_SourceAddr());
-			qry.setParameter(4, mo.getSMS_SourceAddr());
-			
-			qry.setParameter(5, mo.getCMP_AKeyword());
-			qry.setParameter(6, mo.getCMP_SKeyword());
-			qry.setParameter(7, mo.getPriority());
-			
-			if(!(mo.getCmp_tx_id().equals("-1")) ){
-				qry.setParameter(8, String.valueOf(mo.getCmp_tx_id()));
-			}
-			qry.setParameter(9, (mo.isSplit_msg() ? 1 : 0));
-			qry.setParameter(10, mo.getServiceid());
-			qry.setParameter(11, String.valueOf(mo.getPrice()));
-			qry.setParameter(12, mo.getSMS_DataCodingId());
-			qry.setParameter(13, mo.getProcessor_id());
-			qry.setParameter(14, mo.getBillingStatus().toString());
-			qry.setParameter(15, mo.getPricePointKeyword()==null ? "NONE" :  mo.getPricePointKeyword());
-			qry.setParameter(16, (mo.isSubscription() ? 1 : 0));
-			qry.setParameter(17, ( mo.isSubscription() ? 1 : 0 ));
-			
-			int num =  qry.executeUpdate();
-			utx.commit();
-			success = num>0;
-		
-		}catch(Exception e){
-			logger.info("\n\n\n\n\n\t\t\t\t\t\t:::::: mo.getBillingStatus().toString() ::: "+mo.getBillingStatus().toString());
-			
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error("\n\n\n\n\n\t\t\t\t\t\t:::::: mo.getBillingStatus().toString() ::: "+mo.getBillingStatus().toString() + e.getMessage(),e);
-			throw e;
-		}
-		 
-		return success;
-	}
+   
 
 
 	@SuppressWarnings("unchecked")
@@ -866,47 +821,6 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 	}
 	
-	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public void updateMO(String msg, Long msgId) throws TransactionIDGenException{
-		try{
-			utx.begin();
-			Query qry2 = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog`  set MT_Sent=:sms WHERE  id=:id");
-			qry2.setParameter("sms", msg);
-			qry2.setParameter("id", msgId);
-			qry2.executeUpdate();
-			utx.commit();
-			
-		}catch(javax.persistence.NoResultException nre){
-			logger.warn(nre.getMessage(), nre);
-		}catch(Exception exp){
-			try{
-				utx.rollback();
-			}catch(Exception expz){}
-			logger.error(exp.getMessage(), exp);
-		}
-	}
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public IncomingSMS updateMO(IncomingSMS mo) throws TransactionIDGenException{
-		try{
-			utx.begin();
-			Query qry2 = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog`  set MT_Sent=? WHERE  id=?");
-			qry2.setParameter(1, mo.getMt_Sent());
-			qry2.setParameter(2, mo.getId());
-			qry2.executeUpdate();
-			utx.commit();
-			
-		}catch(javax.persistence.NoResultException nre){
-			logger.warn(nre.getMessage(), nre);
-		}catch(Exception exp){
-			try{
-				utx.rollback();
-			}catch(Exception expz){}
-			logger.error(exp.getMessage(), exp);
-		}
-		
-		return mo;
-	}
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
@@ -914,119 +828,6 @@ public class BaseEntityBean implements BaseEntityI {
 	@Override
 	public IncomingSMS logMO(IncomingSMS incomingsms) { 
 		return processorEJB.processMo(incomingsms);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public IncomingSMS resolveKeywords(IncomingSMS mo) {
-		logger.info(">>>>>>V.7>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
-		
-		
-		
-		if(mo.getSMS_Message_String()!=null){
-			if(mo.getSMS_Message_String().isEmpty())
-				return mo;
-			
-		}else{
-			mo.setSMS_Message_String(mo.getSMS_Message_String().trim().toUpperCase());
-			logger.info(">>>>>>>>>>>>>>>>>>>SMS["+mo.getSMS_Message_String()+"]");
-		}
-		
-		
-		try {
-			
-			Query qry = em.createNativeQuery("SELECT "
-					+ "`mop`.id as 'mo_processor_id_fk', "//0
-					+ "`sms`.CMP_Keyword, "//1
-					+ "`sms`.CMP_SKeyword, "//2
-					+ "`sms`.price as 'sms_price', "//3
-					+ "`sms`.id as 'serviceid', "//4
-					+ "`sms`.`split_mt` as 'split_mt', "//5
-					+ "`sms`.`event_type` as 'event_type', "//6
-					+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//7
-					+ "FROM `"+CelcomImpl.database+"`.`sms_service` `sms` LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?");
-			qry.setParameter(1, mo.getSMS_SourceAddr());
-			qry.setParameter(2, replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
-			logger.info("Msg : "+mo.getSMS_Message_String());
-			logger.info("Keyword : "+replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
-			
-			List<Object[]> resp = qry.getResultList();
-			
-			if(resp.size()>0){
-				for(Object[] o: resp){
-					mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
-					mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
-					mo.setServiceid( ((Integer)o[4]).intValue());//rs.getInt("serviceid"));
-					mo.setPrice(BigDecimal.valueOf((Double)o[3]));//BigDecimal.valueOf(rs.getDouble("sms_price")));
-					Long proc_id = Long.valueOf( (  (Integer)o[0] )+"" );
-					mo.setProcessor_id(proc_id);//rs.getInt("mo_processor_id_fk"));
-					mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
-					mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
-					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
-				}
-			}else{
-				
-				Query qry2 = em.createNativeQuery("SELECT "
-						+ "`mop`.id as 'mo_processor_id_fk', "//0
-						+ "`sms`.CMP_Keyword, `sms`.CMP_SKeyword, "//1
-						+ "`sms`.price as 'sms_price', "//2
-						+ "sms.id as 'serviceid', "//3
-						+ "`sms`.`split_mt` as 'split_mt', "//4
-						+ "`sms`.`event_type` as 'event_type', "//5
-						+ "`sms`.`price_point_keyword` as 'price_point_keyword' "//6
-						+ "FROM `"+CelcomImpl.database+"`.`sms_service` sms LEFT JOIN `"+CelcomImpl.database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.cmd='DEFAULT' AND sms.enabled=1 AND mop.shortcode=?");
-				
-				qry2.setParameter(1,mo.getSMS_SourceAddr());
-				
-				List<Object[]> resp2 = qry2.getResultList();
-				
-				if(resp2.size()>0){
-					
-					for(Object[] o: resp2){
-						/*mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-						mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-						mo.setServiceid(rs.getInt("serviceid"));
-						mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-						mo.setProcessor_id(rs.getInt("mo_processor_id_fk"));
-						mo.setSplit_msg(rs.getBoolean("split_mt"));
-						mo.setPricePointKeyword(rs.getString("price_point_keyword"));
-						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));*/
-						mo.setCMP_AKeyword((String)o[1]);//rs.getString("CMP_Keyword"));
-						mo.setCMP_SKeyword((String)o[2]);//rs.getString("CMP_SKeyword"));
-						mo.setServiceid( ((Integer)o[4]).intValue());//rs.getInt("serviceid"));
-						mo.setPrice(  BigDecimal.valueOf((Double)o[3])  );//BigDecimal.valueOf(rs.getDouble("sms_price")));
-						Long proc_id = Long.valueOf( (  (Integer)o[0] )+"" );
-						mo.setProcessor_id(proc_id);//rs.getInt("mo_processor_id_fk"));
-						mo.setSplit_msg((Boolean)o[5]);//rs.getBoolean("split_mt"));
-						mo.setPricePointKeyword((String)o[7]);//rs.getString("price_point_keyword"));
-						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get((String)o[6]));//rs.getString("event_type")));
-					}
-				
-				}else{
-					Query qry3 = em.createNativeQuery("SELECT `mop`.id as 'mo_processor_id_fk' FROM `"+CelcomImpl.database+"`.`mo_processors` mop WHERE mop.shortcode=?");
-					
-					qry3.setParameter(1,mo.getSMS_SourceAddr());
-					
-					List<Integer> resp3 = qry3.getResultList();
-					
-					for(Integer o: resp3){
-						Long proc_id = Long.valueOf(  o.intValue() );
-						mo.setProcessor_id(proc_id);//rs.getInt("mo_processor_id_fk"));
-					}
-					
-				}
-				
-				
-			}
-		
-		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
-			e.printStackTrace();
-		}finally{
-			
-		}
-		
-		
-		return mo;
 	}
 	
 	
@@ -1100,15 +901,6 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 	
-	
-	public boolean sendMT(IncomingSMS mo) throws Exception{
-		final String SEND_MT_1 = "insert into `"+CelcomImpl.database+"`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_AKeyword,CMP_SKeyword,Priority,CMP_TxID,split,serviceid,price,SMS_DataCodingId,mo_processorFK,billing_status,price_point_keyword,subscription) " +
-				"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE billing_status=?, re_tries=re_tries+1";
-
-		return sendMT(mo,SEND_MT_1);
-	}
-	
 	public String generateNextTxId(){
 		try {
 			Thread.sleep(1);
@@ -1116,6 +908,12 @@ public class BaseEntityBean implements BaseEntityI {
 			logger.warn("\n\t\t::"+e.getMessage());
 		}
 		return String.valueOf(System.nanoTime());
+	}
+
+
+	@Override
+	public OutgoingSMS sendMT(OutgoingSMS outgoingsms) throws Exception {
+		return queueprocEJB.saveOrUpdate(outgoingsms);
 	}
 
 

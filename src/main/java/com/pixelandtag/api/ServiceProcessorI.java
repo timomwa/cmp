@@ -3,10 +3,8 @@ package com.pixelandtag.api;
 import java.sql.Connection;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.entities.IncomingSMS;
 
 public interface ServiceProcessorI extends Runnable{
 	

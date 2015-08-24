@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.smssenders.Receiver;
 
@@ -106,8 +107,9 @@ public class MOreceiver2 extends HttpServlet {
 			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
 		
 		try {
-			boolean success = processorEJB.processMo(incomingparams);
-			logger.info("success = "+success);
+			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
+			logger.info("incomingsms = "+incomingsms);
+			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
 		} catch (ConfigurationException e) {
 			logger.error(e.getMessage(),e);
 		}

@@ -17,8 +17,6 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
-import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 
 /**
  * An improvement of com.pixelandtag.sms.producerthreads.MTProducer
@@ -138,7 +136,7 @@ public class OutgoingQueueRouter extends Thread {
 			
 		} catch (OutOfMemoryError e) {
 
-			logger.error("MEM_USAGE: "+ MTProducer.getMemoryUsage()
+			logger.error("MEM_USAGE: "+ getMemoryUsage()
 			        + " >> " 
 					+ e.getMessage(), e);
 
@@ -150,6 +148,18 @@ public class OutgoingQueueRouter extends Thread {
 
 		System.exit(0);
 
+	}
+	
+	public static String getMemoryUsage() {
+		long mem = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
+		if ( mem>=(1024*1024*1024) )
+			return ((int)mem/1024/1024/1024)+" GB";
+		if ( mem>=(1024*1024) )
+			return ((int)mem/1024/1024)+" MB";
+		if ( mem>=(1024) )
+			return ((int)mem/1024)+" KB";
+		return mem+"B";
+			
 	}
 	
 	

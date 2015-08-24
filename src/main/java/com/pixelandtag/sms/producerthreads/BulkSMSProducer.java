@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.MTStatus;
-import com.pixelandtag.autodraw.Alarm;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.bulksms.BulkSMSText;
@@ -58,7 +57,6 @@ public class BulkSMSProducer extends Thread {
 	
 	private static Semaphore semaphoreg;
 	private static Semaphore semaphore;//a semaphore because we might need to recover from a deadlock later.. listen for when we have many recs in the db but no msg is being sent out..
-	private Alarm alarm = new Alarm();
 	private CMPResourceBeanRemote cmpbean;
 	private BulkSmsMTI bulksmsBean;
 	private  Context context = null;

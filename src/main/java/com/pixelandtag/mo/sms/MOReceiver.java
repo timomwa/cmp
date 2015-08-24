@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.entities.IncomingSMS;
@@ -51,6 +52,10 @@ public class MOReceiver extends HttpServlet {
 
 	@EJB
 	private CMPResourceBeanRemote cmpBean;
+	
+	@EJB
+	private ProcessorResolverEJBI processorEJB;
+	
 	
 	//private final int INITIAL_CONNECTIONS = 10;
 	//private final int MAX_CONNECTIONS = 50;
@@ -131,7 +136,7 @@ public class MOReceiver extends HttpServlet {
 			
 			//TODO - Do away with this receiver or modify it to use new
 			
-			celcomAPI.logMO(moMessage);
+		//	processorEJB.logMO(moMessage);
 			
 			celcomAPI.setFr_tz(SERVER_TIMEZONE);
 			celcomAPI.setTo_tz(CLIENT_TIMEZONE);

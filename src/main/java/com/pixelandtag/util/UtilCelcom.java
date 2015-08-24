@@ -1,7 +1,5 @@
 package com.pixelandtag.util;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,8 +19,6 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
-import com.pixelandtag.mms.api.TarrifCode;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.web.beans.MessageType;
 
 public class UtilCelcom {

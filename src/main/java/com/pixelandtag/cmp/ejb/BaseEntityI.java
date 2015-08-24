@@ -34,12 +34,9 @@ public interface BaseEntityI {
 	public SMSService getSMSService(String cmd)  throws Exception;
 	public IncomingSMS logMO(IncomingSMS mo) ;
 	public String replaceAllIllegalCharacters(String text);
-	public IncomingSMS resolveKeywords(IncomingSMS mo);
 	public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception;
-	public IncomingSMS updateMO(IncomingSMS mo) throws TransactionIDGenException;
-	public void updateMO(String msg, Long msgId) throws TransactionIDGenException;
 	public void mimicMO(String keyword, String msisdn);
-	public boolean sendMT(OutgoingSMS mo) throws Exception;
+	public OutgoingSMS sendMT(OutgoingSMS mo) throws Exception;
 	public String generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
 	public void createSuccesBillRec(Billable billable);

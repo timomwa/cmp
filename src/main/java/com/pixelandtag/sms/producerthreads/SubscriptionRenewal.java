@@ -17,6 +17,7 @@ import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.mt.workerthreads.SubscriptionBillingWorker;
 import com.pixelandtag.util.FileUtils;
 
@@ -244,7 +245,7 @@ public class SubscriptionRenewal extends  Thread {
 			}
 		} catch (OutOfMemoryError e) {
 			logger.error(
-					"NEEDS RESTART: MEM_USAGE: " + MTProducer.getMemoryUsage()
+					"NEEDS RESTART: MEM_USAGE: " + OutgoingQueueRouter.getMemoryUsage()
 							+ " >> " + e.getMessage(), e);
 		} finally {
 			myfinalize();
@@ -476,7 +477,7 @@ public class SubscriptionRenewal extends  Thread {
 			logger.info("SIZE OF QUEUE ? "+renewables_ids.size());
 			
 			 final String serial = instance.cmpbean.generateNextTxId();//.takeFirst();//performance issues versus reliability? I choose reliability in this case :)
-			 
+				 
 			 try {
 				 
 				if(serial!=null)

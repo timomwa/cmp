@@ -1,13 +1,11 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
-import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -19,7 +17,6 @@ import snaq.db.DBPoolDataSource;
 import com.inmobia.luckydip.api.NoSettingException;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
@@ -29,22 +26,16 @@ import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.AlterationMethod;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.smsmenu.MenuController;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
-import com.pixelandtag.staticcontent.ContentRetriever;
 import com.pixelandtag.subscription.SubscriptionOld;
-import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
-import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.web.beans.MessageType;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -53,9 +44,6 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	
 	private static final int ENG = 1;//Language English
 	private static final int MAL = 2;//Language Malay
-
-
-	
 
 	private final Logger mo_processor_logger = Logger.getLogger(GenericMenuProcessor.class);
 	//private final String RESET_SESSION_ENG = "\nREPLY with \"Number\" to get the list of services.";
@@ -91,47 +79,10 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 		init_datasource();
 		menu_controller = new MenuController(getEJB());
 		subscription = new SubscriptionOld();
-		//cr = new ContentRetriever();
-		
-		int vendor = DriverUtilities.MYSQL;
-	    String driver = DriverUtilities.getDriver(vendor);
-	    String host =  HTTPMTSenderApp.props.getProperty("db_host");
-	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
-		
-	    String url = DriverUtilities.makeURL(host, dbName, vendor,username, password);
-	   
-		try {
-			celcomAPI = new CelcomImpl(url, "MORE_PROC_API_DS");
-		} catch (Exception e) {
-			mo_processor_logger.error(e.getMessage(),e);
-		}
 	}
 	
 	private void init_datasource(){
-		
-		int vendor = DriverUtilities.MYSQL;
-	    String driver = DriverUtilities.getDriver(vendor);
-	    String host =  HTTPMTSenderApp.props.getProperty("db_host");
-	    String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = HTTPMTSenderApp.props.getProperty("db_username");
-	    String password = HTTPMTSenderApp.props.getProperty("db_password");
-		
-		ds = new DBPoolDataSource();
-	    ds.setName("MENU_PROCESSOR_DS");
-	    ds.setDescription("Processes the More Keyword. Thread datasource: "+ds.getName());
-	    ds.setDriverClassName(driver);
-	    ds.setUrl(url);
-	    ds.setUser(username);
-	    ds.setPassword(password);
-	    ds.setMinPool(1);
-	    ds.setMaxPool(2);
-	    ds.setMaxSize(3);
-	    ds.setIdleTimeout(3600);  // Specified in seconds.
-	    ds.setValidationQuery("SELECT 'Test'");
-		
+			
 	}
 	
 	@Override

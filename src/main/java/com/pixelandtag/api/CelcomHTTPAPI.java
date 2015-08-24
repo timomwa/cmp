@@ -2,11 +2,9 @@ package com.pixelandtag.api;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Queue;
 
-import com.pixelandtag.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.Notification;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -46,20 +44,6 @@ public interface CelcomHTTPAPI extends Settings {
 	
 	public String getTo_tz();
 	
-	/**
-	 * Logs an incoming MO to the database.
-	 * 
-	 * @param mo - com.inmobia.celcom.MO
-	 */
-	public void logMO(IncomingSMS mo);
-	
-	
-	/**
-	 * Retrieves an mo message from the database.
-	 * @return
-	 */
-	public IncomingSMS retrieveMO(String cMP_Txid);
-	
 	
 	/**
 	 * Logs an MT to the database
@@ -76,30 +60,12 @@ public interface CelcomHTTPAPI extends Settings {
 	public void acknowledgeReceipt(IncomingSMS mo);
 	
 	
-	
-	/**
-	 * When we send an MT, we need to know if it was delivered.
-	 * 
-	 * @param notif
-	 */
-	public void acknowledgeDN(Notification notif);
-	
-	
-	
 	/**
 	 * Update SMSStatLog.
 	 * 
 	 * @param notif
 	 */
 	public void updateSMSStatLog(Notification notif);
-	
-	
-	/**
-	 * Retrieves an MO using Transaction id - CPM_Txid
-	 * @param cpm_txId - java.lang.String
-	 * @return com.inmobia.celcom.MO if found, null if none is found.
-	 */
-	public IncomingSMS findMO(String cpm_txId);
 	
 	
 	/**
@@ -160,18 +126,7 @@ public interface CelcomHTTPAPI extends Settings {
 	 */
 	public boolean containsUnicode(String sms);
 	
-	
-	public Queue<IncomingSMS> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword);
-	
-	
-	public Queue<IncomingSMS> getLatestMO(int limit);
-	
-	
-	public void updateMessageLog(IncomingSMS mo);
-	
 	public Queue<ServiceProcessorDTO> getServiceProcessors();
-	
-	public IncomingSMS resolveKeywords(IncomingSMS mo, Connection conn);
 	
 	public void closeConnectionIfNecessary();
 	
@@ -196,12 +151,6 @@ public interface CelcomHTTPAPI extends Settings {
 	 */
 	public void flagMMSIfAny(Notification notification);
 
-	
-	/**
-	 * Processes the lucky dip SMS.
-	 * @param notification
-	 */
-	public void processLuckyDip(Notification notification);
 	
 	
 	public Connection getConnection();

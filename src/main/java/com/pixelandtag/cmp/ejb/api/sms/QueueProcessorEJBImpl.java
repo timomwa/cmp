@@ -2,7 +2,10 @@ package com.pixelandtag.cmp.ejb.api.sms;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Remote;
@@ -16,7 +19,9 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
 import com.pixelandtag.cmp.dao.core.OutgoingSMSDAOI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 
 @Stateless
@@ -39,6 +44,9 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	
 	@Inject
 	private OutgoingSMSDAOI smsoutDAO;
+	
+	@Inject
+	private IncomingSMSDAOI incomingsmsDAO;
 	
 	@Override
 	public boolean updateMessageLog(String cmp_tx_id, MTStatus status)  throws Exception{
@@ -77,6 +85,11 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	public OutgoingSMS saveOrUpdate(OutgoingSMS queue) throws Exception{
 		return smsoutDAO.save(queue);
 	}
+	
+	@Override
+	public IncomingSMS saveOrUpdate(IncomingSMS incomingsms) throws Exception{
+		return incomingsmsDAO.save(incomingsms);
+	}
 	 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -86,20 +99,25 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 			
 			Query qry = em.createNamedQuery(OutgoingSMS.NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC);
 			qry.setParameter("billstatus", billingstatuses);
-			//qry.setParameter("in_outgoing_queue", Boolean.FALSE);
-			//qry.setParameter("sent", Boolean.FALSE);
 			qry.setFirstResult(0);
 			qry.setMaxResults(size.intValue());
 			return qry.getResultList();
 		
 		}catch(Exception e){
-			
 			logger.error(e.getMessage(),e);
-		
 		}
 		
 		return new ArrayList<OutgoingSMS>();
-		
+	
+	}
+	
+	
+	@Override
+	public List<IncomingSMS> getLatestMO(int size){
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("processed", Boolean.FALSE);
+		params.put("mo_ack", Boolean.FALSE);
+		return incomingsmsDAO.findByNamedQuery(IncomingSMS.NQ_LIST_UNPROCESSED, params);
 	}
 
 

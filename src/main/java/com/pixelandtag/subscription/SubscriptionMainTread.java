@@ -2,12 +2,7 @@ package com.pixelandtag.subscription;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,36 +10,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
-import com.pixelandtag.api.Settings;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
-import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.sms.mt.workerthreads.SubscriptionBillingWorker;
-import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.sms.producerthreads.MTProducer;
-import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
-import com.pixelandtag.web.triviaI.MechanicsI;
 
 public class SubscriptionMainTread extends Thread{
 	

@@ -120,7 +120,7 @@ public class DNReceiver extends HttpServlet {
 			
 			celcomAPI.setTo_tz(CLIENT_TIMEZONE);
 			
-			celcomAPI.acknowledgeDN(notification);
+			//celcomAPI.acknowledgeDN(notification);
 			
 			watch.stop();
 			logger.info(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to log the Notification msg");
@@ -144,7 +144,7 @@ public class DNReceiver extends HttpServlet {
 			
 			watch.reset();
 			watch.start();
-			celcomAPI.processLuckyDip(notification);
+			//celcomAPI.processLuckyDip(notification);
 			watch.stop();
 			logger.info(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to process lucky dip process on DLR");
 			

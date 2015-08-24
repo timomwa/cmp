@@ -15,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
 
@@ -41,6 +43,7 @@ public class GenericMessage implements Serializable{
 	private String msisdn;
 	
 	@Index(name="timestamp")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date timestamp;
 	
 	@Index(name="osmopco_tx_id")

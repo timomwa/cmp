@@ -1,11 +1,10 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -22,7 +21,6 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
-import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
@@ -32,22 +30,18 @@ import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.AlterationMethod;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.smsmenu.MenuController;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
 import com.pixelandtag.staticcontent.ContentRetriever;
 import com.pixelandtag.subscription.SubscriptionOld;
-import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.web.beans.MessageType;
 import com.pixelandtag.web.beans.RequestObject;
-import com.pixelandtag.web.triviaI.MechanicsI;
 
 public class MoreProcessor extends GenericServiceProcessor {
 

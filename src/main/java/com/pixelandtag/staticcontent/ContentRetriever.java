@@ -1,13 +1,11 @@
 package com.pixelandtag.staticcontent;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 
@@ -16,14 +14,12 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
-import com.pixelandtag.cmp.ejb.CMPResourceBean;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.dynamic.dbutils.DBConnection;
-import com.pixelandtag.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
-import com.pixelandtag.serviceprocessors.sms.ServiceProcessorLoader;
 import com.pixelandtag.subscription.SubscriptionOld;
-import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
 
 public class ContentRetriever {
@@ -315,14 +311,10 @@ public class ContentRetriever {
 				service.setId(rs.getInt("id"));
 				service.setServiceName(rs.getString("ServiceName"));
 				service.setProcessorClass(rs.getString("ProcessorClass"));
-				//service.setCMP_Keyword(rs.getString("CMP_Keyword"));
-				//service.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 				service.setActive(rs.getBoolean("enabled"));
 				service.setClass_status(rs.getString("class_status"));
 				service.setShortcode(rs.getString("shortcode"));
-//				if(rs.getString("keywords")!=null)
-//					service.setKeywords(rs.getString("keywords").split("#"));
-				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
+				service.setServKey(service.getProcessorClassName()+"_"+service.getId()+"_"+service.getShortcode());
 				
 				service.setThreads(rs.getInt("threads"));
 				
@@ -363,13 +355,14 @@ public class ContentRetriever {
 	 * @param conn
 	 * @return
 	 */
-	public IncomingSMS getContentFromServiceId(int service_id, String msisdn, Connection conn) {
+	public OutgoingSMS getContentFromServiceId(int service_id, String msisdn, Connection conn) {
 		
 		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
 		log.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
 		SMSServiceDTO sm = sub.getSMSservice(service_id, conn);
 		log.info(s+sm);
-		IncomingSMS mo = null;
+		IncomingSMS incomingsms = null;
+		OutgoingSMS outgoingsms = null;
 		
 		if(sm!=null){
 			
@@ -379,23 +372,20 @@ public class ContentRetriever {
 				
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
-				mo = new IncomingSMS();
-				mo.setCmp_tx_id(cmpresource.generateNextTxId());
-				mo.setMsisdn(msisdn);
-				mo.setCMP_AKeyword(sm.getCmp_keyword());
-				mo.setCMP_SKeyword(sm.getCmp_skeyword());
-				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
-				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
-				mo.setSMS_SourceAddr(procDTO.getShortcode());
-				mo.setPriority(1);
-				mo.setServiceid(sm.getId());
-				mo.setSMS_Message_String(sm.getCmd());
+				incomingsms = new IncomingSMS();
+				incomingsms.setCmp_tx_id(cmpresource.generateNextTxId());
+				incomingsms.setMsisdn(msisdn);
+				incomingsms.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
+				incomingsms.setShortcode(procDTO.getShortcode());
+				incomingsms.setServiceid(Long.valueOf(sm.getId()));
+				incomingsms.setSms(sm.getCmd());
 				
 				//added 22nd Dec 2014 - new customer requirement
-				mo.setPricePointKeyword(sm.getPricePointKeyword());
+				incomingsms.setPrice_point_keyword(sm.getPricePointKeyword());
 				
 				//added on 10th June 2013 but not tested
-				mo.setProcessor_id(sm.getMo_processor_FK());
+				incomingsms.setMoprocessor(cmpresource.find(MOProcessor.class, sm.getMo_processor_FK()));
 				
 				
 				
@@ -408,9 +398,9 @@ public class ContentRetriever {
 				//We handle subscription elsewhere, 
 				//this is solely for content fetcnhing 
 				//and not subscribing.
-				mo.setSubscriptionPush(true);
+				incomingsms.setIsSubscription(Boolean.TRUE);
 				
-				mo = processor.process(mo);
+				outgoingsms = processor.process(incomingsms);
 				
 				
 			}catch(Exception e) {
@@ -421,7 +411,7 @@ public class ContentRetriever {
 		}
 		
 		
-		return mo;
+		return outgoingsms;
 	}
 
 }

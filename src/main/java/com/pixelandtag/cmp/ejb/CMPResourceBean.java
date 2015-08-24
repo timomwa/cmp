@@ -6,16 +6,14 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,7 +51,6 @@ import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
-import com.pixelandtag.mms.api.TarrifCode;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
@@ -64,7 +61,6 @@ import com.pixelandtag.sms.producerthreads.TopUpNumber;
 import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.smsmenu.Session;
-import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.SubscriptionSource;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SMSServiceDTO;
@@ -83,6 +79,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			KeyStoreException {
 		super();
 	}
+	
 	
 	private static int DEFAULT_LANGUAGE_ID = 1;
 	private String MINUS_ONE = "-1";
@@ -1177,7 +1174,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(11, mt.getNumber_of_sms());//number_of_sms
 			qry.setParameter(12, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
 			qry.setParameter(13, mt.getServiceid());//serviceid
-			if(mt.getCMP_SKeyword()!=null && mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+			if(mt.getPrice()==null)
 				qry.setParameter(14, 1.0d);//price
 			else
 				qry.setParameter(14, mt.getPrice().doubleValue());//price
@@ -1196,7 +1193,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(22, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
 			qry.setParameter(23, mt.getServiceid());//serviceid
 			
-			if(mt.getCMP_SKeyword()==null || mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+			if(mt.getPrice()==null)
 				qry.setParameter(24, 1.0d);//price
 			else
 				qry.setParameter(24, mt.getPrice().doubleValue());//price
@@ -1206,10 +1203,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(27, mt.getAPIType());//APIType,
 			qry.setParameter(28, mt.getNewCMP_Txid());//new CMPTxid
 			
-			if(mt.getSms()!=null && mt.getSms().startsWith(RM1))
-				qry.setParameter(29, TarrifCode.RM1.getCode());//CMP_SKeyword
-			else
-				qry.setParameter(29, mt.getCMP_SKeyword());//CMP_SKeyword
+			qry.setParameter(29, mt.getCMP_SKeyword());//CMP_SKeyword
 			
 			qry.setParameter(30, mt.getProcessor_id());//CMP_SKeyword
 			
@@ -1886,13 +1880,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(1, mo.getServiceid());
 			qry.setParameter(2, mo.getMsisdn());
 			qry.setParameter(3, mo.getCmp_tx_id());
-			qry.setParameter(4, mo.getCMP_AKeyword());
-			qry.setParameter(5, mo.getCMP_SKeyword());
-			if(mo.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
-				qry.setParameter(6, 1d);
-			else
-				qry.setParameter(6, mo.getPrice().doubleValue());
-			qry.setParameter(7, mo.isSubscriptionPush());
+			qry.setParameter(4, mo.getPrice().doubleValue());
+			qry.setParameter(5, mo.getIsSubscription());
 			
 			int num =  qry.executeUpdate();
 			utx.commit();
@@ -1959,8 +1948,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					subdto.setShortcode(   (String) (o[2]) );//rs.getString("shortcode"));
 					subdto.setServiceName(  (String) (o[3]) );//rs.getString("ServiceName"));
 					subdto.setCmd( (String) (o[4]) );//rs.getString("cmd"));
-					subdto.setCMP_AKeyword(  (String) (o[5]) );//rs.getString("CMP_Keyword"));
-					subdto.setCMP_SKeyword( (String) (o[6]) );//rs.getString("CMP_SKeyword"));
 					subdto.setPrice(new Double((Double) (o[7])));
 					subdto.setPush_unique(( (Integer) (o[8]) ).intValue());//rs.getInt("push_unique"));
 					subdto.setServiceid(service_id);
@@ -2561,11 +2548,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							
 						}
 						
-					}else if(KEYWORD.equalsIgnoreCase(GenericServiceProcessor.SUBSCRIPTION_CONFIRMATION)
-							//|| (kw_is_digit && )
-							){
-						
-						
+					}else if(KEYWORD.equalsIgnoreCase(GenericServiceProcessor.SUBSCRIPTION_CONFIRMATION)){
 						
 						LinkedHashMap<Integer,MenuItem> submenu = menu_from_session.getSub_menus();
 						
@@ -2661,7 +2644,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
 										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(incomingsms.getPrice()));
 									if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
-										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, incomingsms.getSMS_Message_String());
+										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, incomingsms.getSms());
 									
 									
 									//this is sent out normally
@@ -2683,7 +2666,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
 										response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(incomingsms.getPrice()));
 									if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
-										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, incomingsms.getSMS_Message_String());
+										response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, incomingsms.getSms());
 									
 									if(submenus_have_sub_menus)
 										resp = response;//get all the sub menus there.
@@ -2720,27 +2703,22 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							language_id = menu.getLanguage_id();
 							
 							logger.info("::::::::::::::::::::::::: serviceid:: "+menu.getService_id() + "\n\nmenu.toString():\n "+menu.toString()+"\n");
-							final IncomingSMS mosm_  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
+							final OutgoingSMS  outgoingsms  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
 							//final MOSms mosm_ =  cr.getContentFromServiceId(menu.getService_id(),MSISDN,conn);
 							
 							String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
 							if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
 								response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, menu.getName());
 							if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
-								response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(mosm_.getPrice()));
+								response = response.replaceAll(GenericServiceProcessor.PRICE_TAG, String.valueOf(outgoingsms.getPrice()));
 							if(response.indexOf(GenericServiceProcessor.KEYWORD_TAG)>=0)
-								response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, mosm_.getSMS_Message_String());
+								response = response.replaceAll(GenericServiceProcessor.KEYWORD_TAG, outgoingsms.getSms());
 							
 							
 							//this is sent out normally
 							resp = response;
 							
 							return resp;
-							
-							/*mosm_.setMt_Sent((RM.replaceAll(GenericServiceProcessor.PRICE_TG, String.valueOf(mo.getPrice()))+GenericServiceProcessor.SPACE+mosm_.getMt_Sent()));
-							
-							sendMT(mosm_);
-							*/
 							
 						}else{
 							resp = getMessage(GenericServiceProcessor.NO_PENDING_SUBSCRIPTION_ADVICE,  language_id);
@@ -3225,13 +3203,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 
-	public IncomingSMS getContentFromServiceId(int service_id, String msisdn, boolean isSubscription) throws Exception {
+	public OutgoingSMS getContentFromServiceId(int service_id, String msisdn, boolean isSubscription) throws Exception {
 		
 		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
 		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
 		SMSServiceDTO sm = getSMSservice(service_id);
 		logger.info(s+sm);
-		IncomingSMS mo = null;
+		IncomingSMS incomingsms = null;
+		OutgoingSMS outgoingsms = null;
 		
 		if(sm!=null){
 			
@@ -3241,23 +3220,20 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
-				mo = new IncomingSMS();
-				mo.setCmp_tx_id(generateNextTxId());
-				mo.setMsisdn(msisdn);
-				mo.setCMP_AKeyword(sm.getCmp_keyword());
-				mo.setCMP_SKeyword(sm.getCmp_skeyword());
-				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
-				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
-				mo.setSMS_SourceAddr(procDTO.getShortcode());
-				mo.setPriority(1);
-				mo.setServiceid(sm.getId());
-				mo.setSMS_Message_String(sm.getCmd());
+				incomingsms = new IncomingSMS();
+				incomingsms.setCmp_tx_id(generateNextTxId());
+				incomingsms.setMsisdn(msisdn);
+				incomingsms.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
+				incomingsms.setShortcode(procDTO.getShortcode());
+				incomingsms.setServiceid(Long.valueOf(sm.getId()));
+				incomingsms.setSms(sm.getCmd());
 				
 				//added 22nd Dec 2014 - new customer requirement
-				mo.setPricePointKeyword(sm.getPricePointKeyword());
+				incomingsms.setPrice_point_keyword(sm.getPricePointKeyword());
 				
 				//added on 10th June 2013 but not tested
-				mo.setProcessor_id(sm.getMo_processor_FK());
+				incomingsms.setMoprocessor(em.find(MOProcessor.class, sm.getMo_processor_FK()));
 				
 				
 				
@@ -3270,9 +3246,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				//We handle subscription elsewhere, 
 				//this is solely for content fetcnhing 
 				//and not subscribing.
-				mo.setSubscriptionPush(isSubscription);
+				incomingsms.setIsSubscription(isSubscription);
 				
-				mo = processor.process(mo);
+				outgoingsms = processor.process(incomingsms);
 				
 				
 			}catch(Exception e) {
@@ -3283,7 +3259,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		}
 		
 		
-		return mo;
+		return outgoingsms;
 	}
 
 	
@@ -3341,6 +3317,91 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ServiceProcessorDTO> getServiceProcessors() {
+
+		List<ServiceProcessorDTO>  services = null;
+		
+		try {
+			
+			Query qry = em.createQuery("SELECT "
+					+ "mop.id, "//0
+					+ "mop.ServiceName, "//1
+					+ "mop.ProcessorClass, "//2
+					+ "mop.enabled, "//3
+					+ "mop.class_status, "//4
+					+ "mop.shortcode, "//5
+					+ "mop.threads, "//6
+					+ "smss.CMP_Keyword, "//7
+					+ "smss.CMP_SKeyword, "//8
+					+ "group_concat(smss.cmd) as 'keywords',  "//9
+					+ "smss.subscriptionText as 'subscriptionText', "//10
+					+ "smss.unsubscriptionText as 'unsubscriptionText', "//11
+					+ "smss.tailText_subscribed as 'tailText_subscribed', "//12
+					+ "smss.tailText_notsubscribed as 'tailText_notsubscribed', "//13
+					+ "mop.processor_type as 'processor_type' , "//14
+					+ "mop.forwarding_url as 'forwarding_url', "//15
+					+ "mop.protocol as 'protocol', "//16
+					+ "coalesce(mop.smppid,-1,mop.smppid) as 'smppid'  "//17
+					+ "FROM MOProcessor mop, SMSService smss "
+					+ "WHERE smss.moprocessor=mop "
+					+ "AND mop.enabled=1 "
+					+ "AND mop.processor_type <> :phantom_processor "
+					+ "group by mop.id" );
+			
+			qry.setParameter("phantom_processor", ProcessorType.PHANTOM);
+			
+			List<Object[]> rows = qry.getResultList();
+			
+			ServiceProcessorDTO service;
+			
+			int i = 0;
+			
+			for(Object[] row : rows){
+				
+				i++;
+				
+				service = new ServiceProcessorDTO();
+				
+				if(i==1){
+					services = new LinkedList<ServiceProcessorDTO>();
+				}
+				
+				service.setSubscriptionText( (String) row[10]  );
+				service.setUnsubscriptionText( (String) row[11] );
+				service.setTailTextSubscribed( (String) row[12] );
+				service.setTailTextNotSubecribed(  (String) row[13] );
+				service.setId( (Integer) row[0]  );
+				service.setServiceName(  (String) row[1] );
+				service.setProcessorClass(  (String) row[2] );
+				service.setActive(   (Boolean) row[3] );
+				service.setClass_status( (String) row[4]  );
+				service.setShortcode(  (String) row[5]  );
+				if(((String) row[9])!=null)
+					service.setKeywords(((String) row[9]).split(","));
+				service.setForwarding_url(   (String) row[15] );
+				service.setProcessor_type(ProcessorType.fromString((String) row[14]));
+				service.setProtocol(   (String) row[16] );
+				service.setSmppid( (Long) row[17] );
+				service.setServKey(service.getProcessorClassName()+"_"+service.getId()+"_"+"_"+service.getShortcode());
+				service.setThreads( (Integer)row[6] );
+				services.add(service);
+			}
+			
+			
+		} catch (Exception e) {
+			
+			logger.error(e.getMessage(),e);
+			
+		}finally{
+			
+		}
+		
+		return services;
+	}
+
 
 	
 

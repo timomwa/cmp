@@ -4,19 +4,29 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "incoming_sms")
+@NamedQueries({
+	@NamedQuery(
+			name = IncomingSMS.NQ_LIST_UNPROCESSED,
+			query = "select inc from IncomingSMS inc where inc.processed=:processed AND inc.mo_ack=:mo_ack order by inc.timestamp asc"
+	)
+})
 public class IncomingSMS extends GenericMessage implements Serializable{
+	
+	@Transient
+	public static final String NQ_LIST_UNPROCESSED = "incomingsms.listunprocessed";
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -816506620150511093L; 
-	
-	
 	
 	
 	@Column(name="mo_ack", nullable=false)

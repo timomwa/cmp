@@ -3,7 +3,6 @@ package com.pixelandtag.api;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,8 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 
 import javax.naming.InitialContext;
@@ -24,48 +21,19 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import com.inmobia.luckydip.api.LuckyDipFactory;
+import com.inmobia.luckydip.api.LuckyDipI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 //import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.web.beans.MessageType;
-import com.pixelandtag.web.beans.Subscriber;
-import com.pixelandtag.web.triviaI.MechanicsI;
-import com.pixelandtag.web.triviaImpl.MechanicsS;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.entities.Notification;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
-import com.pixelandtag.util.UtilCelcom;
-import com.pixelandtag.mms.api.TarrifCode;
-import com.inmobia.luckydip.api.LuckyDipFactory;
-import com.inmobia.luckydip.api.LuckyDipI;
-import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 
@@ -380,7 +348,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			
 			if(rs.next()){
 				
-				priceTbc = TarrifCode.get(rs.getString(2).trim()).getPrice();
+				priceTbc = 0.0d;//TarrifCode.get(rs.getString(2).trim()).getPrice();
 				
 				wasInLog  = true;
 				
@@ -413,7 +381,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 						CMP_Keyword = rs.getString("CMP_Keyword");
 						CMP_SKeyword = rs.getString("CMP_SKeyword");
 						serviceid = rs.getInt("serviceid");
-						priceTbc = TarrifCode.get(CMP_SKeyword.trim()).getPrice();
+						priceTbc = 0.0d;//TarrifCode.get(CMP_SKeyword.trim()).getPrice();
 						
 							
 					}
@@ -534,412 +502,10 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	
 	
 	
-	public void acknowledgeDN(Notification notif) {
-		
-		Connection conn = null;
-		
-		PreparedStatement pstmt = null;
-		
-		ResultSet rs = null;
-		
-		boolean success = false;
-		
-		int serviceid = 2;
-		double price = 1.0;
-		
-		try {
-			
-			if(connectionObjIsCached){
-				
-				pstmt = getConn().prepareStatement("SELECT mt_ack,SUB_Mobtel,serviceid,price,CMP_Txid,newCMP_Txid FROM `"+database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-			
-			}else{
-				
-				conn = getConn();
-				
-				    pstmt = conn.prepareStatement("SELECT mt_ack,SUB_Mobtel,serviceid,price,CMP_Txid,newCMP_Txid FROM `"+database+"`.`messagelog` WHERE (CMP_Txid = ?) OR (newCMP_Txid = ?)",Statement.RETURN_GENERATED_KEYS);
-			
-			}
-			
-			pstmt.setString(1, String.valueOf(notif.getCmp_tx_id()));
-			pstmt.setString(2, String.valueOf(notif.getCmp_tx_id()));
-			
-			rs = pstmt.executeQuery();
-			
-			int mt_ack = -1;
-			
-			String msisdn  = null;
-			String cMP_Txid = notif.getCmp_tx_id();
-			String newCMP_Txid; 
-			
-			boolean isRetry = false;
-			
-			
-			boolean isthere = false;
-			
-			
-			if(rs.next()){
-				
-				isthere = true;
-				
-				mt_ack = rs.getInt(1);
-				
-				msisdn = rs.getString(2);
-				
-				serviceid = rs.getInt("serviceid");
-				
-				price = rs.getDouble("price");
-				
-				cMP_Txid =  rs.getString("CMP_Txid") ;
-				
-				newCMP_Txid = rs.getString("newCMP_Txid");
-				
-				isRetry =   newCMP_Txid.equalsIgnoreCase(notif.getCmp_tx_id());
-				
-				logger.debug("SMS FOUND: CMP_Txid = "+cMP_Txid+" re-try CMP_Txid = "+notif.getCmp_tx_id());
-			
-			}else{
-				
-				logger.warn("SMS with CMP_Txid = "+cMP_Txid+ " NOT found!");
-				
-			}
-			
-			if(rs!=null)
-				rs.close();
-			
-			if(pstmt!=null)
-				pstmt.close();
-			
-			//Only if the message exists and was not previously marked as acknowldedged
-			if((mt_ack>-1) && ((mt_ack==0) || isthere)){
-				
-				if(connectionObjIsCached){
-					
-					pstmt = getConn().prepareStatement("UPDATE `"+database+"`.`messagelog` SET mt_ack=1, delivery_report_arrive_time=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'), MT_STATUS=?  WHERE  CMP_Txid = ?",Statement.RETURN_GENERATED_KEYS);
-				
-				}else{
-					
-					pstmt = conn.prepareStatement("UPDATE `"+database+"`.`messagelog` SET mt_ack=1, delivery_report_arrive_time=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'), MT_STATUS=?  WHERE CMP_Txid = ?",Statement.RETURN_GENERATED_KEYS);
-				
-				}
-				
-				pstmt.setString(1, notif.getErrorCode().toString());
-				pstmt.setBigDecimal(2, new BigDecimal(cMP_Txid));
-				
-				success = pstmt.executeUpdate()>0;
-				
-				
-				
-				if(notif.getErrorCode().equals(ERROR.PSAInsufficientBalance) || notif.getErrorCode().equals(ERROR.PSANumberBarred)){
-					
-					logger.debug(">>> cMP_Txid: "+cMP_Txid+" >> insufficientBalance "+notif.getErrorCode());
-					
-					MechanicsS.toggleRetry(cMP_Txid, true, conn);
-					
-				try {
-					
-					if(msisdn!=null){
-						
-						
-							Subscriber sub = null;
-							
-							if(connectionObjIsCached){
-								sub = MechanicsS.getSubscriber(msisdn, getConn());
-							}else{
-								sub = MechanicsS.getSubscriber(msisdn, conn);
-							}
-						
-							String msg = "";
-							
-							if(sub!=null){
-								
-								if(connectionObjIsCached){
-									msg = RM0  + sub.getName() + BIGSPACER + UtilCelcom.getMessage(MessageType.INSUFFICIENT_BALANCE, getConn(), sub.getLanguage_id_() );
-								}else{
-									msg = RM0 + sub.getName() + BIGSPACER+ UtilCelcom.getMessage(MessageType.INSUFFICIENT_BALANCE, conn, sub.getLanguage_id_());
-								}
-								
-							}else{
-								
-								if(connectionObjIsCached){
-									
-									msg = UtilCelcom.getMessage(MessageType.INSUFFICIENT_BALANCE, 2, getConn());
-								
-								}else{
-									
-									msg = UtilCelcom.getMessage(MessageType.INSUFFICIENT_BALANCE, 2, conn);
-								
-								}
-								
-							}
-							
-							logger.info(msg+" >>>>> [isretry: "+isRetry+"]<><><><><><><><><><><>[msisdn="+msisdn+"]<><><>[cMP_Txid="+cMP_Txid+"]<><><>[txid="+cMP_Txid+"]<><><><>:::::::::::::SUB HAS INSUFFICIENT BALANCE. WE SEND THEM A MESSAGE TO TELL THEM TO TOP UP, THEN WE MARK THE MT for RE-TRY::::::::::::::<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><");
-							
-							
-							if(!isRetry){
-								
-								if(connectionObjIsCached){
-									MechanicsS.insertIntoHttpToSend(msisdn, msg, MechanicsS.generateNextTxId(), serviceid, price, "22222", "IOD", "IOD0000", getConn());
-									//MechanicsS.insertIntoHttpToSend(msisdn, msg, MechanicsS.generateNextTxId(), serviceid,0, getConn());
-								}else{
-									MechanicsS.insertIntoHttpToSend(msisdn, msg, MechanicsS.generateNextTxId(), serviceid, price, "22222", "IOD", "IOD0000", conn);
-									//MechanicsS.insertIntoHttpToSend(msisdn, msg, MechanicsS.generateNextTxId(),serviceid,0,conn);
-								}
-							}
-							
-							
-							
-					}
-					
-				} catch (Exception e) {
-					
-					log(e);
-					
-				}
-			}
-				
-				
-				logger.debug("MT (CMP_Txid = "+notif.getCmp_tx_id()+ ") " + (success ? "successfully acknowledged" : "acknowledging failed!"));
-				
-			}
-			
-			
-		} catch (SQLException e) {
-			
-			log(e);
-		
-		} catch (InterruptedException e) {
-			
-			log(e);
-			
-		}finally{
-			
-			
-			try {
-				
-				if(rs!=null)
-					rs.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			closeConnectionIfNecessary(conn);	
-		
-		}
-		
-	}
 	
-	/* (non-Javadoc)
-	 * @see com.pixelandtag.CelcomHTTPAPI#retrieveMO(java.lang.String)
-	 */
-	public IncomingSMS retrieveMO(String cMP_Txid) {
-		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		IncomingSMS mo =  null;
-		
-		try {
-			
-			if(connectionObjIsCached){
-				
-				pstmt = getConn().prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE  CMP_Txid = ?",Statement.RETURN_GENERATED_KEYS);
-			
-			}else{
-				
-				conn = getConn();
-				
-				pstmt = conn.prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE  CMP_Txid = ?",Statement.RETURN_GENERATED_KEYS);
-			
-			}
-			
-			pstmt.setString(1, String.valueOf(cMP_Txid));
-			
-			rs = pstmt.executeQuery();
-			
-			if(rs.next()){
-				mo = new IncomingSMS();
-				mo.setId(rs.getInt("id"));
-				mo.setCmp_tx_id(cMP_Txid);
-				mo.setSMS_Message_String(rs.getString("MO_received"));
-				mo.setMt_Sent(rs.getString("MT_Sent"));
-				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
-				mo.setMsisdn(rs.getString("SUB_Mobtel"));
-				mo.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
-				mo.setCMPResponse(rs.getString("CMPResponse"));
-				mo.setAPIType(rs.getString("APIType"));
-				mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-				mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-				String timestamp = rs.getString("timeStamp"); 
-				if(timestamp!=null && !timestamp.isEmpty())
-					try {
-						mo.setTimeStamp(format.parse(timestamp));
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-			}
-			
-			
-		} catch (SQLException e) {
-			
-			log(e);
-		
-		} catch (InterruptedException e) {
-			log(e);
-		}finally{
-			
-			try {
-				
-				if(rs!=null)
-					rs.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			closeConnectionIfNecessary(conn);			
-		
-		}
-		
-		
-		return mo;
-	}
 
-	/* (non-Javadoc)
-	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
-	 */
-	public void logMO(IncomingSMS mo) {
-		
-		logger.debug("LOGGING_MO_CELCOM_");
-		
-		Connection conn = null;
-		
-		PreparedStatement pstmt = null;
-		
-		if(mo.getCmp_tx_id().isEmpty())
-			mo.setCmp_tx_id(generateNextTxId());
-		
-		
-		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()   ["+mo.getSMS_DataCodingId()+"]");
-		logger.debug("BEFORE_LOGGING_SMS : GenericMessage.NON_ASCII_SMS_ENCODING_ID   ["+mo.getSMS_DataCodingId()+"]");
-		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId()!=null  ["+(mo.getSMS_DataCodingId()!=null)+"]");
-		logger.debug("BEFORE_LOGGING_SMS : mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)  ["+(mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID))+"]");
-		
-		if((mo.getSMS_DataCodingId()!=null) && mo.getSMS_DataCodingId().trim().equals(GenericMessage.NON_ASCII_SMS_ENCODING_ID)){
-			logger.debug("BEFORE_DECODING Data Encoding = Old sms = "+mo.getSMS_Message_String());
-			mo.setSMS_Message_String(hexToString(mo.getSMS_Message_String().replaceAll("00","")));
-			logger.debug("AFTER_DECODING new sms = "+mo.getSMS_Message_String());
-		}
-		
-		try {
-			
-			if(connectionObjIsCached){
-				
-				mo = resolveKeywords(mo, getConn());//First resolve the keyword..
-				
-				pstmt = getConn().prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type,price_point_keyword) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
-				
-			}else{
-				
-				conn = getConn();
-				
-				mo = resolveKeywords(mo, conn);//First resolve the keyword..
-				
-				pstmt = conn.prepareStatement("INSERT INTO `"+database+"`.`messagelog`(CMP_Txid,MO_Received,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,price,serviceid,mo_processor_id_fk,msg_was_split,event_type,price_point_keyword) " +
-						"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
-			}
-			
-			
-			
-			logger.info("\n\n\n\n\n\nINCOMING WHOLE SMS ["+mo.getSMS_Message_String()+"] \n\n\n\n\n\n\n");
-			pstmt.setBigDecimal(1, new BigDecimal(mo.getCmp_tx_id()));
-			pstmt.setString(2, mo.getSMS_Message_String());
-			pstmt.setString(3, mo.getSMS_SourceAddr());
-			pstmt.setString(4, mo.getMsisdn());
-			pstmt.setString(5, mo.getSMS_DataCodingId());
-			pstmt.setString(6, mo.getCMPResponse());
-			pstmt.setString(7, mo.getAPIType());
-			pstmt.setString(8, mo.getCMP_AKeyword());
-			pstmt.setString(9, mo.getCMP_SKeyword());
-			
-			pstmt.setDouble(10, mo.getPrice().doubleValue());
-			pstmt.setInt(11, mo.getServiceid());
-			pstmt.setInt(12, mo.getProcessor_id().intValue());
-			pstmt.setBoolean(13, mo.isSplit_msg());
-			
-			pstmt.setString(14, mo.getEventType()!=null ? mo.getEventType().getName() : EventType.CONTENT_PURCHASE.getName());
-			pstmt.setString(15, mo.getPricePointKeyword());
-			
-			logger.info(":::::::::::::::::::mo.getCMP_Keyword(): "+mo.getCMP_AKeyword());
-			logger.info(":::::::::::::::::::mo.getCMP_SKeyword(): "+mo.getCMP_SKeyword());
-			logger.info(":::::::::::::::::::mo.getPrice(): "+mo.getPrice());
-			logger.info(":::::::::::::::::::mo.getProcessor_id(): "+mo.getProcessor_id());
-			logger.info(":::::::::::::::::::mo.isSplit_msg(): "+mo.isSplit_msg());
-			logger.info(":::::::::::::::::::mo.getSMS_DataCodingId(): "+mo.getSMS_DataCodingId());
-			logger.info("::::::::::::::::::: mo.getPricePointKeyword(): "+ mo.getPricePointKeyword());
-			logger.info("::::::::::::::::::: mo.getEventType(): "+ mo.getEventType());
-			
-			
-			pstmt.executeUpdate();
-			
-		} catch (SQLException e) {
-			
-			log(e);
-		
-		} catch (InterruptedException e) {
-			
-			log(e);
-			
-		}finally{
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-				
-			} catch (SQLException e) {
-				
-				log(e);
-				
-			}
-			
-			closeConnectionIfNecessary(conn);
-			
-		}
-		
-		
-		
-		
-	}
-
+	
+	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMT(com.pixelandtag.MT)
 	 */
@@ -1010,7 +576,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setInt(11, mt.getNumber_of_sms());//number_of_sms
 			pstmt.setInt(12, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
 			pstmt.setInt(13, mt.getServiceid());//serviceid
-			if(mt.getCMP_SKeyword()!=null && mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+			if(mt.getPrice()!=null)
 				pstmt.setDouble(14, 1.0d);//price
 			else
 				pstmt.setDouble(14, mt.getPrice().doubleValue());//price
@@ -1028,7 +594,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setInt(21, (mt.isSplit_msg() ? 1 : 0));//number_of_sms
 			pstmt.setInt(22, mt.getServiceid());//serviceid
 			
-			if(mt.getCMP_SKeyword().equals(TarrifCode.RM1.getCode()))
+			if(mt.getPrice()!=null)
 				pstmt.setDouble(23, 1.0d);//price
 			else
 				pstmt.setDouble(23, mt.getPrice().doubleValue());//price
@@ -1039,7 +605,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 			pstmt.setString(27, mt.getNewCMP_Txid());//new CMPTxid
 			
 			if(mt.getSms().startsWith(RM1))
-				pstmt.setString(28, TarrifCode.RM1.getCode());//CMP_SKeyword
+				pstmt.setString(28, "RMRMRM");//CMP_SKeyword
 			else
 				pstmt.setString(28, mt.getCMP_SKeyword());//CMP_SKeyword
 			
@@ -1084,15 +650,6 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	public void acknowledgeReceipt(IncomingSMS mo) {
 		
 		
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see com.pixelandtag.CelcomHTTPAPI#findMO(java.lang.String)
-	 */
-	public IncomingSMS findMO(String cpm_txId) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 
@@ -1551,246 +1108,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		
 	}
 
-	public Queue<IncomingSMS> getLatestMO(int limit, String CMP_Keyword, String CMP_SKeyword) {
-		ConcurrentLinkedQueue<IncomingSMS> moSMS = null;//new ArrayList<MOSms>();
 		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		IncomingSMS mo = null;
-		
-		
-		try{
-			if(connectionObjIsCached){
-				
-				pstmt = getConn().prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_ack = 0 AND CMP_Keyword = ? AND CMP_SKeyword = ? AND MT_STATUS='Success' ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
-				
-					
-			}else{
-				
-				conn = getConn();
-				
-				pstmt = conn.prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_ack = 0 AND CMP_Keyword = ? AND CMP_SKeyword = ? AND MT_STATUS='Success' ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
-				
-			}
-			
-			pstmt.setString(1, CMP_Keyword);
-			pstmt.setString(2, CMP_SKeyword);
-			
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()){
-				
-				if(rs.isFirst()){
-					moSMS = new ConcurrentLinkedQueue<IncomingSMS>();
-					//TODO use a collections object that maintains order!
-				}
-				
-				mo = new IncomingSMS();
-				mo.setId(rs.getInt("id"));
-				mo.setOpco_tx_id(rs.getString("CMP_Txid"));
-				mo.setSMS_Message_String(rs.getString("MO_Received"));
-				mo.setMt_Sent(rs.getString("MT_Sent"));
-				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
-				mo.setMsisdn(rs.getString("SUB_Mobtel"));
-				mo.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
-				mo.setCMPResponse(rs.getString("CMP_Response"));
-				mo.setAPIType(rs.getString("APIType"));
-				mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-				mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-				
-				String timestamp = rs.getString("timeStamp");
-				if(timestamp!=null && !timestamp.isEmpty())
-					try {
-						mo.setTimeStamp(format.parse(timestamp));
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-				
-				
-				mo.setMo_ack(rs.getString("mo_ack"));
-				mo.setMt_ack(rs.getString("mt_ack"));
-				mo.setMT_STATUS(rs.getString("MT_STATUS"));
-				
-				moSMS.add(mo);
-				
-			}
-		
-		
-		}catch(SQLException e){
-			
-			log(e);
-		
-		} catch (InterruptedException e) {
-			log(e);
-		}finally{
-			
-			
-			try {
-				
-				if(rs!=null)
-					rs.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			closeConnectionIfNecessary(conn);
-			
-		}
-		
-		
-		
-		
-		return moSMS;
-	}
-	
-	
-	
-	
-	/* (non-Javadoc)
-	 * @see com.pixelandtag.CelcomHTTPAPI#getLatestMO(int)
-	 */
-	public synchronized Queue<IncomingSMS> getLatestMO(int limit) {
-		
-		Queue<IncomingSMS> moSMS = null;//new ArrayList<MOSms>();
-		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		IncomingSMS mo = null;
-		
-		
-		try{
-			if(connectionObjIsCached){
-				
-				pstmt = getConn().prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_processor_id_fk>0 AND (mo_ack = 0 AND processing=0 AND (MT_Sent IS NULL) OR (MT_STATUS in ('PSANumberBarred','PSAInsufficientBalance','WaitingForDLR') AND re_try=1 AND MT_SendTime between timestamp(DATE_SUB(CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"'), INTERVAL 0 DAY)) AND ((CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"') + INTERVAL 1 DAY) - INTERVAL 1 SECOND)) ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
-				
-					
-			}else{
-				
-				conn = getConn();
-				
-				     pstmt = conn.prepareStatement("SELECT * FROM `"+database+"`.`messagelog` WHERE mo_processor_id_fk>0 AND (mo_ack = 0 AND processing=0 AND (MT_Sent IS NULL) ) OR (MT_STATUS in ('PSANumberBarred','PSAInsufficientBalance','WaitingForDLR') AND re_try=1  AND MT_SendTime between timestamp(DATE_SUB(CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"'), INTERVAL 0 DAY)) AND ((CONVERT_TZ(CURRENT_DATE,'"+fr_tz+"','"+to_tz+"') + INTERVAL 1 DAY) - INTERVAL 1 SECOND)) ORDER BY timeStamp asc"+(limit>0 ? (" LIMIT "+limit) : ("")),Statement.RETURN_GENERATED_KEYS);
-				
-			}
-			
-			
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()){
-				
-				if(rs.isFirst()){
-					moSMS = new LinkedList<IncomingSMS>();
-					//TODO use a collections object that maintains order!
-				}
-				
-				mo = new IncomingSMS();
-				mo.setId(rs.getInt("id"));
-				mo.setCmp_tx_id(rs.getString("CMP_Txid"));
-				mo.setSMS_Message_String(rs.getString("MO_Received"));
-				mo.setMt_Sent(rs.getString("MT_Sent"));
-				mo.setSMS_SourceAddr(rs.getString("SMS_SourceAddr"));
-				mo.setMsisdn(rs.getString("SUB_Mobtel"));
-				mo.setSMS_DataCodingId(rs.getString("SMS_DataCodingId"));
-				mo.setCMPResponse(rs.getString("CMPResponse"));
-				mo.setAPIType(rs.getString("APIType"));
-				mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-				mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-				
-				String timeStamp =  rs.getString("timeStamp");
-				mo.setTimeStamp(stringToTimeStamp(timeStamp));
-				mo.setMo_ack(rs.getString("mo_ack"));
-				mo.setMt_ack(rs.getString("mt_ack"));
-				mo.setMT_STATUS(rs.getString("MT_STATUS"));
-				mo.setServiceid(rs.getInt("serviceid"));
-				mo.setPrice(BigDecimal.valueOf(rs.getDouble("price")));
-				mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));//added by Tim since 2012-09-21 at 1.17pm
-				mo.setSplit_msg(rs.getBoolean("msg_was_split"));
-				mo.setEventType(EventType.get(rs.getString("event_type")));
-				mo.setPricePointKeyword(rs.getString("price_point_keyword"));
-				moSMS.add(mo);
-				
-			}
-		
-		
-		}catch(SQLException e){
-			
-			log(e);
-		
-		} catch (InterruptedException e) {
-			
-			log(e);
-			
-		}finally{
-			
-			
-			try {
-				
-				if(rs!=null)
-					rs.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			
-			if(!connectionObjIsCached){
-				
-				try {
-					
-					if(conn!=null)
-						conn.close();
-				
-				} catch (SQLException e) {
-					
-					log(e);
-				
-				}
-				
-			}
-			
-			closeConnectionIfNecessary(conn);
-						
-			notify();//Wake up all threads waiting on this
-			
-		}
-		
-		
-		
-		
-		return moSMS;
-	}
-
-	
 	
 	private Date stringToTimeStamp(String timestamp) {
 		if(timestamp!=null && !timestamp.isEmpty())
@@ -1802,76 +1120,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		return null;
 	}
 
-	public void updateMessageLog(IncomingSMS mo) {
-
-		
-		/*String sql = "insert into `celcom`.`httptosend`" +
-				"(SMS,MSISDN,SendFrom,fromAddr,CMP_Keyword,CMP_SKeyword,cmp_a_keyword,cmp_s_keyword) " +
-				"VALUES('Thank you.','60133811449','23355','23355','NEWS','RENEWAL','NEWS','RENEWAL')";*/
-		PreparedStatement pstmt = null;
-		
-		
-		try {
-			
-			//First check if that message exists..
-			//pstmt = getConn().prepareStatement("");
-			
-			
-			
-			if(!(mo.getCmp_tx_id().equalsIgnoreCase("-1")))
-				pstmt = getConn().prepareStatement("INSERT INTO `"+CelcomImpl.database+"`.`messagelog`" +
-						"(MO_Received, MT_Sent,SMS_SourceAddr,SUB_Mobtel,CMP_Keyword,CMP_SKeyword,CMP_Txid,MT_SendTime,mo_ack) " +
-						"VALUES(?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"')",Statement.RETURN_GENERATED_KEYS);
-			else
-				pstmt = getConn().prepareStatement("insert into `"+CelcomImpl.database+"`.`httptosend`" +
-						"(MO_Received, MT_Sent,SMS_SourceAddr,SUB_Mobtel,CMP_AKeyword,CMP_SKeyword,CMP_Txid,MT_SendTime,mo_ack) " +
-						"VALUES(?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"'),1) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+fr_tz+"','"+to_tz+"')",Statement.RETURN_GENERATED_KEYS);
-				
-			
-			
-			pstmt.setString(1, mo.getSMS_Message_String());
-			pstmt.setString(2, mo.getMt_Sent());
-			pstmt.setString(3, mo.getSMS_SourceAddr());
-			pstmt.setString(4, mo.getMsisdn());
-			pstmt.setString(5, mo.getCMP_AKeyword());
-			pstmt.setString(6, mo.getCMP_SKeyword());
-			
-			if(!(mo.getCmp_tx_id().equalsIgnoreCase("-1"))){
-				pstmt.setBigDecimal(7, new BigDecimal(mo.getCmp_tx_id()));
-				pstmt.setString(8, mo.getMt_Sent());
-			}else{
-				pstmt.setString(7, mo.getMt_Sent());
-				
-			}
-			
-			
-			pstmt.executeUpdate();
-		
-		} catch (SQLException e) {
-			
-			logger.error(e.getMessage(),e);
-			
-		} catch (InterruptedException e) {
-			
-			logger.error(e.getMessage(),e);
-		
-		}finally{
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-			
-			} catch (SQLException e) {
-				
-				logger.error(e.getMessage(),e);
-			
-			}
-			
-		}
-		
-	}
-    //removed synchronized keyword
+	
 	public  boolean postponeMT(long http_to_send_id) {
 		
 		Connection conn = null;
@@ -1982,8 +1231,6 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				service.setId(rs.getInt("id"));
 				service.setServiceName(rs.getString("ServiceName"));
 				service.setProcessorClass(rs.getString("ProcessorClass"));
-				service.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-				service.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
 				service.setActive(rs.getBoolean("enabled"));
 				service.setClass_status(rs.getString("class_status"));
 				service.setShortcode(rs.getString("shortcode"));
@@ -1993,7 +1240,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 				service.setProcessor_type(ProcessorType.fromString(rs.getString("processor_type")));
 				service.setProtocol(rs.getString("protocol"));
 				service.setSmppid(Long.valueOf(rs.getInt("smppid")));
-				service.setServKey(service.getProcessorClassName()+"_"+service.getCMP_AKeyword()+"_"+service.getCMP_SKeyword()+"_"+service.getShortcode());
+				service.setServKey(service.getProcessorClassName()+"_"+service.getId()+"_"+service.getShortcode());
 				
 				service.setThreads(rs.getInt("threads"));
 				services.add(service);
@@ -2066,153 +1313,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 
-	public IncomingSMS resolveKeywords(IncomingSMS mo, Connection conn) {
 		
-		logger.info(">>>>>>V.5>>>>>>>>>>>>>CELCOM_MO_SMS["+mo.getSMS_Message_String()+"]");
-		
-		if(mo.getSMS_Message_String()!=null){
-			if(mo.getSMS_Message_String().isEmpty())
-				return mo;
-			
-		}else{
-			
-			mo.setSMS_Message_String(mo.getSMS_Message_String().trim().toUpperCase());
-			
-			logger.info(">>>>>>>>>>>>>>>>>>>SMS["+mo.getSMS_Message_String()+"]");
-			
-		}
-		
-		ResultSet rs = null;
-		
-		PreparedStatement pstmt = null;
-		
-		
-		try {
-			
-			
-			pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', `sms`.id as 'serviceid', `sms`.`split_mt` as 'split_mt', `sms`.`event_type` as 'event_type', `sms`.`price_point_keyword` as 'price_point_keyword' FROM `"+database+"`.`sms_service` `sms` LEFT JOIN `"+database+"`.`mo_processors` `mop` on `sms`.`mo_processorFK`=`mop`.`id` WHERE  `mop`.`shortcode`=? AND `sms`.`enabled`=1  AND  `mop`.`enabled`=1 AND `sms`.`CMD`= ?",Statement.RETURN_GENERATED_KEYS);
-			
-			//mo.setSMS_Message_String(replaceAllIllegalCharacters(mo.getSMS_Message_String()));
-			
-			pstmt.setString(1, mo.getSMS_SourceAddr());
-			pstmt.setString(2, replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
-			logger.info("Msg : "+mo.getSMS_Message_String());
-			logger.info("Keyword : "+replaceAllIllegalCharacters(mo.getSMS_Message_String().split("[\\s]")[0].toUpperCase()));
-			
-			rs = pstmt.executeQuery();
-			
-			if(rs.next()){
-				
-				mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-				mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-				mo.setServiceid(rs.getInt("serviceid"));
-				mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-				mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));
-				mo.setSplit_msg(rs.getBoolean("split_mt"));
-				mo.setPricePointKeyword(rs.getString("price_point_keyword"));
-				mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
-				
-			}else{
-				
-				try{
-					rs.close();
-				}catch(Exception e){}
-				
-				try{
-					pstmt.close();
-				}catch(Exception e){}
-				
-				pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', sms.id as 'serviceid', `sms`.`split_mt` as 'split_mt', `sms`.`event_type` as 'event_type', `sms`.`price_point_keyword` as 'price_point_keyword' FROM `"+database+"`.`sms_service` sms LEFT JOIN `"+database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.cmd='DEFAULT' AND sms.enabled=1 AND mop.shortcode=?",Statement.RETURN_GENERATED_KEYS);
-				
-				pstmt.setString(1,mo.getSMS_SourceAddr());
-				
-				rs = pstmt.executeQuery();
-				
-				if(rs.next()){
-					
-					mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-					mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-					mo.setServiceid(rs.getInt("serviceid"));
-					mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-					mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));
-					mo.setSplit_msg(rs.getBoolean("split_mt"));
-					mo.setPricePointKeyword(rs.getString("price_point_keyword"));
-					mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
-				
-				}else{
-					
-					try{
-						rs.close();
-					}catch(Exception e){}
-					
-					try{
-						pstmt.close();
-					}catch(Exception e){}
-					
-					pstmt = conn.prepareStatement("SELECT `mop`.id as 'mo_processor_id_fk', `sms`.CMP_Keyword, `sms`.CMP_SKeyword, `sms`.price as 'sms_price', sms.id as 'serviceid', `sms`.`split_mt` as 'split_mt', `sms`.`event_type` as 'event_type', `sms`.`price_point_keyword` as 'price_point_keyword' FROM `"+database+"`.`sms_service` sms LEFT JOIN `"+database+"`.`mo_processors` mop ON mop.id = sms.mo_processorFK WHERE sms.enabled=1 AND mop.shortcode=?",Statement.RETURN_GENERATED_KEYS);
-					
-					pstmt.setString(1,mo.getSMS_SourceAddr());
-					
-					rs = pstmt.executeQuery();
-					
-					if(rs.next()){
-						
-						mo.setCMP_AKeyword(rs.getString("CMP_Keyword"));
-						mo.setCMP_SKeyword(rs.getString("CMP_SKeyword"));
-						mo.setServiceid(rs.getInt("serviceid"));
-						mo.setPrice(BigDecimal.valueOf(rs.getDouble("sms_price")));
-						mo.setProcessor_id(Long.valueOf(rs.getInt("mo_processor_id_fk")+""));
-						mo.setSplit_msg(rs.getBoolean("split_mt"));
-						mo.setPricePointKeyword(rs.getString("price_point_keyword"));
-						mo.setEventType(com.pixelandtag.sms.producerthreads.EventType.get(rs.getString("event_type")));
-					
-					}
-					
-					
-				}
-				
-				
-			}
-		
-		} catch (SQLException e) {
-			
-			log(e);
-		
-		}finally{
-			
-			
-			try {
-				
-				if(rs!=null)
-					rs.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			try {
-				
-				if(pstmt!=null)
-					pstmt.close();
-			
-			} catch (SQLException e) {
-				
-				log(e);
-			
-			}
-			
-			//closeConnectionIfNecessary(conn);
-			
-		}
-		
-		
-		return mo;
-	}
-
-	
-	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#beingProcessedd(long, boolean)
 	 */
@@ -2457,114 +1558,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 	}
 
 	
-	@Override
-	public void processLuckyDip(Notification notification) {
-		String msg = "";
-		String tx_id = notification.getCmp_tx_id();
-		
-		Connection conn = null;
-		
-		MTsms mt = null;
-		int language_id = UtilCelcom.DEFAULT_LANGUAGE;
-		
-		String voucher_system_status = "";
-		
-		
-		
-		
-		try{
-			
-			if(connectionObjIsCached){
-				voucher_system_status  = UtilCelcom.getConfigValue("voucher_system_status", getConn()).trim();
-			}else{
-				conn = getConn();
-				voucher_system_status  = UtilCelcom.getConfigValue("voucher_system_status", conn).trim();
-			}
-			
-			if(!voucher_system_status.equalsIgnoreCase("on"))
-				return;
-			
-			
-			
-			if(connectionObjIsCached){
-				mt = MechanicsS.getMTsmsFromMessageLog(tx_id,getConn());
-				language_id = UtilCelcom.getSubscriberLanguage(mt.getSUB_C_Mobtel(), getConn());
-			}else{
-				mt = MechanicsS.getMTsmsFromMessageLog(tx_id,conn);
-				language_id = UtilCelcom.getSubscriberLanguage(mt.getSUB_C_Mobtel(), conn);
-			}
-			
-			
-			 
-			
-			
-			if(mt!=null){//lucky dipping
-				
-				logger.debug("IN VOUCHER NOTIF BLOCK!!! >>> "+mt);
-				String ticket_number_notf = null;
-				
-				if(mt.getPrice().compareTo(BigDecimal.ZERO)>0){
-					if(connectionObjIsCached){
-						
-						ticket_number_notf = UtilCelcom.getMessage(MessageType.RANDOM_NUMBER_NOTIFICATION, getConn(), language_id);
-						
-						ticket_number_notf = ticket_number_notf.replaceAll(VOUCHER_TAG , String.valueOf(mt.getCmp_tx_id()));
-						
-						
-						ticket_number_notf = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_number_notf;
-						
-						MechanicsS.insertIntoHttpToSend(mt.getSUB_C_Mobtel(), ticket_number_notf, MechanicsS.generateNextTxId(), mt.getServiceid(), 0d, mt.getShortcode(), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  getConn()), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword",  getConn()), false,getConn());
-						
-						UtilCelcom.queueIntoVoucherSystem(mt,getConn());
-					}else{
-						
-						ticket_number_notf = UtilCelcom.getMessage(MessageType.RANDOM_NUMBER_NOTIFICATION, getConn(), language_id);
-						
-						ticket_number_notf = ticket_number_notf.replaceAll(VOUCHER_TAG, String.valueOf(mt.getCmp_tx_id()));
-						
-						ticket_number_notf = GenericServiceProcessor.RM.replaceAll(GenericServiceProcessor.PRICE_TG, "0")+ticket_number_notf;
-						
-						MechanicsS.insertIntoHttpToSend(mt.getSUB_C_Mobtel(), ticket_number_notf, MechanicsS.generateNextTxId(), mt.getServiceid(), 0d, mt.getShortcode(), UtilCelcom.getConfigValue("free_tarrif_code_cmp_AKeyword",  conn), UtilCelcom.getConfigValue("free_tarrif_code_cmp_SKeyword", conn), false, conn);
-						
-						UtilCelcom.queueIntoVoucherSystem(mt,conn);
-					}
-				}
-				
-				/*if(mt.getPrice()>0){
-				
-					initLuckyDip();
-					
-					if(connectionObjIsCached){
-						msg = "RM0 "+lucky_dip.getTailSMS(mt.getMsisdn(), mt.getServiceid(), getConn());
-						MechanicsS.insertIntoHttpToSend(mt.getMsisdn(), msg, MechanicsS.generateNextTxId(), mt.getServiceid(), 0, mt.getSMS_SourceAddr(), mt.getCMP_AKeyword(), mt.getCMP_SKeyword(), getConn());
-						
-					}else{
-						//connection object already created in code block higher up
-						msg = "RM0 "+lucky_dip.getTailSMS(mt.getMsisdn(), mt.getServiceid(), conn);
-						MechanicsS.insertIntoHttpToSend(mt.getMsisdn(), msg, MechanicsS.generateNextTxId(), mt.getServiceid(), 0, mt.getSMS_SourceAddr(), mt.getCMP_AKeyword(), mt.getCMP_SKeyword(),conn);
-						
-					}
-					
-				}*/
-				
-				
-			}
-			
-			
-		}catch(Exception e){
-			
-			logger.error(e.getMessage(),e);
-		
-		}finally{
-			
-			closeConnectionIfNecessary(conn);
-		}
-		
-		
-		
-		
-		
-	}
+	
 
 	
 	public String generateNextTxId(){

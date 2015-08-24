@@ -6,8 +6,6 @@ import java.math.BigInteger;
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.cmp.entities.IncomingSMS;
-import com.pixelandtag.entities.IncomingSMS;
-import com.pixelandtag.subscription.SubscriptionMain;
 import com.pixelandtag.subscription.dto.MediumType;
 
 /**

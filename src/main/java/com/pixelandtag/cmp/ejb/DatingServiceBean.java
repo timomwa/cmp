@@ -66,13 +66,13 @@ import com.pixelandtag.web.beans.RequestObject;
 @TransactionManagement(TransactionManagementType.BEAN)
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
-public Logger logger = Logger.getLogger(DatingServiceBean.class);
+
+	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
-
 	@Resource
 	private UserTransaction utx;
 
@@ -126,24 +126,24 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 			MOProcessor proc = smsserv.getMoprocessor();
 			
 			if(smsserv!=null  && proc!=null){
-				IncomingSMS incomingsms = new IncomingSMS();
-				incomingsms.setMsisdn(MSISDN);
-				incomingsms.setPrice(BigDecimal.ZERO);
-				incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED); 
-				incomingsms.setSms(msg);
-				incomingsms.setServiceid(smsserv.getId());
-				incomingsms.setMoprocessor(proc);
-				incomingsms.setShortcode(proc.getShortcode());
+				OutgoingSMS outgoingsms = new OutgoingSMS();
+				outgoingsms.setMsisdn(MSISDN);
+				outgoingsms.setPrice(BigDecimal.ZERO);
+				outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED); 
+				outgoingsms.setSms(msg);
+				outgoingsms.setServiceid(smsserv.getId());
+				outgoingsms.setMoprocessor(proc);
+				outgoingsms.setShortcode(proc.getShortcode());
 				
 				if(!ro.getTransactionID().equals("1"))
-					incomingsms.setCmp_tx_id(ro.getTransactionID());
+					outgoingsms.setCmp_tx_id(ro.getTransactionID());
 				else
-					incomingsms.setCmp_tx_id(generateNextTxId());
+					outgoingsms.setCmp_tx_id(generateNextTxId());
 				
-				incomingsms.setSplit(false);
-				incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-				incomingsms.setIsSubscription(false);
-				sendMT(incomingsms);
+				outgoingsms.setSplit(false);
+				outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+				outgoingsms.setIsSubscription(false);
+				sendMT(outgoingsms);
 			}
 			
 		
@@ -477,20 +477,20 @@ public Logger logger = Logger.getLogger(DatingServiceBean.class);
 						MOProcessor proc = smsserv.getMoprocessor();
 						
 						if(smsserv!=null && proc!=null){
-							IncomingSMS incomingsms = new IncomingSMS();
-							incomingsms.setMsisdn(MSISDN);
-							incomingsms.setPrice(BigDecimal.ZERO);
-							incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-							incomingsms.setSms(msg);
-							incomingsms.setServiceid(smsserv.getId());
-							incomingsms.setMoprocessor(proc);
-							incomingsms.setShortcode(proc.getShortcode());
-							incomingsms.setCmp_tx_id(generateNextTxId());
+							OutgoingSMS outgoingsms = new OutgoingSMS();
+							outgoingsms.setMsisdn(MSISDN);
+							outgoingsms.setPrice(BigDecimal.ZERO);
+							outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+							outgoingsms.setSms(msg);
+							outgoingsms.setServiceid(smsserv.getId());
+							outgoingsms.setMoprocessor(proc);
+							outgoingsms.setShortcode(proc.getShortcode());
+							outgoingsms.setCmp_tx_id(generateNextTxId());
 							
-							incomingsms.setSplit(false);
-							incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-							incomingsms.setIsSubscription(false);
-							sendMT(incomingsms);
+							outgoingsms.setSplit(false);
+							outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+							outgoingsms.setIsSubscription(false);
+							sendMT(outgoingsms);
 							//resp = getMessage(DatingMessages.PROFILE_COMPLETE, language_id);
 							//resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 							

@@ -19,10 +19,10 @@ import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
@@ -354,7 +354,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 		}catch(OutOfMemoryError e){
-			logger.fatal("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
+			logger.fatal("NEEDS RESTART: MEM_USAGE: "+OutgoingQueueRouter.getMemoryUsage() +" >> "+e.getMessage(),e);
 		}finally{
 			
 		    if(context!=null) 
@@ -391,19 +391,8 @@ public class SubscriptionBillingWorker implements Runnable {
 
 		logger.info(">>service :: "+service);
 		if (service != null) {
-			MOProcessor processor = mo_processorCache.get(service.getMo_processorFK());
-			if (processor == null) {
-				try {
-					processor = cmp_ejb.find(MOProcessor.class,
-							service.getMo_processorFK());
-				} catch (Exception exp) {
-					logger.warn("Could not find the processor with id : "
-							+service.getMo_processorFK());
-				}
-			}
-
-			//logger.info("\t\t\n\n\n:::::::TXID::::::transaction_id:"+transaction_id+"\n\n\n");
-
+			MOProcessor processor = service.getMoprocessor();
+			
 			billable = new Billable();
 			billable.setCp_id("CONTENT360_KE");
 			billable.setCp_tx_id(SubscriptionRenewal.generateNextId());

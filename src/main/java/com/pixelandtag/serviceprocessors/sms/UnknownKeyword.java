@@ -13,17 +13,12 @@ import org.apache.log4j.Logger;
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.IncomingSMS;
-import com.pixelandtag.mms.apiImpl.MMSApiImpl;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
+import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.web.beans.MessageType;
 import com.pixelandtag.web.beans.RequestObject;
-import com.pixelandtag.web.triviaI.MechanicsI;
 
 public class UnknownKeyword extends GenericServiceProcessor {
 
@@ -49,40 +44,7 @@ public class UnknownKeyword extends GenericServiceProcessor {
     }
 	public UnknownKeyword() {
 
-		int vendor = DriverUtilities.MYSQL;
-		String host = "db";
-		String dbName =  HTTPMTSenderApp.props.getProperty("DATABASE");
-		String url = DriverUtilities.makeURL(host, dbName, vendor);
-
-		dbpds = new DBPoolDataSource();
-		dbpds.setValidatorClassName("snaq.db.Select1Validator");
-		dbpds.setName("unknownkeyword-processor-ds");
-		dbpds.setDescription("Default Processor Pooling DataSource");
-		dbpds.setDriverClassName("com.mysql.jdbc.Driver");
-		dbpds.setUrl(url);
-		dbpds.setUser("root");
-		dbpds.setPassword("");
-		dbpds.setMinPool(1);
-		dbpds.setMaxPool(2);
-		dbpds.setMaxSize(3);
-		dbpds.setIdleTimeout(3600); // Specified in seconds.
-
-		dbpds.setValidationQuery("SELECT 'test'");
-
-		ds = new DBPoolDataSource();
-		ds.setValidatorClassName("snaq.db.Select1Validator");
-		ds.setName("default-mm7-processor-ds");
-		ds.setDescription("MM7 api Pooling DataSource");
-		ds.setDriverClassName("com.mysql.jdbc.Driver");
-		ds.setUrl(url);
-		ds.setUser("root");
-		ds.setPassword("");
-		ds.setMinPool(1);
-		ds.setMaxPool(2);
-		ds.setMaxSize(3);
-		ds.setIdleTimeout(3600); // Specified in seconds.
-
-		ds.setValidationQuery("SELECT 'test'");
+		
 
 	
 		logger.info(">>>>>>>>>>>>> unknown keyowrd processor initialized and dbpoolds initialized!");

@@ -14,16 +14,13 @@ import org.apache.log4j.Logger;
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.IncomingSMS;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
+import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.web.beans.RequestObject;
-import com.pixelandtag.web.triviaI.MechanicsI;
 
 public class NewsProcessor extends GenericServiceProcessor{
 
@@ -52,24 +49,6 @@ public class NewsProcessor extends GenericServiceProcessor{
 	
 	private void init_datasource(){
 		
-		int vendor = DriverUtilities.MYSQL;
-		String driver = DriverUtilities.getDriver(vendor);
-		String host = "db";
-		String dbName = HTTPMTSenderApp.props.getProperty("DATABASE");
-		String url = DriverUtilities.makeURL(host, dbName, vendor);
-		
-		ds = new DBPoolDataSource();
-	    ds.setName("NEWS_PROCESSOR_DS ");
-	    ds.setDescription("News processor thread datasource: "+ds.getName());
-	    ds.setDriverClassName(driver);
-	    ds.setUrl(url);
-	    ds.setUser("root");
-	    ds.setPassword("");
-	    ds.setMinPool(1);
-	    ds.setMaxPool(2);
-	    ds.setMaxSize(3);
-	    ds.setIdleTimeout(3600);  // Specified in seconds.
-	    ds.setValidationQuery("SELECT 'Test'");
 		
 	}
 	

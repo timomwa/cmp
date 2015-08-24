@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.entities.audittools.LatencyLog;
 import com.pixelandtag.cmp.entities.audittools.LatencyLogBuilder;
-import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 
 public class GenericHTTPClient implements Serializable{
 	
@@ -316,7 +316,7 @@ public class GenericHTTPClient implements Serializable{
 			
 		}
 		
-		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + MTProducer.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
+		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + OutgoingQueueRouter.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
 	}
 
 	public synchronized void rezume(){

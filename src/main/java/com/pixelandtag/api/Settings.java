@@ -1,6 +1,5 @@
 package com.pixelandtag.api;
 
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
 
 public interface Settings {
 	
@@ -10,7 +9,7 @@ public interface Settings {
 	public static final String PORT = "80";
 	public static final String CP_USER_ID = "inmobia";
 	public static final String CP_USER_PASSWORD = "inmobia123";
-	public static String database = HTTPMTSenderApp.props!=null ? HTTPMTSenderApp.props.getProperty("DATABASE") : "pixeland_content360";
+	public static String database =  "pixeland_content360";
 	public static String t = "";
 	public static final int SPLITTABLE_MSG = 1;
 	public static final int NON_SPLITABLE_MSG = 2;

@@ -1,6 +1,5 @@
 package com.pixelandtag.serviceprocessors.sms;
 
-import java.math.BigDecimal;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -15,7 +14,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -25,23 +23,17 @@ import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
-import com.pixelandtag.cmp.ejb.HelloWorldI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.entities.IncomingSMS;
-import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
-import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClientWorker;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
 
 public class ContentProxyProcessor extends GenericServiceProcessor {
 
 	final Logger logger = Logger.getLogger(ContentProxyProcessor.class);
-	private HelloWorldI helloBean;
 	private InitialContext context;
 	private Properties mtsenderprop;
 	private StopWatch watch;
@@ -66,8 +58,6 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
 		props.put("jboss.naming.client.ejb.context", true);
 		context = new InitialContext(props);
-		helloBean = (HelloWorldI) context
-				.lookup("cmp/HelloWorldEJB!com.pixelandtag.cmp.ejb.HelloWorldI");
 		cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
@@ -155,7 +145,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	@Override
 	public BaseEntityI getEJB() {
 
-		return helloBean;
+		return cmpbean;
 	}
 
 }

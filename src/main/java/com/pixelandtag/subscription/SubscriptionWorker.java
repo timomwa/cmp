@@ -16,9 +16,11 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
+import com.pixelandtag.serviceprocessors.sms.MoreProcessor;
 import com.pixelandtag.sms.producerthreads.SubscriptionLog;
 
 
@@ -134,23 +136,19 @@ public class SubscriptionWorker extends Thread{
 					
 					SubscriptionDTO dto = getFreeDTOWithProcessor();
 					
-					IncomingSMS mo = new IncomingSMS();
+					IncomingSMS incomingsms = new IncomingSMS();
 					
-					mo.setCmp_tx_id(cmpbean.generateNextTxId());
-					mo.setMsisdn(sub.getMsisdn());
-					mo.setCMP_AKeyword(dto.getCMP_AKeyword());
-					mo.setCMP_SKeyword(dto.getCMP_SKeyword());
-					mo.setSMS_SourceAddr(dto.getShortcode());
-					//if(!sub.getSubActive())//SubscriptionOld has expired, we charge them
-					mo.setPrice(BigDecimal.valueOf(dto.getPrice()));
-					mo.setPriority(1);
-					mo.setServiceid(dto.getServiceid());
-					mo.setSMS_Message_String(dto.getCmd());
-					mo.setProcessor_id(dto.getProcessor_id());
-					mo.setSubscriptionPush(true);//flag that this is a subscription push. Will help system not do some querying later. Save processor 
-					mo.setPricePointKeyword(dto.getPricePointKeyword());
-					mo.setSubscription_id(sub.getId());
-					boolean success = dto.getProcessor().submit(mo);//submit msg to the processor
+					incomingsms.setCmp_tx_id(cmpbean.generateNextTxId());
+					incomingsms.setMsisdn(sub.getMsisdn());
+					incomingsms.setShortcode(dto.getShortcode());
+					incomingsms.setPrice(BigDecimal.valueOf(dto.getPrice()));
+					incomingsms.setServiceid(Long.valueOf(dto.getServiceid()));
+					incomingsms.setSms(dto.getCmd());
+					incomingsms.setMoprocessor(cmpbean.find(MOProcessor.class, dto.getProcessor_id()));
+					incomingsms.setIsSubscription(true);//flag that this is a subscription push. Will help system not do some querying later. Save processor 
+					incomingsms.setPrice_point_keyword(dto.getPricePointKeyword());
+					//incomingsms.setSubscription_id(sub.getId());
+					boolean success = dto.getProcessor().submit(incomingsms);//submit msg to the processor
 					
 
 					if(success)

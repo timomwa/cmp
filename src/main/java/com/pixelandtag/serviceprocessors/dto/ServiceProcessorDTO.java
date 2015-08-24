@@ -21,8 +21,6 @@ public class ServiceProcessorDTO implements Serializable{
 	//The number of threads the service processor should have.
 	private int threads;
 	private String processorClass;
-	private String CMP_AKeyword;
-	private String CMP_SKeyword;
 	private boolean active;
 	private String class_status;
 	private String[] keywords;
@@ -118,12 +116,6 @@ public class ServiceProcessorDTO implements Serializable{
 	public String getProcessorClassName() {
 		return processorClass;
 	}
-	public String getCMP_AKeyword() {
-		return CMP_AKeyword;
-	}
-	public String getCMP_SKeyword() {
-		return CMP_SKeyword;
-	}
 	public boolean isActive() {
 		return active;
 	}
@@ -141,12 +133,6 @@ public class ServiceProcessorDTO implements Serializable{
 	}
 	public void setProcessorClass(String processorClass_) {
 		processorClass = processorClass_;
-	}
-	public void setCMP_AKeyword(String cMP_Keyword) {
-		CMP_AKeyword = cMP_Keyword;
-	}
-	public void setCMP_SKeyword(String cMP_SKeyword) {
-		CMP_SKeyword = cMP_SKeyword;
 	}
 	public void setActive(boolean active) {
 		this.active = active;
@@ -169,13 +155,13 @@ public class ServiceProcessorDTO implements Serializable{
 	
 	
 
+
 	@Override
 	public String toString() {
 		return "ServiceProcessorDTO [id=" + id + ", serviceName=" + serviceName
 				+ ", shortcode=" + shortcode + ", threads=" + threads
-				+ ", processorClass=" + processorClass + ", CMP_AKeyword="
-				+ CMP_AKeyword + ", CMP_SKeyword=" + CMP_SKeyword + ", active="
-				+ active + ", class_status=" + class_status + ", keywords="
+				+ ", processorClass=" + processorClass + ", active=" + active
+				+ ", class_status=" + class_status + ", keywords="
 				+ Arrays.toString(keywords) + ", servKey=" + servKey
 				+ ", price=" + price + ", subscriptionText=" + subscriptionText
 				+ ", unsubscriptionText=" + unsubscriptionText
@@ -183,7 +169,8 @@ public class ServiceProcessorDTO implements Serializable{
 				+ ", tailTextNotSubecribed=" + tailTextNotSubecribed
 				+ ", pricePointKeyword=" + pricePointKeyword
 				+ ", processor_type=" + processor_type + ", forwarding_url="
-				+ forwarding_url + "]";
+				+ forwarding_url + ", protocol=" + protocol + ", smppid="
+				+ smppid + ", opcoid=" + opcoid + "]";
 	}
 
 

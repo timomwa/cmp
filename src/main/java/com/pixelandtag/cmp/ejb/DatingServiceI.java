@@ -3,7 +3,6 @@ package com.pixelandtag.cmp.ejb;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
-import java.util.List;
 
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
@@ -13,10 +12,7 @@ import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
-import com.pixelandtag.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
-import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.web.beans.RequestObject;
 
 

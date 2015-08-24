@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
@@ -195,6 +196,8 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public List<CleanupDTO> getCleanupDtos(Date date) throws Exception;
 	
 	public List<Billable> getBillableSForTransfer(Date date) throws Exception;
+
+	public List<ServiceProcessorDTO> getServiceProcessors();
 
 	
 	

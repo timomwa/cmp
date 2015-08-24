@@ -9,33 +9,24 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.util.FileUtils;
-import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.AlterationMethod;
-import com.pixelandtag.entities.IncomingSMS;
-import com.pixelandtag.sms.application.HTTPMTSenderApp;
 import com.pixelandtag.staticcontent.ContentRetriever;
 import com.pixelandtag.subscription.SubscriptionOld;
 import com.pixelandtag.subscription.dto.SubscriptionDTO;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
+import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
-import com.pixelandtag.web.triviaI.MechanicsI;
 
 public class StaticContentProcessor extends GenericServiceProcessor{
 
 	private final Logger static_content_processor_logger = Logger.getLogger(StaticContentProcessor.class);
-	//private DBPoolDataSource ds;
 	private SubscriptionOld subscription;
 	private Properties mtsenderprop;
 	private ContentRetriever cr = null;

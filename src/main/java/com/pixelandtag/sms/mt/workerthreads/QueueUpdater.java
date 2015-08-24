@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
-import com.pixelandtag.sms.producerthreads.MTProducer;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 
 
 /**
@@ -165,7 +165,7 @@ public class QueueUpdater implements Runnable {
 		}catch(OutOfMemoryError e){
 			
 			//I don't expect this to happen, but if it does...
-			logger.error("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
+			logger.error("NEEDS RESTART: MEM_USAGE: "+OutgoingQueueRouter.getMemoryUsage() +" >> "+e.getMessage(),e);
 		
 		}finally{
 			

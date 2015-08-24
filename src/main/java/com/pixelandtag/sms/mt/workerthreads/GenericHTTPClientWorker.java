@@ -26,8 +26,8 @@ import com.pixelandtag.api.MTStatus;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.BulkSMSProducer;
-import com.pixelandtag.sms.producerthreads.MTProducer;
 
 public class GenericHTTPClientWorker implements Runnable{
 	
@@ -272,7 +272,7 @@ public class GenericHTTPClientWorker implements Runnable{
 		
 		}catch(OutOfMemoryError e){
 			
-			logger.fatal("NEEDS RESTART: MEM_USAGE: "+MTProducer.getMemoryUsage() +" >> "+e.getMessage(),e);
+			logger.fatal("NEEDS RESTART: MEM_USAGE: "+OutgoingQueueRouter.getMemoryUsage() +" >> "+e.getMessage(),e);
 			//Hasn't happened so far during testing. Not expected to happen during runtime
 			//please send alarm
 			
@@ -521,7 +521,7 @@ public class GenericHTTPClientWorker implements Runnable{
 			
 		}
 		
-		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + MTProducer.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
+		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + OutgoingQueueRouter.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
 	}
 
 	public synchronized void rezume(){
