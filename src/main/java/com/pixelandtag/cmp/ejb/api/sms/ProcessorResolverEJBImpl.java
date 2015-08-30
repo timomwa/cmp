@@ -189,7 +189,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		incomingsms.setShortcode(shortcode);
 		incomingsms.setSms(sms);
 		incomingsms.setOpco_tx_id(opcotxid);
-		
+		incomingsms.setOpco(opco);
 		incomingsms = populateProcessorDetails(incomingsms);
 		
 		incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));

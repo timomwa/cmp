@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import org.json.JSONException;
+
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.SMSServiceMetaData;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.entities.MTsms;
@@ -198,6 +201,23 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public List<Billable> getBillableSForTransfer(Date date) throws Exception;
 
 	public List<ServiceProcessorDTO> getServiceProcessors();
+
+	public List<SMSServiceMetaData> getSMSServiceMetaData(Long serviceid);
+
+	public BigInteger count(String db_name, String table,
+			String static_category_value);
+
+	public List<Object[]> listContent(String db_name, String table,
+			String static_category_value, int start, int limit);
+
+	public Date listContent(String db_name, String table,
+			String static_category_value, String sms);
+
+	public List<SMSMenuLevels> getSMSMenuLevels();
+
+	public String getBillingStats(String fromTz, String toTz) throws JSONException;
+
+	public String getCurrentSubDistribution() throws  Exception;
 
 	
 	

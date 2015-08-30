@@ -82,7 +82,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
-		logger.info("\n\n\tIS SUBSCRIPTION?? "+incomingsms.getIsSubscription());
+		logger.info("\n\n\n\tIS SUBSCRIPTION?? "+incomingsms.getIsSubscription());
 		
 		try {
 			
@@ -94,9 +94,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			
 			int language_id = 1;
 		
-			Person person = datingBean.getPerson(incomingsms.getMsisdn());
+			Person person = datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
 			if(person==null)
-				person = datingBean.register(incomingsms.getMsisdn());
+				person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
+			
 			
 			PersonDatingProfile profile = datingBean.getProfile(person);
 			
@@ -154,7 +155,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 			}else if(KEYWORD.equalsIgnoreCase("FIND") || KEYWORD.equalsIgnoreCase("TAFUTA")) {
 				
-				if(person.getId()>0 && profile==null){//Success registering/registered but no profile
+				if(person.getId()>0 && (profile==null || profile.getProfileComplete()==Boolean.FALSE)){//Success registering/registered but no profile
 					
 					outgoingsms = startProfileQuestions(incomingsms,person);
 					
@@ -323,7 +324,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn());
+			person = datingBean.register(incomingsms.getMsisdn(),incomingsms.getOpco());
 		
 		
 		PersonDatingProfile profile = datingBean.getProfile(person);
@@ -364,9 +365,13 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					logger.error(dse.getMessage(), dse);
 				}
 				
-				PersonDatingProfile profile = new PersonDatingProfile();
-				profile.setPerson(person);
-				profile.setUsername(MSISDN);
+				PersonDatingProfile profile = datingBean.getProfile(person);
+				
+				if(profile==null){
+					profile = new PersonDatingProfile();
+					profile.setPerson(person);
+					profile.setUsername(MSISDN);
+				}
 				
 				profile = datingBean.saveOrUpdate(profile);
 				
@@ -380,6 +385,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				ql.setQuestion_id_fk(question.getId());
 				ql = datingBean.saveOrUpdate(ql);
 		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
 			throw new DatingServiceException("Sorry, problem occurred, please try again.",exp);
 		}
 		
@@ -717,7 +723,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						tailmsg = ". However, you're offline. This means you'll not be able to receive any messages from anyone or '"+destination_person.getUsername()+"'. Reply with the word LOGIN to log in.";
 					}
 					
-					outgoingsms.setSms("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
+					outgoingsms.setSms("MessageEmail sent to '"+destination_person.getUsername()+"'"+tailmsg);
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					incomingSMS.setPrice(BigDecimal.ZERO);

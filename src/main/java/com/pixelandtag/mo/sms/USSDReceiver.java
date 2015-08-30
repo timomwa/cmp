@@ -139,7 +139,7 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			
-			Person p = datingBean.getPerson(ro.getMsisdn());
+			Person p = datingBean.getPerson(ro.getMsisdn(),ro.getOpco());
 			
 			locationBean.updateSubscriberLocation(ro);
 			

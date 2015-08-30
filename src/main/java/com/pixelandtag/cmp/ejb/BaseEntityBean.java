@@ -17,19 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.UserTransaction;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -66,6 +60,7 @@ import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
+import com.pixelandtag.dao.generic.GenericDAO;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
@@ -76,7 +71,6 @@ import com.pixelandtag.util.StopWatch;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class BaseEntityBean implements BaseEntityI {
 	
 	private Logger logger = Logger.getLogger(BaseEntityBean.class);
@@ -115,6 +109,8 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	@EJB
 	private QueueProcessorEJBI queueprocEJB;
+	
+	
 	
 	@Override
 	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid){
@@ -189,23 +185,15 @@ public class BaseEntityBean implements BaseEntityI {
     		successfulBill.setTransactionId(billable.getTransactionId());
     		successfulBill.setTransferin(billable.getTransferIn());
     		
-    		//boolean exists = checkIfExists(successfulBill);
+    		successfulBill = em.merge(successfulBill);
     		
-    		//if(!exists){
-    			utx.begin();
-    			successfulBill = em.merge(successfulBill);
-    			utx.commit();
-    		//}
     	}catch(Exception exp){
-			try{
-				utx.rollback();
-			}catch(Exception e){}
 			logger.error(exp.getMessage(),exp);
 		}
     }
     
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public void  mimicMO(String keyword, String msisdn){
 		
 		try {
@@ -305,19 +293,10 @@ public class BaseEntityBean implements BaseEntityI {
 		httpclient = HttpClientBuilder.create().setSslcontext( sslContext).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
 
 	}
-	@Override
-	public EntityManager getEM() {
-		return em;
-	}
 
 	
-	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")
-	protected EntityManager em;
-	
-
-	@Resource
-	protected UserTransaction utx;
+	private EntityManager em;
 	
 	
 	public void setServerTz(String server_tz)  throws Exception {
@@ -352,7 +331,7 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Collection<T> find(Class<T> entityClass,
@@ -376,22 +355,8 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public <T> T saveOrUpdate(T t) throws Exception{
-		try{
-			utx.begin();
-			t = em.merge(t);
-			utx.commit();
-		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
-			logger.error(e.getMessage(),e);
-			throw e;
-		}
-		return t;
+		return em.merge(t);
 	}
 	
 /**
@@ -410,19 +375,22 @@ public class BaseEntityBean implements BaseEntityI {
 		}
 	}
 	
-	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Collection<T> listAll(Class<T> entityClass) throws Exception{
+		return em.createQuery("from "+entityClass.getSimpleName()).getResultList();
+	}
 	
 
 	/**
 	 * To statslog
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@Override
 	public boolean toStatsLog(IncomingSMS incomingsms, String presql)  throws Exception {
 		boolean success = false;
 		try{
 		 
-			utx.begin();
 			Query qry = em.createNativeQuery(presql);
 			qry.setParameter(1, incomingsms.getServiceid());
 			qry.setParameter(2, incomingsms.getMsisdn());
@@ -431,18 +399,12 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(5, incomingsms.getIsSubscription());
 			
 			int num =  qry.executeUpdate();
-			utx.commit();
 			success = num>0;
 		
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 			return false;
 		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
@@ -453,24 +415,17 @@ public class BaseEntityBean implements BaseEntityI {
 
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean  acknowledge(long message_log_id) throws Exception{
 		boolean success = false;
 		try{
 		 
-			utx.begin();
 			Query qry = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?");
 			qry.setParameter(1, message_log_id);
 			int num =  qry.executeUpdate();
-			utx.commit();
 			success = num>0;
 		
 		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
@@ -479,14 +434,13 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text,Integer priority) throws Exception{
 		boolean success = false;
 		try{
 			String insertQ = "insert into "
 					+ "ismpp.messages(smppid,msisdn,shortcode,content,priority,timestamp,received) "
 					+ "VALUES(?, ?, ?, ?, ?, now(), ?);";
-			utx.begin();
 			Query qry = em.createNativeQuery(insertQ);
 			qry.setParameter(1, sppid.intValue());
 			qry.setParameter(2, msisdn);
@@ -497,15 +451,9 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(6, mo_text);
 			
 			int num =  qry.executeUpdate();
-			utx.commit();
 			success = num>0;
 		
 		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
@@ -523,7 +471,6 @@ public class BaseEntityBean implements BaseEntityI {
 			String insertQ = "insert into "
 					+ "ismpp.messages(smppid,msisdn,shortcode,content,priority,timestamp,received) "
 					+ "VALUES(?, ?, ?, ?, 0, now(), ?);";
-			utx.begin();
 			Query qry = em.createNativeQuery(insertQ);
 			qry.setParameter(1, sppid.intValue());
 			qry.setParameter(2, outgoingsms.getMsisdn());
@@ -533,15 +480,9 @@ public class BaseEntityBean implements BaseEntityI {
 			qry.setParameter(5, "");
 			
 			int num =  qry.executeUpdate();
-			utx.commit();
 			success = num>0;
 		
 		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
@@ -549,10 +490,7 @@ public class BaseEntityBean implements BaseEntityI {
 		return success;
 	}
 	
-   
-
-
-	@SuppressWarnings("unchecked")
+   	@SuppressWarnings("unchecked")
 	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception  {
 		T t = null;
 		try{
@@ -824,7 +762,7 @@ public class BaseEntityBean implements BaseEntityI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.CelcomHTTPAPI#logMO(com.pixelandtag.MO)
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@Override
 	public IncomingSMS logMO(IncomingSMS incomingsms) { 
 		return processorEJB.processMo(incomingsms);

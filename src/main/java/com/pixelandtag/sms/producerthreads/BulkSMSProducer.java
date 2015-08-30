@@ -357,7 +357,7 @@ public class BulkSMSProducer extends Thread {
 	
 	
 	
-	public BulkSMSProducer(String connStr_, int workers_, int throttle_, int queueSize_, URLParams urlparams_) throws Exception{
+	public BulkSMSProducer(int workers_, int throttle_, int queueSize_, URLParams urlparams_) throws Exception{
 		
 		semaphore = new Semaphore(1, FAIR);
 		

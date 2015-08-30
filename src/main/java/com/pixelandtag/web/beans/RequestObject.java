@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import javax.servlet.http.HttpServletRequest;
 
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.subscription.dto.MediumType;
 
 /**
@@ -36,6 +37,7 @@ public class RequestObject implements Serializable{
 	private String transactionID = null;
 	private BigInteger sessionid = null;
 	private MediumType mediumType;
+	private OperatorCountry opco;
 	
 	public RequestObject(IncomingSMS incomingsms) throws Exception {
 		
@@ -51,6 +53,7 @@ public class RequestObject implements Serializable{
 		
 		serviceid = incomingsms.getServiceid();
 		
+		opco = incomingsms.getOpco();
 		
 		if (incomingsms.getMsisdn() != null)
 			msisdn = incomingsms.getMsisdn();
@@ -440,6 +443,18 @@ public class RequestObject implements Serializable{
 	}
 	public void setMessageId(Long messageId) {
 		this.messageId = messageId;
+	}
+
+
+
+	public OperatorCountry getOpco() {
+		return opco;
+	}
+
+
+
+	public void setOpco(OperatorCountry opco) {
+		this.opco = opco;
 	}
 
 	

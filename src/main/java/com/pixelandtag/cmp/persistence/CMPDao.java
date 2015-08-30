@@ -54,36 +54,31 @@ public class CMPDao  extends BaseDao {
         return t;
 	} 
 
-	public <T> T find(Class<T> entityClass, Object primaryKey) {
-		return resource_bean.getEM().find(entityClass, primaryKey);
+	public <T> T find(Class<T> entityClass, Long primaryKey) throws Exception {
+		return resource_bean.find(entityClass, primaryKey);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Collection<T> lists( Class<T> entityClass, int start, int end) {
-		return resource_bean.getEM().createQuery("from "+entityClass.getSimpleName()).getResultList();
+	public <T> Collection<T> lists( Class<T> entityClass, int start, int end) throws Exception {
+		return resource_bean.listAll(entityClass);
 	}
 	
 	
 	@SuppressWarnings("unchecked")
-	public <T> Collection<T> find(Class<T> entityClass,Map<String, Object> criteria, int start, int end) {
-		Query query = resource_bean.getEM().createQuery("from " + entityClass.getSimpleName()
-				+ buildWhere(criteria));
-		for (String key : criteria.keySet())
-			query.setParameter(key + "_", criteria.get(key));
-		return query.getResultList();
+	public <T> Collection<T> find(Class<T> entityClass,Map<String, Object> criteria, int start, int end) throws Exception {
+		return resource_bean.find(entityClass, criteria, start,  end);
 	}
 	
 	/**
 	 * 
 	 * @param limit
 	 * @return
+	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Billable> getBillable(int limit){
-		Query qry = resource_bean.getEM().createQuery("from Billable where in_outgoing_queue=0 AND (retry_count<=maxRetriesAllowed) AND resp_status_code <> 200 AND price>0 AND  processed=0 order by priority asc");
-		qry.setFirstResult(0);
-		qry.setMaxResults(limit);
-		return qry.getResultList();
+	public List<Billable> getBillable(int limit) throws Exception{
+		return resource_bean.getBillable(limit);
+		
 	}
 	
 	

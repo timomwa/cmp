@@ -7,28 +7,29 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
@@ -37,6 +38,8 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
+import com.pixelandtag.cmp.entities.ClassStatus;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
@@ -44,6 +47,7 @@ import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.SMSServiceMetaData;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
@@ -70,9 +74,14 @@ import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRemote {
 	
+	@PersistenceContext(unitName = "EjbComponentPU4")
+	private EntityManager em;
+	
+	private Random rand = new Random();
+	
+	private SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
 	
 	public CMPResourceBean() throws KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,
@@ -96,17 +105,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		boolean success = false;
 		try {
-			utx.begin();
 			Query qry = em.createNativeQuery("UPDATE `"+database+"`.`httptosend` SET in_outgoing_queue = 1 WHERE id = :id_");
 			qry.setParameter("id_", String.valueOf(http_to_send_id));
 			qry.executeUpdate();
-			utx.commit();
 			success = true;
 		}catch(Exception e){
-			try{
-				utx.rollback();
-			}catch(Exception exp){
-			}
+			logger.error(e.getMessage(),e);
 			throw new Exception(e.getMessage());
 		
 		}finally{
@@ -248,7 +252,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return sm;
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean unsubscribeAll(String msisdn, SubscriptionStatus status, AlterationMethod method)  throws Exception {
 		
 		boolean success = true;
@@ -260,13 +264,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			for(Subscription subscr : subscriptions){
 				try{
 					subscriptionBean.updateSubscription(subscr.getId().intValue(), status, method);
-					utx.begin();	
 					subscr.setSubscription_status(status);
-					utx.commit();
 				}catch(Exception exp){
-					try{
-						utx.rollback();
-					}catch(Exception ex){}
 					logger.error(exp.getMessage());
 					success = false;
 				}
@@ -450,82 +449,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	
-	/*public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription)  throws Exception{
-		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
-		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
-		SMSServiceDTO sm = getSMSservice(service_id);
-		logger.info(s+sm);
-		MOSms mo = null;
-		
-		if(sm!=null){
-			
-			ServiceProcessorDTO procDTO = getServiceProcessor(sm.getMo_processor_FK());
-			
-			try {
-				
-				
-				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
-				mo = new MOSms();
-				mo.setCMP_Txid(SubscriptionMain.generateNextTxId());
-				mo.setMsisdn(msisdn);
-				mo.setCMP_AKeyword(sm.getCmp_keyword());
-				mo.setCMP_SKeyword(sm.getCmp_skeyword());
-				mo.setPrice(BigDecimal.valueOf(sm.getPrice()));
-				mo.setBillingStatus(mo.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
-				mo.setSMS_SourceAddr(procDTO.getShortcode());
-				mo.setPriority(1);
-				mo.setServiceid(sm.getId());
-				mo.setSMS_Message_String(sm.getCmd());
-				
-				//added 22nd Dec 2014 - new customer requirement
-				mo.setPricePointKeyword(sm.getPricePointKeyword());
-				
-				//added on 10th June 2013 but not tested
-				mo.setProcessor_id(sm.getMo_processor_FK());
-				
-				
-				
-				// **** Below is a Dirty hack. *****
-				//To 
-				//cheat the content processor 
-				//that this is a subscription push, 
-				//so that it does not subscribe 
-				//this subscriber to the service. 
-				//We handle subscription elsewhere, 
-				//this is solely for content fetcnhing 
-				//and not subscribing.
-				mo.setSubscriptionPush(isSubscription);
-				
-				mo = processor.process(mo);
-				
-				
-			}catch(Exception e) {
-				logger.error(e.getMessage(),e);
-			}
-		}else{
-			logger.info(s+" sm is null!");
-		}
-		
-		
-		return mo;
-	}*/
-	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public boolean updateProfile(String msisdn, int language_id) throws Exception{
 		boolean success = false;
 		try {
-			utx.begin();
+			
 			String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscriber_profile`(`msisdn`,`language_id`) VALUES(?,?) ON DUPLICATE KEY UPDATE `language_id`=?";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, msisdn);
 			qry.setParameter(2, language_id);
 			qry.setParameter(3, language_id);
 			success  = qry.executeUpdate()>0;
-			utx.commit();
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			throw e;
 			
@@ -621,13 +559,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return updateSession(language_id.intValue(), msisdn,
 				smsmenu_levels_id_fk.intValue());
 	}
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean updateSession(int language_id, String msisdn,
 			int smsmenu_levels_id_fk) throws Exception{
 		boolean success = false;
 		
 		try{
-			utx.begin();
+			
 			String UPDATE_SESSION = "INSERT INTO `"+CelcomImpl.database+"`.`smsmenu_session`(`msisdn`,`smsmenu_levels_id_fk`,`timeStamp`,`language_id`) VALUES(?,?,now(),?) ON DUPLICATE KEY UPDATE `smsmenu_levels_id_fk`=?,timeStamp=NOW(),language_id=?";
 			Query qry = em.createNativeQuery(UPDATE_SESSION);
 			qry.setParameter(1, msisdn);
@@ -637,10 +575,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(5, language_id);
 			
 			success = (qry.executeUpdate()>0);
-			utx.commit();
+			
 		}catch(Exception e){
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			
@@ -1009,19 +947,19 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 */
 	
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean deleteOldLogs() throws Exception{
 		boolean success = false;
 		
 		try {
-			utx.begin();
+			
 			String sql = "delete from `"+CelcomImpl.database+"`.`subscriptionlog` where date(CONVERT_TZ(timeStamp,'"+getServerTz()+"','"+getClientTz()+"'))<date(CONVERT_TZ(now(),'"+getServerTz()+"','"+getClientTz()+"'))";
 			Query qry = em.createNativeQuery(sql);
 			success = qry.executeUpdate()>0;
-			utx.commit();
+			
 		} catch (Exception e) {
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1066,7 +1004,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1077,20 +1015,20 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return count;
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean logResponse(String msisdn, String responseText) throws Exception{
 		boolean success = false;
 		try {
-			utx.begin();
+			
 			String sql = "INSERT DELAYED INTO `"+CelcomImpl.database+"`.`raw_out_log`(msisdn,response) VALUES(?,?)";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, msisdn);
 			qry.setParameter(2, responseText);
 			success = qry.executeUpdate()>0;
-			utx.commit();
+			
 		} catch (Exception e) {
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1102,21 +1040,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean postponeMT(long http_to_send_id) throws Exception{
 		
 		boolean success = false;
 		
 		try {
-			utx.begin();
+			
 			String sql = "UPDATE `"+CelcomImpl.database+"`.`httptosend` SET `sent` = 0, in_outgoing_queue=0 WHERE id = ?";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, String.valueOf(http_to_send_id));
 			success = qry.executeUpdate()>0;
-			utx.commit();
+			
 		} catch (Exception e) {
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1127,14 +1065,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean logMT(MTsms mt) throws Exception{
 		
 		boolean success = false;
 		
 		try {
 				
-			utx.begin();
+			
 			 
 			String sql = "INSERT INTO `"+CelcomImpl.database+"`.`messagelog`(CMP_Txid,MT_Sent,SMS_SourceAddr,SUB_Mobtel,SMS_DataCodingId,CMPResponse,APIType,CMP_Keyword,CMP_SKeyword,MT_STATUS,number_of_sms,msg_was_split,MT_SendTime,mo_ack,serviceid,price,newCMP_Txid,mo_processor_id_fk,price_point_keyword,subscription) " +
 							"VALUES(?,?,?,?,?,?,?,?,?,?,?,?,CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'),1,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE MT_Sent = ?, mo_ack=1, MT_SendTime=CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'), MT_STATUS = ?, number_of_sms = ?, msg_was_split=?, serviceid=? , price=?, SMS_DataCodingId=?, CMPResponse=?, APIType=?, newCMP_Txid=?, CMP_SKeyword=?, mo_processor_id_fk=?, price_point_keyword=?,subscription=?";
@@ -1210,10 +1148,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(31, mt.getPricePointKeyword());//CMP_SKeyword
 			qry.setParameter(32, (mt.isSubscription()  ? 1 : 0 ));// is subscription ?
 			success = qry.executeUpdate()>0;
-			utx.commit();
+			
 		} catch (Exception e) {
 			try{
-				utx.rollback();
+				
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1264,21 +1202,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean deleteMT(long id) throws Exception {
 		
 		boolean success = false;
 		
 		try {
-			utx.begin();
+			
 			String sql = "DELETE FROM `"+CelcomImpl.database+"`.`httptosend` WHERE id = ?";
 			Query qry = em.createNativeQuery(sql);
 			qry.setParameter(1, String.valueOf(id));
 			success = qry.executeUpdate()>0;
-			utx.commit();
+			
 		} catch (Exception e) {
 			try{
-				utx.rollback();
+				
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1292,7 +1230,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 
 	@SuppressWarnings("unchecked")
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public String getUniqueFromCategory(String database_name,String table,
 			String field,String idfield,String categoryfield,String categoryvalue,
 			String msisdn,int serviceid,int size,Long processor_id) throws Exception{
@@ -1300,7 +1238,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		int contentid=0;
 		
 		try {
-			utx.begin();
+			
 			String categories[] = categoryvalue.split(",");
 			String where="";
 			
@@ -1350,13 +1288,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				}
 			}
 			
-			utx.commit();
+			
 			
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 		} catch ( Exception e ) {
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e,e);
 			throw e;
@@ -1367,7 +1305,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return retval;
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk, SubscriptionStatus status,SubscriptionSource source, AlterationMethod method ) throws Exception{
 		
 		boolean success = false;
@@ -1375,7 +1313,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		try{
 			
 			if(smsService!=null && smsService.getId()>-1){
-				utx.begin();
+				
 				final String TIMEUNIT = smsService.getSubscription_length_time_unit().toString();
 				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk, request_medium,subscription_status,expiryDate) VALUES(?,?,?,?,?, CONVERT_TZ(DATE_ADD(now(), INTERVAL ? "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"' ) ) ON DUPLICATE KEY UPDATE subscription_status = ?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ?  "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"')";
 				Query qry = em.createNativeQuery(sql);
@@ -1397,7 +1335,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				if(qry.executeUpdate()>0)
 					success = true;
-				utx.commit();
+				
 			}else{
 				success = false;
 			}
@@ -1408,7 +1346,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			logger.error(e.getMessage(),e);
 			try{
-				utx.rollback();
+				
 				}catch(Exception e1){}
 			
 			throw e;
@@ -1420,13 +1358,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean subscribe(String msisdn, SMSService smsService, int smsmenu_levels_id_fk, MediumType medium, AlterationMethod method) throws Exception {
 		boolean success = false;
 		
 		try{
 			
-			utx.begin();
+			
 			if(smsService!=null && smsService.getId()>-1){
 				final String TIMEUNIT = smsService.getSubscription_length_time_unit().toString();
 				String sql = "INSERT INTO `"+CelcomImpl.database+"`.`subscription`(sms_service_id_fk,msisdn,smsmenu_levels_id_fk,expiryDate) VALUES(?,?,?,CONVERT_TZ(DATE_ADD(now(), INTERVAL ? "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"')) ON DUPLICATE KEY UPDATE subscription_status=?, renewal_count=renewal_count+1, expiryDate=CONVERT_TZ(DATE_ADD(now(), INTERVAL ? "+TIMEUNIT+") , '"+getServerTz()+"','"+getClientTz()+"')";
@@ -1457,11 +1395,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				success = false;
 			}
 				
-			utx.commit();
+			
 			
 		}catch(Exception e){
 			try{
-			utx.rollback();
+			
 			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
 			throw e;
@@ -1569,20 +1507,20 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			throw new NoContentTypeException("No content Exception!! ");
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean updateServiceSubscription(int subscription_service_id)  throws Exception {
 		boolean success = false;
 		try{
-			 utx.begin();
+			 
 			 String sql = "UPDATE `"+GenericServiceProcessor.DB+"`.`ServiceSubscription` SET lastUpdated=convert_tz(now(),'"+getServerTz()+"','"+getClientTz()+"') WHERE id =:id";
 			Query qry = em.createNativeQuery(sql);	
 			qry.setParameter("id", subscription_service_id);
 			int num =  qry.executeUpdate();
-			 utx.commit();
+			 
 			 success = num>0;
 		}catch(Exception e){
 			try {
-				utx.rollback();
+				
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(),e1);
 			} 
@@ -1707,7 +1645,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	 * @return
 	 * @throws SQLException
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@SuppressWarnings("unchecked")
 	public String getUnique(String database_name,String table,String field,String idfield,String msisdn,int serviceid,int size,int processor_id) throws Exception {
 		
@@ -1717,7 +1655,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		try {
 			
-			utx.begin();
+			
 			
 			String[] fields = field.split(",");
 			StringBuffer sb = new StringBuffer();
@@ -1768,13 +1706,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				qry3.executeUpdate();
 			}
 			
-			utx.commit();
+			
 			
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 		} catch ( Exception e ) {
 			try{
-				utx.rollback();
+				
 			}catch(Exception e1){
 				//logger.error(e1,e1);
 			}
@@ -1814,22 +1752,22 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean updateMessageInQueue(String cp_tx_id, BillingStatus billstatus) throws Exception{
 		boolean success = false;
 		try{
-			 utx.begin();
+			 
 			 Query qry = em.createNativeQuery("UPDATE httptosend set priority=:priority, charged=:charged, billing_status=:billing_status WHERE CMP_TxID=:CMP_TxID ")
 			.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
 			.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 1 :  0)
 			.setParameter("billing_status", billstatus.toString())
 			.setParameter("CMP_TxID", cp_tx_id);
 			int num =  qry.executeUpdate();
-			 utx.commit();
+			 
 			 success = num>0;
 		}catch(Exception e){
 			try {
-				utx.rollback();
+				
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(),e1);
 			} 
@@ -1841,22 +1779,22 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@Override
 	public boolean  acknowledge(long message_log_id) throws Exception{
 		boolean success = false;
 		try{
 		 
-			utx.begin();
+			
 			Query qry = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?");
 			qry.setParameter(1, message_log_id);
 			int num =  qry.executeUpdate();
-			utx.commit();
+			
 			success = num>0;
 		
 		}catch(Exception e){
 			try {
-				utx.rollback();
+				
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(),e1);
 			} 
@@ -1870,12 +1808,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	/**
 	 * To statslog
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
 		boolean success = false;
 		try{
 		 
-			utx.begin();
+			
 			Query qry = em.createNativeQuery(presql);
 			qry.setParameter(1, mo.getServiceid());
 			qry.setParameter(2, mo.getMsisdn());
@@ -1884,12 +1822,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter(5, mo.getIsSubscription());
 			
 			int num =  qry.executeUpdate();
-			utx.commit();
+			
 			success = num>0;
 		
 		}catch(Exception e){
 			try {
-				utx.rollback();
+				
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(),e1);
 			} 
@@ -1927,7 +1865,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		List<SubscriptionDTO> sub_services  = new ArrayList<SubscriptionDTO>();
 	
 		try {
-			utx.begin();
+			
 			Query qry = em.createNativeQuery(sub);
 			List<Object[]> list = qry.getResultList();
 			SubscriptionDTO subdto = null;
@@ -1964,13 +1902,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			}
 			
-			utx.commit();
+			
 			
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 		} catch (Exception e) {
 			try{
-				utx.rollback();
+				
 			}catch(Exception ex){}
 			logger.error(e);
 			throw e;
@@ -1984,7 +1922,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	public int invalidateSimilarBillables(Billable bill) throws Exception{
 		int res = 0;
 		try{
-			utx.begin();
+			
 			Query qry =  em.createQuery("update Billable b set b.valid=:valid where "
 					+ "b.msisdn=:msisdn "
 					+ "AND b.service_id=:service_id  "
@@ -1996,11 +1934,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter("timestampC", bill.getTimeStamp());
 			qry.setParameter("id", bill.getId());
 			res = qry.executeUpdate();
-			utx.commit();
+			
 			return res;
 		}catch(javax.persistence.NoResultException ex){
 			try{
-				utx.rollback();
+				
 			}catch(Exception exo){}
 			logger.error(ex.getMessage());
 			return 0;
@@ -2132,9 +2070,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					}
 					
 					tun.setDepleted(true);
-					utx.begin();
+					
 					tun = em.merge(tun);
-					utx.commit();
+					
 					
 					resp = "You have successfully topped up with KES "+tun.getValue()+". This is valid till xxxx";
 				
@@ -2842,12 +2780,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public void clearUssdSesion(USSDSession sess) {
 	
 		if(sess.getId()!=null){
 			try{
-				utx.begin();
+				
 				Query qry = em.createQuery("from USSDSession s WHERE s.msisdn=:msisdn AND s.sessionId=:sessionId");
 				qry.setParameter("msisdn", sess.getMsisdn());
 				qry.setParameter("sessionId", sess.getSessionId());
@@ -2855,11 +2793,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				logger.debug(":::::::::::::::::::: Session : "+s);
 				em.remove(s);
-				utx.commit();
+				
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 				try{
-				utx.rollback();
+				
 				}catch(Exception exp){}
 			}
 		}
@@ -2966,21 +2904,21 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		}
 		return sess;
 	}
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean saveStaticSMS(String db_name, String table,
 			String static_category_value, String sms) throws Exception{
 		boolean success = false;
 		try{
-			utx.begin();
+			
 			Query qry2 = em.createNativeQuery("INSERT INTO `"+db_name+"`.`"+table+"`(Category,Text,timeStamp) VALUES(:category, :text, CONVERT_TZ(CURRENT_TIMESTAMP,'"+getServerTz()+"','"+getClientTz()+"'))");
 			qry2.setParameter("category", static_category_value);
 			qry2.setParameter("text", sms);
 			
 			success =  qry2.executeUpdate()>0;
-			utx.commit();
+			
 		}catch(Exception exp){
 			try{
-				utx.rollback();
+				
 			}catch(Exception ex){}
 			logger.error(exp.getMessage(),exp);
 			throw exp;
@@ -3001,7 +2939,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 	
 	@SuppressWarnings("unchecked")
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean updateSMSStatLog(String transaction_id, ERROR errorcode) throws Exception {
 		
 		boolean success = false;
@@ -3071,7 +3009,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							priceTbc = new Double((Double) o[4]);//TarrifCode.get(CMP_SKeyword.trim()).getPrice();
 						}
 					}
-						utx.begin();
+						
 						String sql4 = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, CMP_Keyword, CMP_SKeyword,price,statusCode,charged) " +
 								"VALUES(?,?,?,?,?,?,?,?)";
 						Query qry4 = em.createNativeQuery(sql4);
@@ -3089,18 +3027,18 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						
 						logger.debug("______CMP_SKeyword="+CMP_SKeyword+"________cmpTxid = "+transaction_id+"________priceTbc = "+priceTbc+"_________________did not find in smsStatLog but no problem, we found in messagelog__________________________________________SUCCESSFULLY_INSERTED_INTO_SMSStatLog___________________________________________________________________________________");
 						
-						utx.commit();
+						
 					
 					
 				}catch(javax.persistence.NoResultException ex){
 					try{
-						utx.rollback();
+						
 					}catch(Exception ex1){}
 					logger.error(ex.getMessage(),ex);
 				
 				}catch (Exception e) {
 					try{
-						utx.rollback();
+						
 					}catch(Exception ex1){}
 					logger.error(e.getMessage(),e);
 					throw e;
@@ -3114,7 +3052,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			//Only if the message exists in SMSStatLog
 			if(wasInLog){
 				
-				utx.begin();
+				
 				String sql5 = "UPDATE `"+CelcomImpl.database+"`.`SMSStatLog` SET statusCode=?,  charged=?, statusCode=? WHERE  transactionID = ?";
 				BillingStatus billStatus = BillingStatus.WAITING_BILLING;
 				billStatus = errorcode.equals(ERROR.Success)  ? BillingStatus.SUCCESSFULLY_BILLED : billStatus;
@@ -3133,23 +3071,18 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				success = qry5.executeUpdate()>0;
 				
 				logger.debug("MT (transactionID = "+transaction_id+ ") " + (success ? "successfully logged into SMSStatLog" : "failed to log into SMSStatLog"));
-				utx.commit();
+				
 			}
 			
 			
 		}catch(javax.persistence.NoResultException ex){
 			try{
-				utx.rollback();
+				
 			}catch(Exception e1){}
 			logger.error(ex.getMessage(),ex);
 		
 		}  catch (Exception e) {
-			
-			try{
-				utx.rollback();
-			}catch(Exception e1){}
 			logger.error(e.getMessage(),e);
-			
 			throw e;
 			
 		}finally{
@@ -3160,7 +3093,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		
 	}
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Collection<T> find(Class<T> entityClass,
@@ -3194,11 +3127,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					.append(criteria.size() == counter2 ? "" : " AND ");
 		}
 		return sb.toString();
-	}
-
-	@Override
-	public EntityManager getEM() {
-		return super.getEM();
 	}
 	
 	
@@ -3328,26 +3256,24 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			Query qry = em.createQuery("SELECT "
 					+ "mop.id, "//0
-					+ "mop.ServiceName, "//1
-					+ "mop.ProcessorClass, "//2
-					+ "mop.enabled, "//3
+					+ "mop.serviceName, "//1
+					+ "mop.processorClass, "//2
+					+ "mop.enable, "//3
 					+ "mop.class_status, "//4
 					+ "mop.shortcode, "//5
 					+ "mop.threads, "//6
-					+ "smss.CMP_Keyword, "//7
-					+ "smss.CMP_SKeyword, "//8
-					+ "group_concat(smss.cmd) as 'keywords',  "//9
-					+ "smss.subscriptionText as 'subscriptionText', "//10
-					+ "smss.unsubscriptionText as 'unsubscriptionText', "//11
-					+ "smss.tailText_subscribed as 'tailText_subscribed', "//12
-					+ "smss.tailText_notsubscribed as 'tailText_notsubscribed', "//13
-					+ "mop.processor_type as 'processor_type' , "//14
-					+ "mop.forwarding_url as 'forwarding_url', "//15
-					+ "mop.protocol as 'protocol', "//16
-					+ "coalesce(mop.smppid,-1,mop.smppid) as 'smppid'  "//17
+					//+ "group_concat(smss.cmd) ,  "//7
+					+ "smss.subscriptionText , "//7
+					+ "smss.unsubscriptionText , "//8
+					+ "smss.tailText_subscribed , "//9
+					+ "smss.tailText_notsubscribed , "//10
+					+ "mop.processor_type  , "//11
+					+ "mop.forwarding_url , "//12
+					+ "mop.protocol , "//13
+					+ "coalesce(mop.smppid,-1,mop.smppid)   "//14
 					+ "FROM MOProcessor mop, SMSService smss "
 					+ "WHERE smss.moprocessor=mop "
-					+ "AND mop.enabled=1 "
+					+ "AND mop.enable=1 "
 					+ "AND mop.processor_type <> :phantom_processor "
 					+ "group by mop.id" );
 			
@@ -3366,27 +3292,27 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				service = new ServiceProcessorDTO();
 				
 				if(i==1){
-					services = new LinkedList<ServiceProcessorDTO>();
+					services = new ArrayList<ServiceProcessorDTO>();
 				}
 				
-				service.setSubscriptionText( (String) row[10]  );
-				service.setUnsubscriptionText( (String) row[11] );
-				service.setTailTextSubscribed( (String) row[12] );
-				service.setTailTextNotSubecribed(  (String) row[13] );
-				service.setId( (Integer) row[0]  );
+				
+				service.setId( ((Long) row[0]).intValue()  );
 				service.setServiceName(  (String) row[1] );
 				service.setProcessorClass(  (String) row[2] );
-				service.setActive(   (Boolean) row[3] );
-				service.setClass_status( (String) row[4]  );
+				service.setActive(   ((Long) row[3]).intValue()==1 );
+				service.setClass_status( ((ClassStatus) row[4]).name()  );
 				service.setShortcode(  (String) row[5]  );
-				if(((String) row[9])!=null)
-					service.setKeywords(((String) row[9]).split(","));
-				service.setForwarding_url(   (String) row[15] );
-				service.setProcessor_type(ProcessorType.fromString((String) row[14]));
-				service.setProtocol(   (String) row[16] );
-				service.setSmppid( (Long) row[17] );
+				service.setThreads( ((Long)row[6]).intValue() );
+				service.setSubscriptionText( (String) row[7]  );
+				service.setUnsubscriptionText( (String) row[8] );
+				service.setTailTextSubscribed( (String) row[9] );
+				service.setTailTextNotSubecribed(  (String) row[10] );
+				service.setProcessor_type((ProcessorType) row[11]);
+				service.setForwarding_url(   (String) row[12] );
+				service.setProtocol(   (String) row[13] );
+				service.setSmppid( (Long) row[14] );
 				service.setServKey(service.getProcessorClassName()+"_"+service.getId()+"_"+"_"+service.getShortcode());
-				service.setThreads( (Integer)row[6] );
+				
 				services.add(service);
 			}
 			
@@ -3402,12 +3328,148 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return services;
 	}
 
+	@Override
+	public List<SMSServiceMetaData> getSMSServiceMetaData(Long serviceid) {
+		Query qry = em.createQuery("from SMSServiceMetaData smd WHERE sms_service_id_fk=:sms_service_id_fk");
+		qry.setParameter("sms_service_id_fk", serviceid);
+		List<SMSServiceMetaData> metaData = qry.getResultList();
+		return metaData;
+	}
 
+	@Override
+	public BigInteger count(String db_name, String table,
+			String static_category_value) {
+		Query qry2 = em.createNativeQuery("SELECT count(*) FROM `"+db_name+"`.`"+table+"` WHERE Category=:category");
+		qry2.setParameter("category", static_category_value);
+		Object obj = qry2.getSingleResult();
+		BigInteger size = (BigInteger) obj;
+		return size;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Object[]> listContent(String db_name, String table,
+			String static_category_value, int start, int limit) {
+		Query qry2 = em.createNativeQuery("SELECT id,Text,timeStamp FROM `"+db_name+"`.`"+table+"` WHERE Category=:category");
+		qry2.setParameter("category", static_category_value);
+		qry2.setFirstResult(start);
+		qry2.setMaxResults(limit);
+		List<Object[]> list = qry2.getResultList();
+		return list; 
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Date listContent(String db_name, String table,
+			String static_category_value, String sms) {
+		Query qry2 = em.createNativeQuery("SELECT timeStamp FROM `"+db_name+"`.`"+table+"` WHERE Text=:text AND Category=:category");
+		qry2.setParameter("text", sms);
+		qry2.setParameter("category", static_category_value);
+		List<Object> objects = qry2.getResultList();
+		if(objects!=null && objects.size()>0)
+			return (Date) objects.get(0);
+		return null;
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<SMSMenuLevels> getSMSMenuLevels() {
+		Query qry = em.createQuery("from SMSMenuLevels sm WHERE sm.serviceid=-1");
+		return qry.getResultList();
+	}
+
+	@Override
+	public String getBillingStats(String fromTz, String toTz) throws JSONException {
+
+		Query qry = em.createNativeQuery("select date(convert_tz(timeStamp,'"+fromTz+"','"+toTz+"')) dt, count(*) count, price, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 31");
+		
+		List<Object[]> recs = qry.getResultList();
+		
+		JSONObject mainObject = new JSONObject();
+		
+		JSONObject data = new JSONObject();
+		JSONArray labels =  new JSONArray();
+		JSONArray dataArray = new JSONArray();
+		JSONArray datasets =  new JSONArray();
+		
+		for(Object[] o : recs){
+			Date date = (Date) o[0];
+			BigInteger count = (BigInteger) o[1];
+			BigDecimal total_kshs = (BigDecimal) o[3];
+			
+			
+			labels.put(convertToPrettyFormat(date));
+			dataArray.put(total_kshs.longValue());
+			
+		}
+		data.put("data", dataArray);
+		data.put("fillColor", "rgba(151,187,205,1)");
+		data.put("strokeColor", "rgba(151,187,205,0.8)");
+		data.put("highlightFill", "rgba(151,187,205,0.75)");
+		data.put("highlightStroke", "rgba(151,187,205,1)");
+		datasets.put(data);
+		
+		
+
+		mainObject.put("datasets", datasets);
+		mainObject.put("labels", labels);
+		return mainObject.toString();
+	}
+	
+	
+	public String convertToPrettyFormat(Date date){
+		int day = Integer.parseInt(formatDayOfMonth.format(date));
+		String suff  = TimezoneConverterEJB.getDayNumberSuffix(day);
+		DateFormat prettier_df = new SimpleDateFormat("d'"+suff+"' E");
+	    return prettier_df.format(date);
+	}
+
+	@Override
+	public String getCurrentSubDistribution() throws Exception{
+
+		Query qry = em.createNativeQuery("select  count(*) count, sms.service_name as 'service_name' from subscription sub left join sms_service sms on sms.id = sub.sms_service_id_fk where sub.subscription_status='confirmed' group by sms.service_name");
+		
+		List<Object[]> recs = qry.getResultList();
+		
+		JSONObject data = new JSONObject();
+		JSONArray dataArray = new JSONArray();
+		
+		for(Object[] o : recs){
+			
+			BigInteger count = (BigInteger) o[0];
+			String service_name = (String) o[1];
+			
+			String colorHex = getRandomHexColor();
+			JSONObject dataPiece = new JSONObject();
+			dataPiece.put("value", count);
+			dataPiece.put("label", service_name);
+			dataPiece.put("color", "#"+colorHex);
+			dataPiece.put("highlight", "#"+incrementColor(colorHex,50));
+			
+			dataArray.put(dataPiece);
+			
+		}
+		data.put("data", dataArray);
+		
+		return data.toString();
+	}
+
+	private String incrementColor(String hexVal, int increment) {
+		int value = Integer.parseInt(hexVal, 16);
+		value += increment;
+		return Integer.toHexString(value);
+	}
 	
 
-	
-
-	
-
+	private String getRandomHexColor() {
+		
+	    char letters[] = "0123456789ABCDEF".toCharArray();
+	    String color = "";
+	    for (int i = 0; i < 6; i++ ) {
+	        color += letters[(rand.nextInt((15 - 0) + 1) + 0)];
+	    }
+	    return color;
+	}
 
 }

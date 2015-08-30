@@ -30,7 +30,6 @@ import net.sourceforge.stripes.action.Resolution;
 public class StatsAction extends BaseActionBean {
 	
 	private Logger logger = Logger.getLogger(getClass());
-	private Random rand = new Random();
 	
 	@EJB(mappedName =  "java:global/cmp/LinkLatencyStatEJBImpl")
 	private LinkLatencyStatEJBI statsLinkLatEJB;
@@ -61,39 +60,9 @@ public class StatsAction extends BaseActionBean {
 	@RolesAllowed({"admin"})
 	public Resolution getStats() throws JSONException{
 		
-		Query qry = cmp_dao.resource_bean.getEM().createNativeQuery("select date(convert_tz(timeStamp,'"+from_tz+"','"+to_tz+"')) dt, count(*) count, price, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 31");
+		String billingStats = cmp_dao.resource_bean.getBillingStats(from_tz,to_tz);
 		
-		List<Object[]> recs = qry.getResultList();
-		
-		JSONObject mainObject = new JSONObject();
-		
-		JSONObject data = new JSONObject();
-		JSONArray labels =  new JSONArray();
-		JSONArray dataArray = new JSONArray();
-		JSONArray datasets =  new JSONArray();
-		
-		for(Object[] o : recs){
-			Date date = (Date) o[0];
-			BigInteger count = (BigInteger) o[1];
-			BigDecimal total_kshs = (BigDecimal) o[3];
-			
-			
-			labels.put(convertToPrettyFormat(date));
-			dataArray.put(total_kshs.longValue());
-			
-		}
-		data.put("data", dataArray);
-		data.put("fillColor", "rgba(151,187,205,1)");
-		data.put("strokeColor", "rgba(151,187,205,0.8)");
-		data.put("highlightFill", "rgba(151,187,205,0.75)");
-		data.put("highlightStroke", "rgba(151,187,205,1)");
-		datasets.put(data);
-		
-		
-
-		mainObject.put("datasets", datasets);
-		mainObject.put("labels", labels);
-		return sendResponse(mainObject.toString());
+		return sendResponse(billingStats);
 	}
 	
 	
@@ -101,48 +70,13 @@ public class StatsAction extends BaseActionBean {
 	
 	
 	@SuppressWarnings("unchecked")
-	public Resolution currentSubscriberDistribution() throws JSONException{
-		Query qry = cmp_dao.resource_bean.getEM().createNativeQuery("select  count(*) count, sms.service_name as 'service_name' from subscription sub left join sms_service sms on sms.id = sub.sms_service_id_fk where sub.subscription_status='confirmed' group by sms.service_name");
+	public Resolution currentSubscriberDistribution() throws Exception{
 		
-		List<Object[]> recs = qry.getResultList();
 		
-		JSONObject data = new JSONObject();
-		JSONArray dataArray = new JSONArray();
-		
-		for(Object[] o : recs){
-			
-			BigInteger count = (BigInteger) o[0];
-			String service_name = (String) o[1];
-			
-			String colorHex = getRandomHexColor();
-			JSONObject dataPiece = new JSONObject();
-			dataPiece.put("value", count);
-			dataPiece.put("label", service_name);
-			dataPiece.put("color", "#"+colorHex);
-			dataPiece.put("highlight", "#"+incrementColor(colorHex,50));
-			
-			dataArray.put(dataPiece);
-			
-		}
-		data.put("data", dataArray);
-		
-		return sendResponse(data.toString());
+		String currentSubDistro = cmp_dao.resource_bean.getCurrentSubDistribution();
+		return sendResponse(currentSubDistro);
 	}
 
 	
-	private String incrementColor(String hexVal, int increment) {
-		int value = Integer.parseInt(hexVal, 16);
-		value += increment;
-		return Integer.toHexString(value);
-	}
-	
 
-	private String getRandomHexColor() {
-	    char letters[] = "0123456789ABCDEF".toCharArray();
-	    String color = "";
-	    for (int i = 0; i < 6; i++ ) {
-	        color += letters[(rand.nextInt((15 - 0) + 1) + 0)];
-	    }
-	    return color;
-	}
 }

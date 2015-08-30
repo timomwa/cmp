@@ -36,7 +36,6 @@ import com.pixelandtag.web.beans.RequestObject;
  */
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	
 	public Logger logger = Logger.getLogger(LocationEJB.class);
@@ -49,9 +48,6 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	@EJB
 	DatingServiceI dating_ejb;
 	
-
-	@Resource
-	private UserTransaction utx;
 	
 	public LocationEJB() throws KeyManagementException,
 			UnrecoverableKeyException, NoSuchAlgorithmException,

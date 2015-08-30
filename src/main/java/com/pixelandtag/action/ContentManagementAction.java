@@ -29,7 +29,13 @@ public class ContentManagementAction extends BaseActionBean {
 			smsservice = (SMSService) getContext().getRequest().getSession()
 					.getAttribute("smsservice");
 			if(!StringUtils.isEmpty(id)){
-				smsservice = cmp_dao.find(SMSService.class, new Long(id));
+				try {
+					smsservice = cmp_dao.find(SMSService.class, new Long(id));
+				} catch (NumberFormatException e) {
+					log.error(e.getMessage(),e);
+				} catch (Exception e) {
+					log.error(e.getMessage(),e);
+				}
 			}
 		} else {
 			log.info("Got an member from the session :");
@@ -38,7 +44,7 @@ public class ContentManagementAction extends BaseActionBean {
 	
 	
 	@DefaultHandler
-	public Resolution listServices() throws JSONException{
+	public Resolution listServices() throws Exception{
 		Collection<SMSService> test = cmp_dao.lists(SMSService.class, 0, 100);
 		Iterator<SMSService> kws = test.iterator();
 		JSONObject resp = new JSONObject();

@@ -3,15 +3,15 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 public class Attachment extends ModelBase {
     @ManyToOne
-    private Message message;
+    private MessageEmail message;
     private String fileName;
     private long size;
     private String contentType;
 
-    public Message getMessage() {
+    public MessageEmail getMessage() {
         return message;
     }
-    public void setMessage(Message message) {
+    public void setMessage(MessageEmail message) {
         this.message = message;
     }
     public String getFileName() {

@@ -20,8 +20,10 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
+import com.pixelandtag.cmp.dao.core.MessageLogDAOI;
 import com.pixelandtag.cmp.dao.core.OutgoingSMSDAOI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MessageLog;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 
 @Stateless
@@ -48,16 +50,37 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	@Inject
 	private IncomingSMSDAOI incomingsmsDAO;
 	
+	
+	@Inject
+	private MessageLogDAOI messagelogDAO;
+	
 	@Override
-	public boolean updateMessageLog(String cmp_tx_id, MessageStatus status)  throws Exception{
+	public boolean updateMessageLog(String tx_id, MessageStatus status)  throws Exception{
 		
 		try{
-			throw new Exception("com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBImpl.updateMessageLog(Long, MessageStatus) "
-					+ "has not been implemented, but we're not going to cause for this. Implement this later");
+			Map<String,Object> params = new HashMap<String,Object>();
+			params.put("cmp_tx_id", tx_id);
+			List<MessageLog> msglogs = messagelogDAO.findByNamedQuery(MessageLog.NQ_BY_CMP_TXID, params);
+			
+			if(msglogs==null || msglogs.size()<1){
+				params.clear();
+				params.put("opco_tx_id", tx_id);
+				msglogs = messagelogDAO.findByNamedQuery(MessageLog.NQ_BY_OPCO_TXID, params);
+			}
+			
+			if(msglogs!=null && msglogs.size()>0){
+				MessageLog messagelog = msglogs.get(0);
+				messagelog.setStatus(status.name());
+				messagelog = messagelogDAO.save(messagelog);
+				return true;
+			}else{
+				throw new Exception("No such record with cmp_tx_id / opco_tx_id = "+tx_id+" in message_log table");
+			}
+			
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
+			return false;
 		}
-		return true;
 	}
 	
 	

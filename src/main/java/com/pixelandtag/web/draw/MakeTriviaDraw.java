@@ -187,7 +187,7 @@ public class MakeTriviaDraw extends HttpServlet {
 				pstmt.close();
 				
 				if (!do_not_print_send_message)
-					out.println("Message <input type=\"text\" style=\"width: "+message_input_size+"px;\"  name=\"message\" values=\"\"> <input type=\"submit\" name=\"send_message\" value=\"Send Message\"><br/> ");
+					out.println("MessageEmail <input type=\"text\" style=\"width: "+message_input_size+"px;\"  name=\"message\" values=\"\"> <input type=\"submit\" name=\"send_message\" value=\"Send MessageEmail\"><br/> ");
 				
 				out.println("<table border=\"0\" cellpadding=\"10\">");
 				out.println("<tr><td>MSISDN</td></tr>");
@@ -395,7 +395,7 @@ public class MakeTriviaDraw extends HttpServlet {
 					pstmt.close();
 					
 					if (!do_not_print_send_message)
-						out.println("Message <input type=\"text\" style=\"width: "+message_input_size+"px;\" name=\"message\" values=\"\"> <input type=\"submit\" name=\"send_message\" value=\"Send Message\"><br/> ");
+						out.println("MessageEmail <input type=\"text\" style=\"width: "+message_input_size+"px;\" name=\"message\" values=\"\"> <input type=\"submit\" name=\"send_message\" value=\"Send MessageEmail\"><br/> ");
 					
 					pstmt = con.prepareStatement("INSERT INTO "+DB+".winners_sessions (user_id, `from`,`to`, name, timestamp) VALUES(?,?,?,?,NOW())");
 					pstmt.setInt(1,getUserID(req, con));

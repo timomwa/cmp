@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -7,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -16,7 +19,28 @@ import org.hibernate.annotations.Index;
 
 @Entity
 @Table(name = "message_log")
-public class MessageLog {
+@NamedQueries({
+	@NamedQuery(
+			name = MessageLog.NQ_BY_CMP_TXID,
+			query = "from MessageLog ml WHERE ml.cmp_tx_id=:cmp_tx_id"
+	),
+	@NamedQuery(
+			name = MessageLog.NQ_BY_OPCO_TXID,
+			query = "from MessageLog ml WHERE ml.opco_tx_id=:opco_tx_id"
+	)
+})
+public class MessageLog implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5783583112893932358L;
+
+
+	public static final String NQ_BY_CMP_TXID = "messagelog.getby_cmp_txid";
+	
+	public static final String NQ_BY_OPCO_TXID = "messagelog.getby_opco_txid";
+
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,7 +56,7 @@ public class MessageLog {
 	private String opco_tx_id;
 		
 	@Index(name="mlcmp_tx_id")
-	@Column(name="cmp_tx_id", unique=true)
+	@Column(name="cmp_tx_id", unique=true, nullable=false)
 	private String cmp_tx_id;
 	
 	@Column(name="mo_sms")

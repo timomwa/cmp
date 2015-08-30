@@ -34,9 +34,11 @@ import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.Message;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatLog;
@@ -49,6 +51,7 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
+import com.pixelandtag.model.MessageEmail;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
@@ -62,19 +65,14 @@ import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
 
 	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
-	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
-	@Resource
-	private UserTransaction utx;
-
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
 	
@@ -86,7 +84,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	@EJB
-	SubscriptionBeanI subscriptionBean;
+	private SubscriptionBeanI subscriptionBean;
+	
+	@EJB
+	private MessageEJBI messageEJB;
 	
 	
 	@EJB
@@ -106,10 +107,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		final String MSISDN = ro.getMsisdn();
 		
-		Person person = getPerson(MSISDN);
+		Person person = getPerson(MSISDN,ro.getOpco());
 		
 		if(person==null)
-			person = register(MSISDN);
+			person = register(MSISDN,ro.getOpco());
 		
 		PersonDatingProfile profile = getProfile(person);
 		
@@ -575,37 +576,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 	@Override
 	public String getMessage(String key, int language_id) throws DatingServiceException{
-		if(language_id<=0)
-			language_id = 1;
-		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
 		
-		try {
-			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? LIMIT 1";
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, language_id);
-			qry.setParameter(2, key);
-
-			Object obj = qry.getSingleResult();
-			if (obj!=null) {
-				message = (String) obj;
-			}
-
-
-			logger.debug("looking for :[" + key + "], found [" + message + "]");
-			
-			return message;
-
-		}catch(javax.persistence.NoResultException ex){
-			logger.warn(ex.getMessage() + " no profile for subscriber "+message);
-			return null;
-		}catch (Exception e) {
-
-			logger.error(e.getMessage(), e);
-
-			throw new DatingServiceException(e.getMessage(),e);
-
-		}finally{
-		}
+		Message message = messageEJB.getMessage(key, Long.valueOf(language_id));
+		
+		return message.getMessage();
+		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -671,10 +646,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	@Override
-	public Person register(String msisdn) throws Exception {
+	public Person register(String msisdn, OperatorCountry opco) throws Exception {
 		Person person = new Person();
 		person.setMsisdn(msisdn);
-		person.setActive(false);		
+		person.setActive(false);
+		person.setOpco(opco);
 		return saveOrUpdate(person);
 	}
 
@@ -886,11 +862,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public Person getPerson(String msisdn) throws DatingServiceException {
+	public Person getPerson(String msisdn, OperatorCountry opco) throws DatingServiceException {
 		Person person = null;
 		try{
-			Query qry = em.createQuery("from Person p where p.msisdn=:msisdn");
+			Query qry = em.createQuery("from Person p where p.msisdn=:msisdn AND p.opco=:opco");
 			qry.setParameter("msisdn", msisdn);
+			qry.setParameter("opco", opco);
 			List<Person> ps = qry.getResultList();
 			if(ps.size()>0)
 				person = ps.get(0);
@@ -919,7 +896,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Collection<T> find(Class<T> entityClass,
@@ -945,12 +922,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
     /**
 	 * To statslog
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
 		boolean success = false;
 		try{
 		 
-			utx.begin();
 			Query qry = em.createNativeQuery(presql);
 			qry.setParameter(1, mo.getServiceid());
 			qry.setParameter(2, mo.getMsisdn());
@@ -959,15 +935,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setParameter(5, mo.getIsSubscription());
 			
 			int num =  qry.executeUpdate();
-			utx.commit();
 			success = num>0;
 		
 		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
+			
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
@@ -978,24 +949,17 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean  acknowledge(long message_log_id) throws Exception{
 		boolean success = false;
 		try{
 		 
-			utx.begin();
 			Query qry = em.createNativeQuery("UPDATE `"+CelcomImpl.database+"`.`messagelog` SET mo_ack=1 WHERE id=?");
 			qry.setParameter(1, message_log_id);
 			int num =  qry.executeUpdate();
-			utx.commit();
 			success = num>0;
 		
 		}catch(Exception e){
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(),e1);
-			} 
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
@@ -1153,7 +1117,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 			int language_id = 1;
 	
-			final Person person = getPerson(incomingsms.getMsisdn());
+			final Person person = getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
 			
 		
 			Billable billable = createBillable(incomingsms);

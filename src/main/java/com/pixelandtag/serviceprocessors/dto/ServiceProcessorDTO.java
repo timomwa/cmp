@@ -3,10 +3,6 @@ package com.pixelandtag.serviceprocessors.dto;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
 import com.pixelandtag.cmp.entities.ProcessorType;
 
 public class ServiceProcessorDTO implements Serializable{

@@ -10,6 +10,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.pixelandtag.entities.URLParams;
+import com.pixelandtag.sms.mo.MOProcessorThread;
+import com.pixelandtag.sms.producerthreads.BulkSMSProducer;
 
 public class SenderPlatform {
 
@@ -91,10 +93,21 @@ public class SenderPlatform {
 		    }
 		});
 		
+		SenderPlatform senderplatform = new SenderPlatform();
+		senderplatform.initialize();
+				
 		BasicConfigurator.configure();
 		
 		OutgoingQueueRouter outgoingqueuRouter = new OutgoingQueueRouter();
 		outgoingqueuRouter.start();
+		
+		MOProcessorThread moproc = new MOProcessorThread();
+		moproc.start();
+		
+		
+		
+		//BulkSMSProducer bp = new BulkSMSProducer(senderplatform.workers, senderplatform.throttle, senderplatform.queueSize, senderplatform.urlparams);
+		//bp.start();
 		
 	}
 	

@@ -22,9 +22,9 @@ public class LoginPage extends BaseActionBean {
     
 	
 	@DefaultHandler
-	public Resolution login() {
-		Query qry = cmp_dao.resource_bean.getEM().createQuery("from User");
-		List<User> users = qry.getResultList();
+	public Resolution login() throws Exception {
+		//Query qry = cmp_dao.resource_bean.listAll(User.class) .getEM().createQuery("from User");
+		List<User> users = (List<User>) cmp_dao.resource_bean.listAll(User.class);//qry.getResultList();
 		
 		for(User u : users){
 			System.out.println(u);

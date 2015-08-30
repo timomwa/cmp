@@ -22,7 +22,7 @@ public enum ERROR {
 	PCMSendFail, 
 	NegativeDN,
 	Success,
-	PCM200,//Message sent to queue successfully
+	PCM200,//MessageEmail sent to queue successfully
 	PCM301,//Invalid Registration Request
 	PCM302,//Invalid Stop Request
 	PCM303,//Invalid Keyword Request

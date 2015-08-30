@@ -106,7 +106,7 @@ public class Test2 {
         SOAPEnvelope envelope = soapPart.getEnvelope();
         SOAPBody body =         envelope.getBody();
 
-        //Populate the Message
+        //Populate the MessageEmail
        StreamSource preppedMsgSrc = new StreamSource( 
                 new FileInputStream("C:\\Users\\Paul\\Desktop\\MMS Pis\\holyGrail.xml"));
        soapPart.setContent(preppedMsgSrc);

@@ -23,7 +23,7 @@ public class Folder extends ModelBase {
     private String name;
 
     @OneToMany(mappedBy="folder")
-    private Set<Message> messages;
+    private Set<MessageEmail> messages;
 
     public Folder() {
     }
@@ -44,10 +44,10 @@ public class Folder extends ModelBase {
     public void setName(String name) {
         this.name = name;
     }
-    public Set<Message> getMessages() {
+    public Set<MessageEmail> getMessages() {
         return messages;
     }
-    public void setMessages(Set<Message> messages) {
+    public void setMessages(Set<MessageEmail> messages) {
         this.messages = messages;
     }
     @Override

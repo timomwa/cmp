@@ -17,6 +17,11 @@ import org.json.JSONObject;
 @Table(name = "sms_service_metadata")
 public class SMSServiceMetaData implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 13456345200752435L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;

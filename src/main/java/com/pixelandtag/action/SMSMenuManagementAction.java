@@ -50,7 +50,13 @@ public class SMSMenuManagementAction extends BaseActionBean {
 			//smsmenu = (SMSMenuLevels) getContext().getRequest().getSession()
 			//		.getAttribute("smsmenu");
 			if(!StringUtils.isEmpty(id)){
-				smsmenu = cmp_dao.find(SMSMenuLevels.class, new Long(id));
+				try {
+					smsmenu = cmp_dao.find(SMSMenuLevels.class, new Long(id));
+				} catch (NumberFormatException e) {
+					log.error(e.getMessage(),e);
+				} catch (Exception e) {
+					log.error(e.getMessage(),e);
+				}
 			}
 		} else {
 			log.info("Got an member from the session :");
@@ -65,9 +71,7 @@ public class SMSMenuManagementAction extends BaseActionBean {
 		
 		try{
 			
-			Query qry = cmp_dao.resource_bean.getEM().createQuery("from SMSServiceMetaData smd WHERE sms_service_id_fk=:sms_service_id_fk");
-			qry.setParameter("sms_service_id_fk", smsmenu.getServiceid());
-			List<SMSServiceMetaData> metaData = qry.getResultList();
+			List<SMSServiceMetaData> metaData = cmp_dao.resource_bean.getSMSServiceMetaData(smsmenu.getServiceid());
 			
 			String db_name = null;
 			String table = null;
@@ -106,17 +110,10 @@ public class SMSMenuManagementAction extends BaseActionBean {
 			log.info("sms : "+sms);
 			
 			
-			Query qry2 = cmp_dao.resource_bean.getEM().createNativeQuery("SELECT count(*) FROM `"+db_name+"`.`"+table+"` WHERE Category=:category");
-			qry2.setParameter("category", static_category_value);
-			Object obj = qry2.getSingleResult();
-			BigInteger size = (BigInteger) obj;
 			
-			qry2 = cmp_dao.resource_bean.getEM().createNativeQuery("SELECT id,Text,timeStamp FROM `"+db_name+"`.`"+table+"` WHERE Category=:category");
-			qry2.setParameter("category", static_category_value);
-			qry2.setFirstResult(getStart());
-			qry2.setMaxResults(getLimit());
-			List<Object[]> list = qry2.getResultList();
+			BigInteger size = cmp_dao.resource_bean.count(db_name,table,static_category_value);
 			
+			List<Object[]> list = cmp_dao.resource_bean.listContent(db_name,table,static_category_value,getStart(),getLimit());
 			
 			JSONArray data = new JSONArray();
 			resp.put("total", size.intValue());
@@ -179,9 +176,7 @@ public class SMSMenuManagementAction extends BaseActionBean {
 		
 		try{
 			
-			Query qry = cmp_dao.resource_bean.getEM().createQuery("from SMSServiceMetaData smd WHERE sms_service_id_fk=:sms_service_id_fk");
-			qry.setParameter("sms_service_id_fk", smsmenu.getServiceid());
-			List<SMSServiceMetaData> metaData = qry.getResultList();
+			List<SMSServiceMetaData> metaData = cmp_dao.resource_bean.getSMSServiceMetaData(smsmenu.getServiceid());
 			
 			String db_name = null;
 			String table = null;
@@ -219,13 +214,9 @@ public class SMSMenuManagementAction extends BaseActionBean {
 			log.info("smsmenu.getServiceid() : "+smsmenu.getServiceid());
 			log.info("sms : "+sms);
 			
+			Date timeStamp = cmp_dao.resource_bean.listContent(db_name,table,static_category_value,sms);
 			
-			Query qry2 = cmp_dao.resource_bean.getEM().createNativeQuery("SELECT timeStamp FROM `"+db_name+"`.`"+table+"` WHERE Text=:text AND Category=:category");
-			qry2.setParameter("text", sms);
-			qry2.setParameter("category", static_category_value);
-			
-			if(qry2.getResultList().size()>0){
-				Date timeStamp = (Date) qry2.getResultList().get(0);
+			if(timeStamp!=null){
 				String date = sdf.format(timeStamp);
 				jsob.put("success", false);
 				jsob.put("msg", "This content piece was uploaded on "+date+". Category: "+static_category_value);
@@ -254,9 +245,10 @@ public class SMSMenuManagementAction extends BaseActionBean {
 	@SuppressWarnings("unchecked")
 	@DefaultHandler
 	public Resolution listMenu() throws JSONException{
-		List<SMSMenuLevels> parentsl ;
-		Query qry = cmp_dao.resource_bean.getEM().createQuery("from SMSMenuLevels sm WHERE sm.serviceid=-1");
-		parentsl  = qry.getResultList();
+		
+		
+		List<SMSMenuLevels> parentsl = cmp_dao.resource_bean.getSMSMenuLevels();
+		
 		JSONObject resp = new JSONObject();
 		resp.put("size", parentsl.size());
 		for(SMSMenuLevels parent :parentsl){

@@ -171,5 +171,17 @@ public class PersonDatingProfile  implements Serializable  {
 	public void setLanguage_id(int language_id) {
 		this.language_id = language_id;
 	}
+
+	@Override
+	public String toString() {
+		return "PersonDatingProfile [id=" + id + ", username=" + username
+				+ ", person=" + person + ", preferred_gender="
+				+ preferred_gender + ", preferred_age=" + preferred_age
+				+ ", location=" + location + ", dob=" + dob + ", language_id="
+				+ language_id + ", gender=" + gender + ", profileComplete="
+				+ profileComplete + ", creationDate=" + creationDate + "]";
+	}
+	
+	
 	
 }

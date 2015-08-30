@@ -11,7 +11,6 @@ import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
-import com.pixelandtag.cmp.exceptions.TransactionIDGenException;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
@@ -22,6 +21,7 @@ public interface BaseEntityI {
 	public static final String BILLING_FAILED = "BILLING_FAILED";
 	public static SimpleDateFormat sdf =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
+	public <T> Collection<T> listAll(Class<T> entityClass) throws Exception;
 	public <T> T find(Class<T> entityClass, Long id) throws Exception;
 	public <T> Collection<T> find(Class<T> entityClass,	Map<String, Object> criteria, int start, int end)   throws Exception;
 	public <T> T saveOrUpdate(T t) throws Exception ;
@@ -29,7 +29,6 @@ public interface BaseEntityI {
 	public boolean toStatsLog(IncomingSMS incomingsms, String toStatsLog)  throws Exception ;
 	public boolean  acknowledge(long message_log_id) throws Exception;
 	public boolean sendMTSMPP(OutgoingSMS outgoingsms,Long smppid) throws Exception;
-	public EntityManager getEM();
 	public Billable charge(Billable billable) throws Exception;
 	public SMSService getSMSService(String cmd)  throws Exception;
 	public IncomingSMS logMO(IncomingSMS mo) ;

@@ -7,6 +7,7 @@ import java.util.Date;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
@@ -18,9 +19,9 @@ import com.pixelandtag.web.beans.RequestObject;
 
 public interface DatingServiceI extends BaseEntityI {
 	
-	public Person register(String msisdn) throws DatingServiceException, Exception;
+	public Person register(String msisdn, OperatorCountry opco) throws DatingServiceException, Exception;
 
-	public Person getPerson(String msisdn)  throws DatingServiceException;
+	public Person getPerson(String msisdn, OperatorCountry opco)  throws DatingServiceException;
 	
 	public String getMessage(String key, int language_id) throws DatingServiceException;
 

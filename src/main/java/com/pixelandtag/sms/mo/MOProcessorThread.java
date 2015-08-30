@@ -23,7 +23,6 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
-import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.NoServiceProcessorException;
 import com.pixelandtag.util.StopWatch;
 
@@ -34,7 +33,7 @@ import com.pixelandtag.util.StopWatch;
  * 
  */
 
-public class MOProcessorThread implements Runnable {
+public class MOProcessorThread extends Thread {
 	
 	private volatile boolean run = true;
 	private volatile StopWatch watch;
@@ -46,7 +45,7 @@ public class MOProcessorThread implements Runnable {
 	private final Logger logger = Logger.getLogger(MOProcessorThread.class);
 	private volatile int size;
 	public static volatile Map<Integer,ArrayList<ServiceProcessorI>> processor_pool = new ConcurrentHashMap<Integer,ArrayList<ServiceProcessorI>>();
-	private volatile Map<Integer, ServiceProcessorDTO> processorDtos;
+	//private volatile Map<Integer, ServiceProcessorDTO> processorDtos;
 	private DBPoolDataSource ds;
 	private Context context;
 	private QueueProcessorEJBI queueprocbean;
@@ -71,6 +70,8 @@ public class MOProcessorThread implements Runnable {
 	private void initProcessorCache() throws Exception{
 		
 		serviceProcessors = cmpejb.getServiceProcessors();
+		
+		System.out.println("\n\n\n\n\t\t serviceProcessors.size() :: "+serviceProcessors);
 		
 		ServiceProcessorI p = null;
 		
@@ -144,19 +145,20 @@ public class MOProcessorThread implements Runnable {
 
 		watch = new StopWatch();
 
-		processorDtos = new HashMap<Integer, ServiceProcessorDTO>();
+		//processorDtos = new HashMap<Integer, ServiceProcessorDTO>();
 
-		List<ServiceProcessorDTO> proc =  cmpejb.getServiceProcessors();
+		initEJBs();
+		initProcessorCache();
+		
+		/*List<ServiceProcessorDTO> proc =  cmpejb.getServiceProcessors();
 		
 		Iterator<ServiceProcessorDTO> it = proc.iterator();
 		
 		while(it.hasNext()) {
 			ServiceProcessorDTO dto = it.next();
 			processorDtos.put(dto.getId(), dto);
-		}
+		}*/
 		
-		initEJBs();
-		initProcessorCache();
 	}
 
 	

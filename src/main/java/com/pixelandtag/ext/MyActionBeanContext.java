@@ -8,7 +8,7 @@ import com.pixelandtag.cmp.entities.User;
 import com.pixelandtag.dao.FolderDaoImpl;
 import com.pixelandtag.model.Folder;
 import com.pixelandtag.model.FolderDao;
-import com.pixelandtag.model.Message;
+import com.pixelandtag.model.MessageEmail;
 
 import net.sourceforge.stripes.action.ActionBeanContext;
 /*import stripesbook.dao.FolderDao;
@@ -38,11 +38,11 @@ public class MyActionBeanContext  extends ActionBeanContext{
 	        }
 	        return folder;
 	    }
-	    public void setMessageCompose(Message message) {
+	    public void setMessageCompose(MessageEmail message) {
 	        setCurrent(MESSAGE, message);
 	    }
-	    public Message getMessageCompose() {
-	        return getCurrent(MESSAGE, new Message());
+	    public MessageEmail getMessageCompose() {
+	        return getCurrent(MESSAGE, new MessageEmail());
 	    }
 	    public void setUser(User user) {
 	        if (user != null) {

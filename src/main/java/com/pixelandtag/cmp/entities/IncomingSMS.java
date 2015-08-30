@@ -5,12 +5,20 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.Index;
+
+import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
 @Table(name = "incoming_sms")
@@ -39,6 +47,12 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 	private Boolean processed;
 	
 	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name = "opco_id_fk", nullable=false)
+	@Index(name="opcproflidx")
+	private OperatorCountry opco;
+	
+	
 	
 	@PreUpdate
 	@PrePersist
@@ -51,7 +65,8 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 			setTimestamp(new Date());
 		if(getIsSubscription()==null)
 			setIsSubscription(Boolean.FALSE);
-		
+		if(getBilling_status()==null)
+		   setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
 	}
 
 
@@ -72,6 +87,16 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 
 	public void setMo_ack(Boolean mo_ack) {
 		this.mo_ack = mo_ack;
+	}
+
+
+	public OperatorCountry getOpco() {
+		return opco;
+	}
+
+
+	public void setOpco(OperatorCountry opco) {
+		this.opco = opco;
 	}
 
 
