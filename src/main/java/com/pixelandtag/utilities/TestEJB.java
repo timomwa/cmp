@@ -68,12 +68,16 @@ public class TestEJB {
 			 */
 			 
 			 OutgoingSMS mtsms = new OutgoingSMS();
-			 mtsms.setMsisdn("254770178979");//0770178979
-			 mtsms.setSms("Test sms from new platform reloaded");
-			 mtsms.setShortcode("32329");
-			 mtsms.setCmp_tx_id(String.valueOf(4654534354L));
 			 
-			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-7");
+			 mtsms.setSms("Hello Tim, welcome to the pixelAndTag cross-platform SMS Gateway!");
+			 mtsms.setShortcode("32329");
+			 mtsms.setCmp_tx_id(String.valueOf(4654534354L));//Random val
+			 
+			 
+			 mtsms.setMsisdn("254735594326");//0770178979////254734606096//0772079509
+			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-3");
+			 
+			 
 			 
 			 mtsms.setOpcosenderprofile(opcosenderprofile);
 			

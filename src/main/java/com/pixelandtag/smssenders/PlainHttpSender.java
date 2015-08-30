@@ -231,12 +231,19 @@ public class PlainHttpSender extends GenericSender {
 				if(key.trim().toLowerCase().startsWith(HTTP_REST_PATH_PARAM_PREFIX)){
 					String param_name = key.split(HTTP_REST_PATH_PARAM_PREFIX)[1];
 					try {
-						url = url.replaceAll("\\$\\{"+param_name+"\\}", URLEncoder.encode(getValueFromqparams(qparams,param_name),"UTF-8"));
+						String basicparam = getValueFromqparams(qparams,param_name);
+						if(basicparam!=null)
+							url = url.replaceAll("\\$\\{"+param_name+"\\}", URLEncoder.encode(basicparam,"UTF-8"));
+						url = url.replaceAll("\\$\\{"+param_name+"\\}", config.getValue().getValue());
 					} catch (UnsupportedEncodingException e) {
 						logger.error(e.getMessage(),e);
 						throw new MessageSenderException("Could not encode path param",e);
 					}
 				}
+			}
+			
+			for(NameValuePair valuep : qparams){
+				url = url.replaceAll("\\$\\{"+valuep.getName()+"\\}", valuep.getValue());
 			}
 		}
 		

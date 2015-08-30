@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -42,8 +43,9 @@ public class GenericMessage implements Serializable{
 	@Column(name="msisdn")
 	private String msisdn;
 	
-	@Index(name="timestamp")
+	@Index(name="timestampidx")
 	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="timestamp")
 	private Date timestamp;
 	
 	@Index(name="osmopco_tx_id")
@@ -51,7 +53,7 @@ public class GenericMessage implements Serializable{
 	private String opco_tx_id;
 		
 	@Index(name="osmcmp_tx_id")
-	@Column(name="cmp_tx_id")
+	@Column(name="cmp_tx_id", unique=true)
 	private String cmp_tx_id;	
 
 	@Column(name="sms",length=1000)
@@ -83,6 +85,7 @@ public class GenericMessage implements Serializable{
 	@Column(name="isSubscription", nullable=false)
 	private Boolean isSubscription;
 	
+	@PreUpdate
 	@PrePersist
 	public void onCreate(){
 		if(isSubscription==null)
@@ -230,6 +233,20 @@ public class GenericMessage implements Serializable{
 
 	public void setIsSubscription(Boolean isSubscription) {
 		this.isSubscription = isSubscription;
+	}
+
+
+	@Override
+	public String toString() {
+		return "GenericMessage [id=" + id + ", shortcode=" + shortcode
+				+ ", msisdn=" + msisdn + ", timestamp=" + timestamp
+				+ ", opco_tx_id=" + opco_tx_id + ", cmp_tx_id=" + cmp_tx_id
+				+ ", sms=" + sms + ", billing_status=" + billing_status
+				+ ", price=" + price + ", serviceid=" + serviceid + ", split="
+				+ split + ", event_type=" + event_type
+				+ ", price_point_keyword=" + price_point_keyword
+				+ ", moprocessor=" + moprocessor + ", isSubscription="
+				+ isSubscription + "]";
 	}
 	
 }

@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.IPAddressWhitelist;
@@ -86,7 +86,7 @@ public class BulkSMSUtilEJB implements BulkSMSUtilBeanI {
 			
 			for(Object[] o : obj){
 				Long count = (Long)o[0];
-				MTStatus status = (MTStatus)o[1];
+				MessageStatus status = (MessageStatus)o[1];
 				Date scheduletime = (Date)o[2];
 				String timezone = (String)o[3];
 				Long text_id = (Long)o[4];
@@ -133,10 +133,10 @@ public class BulkSMSUtilEJB implements BulkSMSUtilBeanI {
 	
 	
 	/* (non-Javadoc)
-	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#getCurrentOutgoingQueue(com.pixelandtag.bulksms.BulkSMSPlan, com.pixelandtag.api.MTStatus)
+	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#getCurrentOutgoingQueue(com.pixelandtag.bulksms.BulkSMSPlan, com.pixelandtag.api.MessageStatus)
 	 */
 	@Override
-	public BigInteger getCurrentOutgoingQueue(BulkSMSPlan plan,MTStatus status)  {
+	public BigInteger getCurrentOutgoingQueue(BulkSMSPlan plan,MessageStatus status)  {
 		BigInteger planBalance = null;
 		try{
 			Query query = em.createQuery("select coalesce(count(*),0) from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"

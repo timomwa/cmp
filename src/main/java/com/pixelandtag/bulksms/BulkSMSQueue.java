@@ -25,7 +25,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.entities.TimeUnit;
 
 @NamedQueries({
@@ -82,7 +82,7 @@ public class BulkSMSQueue implements Serializable{
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
 	@Index(name="logstsidx")
-	private MTStatus status;
+	private MessageStatus status;
 	
 	@Column(name = "timelogged")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -102,7 +102,7 @@ public class BulkSMSQueue implements Serializable{
 		if(timelogged==null)
 			timelogged = new Date();
 		if(status==null)
-			status = MTStatus.RECEIVED;
+			status = MessageStatus.RECEIVED;
 		if(validity==null){
 			validity = 365;
 			timeunit = TimeUnit.DAY;
@@ -154,11 +154,11 @@ public class BulkSMSQueue implements Serializable{
 		this.priority = priority;
 	}
 
-	public MTStatus getStatus() {
+	public MessageStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(MTStatus status) {
+	public void setStatus(MessageStatus status) {
 		this.status = status;
 	}
 

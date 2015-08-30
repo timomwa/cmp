@@ -10,7 +10,7 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
@@ -95,11 +95,11 @@ public class SenderThreadWorker implements Runnable{
 						
 						SenderResp response = sender.sendSMS(sms);
 						
-						MTStatus mtstatus;
+						MessageStatus mtstatus;
 						
 						if(response.getSuccess()==Boolean.TRUE){
 							
-							mtstatus = MTStatus.SENT_SUCCESSFULLY;
+							mtstatus = MessageStatus.SENT_SUCCESSFULLY;
 							queueprocbean.deleteFromQueue(sms);
 						
 						}else{
@@ -111,9 +111,9 @@ public class SenderThreadWorker implements Runnable{
 							sms = queueprocbean.saveOrUpdate(sms);
 							
 							if(sms.getRe_tries().intValue()<=sms.getTtl())
-								mtstatus = MTStatus.FAILED_TEMPORARILY;
+								mtstatus = MessageStatus.FAILED_TEMPORARILY;
 							else
-								mtstatus = MTStatus.FAILED_PERMANENTLY;
+								mtstatus = MessageStatus.FAILED_PERMANENTLY;
 						}
 						
 						queueprocbean.updateMessageLog(sms.getCmp_tx_id(), mtstatus);

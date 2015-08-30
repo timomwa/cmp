@@ -18,7 +18,7 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
 import com.pixelandtag.cmp.dao.core.OutgoingSMSDAOI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -49,10 +49,10 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	private IncomingSMSDAOI incomingsmsDAO;
 	
 	@Override
-	public boolean updateMessageLog(String cmp_tx_id, MTStatus status)  throws Exception{
+	public boolean updateMessageLog(String cmp_tx_id, MessageStatus status)  throws Exception{
 		
 		try{
-			throw new Exception("com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBImpl.updateMessageLog(Long, MTStatus) "
+			throw new Exception("com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBImpl.updateMessageLog(Long, MessageStatus) "
 					+ "has not been implemented, but we're not going to cause for this. Implement this later");
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);

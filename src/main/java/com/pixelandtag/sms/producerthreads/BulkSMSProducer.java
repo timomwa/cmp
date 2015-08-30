@@ -17,7 +17,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.bulksms.BulkSMSText;
@@ -318,7 +318,7 @@ public class BulkSMSProducer extends Thread {
 			try {
 				logger.info("Returned to db: "+ sms.toString());
 				BulkSMSQueue q = sms.getBulktext();
-				q.setStatus(MTStatus.FAILED_TEMPORARILY);
+				q.setStatus(MessageStatus.FAILED_TEMPORARILY);
 				cmpbean.saveOrUpdate(q);
 			} catch (Exception e) {
 				log(e);
@@ -485,7 +485,7 @@ public class BulkSMSProducer extends Thread {
 					 String cpTxId = cmpbean.generateNextTxId();
 					 bulktext.setCptxId(cpTxId.toString());
 					 bulktext.setRetrycount(bulktext.getRetrycount().intValue() + 1);
-					 bulktext.setStatus(MTStatus.IN_QUEUE);
+					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext =  cmpbean.saveOrUpdate(bulktext);//Mar it as is in queue.
 					 
 					
@@ -500,10 +500,10 @@ public class BulkSMSProducer extends Thread {
 					 if(plan.getProtocol().equalsIgnoreCase("smpp")){
 						 boolean success  = cmpbean.sendMTSMPP(plan.getProcessor_id(),bulktext.getMsisdn(),text.getSenderid(),text.getContent(),"",bulktext.getPriority());
 						 if(success){
-							 bulktext.setStatus(MTStatus.SENDING);
+							 bulktext.setStatus(MessageStatus.SENDING);
 						 }else{
-							 MTStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0) ? 
-									 MTStatus.FAILED_TEMPORARILY : MTStatus.FAILED_PERMANENTLY;
+							 MessageStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0) ? 
+									 MessageStatus.FAILED_TEMPORARILY : MessageStatus.FAILED_PERMANENTLY;
 							 bulktext.setStatus(status);
 						 }
 					 }
@@ -527,22 +527,22 @@ public class BulkSMSProducer extends Thread {
 								}else{
 									genericMT.offer(param);
 								}
-								bulktext.setStatus(MTStatus.SENDING);
+								bulktext.setStatus(MessageStatus.SENDING);
 								
 						 	}catch(Exception e){
 								
 								log(e);
 								
-								MTStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
-										 ? MTStatus.FAILED_TEMPORARILY : MTStatus.FAILED_PERMANENTLY;
+								MessageStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
+										 ? MessageStatus.FAILED_TEMPORARILY : MessageStatus.FAILED_PERMANENTLY;
 								 bulktext.setStatus(status);
 							}
 					 }
 					 
 				}catch(Exception exp){
 					log(exp);
-					 MTStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
-							 ? MTStatus.FAILED_TEMPORARILY : MTStatus.FAILED_PERMANENTLY;
+					 MessageStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
+							 ? MessageStatus.FAILED_TEMPORARILY : MessageStatus.FAILED_PERMANENTLY;
 					 bulktext.setStatus(status);
 				}finally{
 					bulktext =  cmpbean.saveOrUpdate(bulktext);

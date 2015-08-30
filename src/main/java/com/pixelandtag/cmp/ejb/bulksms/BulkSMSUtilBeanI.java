@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.IPAddressWhitelist;
@@ -15,10 +15,10 @@ public interface BulkSMSUtilBeanI {
 	/**
 	 * 
 	 * @param plan - com.pixelandtag.bulksms.BulkSMSPlan
-	 * @param status - com.pixelandtag.api.MTStatus
+	 * @param status - com.pixelandtag.api.MessageStatus
 	 * @return - java.math.BigInteger
 	 */
-	public BigInteger getCurrentOutgoingQueue(BulkSMSPlan plan,MTStatus status);
+	public BigInteger getCurrentOutgoingQueue(BulkSMSPlan plan,MessageStatus status);
 
 	/**
 	 * 

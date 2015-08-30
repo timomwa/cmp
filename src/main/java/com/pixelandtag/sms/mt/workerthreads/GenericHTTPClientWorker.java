@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.ERROR;
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.entities.MTsms;
@@ -109,9 +109,9 @@ public class GenericHTTPClientWorker implements Runnable{
 								final int RESP_CODE_  = call(httpparams);//send SMS the way it is
 								
 								if(RESP_CODE_==HttpStatus.SC_OK){
-									bulksms.setStatus(MTStatus.SENT_SUCCESSFULLY);
+									bulksms.setStatus(MessageStatus.SENT_SUCCESSFULLY);
 								}else{
-									bulksms.setStatus(MTStatus.FAILED_TEMPORARILY);
+									bulksms.setStatus(MessageStatus.FAILED_TEMPORARILY);
 								}
 								}catch(Exception exp){
 									logger.error(exp.getMessage(),exp);

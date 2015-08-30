@@ -1,260 +1,165 @@
 package com.pixelandtag.mo.sms;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.EJB;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
-import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
-import com.pixelandtag.connections.ConnectionPool;
-import com.pixelandtag.connections.DriverUtilities;
-import com.pixelandtag.entities.MOSms;
-import com.pixelandtag.util.StopWatch;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
+import com.pixelandtag.smssenders.Receiver;
 
 /**
- * 
- * @author Timothy Mwangi Gikonyo
- * @since 2nd February 2012
- * 
- * Servlet receives MO messages from Celcom and logs to the database..
- * /moreceiver
- *
+ * Servlet implementation class MOReceiver
  */
 public class MOReceiver extends HttpServlet {
 	
-	private Logger logger = Logger.getLogger(MOReceiver.class);
-	private StopWatch watch;
-	private DataSource ds;
-	private Context initContext;
-	//private ConnectionPool connectionPool;
-	private CelcomHTTPAPI celcomAPI;
+	private Logger logger = Logger.getLogger(getClass());
 	
-	private byte[] OK_200 =  "200 OK".getBytes();
-	private final String SERVER_TIMEZONE = "-05:00";
-	private final String CLIENT_TIMEZONE = "+03:00";
-
-	@EJB
-	private CMPResourceBeanRemote cmpBean;
+	//private Map<String, Receiver> receiverCache = new HashMap<String, Receiver>();
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
 	
-	
-	//private final int INITIAL_CONNECTIONS = 10;
-	//private final int MAX_CONNECTIONS = 50;
-
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 14512222156L;
+	private static final long serialVersionUID = -2356001039800380250L;
 
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		doPost(req, resp);
+	/**
+     * @see HttpServlet#HttpServlet()
+     */
+    public MOReceiver() {
+        super();
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request, response);
 	}
 
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	@SuppressWarnings("unchecked")
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
 		
-		
-		ServletOutputStream sOutStream = null;
-		
-		
-		Enumeration enums = req.getParameterNames();
+		Enumeration<String> enums = request.getParameterNames();
 		
 		String paramName = "";
 		String value  = "";
+		
+		Map<String, String> incomingparams = new HashMap<String,String>();
+		
+		String ip_addr = request.getRemoteAddr();
+		
+		
+		Enumeration<String> headernames = request.getHeaderNames();
+		String headerstr = "\n";
+		 while (headernames.hasMoreElements()) { 
+			 String headerName = (String) headernames.nextElement();  
+		     String headerValue = request.getHeader(headerName);  
+		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
+		     incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
+		 }
+		
+		 
+		 logger.info(headerstr+"\n\n");
+		
+		
+		incomingparams.put(Receiver.IP_ADDRESS, ip_addr);
+		
+		String params = "\n\n\t:: REQ "+ip_addr;
 		
 		while(enums.hasMoreElements()){
 			
 			paramName = (String) enums.nextElement();
 			
-			value = req.getParameter(paramName);
+			value = request.getParameter(paramName);
 			
-			String ip_addr = req.getRemoteAddr();
-			
-			logger.error("\t:::::: SMS REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
-			
-			logger.error("NOT AN ERROR. CELCOM_MO_RECEIVER!: paramName: "+paramName+ " value: "+value);
+			incomingparams.put(paramName, value);
+						
+			params += "\n\t:: "+   paramName +" : "+value;
 			
 		}
 		
+		logger.info(params+"\n\n");
 		
-		watch.start();
+		final String body = getBody(request);
 		
 		
-		try{
-			
-			sOutStream = resp.getOutputStream();
-			
-			if(req.getParameter("test")!=null){
-				sOutStream.write(("OK : Received : "+req.getParameter("test")).getBytes());
-				sOutStream.close();
-				return;
-			}
-			
-			final MOSms moMessage = new MOSms(req,cmpBean.generateNextTxId());
-			
-			if(ds==null){
-				init();
-			}
-			if(ds!=null){
-				Connection conn = null;
-				try{
-					conn = ds.getConnection();//try retrieve a connection
-					conn.setAutoCommit(true);//see if it's healthy. It would throw exception
-				}catch(Exception e){
-					logger.warn("Could not get a connection from datasource. We re-initialize DS");
-					init();
-				}finally{
-					try{
-						if(conn!=null)
-							conn.close();
-					}catch(Exception e){
-					}
-				}
-			}
-			
-			//TODO - Do away with this receiver or modify it to use new
-			
-		//	processorEJB.logMO(moMessage);
-			
-			celcomAPI.setFr_tz(SERVER_TIMEZONE);
-			celcomAPI.setTo_tz(CLIENT_TIMEZONE);
-			
-			logger.debug(moMessage.toString());
-			
-			watch.stop();
-			
-			logger.info(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to log the MO msg");
-		      
-			watch.reset();
-			
-			sOutStream.write(OK_200);
-			
-		}catch(Exception e){
-			
+		if(!body.isEmpty())
+			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
+		
+		try {
+			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
+			logger.info("incomingsms = "+incomingsms);
+			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
+		} catch (ConfigurationException e) {
 			logger.error(e.getMessage(),e);
-			sOutStream.write("{\"status\": \"MO Request not understood\"}".getBytes());
-		}finally{
-			
-			try{
-			
-				resp.sendError(HttpServletResponse.SC_OK);
-				
-				celcomAPI.closeConnectionIfNecessary();
-				
-				sOutStream.close();
-				
-			}catch(Exception e){
-				sOutStream.write("{\"status\": \"MO Request not understood\"}".getBytes());
-			}
-			
 		}
+		
 		
 		
 	}
-
-	@Override
-	public void destroy() {
-		
-		logger.info("CELCOM_MO_RECEIVER: in Destroy");
-		
-		try {
-			
-			if(initContext!=null)
-				initContext.close();
-		
-		} catch (NamingException e) {
-			logger.error(e.getMessage(),e);
-		}
 	
-	}
+	
+	
+	public String getBody(HttpServletRequest request) throws IOException {
 
-	@Override
-	public void init() throws ServletException {
-		
-		watch = new StopWatch();
-		
-		watch.start();
-		
-		
-		try {
-			
-			initContext = new InitialContext();
-			
-			ds = (DataSource)initContext.lookup("java:/cmpDS");
-			
-			try {
-//				//celcomAPI = new CelcomImpl("jdbc:mysql://db/pixeland_content360?user=pixeland_content&password=D13@pixel&Tag","tasdf");
-				celcomAPI = new CelcomImpl(ds);
-			} catch (Exception e) {
-				logger.error(e.getMessage(),e);
-			}
-			
-		} catch (NamingException e) {
-			
-			logger.error(e.getMessage(),e);
-		
-		}
-		
-		/*int vendor = DriverUtilities.MYSQL;
-	    String driver = DriverUtilities.getDriver(vendor);
-	    String host = "db";
-	    String dbName = CelcomHTTPAPI.DATABASE;
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = "root";
-	    String password = "";
-	    
-	    logger.info(url);
+	    String body = null;
+	    StringBuilder stringBuilder = new StringBuilder();
+	    BufferedReader bufferedReader = null;
+	    InputStream inputStream = null;
 	    
 	    try {
+	        inputStream = request.getInputStream();
+	        if (inputStream != null) {
+	            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+	            char[] charBuffer = new char[128];
+	            int bytesRead = -1;
+	            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+	                stringBuilder.append(charBuffer, 0, bytesRead);
+	            }
+	        } else {
+	            stringBuilder.append("");
+	        }
+	    } catch (IOException ex) {
+	        logger.error(ex.getMessage(),ex);
+	    } finally {
 	    	
-	      connectionPool =
-	        new ConnectionPool(driver, url, username, password,INITIAL_CONNECTIONS,MAX_CONNECTIONS,true);
-	      
-	      watch.stop();
-	      
-	      logger.info(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to create the connection pool");
-	      
-	      watch.reset();
-	      
-	      
-	      celcomAPI = new CelcomImpl(connectionPool);
-	      
-	    
-	    } catch(SQLException sqle) {
-	     
-	    	logger.error("Error making pool: " + sqle);
-	      
-	    	connectionPool = null;
-	    
-	    }*/
+	        if (bufferedReader != null) {
+	            try {
+	                bufferedReader.close();
+	            } catch (IOException ex) {
+	            	 logger.error(ex.getMessage(),ex);
+	            }
+	        }
+	        
+	        try {
+	        	inputStream.close();
+            } catch (IOException ex) {
+            }
+	    }
 
-	    
+	    body = stringBuilder.toString();
+	    return body;
 	}
-	
-	
-
-	
 
 }

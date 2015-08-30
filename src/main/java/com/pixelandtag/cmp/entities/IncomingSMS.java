@@ -1,12 +1,14 @@
 package com.pixelandtag.cmp.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -38,13 +40,17 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 	
 	
 	
-	
+	@PreUpdate
 	@PrePersist
 	public void onCreate(){
 		if(processed==null)
 			processed = Boolean.FALSE;
 		if(mo_ack==null)
 			mo_ack = Boolean.FALSE;
+		if(getTimestamp()==null)
+			setTimestamp(new Date());
+		if(getIsSubscription()==null)
+			setIsSubscription(Boolean.FALSE);
 		
 	}
 

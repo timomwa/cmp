@@ -81,7 +81,7 @@ public class OutgoingQueueRouter extends Thread {
 					+" Operator name : "+opcoprofile.getOpco().getOperator().getName()+", country="
 					+opcoprofile.getOpco().getCountry().getName()+"\n");
 			int success = 0;
-			for(int i = 0; i<threads; i++){
+			for(int i = 0; i<threads.intValue(); i++){
 				try{
 					SenderThreadWorker worker = new SenderThreadWorker(outqueue, opcoprofile);
 					Thread t1 = new Thread(worker);
@@ -128,7 +128,7 @@ public class OutgoingQueueRouter extends Thread {
 				}
 				
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(1000);//TODO extenalize this sleep value
 				} catch (InterruptedException e) {
 					logger.error(e);
 				}
@@ -139,6 +139,9 @@ public class OutgoingQueueRouter extends Thread {
 			logger.error("MEM_USAGE: "+ getMemoryUsage()
 			        + " >> " 
 					+ e.getMessage(), e);
+			System.out.println("We ran out of memory, so we don't continue running");
+			logger.error("We ran out of memory, so we don't continue running");
+			setRun(false);
 
 		} finally {
 

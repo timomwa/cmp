@@ -35,7 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
@@ -186,7 +186,7 @@ public class BulkSMSEJB implements BulkSMSI {
 			throw new PlanBalanceException("This plan doesn't have enough credits. Current plan balance is "+planBalance.intValue()+", this batch: "+thisBatch.intValue());
 		}
 		
-		BigInteger currentoutgoingsize = util_ejb.getCurrentOutgoingQueue(plan,MTStatus.RECEIVED);
+		BigInteger currentoutgoingsize = util_ejb.getCurrentOutgoingQueue(plan,MessageStatus.RECEIVED);
 		
 		if(plan.getMaxoutqueue().compareTo(currentoutgoingsize)<=0)//queue full
 			throw new QueueFullException("Queue is full, please try again.");
@@ -209,7 +209,7 @@ public class BulkSMSEJB implements BulkSMSI {
 				BulkSMSQueue queue = new BulkSMSQueue();
 				queue.setMsisdn((String) msisdnlist.get(x));
 				queue.setPriority(priority);
-				queue.setStatus(MTStatus.RECEIVED);
+				queue.setStatus(MessageStatus.RECEIVED);
 				queue.setText(textb);
 				queue = em.merge(queue);
 			}

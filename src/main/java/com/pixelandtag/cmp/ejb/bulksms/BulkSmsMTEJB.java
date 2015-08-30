@@ -26,7 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
@@ -71,9 +71,9 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 		
 		try{
 			Query qry = em.createNamedQuery(BulkSMSQueue.NAMED_QUERY);
-			Collection<MTStatus> names = new ArrayList<MTStatus>();
-			names.add(MTStatus.RECEIVED);
-			names.add(MTStatus.FAILED_TEMPORARILY);
+			Collection<MessageStatus> names = new ArrayList<MessageStatus>();
+			names.add(MessageStatus.RECEIVED);
+			names.add(MessageStatus.FAILED_TEMPORARILY);
 			qry.setParameter("statuses", names);
 			qry.setParameter("sheduledate", new Date());
 			unprocessed_queue = qry.getResultList();
@@ -233,7 +233,7 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 		}
 
 		BigInteger currentoutgoingsize = util_ejb.getCurrentOutgoingQueue(plan,
-				MTStatus.RECEIVED);
+				MessageStatus.RECEIVED);
 
 		if (plan.getMaxoutqueue().compareTo(currentoutgoingsize) <= 0)// queue
 																		// full
@@ -260,7 +260,7 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 			BulkSMSQueue queue = new BulkSMSQueue();
 			queue.setMsisdn(msisdn);
 			queue.setPriority(priority);
-			queue.setStatus(MTStatus.RECEIVED);
+			queue.setStatus(MessageStatus.RECEIVED);
 			queue.setText(textb);
 			queue.setBulktxId(cptxid);
 			queue = em.merge(queue);

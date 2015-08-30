@@ -18,12 +18,16 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
 import com.pixelandtag.cmp.dao.core.MessageExtraParamsDAOI;
+import com.pixelandtag.cmp.dao.core.MessageLogDAOI;
 import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.MessageExtraParams;
+import com.pixelandtag.cmp.entities.MessageLog;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
@@ -51,6 +55,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	private IncomingSMSDAOI incomingSMSDAO;
 	
 	@Inject
+	private MessageLogDAOI messagelogDAO;
+	
+	@Inject
 	private MessageExtraParamsDAOI extraparamsDAO;
 	
 	private List<String> mandatory = new ArrayList<String>();
@@ -62,6 +69,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		mandatory.add(Receiver.HTTP_RECEIVER_SMS_PARAM_NAME);
 		mandatory.add(Receiver.HTTP_RECEIVER_HAS_PAYLOAD);
 		mandatory.add(Receiver.HTTP_RECEIVER_EXPECTED_CONTENTTYPE);
+		mandatory.add(Receiver.MO_MEDIUM_SOURCE);
 	}
 	
 	@EJB
@@ -97,9 +105,10 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		ProfileConfigs msisdn_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_MSISDN_PARAM_NAME);
 		ProfileConfigs shortcode_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_SHORTCODE_PARAM_NAME);
 		ProfileConfigs sms_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_SMS_PARAM_NAME);
-		ProfileConfigs txid_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_TX_ID_PARAM_NAME);
+		ProfileConfigs txid_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_OPCO_TX_ID_PARAM_NAME);
 		ProfileConfigs receiver_has_payload = profileconfigs.get(Receiver.HTTP_RECEIVER_HAS_PAYLOAD);
 		ProfileConfigs expectedcontenttype = profileconfigs.get(Receiver.HTTP_RECEIVER_EXPECTED_CONTENTTYPE);
+		ProfileConfigs mo_medium_source = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
 		
 		
 		for(String param : mandatory)
@@ -185,9 +194,25 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 		incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
 		
+		incomingsms.setIsSubscription(Boolean.FALSE);
+		
+		
 		try {
 			
 			incomingsms = incomingSMSDAO.save(incomingsms);
+			
+			
+			MessageLog messagelog = new MessageLog();
+			messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
+			messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());
+			messagelog.setMo_processor_id_fk(incomingsms.getMoprocessor().getId());
+			messagelog.setMo_sms(incomingsms.getSms());
+			messagelog.setMo_timestamp(incomingsms.getTimestamp());
+			messagelog.setShortcode(incomingsms.getShortcode());
+			messagelog.setSource(mo_medium_source.getValue());
+			messagelog.setStatus(MessageStatus.RECEIVED.name());
+			
+			messagelog = messagelogDAO.save(messagelog);
 			
 			
 			for(Map.Entry<String,String> incoming : incomingparams.entrySet()){
@@ -208,6 +233,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 				
 				
 			}
+			
+			
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -232,28 +259,53 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop WHERE sms.mo_processorFK=mop.id "
-				+ " AND mop.shortcode=:shortcode AND mop.enabled=1 AND sms.enabled=1 AND sms.CMD=:keyword");
+				+ "FROM SMSService sms, MOProcessor mop WHERE sms.moprocessor=mop "
+				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword");
 		
 		qry.setParameter("shortcode", incomingsms.getShortcode());
 		qry.setParameter("keyword", keyword);
 		
 		List<Object[]> rows = qry.getResultList();
 		
+		
+		if(rows.size()<1){
+			qry = em.createQuery("SELECT "
+					+ "mop.id, "//0
+					+ "sms.price, "//1
+					+ "sms.id, "//2
+					+ "sms.split_mt, "//3
+					+ "sms.event_type, "//4
+					+ "sms.price_point_keyword  "//5
+				+ "FROM SMSService sms, MOProcessor mop WHERE sms.moprocessor=mop "
+				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword");
+		
+			qry.setParameter("shortcode", incomingsms.getShortcode());
+			qry.setParameter("keyword", "DEFAULT");
+			
+			keyword = "DEFAULT";
+			
+			rows = qry.getResultList();
+		}
+			
+		
 		for(Object[] row : rows){
+			
 			Long mo_processor_id = (Long) row[0];
-			BigDecimal price = (BigDecimal) row[1];
+			Double price = (Double) row[1];
 			Long sms_ervice_id = (Long) row[2];
 			Boolean split_mt = (Boolean) row[3];
 			String event_type = (String) row[4];
 			String price_point_keyword = (String) row[5];
+						
+			MOProcessor proc = moprocDAO.findById(mo_processor_id);		
 			
-			incomingsms.setMoprocessor(moprocDAO.findById(mo_processor_id));
-			incomingsms.setPrice(price);
+			incomingsms.setMoprocessor(proc);
+			incomingsms.setPrice(BigDecimal.valueOf(price));
 			incomingsms.setServiceid(sms_ervice_id);
 			incomingsms.setSplit(split_mt);
 			incomingsms.setEvent_type(event_type);
 			incomingsms.setPrice_point_keyword(price_point_keyword);
+			
 		}
 		
 		return incomingsms;

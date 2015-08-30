@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.pixelandtag.api.MTStatus;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.bulksms.BulkSMSAccount;
 import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.cmp.ejb.bulksms.APIAuthenticationException;
@@ -96,7 +96,7 @@ public class BulkQueryEJB implements BulkQueryI {
 		BigInteger planBalance = util_ejb.getPlanBalance(plan);
 		String planstatus_str = util_ejb.getPlanQueueStatus(plan,telcoid,senderid,price); 
 		JSONObject planstatus = new JSONObject(planstatus_str);
-		BigInteger currentoutgoingsize = util_ejb.getCurrentOutgoingQueue(plan,MTStatus.RECEIVED);
+		BigInteger currentoutgoingsize = util_ejb.getCurrentOutgoingQueue(plan,MessageStatus.RECEIVED);
 			
 		planstatus.put("activationDate", plan.getDatePurchased());
 		planstatus.put("bundle_size", plan.getNumberOfSMS().intValue());

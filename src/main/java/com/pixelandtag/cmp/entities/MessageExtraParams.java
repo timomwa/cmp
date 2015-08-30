@@ -24,15 +24,15 @@ public class MessageExtraParams implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="transactionid", nullable=false, unique=true)
+	@Column(name="transactionid", nullable=false,length=200)
 	@Index(name="trxnididx")
 	private String transactionid;
 	
-	@Column(name="paramKey", nullable=false)
+	@Column(name="paramKey", nullable=false,length=1000)
 	@Index(name="trxnididx")
 	private String paramKey;
 		
-	@Column(name="paramValue", nullable=false)
+	@Column(name="paramValue", nullable=false,length=1000)
 	private String paramValue;
 
 	public Long getId() {

@@ -221,20 +221,6 @@
 		<servlet-name>USSDReceiver</servlet-name>
 		<url-pattern>/ussd</url-pattern>
 	</servlet-mapping>
-	
-	
-	<servlet>
-		<description>
-		</description>
-		<display-name>MOReceiver</display-name>
-		<servlet-name>MOReceiver</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.MOReceiver
-		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>MOReceiver</servlet-name>
-		<url-pattern>/sms</url-pattern>
-	</servlet-mapping>
 
 
 
@@ -359,12 +345,12 @@
 		<servlet-name>giant</servlet-name>
 		<url-pattern>/giant</url-pattern>
 	</servlet-mapping>
+	
+	
 	<servlet-mapping>
-		<servlet-name>MOreceiver2</servlet-name>
-		<url-pattern>/MOreceiver2</url-pattern>
+		<servlet-name>MOreceiver</servlet-name>
+		<url-pattern>/sms</url-pattern>
 	</servlet-mapping>
-	
-	
 	
 	
 	<servlet>
@@ -377,9 +363,9 @@
 	<servlet>
 		<description>
 		</description>
-		<display-name>MOreceiver2</display-name>
-		<servlet-name>MOreceiver2</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.MOreceiver2</servlet-class>
+		<display-name>MOreceiver</display-name>
+		<servlet-name>MOreceiver</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.MOReceiver</servlet-class>
 	</servlet>
 	
 	
