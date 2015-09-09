@@ -335,7 +335,11 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	}
 	
 
-
+	@Override
+	public MOProcessor getMOProcessor(String shortcode){
+		return moprocDAO.findBy("shortcode", shortcode);
+	}
+	
 	/**
 	 * 
 	 * @param xml

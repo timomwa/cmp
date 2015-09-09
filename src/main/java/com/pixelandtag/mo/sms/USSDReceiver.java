@@ -30,6 +30,7 @@ import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
@@ -51,7 +52,7 @@ import com.pixelandtag.web.beans.RequestObject;
  */
 public class USSDReceiver extends HttpServlet {
 	
-	//private static final transient Logger logger = Logger.getLogger(USSDReceiver.class);
+	private  Logger logger = Logger.getLogger(USSDReceiver.class);
 	private StopWatch watch;
 	private DataSource ds;
 	private Context initContext;
@@ -140,12 +141,14 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setShortcode(moMessage.getSMS_SourceAddr());
 				incomingsms.setProcessed(Boolean.TRUE);
 				incomingsms.setMo_ack(Boolean.TRUE);
-				incomingsms = processorEJB.populateProcessorDetails(incomingsms);
+				MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
+				incomingsms.setMoprocessor(processor);
 				messageID = datingBean.logMO(incomingsms).getId();
 				ro.setMessageId(messageID);
 				
 			}catch(Exception e){
-				e.printStackTrace();
+				logger.error(e.getMessage(),e);
+				response = "Problem occurred. Please try again later";
 			}
 			
 			
@@ -175,18 +178,21 @@ public class USSDReceiver extends HttpServlet {
 				ro.setMessageId(messageID);
 				
 			}catch(Exception e){
-				e.printStackTrace();
+				logger.error(e.getMessage(),e);
+				response = "Problem occurred. Please try again later";
 			}
 			
 			
 			pw.write(response);
 			
 		}catch(Exception e){
-			e.printStackTrace();
+			logger.error(e.getMessage(),e);
+			response = "Problem occurred. Please try again later";
 			try{
 				pw.close();
 			}catch(Exception ex){
-				e.printStackTrace();
+				logger.error(e.getMessage(),e);
+				response = "Problem occurred. Please try again later";
 			}
 			
 		}finally{
@@ -194,7 +200,8 @@ public class USSDReceiver extends HttpServlet {
 			try{
 				pw.close();
 			}catch(Exception e){
-				e.printStackTrace();
+				logger.error(e.getMessage(),e);
+				response = "Problem occurred. Please try again later";
 			}
 			
 		}
@@ -204,16 +211,13 @@ public class USSDReceiver extends HttpServlet {
 
 	@Override
 	public void destroy() {
-		
-		System.out.println("CELCOM_MO_RECEIVER: in Destroy");
-		
 		try {
 			
 			if(initContext!=null)
 				initContext.close();
 		
 		} catch (NamingException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(),e);
 		}
 	
 	}
