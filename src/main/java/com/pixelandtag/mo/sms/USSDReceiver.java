@@ -28,6 +28,7 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.ConnectionPool;
@@ -68,6 +69,9 @@ public class USSDReceiver extends HttpServlet {
 	
 	@EJB
 	private LocationBeanI locationBean;
+	
+	@EJB
+	private ProcessorResolverEJBI processorEJB;
 
 
 	/**
@@ -131,6 +135,12 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setCmp_tx_id(moMessage.getCmp_tx_id());
 				incomingsms.setEvent_type(moMessage.getEventType()!=null ? moMessage.getEventType().toString() : "" );
 				incomingsms.setIsSubscription(Boolean.FALSE);
+				incomingsms.setMediumType(MediumType.ussd);
+				incomingsms.setSms(moMessage.getSMS_Message_String());
+				incomingsms.setShortcode(moMessage.getSMS_SourceAddr());
+				incomingsms.setProcessed(Boolean.TRUE);
+				incomingsms.setMo_ack(Boolean.TRUE);
+				incomingsms = processorEJB.populateProcessorDetails(incomingsms);
 				messageID = datingBean.logMO(incomingsms).getId();
 				ro.setMessageId(messageID);
 				
@@ -162,7 +172,6 @@ public class USSDReceiver extends HttpServlet {
 			try{
 				
 				moMessage.setMt_Sent(response);
-				//datingBean.updateMO(response,messageID); TODO - re-do the updateMO message
 				ro.setMessageId(messageID);
 				
 			}catch(Exception e){
@@ -173,7 +182,6 @@ public class USSDReceiver extends HttpServlet {
 			pw.write(response);
 			
 		}catch(Exception e){
-			//pw.write("");
 			e.printStackTrace();
 			try{
 				pw.close();
@@ -187,7 +195,6 @@ public class USSDReceiver extends HttpServlet {
 				pw.close();
 			}catch(Exception e){
 				e.printStackTrace();
-				//sOutStream.write("{\"status\": \"MO Request not understood\"}".getBytes());
 			}
 			
 		}
@@ -226,8 +233,7 @@ public class USSDReceiver extends HttpServlet {
 			ds = (DataSource)initContext.lookup("java:/cmpDS");
 			
 			try {
-//				//celcomAPI = new CelcomImpl("jdbc:mysql://db/pixeland_content360?user=pixeland_content&password=D13@pixel&Tag","tasdf");
-			//	celcomAPI = new CelcomImpl(ds);
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -237,39 +243,6 @@ public class USSDReceiver extends HttpServlet {
 			e.printStackTrace();
 		
 		}
-		
-		/*int vendor = DriverUtilities.MYSQL;
-	    String driver = DriverUtilities.getDriver(vendor);
-	    String host = "db";
-	    String dbName = CelcomHTTPAPI.DATABASE;
-	    String url = DriverUtilities.makeURL(host, dbName, vendor);
-	    String username = "root";
-	    String password = "";
-	    
-	    System.out.println(url);
-	    
-	    try {
-	    	
-	      connectionPool =
-	        new ConnectionPool(driver, url, username, password,INITIAL_CONNECTIONS,MAX_CONNECTIONS,true);
-	      
-	      watch.stop();
-	      
-	      System.out.println(">< . >< . >< . >< . >< . it took "+(Double.parseDouble(watch.elapsedMillis()+"")/1000d) + " seconds to create the connection pool");
-	      
-	      watch.reset();
-	      
-	      
-	      celcomAPI = new CelcomImpl(connectionPool);
-	      
-	    
-	    } catch(SQLException sqle) {
-	     
-	    	logger.error("Error making pool: " + sqle);
-	      
-	    	connectionPool = null;
-	    
-	    }*/
 
 	    
 	}

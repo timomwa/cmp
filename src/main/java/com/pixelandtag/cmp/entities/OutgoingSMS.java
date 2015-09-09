@@ -25,6 +25,7 @@ import org.hibernate.annotations.Index;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.subscription.dto.MediumType;
 
 /**
  * An improvement of com.pixelandtag.cmp.entities.HttpToSend
@@ -115,6 +116,8 @@ public class OutgoingSMS extends GenericMessage implements Serializable {
 			ttl = 1L;
 		if(charged==null)
 			charged = Boolean.FALSE;
+		if(getMediumType()==null)
+			setMediumType(MediumType.sms);
 		
 	}
 	

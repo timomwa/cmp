@@ -16,6 +16,7 @@ public interface Receiver {
 	public static String HTTP_RECEIVER_PAYLOAD = "receiver_payload";
 	public static String HTTP_RECEIVER_EXPECTED_CONTENTTYPE = "receiver_expected_contenttype";
 	public static String HTTP_RECEIVER_OPCO_CODE = "receiver_opco_code";
+	public static String HTTP_RECEIVER_TYPE = "receiver_message_type";
 	
 	public boolean logMO(Map<String, String> params);
 

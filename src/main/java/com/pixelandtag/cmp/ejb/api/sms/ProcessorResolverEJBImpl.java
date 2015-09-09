@@ -34,6 +34,7 @@ import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.smssenders.JsonUtilI;
 import com.pixelandtag.smssenders.Receiver;
+import com.pixelandtag.subscription.dto.MediumType;
 
 @Stateless
 @Remote
@@ -129,6 +130,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		String shortcode = null;
 		String sms = "";
 		String opcotxid = null;
+		String type_ = incomingparams.get(Receiver.HTTP_RECEIVER_TYPE);
+		MediumType type = ( type_!=null && !type_.isEmpty() ) ? MediumType.get(type_) : MediumType.sms;
 		
 		
 		if(receiver_has_payload.getValue().equalsIgnoreCase("yes")){
@@ -192,7 +195,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 		
 		IncomingSMS incomingsms = new IncomingSMS();
-		
+		incomingsms.setMediumType(type);
 		incomingsms.setMsisdn(msisdn);
 		incomingsms.setShortcode(shortcode);
 		incomingsms.setSms(sms);

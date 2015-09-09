@@ -65,7 +65,7 @@ public class SenderPlatform {
 		if(log4J!=null)
 			PropertyConfigurator.configure(log4J); 
 		else
-			BasicConfigurator.configure();
+			PropertyConfigurator.configure(createProps());//BasicConfigurator.configure();
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("\nmturl: ").append(mturl)
@@ -95,10 +95,6 @@ public class SenderPlatform {
 		
 		SenderPlatform senderplatform = new SenderPlatform();
 		senderplatform.initialize();
-				
-		Properties properties = createProps();
-		PropertyConfigurator.configure(properties);
-		//BasicConfigurator.configure();
 		
 		OutgoingQueueRouter outgoingqueuRouter = new OutgoingQueueRouter();
 		outgoingqueuRouter.start();
@@ -108,8 +104,8 @@ public class SenderPlatform {
 		
 		
 		
-		//BulkSMSProducer bp = new BulkSMSProducer(senderplatform.workers, senderplatform.throttle, senderplatform.queueSize, senderplatform.urlparams);
-		//bp.start();
+		BulkSMSProducer bp = new BulkSMSProducer(senderplatform.workers, senderplatform.throttle, senderplatform.queueSize, senderplatform.urlparams);
+		bp.start();
 		
 	}
 	

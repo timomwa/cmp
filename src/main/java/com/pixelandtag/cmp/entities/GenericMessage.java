@@ -23,6 +23,7 @@ import org.hibernate.annotations.Index;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.subscription.dto.MediumType;
 
 @MappedSuperclass
 public class GenericMessage implements Serializable{
@@ -62,6 +63,10 @@ public class GenericMessage implements Serializable{
 	@Column(name="billing_status")
 	@Enumerated(EnumType.STRING)
 	private BillingStatus billing_status;
+	
+	@Column(name="mediumtype")
+	@Enumerated(EnumType.STRING)
+	private MediumType mediumType;
 			
 	@Column(name="price")
 	private BigDecimal price;
@@ -100,6 +105,8 @@ public class GenericMessage implements Serializable{
 			billing_status = BillingStatus.NO_BILLING_REQUIRED;
 		if(event_type==null)
 			event_type = EventType.CONTENT_PURCHASE.getName();
+		if(mediumType==null)
+			mediumType = MediumType.sms;
 		
 	}
 	
@@ -235,6 +242,18 @@ public class GenericMessage implements Serializable{
 		this.isSubscription = isSubscription;
 	}
 
+	
+	
+
+	public MediumType getMediumType() {
+		return mediumType;
+	}
+
+
+	public void setMediumType(MediumType mediumType) {
+		this.mediumType = mediumType;
+	}
+
 
 	@Override
 	public String toString() {
@@ -242,11 +261,12 @@ public class GenericMessage implements Serializable{
 				+ ", msisdn=" + msisdn + ", timestamp=" + timestamp
 				+ ", opco_tx_id=" + opco_tx_id + ", cmp_tx_id=" + cmp_tx_id
 				+ ", sms=" + sms + ", billing_status=" + billing_status
-				+ ", price=" + price + ", serviceid=" + serviceid + ", split="
-				+ split + ", event_type=" + event_type
-				+ ", price_point_keyword=" + price_point_keyword
-				+ ", moprocessor=" + moprocessor + ", isSubscription="
-				+ isSubscription + "]";
+				+ ", mediumType=" + mediumType + ", price=" + price
+				+ ", serviceid=" + serviceid + ", split=" + split
+				+ ", event_type=" + event_type + ", price_point_keyword="
+				+ price_point_keyword + ", moprocessor=" + moprocessor
+				+ ", isSubscription=" + isSubscription + "]";
 	}
+	
 	
 }

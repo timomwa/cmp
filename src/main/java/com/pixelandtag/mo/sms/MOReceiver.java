@@ -21,6 +21,7 @@ import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.smssenders.Receiver;
+import com.pixelandtag.subscription.dto.MediumType;
 
 /**
  * Servlet implementation class MOReceiver
@@ -106,6 +107,8 @@ public class MOReceiver extends HttpServlet {
 		
 		if(!body.isEmpty())
 			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
+		
+		incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
 		
 		try {
 			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);

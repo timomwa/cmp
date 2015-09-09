@@ -19,6 +19,7 @@ import org.hibernate.annotations.Index;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.subscription.dto.MediumType;
 
 @Entity
 @Table(name = "incoming_sms")
@@ -74,6 +75,8 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 			setIsSubscription(Boolean.FALSE);
 		if(getBilling_status()==null)
 		   setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+		if(getMediumType()==null)
+			setMediumType(MediumType.sms);
 	}
 
 
@@ -127,6 +130,7 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 		outgoing.setTtl(3L);
 		outgoing.setIsSubscription(getIsSubscription());
 		outgoing.setMoprocessor(getMoprocessor());
+		outgoing.setMediumType(getMediumType());
 		return outgoing;
 	}
 	
