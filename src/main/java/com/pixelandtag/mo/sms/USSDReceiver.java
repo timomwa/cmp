@@ -142,6 +142,8 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setProcessed(Boolean.TRUE);
 				incomingsms.setMo_ack(Boolean.TRUE);
 				MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
+				
+				logger.info(" >> processor = "+processor);
 				incomingsms.setMoprocessor(processor);
 				messageID = datingBean.logMO(incomingsms).getId();
 				ro.setMessageId(messageID);

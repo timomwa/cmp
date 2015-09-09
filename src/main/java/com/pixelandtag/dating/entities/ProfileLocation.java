@@ -37,7 +37,7 @@ public class ProfileLocation implements Serializable  {
 	@Index(name="plocidx")
 	private Location location;
 	
-	@ManyToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.EAGER)
 	@JoinColumn(name = "profile_id_fk")
 	@Index(name="plocpidx")
 	private PersonDatingProfile profile;
