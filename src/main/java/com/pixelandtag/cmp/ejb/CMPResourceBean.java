@@ -43,6 +43,7 @@ import com.pixelandtag.cmp.entities.ClassStatus;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.Message;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
@@ -100,6 +101,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private SubscriptionBeanI subscriptionBean;
+	
+	
+	@EJB
+	private MessageEJBI messageEJB;
 	
 	public boolean markInQueue(Long http_to_send_id) throws Exception {
 		
@@ -472,36 +477,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return success;
 	}
 	
-	public String getMessage(String key, int language_id) throws Exception{
-		String message = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
-		
-		try {
-			String sql = "SELECT message FROM "+CelcomImpl.database+".message WHERE language_id = ? AND `key` = ? ORDER BY RAND() LIMIT 1";
-			Query qry = em.createNativeQuery(sql);
-			qry.setParameter(1, language_id);
-			qry.setParameter(2, key);
-
-			Object obj = qry.getSingleResult();
-			if (obj!=null) {
-				message = (String) obj;
-			}
-
-
-			logger.debug("looking for :[" + key + "], found [" + message + "]");
-			
-			return message;
-
-		}catch(javax.persistence.NoResultException ex){
-			logger.warn(ex.getMessage() + " no profile for subscriber "+message);
-			return null;
-		}catch (Exception e) {
-
-			logger.error(e.getMessage(), e);
-
-			throw e;
-
-		}finally{
-		}
+	public String getMessage(String key, int language_id) throws Exception{//
+		 Message message = messageEJB.getMessage(key, Long.valueOf(language_id));
+		 return message!=null ? message.getMessage() : null;
 	}
 	
 	public int getSubscriberLanguage(String msisdn) throws Exception {

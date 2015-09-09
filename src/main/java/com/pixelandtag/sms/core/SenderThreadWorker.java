@@ -43,6 +43,7 @@ public class SenderThreadWorker implements Runnable{
 	private boolean run = true;
 	private boolean stopped  = false;
 	
+	
 	public SenderThreadWorker(Queue<OutgoingSMS> outqueue_, OpcoSenderReceiverProfile opcosenderprofile_) throws Exception{
 		this.outqueue = outqueue_;
 		this.opcosenderprofile = opcosenderprofile_;
@@ -82,7 +83,7 @@ public class SenderThreadWorker implements Runnable{
 			
 			try{
 			
-				OutgoingSMS sms = outqueue!=null ? (outqueue.size()>1000 ? outqueue.poll() : OutgoingQueueRouter.poll() ) : null;
+				OutgoingSMS sms = outqueue!=null ? (outqueue.size()>1000 ? outqueue.poll() : OutgoingQueueRouter.poll(opcosenderprofile.getId()) ) : null; 
 				
 				if(sms!=null && sms.getId().compareTo(-1L)>0){
 					
@@ -101,6 +102,7 @@ public class SenderThreadWorker implements Runnable{
 							
 							mtstatus = MessageStatus.SENT_SUCCESSFULLY;
 							queueprocbean.deleteFromQueue(sms);
+							queueprocbean.deleteCorrespondingIncomingSMS(sms);
 						
 						}else{
 							
@@ -116,7 +118,7 @@ public class SenderThreadWorker implements Runnable{
 								mtstatus = MessageStatus.FAILED_PERMANENTLY;
 						}
 						
-						queueprocbean.updateMessageLog(sms.getCmp_tx_id(), mtstatus);
+						queueprocbean.updateMessageLog(sms, mtstatus);
 						
 						
 					}catch(Exception exp){
@@ -131,7 +133,9 @@ public class SenderThreadWorker implements Runnable{
 					setRun(false);
 				}
 				
-				Thread.sleep(1000);
+				int sleeptime = outqueue.size()>0 ? 0 : 1000;
+				
+				Thread.sleep(sleeptime);
 				
 			}catch(InterruptedException ie){
 				

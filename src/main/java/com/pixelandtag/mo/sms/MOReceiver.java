@@ -76,7 +76,7 @@ public class MOReceiver extends HttpServlet {
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = request.getHeader(headerName);  
 		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
-		     incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
+		     //incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
 		 }
 		
 		 

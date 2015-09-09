@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
@@ -401,6 +403,12 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 						final OutgoingSMS outgoingsms = process(mo);//this will actually process the stuff.. uses the subclass to process..
 						
 						logger.debug("\n\n\n\n\n\n>>>>>>>>>>>>>>>> OUR MO >>>>>>>>>>>>>>>>> "+outgoingsms.toString()+"\n\n\n\n");
+						
+						if(outgoingsms.getOpcosenderprofile()==null){//In case no sender profile, use the incoming one's
+							OperatorCountry opco = mo.getOpco();
+							OpcoSenderReceiverProfile opcosenderprofile = getEJB().getopcosenderProfileFromOpcoId(opco.getId());
+							outgoingsms.setOpcosenderprofile(opcosenderprofile);
+						}
 						
 						sendMT(outgoingsms);
 					

@@ -50,7 +50,7 @@ public class MessageEJBImpl implements MessageEJBI {
 			msg = message.getMessage();
 		}
 	
-		logger.debug("looking for :[" + key + "], found [" + msg + "]");
+		logger.info("looking for :[" + key + "], found [" + msg + "]");
 	
 		return message;
 		

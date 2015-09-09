@@ -96,7 +96,9 @@ public class SenderPlatform {
 		SenderPlatform senderplatform = new SenderPlatform();
 		senderplatform.initialize();
 				
-		BasicConfigurator.configure();
+		Properties properties = createProps();
+		PropertyConfigurator.configure(properties);
+		//BasicConfigurator.configure();
 		
 		OutgoingQueueRouter outgoingqueuRouter = new OutgoingQueueRouter();
 		outgoingqueuRouter.start();
@@ -113,6 +115,18 @@ public class SenderPlatform {
 	
 	
 	
+	private static Properties createProps() {
+		Properties props = new Properties();
+		props.put("log4j.rootCategory", "INFO, dailyApp");
+		props.put("log4j.appender.A1", "org.apache.log4j.ConsoleAppender");
+		props.put("log4j.appender.A1.layout", "org.apache.log4j.PatternLayout");
+		props.put("log4j.appender.A1.layout.ConversionPattern", "%d %-4r [%t] %-5p %c{2} %x - %m%n");
+		props.put("log4j.appender.dailyApp", "org.apache.log4j.ConsoleAppender");
+		props.put("log4j.appender.dailyApp.layout", "org.apache.log4j.PatternLayout");
+		props.put("log4j.appender.dailyApp.layout.ConversionPattern", "%d %-4r [%t] %-5p %c{2} %x - %m%n");
+		return props;
+	}
+
 	private String getPath(String filename){
 		return System.getProperty("user.dir")
 		+ System.getProperty("file.separator") + filename;

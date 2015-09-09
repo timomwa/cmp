@@ -1,6 +1,9 @@
 package com.pixelandtag.utilities;
 
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TimeZone;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -9,12 +12,15 @@ import org.apache.log4j.BasicConfigurator;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.entities.MTsms;
 
 public class TestEJB {
@@ -28,6 +34,7 @@ public class TestEJB {
 	private static TimezoneConverterI tzconvert;
 	private static SMSGatewayI smsgw;
 	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
+	private static ConfigsEJBI configsEJB;
 	
 	public static void main(String[] args) throws Exception {
 		try{
@@ -56,8 +63,26 @@ public class TestEJB {
 			 
 			 
 			 opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
+			
+			 configsEJB = (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");
+			 
+			 OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
+			 
+			 System.out.println("\n"+opco+"\n");
+			 
+			 OpcoSenderReceiverProfile profile = configsEJB.getActiveOpcoSenderReceiverProfile(opco);
+			 
+			 System.out.println("\n"+profile.getProfile()+"\n");
+			 
+			 Map<String, ProfileConfigs> profileconfigs = configsEJB.getAllConfigs(profile.getProfile());
 			 
 			 
+			 for(String ke : profileconfigs.keySet())
+				 System.out.println(ke+" : "+profileconfigs.get(ke).getValue());
+			 
+			 
+			 if(true)
+				 return;
 			 
 			/* MTsms mtsms = new MTsms();
 			 mtsms.setMsisdn("254770178979");//0770178979
@@ -90,7 +115,7 @@ public class TestEJB {
 			 //TODO - Have a way to determine a successful MT (maybe http response code, or parsing response)
 			 
 			 
-			 
+			// context.close();
 	}catch(Exception exp){
 			exp.printStackTrace();
 		}finally{

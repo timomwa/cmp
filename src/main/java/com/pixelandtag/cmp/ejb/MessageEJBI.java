@@ -4,6 +4,6 @@ import com.pixelandtag.cmp.entities.Message;
 
 public interface MessageEJBI {
 
-	public Message getMessage(String key, Long valueOf);
+	public Message getMessage(String key, Long language_id);
 
 }

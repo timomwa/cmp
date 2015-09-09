@@ -26,12 +26,19 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 	@NamedQuery(
 			name = IncomingSMS.NQ_LIST_UNPROCESSED,
 			query = "select inc from IncomingSMS inc where inc.processed=:processed AND inc.mo_ack=:mo_ack order by inc.timestamp asc"
+	),
+	@NamedQuery(
+			name = IncomingSMS.NQ_DELETE_BY_TX_ID,
+			query = "delete from IncomingSMS inc where inc.cmp_tx_id=:cmp_tx_id OR inc.opco_tx_id=:opco_tx_id"
 	)
 })
 public class IncomingSMS extends GenericMessage implements Serializable{
 	
 	@Transient
 	public static final String NQ_LIST_UNPROCESSED = "incomingsms.listunprocessed";
+	
+	@Transient
+	public static final String NQ_DELETE_BY_TX_ID = "incomingsms.deletebytxid";
 	
 	/**
 	 * 

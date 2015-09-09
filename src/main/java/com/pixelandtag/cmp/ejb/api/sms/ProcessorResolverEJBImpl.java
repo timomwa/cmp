@@ -78,13 +78,21 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	@Inject
 	private static JsonUtilI jsonutil;
 	
+	@EJB
+	private OpcoEJBI opcoEJB;
+	
 	
 	@Override
 	public IncomingSMS processMo(Map<String, String> incomingparams) throws ConfigurationException{
 		
 		String ip_address = incomingparams.get(Receiver.IP_ADDRESS);
 		
-		OperatorCountry opco = configsEJB.getOperatorByIpAddress(ip_address);
+		String opcocode = incomingparams.get(Receiver.HTTP_RECEIVER_OPCO_CODE);
+		
+		OperatorCountry opco = ( opcocode!=null && !opcocode.isEmpty() ) ? opcoEJB.findOpcoByCode(opcocode) : null;
+		
+		if(opco==null)
+			opco = configsEJB.getOperatorByIpAddress(ip_address);
 		
 		if(opco==null)
 			throw new ConfigurationException("No operator identified by the IP address => "+ip_address);
@@ -211,7 +219,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			messagelog.setShortcode(incomingsms.getShortcode());
 			messagelog.setSource(mo_medium_source.getValue());
 			messagelog.setStatus(MessageStatus.RECEIVED.name());
-			
+			messagelog.setMsisdn(msisdn);
 			messagelog = messagelogDAO.save(messagelog);
 			
 			
@@ -228,7 +236,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					msgparams.setTransactionid(incomingsms.getCmp_tx_id());
 					msgparams.setParamKey(incoming.getKey());
 					msgparams.setParamValue(incoming.getValue());
-					extraparamsDAO.save(msgparams);
+					msgparams = extraparamsDAO.save(msgparams);
 				}
 				
 				

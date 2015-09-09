@@ -1,10 +1,15 @@
 package com.pixelandtag.sms.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 
 import javax.naming.Context;
@@ -29,29 +34,36 @@ public class OutgoingQueueRouter extends Thread {
 
 	private boolean run = true;
 	private Logger logger = Logger.getLogger(getClass());
-	private volatile static Queue<OutgoingSMS> outqueue = null;
-	private int maxsizeofqueue = 100000;//TODO externalize
+	private Long maxsizeofqueue = 100000L;//TODO externalize
 	private  Context context = null;
 	private static QueueProcessorEJBI queueprocEJB;
 	private OpcoSenderProfileEJBI opcosenderprofEJB;
 	private static List<SenderThreadWorker> senderworkers = new ArrayList<SenderThreadWorker>();
+	private static ConcurrentMap<Long,Queue<OutgoingSMS>> opcoqueuemap = new ConcurrentHashMap<Long,Queue<OutgoingSMS>>();
 	private static Semaphore queueSemaphore;
 	static{
 		queueSemaphore = new Semaphore(1, true);
 	}
 	
-	public static OutgoingSMS poll() throws InterruptedException{
+	public static OutgoingSMS poll(Long profileId) throws InterruptedException{
 		
 		try{
 			
 			queueSemaphore.acquire();
-			 
-			final OutgoingSMS myMt = outqueue.poll();
-				 
-			if(myMt!=null && myMt.getId()>-1)
-				queueprocEJB.updateQueueStatus(myMt.getId(), Boolean.TRUE);
 			
-			return myMt;
+			Queue<OutgoingSMS> outqueue = opcoqueuemap.get(profileId);
+			
+			if(outqueue!=null){
+				
+				final OutgoingSMS myMt = outqueue.poll();
+				
+				if(myMt!=null && myMt.getId()>-1)
+					queueprocEJB.updateQueueStatus(myMt.getId(), Boolean.TRUE);
+				
+				return myMt;
+			}
+			
+			return null;
 		
 		}finally{
 			queueSemaphore.release(); 
@@ -64,7 +76,6 @@ public class OutgoingQueueRouter extends Thread {
 	
 	
 	private void initialize() throws Exception {
-		outqueue = new ConcurrentLinkedQueue<OutgoingSMS>();
 		initEJB();
 		startWorkers();
 		setDaemon(true);//I don't know what I am doing here 
@@ -81,9 +92,13 @@ public class OutgoingQueueRouter extends Thread {
 					+" Operator name : "+opcoprofile.getOpco().getOperator().getName()+", country="
 					+opcoprofile.getOpco().getCountry().getName()+"\n");
 			int success = 0;
+			
+			Queue<OutgoingSMS> outqueue_ = new ConcurrentLinkedQueue<OutgoingSMS>();
+			
 			for(int i = 0; i<threads.intValue(); i++){
+				
 				try{
-					SenderThreadWorker worker = new SenderThreadWorker(outqueue, opcoprofile);
+					SenderThreadWorker worker = new SenderThreadWorker(outqueue_, opcoprofile);
 					Thread t1 = new Thread(worker);
 					t1.start();
 					senderworkers.add(worker);
@@ -91,7 +106,11 @@ public class OutgoingQueueRouter extends Thread {
 				}catch(Exception exp){
 					logger.error(exp.getMessage(),exp);
 				}
+				
 			}
+			
+			opcoqueuemap.put(opcoprofile.getId(), outqueue_);
+			
 			logger.info(" successful workers started "+success);
 		}
 		
@@ -121,9 +140,9 @@ public class OutgoingQueueRouter extends Thread {
 
 			while (run) {
 				
-				logger.info("NEW_MT_QUEUE : "+outqueue.size());
 				
-				if(outqueue.size()<1){
+				int lowestsize = getLowestSizeOfQueue();
+				if(lowestsize<1){
 					populateQueue();
 				}
 				
@@ -153,6 +172,17 @@ public class OutgoingQueueRouter extends Thread {
 
 	}
 	
+	private int getLowestSizeOfQueue() {
+		
+		int lowestsize = 10;
+		
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet())
+			if(lowestsize>entryset.getValue().size())
+				lowestsize = entryset.getValue().size();
+		
+		return lowestsize;
+	}
+
 	public static String getMemoryUsage() {
 		long mem = (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
 		if ( mem>=(1024*1024*1024) )
@@ -169,11 +199,23 @@ public class OutgoingQueueRouter extends Thread {
 	
 	private void populateQueue()  {
 		
-		List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(1000L); 
-	
-		if(outqueue.size()<=maxsizeofqueue)//Control the amount of RAM to be used
-			for(OutgoingSMS queue : outqueuelist_)
-				outqueue.offer(queue);
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet()){
+			
+			Long profileid = entryset.getKey();
+			Queue<OutgoingSMS> outqueue = entryset.getValue();
+			
+			if(outqueue.size()<1){
+				
+				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profileid); 
+				
+				for(OutgoingSMS outgoingsms : outqueuelist_){
+					if(outqueue.size()<1){
+						outqueue.offer(outgoingsms);
+						opcoqueuemap.put(profileid, outqueue);
+					}
+				}
+			}
+		}
 		
 	}
 	
@@ -182,7 +224,8 @@ public class OutgoingQueueRouter extends Thread {
 		
 		System.out.println("Shutting down...");
 		
-		outqueue.clear();//clear queue
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet())
+			entryset.getValue().clear();//clear queue
 		
 		for(SenderThreadWorker worker : senderworkers)
 			worker.stop();
