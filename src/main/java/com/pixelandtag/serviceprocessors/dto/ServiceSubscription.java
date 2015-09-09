@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class ServiceSubscription implements Serializable{
 	
-	private int id,serviceid;
+	private int id,serviceid,opcoid;
 	private String schedule,lastUpdated,ExpiryDate;
 	public int getId() {
 		return id;
@@ -35,6 +35,12 @@ public class ServiceSubscription implements Serializable{
 	}
 	public void setExpiryDate(String expiryDate) {
 		ExpiryDate = expiryDate;
+	}
+	public int getOpcoid() {
+		return opcoid;
+	}
+	public void setOpcoid(int opcoid) {
+		this.opcoid = opcoid;
 	}
 	
 

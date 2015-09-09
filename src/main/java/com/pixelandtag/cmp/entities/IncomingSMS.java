@@ -126,6 +126,7 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 		outgoing.setTimestamp(getTimestamp());
 		outgoing.setTtl(3L);
 		outgoing.setIsSubscription(getIsSubscription());
+		outgoing.setMoprocessor(getMoprocessor());
 		return outgoing;
 	}
 	

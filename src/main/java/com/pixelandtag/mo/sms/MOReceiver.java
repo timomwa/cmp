@@ -85,7 +85,7 @@ public class MOReceiver extends HttpServlet {
 		
 		incomingparams.put(Receiver.IP_ADDRESS, ip_addr);
 		
-		String params = "\n\n\t:: REQ "+ip_addr;
+		String params = "\n\n\t:: ip_addr "+ip_addr;
 		
 		while(enums.hasMoreElements()){
 			

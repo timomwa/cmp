@@ -52,8 +52,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private InitialContext context;
 	//private Properties mtsenderprop;
-	private boolean allow_number_sharing  = false;
-	private boolean allow_multiple_plans = true;
+	private boolean allow_number_sharing  = true;
+	private boolean allow_multiple_plans = false;
 	
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
