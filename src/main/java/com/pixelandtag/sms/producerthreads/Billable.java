@@ -389,13 +389,24 @@ public class Billable implements Serializable {
 		return base_charge_xml;
 	}
 
+	
+
+	@Override
 	public String toString() {
-		return "Billable [operation=" + operation + ", msisdn=" + msisdn
-				+ ", shortcode=" + shortcode + ", keyword=" + keyword
+		return "Billable [id=" + id + ", resp_status_code=" + resp_status_code
+				+ ", pricePointKeyword=" + pricePointKeyword + ", success="
+				+ success + ", message_id=" + message_id
+				+ ", in_outgoing_queue=" + in_outgoing_queue + ", valid="
+				+ valid + ", opco=" + opco + ", transferIn=" + transferIn
+				+ ", priority=" + priority + ", timeStamp=" + timeStamp
+				+ ", maxRetriesAllowed=" + maxRetriesAllowed + ", retry_count="
+				+ retry_count + ", operation=" + operation + ", msisdn="
+				+ msisdn + ", shortcode=" + shortcode + ", keyword=" + keyword
 				+ ", price=" + price + ", cp_id=" + cp_id + ", event_type="
 				+ event_type + ", service_id=" + service_id
 				+ ", discount_applied=" + discount_applied + ", cp_tx_id="
-				+ cp_tx_id + ", opco_tx_id=" + opco_tx_id + "]";
+				+ cp_tx_id + ", opco_tx_id=" + opco_tx_id + ", processed="
+				+ processed + ", transactionId=" + transactionId + "]";
 	}
 
 	public String getTransactionId() {
