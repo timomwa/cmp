@@ -1177,6 +1177,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			billable = saveOrUpdate(billable);
 		
 		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
 			throw new DatingServiceException("Sorry, something went wrong. Try again later.", exp);
 		}
 		
