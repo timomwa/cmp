@@ -175,7 +175,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	@Override
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus,  AlterationMethod method) throws Exception{
 			Subscription sub = null;
 			try{

@@ -1100,6 +1100,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public OutgoingSMS renewSubscription(IncomingSMS incomingsms, Long serviceid, AlterationMethod method) throws DatingServiceException{
 		
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();

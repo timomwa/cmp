@@ -205,7 +205,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setPriority(0l);
 		billable.setProcessed(0L);
 		billable.setRetry_count(0L);
-		billable.setService_id(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setService_id( outgoingsms.getServiceid()!=null ? String.valueOf(outgoingsms.getServiceid()) : "" );// outgoingsms.getSms().split("\\s")[0].toUpperCase());
 		billable.setShortcode(outgoingsms.getShortcode());		
 		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
 		billable.setEvent_type(outgoingsms.getEvent_type()!=null ? EventType.get(outgoingsms.getEvent_type()) : EventType.SUBSCRIPTION_PURCHASE);
