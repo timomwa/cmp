@@ -220,7 +220,7 @@ public class USSDReceiver extends HttpServlet {
 				response = "Problem occurred. Please try again later";
 			}
 			
-			queueprocEJB.deleteCorrespondingIncomingSMS(outgoingsms);
+			//queueprocEJB.deleteCorrespondingIncomingSMS(outgoingsms);
 			queueprocEJB.updateMessageLog(outgoingsms, MessageStatus.SENT_SUCCESSFULLY);
 			
 			pw.write(response);

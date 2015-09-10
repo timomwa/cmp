@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb.stats;
-
+public class PerformanceMonitorEJB {}
+/*
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -51,7 +52,7 @@ public class PerformanceMonitorEJB {
 	
 	private boolean running = false;
 	
-	@Schedule(second = "0", minute = "*/1", hour = "*", dayOfMonth="*", persistent = false, year="*" )
+	@Schedule(second = "0", minute = "/1", hour = "*", dayOfMonth="*", persistent = false, year="*" )
 	public void checkHoulyAverage(){
 		
 		if(running)
@@ -123,3 +124,4 @@ public class PerformanceMonitorEJB {
 	}
 
 }
+*/
