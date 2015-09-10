@@ -368,6 +368,9 @@ public class Billable implements Serializable {
 			if(getOpco_tx_id()==null && getCp_tx_id()!=null )
 				setOpco_tx_id(getCp_tx_id());
 			
+			System.out.println("  : base_charge_xml : "+base_charge_xml);
+			System.out.println("  : getOpco_tx_id() : "+getOpco_tx_id());
+			
 			base_charge_xml = base_charge_xml.replaceAll("\\{OPERATION\\}", getOperation());
 			base_charge_xml = base_charge_xml.replaceAll("\\{MSISDN\\}", getMsisdn());
 			base_charge_xml = base_charge_xml.replaceAll("\\{SHORTCODE\\}", getShortcode());
