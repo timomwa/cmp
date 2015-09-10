@@ -357,7 +357,12 @@ public class BaseEntityBean implements BaseEntityI {
 
 
 	public <T> T saveOrUpdate(T t) throws Exception{
-		return em.merge(t);
+		try{
+			t = em.merge(t);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		return t;
 	}
 	
 /**
@@ -622,6 +627,8 @@ public class BaseEntityBean implements BaseEntityI {
 			
 					
 			}catch (Exception ioe) {
+				
+				logger.error(ioe.getMessage(), ioe);
 				
 				success  = false;
 				

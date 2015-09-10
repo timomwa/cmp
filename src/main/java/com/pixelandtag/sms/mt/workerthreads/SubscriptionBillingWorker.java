@@ -313,7 +313,7 @@ public class SubscriptionBillingWorker implements Runnable {
 							
 							logger.error(exp.getMessage(),exp);
 							logger.info("SUBSCRIPTION_RENEWAL:::::::::SOMETHING WENT WRONG, WE TRY AGAIN ");
-							subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()),AlterationMethod.self_via_sms);
+							subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()),AlterationMethod.system_autorenewal);
 							
 						}
 					}else{
