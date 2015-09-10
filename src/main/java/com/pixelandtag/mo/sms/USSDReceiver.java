@@ -2,19 +2,14 @@ package com.pixelandtag.mo.sms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.EJB;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.Transient;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -24,9 +19,6 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
-import com.ibm.icu.util.TimeZone;
-import com.pixelandtag.api.CelcomHTTPAPI;
-import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
@@ -38,10 +30,7 @@ import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.MessageLog;
-import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
-import com.pixelandtag.connections.ConnectionPool;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.entities.MOSms;
@@ -237,6 +226,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			messageLog.setMt_sms(response);
 			messageLog.setMt_timestamp(timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), opco.getCountry().getTimeZone()));
+			messageLog = processorEJB.saveMessageLog(messageLog);
 			
 			pw.write(response);
 			

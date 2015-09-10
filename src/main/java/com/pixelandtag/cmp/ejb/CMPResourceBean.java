@@ -2644,10 +2644,17 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							return resp;
 						}
 						
-					}else if(KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
+					}else if(KEYWORD.equals("UNSUBSCRIBE") || KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
 						
 						String msg1 = getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id);
+						unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_ussd);
+						//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
+						msg1 = getMessage(GenericServiceProcessor.UNSUBSCRIBED_ALL_ADVICE, language_id);
+						msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, getMessage(MessageType.ALL_SERVICES, language_id));
+						resp = GenericServiceProcessor.SPACE+msg1;
+						return resp;
 						
+						/* Uncomment this block for graceful stop
 						int stop_number = -1;
 						
 						try{
@@ -2729,7 +2736,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							
 						resp = msg1;
 						return resp;
-						
+						*/
 
 					}else if(KEYWORD.equals("HELP")){
 						
