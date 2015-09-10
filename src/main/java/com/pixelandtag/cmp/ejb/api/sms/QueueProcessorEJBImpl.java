@@ -104,7 +104,7 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				msglogs = messagelogDAO.findByNamedQuery(MessageLog.NQ_BY_OPCO_TXID, params);
 			}
 			MessageLog messagelog = null;
-			Date mt_timestamp = timeconverterEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), sms.getOpcosenderprofile().getOpco().getCountry().getTimeZone());
+			Date mt_timestamp =new Date();
 			if(msglogs!=null && msglogs.size()>0){
 				messagelog = msglogs.get(0);
 				messagelog.setStatus(status.name());
