@@ -177,10 +177,10 @@ public class SubscriptionBillingWorker implements Runnable {
 					//if such a billable exists
 					if(billable!=null){
 						try{
+							logger.info(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 							
 								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 									setBusy(true);
-									logger.info(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 									String xml = billable.getChargeXML(BillableI.plainchargeXML);
 									logger.info("BILLABLE: "+billable.toString());
 									param.setStringentity(xml);
