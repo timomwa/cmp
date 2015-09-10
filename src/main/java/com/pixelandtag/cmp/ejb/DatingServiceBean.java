@@ -1191,6 +1191,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			
 		billable.setCp_id("CONTENT360_KE");
 		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
+		billable.setOpco_tx_id(incomingsms.getOpco_tx_id());
 		billable.setDiscount_applied("0");
 		billable.setIn_outgoing_queue(0l);
 		billable.setKeyword(incomingsms.getSms().split("\\s")[0].toUpperCase());
@@ -1207,7 +1208,6 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		else
 			billable.setService_id(incomingsms.getSms().split("\\s")[0].toUpperCase());
 		billable.setShortcode(incomingsms.getShortcode());		
-		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
 		billable.setEvent_type((incomingsms.getEvent_type()!=null ?  EventType.get(incomingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(incomingsms.getPrice_point_keyword());
 		billable.setOpco(incomingsms.getOpco());

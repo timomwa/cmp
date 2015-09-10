@@ -359,6 +359,15 @@ public class Billable implements Serializable {
 	public void setMessage_id(long message_id) {
 		this.message_id = message_id;
 	}
+	
+	@PreUpdate
+	@PrePersist
+	public void update(){
+		
+		if(opco_tx_id==null && getCp_tx_id()!=null)
+			opco_tx_id = getCp_tx_id();
+		
+	}
 
 	public String getChargeXML(String base_charge_xml) throws PricePointException {
 		try{
@@ -386,7 +395,7 @@ public class Billable implements Serializable {
 				+ ", price=" + price + ", cp_id=" + cp_id + ", event_type="
 				+ event_type + ", service_id=" + service_id
 				+ ", discount_applied=" + discount_applied + ", cp_tx_id="
-				+ cp_tx_id + ", tx_id=" + opco_tx_id + "]";
+				+ cp_tx_id + ", opco_tx_id=" + opco_tx_id + "]";
 	}
 
 	public String getTransactionId() {
