@@ -188,7 +188,7 @@ public class BaseEntityBean implements BaseEntityI {
     		successfulBill.setTimeStamp(billable.getTimeStamp());
     		successfulBill.setTransactionId(billable.getTransactionId());
     		successfulBill.setTransferin(billable.getTransferIn());
-    		successfulBill.setOpco(billable.getOpco());
+    		successfulBill.setOpco(em.merge(billable.getOpco()));
     		successfulBill = em.merge(successfulBill);
     		
     	}catch(Exception exp){

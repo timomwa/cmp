@@ -68,7 +68,7 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	@Column(name = "keyword")
 	private String keyword;
 	
-	@ManyToOne(cascade=CascadeType.MERGE)
+	@ManyToOne(cascade={CascadeType.MERGE, CascadeType.PERSIST})
 	@JoinColumn(name = "opco_id_fk", nullable=false)
 	@Index(name="sblocpidx")
 	private OperatorCountry opco;
