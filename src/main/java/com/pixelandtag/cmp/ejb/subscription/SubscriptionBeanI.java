@@ -3,6 +3,7 @@ package com.pixelandtag.cmp.ejb.subscription;
 import java.util.List;
 
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.subscription.dto.MediumType;
@@ -21,23 +22,25 @@ public interface SubscriptionBeanI {
 	
 	/**
 	 * Renews the subscription to this services for this msisdn
+	 * @param operatorCountry
 	 * @param msisdn
 	 * @param smsService - Long serviceid
 	 * @return
 	 * @throws Exception
 	 */
-	public Subscription renewSubscription(String msisdn, Long serviceId, AlterationMethod method) throws Exception;
+	public Subscription renewSubscription(OperatorCountry operatorCountry, String msisdn, Long serviceId, AlterationMethod method) throws Exception;
 	
 	
 	/**
 	 * Renews the subscription to this services for this msisdn
+	 * @param operatorCountry 
 	 * @param msisdn
 	 * @param smsService
 	 * @param substatus - com.pixelandtag.subscription.dto.SubscriptionStatus
 	 * @return
 	 * @throws Exception
 	 */
-	public Subscription renewSubscription(String msisdn, SMSService smsService,SubscriptionStatus substatus, AlterationMethod method) throws Exception;
+	public Subscription renewSubscription(OperatorCountry operatorCountry, String msisdn, SMSService smsService,SubscriptionStatus substatus, AlterationMethod method) throws Exception;
 	
 	
 	/**

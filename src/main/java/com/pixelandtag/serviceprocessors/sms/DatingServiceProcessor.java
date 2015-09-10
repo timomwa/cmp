@@ -532,7 +532,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 						SMSService smsservice = datingBean.getSMSService("DATE");
 						
-						subscriptionBean.renewSubscription(MSISDN, smsservice, SubscriptionStatus.confirmed,AlterationMethod.self_via_sms);
+						subscriptionBean.renewSubscription(incomingSMS.getOpco(), MSISDN, smsservice, SubscriptionStatus.confirmed,AlterationMethod.self_via_sms);
 					}
 				}
 				

@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
@@ -129,11 +130,11 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#renewSubscription(java.lang.String, java.lang.Long)
 	 */
 	@Override
-	public Subscription renewSubscription(String msisdn, Long serviceid, AlterationMethod method) throws Exception{
+	public Subscription renewSubscription(OperatorCountry operatorCountry, String msisdn, Long serviceid, AlterationMethod method) throws Exception{
 		Subscription sub = null;
 		try{
 			SMSService service = em.find(SMSService.class, serviceid);
-			sub = renewSubscription(msisdn, service, SubscriptionStatus.confirmed, method);
+			sub = renewSubscription(operatorCountry,msisdn, service, SubscriptionStatus.confirmed, method);
 			updateQueueStatus(0L,sub.getId(),method);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
@@ -176,7 +177,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus,  AlterationMethod method) throws Exception{
+	public Subscription renewSubscription(OperatorCountry operatorCountry, String msisdn, SMSService smsService, SubscriptionStatus substatus,  AlterationMethod method) throws Exception{
 			Subscription sub = null;
 			try{
 				Query qry;
@@ -195,6 +196,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					sub = new Subscription();
 					sub.setMsisdn(msisdn);
 					sub.setSms_service_id_fk(smsService.getId());
+					sub.setOpco(operatorCountry);
 				}
 				
 				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
@@ -226,12 +228,12 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					logger.error(exp.getMessage());
 				}
 				
+				return sub;
 				
 			}catch(Exception exp){
-				//throw exp;
 				logger.error(exp.getMessage());
+				throw exp;
 			}
-			return sub;
 		}
 	
 	

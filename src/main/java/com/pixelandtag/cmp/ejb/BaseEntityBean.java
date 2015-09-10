@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -169,6 +171,7 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void createSuccesBillRec(Billable billable){
     	try{
     		

@@ -1164,7 +1164,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				SMSService smsserv = find(SMSService.class, serviceid);
 				
 				
-				Subscription sub = subscriptionBean.renewSubscription(MSISDN, smsserv,SubscriptionStatus.confirmed,method);
+				Subscription sub = subscriptionBean.renewSubscription(incomingsms.getOpco(), MSISDN, smsserv,SubscriptionStatus.confirmed,method);
+				
+				logger.info(" ::::????****  sub.getExpiryDate()  : "+(sub!=null ? sub.getExpiryDate() : null));
 				
 				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
 				msg = msg.replaceAll(EXPIRY_DATE_TAG, timezone_ejb.convertToPrettyFormat( sub.getExpiryDate() ));
