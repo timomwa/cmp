@@ -190,7 +190,7 @@ public class USSDReceiver extends HttpServlet {
 				messagelog.setShortcode(incomingsms.getShortcode());
 				messagelog.setSource(incomingsms.getMediumType().name());
 				messagelog.setStatus(MessageStatus.RECEIVED.name());
-				
+				messagelog.setMo_sms(moMessage.getSMS_Message_String());
 				messagelog = processorEJB.saveMessageLog(messagelog);
 				
 				outgoingsms = incomingsms.convertToOutgoing();
@@ -232,8 +232,8 @@ public class USSDReceiver extends HttpServlet {
 				response = "Problem occurred. Please try again later";
 			}
 			
-			//queueprocEJB.deleteCorrespondingIncomingSMS(outgoingsms);
 			outgoingsms.setSms(response);
+			queueprocEJB.deleteCorrespondingIncomingSMS(outgoingsms);
 			queueprocEJB.updateMessageLog(outgoingsms, MessageStatus.SENT_SUCCESSFULLY);
 			
 			pw.write(response);
