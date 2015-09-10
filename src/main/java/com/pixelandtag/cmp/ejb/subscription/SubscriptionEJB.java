@@ -12,8 +12,6 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -22,7 +20,6 @@ import javax.transaction.UserTransaction;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomImpl;
-import com.pixelandtag.cmp.ejb.DatingServiceBean;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -34,18 +31,13 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class SubscriptionEJB implements SubscriptionBeanI {
 	
 
 	public Logger logger = Logger.getLogger(getClass());
 	
-	@Resource
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
-	
-	@Resource
-	private UserTransaction utx;
 
 	@EJB
 	TimezoneConverterI timezoneEJB;
@@ -56,12 +48,11 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public void updateCredibilityIndex(String msisdn, Long service_id, int change){
 		try{
 			Subscription subsc = getSubscription(msisdn, service_id);
 			if(subsc!=null){
-				utx.begin();
 				if(change>=1){
 					int prev_index = subsc.getCredibility_index().intValue();
 					subsc.setCredibility_index(prev_index>=0 ? (change+prev_index) : 0);//we re-set their index if they previously had a bad record, but now they have credit
@@ -69,9 +60,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);//keep sinking deep into bad credit
 				}
 				subsc = em.merge(subsc);
-				utx.commit();
 			}else{
-				utx.begin();
 				subsc = subscribe(msisdn,service_id,MediumType.ussd,AlterationMethod.system_autorenewal);
 				if(change>=1){
 					int prev_index = subsc.getCredibility_index().intValue();
@@ -80,26 +69,20 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					subsc.setCredibility_index(subsc.getCredibility_index().intValue()+change);//keep sinking deep into bad credit
 				}
 				subsc = em.merge(subsc);
-				utx.commit();
 			}
 			
 		}catch(Exception exp){
-			try{
-				utx.rollback();
-			}catch(Exception esp){
-			}
 			logger.error(exp.getMessage(),exp);
 		}
 		
 	}
 	
 
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@Override
 	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method) {
 		Subscription subscription = null;
 		try{
-			utx.begin();
 			subscription = new Subscription();
 			subscription.setMsisdn(msisdn);
 			subscription.setSms_service_id_fk(service_id);
@@ -113,11 +96,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			
 			
 			subscription = em.merge(subscription);
-			utx.commit();
 		}catch(Exception e){
-			try{
-				utx.rollback();
-			}catch(Exception exp){}
 			logger.error(e.getMessage());
 		}
 		return subscription;
@@ -182,20 +161,14 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	@Override
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public void updateQueueStatus(Long status, Long id, AlterationMethod method) throws Exception{
 		try{
-			utx.begin();
 			Query qry = em.createQuery("UPDATE Subscription s SET s.queue_status=:queue_status WHERE s.id=:id");
 			qry.setParameter("queue_status", status);
 			qry.setParameter("id", id);
 			qry.executeUpdate();
-			utx.commit();
 		}catch(Exception exp){
-			try{
-				utx.rollback();
-			}catch(Exception exp2){
-			}
 			logger.error(exp.getMessage(),exp);
 			throw exp;
 		}
@@ -204,7 +177,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	@Override
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus,  AlterationMethod method) throws Exception{
 			Subscription sub = null;
 			try{
@@ -236,7 +209,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 				logger.error(">>>>RENEWING SUBSCRIPTION OPCO_TZ:  NAIROBI_TIME :::"+nowInNairobiTz+"  expiryDate:: "+expiryDate);
 				
 				try{
-					utx.begin();
 					sub.setExpiryDate(timezoneEJB.stringToDate(expiryDate));
 					sub.setRenewal_count(sub.getRenewal_count()+1);
 					sub.setSubscription_status(substatus);
@@ -252,11 +224,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					sh.setAlteration_method(method);
 					sh = em.merge(sh);
 					
-					utx.commit();
 				}catch(Exception exp){
-					try{
-						utx.rollback();
-					}catch(Exception expr){}
 					logger.error(exp.getMessage());
 				}
 				
@@ -270,7 +238,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public List<Subscription> listServiceMSISDN(String sub_status, int serviceid) throws Exception {
@@ -278,8 +246,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		try {
 			
 			Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
-			
-			utx.begin();
+
 			String sql = "SELECT "
 					+ "id,"//0
 					+ "subscription_status,"//1
@@ -319,13 +286,9 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			
 			
 			
-			utx.commit();
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 		} catch (Exception e) {
-			try{
-				utx.rollback();
-			}catch(Exception e1){}
 			logger.error(e.getMessage());
 			throw e;
 		}finally{
@@ -341,8 +304,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	public Long countsearchSubscription(String msisdn) throws Exception{
 		
 		Long count = 0L;
-		
-		
 		try{
 			
 			Query qry = em.createQuery("SELECT count(*) from Subscription sub WHERE lower(sub.msisdn) like lower(:msisdn) ");
@@ -510,7 +471,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	 * @param status - com.inmobia.celcom.subscription.dto.SubscriptionStatus
 	 * @return
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean updateSubscription(int subscription_id, String msisdn, SubscriptionStatus status, AlterationMethod method) throws Exception {
 		
 		boolean success = false;
@@ -532,26 +493,19 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			sbh.setTimeStamp(timeInNairobi);
 			
-			utx.begin();
 			sub = em.merge(sub);
 			sbh = em.merge(sbh);
 			success = true;
-			utx.commit();
 		}catch(Exception e){
-			try{
-			utx.rollback();
-			}catch(Exception ee){}
 			logger.error(e.getMessage(),e);
-			
 			throw e;
-			
 		}finally{}
 		
 		
 		return success;
 	}
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	
 	public boolean updateSubscription(int subscription_id, SubscriptionStatus status, AlterationMethod method) throws Exception{
 
 		boolean success = false;
@@ -561,7 +515,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			Query qry = em.createQuery("from Subscription where id = :id ");
 			qry.setParameter("id", Long.valueOf(subscription_id));
 			Subscription sub = (Subscription) qry.getSingleResult();
-			utx.begin();
 			sub.setSubscription_status(status);
 			
 			SubscriptionHistory sbh = new SubscriptionHistory();
@@ -577,11 +530,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			sub = em.merge(sub);
 			sbh = em.merge(sbh);
 			success = true;
-			utx.commit();
 		}catch(Exception e){
-			try{
-			utx.rollback();
-			}catch(Exception ee){}
 			logger.error(e.getMessage(),e);
 			
 			throw e;
