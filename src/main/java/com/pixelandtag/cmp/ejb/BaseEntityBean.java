@@ -533,9 +533,9 @@ public class BaseEntityBean implements BaseEntityI {
 			httsppost.setHeader("Authorization", "Basic " + encoding);
 			httsppost.setHeader("SOAPAction","");
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
-			
+			logger.info("\n\n\n BILLABLE: "+billable.toString()+"\n\n");
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			logger.info("BILLABLE: "+billable.toString());
+			
 			logger.info("XML SENT \n : "+xml + "\n");
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);

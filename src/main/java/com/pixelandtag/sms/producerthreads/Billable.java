@@ -361,17 +361,22 @@ public class Billable implements Serializable {
 	}
 
 	public String getChargeXML(String base_charge_xml) throws PricePointException {
-		base_charge_xml = base_charge_xml.replaceAll("\\{OPERATION\\}", getOperation());
-		base_charge_xml = base_charge_xml.replaceAll("\\{MSISDN\\}", getMsisdn());
-		base_charge_xml = base_charge_xml.replaceAll("\\{SHORTCODE\\}", getShortcode());
-		base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
-		base_charge_xml = base_charge_xml.replaceAll("\\{SERVICE_ID\\}", getService_id());
-		base_charge_xml = base_charge_xml.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()));
-		base_charge_xml = base_charge_xml.replaceAll("\\{CP_ID\\}", getCp_id());
-		base_charge_xml = base_charge_xml.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName());
-		base_charge_xml = base_charge_xml.replaceAll("\\{TX_ID\\}",getOpco_tx_id());
-		base_charge_xml = base_charge_xml.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
-		base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
+		try{
+			base_charge_xml = base_charge_xml.replaceAll("\\{OPERATION\\}", getOperation());
+			base_charge_xml = base_charge_xml.replaceAll("\\{MSISDN\\}", getMsisdn());
+			base_charge_xml = base_charge_xml.replaceAll("\\{SHORTCODE\\}", getShortcode());
+			base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
+			base_charge_xml = base_charge_xml.replaceAll("\\{SERVICE_ID\\}", getService_id());
+			base_charge_xml = base_charge_xml.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()));
+			base_charge_xml = base_charge_xml.replaceAll("\\{CP_ID\\}", getCp_id());
+			base_charge_xml = base_charge_xml.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName());
+			base_charge_xml = base_charge_xml.replaceAll("\\{TX_ID\\}",getOpco_tx_id());
+			base_charge_xml = base_charge_xml.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
+			base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
+		}catch(Exception exp){
+			exp.getMessage();
+			throw new PricePointException(exp);
+		}
 		return base_charge_xml;
 	}
 
