@@ -196,9 +196,9 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					sub = new Subscription();
 					sub.setMsisdn(msisdn);
 					sub.setSms_service_id_fk(smsService.getId());
-					sub.setOpco(operatorCountry);
 				}
 				
+				sub.setOpco(operatorCountry);
 				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 				qry = em.createNativeQuery("select DATE_ADD(:curdate_local, INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
 				qry.setParameter("curdate_local", nowInNairobiTz);
