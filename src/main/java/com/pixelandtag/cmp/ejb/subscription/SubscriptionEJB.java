@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
@@ -15,7 +14,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 
@@ -177,7 +175,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	@Override
-	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public Subscription renewSubscription(String msisdn, SMSService smsService, SubscriptionStatus substatus,  AlterationMethod method) throws Exception{
 			Subscription sub = null;
 			try{

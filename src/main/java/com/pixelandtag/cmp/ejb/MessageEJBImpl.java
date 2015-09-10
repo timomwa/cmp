@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,6 +32,7 @@ public class MessageEJBImpl implements MessageEJBI {
 
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public Message getMessage(String key, Long language_id){
 		
 		Message message = null;
@@ -37,7 +40,8 @@ public class MessageEJBImpl implements MessageEJBI {
 		if(language_id<=0)
 			language_id = 1L;
 	
-		String msg = "Error 130 :  Translation text not found. language_id = "+language_id+" key = "+key;
+		String msg = "State 130 :  language_id = "+language_id+" key = "+key;
+		logger.info(msg);
 		
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("language_id", language_id);
