@@ -224,7 +224,7 @@ public class USSDReceiver extends HttpServlet {
 				response = "Problem occurred. Please try again later";
 			}
 			
-			
+			messageLog.setStatus(MessageStatus.SENT_SUCCESSFULLY.name());
 			messageLog.setMt_sms(response);
 			messageLog.setMt_timestamp(timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), opco.getCountry().getTimeZone()));
 			messageLog = processorEJB.saveMessageLog(messageLog);
