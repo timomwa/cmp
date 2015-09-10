@@ -703,8 +703,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(destination_person.getPerson().getLoggedin()==null || destination_person.getPerson().getLoggedin()==true){
 					log.setOffline_msg(Boolean.FALSE);
 					
-					OutgoingSMS chatMT  = incomingSMS.convertToOutgoing();
-					chatMT.setMsisdn(destination_person.getPerson().getMsisdn());
+					OutgoingSMS outgoingchatsms  = incomingSMS.convertToOutgoing();
+					outgoingchatsms.setMsisdn(destination_person.getPerson().getMsisdn());
 					String msg = "";
 					if(!directMsg){//if it's not a direct message, then put advice
 						msg = source_user+CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
@@ -712,19 +712,20 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}else{
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
-					chatMT.setSms(msg);
-					chatMT.setCmp_tx_id(generateNextTxId());
-					chatMT.setPriority(0);//highest priority possible
-					chatMT.setPrice(BigDecimal.ZERO);
+					outgoingchatsms.setSms(msg);
+					outgoingchatsms.setCmp_tx_id(generateNextTxId());
+					outgoingchatsms.setPriority(0);//highest priority possible
+					outgoingchatsms.setPrice(BigDecimal.ZERO);
 					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
-					chatMT.setOpcosenderprofile(opcotrxprofile);
-					sendMT(chatMT);
+					outgoingchatsms.setOpcosenderprofile(opcotrxprofile);
+					
+					sendMT(outgoingchatsms);
 					String tailmsg = "";
 					if(!person.getLoggedin()){
 						tailmsg = ". However, you're offline. This means you'll not be able to receive any messages from anyone or '"+destination_person.getUsername()+"'. Reply with the word LOGIN to log in.";
 					}
 					
-					outgoingsms.setSms("MessageEmail sent to '"+destination_person.getUsername()+"'"+tailmsg);
+					outgoingsms.setSms("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					incomingSMS.setPrice(BigDecimal.ZERO);

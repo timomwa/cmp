@@ -103,19 +103,31 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				params.put("opco_tx_id", sms.getOpco_tx_id());
 				msglogs = messagelogDAO.findByNamedQuery(MessageLog.NQ_BY_OPCO_TXID, params);
 			}
-			
+			MessageLog messagelog = null;
+			Date mt_timestamp = timeconverterEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), sms.getOpcosenderprofile().getOpco().getCountry().getTimeZone());
 			if(msglogs!=null && msglogs.size()>0){
-				MessageLog messagelog = msglogs.get(0);
+				messagelog = msglogs.get(0);
 				messagelog.setStatus(status.name());
 				messagelog.setMt_sms(sms.getSms());
-				Date mt_timestamp = timeconverterEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), sms.getOpcosenderprofile().getOpco().getCountry().getTimeZone());
 				messagelog.setMt_timestamp(mt_timestamp);
-				messagelog = messagelogDAO.save(messagelog);
-				return true;
 			}else{
-				logger.info("No such record with cmp_tx_id / opco_tx_id = "+sms.getCmp_tx_id()+"/"+sms.getOpco_tx_id()+"  in message_log table");
-				return false;
+				logger.info("No such record with cmp_tx_id / opco_tx_id = "+sms.getCmp_tx_id()+"/"+sms.getOpco_tx_id()+"  in message_log table, so we create one");
+				
+				messagelog = new MessageLog();
+				messagelog.setCmp_tx_id(sms.getCmp_tx_id());
+				messagelog.setMo_processor_id_fk(sms.getMoprocessor().getId());
+				messagelog.setMsisdn(sms.getMsisdn());
+				messagelog.setMt_sms(sms.getSms());
+				messagelog.setMt_timestamp(mt_timestamp);
+				messagelog.setOpco_tx_id(sms.getOpco_tx_id());
+				messagelog.setShortcode(sms.getShortcode());
+				messagelog.setSource(sms.getMediumType().name());
+				messagelog.setStatus(status.name());
 			}
+			
+			messagelog = messagelogDAO.save(messagelog);
+			
+			return true;
 			
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
