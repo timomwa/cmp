@@ -384,6 +384,8 @@ public class SubscriptionBillingWorker implements Runnable {
 		if (service == null) {
 			try {
 				service = cmp_ejb.find(SMSService.class, sms_service_id);
+				if(service!=null)
+				sms_serviceCache.put(sms_service_id, service);
 			} catch (Exception e) {
 				logger.warn("Couldn't find service with id "
 						+ sms_service_id);
