@@ -113,7 +113,8 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				messagelog = messagelogDAO.save(messagelog);
 				return true;
 			}else{
-				throw new Exception("No such record with cmp_tx_id / opco_tx_id = "+sms.getCmp_tx_id()+"/"+sms.getOpco_tx_id()+"  in message_log table");
+				logger.info("No such record with cmp_tx_id / opco_tx_id = "+sms.getCmp_tx_id()+"/"+sms.getOpco_tx_id()+"  in message_log table");
+				return false;
 			}
 			
 		}catch(Exception exp){

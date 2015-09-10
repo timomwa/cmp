@@ -340,6 +340,11 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		return moprocDAO.findBy("shortcode", shortcode);
 	}
 	
+	
+	public MessageLog saveMessageLog(MessageLog messagelog) throws Exception{
+		return messagelogDAO.save(messagelog);
+	}
+	
 	/**
 	 * 
 	 * @param xml

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.MessageLog;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 
 public interface ProcessorResolverEJBI {
@@ -15,6 +16,8 @@ public interface ProcessorResolverEJBI {
 	public IncomingSMS processMo(IncomingSMS incomingsms);
 
 	public MOProcessor getMOProcessor(String shortcode);
+
+	public MessageLog saveMessageLog(MessageLog messageLog) throws Exception;
 	
 	
 

@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -23,16 +24,20 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.icu.util.TimeZone;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.MessageLog;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.connections.ConnectionPool;
@@ -82,6 +87,9 @@ public class USSDReceiver extends HttpServlet {
 	
 	@EJB
 	private ConfigsEJBI configsEJB;
+	
+	@EJB
+	private TimezoneConverterI timezoneEJB;
 
 
 	/**
@@ -151,13 +159,18 @@ public class USSDReceiver extends HttpServlet {
 			
 			final MOSms moMessage = new MOSms(req,tx_id);
 			
+			MessageLog messageLog = new MessageLog();
+			IncomingSMS incomingsms = new IncomingSMS();
+			OperatorCountry opco = configsEJB.getOperatorByIpAddress(ip_addr);
+			
 			try{
 				moMessage.setMediumType(MediumType.ussd);
 				moMessage.setMt_Sent(response);
 				
-				IncomingSMS incomingsms = new IncomingSMS();
+				
 				incomingsms.setBilling_status(moMessage.getBillingStatus());
 				incomingsms.setCmp_tx_id(moMessage.getCmp_tx_id());
+				incomingsms.setOpco_tx_id(moMessage.getOpco_tx_id());
 				incomingsms.setEvent_type(moMessage.getEventType()!=null ? moMessage.getEventType().toString() : "" );
 				incomingsms.setIsSubscription(Boolean.FALSE);
 				incomingsms.setMediumType(MediumType.ussd);
@@ -166,13 +179,24 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setProcessed(Boolean.TRUE);
 				incomingsms.setMo_ack(Boolean.TRUE);
 				MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
-				OperatorCountry opco = configsEJB.getOperatorByIpAddress(ip_addr);
 				incomingsms.setOpco(opco);
 				logger.info(" >> processor = "+processor);
 				incomingsms.setMoprocessor(processor);
 				messageID = datingBean.logMO(incomingsms).getId();
 				ro.setMessageId(messageID);
 				ro.setOpco(opco);
+				
+				
+				messageLog.setCmp_tx_id(incomingsms.getCmp_tx_id());
+				messageLog.setMo_processor_id_fk(processor.getId());
+				messageLog.setMo_sms(incomingsms.getSms());
+				messageLog.setMsisdn(incomingsms.getMsisdn());
+				messageLog.setOpco_tx_id(incomingsms.getOpco_tx_id());
+				messageLog.setShortcode(incomingsms.getShortcode());
+				messageLog.setSource(incomingsms.getMediumType().name());
+				messageLog.setStatus(MessageStatus.RECEIVED.name());
+				
+				messageLog = processorEJB.saveMessageLog(messageLog);
 				
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
@@ -210,6 +234,9 @@ public class USSDReceiver extends HttpServlet {
 				response = "Problem occurred. Please try again later";
 			}
 			
+			
+			messageLog.setMt_sms(response);
+			messageLog.setMt_timestamp(timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), opco.getCountry().getTimeZone()));
 			
 			pw.write(response);
 			

@@ -35,6 +35,7 @@ public abstract class GenericMO extends GenericMessage {
 		
 		//setCMP_Txid(request.getParameter("tid"));
 		if(request.getParameter("tid")!=null && !request.getParameter("tid").isEmpty()){
+			setOpco_tx_id(request.getParameter("tid"));
 			try{
 				setCmp_tx_id(nextTxnId);
 			}catch(Exception exp){
