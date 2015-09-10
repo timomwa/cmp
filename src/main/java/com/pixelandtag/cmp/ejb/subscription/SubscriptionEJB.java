@@ -189,7 +189,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					qry.setMaxResults(1);
 					sub = (Subscription) qry.getSingleResult();
 				}catch(javax.persistence.NoResultException exp){
-					
+					logger.warn("No subscription wit sms_service_id_fk="+smsService.getId()+" and msisdn = "+msisdn);
 				}
 				
 				if(sub==null){
