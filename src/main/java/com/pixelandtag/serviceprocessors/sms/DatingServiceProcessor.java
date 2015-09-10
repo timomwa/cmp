@@ -421,7 +421,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						keywordIsNumber = true;
 					}catch(Exception exp){}
 					
-					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
+					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES") || KEYWORD.trim().equalsIgnoreCase("YEP")
+							|| KEYWORD.trim().equalsIgnoreCase("NDIO") || KEYWORD.trim().equalsIgnoreCase("NDIYO")  || KEYWORD.trim().equalsIgnoreCase("SAWA") || KEYWORD.trim().equalsIgnoreCase("OK") )) ){
 						person.setAgreed_to_tnc(Boolean.TRUE);
 						person = datingBean.saveOrUpdate(person);
 					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){

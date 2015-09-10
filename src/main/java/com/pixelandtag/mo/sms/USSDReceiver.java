@@ -167,6 +167,7 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setShortcode(moMessage.getSMS_SourceAddr());
 				incomingsms.setProcessed(Boolean.TRUE);
 				incomingsms.setMo_ack(Boolean.TRUE);
+				incomingsms.setMsisdn(moMessage.getMsisdn());
 				MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
 				incomingsms.setOpco(opco);
 				logger.info(" >> processor = "+processor);

@@ -173,7 +173,7 @@ public class MsisdnController extends HttpServlet {
 						 ps.close();
 					 }catch(Exception exp){}
 					 
-					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel', cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', mt_timestamp as dlrArrive,`shortcode` as 'source' from "+DB+".message_log where date(mo_timestamp)=? order by mo_timestamp desc limit 50");
+					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel', cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', mt_timestamp as dlrArrive,`source` as 'source' from "+DB+".message_log where date(mo_timestamp)=? order by mo_timestamp desc limit 50");
 					 ps.setString(1, date);
 				 }
 			 }
