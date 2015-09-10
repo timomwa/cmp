@@ -210,6 +210,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
 		billable.setEvent_type(outgoingsms.getEvent_type()!=null ? EventType.get(outgoingsms.getEvent_type()) : EventType.SUBSCRIPTION_PURCHASE);
 		billable.setPricePointKeyword(outgoingsms.getPrice_point_keyword());
+		billable.setOpco(outgoingsms.getOpcosenderprofile().getOpco());
 		logger.debug(" before save "+billable.getId());
 		
 		try{
