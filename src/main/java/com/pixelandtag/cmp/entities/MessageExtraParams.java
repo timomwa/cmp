@@ -28,7 +28,7 @@ public class MessageExtraParams implements Serializable{
 	@Index(name="trxnididx")
 	private String transactionid;
 	
-	@Column(name="paramKey", nullable=false,length=200)
+	@Column(name="paramKey", nullable=false,length=45)
 	@Index(name="trxnididx")
 	private String paramKey;
 		

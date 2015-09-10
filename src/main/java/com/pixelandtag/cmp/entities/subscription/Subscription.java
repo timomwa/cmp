@@ -88,9 +88,9 @@ public class Subscription implements Serializable {
 	private Integer credibility_index;
 	
 	
-	@JoinColumn(name="opco_id_fk")
-	@Index(name="oprtfkidx")
-	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@JoinColumn(name="opco_id_fk", nullable=false)
+	@Index(name="opsscfkidx")
+	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	private OperatorCountry opco;
 	
 	

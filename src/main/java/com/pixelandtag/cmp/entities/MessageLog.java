@@ -59,7 +59,7 @@ public class MessageLog implements Serializable {
 	@Column(name="cmp_tx_id", unique=true, nullable=false)
 	private String cmp_tx_id;
 	
-	@Column(name="mo_sms")
+	@Column(name="mo_sms",length=1000)
 	private String mo_sms;
 		
 	@Column(name="mo_timestamp", nullable=false)
@@ -68,7 +68,7 @@ public class MessageLog implements Serializable {
 	private Date mo_timestamp;
 	
 	
-	@Column(name="mt_sms")
+	@Column(name="mt_sms",length=1000)
 	private String mt_sms;
 	
 

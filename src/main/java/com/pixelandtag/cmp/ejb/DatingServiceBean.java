@@ -1209,7 +1209,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
 		billable.setEvent_type((incomingsms.getEvent_type()!=null ?  EventType.get(incomingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(incomingsms.getPrice_point_keyword());
-			
+		billable.setOpco(incomingsms.getOpco());
 		return billable;
 	}
 

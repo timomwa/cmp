@@ -75,7 +75,7 @@ import com.pixelandtag.util.StopWatch;
 public class BaseEntityBean implements BaseEntityI {
 	
 	private Logger logger = Logger.getLogger(BaseEntityBean.class);
-	private String server_tz = "-05:00";//TODO externalize
+	private String server_tz = "-04:00";//TODO externalize
 	private String client_tz = "+03:00";//TODO externalize
 	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";//TODO externalize this
 	private StopWatch watch;

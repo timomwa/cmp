@@ -375,6 +375,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		
 		Billable billable = null;
 	
+		
 		logger.info(" sub "+sub);
 		Long sms_service_id = sub.getSms_service_id_fk();
 		
@@ -414,6 +415,7 @@ public class SubscriptionBillingWorker implements Runnable {
 					: EventType.SUBSCRIPTION_PURCHASE));
 			billable.setPricePointKeyword(service.getPrice_point_keyword());
 			billable.setSuccess(Boolean.FALSE);
+			billable.setOpco(sub.getOpco());
 			logger.debug(" before queue transaction_id" + billable.getCp_tx_id());
 
 			
