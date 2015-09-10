@@ -365,6 +365,9 @@ public class Billable implements Serializable {
 
 	public String getChargeXML(String base_charge_xml) throws PricePointException {
 		try{
+			if(getOpco_tx_id()==null && getCp_tx_id()!=null )
+				setOpco_tx_id(getCp_tx_id());
+			
 			base_charge_xml = base_charge_xml.replaceAll("\\{OPERATION\\}", getOperation());
 			base_charge_xml = base_charge_xml.replaceAll("\\{MSISDN\\}", getMsisdn());
 			base_charge_xml = base_charge_xml.replaceAll("\\{SHORTCODE\\}", getShortcode());
@@ -373,8 +376,8 @@ public class Billable implements Serializable {
 			base_charge_xml = base_charge_xml.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()));
 			base_charge_xml = base_charge_xml.replaceAll("\\{CP_ID\\}", getCp_id());
 			base_charge_xml = base_charge_xml.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName());
-			base_charge_xml = base_charge_xml.replaceAll("\\{TX_ID\\}",getOpco_tx_id());
-			base_charge_xml = base_charge_xml.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
+			base_charge_xml = base_charge_xml.replaceAll("\\{TX_ID\\}",getOpco_tx_id() );
+			base_charge_xml = base_charge_xml.replaceAll("\\{CP_TX_ID\\}", getCp_tx_id());
 			base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
 		}catch(Exception exp){
 			exp.getMessage();
