@@ -21,11 +21,70 @@ import com.pixelandtag.action.BaseActionBean;
 @Remote
 public class LinkLatencyStatEJBImpl implements LinkLatencyStatEJBI {
 
-public Logger logger = Logger.getLogger(getClass());
+
+	public Logger logger = Logger.getLogger(getClass());
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	protected EntityManager em;
 	
+	@Override
+	public BigDecimal getAverageDailyRevenueForTheLast(int lastdays){
+		
+		BigDecimal averagecount = BigDecimal.ZERO;
+		
+		try{
+			
+			Query query  = em.createNativeQuery("select avg(total_kshs) as avgrev from (select date(convert_tz(timeStamp,'"+BaseActionBean.from_tz+"','"+BaseActionBean.to_tz+"')) dt, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit :lastdays) st ");
+			query.setParameter("lastdays", lastdays);
+			averagecount = (BigDecimal) query.getSingleResult();
+			
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		
+		return averagecount;
+		
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public BigDecimal getcurrentStats(){
+
+		BigDecimal averagecount = BigDecimal.ZERO;
+		
+		try{
+			
+			Query query  = em.createNativeQuery("select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 1 ");
+			
+			List<Object[]> recs = query.getResultList();
+			for(Object[] o : recs)
+				averagecount = (BigDecimal) o[1];
+			
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		
+		return averagecount;
+	}
+	
+	@Override
+	public BigDecimal getAverageHourlyRevenueForTheLast(int lastdays){
+		
+		BigDecimal averagecount = BigDecimal.ZERO;
+		
+		try{
+			
+			Query query  = em.createNativeQuery("select avg(total_kshs) as avgrev from (select date(convert_tz(timeStamp,'"+BaseActionBean.from_tz+"','"+BaseActionBean.to_tz+"')) dt, sum(price) total_kshs from  success_billing where success=1 AND  hour(timeStamp)<=hour(now())  group by dt order by dt desc limit :lastdays) st ");
+			query.setParameter("lastdays", lastdays);
+			averagecount = (BigDecimal) query.getSingleResult();
+			
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		
+		return averagecount;
+		
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override

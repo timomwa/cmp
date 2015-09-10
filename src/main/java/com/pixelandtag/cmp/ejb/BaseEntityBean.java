@@ -536,11 +536,8 @@ public class BaseEntityBean implements BaseEntityI {
 			httsppost.setHeader("Authorization", "Basic " + encoding);
 			httsppost.setHeader("SOAPAction","");
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
-			logger.info("\n\n\n BILLABLE OPCO : "+billable.getOpco()+"\n\n");
-			logger.info("\n\n\n BILLABLE: "+billable.toString()+"\n\n");
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
 			
-			logger.info("XML SENT \n : "+xml + "\n");
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			
@@ -557,8 +554,8 @@ public class BaseEntityBean implements BaseEntityI {
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
 			
-			 logger.info("RESP CODE : "+RESP_CODE);
-			 logger.info("RESP XML : "+resp);
+			 logger.debug("RESP CODE : "+RESP_CODE);
+			 logger.debug("RESP XML : "+resp);
 			 
 			
 			

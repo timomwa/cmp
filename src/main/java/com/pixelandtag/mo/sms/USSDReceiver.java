@@ -26,10 +26,12 @@ import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.MessageLog;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
@@ -79,6 +81,9 @@ public class USSDReceiver extends HttpServlet {
 	
 	@EJB
 	private TimezoneConverterI timezoneEJB;
+	
+	@EJB
+	private QueueProcessorEJBI queueprocEJB;
 
 
 	/**
@@ -148,7 +153,7 @@ public class USSDReceiver extends HttpServlet {
 			
 			final MOSms moMessage = new MOSms(req,tx_id);
 			
-			MessageLog messageLog = new MessageLog();
+			OutgoingSMS outgoingsms = null;
 			IncomingSMS incomingsms = new IncomingSMS();
 			OperatorCountry opco = configsEJB.getOperatorByIpAddress(ip_addr);
 			
@@ -176,17 +181,8 @@ public class USSDReceiver extends HttpServlet {
 				ro.setMessageId(messageID);
 				ro.setOpco(opco);
 				
-				
-				messageLog.setCmp_tx_id(incomingsms.getCmp_tx_id());
-				messageLog.setMo_processor_id_fk(processor.getId());
-				messageLog.setMo_sms(incomingsms.getSms());
-				messageLog.setMsisdn(incomingsms.getMsisdn());
-				messageLog.setOpco_tx_id(incomingsms.getOpco_tx_id());
-				messageLog.setShortcode(incomingsms.getShortcode());
-				messageLog.setSource(incomingsms.getMediumType().name());
-				messageLog.setStatus(MessageStatus.RECEIVED.name());
-				
-				messageLog = processorEJB.saveMessageLog(messageLog);
+				outgoingsms = incomingsms.convertToOutgoing();
+				outgoingsms = queueprocEJB.saveOrUpdate(outgoingsms);
 				
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
@@ -224,10 +220,8 @@ public class USSDReceiver extends HttpServlet {
 				response = "Problem occurred. Please try again later";
 			}
 			
-			messageLog.setStatus(MessageStatus.SENT_SUCCESSFULLY.name());
-			messageLog.setMt_sms(response);
-			messageLog.setMt_timestamp(timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), opco.getCountry().getTimeZone()));
-			messageLog = processorEJB.saveMessageLog(messageLog);
+			queueprocEJB.deleteCorrespondingIncomingSMS(outgoingsms);
+			queueprocEJB.updateMessageLog(outgoingsms, MessageStatus.SENT_SUCCESSFULLY);
 			
 			pw.write(response);
 			
