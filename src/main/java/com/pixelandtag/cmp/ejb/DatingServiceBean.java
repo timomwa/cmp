@@ -578,7 +578,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		Message message = messageEJB.getMessage(key, Long.valueOf(language_id));
 		
-		return message.getMessage();
+		return message!=null ? message.getMessage() : null;
 		
 	}
 	
@@ -1128,7 +1128,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			String msg = "";
 			
 			PersonDatingProfile profile = person!=null?  getProfile(person) : null;
-			if(profile!=null)
+			if(profile!=null && profile.getLanguage_id()>0)
 				language_id = profile.getLanguage_id();
 			
 			if(!billable.isSuccess()){

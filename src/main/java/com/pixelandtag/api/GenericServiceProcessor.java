@@ -196,7 +196,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
 		billable.setDiscount_applied("0");
 		billable.setIn_outgoing_queue(0l);
-		billable.setKeyword(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setKeyword(outgoingsms.getSms()!=null ? outgoingsms.getSms().split("\\s")[0].toUpperCase() : "recharge");
 		billable.setMaxRetriesAllowed(1L);
 		billable.setMessage_id(outgoingsms.getId());
 		billable.setMsisdn(outgoingsms.getMsisdn());
