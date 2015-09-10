@@ -2296,6 +2296,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 									incomingsms.setServiceid( Long.valueOf(smsserv.getId().intValue()));
 									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
+									incomingsms.setOpco(req.getOpco());
 									logger.info(">>>>>>>>>>>> req: "+req);
 									logger.info(">>>>>>>>>>>> req.getMessageId(): "+req.getMessageId());
 									incomingsms.setId(req.getMessageId());
@@ -2449,6 +2450,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
 									incomingsms.setId(req.getMessageId());
 									incomingsms.setMoprocessor(proc);
+									incomingsms.setOpco(req.getOpco());
 									logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
 									
 									logMO(incomingsms);
@@ -2506,6 +2508,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							incomingsms.setShortcode(proc.getShortcode());
 							incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
 							incomingsms.setMoprocessor(proc);
+							incomingsms.setOpco(req.getOpco());
 							logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
 							
 							logMO(incomingsms);
