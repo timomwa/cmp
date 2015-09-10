@@ -361,18 +361,18 @@ public class Billable implements Serializable {
 	}
 
 	public String getChargeXML(String base_charge_xml) throws PricePointException {
-		return base_charge_xml
-				.replaceAll("\\{OPERATION\\}", getOperation())
-				.replaceAll("\\{MSISDN\\}", getMsisdn())
-				.replaceAll("\\{SHORTCODE\\}", getShortcode())
-				.replaceAll("\\{KEYWORD\\}", getPricePointKeyword())
-				.replaceAll("\\{SERVICE_ID\\}", getService_id())
-				.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()))
-				.replaceAll("\\{CP_ID\\}", getCp_id())
-				.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName())
-				.replaceAll("\\{TX_ID\\}",getOpco_tx_id())
-				.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()))
-				.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
+		base_charge_xml = base_charge_xml.replaceAll("\\{OPERATION\\}", getOperation());
+		base_charge_xml = base_charge_xml.replaceAll("\\{MSISDN\\}", getMsisdn());
+		base_charge_xml = base_charge_xml.replaceAll("\\{SHORTCODE\\}", getShortcode());
+		base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
+		base_charge_xml = base_charge_xml.replaceAll("\\{SERVICE_ID\\}", getService_id());
+		base_charge_xml = base_charge_xml.replaceAll("\\{PRICE\\}", String.valueOf( getPrice().doubleValue()));
+		base_charge_xml = base_charge_xml.replaceAll("\\{CP_ID\\}", getCp_id());
+		base_charge_xml = base_charge_xml.replaceAll("\\{EVENT_TYPE\\}", getEvent_type().getName());
+		base_charge_xml = base_charge_xml.replaceAll("\\{TX_ID\\}",getOpco_tx_id());
+		base_charge_xml = base_charge_xml.replaceAll("\\{CP_TX_ID\\}", String.valueOf(getCp_tx_id()));
+		base_charge_xml = base_charge_xml.replaceAll("\\{KEYWORD\\}", getPricePointKeyword());
+		return base_charge_xml;
 	}
 
 	public String toString() {

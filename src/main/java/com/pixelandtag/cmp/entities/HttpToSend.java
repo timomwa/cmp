@@ -134,7 +134,7 @@ public class HttpToSend implements Serializable{
 	
 	
 	@ManyToOne(cascade=CascadeType.MERGE)
-	@JoinColumn(name = "opco_id_fk", nullable=false)
+	@JoinColumn(name = "opco_id_fk")
 	@Index(name="httsopcoidx")
 	private OperatorCountry opco;
 	

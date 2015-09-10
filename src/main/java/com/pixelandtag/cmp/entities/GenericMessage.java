@@ -84,7 +84,7 @@ public class GenericMessage implements Serializable{
 	private String price_point_keyword;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="processor_id", nullable=false)
+	@JoinColumn(name="processor_id")
 	private MOProcessor moprocessor;
 	
 	@Column(name="isSubscription", nullable=false)

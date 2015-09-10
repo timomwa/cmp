@@ -24,7 +24,7 @@ public class MessageExtraParams implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="transactionid", nullable=false,length=200)
+	@Column(name="transactionid", nullable=false,length=45)
 	@Index(name="trxnididx")
 	private String transactionid;
 	
