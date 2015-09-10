@@ -535,8 +535,8 @@ public class BaseEntityBean implements BaseEntityI {
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
 			
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			logger.debug("BILLABLE: "+billable.toString());
-			logger.debug("XML SENT \n : "+xml + "\n");
+			logger.info("BILLABLE: "+billable.toString());
+			logger.info("XML SENT \n : "+xml + "\n");
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			
@@ -544,7 +544,7 @@ public class BaseEntityBean implements BaseEntityI {
 			watch.start();
 			response = httpclient.execute(httsppost);
 			watch.stop();
-			logger.debug("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
+			logger.info("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
 			 
 			 final int RESP_CODE = response.getStatusLine().getStatusCode();
@@ -553,8 +553,8 @@ public class BaseEntityBean implements BaseEntityI {
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
 			
-			 logger.debug("RESP CODE : "+RESP_CODE);
-			 logger.debug("RESP XML : "+resp);
+			 logger.info("RESP CODE : "+RESP_CODE);
+			 logger.info("RESP XML : "+resp);
 			 
 			
 			
