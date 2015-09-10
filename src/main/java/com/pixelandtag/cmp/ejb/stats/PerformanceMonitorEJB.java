@@ -54,9 +54,10 @@ public class PerformanceMonitorEJB {
 	@Schedule(second = "0", minute = "*/1", hour = "*", dayOfMonth="*", persistent = false, year="*" )
 	public void checkHoulyAverage(){
 		
-		
 		if(running)
 			return;
+		
+		running = true;
 		
 		sb.setLength(0);
 		
@@ -105,7 +106,7 @@ public class PerformanceMonitorEJB {
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(),e1);
 		}finally{
-			
+			running  = false;
 			sb.append("\t\t\t averagehourly \t : \t ").append(averagehourly).append("\n");
 			sb.append("\t\t\t currentstats \t : \t ").append(currentstats).append("\n");
 			sb.append("\t\t\t decline \t : \t ").append(decline).append("\n");
@@ -114,6 +115,8 @@ public class PerformanceMonitorEJB {
 			sb.append("\t\t\t supportTeam \t : \t ").append(supportTeam).append("\n");
 			
 			logger.info("\n\n"+sb.toString()+"\n\n");
+			
+			
 		}
 		
 		
