@@ -172,6 +172,7 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setMoprocessor(processor);
 				messageID = datingBean.logMO(incomingsms).getId();
 				ro.setMessageId(messageID);
+				ro.setOpco(opco);
 				
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
