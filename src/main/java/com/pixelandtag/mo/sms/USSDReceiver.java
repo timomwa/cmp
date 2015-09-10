@@ -181,6 +181,18 @@ public class USSDReceiver extends HttpServlet {
 				ro.setMessageId(messageID);
 				ro.setOpco(opco);
 				
+				MessageLog messagelog = new MessageLog();
+				messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
+				messagelog.setMo_processor_id_fk(incomingsms.getMoprocessor().getId());
+				messagelog.setMsisdn(incomingsms.getMsisdn());
+				messagelog.setMt_sms(incomingsms.getSms());
+				messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());
+				messagelog.setShortcode(incomingsms.getShortcode());
+				messagelog.setSource(incomingsms.getMediumType().name());
+				messagelog.setStatus(MessageStatus.RECEIVED.name());
+				
+				messagelog = processorEJB.saveMessageLog(messagelog);
+				
 				outgoingsms = incomingsms.convertToOutgoing();
 				outgoingsms = queueprocEJB.saveOrUpdate(outgoingsms);
 				
@@ -221,6 +233,7 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			//queueprocEJB.deleteCorrespondingIncomingSMS(outgoingsms);
+			outgoingsms.setSms(response);
 			queueprocEJB.updateMessageLog(outgoingsms, MessageStatus.SENT_SUCCESSFULLY);
 			
 			pw.write(response);
