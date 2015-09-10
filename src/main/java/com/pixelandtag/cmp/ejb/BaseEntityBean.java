@@ -58,6 +58,7 @@ import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dao.generic.GenericDAO;
@@ -193,8 +194,8 @@ public class BaseEntityBean implements BaseEntityI {
     }
     
 
-	
-	public void  mimicMO(String keyword, String msisdn){
+	@Override
+	public void  mimicMO(String keyword, String msisdn, OperatorCountry operatorCountry){
 		
 		try {
 			
@@ -213,7 +214,7 @@ public class BaseEntityBean implements BaseEntityI {
 			incomingsms.setServiceid(smsserv.getId());
 			incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
 			incomingsms.setMoprocessor(proc);  
-			
+			incomingsms.setOpco(operatorCountry);
 			logger.info("\n\n\n\n\n::::::::::::::::processor_fk.intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
 
 			logMO(incomingsms);

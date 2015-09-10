@@ -273,7 +273,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
 				
 				if(!subvalid)
-					cmp_bean.mimicMO("BILLING_SERV5",MSISDN);
+					cmp_bean.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
 				
 				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
 					

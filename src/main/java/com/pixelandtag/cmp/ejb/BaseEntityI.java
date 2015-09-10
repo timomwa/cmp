@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
@@ -34,7 +35,7 @@ public interface BaseEntityI {
 	public IncomingSMS logMO(IncomingSMS mo) ;
 	public String replaceAllIllegalCharacters(String text);
 	public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception;
-	public void mimicMO(String keyword, String msisdn);
+	public void mimicMO(String keyword, String msisdn, OperatorCountry operatorCountry);
 	public OutgoingSMS sendMT(OutgoingSMS mo) throws Exception;
 	public String generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
