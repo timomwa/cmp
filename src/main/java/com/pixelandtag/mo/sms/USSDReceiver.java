@@ -28,10 +28,13 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.connections.ConnectionPool;
 import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.dating.entities.Person;
@@ -73,6 +76,12 @@ public class USSDReceiver extends HttpServlet {
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
+	
+	@EJB
+	private OpcoEJBI opcoEJB;
+	
+	@EJB
+	private ConfigsEJBI configsEJB;
 
 
 	/**
@@ -91,6 +100,17 @@ public class USSDReceiver extends HttpServlet {
 			throws ServletException, IOException {
 		
 		
+		Enumeration<String> headernames = req.getHeaderNames();
+		String headerstr = "\n";
+		 while (headernames.hasMoreElements()) { 
+			 String headerName = (String) headernames.nextElement();  
+		     String headerValue = req.getHeader(headerName);  
+		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
+		 }
+		
+		 
+		 logger.info(headerstr+"\n\n");
+		 
 		ServletOutputStream sOutStream = null;
 		
 		
@@ -110,6 +130,10 @@ public class USSDReceiver extends HttpServlet {
 			System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
 			
 		}
+		
+		String ip_addr = req.getRemoteAddr();
+		
+		System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
 		
 		
 		watch.start();
@@ -142,7 +166,8 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setProcessed(Boolean.TRUE);
 				incomingsms.setMo_ack(Boolean.TRUE);
 				MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
-				
+				OperatorCountry opco = configsEJB.getOperatorByIpAddress(ip_addr);
+				incomingsms.setOpco(opco);
 				logger.info(" >> processor = "+processor);
 				incomingsms.setMoprocessor(processor);
 				messageID = datingBean.logMO(incomingsms).getId();
