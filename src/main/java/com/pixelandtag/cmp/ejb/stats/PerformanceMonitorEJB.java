@@ -1,13 +1,12 @@
+package com.pixelandtag.cmp.ejb.stats;
+
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.TimerService;
-import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 
