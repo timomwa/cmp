@@ -1,6 +1,3 @@
-package com.pixelandtag.cmp.ejb.stats;
-public class PerformanceMonitorEJB {}
-/*
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -124,4 +121,3 @@ public class PerformanceMonitorEJB {
 	}
 
 }
-*/
