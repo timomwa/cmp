@@ -28,12 +28,12 @@
 	<dependencies>
 
 
-		<!--dependency>
+		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<version>6.0</version>
 			<scope>compile</scope>
-		</dependency-->
+		</dependency>
 
 		<dependency>
 			<groupId>javax.annotation</groupId>
