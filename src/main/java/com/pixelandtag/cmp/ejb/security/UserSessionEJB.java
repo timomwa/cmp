@@ -66,14 +66,9 @@ public class UserSessionEJB implements UserSessionI {
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void createAuditTrail(AuditTrail useraction){
 		try{
-			//utx.begin();
-			em.merge(useraction);
-			//utx.commit();
+			useraction= em.merge(useraction);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
-			try{
-				//utx.rollback();
-			}catch(Exception ex){}
 		}
 	}
 

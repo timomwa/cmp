@@ -7,7 +7,7 @@ AJAX = new XMLHttpRequest();
 AJAX = new ActiveXObject("Microsoft.XMLHTTP");
 }
 if (AJAX) {
-AJAX.open("GET", '/integration?listIntegrationConfig', false);
+AJAX.open("GET", '/Permission.action', false);
 AJAX.send(null);
 var res = AJAX.responseText;
 GLOBAL_VARS.currentRoles = eval('(' + res + ')');
