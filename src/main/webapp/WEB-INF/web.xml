@@ -234,7 +234,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DNReceiver</servlet-name>
-		<url-pattern>/dn</url-pattern>
+		<url-pattern>/dnotifications</url-pattern>
 	</servlet-mapping>
 
 
@@ -351,6 +351,10 @@
 		<servlet-name>MOreceiver</servlet-name>
 		<url-pattern>/sms</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OrangeMOReceiver</servlet-name>
+		<url-pattern>/dn</url-pattern>
+	</servlet-mapping>
 	
 	
 	<servlet>
@@ -366,6 +370,13 @@
 		<display-name>MOreceiver</display-name>
 		<servlet-name>MOreceiver</servlet-name>
 		<servlet-class>com.pixelandtag.mo.sms.MOReceiver</servlet-class>
+	</servlet>
+	<servlet>
+		<description>
+		</description>
+		<display-name>OrangeMOReceiver</display-name>
+		<servlet-name>OrangeMOReceiver</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.OrangeMOReceiver</servlet-class>
 	</servlet>
 	
 	
