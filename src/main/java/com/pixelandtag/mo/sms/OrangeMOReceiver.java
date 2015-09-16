@@ -97,7 +97,14 @@ public class OrangeMOReceiver extends HttpServlet {
 		PrintWriter pw = response.getWriter();
 		
 		try{
-			pw.write("Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
+		
+			String responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
+								   +"<soapenv:Header/>"
+								   +"<soapenv:Body>"
+								   +"<loc:notifySmsReceptionResponse/>"
+								   +"</soapenv:Body>"
+								   +"</soapenv:Envelope>";
+			pw.write(responsexml);//"Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}finally{

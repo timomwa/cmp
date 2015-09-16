@@ -163,8 +163,8 @@ insert into user select next_val+1,'janet.murithi@gmail.com',1,'janet.murithi@gm
 DELIMITER $
 CREATE PROCEDURE numbers()
 BEGIN
-    select count(distinct SUB_Mobtel) as 'distinct msisdn' from messagelog;
-    select count(*), date(timeStamp) ts from messagelog  group by ts order by ts asc;
+    select count(distinct msisdn) as 'distinct msisdn' from message_log;
+    select count(*), date(mo_timestamp) ts from message_log  group by ts order by ts asc;
 	select count(*),profileComplete ,date(creationDate) dt from dating_profile group by profileComplete,dt;
 	select count(*),profileComplete from dating_profile group by profileComplete;
 	select count(*), date(timeStamp) ts from dating_chatlog where hour(timeStamp)<=hour(now()) group by ts order by ts asc;

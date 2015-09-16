@@ -41,7 +41,7 @@ public interface Sender{
 	public final String HTTP_RESP_XML_REF_VALUE_KEY = "http_resp_xml_ref_value_key";
 	public final String HTTP_RESP_XML_RESP_MSG_KEY = "http_resp_xml_resp_msg_key";
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
-	
+	public final String HTTP_ALLOW_SENDING_BLANK_TEXT = "http_allow_send_blank_text";
 	
 	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException;
 	public void validateMandatory()  throws MessageSenderException;

@@ -26,6 +26,8 @@ import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 
 public class PlainHttpSender extends GenericSender {
 	
+	
+
 	private Logger logger = Logger.getLogger(getClass());
 	
 	@Inject
@@ -65,6 +67,11 @@ public class PlainHttpSender extends GenericSender {
 	@Override
 	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException {
 		
+		if(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME)!=null)
+			if(this.configuration.get(HTTP_ALLOW_SENDING_BLANK_TEXT).getValue().equalsIgnoreCase("yes"))
+				if(outgoingsms.getSms()==null || outgoingsms.getSms().isEmpty())
+					throw new MessageSenderException("SMS to be sent is null. We can't send null or empty messages");
+		
 		SenderResp response = new SenderResp();
 		
 		String auth_header_value = "";
@@ -90,8 +97,6 @@ public class PlainHttpSender extends GenericSender {
 			if(headerhasunameandpwd==null || headerhasunameandpwd.getValue()==null || headerhasunameandpwd.getValue().isEmpty()){
 				throw new MessageSenderException("No configuration set for \""+HTTP_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD+"\" for this opco");
 			}
-			
-			
 			
 			if(headerhasunameandpwd.getValue().equalsIgnoreCase("yes")){
 				
