@@ -17,7 +17,7 @@ import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
 import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
-import com.pixelandtag.smssenders.SMSSenderFactory;
+import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.Sender;
 
 @Stateless
@@ -54,7 +54,7 @@ public class SMSGatewayImpl implements SMSGatewayI {
 		senderconfigs.setOpcotemplates(opcotemplates);
 		
 		try {
-			Sender sender = SMSSenderFactory.getSenderInstance(senderconfigs);
+			Sender sender = SenderFactory.getSenderInstance(senderconfigs);
 			sender.sendSMS(outgoingsms);
 			return true;
 		} catch (Exception exp) {

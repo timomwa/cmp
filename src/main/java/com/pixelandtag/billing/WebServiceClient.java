@@ -98,7 +98,8 @@ public class WebServiceClient {
 				}
 				};
 				
-				 
+				String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
+				
 				KeyStore ks = KeyStore.getInstance("JKS");
 				ks.load(new FileInputStream("F:\\SDPKeyStore.jks"), "12345678".toCharArray());// Location of Key Store c:\\SDPKeystore.dat,12345678
 				
@@ -129,8 +130,8 @@ public class WebServiceClient {
 					}
 				}};
 				SSLContext sslContext = SSLContext.getInstance("SSL");
-				sslContext.init(null, trustAllCerts, new SecureRandom());
-				//sslContext.init(kmf.getKeyManagers(), tm, null);
+				//sslContext.init(null, trustAllCerts, new SecureRandom());
+				sslContext.init(kmf.getKeyManagers(), tm, null);
 				
 				
 				
@@ -144,7 +145,6 @@ public class WebServiceClient {
 			
 				System.out.println("DoHttpPost(): Connection received");
 				
-				String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
 				String encoding = null;
 				sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
 				encoding = encoder.encode( usernamePassword.getBytes() ); 
