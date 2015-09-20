@@ -303,6 +303,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						outgoingsms.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
 						outgoingsms.setSms(msg);//tell them to renew
 						outgoingsms.setPriority(3);
+						
 					}else{
 						outgoingsms = processDating(incomingsms,person);
 					}
@@ -321,7 +322,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 
 	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person) throws Exception { 
-					
+					  
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		if(person==null)
 			person = datingBean.register(incomingsms.getMsisdn(),incomingsms.getOpco());
