@@ -160,7 +160,7 @@ public class BillingClass {
 			System.out.println("FILE TO READ?? >> "+args[0]);
 			xml_ = readTextFile(args[0]);
 		}
-		
+		System.out.println(xml_);
 		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 		HttpClient httpsclient;
 		 
@@ -206,7 +206,7 @@ public class BillingClass {
 		 
 		 String resp = convertStreamToString(response.getEntity().getContent());
 		 
-System.out.println(xml_);
+
 		 System.out.println("RESP CODE : "+RESP_CODE);
 		 System.out.println("RESP XML : "+resp);
 		 

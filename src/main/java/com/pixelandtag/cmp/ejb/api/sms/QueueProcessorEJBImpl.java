@@ -19,6 +19,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.MessageStatus;
@@ -29,6 +30,7 @@ import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MessageLog;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 
 @Stateless
 @Remote
@@ -208,13 +210,13 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<OutgoingSMS> getUnsent(Long size, Long profileid){
+	public List<OutgoingSMS> getUnsent(Long size, OpcoSenderReceiverProfile opcoSenderReceiverProfile){
 		
 		try{
-			
 			Query qry = em.createNamedQuery(OutgoingSMS.NQ_LIST_UNSENT_BY_PROFILE_ORDER_BY_PRIORITY_DESC);
 			qry.setParameter("billstatus", billingstatuses);
-			qry.setParameter("opcosenderprofileid", profileid);
+			qry.setParameter("opcosenderprofile", opcoSenderReceiverProfile);
+			qry.setParameter("timestamp", DateTime.now().toDate());
 			qry.setFirstResult(0);
 			qry.setMaxResults(size.intValue());
 			return qry.getResultList();

@@ -40,6 +40,7 @@ public class OutgoingQueueRouter extends Thread {
 	private OpcoSenderProfileEJBI opcosenderprofEJB;
 	private static List<SenderThreadWorker> senderworkers = new ArrayList<SenderThreadWorker>();
 	private static ConcurrentMap<Long,Queue<OutgoingSMS>> opcoqueuemap = new ConcurrentHashMap<Long,Queue<OutgoingSMS>>();
+	private static Map<Long,OpcoSenderReceiverProfile> profilemap = new HashMap<Long,OpcoSenderReceiverProfile>();
 	private static Semaphore queueSemaphore;
 	static{
 		queueSemaphore = new Semaphore(1, true);
@@ -86,6 +87,9 @@ public class OutgoingQueueRouter extends Thread {
 		List<OpcoSenderReceiverProfile> profiles = opcosenderprofEJB.getAllActiveProfiles();
 		
 		for(OpcoSenderReceiverProfile opcoprofile : profiles){
+			
+			profilemap.put(opcoprofile.getId(), opcoprofile);
+			
 			Integer threads = opcoprofile.getWorkers();
 			logger.info("\n\nAbout to initialize "+threads+" sender threads for opco with code "
 					+opcoprofile.getOpco().getCode()
@@ -206,7 +210,7 @@ public class OutgoingQueueRouter extends Thread {
 			
 			if(outqueue.size()<1){
 				
-				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profileid); 
+				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profilemap.get(profileid));  
 				
 				for(OutgoingSMS outgoingsms : outqueuelist_){
 					if(outqueue.size()<1){

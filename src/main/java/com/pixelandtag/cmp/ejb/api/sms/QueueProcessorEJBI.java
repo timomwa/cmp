@@ -6,12 +6,13 @@ import java.util.Queue;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 
 
 public interface QueueProcessorEJBI  {
 
 	public List<OutgoingSMS> getUnsent(Long size);
-	public List<OutgoingSMS> getUnsent(Long size, Long profileid);
+	public List<OutgoingSMS> getUnsent(Long size, OpcoSenderReceiverProfile opcoSenderReceiverProfile);
 	public OutgoingSMS saveOrUpdate(OutgoingSMS queue) throws Exception;
 	public IncomingSMS saveOrUpdate(IncomingSMS incomingsms) throws Exception;
 	public boolean deleteFromQueue(OutgoingSMS sms)  throws Exception;

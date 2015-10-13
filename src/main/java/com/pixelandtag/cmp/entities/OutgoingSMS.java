@@ -47,11 +47,15 @@ import com.pixelandtag.subscription.dto.MediumType;
 @NamedQueries({
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC,
-			query = "select que from OutgoingSMS que where que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc"
+			query = "select que from OutgoingSMS que where que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc, que.timestamp asc"
+	),
+	@NamedQuery(
+			name = OutgoingSMS.NQ_LIST_UNSENT_BY_PROFILEID_ORDER_BY_PRIORITY_DESC,
+			query = "select que from OutgoingSMS que where que.opcosenderprofile.id=:opcosenderprofileid AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc, que.timestamp asc"
 	),
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UNSENT_BY_PROFILE_ORDER_BY_PRIORITY_DESC,
-			query = "select que from OutgoingSMS que where que.opcosenderprofile.id=:opcosenderprofileid AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc"
+			query = "select que from OutgoingSMS que where que.opcosenderprofile=:opcosenderprofile AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc, que.timestamp asc"
 	),
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID,
@@ -69,7 +73,10 @@ public class OutgoingSMS extends GenericMessage implements Serializable {
 	public static final String NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC = "smsqueue.listunsent";
 	
 	@Transient
-	public static final String NQ_LIST_UNSENT_BY_PROFILE_ORDER_BY_PRIORITY_DESC = "smsqueue.listunsent.by.profile";
+	public static final String NQ_LIST_UNSENT_BY_PROFILEID_ORDER_BY_PRIORITY_DESC = "smsqueue.listunsent.by.profile";
+	
+	@Transient
+	public static final String NQ_LIST_UNSENT_BY_PROFILE_ORDER_BY_PRIORITY_DESC = "smsqueue.listunsent.by.profile.and.ts";
 
 	@Transient
 	public static final String NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID = "smsqueue.updatequeuestatusbyid";

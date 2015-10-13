@@ -1,0 +1,46 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:char="http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging">
+	<soapenv:Header />
+	<soapenv:Body>
+		<char:charge>
+			<inputMsg>
+				<operation>credit</operation>
+				<userId>254789437323</userId>
+				<contentId>32329LOVECHAT</contentId>
+				<itemName>32329LOVECHAT</itemName>
+				<contentDescription>32329LOVECHAT</contentDescription>
+				<circleId></circleId>
+				<lineOfBusiness></lineOfBusiness>
+				<customerSegment></customerSegment>
+				<contentMediaType>32329LOVECHAT</contentMediaType>
+				<serviceId>439</serviceId>
+				<parentId></parentId>
+				<actualPrice>5.0</actualPrice>
+				<basePrice>5.0</basePrice>
+				<discountApplied>0</discountApplied>
+				<paymentMethod></paymentMethod>
+				<revenuePercent></revenuePercent>
+				<netShare>0</netShare>
+				<cpId>CONTENT360_KE</cpId>
+				<customerClass></customerClass>
+				<eventType>Subscription Purchase</eventType>
+				<localTimeStamp></localTimeStamp>
+				<transactionId>32329</transactionId>
+				<subscriptionTypeCode>abcd</subscriptionTypeCode>
+				<subscriptionName>0</subscriptionName>
+				<parentType></parentType>
+				<deliveryChannel>SMS</deliveryChannel>
+				<subscriptionExternalId>0</subscriptionExternalId>
+				<contentSize></contentSize>
+				<currency>Kshs</currency>
+				<copyrightId>mauj</copyrightId>
+				<cpTransactionId>123456787785</cpTransactionId>
+				<copyrightDescription>copyright</copyrightDescription>
+				<sMSkeyword>asdf</sMSkeyword>
+				<srcCode>32329</srcCode>
+				<contentUrl>www.content360.co.ke</contentUrl>
+				<subscriptiondays>2</subscriptiondays>
+			</inputMsg>
+		</char:charge>
+	</soapenv:Body>
+</soapenv:Envelope>
