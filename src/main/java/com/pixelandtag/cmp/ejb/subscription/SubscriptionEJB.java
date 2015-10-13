@@ -18,6 +18,7 @@ import javax.persistence.Query;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.ejb.MessageEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
@@ -39,7 +40,11 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	private EntityManager em;
 
 	@EJB
-	TimezoneConverterI timezoneEJB;
+	private TimezoneConverterI timezoneEJB;
+	
+	@EJB
+	private SubscriptionRenewalNotificationI subrenewalnotificationEJB;
+	
 	
 	
 	
@@ -136,6 +141,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			SMSService service = em.find(SMSService.class, serviceid);
 			sub = renewSubscription(operatorCountry,msisdn, service, SubscriptionStatus.confirmed, method);
 			updateQueueStatus(0L,sub.getId(),method);
+			subrenewalnotificationEJB.sendSubscriptionRenewalMessage(operatorCountry,service,msisdn, sub); 
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}

@@ -158,14 +158,14 @@ public class MsisdnController extends HttpServlet {
 			 date = requestJSON.getString("date").trim();
 			 
 			 if(msisdn!=null && !msisdn.isEmpty()){
-				 ps = conn.prepareStatement("select MT_STATUS,convert_tz(timeStamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',SUB_Mobtel,CMP_Txid,MO_Received,MT_Sent,CMPResponse, delivery_report_arrive_time as dlrArrive,`source` as 'source' from "+DB+".messagelog where SUB_Mobtel=? and date(timeStamp)=? order by timeStamp desc");
+				     ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received',mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".messagelog where msisdn=? and date(convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"'))=? order by mo_timestamp desc");
 				 ps.setString(1, msisdn);
 				 ps.setString(2, date);
 			 }else{
 				 try{
 					 
 					 int limit = Integer.valueOf(date);
-					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".messagelog order by timeStamp desc limit "+limit);
+					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".messagelog order by mo_timestamp desc limit "+limit);
 					 
 				 }catch(NumberFormatException ex){
 					 

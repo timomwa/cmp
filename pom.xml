@@ -28,12 +28,8 @@
 	<dependencies>
 
 
-		<!--dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
-			<version>6.0</version>
-			<scope>compile</scope>
-		</dependency-->
+		<!--dependency> <groupId>javax</groupId> <artifactId>javaee-api</artifactId> 
+			<version>6.0</version> <scope>compile</scope> </dependency -->
 
 		<dependency>
 			<groupId>javax.annotation</groupId>
@@ -47,6 +43,11 @@
 			<version>1.19</version>
 		</dependency>
 
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>

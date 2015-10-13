@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.smssenders.Receiver;
@@ -34,6 +35,8 @@ public class MOReceiver extends HttpServlet {
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
+	
+	
 	
     /**
 	 * 
