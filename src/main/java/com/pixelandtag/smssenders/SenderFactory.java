@@ -9,7 +9,7 @@ import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayException;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 
-public class SMSSenderFactory {
+public class SenderFactory {
 	
 	@SuppressWarnings("unchecked")
 	public static Sender getSenderInstance(SenderConfiguration senderConfigs) throws Exception {

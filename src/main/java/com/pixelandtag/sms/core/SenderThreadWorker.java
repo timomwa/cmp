@@ -20,7 +20,7 @@ import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
 import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
-import com.pixelandtag.smssenders.SMSSenderFactory;
+import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.smssenders.SenderResp;
 /**
@@ -72,7 +72,7 @@ public class SenderThreadWorker implements Runnable{
 		SenderConfiguration senderconfigs = new SenderConfiguration();
 		senderconfigs.setOpcoconfigs(opcoconfigs);
 		senderconfigs.setOpcotemplates(opcotemplates);
-		sender = SMSSenderFactory.getSenderInstance(senderconfigs);
+		sender = SenderFactory.getSenderInstance(senderconfigs);
 		sender.validateMandatory();//Validates mandatory configs.
 	}
 
