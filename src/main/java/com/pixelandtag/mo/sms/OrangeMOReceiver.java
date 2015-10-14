@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -17,7 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.smssenders.Receiver;
+import com.pixelandtag.subscription.dto.MediumType;
 
 /**
  * Servlet implementation class OrangeMOReceiver
@@ -29,6 +34,9 @@ public class OrangeMOReceiver extends HttpServlet {
 	private Logger logger = Logger.getLogger(OrangeMOReceiver.class);
 	
 	private static final long serialVersionUID = 1L;
+	
+	@EJB
+	private ProcessorResolverEJBI processorEJB;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -93,6 +101,19 @@ public class OrangeMOReceiver extends HttpServlet {
 		final String body = getBody(request);
 		
 		logger.info("MO_ORANGE:"+body+"\n\n");
+		
+		if(!body.isEmpty())
+			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
+		
+		incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
+		
+		try {
+			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
+			logger.info("incomingsms = "+incomingsms);
+			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
+		} catch (ConfigurationException e) {
+			logger.error(e.getMessage(),e);
+		}
 		
 		PrintWriter pw = response.getWriter();
 		

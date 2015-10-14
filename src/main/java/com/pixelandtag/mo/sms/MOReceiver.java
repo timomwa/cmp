@@ -113,6 +113,7 @@ public class MOReceiver extends HttpServlet {
 		
 		incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
 		
+		
 		try {
 			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
 			logger.info("incomingsms = "+incomingsms);

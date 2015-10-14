@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 

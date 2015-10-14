@@ -1,5 +1,4 @@
 package com.pixelandtag.sms.core;
-
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
