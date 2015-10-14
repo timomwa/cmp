@@ -80,9 +80,9 @@ public class OrangeMOReceiver extends HttpServlet {
 		 logger.info("MO_ORANGE:"+headerstr+"\n\n");
 		
 		
-		incomingparams.put(Receiver.IP_ADDRESS, ip_addr);
+		incomingparams.put(Receiver.IP_ADDRESS, "123.123.123");
 		
-		String params = "\n\n\tMO_ORANGE::: ip_addr "+ip_addr;
+		String params = "\n\n\tMO_ORANGE::: real ip_addr "+ip_addr+" fake ip address 123.123.123";
 		
 		while(enums.hasMoreElements()){
 			
