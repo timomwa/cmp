@@ -155,8 +155,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 				msisdn = getValue(payload, msisdn_param_name_cfg.getValue());
 				shortcode = getValue(payload, shortcode_param_name_cfg.getValue());
 				sms = getValue(payload, sms_param_name_cfg.getValue());
-				if(txid_param_name_cfg!=null && txid_param_name_cfg.getValue()!=null || 
-						!txid_param_name_cfg.getValue().isEmpty()){
+				if(txid_param_name_cfg!=null && (txid_param_name_cfg.getValue()!=null || 
+						!txid_param_name_cfg.getValue().isEmpty())){
 					opcotxid = getValue(payload, txid_param_name_cfg.getValue() );
 				}
 			}
@@ -169,8 +169,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					shortcode = (String)jsonutil.getValue(shortcode_param_name_cfg.getValue());
 					sms = (String)jsonutil.getValue(sms_param_name_cfg.getValue());
 					
-					if(txid_param_name_cfg!=null && txid_param_name_cfg.getValue()!=null || 
-							!txid_param_name_cfg.getValue().isEmpty()){
+					if(txid_param_name_cfg!=null && (txid_param_name_cfg.getValue()!=null || 
+							!txid_param_name_cfg.getValue().isEmpty())){
 						opcotxid = (String)jsonutil.getValue(txid_param_name_cfg.getValue());
 					}
 					
