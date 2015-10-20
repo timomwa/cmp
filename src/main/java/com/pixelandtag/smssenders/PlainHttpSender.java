@@ -59,6 +59,7 @@ public class PlainHttpSender extends GenericSender {
 		mandatoryparams.add(HTTP_HAS_PAYLOAD);
 		mandatoryparams.add(HTTP_IS_RESTFUL);
 		mandatoryparams.add(HTTP_HEADER_AUTH_HAS_MULTIPLE_KV_PAIRS);
+		mandatoryparams.add(HTTP_ALLOW_SENDING_BLANK_TEXT);
 		for(String param : mandatoryparams)
 			if(this.configuration.get(param)==null)
 				throw new MessageSenderException("No configuration set for \""+param+"\" for this opco");
@@ -240,6 +241,9 @@ public class PlainHttpSender extends GenericSender {
 						if(basicparam!=null)
 							url = url.replaceAll("\\$\\{"+param_name+"\\}", URLEncoder.encode(basicparam,"UTF-8"));
 						url = url.replaceAll("\\$\\{"+param_name+"\\}", config.getValue().getValue());
+					}catch (IllegalArgumentException e) {
+						logger.error(e.getMessage() +" param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
+						throw new MessageSenderException( " param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
 					} catch (UnsupportedEncodingException e) {
 						logger.error(e.getMessage(),e);
 						throw new MessageSenderException("Could not encode path param",e);
