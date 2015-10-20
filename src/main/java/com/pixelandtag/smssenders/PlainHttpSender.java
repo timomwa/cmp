@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
@@ -213,12 +214,12 @@ public class PlainHttpSender extends GenericSender {
 				String key = config.getKey();
 				if(key.trim().toLowerCase().startsWith(HTTP_PAYLOAD_PARAM_PREFIX)){
 					String param_name = key.split(HTTP_PAYLOAD_PARAM_PREFIX)[1];
-					payload_template = payload_template.replaceAll("\\$\\{"+param_name+"\\}", config.getValue().getValue());
+					payload_template = payload_template.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(config.getValue().getValue()) );
 				}
 			}
 			
 			for(NameValuePair valuep : qparams){
-				payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", valuep.getValue());
+				payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", Matcher.quoteReplacement( valuep.getValue()) );
 			}
 			
 			generic_http_parameters.setStringentity(payload_template);
@@ -239,8 +240,8 @@ public class PlainHttpSender extends GenericSender {
 					try {
 						String basicparam = getValueFromqparams(qparams,param_name);
 						if(basicparam!=null)
-							url = url.replaceAll("\\$\\{"+param_name+"\\}", URLEncoder.encode(basicparam,"UTF-8"));
-						url = url.replaceAll("\\$\\{"+param_name+"\\}", config.getValue().getValue());
+							url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(URLEncoder.encode(basicparam,"UTF-8") ));
+						url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(config.getValue().getValue()));
 					}catch (IllegalArgumentException e) {
 						logger.error(e.getMessage() +" param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
 						throw new MessageSenderException( " param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
@@ -252,7 +253,7 @@ public class PlainHttpSender extends GenericSender {
 			}
 			
 			for(NameValuePair valuep : qparams){
-				url = url.replaceAll("\\$\\{"+valuep.getName()+"\\}", valuep.getValue());
+				url = url.replaceAll("\\$\\{"+valuep.getName()+"\\}", Matcher.quoteReplacement(valuep.getValue()));
 			}
 		}
 		
