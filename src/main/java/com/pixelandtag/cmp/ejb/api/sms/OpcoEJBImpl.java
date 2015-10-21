@@ -16,7 +16,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 public class OpcoEJBImpl implements OpcoEJBI {
 	
 	
-public Logger logger = Logger.getLogger(getClass());
+	public Logger logger = Logger.getLogger(getClass());
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;

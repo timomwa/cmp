@@ -275,16 +275,19 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop WHERE sms.moprocessor=mop "
-				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword");
+				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE sms.moprocessor=mop "
+				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword"
+				+ " AND osms.opco=:opco");
 		
 		qry.setParameter("shortcode", incomingsms.getShortcode());
 		qry.setParameter("keyword", keyword);
+		qry.setParameter("opco", incomingsms.getOpco());
 		
 		List<Object[]> rows = qry.getResultList();
 		
 		
 		if(rows.size()<1){
+			
 			qry = em.createQuery("SELECT "
 					+ "mop.id, "//0
 					+ "sms.price, "//1
@@ -292,11 +295,13 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop WHERE sms.moprocessor=mop "
-				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword");
+				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE sms.moprocessor=mop "
+				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword"
+				+ " AND osms.opco=:opco");
 		
 			qry.setParameter("shortcode", incomingsms.getShortcode());
 			qry.setParameter("keyword", "DEFAULT");
+			qry.setParameter("opco", incomingsms.getOpco());
 			
 			keyword = "DEFAULT";
 			
@@ -321,6 +326,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			incomingsms.setSplit(split_mt);
 			incomingsms.setEvent_type(event_type);
 			incomingsms.setPrice_point_keyword(price_point_keyword);
+			
 			
 		}
 		
