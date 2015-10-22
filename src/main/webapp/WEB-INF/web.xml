@@ -356,6 +356,10 @@
 		<url-pattern>/dn</url-pattern>
 	</servlet-mapping>
 	
+	<servlet-mapping>
+		<servlet-name>SafaricomMOReceiver</servlet-name>
+		<url-pattern>/safchat</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 		<description>
@@ -377,6 +381,15 @@
 		<display-name>OrangeMOReceiver</display-name>
 		<servlet-name>OrangeMOReceiver</servlet-name>
 		<servlet-class>com.pixelandtag.mo.sms.OrangeMOReceiver</servlet-class>
+	</servlet>
+	
+	
+	<servlet>
+		<description>
+		</description>
+		<display-name>SafaricomMOReceiver</display-name>
+		<servlet-name>SafaricomMOReceiver</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.SafaricomMOReceiver</servlet-class>
 	</servlet>
 	
 	
