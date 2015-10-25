@@ -257,7 +257,8 @@ public class PlainHttpSender extends GenericSender {
 		}
 		
 		try {
-			generic_http_parameters.setUrl(URLEncoder.encode(url,"UTF-8"));
+			url = URLEncoder.encode(url,"UTF-8");
+			generic_http_parameters.setUrl(url);
 		} catch (UnsupportedEncodingException e) {
 			throw new MessageSenderException("Could not encode path param",e);
 		}
@@ -276,8 +277,8 @@ public class PlainHttpSender extends GenericSender {
 		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
 		
-		logger.info("\n\n\t\t>>>url>>> : "+url
-				+"\n\t\tauth_header_value = "+auth_header_value+
+		logger.info("\n\n\t\t>>>url>>> : ["+url
+				+"]\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
 				"\n\t\t>>>response>>> : "+resp.getBody()+"\n\n");
 		
