@@ -240,8 +240,8 @@ public class PlainHttpSender extends GenericSender {
 					try {
 						String basicparam = getValueFromqparams(qparams,param_name);
 						if(basicparam!=null)
-							url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(basicparam ));
-						url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(config.getValue().getValue()));
+							url = url.replaceAll("\\$\\{"+param_name+"\\}", URLEncoder.encode( Matcher.quoteReplacement(basicparam ),"UTF-8"  ) );
+						url = url.replaceAll("\\$\\{"+param_name+"\\}",  URLEncoder.encode( Matcher.quoteReplacement(config.getValue().getValue())  ,"UTF-8"));
 					}catch (IllegalArgumentException e) {
 						logger.error(e.getMessage() +" param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
 						throw new MessageSenderException( " param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
@@ -256,12 +256,7 @@ public class PlainHttpSender extends GenericSender {
 			}
 		}
 		
-		try {
-			url = URLEncoder.encode(url,"UTF-8");
-			generic_http_parameters.setUrl(url);
-		} catch (UnsupportedEncodingException e) {
-			throw new MessageSenderException("Could not encode path param",e);
-		}
+		generic_http_parameters.setUrl(url);
 		
 		ProfileConfigs httpmethod = this.configuration.get(HTTP_REQUEST_METHOD);
 		
