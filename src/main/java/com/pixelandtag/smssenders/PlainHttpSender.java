@@ -240,14 +240,13 @@ public class PlainHttpSender extends GenericSender {
 					try {
 						String basicparam = getValueFromqparams(qparams,param_name);
 						if(basicparam!=null)
-							url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(URLEncoder.encode(basicparam,"UTF-8") ));
+							url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(basicparam ));
 						url = url.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(config.getValue().getValue()));
 					}catch (IllegalArgumentException e) {
 						logger.error(e.getMessage() +" param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
 						throw new MessageSenderException( " param_name = "+param_name+" config value = "+ config.getValue().getValue(),e);
-					} catch (UnsupportedEncodingException e) {
+					} catch (Exception e) {
 						logger.error(e.getMessage(),e);
-						throw new MessageSenderException("Could not encode path param",e);
 					}
 				}
 			}
@@ -257,18 +256,23 @@ public class PlainHttpSender extends GenericSender {
 			}
 		}
 		
-		generic_http_parameters.setUrl(url);
+		try {
+			generic_http_parameters.setUrl(URLEncoder.encode(url,"UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new MessageSenderException("Could not encode path param",e);
+		}
 		
 		ProfileConfigs httpmethod = this.configuration.get(HTTP_REQUEST_METHOD);
 		
-		if(httpmethod!=null)
+		if(httpmethod!=null){
+			generic_http_parameters.setHttpmethod(httpmethod.getValue());
+		}else{
 			generic_http_parameters.setHttpmethod(HttpMethod.POST);
-		else
 			logger.warn("No configuration for \""+HTTP_REQUEST_METHOD
 					+"\" has been provided, so we will use "
 					+ "HTTP POST as default. If you wish to override this, "
 					+ "provide this config in db");
-		
+		}
 		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
 		
