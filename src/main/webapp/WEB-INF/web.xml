@@ -361,6 +361,7 @@
 		<url-pattern>/safchat</url-pattern>
 	</servlet-mapping>
 	
+	
 	<servlet>
 		<description>
 		</description>
@@ -391,6 +392,9 @@
 		<servlet-name>SafaricomMOReceiver</servlet-name>
 		<servlet-class>com.pixelandtag.mo.sms.SafaricomMOReceiver</servlet-class>
 	</servlet>
+	
+	
+	
 	
 	
 	
