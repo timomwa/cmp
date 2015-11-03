@@ -477,8 +477,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return success;
 	}
 	
-	public String getMessage(String key, int language_id) throws Exception{//
-		 Message message = messageEJB.getMessage(key, Long.valueOf(language_id));
+	public String getMessage(String key, int language_id, Long opcoid) throws Exception{//
+		 Message message = messageEJB.getMessage(key, Long.valueOf(language_id), opcoid);
 		 return message!=null ? message.getMessage() : null;
 	}
 	
@@ -1725,8 +1725,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	
 	public String getMessage(MessageType messageType,
-			int language) throws Exception {
-		return getMessage(messageType.toString(), language);
+			int language, Long opcoid) throws Exception {
+		return getMessage(messageType.toString(), language, opcoid);
 	}
 	
 	
@@ -2206,26 +2206,26 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					if( KEYWORD.contains("*") && req.getMediumType()==MediumType.ussd ){
 					
 						updateSession(language_id,MSISDN, menu_from_session.getMenu_id(),sess,menu_from_session.getParent_level_id(),req.getSessionid());//update session to upper menu.
-						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, req.getOpco().getId());
 						return resp;
 						
 					}else if(KEYWORD.equalsIgnoreCase("") || KEYWORD.equalsIgnoreCase("MENU") ||  KEYWORD.equalsIgnoreCase("ORODHA")||  KEYWORD.equalsIgnoreCase("MORE") ||  KEYWORD.equalsIgnoreCase("ZAIDI")){
 						
 						updateSession(language_id,MSISDN, menu_from_session.getParent_level_id(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,menu_from_session.getParent_level_id(),menuid);
-						resp = item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						resp = item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, req.getOpco().getId());
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("#")){
 						
 						updateSession(language_id,MSISDN, menu_from_session.getParent_level_id(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,menu_from_session.getParent_level_id(),menuid);
-						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
+						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id, req.getOpco().getId()));//get all the sub menus there.
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("0")){
 						
 						updateSession(language_id, MSISDN, -1,sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 						MenuItem item = getMenuByParentLevelId(language_id,-1,menuid);
-						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));//get all the sub menus there.
+						resp = (item.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id, req.getOpco().getId()));//get all the sub menus there.
 						return resp;
 					}else if(KEYWORD.equalsIgnoreCase("GIFT") || KEYWORD.equalsIgnoreCase("HIDIAH") || KEYWORD.equalsIgnoreCase("HADIAH")){
 						
@@ -2239,7 +2239,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						updateSession(language_id,MSISDN, -1,sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 						menu_from_session = getTopMenu(menu_id, language_id);
 						
-						resp = (menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id));
+						resp = (menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id, req.getOpco().getId()));
 						return resp;
 					}else if(kw_is_digit){
 						
@@ -2353,9 +2353,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							updateSession(language_id,MSISDN, chosenMenu.getId(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session
 							
 							if(submenus_have_sub_menus){
-								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id, req.getOpco().getId());//get all the sub menus there.
 							}else{
-								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//advice on how to subscribe
+								resp = chosenMenu.enumerate() +getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id, req.getOpco().getId());//advice on how to subscribe
 								
 								SMSService smsserv = em.find(SMSService.class, Long.valueOf(chosenMenu.getId()+""));
 								
@@ -2397,10 +2397,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								}
 								
 								if(chosenMenu.getSub_menus()!=null){
-									resp = chosenMenu.enumerate()+getMessage(key, language_id);//get all the sub menus there.
+									resp = chosenMenu.enumerate()+getMessage(key, language_id, req.getOpco().getId());//get all the sub menus there.
 									updateSession(language_id,MSISDN, chosenMenu.getId(),sess,chosenMenu.getMenu_id(),req.getSessionid());//update session
 								}else{
-									resp =  menu_from_session.enumerate()+getMessage(key, language_id);//get all the sub menus there.
+									resp =  menu_from_session.enumerate()+getMessage(key, language_id, req.getOpco().getId());//get all the sub menus there.
 									updateSession(language_id,MSISDN, chosenMenu.getId(),sess,chosenMenu.getMenu_id(),req.getSessionid());//update session
 								}
 									
@@ -2539,9 +2539,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								
 								
 								if(submenus_have_sub_menus)
-									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id, req.getOpco().getId());//get all the sub menus there.
 								else
-									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+									resp = chosenMenu.enumerate()+getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id, req.getOpco().getId());//get all the sub menus there.
 								
 								
 								return resp;
@@ -2557,7 +2557,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									subscribe( MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS,AlterationMethod.self_via_sms);//subscribe but marks as "confirmed"
 									//subscription.subscribe(conn, MSISDN, chosenMenu.getService_id(), chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS);//subscribe but marks as "confirmed"
 									
-									String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
+									String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id, req.getOpco().getId()) ;
 									if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
 										response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
 									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
@@ -2579,7 +2579,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									//that you don't charge a subscriber without warning. They must confim their subscription.
 									
 									//Already subscribed text
-									String response = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
+									String response = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id, req.getOpco().getId()) ;
 									if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
 										response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, chosenMenu.getName());
 									if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
@@ -2599,9 +2599,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 						}else{
 							//Here check if subscriber sent valid keyword, fetch service, and subscribe then to that service.
 							if(submenus_have_sub_menus)
-								resp = menu_from_session.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id);//get all the sub menus there.
+								resp = menu_from_session.enumerate() +getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE, language_id, req.getOpco().getId());//get all the sub menus there.
 							else
-								resp = menu_from_session.enumerate() + getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id);//get all the sub menus there.
+								resp = menu_from_session.enumerate() + getMessage(GenericServiceProcessor.SUBSCRIPTION_ADVICE, language_id, req.getOpco().getId());//get all the sub menus there.
 						
 							return resp;
 						}
@@ -2625,7 +2625,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							final OutgoingSMS  outgoingsms  = getContentFromServiceId(menu.getService_id(),MSISDN,true);
 							//final MOSms mosm_ =  cr.getContentFromServiceId(menu.getService_id(),MSISDN,conn);
 							
-							String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id) ;
+							String response = getMessage(GenericServiceProcessor.CONFIRMED_SUBSCRIPTION_ADVICE, language_id, req.getOpco().getId()) ;
 							if(response.indexOf(GenericServiceProcessor.SERVICENAME_TAG)>=0)
 								response = response.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, menu.getName());
 							if(response.indexOf(GenericServiceProcessor.PRICE_TAG)>=0)
@@ -2640,13 +2640,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							return resp;
 							
 						}else{
-							resp = getMessage(GenericServiceProcessor.NO_PENDING_SUBSCRIPTION_ADVICE,  language_id);
+							resp = getMessage(GenericServiceProcessor.NO_PENDING_SUBSCRIPTION_ADVICE,  language_id, req.getOpco().getId());
 							return resp;
 						}
 						
 					}else if(KEYWORD.equals("UNSUBSCRIBE") || KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
 						
-						String msg1 = getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id);
+						String msg1 = getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id, req.getOpco().getId());
 						
 						/*unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_ussd);
 						//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
@@ -2671,8 +2671,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
 								unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_ussd);
 								//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
-								msg1 = getMessage(GenericServiceProcessor.UNSUBSCRIBED_ALL_ADVICE, language_id);
-								msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, getMessage(MessageType.ALL_SERVICES, language_id));
+								msg1 = getMessage(GenericServiceProcessor.UNSUBSCRIBED_ALL_ADVICE, language_id, req.getOpco().getId());
+								msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, getMessage(MessageType.ALL_SERVICES, language_id, req.getOpco().getId()));
 								resp = GenericServiceProcessor.SPACE+msg1;
 								return resp;
 								
@@ -2687,7 +2687,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_ussd); 
 										msg1 = msg1.replaceAll(GenericServiceProcessor.SERVICENAME_TAG, toUnsubscribe.getService_name());
 									}else{
-										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id, req.getOpco().getId());
 									}
 									
 									resp = msg1;
@@ -2703,13 +2703,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										    //if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
 									    	subscriptionBean.updateSubscription(subscription.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_ussd);
 										}else{
-											msg1 = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id) ;
+											msg1 = getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id, req.getOpco().getId()) ;
 											}
 									    
 									
 										//subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed);
 									}else{
-										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+										msg1 = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id, req.getOpco().getId());
 									}
 									
 									
@@ -2726,12 +2726,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								resp = msg1;
 										
 							}else {
-								msg1 = stringFyServiceList(allsubscribed)+getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, language_id);
+								msg1 = stringFyServiceList(allsubscribed)+getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, language_id, req.getOpco().getId());
 								resp = msg1;
 							}
 									
 						}else{
-							msg1 = getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id);
+							msg1 = getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id, req.getOpco().getId());
 							
 						}
 							
@@ -2741,20 +2741,20 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 					}else if(KEYWORD.equals("HELP")){
 						
-						String msg1 =  getMessage(MessageType.HELP, language_id);
+						String msg1 =  getMessage(MessageType.HELP, language_id, req.getOpco().getId());
 						resp = msg1;
 						
 					}else if(KEYWORD.equals("INFO")){
 						
-						String msg1 =  getMessage(MessageType.INFO,language_id);
+						String msg1 =  getMessage(MessageType.INFO,language_id, req.getOpco().getId());
 						resp = msg1;
 					
 					}else if(menu_from_session!=null && menu_from_session.getService_id()>-1){
 						//updateSession(language_id,MSISDN, current_menu.getMenu_id(),sess,current_menu.getId(),req.getSessionid());//update session to upper menu.
-						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, req.getOpco().getId());
 					}else{
 						//Unknown keyword
-						resp = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id);
+						resp = getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id, req.getOpco().getId());
 					}
 
 					

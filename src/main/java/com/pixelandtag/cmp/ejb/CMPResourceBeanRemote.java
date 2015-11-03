@@ -130,12 +130,12 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 
 	public int getSubscriberLanguage(String msisdn) throws Exception;
 
-	public String getMessage(String key, int language_id) throws Exception;
+	public String getMessage(String key, int language_id, Long opcoid) throws Exception;
 	
 	public boolean updateProfile(String msisdn, int language_id) throws Exception;
 	
 	public String getMessage(MessageType messageType,
-			int language) throws Exception;
+			int language, Long opcoid) throws Exception;
 
 	//public MOSms getContentFromServiceId(int service_id, String msisdn, boolean isSubscription)  throws Exception;
 	

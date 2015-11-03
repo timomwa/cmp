@@ -87,7 +87,7 @@ public class Content360UnknownKeyword extends GenericServiceProcessor {
 		
 			int language_id = cmpbean.getSubscriberLanguage(MSISDN);
 			
-			String response = cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id) ;
+			String response = cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id, incomingsms.getOpco().getId()) ;
 			
 			outgoingsms.setSms(response + " "+ getTailTextNotSubecribed().replaceAll("<KEYWORD>", req.getKeyword()).replaceAll("<PRICE>", incomingsms.getPrice().toEngineeringString()));
 			

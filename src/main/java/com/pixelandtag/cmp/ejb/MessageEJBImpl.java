@@ -33,7 +33,7 @@ public class MessageEJBImpl implements MessageEJBI {
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public Message getMessage(String key, Long language_id){
+	public Message getMessage(String key, Long language_id, Long opcoid){
 		
 		Message message = null;
 		
@@ -46,8 +46,9 @@ public class MessageEJBImpl implements MessageEJBI {
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("language_id", language_id);
 		params.put("key", key);
-	
-		List<Message>  messages = messageDAO.findByNamedQuery(Message.NQ_FIND_BY_LANG_AND_KEY, params);
+		params.put("opcoid", opcoid);
+		
+		List<Message>  messages = messageDAO.findByNamedQuery(Message.NQ_FIND_BY_LANG_AND_KEY_AND_OPCOID, params);
 	
 		if(messages!=null && messages.size()>0){
 			message = messages.get(0);

@@ -158,14 +158,14 @@ public class MsisdnController extends HttpServlet {
 			 date = requestJSON.getString("date").trim();
 			 
 			 if(msisdn!=null && !msisdn.isEmpty()){
-				     ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received',mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".messagelog where msisdn=? and date(convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"'))=? order by mo_timestamp desc");
+				     ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received',mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".message_log where msisdn=? and date(convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"'))=? order by mo_timestamp desc");
 				 ps.setString(1, msisdn);
 				 ps.setString(2, date);
 			 }else{
 				 try{
 					 
 					 int limit = Integer.valueOf(date);
-					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".messagelog order by mo_timestamp desc limit "+limit);
+					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source' from "+DB+".message_log order by mo_timestamp desc limit "+limit);
 					 
 				 }catch(NumberFormatException ex){
 					 

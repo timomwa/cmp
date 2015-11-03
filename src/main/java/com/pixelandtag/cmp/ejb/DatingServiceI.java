@@ -23,9 +23,9 @@ public interface DatingServiceI extends BaseEntityI {
 
 	public Person getPerson(String msisdn, OperatorCountry opco)  throws DatingServiceException;
 	
-	public String getMessage(String key, int language_id) throws DatingServiceException;
+	public String getMessage(String key, int language_id, Long opcoid) throws DatingServiceException;
 
-	public String getMessage(DatingMessages successSubscribing, int language_id) throws DatingServiceException;
+	public String getMessage(DatingMessages successSubscribing, int language_id, Long opcoid) throws DatingServiceException;
 
 	public PersonDatingProfile getProfile(Person person) throws DatingServiceException;
 

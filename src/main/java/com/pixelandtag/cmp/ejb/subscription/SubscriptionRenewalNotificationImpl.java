@@ -67,14 +67,18 @@ public class SubscriptionRenewalNotificationImpl implements
 			
 			Long languageid =0L;//Todo personalize language
 			
-			Message messag = messageEJB.getMessage(DatingMessages.SUBSCRIPTION_RENEWED.toString(), languageid);
+			DatingMessages message_key = sub.getRenewal_count().compareTo(1L)==0 ? DatingMessages.FIRST_SUBSCRIPTION_WELCOME  : DatingMessages.SUBSCRIPTION_RENEWED;
+			
+			Message messag = messageEJB.getMessage(message_key.toString(), languageid, operatorCountry.getOperator().getId()); 
 			
 			if(messag==null)
-				throw new Exception("No message for key "+DatingMessages.SUBSCRIPTION_RENEWED.toString());
+				throw new Exception("No message for key "+message_key.toString());
 			
 			String msg = messag.getMessage();
 			msg = msg.replaceAll(BaseEntityI.EXPIRY_DATE_TAG, timezoneEJB.convertToPrettyFormat( sub.getExpiryDate() ));
 			msg = msg.replaceAll(BaseEntityI.SERVICE_NAME_TAG, service.getService_name());
+			msg = msg.replaceAll(BaseEntityI.PRICE_TAG, service.getPrice().toString());
+			msg = msg.replaceAll(BaseEntityI.FREQUENCY, service.getSubscription_length_time_unit().toString().toLowerCase());
 			OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofEJB.getActiveProfileForOpco(operatorCountry.getId());
 			
 			OutgoingSMS outgoingsms = new OutgoingSMS();

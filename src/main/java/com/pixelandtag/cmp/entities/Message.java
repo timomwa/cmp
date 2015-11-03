@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 
@@ -20,6 +21,10 @@ import javax.persistence.UniqueConstraint;
 	@NamedQuery(
 			name = Message.NQ_FIND_BY_LANG_AND_KEY,
 			query = "from Message msg WHERE msg.language_id=:language_id AND msg.key=:key"
+	),
+	@NamedQuery(
+			name = Message.NQ_FIND_BY_LANG_AND_KEY,
+			query = "from Message msg WHERE msg.language_id=:language_id AND msg.key=:key AND msg.opcoid=:opcoid"
 	)
 })
 public class Message implements Serializable {
@@ -29,7 +34,13 @@ public class Message implements Serializable {
 	 */
 	private static final long serialVersionUID = 5195495880317013179L;
 
+	
+	@Transient
 	public static final String NQ_FIND_BY_LANG_AND_KEY = "message_find_by_langid_and_key";
+	
+	@Transient
+	public static final String NQ_FIND_BY_LANG_AND_KEY_AND_OPCOID = "message_find_by_langid_and_key_and_opcoid";
+	
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -43,6 +54,10 @@ public class Message implements Serializable {
 	
 	@Column(name="message", length=1000)
 	private String message;
+	
+	@Column(name="opco_id")
+	private Long opcoid;
+	
 
 	public Long getId() {
 		return id;
@@ -74,6 +89,14 @@ public class Message implements Serializable {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public Long getOpcoid() {
+		return opcoid;
+	}
+
+	public void setOpcoid(Long opcoid) {
+		this.opcoid = opcoid;
 	}
 	
 	

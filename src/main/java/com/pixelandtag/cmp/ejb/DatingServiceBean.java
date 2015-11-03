@@ -187,7 +187,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				 match = findMatch(pref_gender,person.getId());
 			
 			if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
-				resp = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id);
+				resp = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, person.getOpco().getId());
 				resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 			}else{
 				try{
@@ -199,8 +199,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				}catch(Exception exp){
 					logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n");
 				}
-				String gender_pronoun = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id);
-				String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id);
+				String gender_pronoun = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id, person.getOpco().getId());
+				String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id, person.getOpco().getId());
 				StringBuffer sb = new StringBuffer();
 				BigInteger age = calculateAgeFromDob(match.getDob());  
 				sb.append("\n").append("Age: ").append(age.toString()).append("\n");
@@ -218,7 +218,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				}
 				sb.append("Location : ").append(locationName).append("\n");
 				sb.append("Gender : ").append(match.getGender()).append("\n");
-				String msg = getMessage(DatingMessages.MATCH_FOUND, language_id);
+				String msg = getMessage(DatingMessages.MATCH_FOUND, language_id, person.getOpco().getId());
 				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG, gender_pronoun);
 				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG2, gender_pronoun2);
@@ -271,7 +271,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						resp = "Ok. Bye";
 						return resp;
 					}else{
-						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id) + GenericServiceProcessor.SPACE +"Proceed?\n1. No\n2. Yes" ;
+						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.SPACE +"Proceed?\n1. No\n2. Yes" ;
 						return resp;
 					}
 						
@@ -290,9 +290,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						profile.setUsername(KEYWORD);
 					}else{
 						if(KEYWORD.equalsIgnoreCase(req.getCode())){
-							resp = getMessage(DatingMessages.REPLY_WITH_USERNAME, language_id);
+							resp = getMessage(DatingMessages.REPLY_WITH_USERNAME, language_id, person.getOpco().getId());
 						}else{
-							resp = getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id);
+							resp = getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, language_id, person.getOpco().getId());
 						}
 						
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, KEYWORD);
@@ -312,7 +312,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					}else{
 						
 						try{
-							resp = getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id);
+							resp = getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id, person.getOpco().getId());
 						}catch(DatingServiceException dse){
 							logger.error(dse.getMessage(), dse);
 						}
@@ -327,18 +327,18 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					try{
 						age = new BigDecimal(KEYWORD);
 					}catch(java.lang.NumberFormatException nfe){
-						resp = getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
+						resp = getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id, person.getOpco().getId());
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 						return resp;
 					}
 					if(age.compareTo(new BigDecimal(100l))>=0){
-						resp = getMessage(DatingMessages.UNREALISTIC_AGE, language_id);
+						resp = getMessage(DatingMessages.UNREALISTIC_AGE, language_id, person.getOpco().getId());
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 						resp = resp.replaceAll(GenericServiceProcessor.AGE_TAG,  age.intValue()+"");
 						return resp;
 					}
 					if(age.compareTo(new BigDecimal(18l))<0){
-						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
+						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id, person.getOpco().getId());
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  age.intValue()+"");
 						return resp;
 					}
@@ -356,7 +356,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					}catch(java.lang.NumberFormatException nfe){
 					}
 					if(KEYWORD.contains("*") || KEYWORD.equalsIgnoreCase(req.getCode()) || MESSAGE.equalsIgnoreCase(req.getCode()) || location_is_only_number){
-						resp = getMessage(DatingMessages.LOCATION_INVALID, language_id);
+						resp = getMessage(DatingMessages.LOCATION_INVALID, language_id, person.getOpco().getId());
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 						return resp;
 					}
@@ -379,13 +379,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					try{
 						age = new BigDecimal(KEYWORD);
 					}catch(java.lang.NumberFormatException nfe){
-						resp = getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id);
+						resp = getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id, person.getOpco().getId());
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 						return resp;
 					}
 					
 					if(age.compareTo(new BigDecimal(18l))<0){
-						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id);
+						resp = getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, language_id, person.getOpco().getId());
 						resp = resp.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 						return resp;
 					}
@@ -399,7 +399,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						profile.setPreferred_gender(Gender.FEMALE);
 					}else{
 						try{
-							resp = getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id);
+							resp = getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, language_id, person.getOpco().getId());
 						}catch(DatingServiceException dse){
 							logger.error(dse.getMessage(), dse);
 						}
@@ -456,9 +456,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						}
 					    
 						
-						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id);
-						String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id);
-						String msg = getMessage(DatingMessages.MATCH_FOUND, language_id);
+						String gender_pronoun = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id, person.getOpco().getId());
+						String gender_pronoun2 = pref_gender.equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id, person.getOpco().getId());
+						String msg = getMessage(DatingMessages.MATCH_FOUND, language_id, person.getOpco().getId());
 						logger.info("\n\n\n\t\t msg:::"+resp);
 						logger.info("\n\n\n\t\t profile:::"+profile);
 						StringBuffer sb = new StringBuffer();
@@ -513,7 +513,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 									cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id(),null,item.getMenu_id(),req.getSessionid());
 								else
 									cmp_ejb.updateSession(language_id,MSISDN, item.getParent_level_id());//update session to upper menu.
-								resp = "Select your chat bundles.\n"+ resp+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id);
+								resp = "Select your chat bundles.\n"+ resp+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, person.getOpco().getId());
 							}
 						}else{
 							resp = "Request received but we couldn't process your request. Do try again later.";
@@ -544,7 +544,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				
 				try{
-					resp = getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, language_id);
+					resp = getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, language_id, person.getOpco().getId());
 				}catch(DatingServiceException dse){
 					logger.error(dse.getMessage(), dse);
 				}
@@ -574,9 +574,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 
 		
 	@Override
-	public String getMessage(String key, int language_id) throws DatingServiceException{
+	public String getMessage(String key, int language_id, Long opcoid) throws DatingServiceException{
 		
-		Message message = messageEJB.getMessage(key, Long.valueOf(language_id));
+		Message message = messageEJB.getMessage(key, Long.valueOf(language_id), opcoid);
 		
 		return message!=null ? message.getMessage() : null;
 		
@@ -638,10 +638,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 	}
 	@Override
-	public String getMessage(DatingMessages datingMsg, int language_id) throws DatingServiceException{
+	public String getMessage(DatingMessages datingMsg, int language_id, Long opcoid) throws DatingServiceException{
 		if(language_id<=0)
 			language_id = 1;
-		return getMessage(datingMsg.toString(),language_id);
+		return getMessage(datingMsg.toString(),language_id, opcoid);
 	}
 	
 	@Override
@@ -1145,7 +1145,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					 message_key =  billable.getResp_status_code();
 				}
 				
-				String message = getMessage(message_key, language_id);
+				String message = getMessage(message_key, language_id, person.getOpco().getId());
 				
 				outgoingsms.setSms(message);
 				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price
@@ -1167,10 +1167,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				Subscription sub = subscriptionBean.renewSubscription(incomingsms.getOpco(), MSISDN, smsserv,SubscriptionStatus.confirmed,method);
 				
 				logger.info(" ::::????****  sub.getExpiryDate()  : "+(sub!=null ? sub.getExpiryDate() : null));
+				DatingMessages message_key = sub.getRenewal_count().compareTo(1L)==0 ? DatingMessages.FIRST_SUBSCRIPTION_WELCOME  : DatingMessages.SUBSCRIPTION_RENEWED;
 				
-				msg = getMessage(DatingMessages.SUBSCRIPTION_RENEWED, language_id);
+				msg = getMessage(message_key, language_id, person.getOpco().getId());
 				msg = msg.replaceAll(EXPIRY_DATE_TAG, timezone_ejb.convertToPrettyFormat( sub.getExpiryDate() ));
 				msg = msg.replaceAll(SERVICE_NAME_TAG, smsserv.getService_name());
+				msg = msg.replaceAll(PRICE_TAG, smsserv.getPrice().toString());
+				msg = msg.replaceAll(BaseEntityI.FREQUENCY, smsserv.getSubscription_length_time_unit().toString().toLowerCase());
 				outgoingsms.setSms(msg);
 				outgoingsms.setPrice(incomingsms.getPrice());//set price to subscription price
 				outgoingsms.setPriority(0);
