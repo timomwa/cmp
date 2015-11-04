@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -91,6 +92,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@EJB
 	TimezoneConverterI timezoneEJB;
+	
+	@EJB
+	private TimeStampSequenceEJBI timeStampEJB;
 	
 	private StopWatch watch = new StopWatch();
 	
@@ -1105,6 +1109,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
+		if(outgoingsms.getCmp_tx_id()==null || outgoingsms.getCmp_tx_id().trim().isEmpty()){
+			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+		}
 		try{
 			
 			

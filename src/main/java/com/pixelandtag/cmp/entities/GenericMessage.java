@@ -107,6 +107,8 @@ public class GenericMessage implements Serializable{
 			event_type = EventType.CONTENT_PURCHASE.getName();
 		if(mediumType==null)
 			mediumType = MediumType.sms;
+		if(cmp_tx_id==null || cmp_tx_id.isEmpty())
+			cmp_tx_id = String.valueOf(System.nanoTime());
 		
 	}
 	
