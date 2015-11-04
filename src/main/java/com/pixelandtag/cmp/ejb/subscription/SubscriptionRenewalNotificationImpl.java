@@ -93,7 +93,7 @@ public class SubscriptionRenewalNotificationImpl implements
 			outgoingsms.setMoprocessor(service.getMoprocessor());
 			outgoingsms.setMediumType(MediumType.sms);
 			outgoingsms.setPrice_point_keyword(service.getPrice_point_keyword());
-			outgoingsms.setTtl(10L);
+			outgoingsms.setTtl(10L); 
 			outgoingsms.setShortcode(service.getMoprocessor().getShortcode());
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			
