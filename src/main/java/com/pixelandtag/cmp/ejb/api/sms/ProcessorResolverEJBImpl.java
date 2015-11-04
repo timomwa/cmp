@@ -217,7 +217,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			
 			incomingsms = incomingSMSDAO.save(incomingsms);
 			
-			
 			MessageLog messagelog = new MessageLog();
 			messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
 			messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());

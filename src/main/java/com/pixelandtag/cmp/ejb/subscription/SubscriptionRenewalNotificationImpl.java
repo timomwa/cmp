@@ -18,6 +18,7 @@ import com.pixelandtag.cmp.ejb.MessageEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
+import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.Message;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
@@ -54,6 +55,9 @@ public class SubscriptionRenewalNotificationImpl implements
 	
 	@EJB
 	private OperatorCountryRulesEJBI opcoRulesEJBI;
+	
+	@EJB
+	private TimeStampSequenceEJBI timeStampEJB;
 	
 	@Override
 	public boolean sendSubscriptionRenewalMessage(OperatorCountry operatorCountry,
@@ -97,6 +101,7 @@ public class SubscriptionRenewalNotificationImpl implements
 			outgoingsms.setShortcode(service.getMoprocessor().getShortcode());
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			outgoingsms.setIsSubscription(Boolean.TRUE);
+			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
 			Date earliestsendtimeslot = opcoRulesEJBI.findEarliestSendtime(opcosenderprofile); 
 			outgoingsms.setTimestamp(earliestsendtimeslot);
 			
