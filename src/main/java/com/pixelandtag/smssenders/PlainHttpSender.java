@@ -253,10 +253,14 @@ public class PlainHttpSender extends GenericSender {
 			
 			for(NameValuePair valuep : qparams){
 				try {
-					url = url.replaceAll("\\$\\{"+valuep.getName()+"\\}", URLEncoder.encode( Matcher.quoteReplacement(valuep.getValue()) ,"UTF-8"  )   )   ;
+					if(valuep.getName()!=null && valuep.getValue()!=null)
+						url = url.replaceAll("\\$\\{"+valuep.getName()+"\\}", URLEncoder.encode( Matcher.quoteReplacement(valuep.getValue()) ,"UTF-8"  )   )   ;
 				} catch (UnsupportedEncodingException e) {
 					logger.error(e.getMessage(),e);
-					throw new MessageSenderException("Could not encode param ="+valuep.getName()+",  value"+valuep.getValue(),e);
+					throw new MessageSenderException("Unsupporte Encoding. Could not encode param ="+valuep.getName()+",  value"+valuep.getValue(),e);
+				}catch(Exception e){
+					logger.error(e.getMessage(),e);
+					throw new MessageSenderException("General Error. Could not encode param ="+valuep.getName()+",  value"+valuep.getValue(),e);
 				}
 			}
 		}
