@@ -23,7 +23,7 @@ import javax.persistence.UniqueConstraint;
 			query = "from Message msg WHERE msg.language_id=:language_id AND msg.key=:key"
 	),
 	@NamedQuery(
-			name = Message.NQ_FIND_BY_LANG_AND_KEY,
+			name = Message.NQ_FIND_BY_LANG_AND_KEY_AND_OPCOID,
 			query = "from Message msg WHERE msg.language_id=:language_id AND msg.key=:key AND msg.opcoid=:opcoid"
 	)
 })
