@@ -69,7 +69,7 @@ public class SubscriptionRenewalNotificationImpl implements
 			
 			DatingMessages message_key = sub.getRenewal_count().compareTo(1L)==0 ? DatingMessages.FIRST_SUBSCRIPTION_WELCOME  : DatingMessages.SUBSCRIPTION_RENEWED;
 			
-			Message messag = messageEJB.getMessage(message_key.toString(), languageid, operatorCountry.getOperator().getId()); 
+			Message messag = messageEJB.getMessage(message_key.toString(), languageid, operatorCountry.getId()); 
 			
 			if(messag==null)
 				throw new Exception("No message for key "+message_key.toString());
