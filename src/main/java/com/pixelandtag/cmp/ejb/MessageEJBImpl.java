@@ -40,7 +40,7 @@ public class MessageEJBImpl implements MessageEJBI {
 		if(language_id<=0)
 			language_id = 1L;
 	
-		String msg = "State 130 :  language_id = "+language_id+" key = "+key;
+		String msg = "State 130 :  language_id = "+language_id+" key = "+key+" opcoid = "+opcoid;
 		logger.info(msg);
 		
 		Map<String,Object> params = new HashMap<String,Object>();
