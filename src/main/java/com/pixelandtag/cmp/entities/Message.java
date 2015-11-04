@@ -16,7 +16,7 @@ import javax.persistence.UniqueConstraint;
 
 
 @Entity
-@Table(name = "message", uniqueConstraints = @UniqueConstraint(columnNames={"language_id","msg_key"}))
+@Table(name = "message", uniqueConstraints = @UniqueConstraint(columnNames={"language_id","msg_key", "opco_id"}))
 @NamedQueries({
 	@NamedQuery(
 			name = Message.NQ_FIND_BY_LANG_AND_KEY,
@@ -66,6 +66,7 @@ public class Message implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
 
 	public Long getLanguage_id() {
 		return language_id;
