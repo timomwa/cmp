@@ -278,7 +278,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "osms.smsservice.event_type, "//4
 					+ "osms.smsservice.price_point_keyword  "//5
 				+ "FROM OpcoSMSService osms"
-				+ " AND osms.smsservice.shortcode=:shortcode "
+				+ " WHERE osms.smsservice.shortcode=:shortcode "
 				+ " AND osms.moprocessor.mop.enable=1 "
 				+ " AND osms.smsservice.enabled=1 "
 				+ " AND osms.smsservice.cmd=:keyword"
@@ -302,7 +302,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "osms.smsservice.event_type, "//4
 					+ "osms.smsservice.price_point_keyword  "//5
 				+ "FROM OpcoSMSService osms"
-				+ " AND osms.smsservice.shortcode=:shortcode "
+				+ " WHERE osms.smsservice.shortcode=:shortcode "
 				+ " AND osms.moprocessor.mop.enable=1 "
 				+ " AND osms.smsservice.enabled=1 "
 				+ " AND osms.smsservice.cmd=:keyword"
