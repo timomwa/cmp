@@ -271,7 +271,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 				? replaceAllIllegalCharacters(incomingsms.getSms().split("[\\s]")[0].toUpperCase()) : "DEFAULT";
 				
 		Query qry = em.createQuery("SELECT "
-					+ "mop.id, "//0
+					+ "osms.moprocessor.id, "//0
 					+ "sms.price, "//1
 					+ "sms.id, "//2
 					+ "sms.split_mt, "//3
@@ -295,7 +295,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(rows.size()<1){
 			
 			qry = em.createQuery("SELECT "
-					+ "mop.id, "//0
+					+ "osms.moprocessor.id, "//0
 					+ "sms.price, "//1
 					+ "sms.id, "//2
 					+ "sms.split_mt, "//3
