@@ -102,6 +102,7 @@ public class SubscriptionRenewalNotificationImpl implements
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			outgoingsms.setIsSubscription(Boolean.TRUE);
 			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+			outgoingsms.setMsisdn(msisdn);
 			Date earliestsendtimeslot = opcoRulesEJBI.findEarliestSendtime(opcosenderprofile); 
 			outgoingsms.setTimestamp(earliestsendtimeslot);
 			
