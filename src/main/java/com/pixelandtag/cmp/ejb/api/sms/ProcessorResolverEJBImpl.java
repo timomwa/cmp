@@ -274,7 +274,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE sms.moprocessor=mop "
+				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE osms.moprocessor=mop "
 				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword"
 				+ " AND osms.opco=:opco");
 		
@@ -294,7 +294,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE sms.moprocessor=mop "
+				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE osms.moprocessor=mop "
 				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword"
 				+ " AND osms.opco=:opco");
 		

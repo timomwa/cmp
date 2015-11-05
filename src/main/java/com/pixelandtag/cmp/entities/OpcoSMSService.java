@@ -34,6 +34,11 @@ public class OpcoSMSService implements Serializable {
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="opco_id_fk", nullable=false)
 	private OperatorCountry opco;
+	
+	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="mo_processor_id")
+	private MOProcessor moprocessor;
 
 	public Long getId() {
 		return id;
@@ -58,9 +63,13 @@ public class OpcoSMSService implements Serializable {
 	public void setOpco(OperatorCountry opco) {
 		this.opco = opco;
 	}
-	
-	
-	
-	
+
+	public MOProcessor getMoprocessor() {
+		return moprocessor;
+	}
+
+	public void setMoprocessor(MOProcessor moprocessor) {
+		this.moprocessor = moprocessor;
+	}
 
 }
