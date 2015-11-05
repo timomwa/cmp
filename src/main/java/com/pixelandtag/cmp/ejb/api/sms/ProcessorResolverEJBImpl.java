@@ -277,7 +277,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE sms=osms.smsservice"
+				+ "FROM OpcoSMSService osms, SMSService sms, MOProcessor mop  WHERE sms=osms.smsservice"
 				+ " AND mop=osms.moprocessor "
 				+ " AND mop.shortcode=:shortcode "
 				+ " AND mop.enable=1 "
@@ -291,6 +291,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 		List<Object[]> rows = qry.getResultList();
 		
+		System.out.println("\n\n\n 1. rows.size()  :::::   "+rows.size());
 		
 		if(rows.size()<1){
 			
@@ -315,6 +316,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			
 			keyword = "DEFAULT";
 			
+			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
 			rows = qry.getResultList();
 		}
 			
