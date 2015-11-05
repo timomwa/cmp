@@ -272,17 +272,16 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 				
 		Query qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
-					+ "sms.price, "//1
-					+ "sms.id, "//2
-					+ "sms.split_mt, "//3
-					+ "sms.event_type, "//4
-					+ "sms.price_point_keyword  "//5
-				+ "FROM OpcoSMSService osms, SMSService sms, MOProcessor mop  WHERE sms=osms.smsservice"
-				+ " AND mop=osms.moprocessor "
-				+ " AND mop.shortcode=:shortcode "
-				+ " AND mop.enable=1 "
-				+ " AND sms.enabled=1 "
-				+ " AND sms.cmd=:keyword"
+					+ "osms.smsservice.price, "//1
+					+ "osms.smsservice.id, "//2
+					+ "osms.smsservice.split_mt, "//3
+					+ "osms.smsservice.event_type, "//4
+					+ "osms.smsservice.price_point_keyword  "//5
+				+ "FROM OpcoSMSService osms"
+				+ " AND osms.smsservice.shortcode=:shortcode "
+				+ " AND osms.moprocessor.mop.enable=1 "
+				+ " AND osms.smsservice.enabled=1 "
+				+ " AND osms.smsservice.cmd=:keyword"
 				+ " AND osms.opco=:opco");
 		
 		qry.setParameter("shortcode", incomingsms.getShortcode());
@@ -297,17 +296,16 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			
 			qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
-					+ "sms.price, "//1
-					+ "sms.id, "//2
-					+ "sms.split_mt, "//3
-					+ "sms.event_type, "//4
-					+ "sms.price_point_keyword  "//5
-				+ "FROM OpcoSMSService osms, SMSService sms, MOProcessor mop  WHERE sms=osms.smsservice"
-				+ " AND mop=osms.moprocessor "
-				+ " AND mop.shortcode=:shortcode "
-				+ " AND mop.enable=1 "
-				+ " AND sms.enabled=1 "
-				+ " AND sms.cmd=:keyword"
+					+ "osms.smsservice.price, "//1
+					+ "osms.smsservice.id, "//2
+					+ "osms.smsservice.split_mt, "//3
+					+ "osms.smsservice.event_type, "//4
+					+ "osms.smsservice.price_point_keyword  "//5
+				+ "FROM OpcoSMSService osms"
+				+ " AND osms.smsservice.shortcode=:shortcode "
+				+ " AND osms.moprocessor.mop.enable=1 "
+				+ " AND osms.smsservice.enabled=1 "
+				+ " AND osms.smsservice.cmd=:keyword"
 				+ " AND osms.opco=:opco");
 		
 			qry.setParameter("shortcode", incomingsms.getShortcode());
