@@ -208,6 +208,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		incomingsms.setOpco(opco);
 		incomingsms = populateProcessorDetails(incomingsms);
 		
+		if(incomingsms.getMoprocessor()==null)
+			throw new ConfigurationException("Couldn't find processor for shortcode =\""+incomingsms.getShortcode()+"\", opcoid=\""+incomingsms.getOpco().getId()+"\"");
+		
 		incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
 		
 		incomingsms.setIsSubscription(Boolean.FALSE);
@@ -274,8 +277,12 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE osms.moprocessor=mop "
-				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword"
+				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE sms=osms.smsserviceosms"
+				+ " AND mop=osms.moprocessor "
+				+ " AND mop.shortcode=:shortcode "
+				+ " AND mop.enable=1 "
+				+ " AND sms.enabled=1 "
+				+ " AND sms.cmd=:keyword"
 				+ " AND osms.opco=:opco");
 		
 		qry.setParameter("shortcode", incomingsms.getShortcode());
@@ -294,8 +301,12 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 					+ "sms.split_mt, "//3
 					+ "sms.event_type, "//4
 					+ "sms.price_point_keyword  "//5
-				+ "FROM SMSService sms, MOProcessor mop, OpcoSMSService osms WHERE osms.moprocessor=mop "
-				+ " AND mop.shortcode=:shortcode AND mop.enable=1 AND sms.enabled=1 AND sms.cmd=:keyword"
+				+ "FROM OpcoSMSService osms, SMSService sms, MOProcessor mop  WHERE sms=osms.smsserviceosms"
+				+ " AND mop=osms.moprocessor "
+				+ " AND mop.shortcode=:shortcode "
+				+ " AND mop.enable=1 "
+				+ " AND sms.enabled=1 "
+				+ " AND sms.cmd=:keyword"
 				+ " AND osms.opco=:opco");
 		
 			qry.setParameter("shortcode", incomingsms.getShortcode());
