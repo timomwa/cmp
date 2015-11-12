@@ -211,8 +211,6 @@ public class PlainHttpSender extends GenericSender {
 						+ "hasn't been found. First check if the name is "
 						+ "correct in the opco_configs table and matches in the opco_templates table");
 			
-			
-			
 			for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){//Any other header param
 				
 				String key = config.getKey();
@@ -221,9 +219,11 @@ public class PlainHttpSender extends GenericSender {
 					payload_template = payload_template.replaceAll("\\$\\{"+param_name+"\\}", Matcher.quoteReplacement(config.getValue().getValue()) );
 				}
 			}
-			
 			for(NameValuePair valuep : qparams){
-				payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", Matcher.quoteReplacement( valuep.getValue()) );
+				if(valuep.getValue()!=null)
+					payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", Matcher.quoteReplacement( valuep.getValue()) );
+				else
+					logger.warn("Value for valuep.getName()-> '"+valuep.getName()+"' is valuep.getValue()-> '"+valuep.getValue()+"'");
 			}
 			
 			generic_http_parameters.setStringentity(payload_template);

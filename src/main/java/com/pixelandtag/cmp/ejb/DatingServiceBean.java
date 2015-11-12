@@ -1152,7 +1152,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					 message_key =  billable.getResp_status_code();
 				}
 				
-				String message = getMessage(message_key, language_id, person.getOpco().getId());
+				String message = message_key!=BILLING_FAILED ? getMessage(message_key, language_id, person.getOpco().getId()) : null;
 				
 				outgoingsms.setSms(message);
 				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price
