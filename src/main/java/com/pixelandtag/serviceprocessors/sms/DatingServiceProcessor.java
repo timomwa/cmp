@@ -723,7 +723,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					
 					outgoingchatsms.setSms(msg);
-					outgoingchatsms.setCmp_tx_id(generateNextTxId());
+					outgoingchatsms.setCmp_tx_id(generateNextTxId());//Is a totally new message
+					outgoingchatsms.setOpco_tx_id(generateNextTxId());//Is a totally new message
 					outgoingchatsms.setPriority(0);//highest priority possible
 					outgoingchatsms.setPrice(BigDecimal.ZERO);
 					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
