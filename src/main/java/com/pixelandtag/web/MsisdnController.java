@@ -118,7 +118,7 @@ public class MsisdnController extends HttpServlet {
 			  if(jsonstr==null || jsonstr.isEmpty())
 				  jsonstr = elem;
 			logger.info("Incomming json >> " + jb.toString());
-			requestJSON = new JSONObject(jb.toString());
+			requestJSON = new JSONObject(jsonstr);
 			String command = requestJSON.getString("command");
 			logger.info("command>> "+command);
 			
