@@ -92,7 +92,7 @@ var TRIVIA = {
 							if(MT_STATUS=='FAILED_TEMPORARILY')
 								img = "images/temp_fail.png";
 							
-							String imgstr = "<img width='8' src='"+img+"' alt='Temp fail'/>";
+							var imgstr = "<img width='8' src='"+img+"' alt='Temp fail'/>";
 							table.append($("<TR>" +
 							"<TD>"+CMP_Txid+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
