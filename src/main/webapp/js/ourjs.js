@@ -54,7 +54,8 @@ var TRIVIA = {
 							"<th scope='col'>MT_Sent</th>" +
 							"<th scope='col'>MT_STATUS</th>" +
 							"<th scope='col'>dlrArrive</th>" +
-							"<th scope='col'>source</th></TR></TABLE>");
+							"<th scope='col'>source</th>" +
+							"<th scope='col'>shortcode</th></TR></TABLE>");
 					
 					TRIVIA.statsdiv.html("");
 					TRIVIA.statsdiv.css('width','90%');
@@ -78,16 +79,27 @@ var TRIVIA = {
 							var MT_STATUS =  unescape(data.MT_STATUS[b]);
 							var dlrArrive =  unescape(data.dlrArrive[b]);
 							var source = unescape(data.source[b]);
+							var shortcode = unescape(data.shortcode[b]);
 							
 							var spanC = (source == 'ussd') ? "red" : "green";
+							var img = "";
+							if(MT_STATUS=='SENT_SUCCESSFULLY')
+								img = "<img src='images/assign.png' alt='Success'/>";
+							if(MT_STATUS=='FAILED_PERMANENTLY')
+								img = "<img src='images/error.png' alt='Failed'/>";
+							if(MT_STATUS=='RECEIVED')
+								img = "<img src='images/received.png' alt='Received'/>";
+							if(MT_STATUS=='FAILED_TEMPORARILY')
+								img = "<img src='images/temp_fail.png' alt='Tem fail'/>";
 							table.append($("<TR>" +
 							"<TD>"+CMP_Txid+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
 							"<TD>"+SUB_Mobtel+"</TD>" +
 							"<TD>"+MO_Received+"</TD>" +
 							"<TD>"+MT_Sent+"</TD>" +
-							"<TD>"+MT_STATUS+"</TD>" +
+							"<TD>"+MT_STATUS+"&nbsp;&nbsp;&nbsp;"+img+"</TD>" +
 							"<TD>"+dlrArrive+"</TD>" +
+							"<TD>"+shortcode+"</TD>" +
 							"<TD><span class='"+spanC+"'>"+source+"</span></TD></TR>"));
 							
 							//TRIVIA.statsdiv.append("<span class='lefters'>"+statusCode+" = "+count+" </span><br/>");
