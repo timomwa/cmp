@@ -252,8 +252,12 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 					
 				}else{
+					int lang = profile.getLanguage_id();
+					if(lang<=0)
+						lang = 1;
 					outgoingsms.setPrice(BigDecimal.ZERO);
-					outgoingsms.setSms("You already have a valid subscription. Dial *329# to find a friend to chat with, or reply with FIND");
+					String msg = datingBean.getMessage(DatingMessages.YOU_ALREADY_HAVE_VALID_SUBSCRIPTION_NOW_FIND_MATCH, lang, incomingsms.getOpco().getId());
+					outgoingsms.setSms(msg);
 				}
 				
 			}else if(KEYWORD.equalsIgnoreCase("DATE") || person!=null){
