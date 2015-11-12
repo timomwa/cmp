@@ -20,6 +20,7 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -48,6 +49,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private DatingServiceI datingBean;
 	private LocationBeanI location_ejb; 
 	private CMPResourceBeanRemote cmp_bean;
+	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	private SubscriptionBeanI subscriptionBean;
 	private OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private InitialContext context;
@@ -74,6 +76,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		cmp_bean = (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
+		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
@@ -717,12 +720,17 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}else{
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
+					
+					
 					outgoingchatsms.setSms(msg);
 					outgoingchatsms.setCmp_tx_id(generateNextTxId());
 					outgoingchatsms.setPriority(0);//highest priority possible
 					outgoingchatsms.setPrice(BigDecimal.ZERO);
 					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
 					outgoingchatsms.setOpcosenderprofile(opcotrxprofile);
+					String shortcode = opcosmsserviceejb.getShortcodeByServiceIdAndOpcoId(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
+					logger.info("\n\n\n\n\n\t\toutgoing shortcode >>>>> "+shortcode);
+					outgoingchatsms.setShortcode(shortcode);
 					
 					sendMT(outgoingchatsms);
 					String tailmsg = "";

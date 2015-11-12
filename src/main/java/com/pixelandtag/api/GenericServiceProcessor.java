@@ -505,13 +505,13 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		try {
 			
-			int max_retry = 5;
-			int count = 0;
+			//int max_retry = 5;
+			//int count = 0;
 			
 			boolean success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
-			while(!success && count<=max_retry){
-				success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
-			}
+			//while(!success && count<=max_retry){
+			//	success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
+			//}
 			
 			
 		}catch (Exception e) {

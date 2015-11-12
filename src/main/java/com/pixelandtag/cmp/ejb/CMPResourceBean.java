@@ -400,7 +400,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 	}
 	
-	
+	@Override
+	public SMSService getSMSservice(Long service_id) throws Exception{
+		return em.find(SMSService.class, service_id);
+	}
 	
 	@SuppressWarnings("unchecked")
 	public SMSServiceDTO getSMSservice(int service_id) throws Exception{
