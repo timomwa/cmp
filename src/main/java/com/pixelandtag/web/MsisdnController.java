@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -93,12 +94,29 @@ public class MsisdnController extends HttpServlet {
 				}catch(Exception e){}
 				
 			}
+			
+			@SuppressWarnings("unchecked")
+			Enumeration<String> param_enums = req.getParameterNames();
+			String elem = "";
+			int i = 0;
+			while(param_enums.hasMoreElements()){
+				elem  =  param_enums.nextElement();
+				logger.info(i+". Parameter names :: "+elem );
+				i++;
+			}
+			
+			
+			
 			StringBuffer jb = new StringBuffer();
 			BufferedReader reader = req.getReader();
 			   
 			  while ((line = reader.readLine()) != null)
 		    	  jb.append(line);
 			
+			  String jsonstr = jb.toString();
+			  
+			  if(jsonstr==null || jsonstr.isEmpty())
+				  jsonstr = elem;
 			logger.info("Incomming json >> " + jb.toString());
 			requestJSON = new JSONObject(jb.toString());
 			String command = requestJSON.getString("command");
