@@ -83,8 +83,12 @@ public class PlainHttpSender extends GenericSender {
 		generic_http_parameters.setId(outgoingsms.getId());
 		
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		if(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME)!=null)
-			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), outgoingsms.getCmp_tx_id().toString()));//"cptxid"
+		if(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME)!=null){
+			String transaction_id_ = outgoingsms.getOpco_tx_id();
+			if(transaction_id_==null || transaction_id_.trim().isEmpty())
+				transaction_id_ = outgoingsms.getCmp_tx_id();
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TRANSACTION_ID_PARAM_NAME).getValue(), transaction_id_));//"cptxid"
+		}
 		
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),outgoingsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),outgoingsms.getMsisdn()));//"msisdn"
