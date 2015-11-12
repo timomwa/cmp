@@ -41,7 +41,7 @@ var TRIVIA = {
 				
 				url: 'msisdnController',
 				
-				data: '{\'command\': \'getLogsFor\', \'msisdn\' : \''+msisdn+'\', \'date\': \''+date+'\'}',
+				data: "{\"command\": \"getLogsFor\", \"msisdn\" : \""+msisdn+"\", \"date\": \""+date+"\"}",
 				
 				success: function(data){
 					

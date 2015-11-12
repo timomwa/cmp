@@ -57,7 +57,7 @@ public class MsisdnController extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		StringBuffer jb = new StringBuffer();
+		
 		Connection conn = null;
 		PrintWriter out = null;
 		String line = null;
@@ -93,7 +93,7 @@ public class MsisdnController extends HttpServlet {
 				}catch(Exception e){}
 				
 			}
-			
+			StringBuffer jb = new StringBuffer();
 			BufferedReader reader = req.getReader();
 			   
 			  while ((line = reader.readLine()) != null)
