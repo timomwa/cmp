@@ -51,11 +51,11 @@ var TRIVIA = {
 							"<th scope='col'>timeStamp" +
 							"</th><th scope='col'>SUB_Mobtel</th>" +
 							"<th scope='col'>MO_Received</th>" +
-							"<th scope='col'>MT_Sent</th>" +
+							"<th scope='col' style='width:150px'>MT_Sent</th>" +
 							"<th scope='col'>MT_STATUS</th>" +
 							"<th scope='col'>dlrArrive</th>" +
-							"<th scope='col'>source</th>" +
-							"<th scope='col'>shortcode</th></TR></TABLE>");
+							"<th scope='col'>shortcode</th>" +
+							"<th scope='col'>source</th></TR></TABLE>");
 					
 					TRIVIA.statsdiv.html("");
 					TRIVIA.statsdiv.css('width','90%');
@@ -84,20 +84,22 @@ var TRIVIA = {
 							var spanC = (source == 'ussd') ? "red" : "green";
 							var img = "";
 							if(MT_STATUS=='SENT_SUCCESSFULLY')
-								img = "<img src='images/assign.png' alt='Success'/>";
+								img = "images/assign.png";
 							if(MT_STATUS=='FAILED_PERMANENTLY')
-								img = "<img src='images/error.png' alt='Failed'/>";
+								img = "images/error.png";
 							if(MT_STATUS=='RECEIVED')
-								img = "<img src='images/received.png' alt='Received'/>";
+								img = "images/received.png";
 							if(MT_STATUS=='FAILED_TEMPORARILY')
-								img = "<img src='images/temp_fail.png' alt='Tem fail'/>";
+								img = "images/temp_fail.png";
+							
+							String imgstr = "<img width='8' src='"+img+"' alt='Temp fail'/>";
 							table.append($("<TR>" +
 							"<TD>"+CMP_Txid+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
 							"<TD>"+SUB_Mobtel+"</TD>" +
 							"<TD>"+MO_Received+"</TD>" +
 							"<TD>"+MT_Sent+"</TD>" +
-							"<TD>"+MT_STATUS+"&nbsp;&nbsp;&nbsp;"+img+"</TD>" +
+							"<TD>"+MT_STATUS+"&nbsp;&nbsp;"+imgstr+"</TD>" +
 							"<TD>"+dlrArrive+"</TD>" +
 							"<TD>"+shortcode+"</TD>" +
 							"<TD><span class='"+spanC+"'>"+source+"</span></TD></TR>"));
