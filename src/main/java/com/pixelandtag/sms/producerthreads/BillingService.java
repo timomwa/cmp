@@ -75,7 +75,7 @@ public class BillingService extends Thread{
 	private CMPResourceBeanRemote cmpbean;
 	private  Context context = null;
 	public void initEJB() throws NamingException{
-	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+	    	 String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 			 Properties props = new Properties();
 			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
 			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");

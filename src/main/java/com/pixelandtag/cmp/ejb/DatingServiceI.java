@@ -3,6 +3,7 @@ package com.pixelandtag.cmp.ejb;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
@@ -13,6 +14,7 @@ import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
+import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -58,6 +60,16 @@ public interface DatingServiceI extends BaseEntityI {
 	public boolean deactivate(String msisdn);
 	
 	public boolean reactivate(String msisdn);
+
+	public BigInteger countIncompleteProfiles();
+	
+	public BigInteger countAllProfiles(Gender gender);
+
+	public List<PersonDatingProfile> listIncompleteProfiles(BigInteger start,BigInteger records_per_run);
+	
+	public QuestionLog getLastQuestionLog(Long profile_id);
+	
+	public String startProfileQuestions(String msisdn, Person person);
 
 	
 

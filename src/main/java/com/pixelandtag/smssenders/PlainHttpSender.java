@@ -283,6 +283,8 @@ public class PlainHttpSender extends GenericSender {
 					+ "provide this config in db");
 		}
 		
+		logger.info(outgoingsms);
+		
 		GenericHttpResp resp = httpclient.call(generic_http_parameters);
 		
 		logger.info("\n\n\t\t>>>url>>> : ["+url

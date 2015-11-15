@@ -189,6 +189,15 @@ public class OutgoingSMS extends GenericMessage implements Serializable {
 		this.sent = sent;
 	}
 
+	@Override
+	public String toString() {
+		return "OutgoingSMS [opcosenderprofile=" + opcosenderprofile
+				+ ",\n in_outgoing_queue=" + in_outgoing_queue
+				+ ",\n priority=" + priority + ",\n re_tries=" + re_tries
+				+ ",\n ttl=" + ttl + ",\n charged=" + charged + ",\n sent="
+				+ sent + "]";
+	}
+
 	
 
 

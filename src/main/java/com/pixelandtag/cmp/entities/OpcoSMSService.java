@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +18,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -61,12 +65,17 @@ public class OpcoSMSService implements Serializable {
 	@Column(name="price", scale=2, precision=20)
 	private BigDecimal price;
 	
+	@Column(name="billing_type")
+	@Enumerated(EnumType.STRING)
+	private BillingType billingType;
 	
 	@PreUpdate
 	@PrePersist
 	public void update(){
 		if(price==null)
 			price = BigDecimal.ZERO;
+		if(billingType==null)
+			billingType = BillingType.NONE;
 	}
 
 	public Long getId() {
@@ -108,4 +117,22 @@ public class OpcoSMSService implements Serializable {
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
+
+	public BillingType getBillingType() {
+		return billingType;
+	}
+
+	public void setBillingType(BillingType billingType) {
+		this.billingType = billingType;
+	}
+
+	@Override
+	public String toString() {
+		return "OpcoSMSService [id=" + id + ",\n smsservice=" + smsservice
+				+ ",\n opco=" + opco + ",\n moprocessor=" + moprocessor
+				+ ",\n price=" + price + ",\n billingType=" + billingType
+				+ "]";
+	}
+	
+	
 }

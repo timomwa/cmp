@@ -288,7 +288,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					try{
 						if(isunique)
 							isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(KEYWORD).toString()));
-					}catch(Exception exp){}
+					}catch(Exception exp){
+						logger.error(exp.getMessage(),exp);
+					}
 					
 					if(isunique){
 						profile.setUsername(KEYWORD);
@@ -539,13 +541,20 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 
 	private String startProfileQuestions(RequestObject req, Person person) throws DatingServiceException {
+		String resp =  startProfileQuestions(req.getMsisdn(), person);
+		if(resp==null || resp.isEmpty())
+			throw new DatingServiceException("Sorry, problem occurred, please try again.");
+		return resp;
+	}
+	
+	
+	@Override
+	public String startProfileQuestions(String msisdn, Person person){
 
 		String resp = "Request received.";
 		
 		try{
-				final String MSISDN = req.getMsisdn();
 				int language_id = 1;
-				
 				
 				try{
 					resp = getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, language_id, person.getOpco().getId());
@@ -555,7 +564,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				PersonDatingProfile profile = new PersonDatingProfile();
 				profile.setPerson(person);
-				profile.setUsername(MSISDN);
+				profile.setUsername(msisdn);
 				
 				profile = saveOrUpdate(profile);
 				
@@ -568,8 +577,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				ql.setProfile_id_fk(profile.getId());
 				ql.setQuestion_id_fk(question.getId());
 				ql = saveOrUpdate(ql);
+				
 		}catch(Exception exp){
-			throw new DatingServiceException("Sorry, problem occurred, please try again.",exp);
+			logger.error(exp.getMessage(), exp);
 		}
 		
 		return resp;
@@ -1230,7 +1240,29 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return billable;
 	}
 
+	@Override
+	public QuestionLog getLastQuestionLog(Long profile_id){
+		QuestionLog questionlog = null;
+		try{
+			Query qry = em.createQuery("FROM QuestionLog ql WHERE ql.profile_id_fk=:profile_id_fk order by timeStamp desc,id desc,question_id_fk desc ");
+			qry.setParameter("profile_id_fk", profile_id);
+			qry.setFirstResult(0);
+			qry.setMaxResults(1);
+			questionlog = (QuestionLog) qry.getSingleResult();
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage() + " no more profile questions log for profile  id  "+profile_id);
+			return null;
+		}catch (Exception e) {
+
+			logger.error(e.getMessage(), e);
+		}finally{
+		}
+
+		return questionlog;
+	}
+	
 	@SuppressWarnings("unchecked")
+	@Override
 	public ProfileQuestion getPreviousQuestion(Long profile_id) throws DatingServiceException{
 		
 		ProfileQuestion nexqQ = null;
@@ -1349,7 +1381,45 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return success;
 	}
 	
+	@Override
+	public BigInteger countIncompleteProfiles(){
+		try{
+			Query query = em.createQuery("select count(*) from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
+			query.setParameter("profilecomplete", Boolean.FALSE);
+			return BigInteger.valueOf( (Long) query.getSingleResult() );
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return BigInteger.ZERO;
+	}
 	
+	@Override
+	public BigInteger countAllProfiles(Gender gender){
+		try{
+			Query query = em.createQuery("select count(*) from PersonDatingProfile dp WHERE dp.gender=:gender");
+			query.setParameter("gender", gender);
+			return BigInteger.valueOf( (Long) query.getSingleResult() );
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return BigInteger.ZERO;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<PersonDatingProfile> listIncompleteProfiles(BigInteger start,BigInteger records_per_run){
+		
+		List<PersonDatingProfile> persondatingprofiles = new ArrayList<PersonDatingProfile>();
+		try{
+			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
+			query.setParameter("profilecomplete", Boolean.FALSE);
+			persondatingprofiles = query.getResultList();
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return persondatingprofiles;
+	
+	}
 
 	
 }
