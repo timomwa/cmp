@@ -153,6 +153,7 @@ public class ProfileQuestionsPrompter {
 				logger.info(" profile.getCreationDate() : "+profile.getCreationDate());
 				Date lastseen = (question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate());
 				logger.info(" lastseen : "+lastseen);
+				logger.info(" timezoneconverterEJB : "+timezoneconverterEJB);
 				String prettyTime = timezoneconverterEJB.convertToPrettyFormat( lastseen );
 				
 				message = message.replaceAll(GenericServiceProcessor.USERNAME_TAG, Matcher.quoteReplacement(username));
