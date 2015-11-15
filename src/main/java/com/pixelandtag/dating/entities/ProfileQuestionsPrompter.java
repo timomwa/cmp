@@ -122,7 +122,6 @@ public class ProfileQuestionsPrompter {
 				
 				logger.info(start+","+records_per_run);
 				List<PersonDatingProfile> profiles = datingserviceEJB.listIncompleteProfiles(start,records_per_run);
-				if(profiles!=null)
 				logger.info("profiles.size():: "+profiles.size());
 				resumeQuestions(profiles,total_girls, total_boys);
 				start = records_per_run.add(start);

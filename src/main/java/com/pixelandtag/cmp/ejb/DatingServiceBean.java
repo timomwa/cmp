@@ -1411,9 +1411,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		List<PersonDatingProfile> persondatingprofiles = new ArrayList<PersonDatingProfile>();
 		try{
+			System.out.println("\n\n\n about to make query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
 			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
 			query.setParameter("profilecomplete", Boolean.FALSE);
 			persondatingprofiles = query.getResultList();
+			System.out.println("\n\n\n done running  query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
+			
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}
