@@ -3245,7 +3245,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		List<ServiceProcessorDTO>  services = null;
 		
 		try {
-			
+			/*
 			Query qry = em.createQuery("SELECT "
 					+ "mop.id, "//0
 					+ "mop.serviceName, "//1
@@ -3268,6 +3268,27 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					+ "AND mop.enable=1 "
 					+ "AND mop.processor_type <> :phantom_processor "
 					+ "group by mop.id" );
+			*/
+			Query qry = em.createQuery("SELECT "
+					+ "osms.moprocessor.id, "//0
+					+ "osms.moprocessor.serviceName, "//1
+					+ "osms.moprocessor.processorClass, "//2
+					+ "osms.moprocessor.enable, "//3
+					+ "osms.moprocessor.class_status, "//4
+					+ "osms.moprocessor.shortcode, "//5
+					+ "osms.moprocessor.threads, "//6
+					+ "osms.smsservice.subscriptionText , "//7
+					+ "osms.smsservice.unsubscriptionText , "//8
+					+ "osms.smsservice.tailText_subscribed , "//9
+					+ "osms.smsservice.tailText_notsubscribed , "//10
+					+ "osms.moprocessor.processor_type  , "//11
+					+ "osms.moprocessor.forwarding_url  , "//12
+					+ "osms.moprocessor.protocol , "//13
+					+ "coalesce(osms.moprocessor.smppid,-1,osms.moprocessor.smppid)   "//14
+				+ "FROM OpcoSMSService osms"
+				+ "WHERE osms.moprocessor.enable=1 "
+				+ "AND osms.moprocessor.processor_type <> :phantom_processor "
+				+ "group by osms.moprocessor.id");
 			
 			qry.setParameter("phantom_processor", ProcessorType.PHANTOM);
 			
