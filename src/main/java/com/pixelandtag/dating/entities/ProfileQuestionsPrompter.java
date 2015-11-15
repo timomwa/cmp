@@ -122,6 +122,8 @@ public class ProfileQuestionsPrompter {
 				
 				logger.info(start+","+records_per_run);
 				List<PersonDatingProfile> profiles = datingserviceEJB.listIncompleteProfiles(start,records_per_run);
+				if(profiles!=null)
+				logger.info("profiles.size():: "+profiles.size());
 				resumeQuestions(profiles,total_girls, total_boys);
 				start = records_per_run.add(start);
 				remaining = count.subtract(start);
@@ -150,6 +152,8 @@ public class ProfileQuestionsPrompter {
 				
 				if(username.equals(person.getMsisdn()))
 					username = "";
+				
+				logger.info("username == "+username);
 				
 				BigInteger potentialMates = total_girls.add(total_boys);
 				DatingMessages datingmessage = DatingMessages.REMINDER_COMPLETE_QUESTIONS;

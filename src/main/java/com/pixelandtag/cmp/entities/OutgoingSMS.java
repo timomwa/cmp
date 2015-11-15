@@ -195,7 +195,21 @@ public class OutgoingSMS extends GenericMessage implements Serializable {
 				+ ",\n in_outgoing_queue=" + in_outgoing_queue
 				+ ",\n priority=" + priority + ",\n re_tries=" + re_tries
 				+ ",\n ttl=" + ttl + ",\n charged=" + charged + ",\n sent="
-				+ sent + "]";
+				+ sent + ",\n getId()=" + getId() + ",\n getMsisdn()="
+				+ getMsisdn() + ",\n getCmp_tx_id()=" + getCmp_tx_id()
+				+ ",\n getOpco_tx_id()=" + getOpco_tx_id()
+				+ ",\n getBilling_status()=" + getBilling_status()
+				+ ",\n getTimestamp()=" + getTimestamp() + ",\n getPrice()="
+				+ getPrice() + ",\n getServiceid()=" + getServiceid()
+				+ ",\n getSms()=" + getSms() + ",\n getShortcode()="
+				+ getShortcode() + ",\n getSplit()=" + getSplit()
+				+ ",\n getEvent_type()=" + getEvent_type()
+				+ ",\n getPrice_point_keyword()=" + getPrice_point_keyword()
+				+ ",\n getMoprocessor()=" + getMoprocessor()
+				+ ",\n getIsSubscription()=" + getIsSubscription()
+				+ ",\n getMediumType()=" + getMediumType() + ",\n toString()="
+				+ super.toString() + ",\n getClass()=" + getClass()
+				+ ",\n hashCode()=" + hashCode() + "]";
 	}
 
 	
