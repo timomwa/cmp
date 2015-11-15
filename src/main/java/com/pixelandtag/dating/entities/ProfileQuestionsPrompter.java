@@ -146,14 +146,14 @@ public class ProfileQuestionsPrompter {
 				
 				
 				String message  = datingserviceEJB.getMessage(datingmessage,profile.getLanguage_id(), person.getOpco().getId());
-				String prettyTime = timezoneconverterEJB.convertToPrettyFormat(question_log.getTimeStamp());
+				String prettyTime = timezoneconverterEJB.convertToPrettyFormat(question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate() );
 				
 				message = message.replaceAll(GenericServiceProcessor.USERNAME_TAG, Matcher.quoteReplacement(username));
 				message = message.replaceAll(GenericServiceProcessor.POTENTIAL_MATES_COUNT_TAG, Matcher.quoteReplacement(potentialMates.toString()));
 				message = message.replaceAll(GenericServiceProcessor.LAST_QUESTION_DATE_TAG, Matcher.quoteReplacement(prettyTime));
 				//You're missing out <USERNAME>! There are <POTENTIAL_MATES_COUNT> single ladies here waiting to chat but your profile is incomplete. 
 				//Please complete the following questions sent to you on <LAST_QUESTION_DATE>.
-				
+				logger.info(" MSG:: "+message);
 				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),0);
 				
 				String question = null;
