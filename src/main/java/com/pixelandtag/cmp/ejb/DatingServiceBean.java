@@ -1414,8 +1414,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			System.out.println("\n\n\n about to make query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
 			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
 			query.setParameter("profilecomplete", Boolean.FALSE);
+			query.setFirstResult(start.intValue());
+			query.setMaxResults(records_per_run.intValue());
 			persondatingprofiles = query.getResultList();
-			System.out.println("\n\n\n done running  query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
+			System.out.println("\n\n\n done running  query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete size of results GUGAMUGARESULTS:: "+persondatingprofiles.size());
 			
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
