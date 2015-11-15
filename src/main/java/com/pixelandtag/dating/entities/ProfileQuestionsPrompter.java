@@ -1,6 +1,7 @@
 package com.pixelandtag.dating.entities;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -147,7 +148,11 @@ public class ProfileQuestionsPrompter {
 				
 				
 				String message  = datingserviceEJB.getMessage(datingmessage,profile.getLanguage_id(), person.getOpco().getId());
-				String prettyTime = timezoneconverterEJB.convertToPrettyFormat((question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate()) );
+				logger.info(" question_log : "+question_log);
+				logger.info(" profile : "+profile);
+				logger.info(" profile.getCreationDate() : "+profile.getCreationDate());
+				Date lastseen = (question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate());
+				String prettyTime = timezoneconverterEJB.convertToPrettyFormat( lastseen );
 				
 				message = message.replaceAll(GenericServiceProcessor.USERNAME_TAG, Matcher.quoteReplacement(username));
 				message = message.replaceAll(GenericServiceProcessor.POTENTIAL_MATES_COUNT_TAG, Matcher.quoteReplacement(potentialMates.toString()));
