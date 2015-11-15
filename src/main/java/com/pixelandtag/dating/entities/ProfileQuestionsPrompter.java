@@ -152,6 +152,7 @@ public class ProfileQuestionsPrompter {
 		for(PersonDatingProfile profile : profiles){
 			try{
 				
+				Thread.sleep(1000);//Sleep for a second
 				Person person = profile.getPerson();
 				if(person.getOpco()==null)
 					continue;
@@ -205,6 +206,8 @@ public class ProfileQuestionsPrompter {
 				mtcreatorEJB.sendMT(question,serviceid, person.getMsisdn(), person.getOpco(),5);
 				
 				profilecompletionreminderLoggerEJB.log(profile);
+				
+				
 				
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
