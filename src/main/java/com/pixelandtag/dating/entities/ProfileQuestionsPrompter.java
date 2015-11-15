@@ -80,7 +80,7 @@ public class ProfileQuestionsPrompter {
 			props.put("jboss.naming.client.ejb.context", true);
 			context = new InitialContext(props);
 			datingserviceEJB = (DatingServiceI) context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
-			profilecompletionreminderLoggerEJB = (ProfileCompletionReminderLogEJBI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI");
+			profilecompletionreminderLoggerEJB = (ProfileCompletionReminderLogEJBI) context.lookup("cmp/ProfileCompletionReminderLogEJBImpl!com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI");
 			timezoneconverterEJB = (TimezoneConverterI) context.lookup("cmp/TimezoneConverterEJB!com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI");
 			mtcreatorEJB = (MTCreatorEJBI) context.lookup("cmp/MTCreatorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI");
 			logger.info("Successfully initialized EJBs..");
