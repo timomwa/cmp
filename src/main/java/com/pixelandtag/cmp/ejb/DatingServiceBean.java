@@ -68,7 +68,7 @@ import com.pixelandtag.web.beans.RequestObject;
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
 
-	public Logger logger = Logger.getLogger(DatingServiceBean.class);
+	public Logger logger = Logger.getLogger(getClass());
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
@@ -1411,14 +1411,23 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		List<PersonDatingProfile> persondatingprofiles = new ArrayList<PersonDatingProfile>();
 		try{
-			System.out.println("\n\n\n about to make query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
-			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete");
+			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete"
+					+ " AND dp.person.loggedin=:loggedin AND dp not in "
+					+ "(SELECT pcl.profile from ProfileCompletionReminderLog pcl WHERE "
+					+ "("
+					+ "date(pcl.timeStamp)=year(:todaysdate)"
+					+ " AND "
+					+ " month(pcl.timeStamp)=month(:todaysdate)"
+					+ " AND "
+					+ " day(pcl.timeStamp)=day(:todaysdate)"
+					+ ")"
+					+ ")");
 			query.setParameter("profilecomplete", Boolean.FALSE);
+			query.setParameter("loggedin", Boolean.TRUE);
+			query.setParameter("todaysdate", new Date());
 			query.setFirstResult(start.intValue());
 			query.setMaxResults(records_per_run.intValue());
 			persondatingprofiles = query.getResultList();
-			System.out.println("\n\n\n done running  query- > from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete size of results GUGAMUGARESULTS:: "+persondatingprofiles.size());
-			
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}

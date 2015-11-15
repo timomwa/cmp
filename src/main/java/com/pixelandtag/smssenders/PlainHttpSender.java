@@ -283,9 +283,14 @@ public class PlainHttpSender extends GenericSender {
 					+ "provide this config in db");
 		}
 		
-		logger.info(outgoingsms);
 		
-		GenericHttpResp resp = httpclient.call(generic_http_parameters);
+		GenericHttpResp resp = null;
+		try{
+			resp = httpclient.call(generic_http_parameters);
+		}catch(Exception exp){
+			logger.info(outgoingsms);
+			logger.error(exp.getMessage(), exp);
+		}
 		
 		logger.info("\n\n\t\t>>>url>>> : ["+url
 				+"]\n\t\tauth_header_value = "+auth_header_value+

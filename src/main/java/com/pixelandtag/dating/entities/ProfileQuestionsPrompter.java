@@ -1,23 +1,20 @@
 package com.pixelandtag.dating.entities;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
@@ -26,12 +23,7 @@ import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
-import com.pixelandtag.cmp.entities.OpcoSMSService;
-import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
-import com.pixelandtag.sms.producerthreads.EventType;
-import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.util.FileUtils;
 
 
@@ -42,15 +34,10 @@ public class ProfileQuestionsPrompter {
 	private Properties log4J;
 	private Properties properties;
 	private DatingServiceI datingserviceEJB = null;
-	private SubscriptionBeanI subscriptionEJB = null;
 	private TimezoneConverterI timezoneconverterEJB = null;
 	private BigInteger records_per_run = BigInteger.valueOf(10000);
-	private QueueProcessorEJBI queueProcessorEJB = null;
-	private OperatorCountryRulesEJBI opcorulesEJB = null;
-	private OpcoSenderProfileEJBI opcosenderprofileEJB = null;
-	private TimeStampSequenceEJBI timeStampEJB;
-	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
 	private MTCreatorEJBI mtcreatorEJB;
+	private ProfileCompletionReminderLogEJBI profilecompletionreminderLoggerEJB;
 	private Long serviceid = -1L;
 	
 	
@@ -90,12 +77,8 @@ public class ProfileQuestionsPrompter {
 			props.put("jboss.naming.client.ejb.context", true);
 			context = new InitialContext(props);
 			datingserviceEJB = (DatingServiceI) context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
-			subscriptionEJB = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
+			profilecompletionreminderLoggerEJB = (ProfileCompletionReminderLogEJBI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI");
 			timezoneconverterEJB = (TimezoneConverterI) context.lookup("cmp/TimezoneConverterEJB!com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI");
-			queueProcessorEJB = (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
-			opcorulesEJB = (OperatorCountryRulesEJBI) context.lookup("cmp/OperatorCountryRulesEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI");
-			timeStampEJB = (TimeStampSequenceEJBI) context.lookup("cmp/TimeStampSequenceEJBImpl!com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI");
-			opcoSMSServiceEJB = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 			mtcreatorEJB = (MTCreatorEJBI) context.lookup("cmp/MTCreatorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI");
 			logger.info("Successfully initialized EJBs..");
 		
@@ -186,6 +169,8 @@ public class ProfileQuestionsPrompter {
 				logger.info((previousQuestion!=null ? "PREVIOUS ": "NEW") +" QUESTION ::: "+question + " msisdn : "+person.getMsisdn());
 			
 				mtcreatorEJB.sendMT(question,serviceid, person.getMsisdn(), person.getOpco(),5);
+				
+				profilecompletionreminderLoggerEJB.log(profile);
 				
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
