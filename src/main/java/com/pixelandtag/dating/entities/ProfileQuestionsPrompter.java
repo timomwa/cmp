@@ -123,10 +123,11 @@ public class ProfileQuestionsPrompter {
 	private void resumeQuestions(List<PersonDatingProfile> profiles,BigInteger total_girls,BigInteger total_boys) {
 		
 		for(PersonDatingProfile profile : profiles){
-			
 			try{
 				
 				Person person = profile.getPerson();
+				if(person.getOpco()==null)
+					continue;
 				ProfileQuestion previousQuestion = datingserviceEJB.getPreviousQuestion(profile.getId());
 				QuestionLog question_log = datingserviceEJB.getLastQuestionLog(profile.getId());
 				
@@ -146,7 +147,7 @@ public class ProfileQuestionsPrompter {
 				
 				
 				String message  = datingserviceEJB.getMessage(datingmessage,profile.getLanguage_id(), person.getOpco().getId());
-				String prettyTime = timezoneconverterEJB.convertToPrettyFormat(question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate() );
+				String prettyTime = timezoneconverterEJB.convertToPrettyFormat((question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate()) );
 				
 				message = message.replaceAll(GenericServiceProcessor.USERNAME_TAG, Matcher.quoteReplacement(username));
 				message = message.replaceAll(GenericServiceProcessor.POTENTIAL_MATES_COUNT_TAG, Matcher.quoteReplacement(potentialMates.toString()));
