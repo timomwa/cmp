@@ -15,12 +15,14 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.Message;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
@@ -59,6 +61,9 @@ public class SubscriptionRenewalNotificationImpl implements
 	@EJB
 	private TimeStampSequenceEJBI timeStampEJB;
 	
+	@EJB
+	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
+	
 	@Override
 	public boolean sendSubscriptionRenewalMessage(OperatorCountry operatorCountry,
 			SMSService service, String msisdn, Subscription sub){
@@ -84,6 +89,7 @@ public class SubscriptionRenewalNotificationImpl implements
 			msg = msg.replaceAll(BaseEntityI.PRICE_TAG, service.getPrice().toString());
 			msg = msg.replaceAll(BaseEntityI.FREQUENCY, service.getSubscription_length_time_unit().toString().toLowerCase());
 			OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofEJB.getActiveProfileForOpco(operatorCountry.getId());
+			OpcoSMSService opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService(service.getId(), operatorCountry);
 			
 			OutgoingSMS outgoingsms = new OutgoingSMS();
 			outgoingsms.setSms(msg);
@@ -94,11 +100,11 @@ public class SubscriptionRenewalNotificationImpl implements
 			outgoingsms.setCharged(Boolean.FALSE);
 			outgoingsms.setEvent_type(EventType.SUBSCRIPTION_PURCHASE.getName());
 			outgoingsms.setServiceid(service.getId());
-			outgoingsms.setMoprocessor(service.getMoprocessor());
+			outgoingsms.setMoprocessor(opcosmsservice.getMoprocessor());
 			outgoingsms.setMediumType(MediumType.sms);
 			outgoingsms.setPrice_point_keyword(service.getPrice_point_keyword());
 			outgoingsms.setTtl(10L); 
-			outgoingsms.setShortcode(service.getMoprocessor().getShortcode());
+			outgoingsms.setShortcode(opcosmsservice.getMoprocessor().getShortcode());
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			outgoingsms.setIsSubscription(Boolean.TRUE);
 			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));

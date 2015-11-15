@@ -75,17 +75,34 @@ public class OperatorCountryRulesEJBImpl implements OperatorCountryRulesEJBI {
 			
 			
 			int current_opco_hour = timeinopco.getHourOfDay();
+			StringBuffer sb = new StringBuffer();
+			sb.append("\n").append("----------------------------------------------------");
+			sb.append("\n").append("Hour in opco "+current_opco_hour);
+			sb.append("\n").append("latest_message_send_hour "+latest_message_send_hour);
+			sb.append("\n").append("current_opco_hour "+current_opco_hour);
+			sb.append("\n").append(" (current_opco_hour>=earliest_message_send_hour && current_opco_hour<=latest_message_send_hour) : "+(current_opco_hour>=earliest_message_send_hour && current_opco_hour<=latest_message_send_hour));
+			sb.append("\n").append("----------------------------------------------------");
 			
-			if(current_opco_hour>=earliest_message_send_hour && current_opco_hour<=latest_message_send_hour)
-				return timeZoneConverterEJB.convertFromOneTimeZoneToAnother(timeinopco.toDate(),  opcosenderprofile.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
-			
+			if(current_opco_hour>=earliest_message_send_hour && current_opco_hour<=latest_message_send_hour){
+				Date timetosend =  timeZoneConverterEJB.convertFromOneTimeZoneToAnother(timeinopco.toDate(),  opcosenderprofile.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
+				
+				sb.append("\n").append("Message will be sent at : "+timetosend);
+				sb.append("\n").append("----------------------------------------------------");
+				logger.info(sb.toString());
+				return timetosend;
+			}
 			//If we can't send, set the message to be sent next day earliest possible.
 			timeinopco = timeinopco.plusDays(1);
 			timeinopco = timeinopco.hourOfDay().setCopy(earliest_message_send_hour);
 			timeinopco = timeinopco.minuteOfDay().setCopy(0);
 			timeinopco = timeinopco.secondOfMinute().setCopy(0);
 			
-			return timeZoneConverterEJB.convertFromOneTimeZoneToAnother(timeinopco.toDate(),  opcosenderprofile.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
+			Date timetosend = timeZoneConverterEJB.convertFromOneTimeZoneToAnother(timeinopco.toDate(),  opcosenderprofile.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
+			sb.append("\n").append("Message will be sent at : "+timetosend);
+			sb.append("\n").append("----------------------------------------------------");
+			logger.info(sb.toString());
+			
+			return timetosend;
 			
 		}catch(OpcoRuleException e){
 			logger.error(e.getMessage(),e);
