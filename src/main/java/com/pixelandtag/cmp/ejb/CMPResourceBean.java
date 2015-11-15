@@ -3285,7 +3285,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					+ "osms.moprocessor.forwarding_url  , "//12
 					+ "osms.moprocessor.protocol , "//13
 					+ "coalesce(osms.moprocessor.smppid,-1,osms.moprocessor.smppid)   "//14
-				+ "FROM OpcoSMSService osms"
+				+ "FROM OpcoSMSService osms "
 				+ "WHERE osms.moprocessor.enable=1 "
 				+ "AND osms.moprocessor.processor_type <> :phantom_processor "
 				+ "group by osms.moprocessor.id");
