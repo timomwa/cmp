@@ -42,7 +42,7 @@ public class ProfileQuestionsPrompter {
 	private MTCreatorEJBI mtcreatorEJB;
 	private ProfileCompletionReminderLogEJBI profilecompletionreminderLoggerEJB;
 	private Long serviceid = -1L;
-	
+	private long sleeptime = 0;
 	
 	private void initialize()  {
 		
@@ -68,6 +68,13 @@ public class ProfileQuestionsPrompter {
 				}catch(Exception exp){
 					logger.error(exp.getMessage(), exp);
 				}
+				try{
+					sleeptime = Long.valueOf(properties.getProperty("sleeptime"));
+				}catch(Exception exp){
+					logger.error(exp.getMessage(), exp);
+				}
+				
+				
 			}
 			
 			
@@ -91,30 +98,7 @@ public class ProfileQuestionsPrompter {
 
 	}
 	
-	SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
-	
-	public String convertToPrettyFormat(Date date){
-		int day = Integer.parseInt(formatDayOfMonth.format(date));
-		String suff  = getDayNumberSuffix(day);
-		DateFormat prettier_df = new SimpleDateFormat("d'"+suff+"' E MMM YYYY h:mm a ");
-	    return prettier_df.format(date);
-	}
 
-	public static String getDayNumberSuffix(int day) {
-	    if (day >= 11 && day <= 13) {
-	        return "th";
-	    }
-	    switch (day % 10) {
-	    case 1:
-	        return "st";
-	    case 2:
-	        return "nd";
-	    case 3:
-	        return "rd";
-	    default:
-	        return "th";
-	    }
-	}
 	private void sendReminders() {
 		
 		BigInteger count = datingserviceEJB.countIncompleteProfiles();
@@ -152,7 +136,7 @@ public class ProfileQuestionsPrompter {
 		for(PersonDatingProfile profile : profiles){
 			try{
 				
-				Thread.sleep(1000);//Sleep for a second
+				Thread.sleep(sleeptime);//Sleep for some time
 				Person person = profile.getPerson();
 				if(person.getOpco()==null)
 					continue;
@@ -175,13 +159,8 @@ public class ProfileQuestionsPrompter {
 				
 				
 				String message  = datingserviceEJB.getMessage(datingmessage,profile.getLanguage_id(), person.getOpco().getId());
-				logger.info(" question_log : "+question_log);
-				logger.info(" profile : "+profile);
-				logger.info(" profile.getCreationDate() : "+profile.getCreationDate());
 				Date lastseen = (question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate());
-				logger.info(" lastseen : "+lastseen);
-				logger.info(" timezoneconverterEJB : "+timezoneconverterEJB);
-				String prettyTime = timezoneconverterEJB==null ? convertToPrettyFormat(lastseen) : timezoneconverterEJB.convertToPrettyFormat( lastseen );
+				String prettyTime = timezoneconverterEJB.convertToPrettyFormat( lastseen );
 				
 				message = message.replaceAll(GenericServiceProcessor.USERNAME_TAG, Matcher.quoteReplacement(username));
 				message = message.replaceAll(GenericServiceProcessor.POTENTIAL_MATES_COUNT_TAG, Matcher.quoteReplacement(potentialMates.toString()));
