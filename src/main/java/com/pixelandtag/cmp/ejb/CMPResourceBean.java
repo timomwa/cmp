@@ -80,6 +80,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
+	@EJB
+	private DatingServiceI datingserviceEJB;
+	
 	private Random rand = new Random();
 	
 	private SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
@@ -277,6 +280,11 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 			}
 			
+			try{
+				datingserviceEJB.deactivate(msisdn);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+			}
 			
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
@@ -3245,30 +3253,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		List<ServiceProcessorDTO>  services = null;
 		
 		try {
-			/*
-			Query qry = em.createQuery("SELECT "
-					+ "mop.id, "//0
-					+ "mop.serviceName, "//1
-					+ "mop.processorClass, "//2
-					+ "mop.enable, "//3
-					+ "mop.class_status, "//4
-					+ "mop.shortcode, "//5
-					+ "mop.threads, "//6
-					//+ "group_concat(smss.cmd) ,  "//7
-					+ "smss.subscriptionText , "//7
-					+ "smss.unsubscriptionText , "//8
-					+ "smss.tailText_subscribed , "//9
-					+ "smss.tailText_notsubscribed , "//10
-					+ "mop.processor_type  , "//11
-					+ "mop.forwarding_url , "//12
-					+ "mop.protocol , "//13
-					+ "coalesce(mop.smppid,-1,mop.smppid)   "//14
-					+ "FROM MOProcessor mop, SMSService smss "
-					+ "WHERE smss.moprocessor=mop "
-					+ "AND mop.enable=1 "
-					+ "AND mop.processor_type <> :phantom_processor "
-					+ "group by mop.id" );
-			*/
+
 			Query qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
 					+ "osms.moprocessor.serviceName, "//1
