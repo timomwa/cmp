@@ -1,6 +1,8 @@
 package com.pixelandtag.dating.entities;
 
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -35,7 +37,7 @@ public class ProfileQuestionsPrompter {
 	private Properties log4J;
 	private Properties properties;
 	private DatingServiceI datingserviceEJB = null;
-	private TimezoneConverterI timezoneconverterEJB = null;
+	private TimezoneConverterI timezoneconverterEJB;
 	private BigInteger records_per_run = BigInteger.valueOf(10000);
 	private MTCreatorEJBI mtcreatorEJB;
 	private ProfileCompletionReminderLogEJBI profilecompletionreminderLoggerEJB;
@@ -88,7 +90,31 @@ public class ProfileQuestionsPrompter {
 		}
 
 	}
+	
+	SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
+	
+	public String convertToPrettyFormat(Date date){
+		int day = Integer.parseInt(formatDayOfMonth.format(date));
+		String suff  = getDayNumberSuffix(day);
+		DateFormat prettier_df = new SimpleDateFormat("d'"+suff+"' E MMM YYYY h:mm a ");
+	    return prettier_df.format(date);
+	}
 
+	public static String getDayNumberSuffix(int day) {
+	    if (day >= 11 && day <= 13) {
+	        return "th";
+	    }
+	    switch (day % 10) {
+	    case 1:
+	        return "st";
+	    case 2:
+	        return "nd";
+	    case 3:
+	        return "rd";
+	    default:
+	        return "th";
+	    }
+	}
 	private void sendReminders() {
 		
 		BigInteger count = datingserviceEJB.countIncompleteProfiles();
@@ -154,7 +180,7 @@ public class ProfileQuestionsPrompter {
 				Date lastseen = (question_log!=null ? question_log.getTimeStamp() : profile.getCreationDate());
 				logger.info(" lastseen : "+lastseen);
 				logger.info(" timezoneconverterEJB : "+timezoneconverterEJB);
-				String prettyTime = timezoneconverterEJB.convertToPrettyFormat( lastseen );
+				String prettyTime = timezoneconverterEJB==null ? convertToPrettyFormat(lastseen) : timezoneconverterEJB.convertToPrettyFormat( lastseen );
 				
 				message = message.replaceAll(GenericServiceProcessor.USERNAME_TAG, Matcher.quoteReplacement(username));
 				message = message.replaceAll(GenericServiceProcessor.POTENTIAL_MATES_COUNT_TAG, Matcher.quoteReplacement(potentialMates.toString()));
