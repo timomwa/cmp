@@ -2302,7 +2302,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
 									incomingsms.setSms(smsserv.getCmd());
 									incomingsms.setShortcode(proc.getShortcode());
-									incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+									incomingsms.setPrice(smsserv.getPrice());
 									incomingsms.setCmp_tx_id(generateNextTxId());
 									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 									incomingsms.setServiceid( Long.valueOf(smsserv.getId().intValue()));
@@ -2454,7 +2454,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
 									incomingsms.setSms(smsserv.getCmd());
 									incomingsms.setShortcode(proc.getShortcode());
-									incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+									incomingsms.setPrice(smsserv.getPrice());
 									incomingsms.setCmp_tx_id(generateNextTxId());
 									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 									incomingsms.setServiceid(smsserv.getId());
@@ -2517,7 +2517,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 							incomingsms.setServiceid(Long.valueOf(chosenMenu.getService_id()));
 							incomingsms.setSms(smsserv.getCmd());
 							incomingsms.setShortcode(proc.getShortcode());
-							incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+							incomingsms.setPrice(smsserv.getPrice());
 							incomingsms.setMoprocessor(proc);
 							incomingsms.setOpco(req.getOpco());
 							logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");

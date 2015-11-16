@@ -125,7 +125,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			String msg = findMatch(ro,person,profile);
 			
 			
-			SMSService smsserv = getSMSService("DATE");
+			SMSService smsserv = getSMSService("DATE",ro.getOpco());
 			MOProcessor proc = smsserv.getMoprocessor();
 			
 			if(smsserv!=null  && proc!=null){
@@ -478,7 +478,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						msg = msg.replaceAll(GenericServiceProcessor.DEST_USERNAME_TAG, match.getUsername());
 						msg = msg.replaceAll(GenericServiceProcessor.PROFILE_TAG, sb.toString());
 						
-						SMSService smsserv = getSMSService("DATE");
+						SMSService smsserv = getSMSService("DATE", person.getOpco());
 						MOProcessor proc = smsserv.getMoprocessor();
 						
 						if(smsserv!=null && proc!=null){

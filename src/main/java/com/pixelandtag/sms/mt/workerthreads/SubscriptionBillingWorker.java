@@ -404,10 +404,10 @@ public class SubscriptionBillingWorker implements Runnable {
 			billable.setService_id(service.getId().toString());
 			billable.setMaxRetriesAllowed(0L);
 			billable.setMsisdn(sub.getMsisdn());
-			billable.setOperation(BigDecimal.valueOf(service.getPrice())
+			billable.setOperation(service.getPrice()
 					.compareTo(BigDecimal.ZERO) > 0 ? Operation.debit
 					.toString() : Operation.credit.toString());
-			billable.setPrice(BigDecimal.valueOf(service.getPrice()));
+			billable.setPrice(service.getPrice());
 			billable.setPriority(0l);
 			billable.setProcessed(1L);
 			billable.setRetry_count(0L);
