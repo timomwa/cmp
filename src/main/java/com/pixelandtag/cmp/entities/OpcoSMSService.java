@@ -31,6 +31,10 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 	@NamedQuery(
 			name = OpcoSMSService.NQ_FIND_BY_SERVICE_ID_AND_OPCO,
 			query = "from OpcoSMSService osms WHERE osms.smsservice.id=:service_id AND osms.opco=:opco"
+	),
+	@NamedQuery(
+			name = OpcoSMSService.NQ_FIND_BY_KEYWORD_AND_OPCO,
+			query = "from OpcoSMSService osms WHERE osms.smsservice.cmd=:keyword AND osms.opco=:opco"
 	)
 })
 public class OpcoSMSService implements Serializable {
@@ -42,6 +46,9 @@ public class OpcoSMSService implements Serializable {
 	
 	@Transient
 	public static final String NQ_FIND_BY_SERVICE_ID_AND_OPCO = "findbyserviceidandopco";
+	
+	@Transient
+	public static final String NQ_FIND_BY_KEYWORD_AND_OPCO = "findbykeywordandopco";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

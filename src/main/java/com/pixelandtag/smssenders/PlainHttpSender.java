@@ -69,10 +69,10 @@ public class PlainHttpSender extends GenericSender {
 	@Override
 	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException {
 		
-		if(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME)!=null)
-			if(this.configuration.get(HTTP_ALLOW_SENDING_BLANK_TEXT).getValue().equalsIgnoreCase("yes"))
+		if(this.configuration.get(HTTP_ALLOW_SENDING_BLANK_TEXT)!=null)
+			if(this.configuration.get(HTTP_ALLOW_SENDING_BLANK_TEXT).getValue().equalsIgnoreCase("no"))
 				if(outgoingsms.getSms()==null || outgoingsms.getSms().isEmpty())
-					throw new MessageSenderException("SMS to be sent is null. We can't send null or empty messages");
+					throw new MessageSenderException("SMS to be sent is null. We can't send null or empty messages sms-"+outgoingsms);
 		
 		SenderResp response = new SenderResp();
 		

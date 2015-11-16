@@ -233,14 +233,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					|| KEYWORD.equalsIgnoreCase("BILLING_SERV15")
 					|| KEYWORD.equalsIgnoreCase("BILLING_SERV30")){
 				
-				SMSService smsservice0 = datingBean.getSMSService(KEYWORD);
+				SMSService smsservice0 = datingBean.getSMSService(KEYWORD, incomingsms.getOpco());
 				List<String> services = new ArrayList<String>();
 				services.add("BILLING_SERV5");
 				services.add("DATE");
 				services.add("BILLING_SERV15");
 				services.add("BILLING_SERV30");
 				
-				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
+				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
 				if(!subvalid || allow_multiple_plans  ){
@@ -277,7 +277,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				services.add("BILLING_SERV15");
 				services.add("BILLING_SERV30");
 				
-				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services);
+				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, person.getOpco());
 				
 				if(!subvalid)
 					cmp_bean.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
@@ -291,7 +291,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					//Please top up to continue chatting with x ..
 					int lang = 1;
 					if(!subvalid && profile!=null && profile.getProfileComplete() ){//Profile is complete just need to renew subscription
-						SMSService dating = datingBean.getSMSService("DATE");
+						SMSService dating = datingBean.getSMSService("DATE",incomingsms.getOpco());
 						lang = profile.getLanguage_id();
 						PersonDatingProfile dest = datingBean.getperSonUsingChatName(MESSAGE);//find destination person
 						String msg = "";
@@ -538,7 +538,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						person.setActive(true);
 						profile.setPerson(person);
 						
-						SMSService smsservice = datingBean.getSMSService("DATE");
+						SMSService smsservice = datingBean.getSMSService("DATE",person.getOpco());
 						
 						subscriptionBean.renewSubscription(incomingSMS.getOpco(), MSISDN, smsservice, SubscriptionStatus.confirmed,AlterationMethod.self_via_sms);
 					}

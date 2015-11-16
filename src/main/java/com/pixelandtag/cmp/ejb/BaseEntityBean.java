@@ -50,6 +50,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
@@ -57,6 +58,7 @@ import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -113,7 +115,8 @@ public class BaseEntityBean implements BaseEntityI {
 	@EJB
 	private QueueProcessorEJBI queueprocEJB;
 	
-	
+	@EJB
+	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	
 	@Override
 	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid){
@@ -202,7 +205,7 @@ public class BaseEntityBean implements BaseEntityI {
 		
 		try {
 			
-			SMSService smsserv = getSMSService(keyword);
+			SMSService smsserv = getSMSService(keyword,operatorCountry);
 			
 			MOProcessor proc = smsserv.getMoprocessor();
 			
@@ -211,7 +214,7 @@ public class BaseEntityBean implements BaseEntityI {
 			incomingsms.setServiceid(smsserv.getId());
 			incomingsms.setSms(smsserv.getCmd());
 			incomingsms.setShortcode(proc.getShortcode());
-			incomingsms.setPrice(BigDecimal.valueOf(smsserv.getPrice()));
+			incomingsms.setPrice(smsserv.getPrice());
 			incomingsms.setCmp_tx_id(generateNextTxId());
 			incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 			incomingsms.setServiceid(smsserv.getId());
@@ -257,16 +260,18 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 
 
-    public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception{
+    public boolean hasAnyActiveSubscription(String msisdn, List<String> services, OperatorCountry opco) throws Exception{
 		
-		boolean isAtive = false;
+    	boolean isAtive = false;
 		
 		if(msisdn==null || services==null || services.size()<1 )
 			return false;
 		
 		for(String kwd: services){
-			SMSService smsservice = getSMSService(kwd);
-			if(subscriptionEjb.subscriptionValid(msisdn, smsservice.getId()))
+			OpcoSMSService opcosmsservice = opcosmsserviceejb.getOpcoSMSService(kwd, opco);
+			SMSService smsservice = opcosmsservice.getSmsservice();
+			
+			if(subscriptionEjb.subscriptionValid(msisdn, smsservice.getId()) || smsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)
 				return true;
 			
 		}
@@ -815,17 +820,15 @@ public class BaseEntityBean implements BaseEntityI {
 		
 	}
 	@SuppressWarnings("unchecked")
-	public SMSService getSMSService(String cmd)  throws Exception{
+	public SMSService getSMSService(String cmd, OperatorCountry opco)  throws Exception{
 		SMSService sub = null;
 		try{
-			Query qry = em.createQuery("from SMSService sm WHERE sm.cmd=:cmd");
-			qry.setParameter("cmd", cmd);
-			List<SMSService> subl = qry.getResultList();
-			if(subl.size()>0)
-				sub = subl.get(0);
+			OpcoSMSService opcosmsservice = opcosmsserviceejb.getOpcoSMSService(cmd, opco);
+			sub = opcosmsservice.getSmsservice();
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
 		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
 			throw exp;
 		}
 		return sub;

@@ -33,10 +33,10 @@ public interface BaseEntityI {
 	public boolean  acknowledge(long message_log_id) throws Exception;
 	public boolean sendMTSMPP(OutgoingSMS outgoingsms,Long smppid) throws Exception;
 	public Billable charge(Billable billable) throws Exception;
-	public SMSService getSMSService(String cmd)  throws Exception;
+	public SMSService getSMSService(String cmd, OperatorCountry opco)  throws Exception;
 	public IncomingSMS logMO(IncomingSMS mo) ;
 	public String replaceAllIllegalCharacters(String text);
-	public boolean hasAnyActiveSubscription(String msisdn, List<String> services) throws Exception;
+	public boolean hasAnyActiveSubscription(String msisdn, List<String> services, OperatorCountry operatorCountry) throws Exception;
 	public void mimicMO(String keyword, String msisdn, OperatorCountry operatorCountry);
 	public OutgoingSMS sendMT(OutgoingSMS mo) throws Exception;
 	public String generateNextTxId();

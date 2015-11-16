@@ -1,6 +1,7 @@
 package com.pixelandtag.cmp.entities;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -55,7 +56,7 @@ public class SMSService implements Serializable {
 	private String service_description;
 	
 	@Column(name="price")
-	private Double price;
+	private BigDecimal price;
 	
 	@Column(name="price_point_keyword")
 	private String price_point_keyword;
@@ -158,11 +159,11 @@ public class SMSService implements Serializable {
 		this.service_description = service_description;
 	}
 
-	public Double getPrice() {
-		return price;
+	public BigDecimal getPrice() {
+		return price==null ? BigDecimal.ZERO : price;
 	}
 
-	public void setPrice(Double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
