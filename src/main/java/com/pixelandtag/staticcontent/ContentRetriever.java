@@ -375,7 +375,7 @@ public class ContentRetriever {
 				incomingsms = new IncomingSMS();
 				incomingsms.setCmp_tx_id(cmpresource.generateNextTxId());
 				incomingsms.setMsisdn(msisdn);
-				incomingsms.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
 				incomingsms.setShortcode(procDTO.getShortcode());
 				incomingsms.setServiceid(Long.valueOf(sm.getId()));

@@ -238,7 +238,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					sm.setPush_unique( ((Integer) o[3]).compareTo(1)==0 );//rs.getBoolean("push_unique"));//3
 					sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
 					sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
-					sm.setPrice(new Double((Double) (o[6])));//6
+					sm.setPrice((BigDecimal) (o[6]));//6
 					sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
 					sm.setCmp_keyword(  (o[8]!=null ? (String) o[8] : "IOD") );//rs.getString("CMP_Keyword"));//8
 					sm.setCmp_skeyword( (o[9]!=null ? (String) o[9] : "IOD0000" ) );//rs.getString("CMP_SKeyword"));//9
@@ -335,7 +335,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				sm.setPush_unique( ((Integer) o[3]).compareTo(1)==0);//rs.getBoolean("push_unique"));//3
 				sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
 				sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
-				sm.setPrice(new Double((Double) (o[6])));//6
+				sm.setPrice((BigDecimal) (o[6]));//6
 				sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
 				//sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
 				//sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
@@ -436,7 +436,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					sm.setPush_unique(((Integer) o[3]).compareTo(1)==0);//rs.getBoolean("push_unique"));//3
 					sm.setService_name(  (String) o[4]  );//rs.getString("service_name"));//4
 					sm.setService_description((String) o[5]  );//rs.getString("service_description"));//5
-					sm.setPrice(new Double((Double) (o[6])));//6
+					sm.setPrice((BigDecimal) (o[6]));//6
 					sm.setPricePointKeyword((String) o[7] );//rs.getString("price_point_keyword"));//7
 					//sm.setCmp_keyword( (String) o[8] );//rs.getString("CMP_Keyword"));//8
 					//sm.setCmp_skeyword((String) o[9] );//rs.getString("CMP_SKeyword"));//9
@@ -3151,7 +3151,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				incomingsms = new IncomingSMS();
 				incomingsms.setCmp_tx_id(generateNextTxId());
 				incomingsms.setMsisdn(msisdn);
-				incomingsms.setPrice(BigDecimal.valueOf(sm.getPrice()));
+				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
 				incomingsms.setShortcode(procDTO.getShortcode());
 				incomingsms.setServiceid(Long.valueOf(sm.getId()));

@@ -322,7 +322,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		for(Object[] row : rows){
 			
 			Long mo_processor_id = (Long) row[0];
-			Double price = (Double) row[1];
+			BigDecimal price = (BigDecimal) row[1];
 			Long sms_ervice_id = (Long) row[2];
 			Boolean split_mt = (Boolean) row[3];
 			String event_type = (String) row[4];
@@ -331,7 +331,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			MOProcessor proc = moprocDAO.findById(mo_processor_id);		
 			
 			incomingsms.setMoprocessor(proc);
-			incomingsms.setPrice(BigDecimal.valueOf(price));
+			incomingsms.setPrice(price);
 			incomingsms.setServiceid(sms_ervice_id);
 			incomingsms.setSplit(split_mt);
 			incomingsms.setEvent_type(event_type);

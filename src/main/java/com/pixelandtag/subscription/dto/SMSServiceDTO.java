@@ -1,6 +1,7 @@
 package com.pixelandtag.subscription.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * represents `celcom`.`sms_service`
@@ -19,7 +20,7 @@ public class SMSServiceDTO  implements Serializable {
 	private boolean push_unique;
 	private String service_name;
 	private String service_description;
-	private double price;
+	private BigDecimal price;
 	private String cmp_keyword;
 	private String cmp_skeyword;
 	private boolean enabled;
@@ -50,7 +51,7 @@ public class SMSServiceDTO  implements Serializable {
 	public String getService_description() {
 		return service_description;
 	}
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 	public String getCmp_keyword() {
@@ -80,7 +81,7 @@ public class SMSServiceDTO  implements Serializable {
 	public void setService_description(String service_description) {
 		this.service_description = service_description;
 	}
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 	public void setCmp_keyword(String cmp_keyword) {
