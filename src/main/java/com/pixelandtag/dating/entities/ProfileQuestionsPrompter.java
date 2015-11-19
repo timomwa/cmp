@@ -17,6 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.MatchesLogEJBI;
 import com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
@@ -41,6 +42,7 @@ public class ProfileQuestionsPrompter {
 	private BigInteger records_per_run = BigInteger.valueOf(10000);
 	private MTCreatorEJBI mtcreatorEJB;
 	private ProfileCompletionReminderLogEJBI profilecompletionreminderLoggerEJB;
+	private MatchesLogEJBI matchesLogEJB;
 	private Long serviceid = -1L;
 	private Long find_kw_serviceid = -1L;
 	private long sleeptime = 0;
@@ -91,6 +93,7 @@ public class ProfileQuestionsPrompter {
 			profilecompletionreminderLoggerEJB = (ProfileCompletionReminderLogEJBI) context.lookup("cmp/ProfileCompletionReminderLogEJBImpl!com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI");
 			timezoneconverterEJB = (TimezoneConverterI) context.lookup("cmp/TimezoneConverterEJB!com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI");
 			mtcreatorEJB = (MTCreatorEJBI) context.lookup("cmp/MTCreatorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI");
+			matchesLogEJB = (MatchesLogEJBI) context.lookup("cmp/MatchesLogEJBImpl!com.pixelandtag.cmp.ejb.MatchesLogEJBI");
 			logger.info("Successfully initialized EJBs..");
 		
 		}catch(Exception exp){
@@ -122,7 +125,6 @@ public class ProfileQuestionsPrompter {
 				sendMatches(profiles);
 				start = records_per_run.add(start);
 				remaining = count.subtract(start);
-				
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
 				exp.printStackTrace();
@@ -162,6 +164,8 @@ public class ProfileQuestionsPrompter {
 				logger.info("match == "+match);
 				
 				mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),0);
+				
+				matchesLogEJB.log(profile);
 				
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);

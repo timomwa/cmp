@@ -43,6 +43,7 @@ public class MatchesLog implements Serializable  {
 	
 	@Column(name="timeStamp")
 	@Temporal(TemporalType.TIMESTAMP)
+	@Index(name="dmlcpidx")
 	private Date timeStamp;
 	
 	
