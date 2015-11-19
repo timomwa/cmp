@@ -170,12 +170,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				String location = profile.getLocation();
 				//location_ejb
 				PersonDatingProfile match = null;
-				if(match==null){
-					try{
-						match = datingBean.findMatch(profile);//try find by their location
-					}catch(DatingServiceException exp){
-						logger.error(exp.getMessage(),exp);
-					}
+				try{
+					match = datingBean.findMatch(profile);//try find by their location
+				}catch(DatingServiceException exp){
+					logger.error(exp.getMessage(),exp);
 				}
 				
 				if(match==null)

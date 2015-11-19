@@ -71,6 +71,10 @@ public interface DatingServiceI extends BaseEntityI {
 	
 	public String startProfileQuestions(String msisdn, Person person);
 
+	public List<PersonDatingProfile> listCompleteProfiles(int first, int limit);
+
+	public String findMatchString(PersonDatingProfile profile);
+
 	
 
 	

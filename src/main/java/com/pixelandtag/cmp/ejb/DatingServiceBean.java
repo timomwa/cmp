@@ -12,18 +12,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
 
@@ -1435,5 +1431,103 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	}
 
-	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<PersonDatingProfile> listCompleteProfiles(int first, int limit) {
+		List<PersonDatingProfile> persondatingprofiles = new ArrayList<PersonDatingProfile>();
+		try{
+			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete"
+					+ " AND dp.person.loggedin=:loggedin AND dp not in "
+					+ "(SELECT pcl.profile from MatchesLog pcl WHERE "
+					+ "("
+					+ "date(pcl.timeStamp)=year(:todaysdate)"
+					+ " AND "
+					+ " month(pcl.timeStamp)=month(:todaysdate)"
+					+ " AND "
+					+ " day(pcl.timeStamp)=day(:todaysdate)"
+					+ ")"
+					+ ")");
+			query.setParameter("profilecomplete", Boolean.FALSE);
+			query.setParameter("loggedin", Boolean.TRUE);
+			query.setParameter("todaysdate", new Date());
+			query.setFirstResult(first);
+			query.setMaxResults(limit);
+			persondatingprofiles = query.getResultList();
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		return persondatingprofiles;
+	}
+
+	public String findMatchString(PersonDatingProfile profile){
+		String msg  = null;
+		try {
+			PersonDatingProfile match = null;
+			try{
+				match = findMatch(profile);//try find by their location
+			}catch(DatingServiceException exp){
+				logger.error(exp.getMessage(),exp);
+			}
+			
+			String location = profile.getLocation();
+			Person person = profile.getPerson();
+			
+			if(match==null)
+				match = findMatch(profile.getPreferred_gender(),profile.getPreferred_age(), location,person.getId());
+			if(match==null)
+				 match = findMatch(profile.getPreferred_gender(),profile.getPreferred_age(),person.getId());
+			if(match==null)
+				 match = findMatch(profile.getPreferred_gender(),person.getId());
+			
+			int language_id = profile.getLanguage_id();
+			if(language_id<1)
+				language_id = 1;
+			if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
+				msg = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, person.getOpco().getId());
+				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+			}else{
+				try{
+					SystemMatchLog sysmatchlog = new SystemMatchLog();
+					sysmatchlog.setPerson_a_id(person.getId());
+					sysmatchlog.setPerson_b_id(match.getPerson().getId());
+					sysmatchlog.setPerson_a_notified(true);
+					sysmatchlog = saveOrUpdate(sysmatchlog);
+				}catch(Exception exp){
+					logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n",exp);
+				}
+				String gender_pronoun = profile.getPreferred_gender().equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id, person.getOpco().getId());
+				String gender_pronoun2 = profile.getPreferred_gender().equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id, person.getOpco().getId());
+				StringBuffer sb = new StringBuffer();
+				BigInteger age = calculateAgeFromDob(match.getDob());  
+				sb.append("\n").append("Age: ").append(age.toString()).append("\n");
+				String locationName = match.getLocation();
+				if(locationName==null || locationName.trim().isEmpty()){
+					ProfileLocation pl = location_ejb.findProfileLocation(match);
+					if(pl!=null && pl.getLocation()!=null){
+						locationName = pl.getLocation().getLocationName();
+						if(locationName==null || locationName.trim().isEmpty()){
+							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+							if(loc!=null)
+								locationName = loc.getLocationName();
+						}
+					}
+				}
+				sb.append("Location : ").append(locationName).append("\n");
+				sb.append("Gender : ").append(match.getGender()).append("\n");
+				msg = getMessage(DatingMessages.MATCH_FOUND, language_id, person.getOpco().getId());
+				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG, gender_pronoun);
+				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG2, gender_pronoun2);
+				msg = msg.replaceAll(GenericServiceProcessor.DEST_USERNAME_TAG, match.getUsername());
+				msg = msg.replaceAll(GenericServiceProcessor.PROFILE_TAG, sb.toString());
+			}
+			
+		} catch (DatingServiceException e) {
+			logger.error(e.getMessage(), e);
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+		}
+		
+		return msg;
+	}
 }

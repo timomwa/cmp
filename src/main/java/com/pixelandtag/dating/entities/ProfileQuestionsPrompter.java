@@ -42,9 +42,10 @@ public class ProfileQuestionsPrompter {
 	private MTCreatorEJBI mtcreatorEJB;
 	private ProfileCompletionReminderLogEJBI profilecompletionreminderLoggerEJB;
 	private Long serviceid = -1L;
+	private Long find_kw_serviceid = -1L;
 	private long sleeptime = 0;
 	
-	private void initialize()  {
+	private void initialize() throws Exception  {
 		
 		try{
 			
@@ -63,11 +64,11 @@ public class ProfileQuestionsPrompter {
 					logger.error(exp.getMessage() , exp);
 				}
 				
-				try{
-					serviceid = Long.valueOf(properties.getProperty("serviceid"));
-				}catch(Exception exp){
-					logger.error(exp.getMessage(), exp);
-				}
+				serviceid = Long.valueOf(properties.getProperty("serviceid"));
+				
+				find_kw_serviceid = Long.valueOf(properties.getProperty("find_kw_serviceid"));
+				
+				
 				try{
 					sleeptime = Long.valueOf(properties.getProperty("sleeptime"));
 				}catch(Exception exp){
@@ -94,10 +95,83 @@ public class ProfileQuestionsPrompter {
 		
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
+			throw exp;
 		}
 
 	}
 	
+
+	
+	private void sendPotentialMatches() {
+		BigInteger count = datingserviceEJB.countIncompleteProfiles();
+		
+		BigInteger total_girls = datingserviceEJB.countAllProfiles(Gender.FEMALE);
+		BigInteger total_boys = datingserviceEJB.countAllProfiles(Gender.MALE); 
+		
+		BigInteger start = BigInteger.ZERO;
+
+		BigInteger remaining = count;
+		
+		while(remaining.compareTo(BigInteger.ZERO)>=0){
+			
+			try{
+				
+				logger.info(start+","+records_per_run);
+				List<PersonDatingProfile> profiles = datingserviceEJB.listCompleteProfiles(start.intValue(),records_per_run.intValue());
+				logger.info("MATCHING::: profiles.size():: "+profiles.size());
+				sendMatches(profiles);
+				start = records_per_run.add(start);
+				remaining = count.subtract(start);
+				
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+				exp.printStackTrace();
+				break;
+			}
+		}
+		
+	}
+	
+	
+	private void sendMatches(List<PersonDatingProfile> profiles) {
+		
+		
+		for(PersonDatingProfile profile : profiles){
+			try{
+				
+				Person person = profile.getPerson();
+				if(person.getOpco()==null)
+					continue;
+				
+				String username = profile.getUsername();
+				String msisdn = person.getMsisdn();
+				
+				logger.info("username == "+msisdn);
+				
+				if(!msisdn.equalsIgnoreCase("254721912151")){
+					continue;
+				}
+				
+				if(username.equals(person.getMsisdn()))
+					username = "";
+				
+				logger.info("username == "+username);
+				
+				String match = datingserviceEJB.findMatchString(profile);
+				
+				logger.info("match == "+match);
+				
+				mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),0);
+				
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+			}
+		}
+		
+		
+	}
+
+
 
 	private void sendReminders() {
 		
@@ -204,17 +278,22 @@ public class ProfileQuestionsPrompter {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		
-		ProfileQuestionsPrompter propter = new ProfileQuestionsPrompter();
-		propter.initialize();
-		propter.sendReminders();
-		propter.cleanup();
+		if(args!=null && args.length>0){
+			ProfileQuestionsPrompter propter = new ProfileQuestionsPrompter();
+			propter.initialize();
+			if(args[0].equalsIgnoreCase("reminders"))
+				propter.sendReminders();
+			if(args[0].equalsIgnoreCase("reminders"))
+				propter.sendPotentialMatches();
+			propter.cleanup();
+		}else{
+			throw new Exception("You need to provide arguements. "
+					+ "Either \"reminder\" or \"match\" for profile completion reminders & people matching respectively");
+		}
 	
 	}
 
-	
-
-	
 
 }
