@@ -142,7 +142,7 @@ public class ProfileQuestionsPrompter {
 			try{
 				
 				Person person = profile.getPerson();
-				if(person.getOpco()==null)
+				if(person.getOpco()==null || person.getOpco().getId().intValue()!=128023537)
 					continue;
 				
 				String username = profile.getUsername();
