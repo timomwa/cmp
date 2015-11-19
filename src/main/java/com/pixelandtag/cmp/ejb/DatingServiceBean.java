@@ -1447,7 +1447,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ " day(pcl.timeStamp)=day(:todaysdate)"
 					+ ")"
 					+ ")");
-			query.setParameter("profilecomplete", Boolean.FALSE);
+			query.setParameter("profilecomplete", Boolean.TRUE);
 			query.setParameter("loggedin", Boolean.TRUE);
 			query.setParameter("todaysdate", new Date());
 			query.setFirstResult(first);
