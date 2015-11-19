@@ -149,23 +149,29 @@ public class ProfileQuestionsPrompter {
 				String msisdn = person.getMsisdn();
 				
 				logger.info("msisdn == ["+msisdn+"], opcoid  = ["+person.getOpco().getId()+"]");
+				logger.info("msisdn.equalsIgnoreCase(\"254721912151\") : "+msisdn.equalsIgnoreCase("254721912151"));
+				logger.info("msisdn.equalsIgnoreCase(\"254720988636\") : "+msisdn.equalsIgnoreCase("254720988636"));
 				
-				if(!msisdn.equalsIgnoreCase("254721912151") || !msisdn.equalsIgnoreCase("254720988636")){
+				if(msisdn.trim().equalsIgnoreCase("254721912151") || msisdn.trim().equalsIgnoreCase("254720988636")){
+				
+					if(username.equals(person.getMsisdn()))
+						username = "";
+					
+					logger.info("username == ["+username+"]");
+					
+					String match = datingserviceEJB.findMatchString(profile);
+					
+					logger.info("match == "+match);
+					
+					mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),0);
+					
+					matchesLogEJB.log(profile);
+					
+					
+				}else{
 					continue;
 				}
 				
-				if(username.equals(person.getMsisdn()))
-					username = "";
-				
-				logger.info("username == ["+username+"]");
-				
-				String match = datingserviceEJB.findMatchString(profile);
-				
-				logger.info("match == "+match);
-				
-				mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),0);
-				
-				matchesLogEJB.log(profile);
 				
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
