@@ -148,16 +148,16 @@ public class ProfileQuestionsPrompter {
 				String username = profile.getUsername();
 				String msisdn = person.getMsisdn();
 				
-				logger.info("username == "+msisdn);
+				logger.info("msisdn == ["+msisdn+"], opcoid  = ["+person.getOpco().getId()+"]");
 				
-				if(!msisdn.equalsIgnoreCase("254721912151")){
+				if(!msisdn.equalsIgnoreCase("254721912151") || !msisdn.equalsIgnoreCase("254720988636")){
 					continue;
 				}
 				
 				if(username.equals(person.getMsisdn()))
 					username = "";
 				
-				logger.info("username == "+username);
+				logger.info("username == ["+username+"]");
 				
 				String match = datingserviceEJB.findMatchString(profile);
 				
@@ -289,7 +289,7 @@ public class ProfileQuestionsPrompter {
 			propter.initialize();
 			if(args[0].equalsIgnoreCase("reminders"))
 				propter.sendReminders();
-			if(args[0].equalsIgnoreCase("reminders"))
+			if(args[0].equalsIgnoreCase("match"))
 				propter.sendPotentialMatches();
 			propter.cleanup();
 		}else{
