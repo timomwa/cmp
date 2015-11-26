@@ -118,7 +118,7 @@ public class OpcoSMSService implements Serializable {
 	}
 
 	public BigDecimal getPrice() {
-		return price;
+		return price==null ? BigDecimal.ZERO : price;
 	}
 
 	public void setPrice(BigDecimal price) {

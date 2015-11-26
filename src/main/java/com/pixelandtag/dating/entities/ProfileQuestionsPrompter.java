@@ -281,6 +281,7 @@ public class ProfileQuestionsPrompter {
 
 	private void cleanup() {
 		try {
+			Thread.sleep(5000);//Wait 5 sec
 			if(context!=null)
 				context.close();
 		} catch (Exception e) {

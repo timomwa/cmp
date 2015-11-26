@@ -44,10 +44,15 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String GENDER_PRONOUN_TAG2  = "<GENDER_PRONOUN2>";
 	public static final String GENDER_PRONOUN_N = "GENDER_PRONOUN_N";
 	public static final String DEST_USERNAME_TAG = "<DEST_USERNAME>";
+	public static final String SOURCE_USERNAME_TAG = "<SOURCE_USERNAME>";
+	public static final String PRONOUN_TAG = "<PRONOUN>";
+	public static final String MSG_PRICE_TAG = "<PRICE>";
+	public static final String CHAT_MESSAGE_TAG = "<CHAT_MESSAGE>";
 	public static final String PROFILE_TAG = "<PROFILE>";
 	public static final String GENDER_PRONOUN_M = "GENDER_PRONOUN_M";
 	public static final String GENDER_PRONOUN_F = "GENDER_PRONOUN_F";
 	public static final String GENDER_PRONOUN_INCHAT_F = "GENDER_PRONOUN_INCHAT_F";
+	public static final String CHAT_MESSAGE_TEMPLATE = "CHAT_MESSAGE_TEMPLATE";
 	public static final String GENDER_PRONOUN_INCHAT_M = "GENDER_PRONOUN_INCHAT_M";
 	public static final String CHAT_USERNAME_SEPERATOR = " Says: ";
 	public static final String CHAT_USERNAME_SEPERATOR_DIRECT = " : ";

@@ -172,19 +172,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		String resp = "Request to find match received.";
 		
 		Gender pref_gender = profile.getPreferred_gender();
-		BigDecimal pref_age = profile.getPreferred_age();
-		String location = profile.getLocation();
+		
 		int language_id = profile.getLanguage_id();
 		
 		try{
 			
-			PersonDatingProfile match = findMatch(profile);
-			if(match==null)
-				match  = findMatch(pref_gender,pref_age, location,person.getId());
-			if(match==null)
-				 match = findMatch(pref_gender,pref_age,person.getId());
-			if(match==null)
-				 match = findMatch(pref_gender,person.getId());
+			PersonDatingProfile match = searchMatch(profile);
 			
 			if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
 				resp = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, person.getOpco().getId());
@@ -684,7 +677,51 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 		return person;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public PersonDatingProfile findMatch(Gender pref_gender, Long curPersonId, OperatorCountry opco) throws DatingServiceException{
+		PersonDatingProfile person = null;
+		try{
+			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
+			alreadyMatched.add(curPersonId);
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.opco=:opco AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			qry.setParameter("active", new Boolean(true));
+			qry.setParameter("gender", pref_gender);
+			qry.setParameter("person_a_id", curPersonId);
+			qry.setParameter("opco", opco);
+			//qry.setParameter("alreadyMatched", alreadyMatched);
+			List<PersonDatingProfile> ps = qry.getResultList();
+			if(ps.size()>0)
+				person = ps.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}
+		return person;
+	}
 
+	
+	@SuppressWarnings("unchecked")
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curPersonId, OperatorCountry opco) throws DatingServiceException{
+		PersonDatingProfile person = null;
+		try{
+			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
+			alreadyMatched.add(curPersonId);
+			Date dob = calculateDobFromAge(pref_age);
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.opco=:opco AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			qry.setParameter("gender", pref_gender);
+			qry.setParameter("active", new Boolean(true));
+			qry.setParameter("dob", dob);
+			qry.setParameter("person_a_id", curPersonId);
+			qry.setParameter("opco", opco);
+			//qry.setParameter("alreadyMatched", alreadyMatched);
+			List<PersonDatingProfile> ps = qry.getResultList();
+			if(ps.size()>0)
+				person = ps.get(0);
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}
+		return person;
+	}
 	
 	
 	@SuppressWarnings("unchecked")
@@ -797,6 +834,138 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 		
 		return persondatingProfile;
+	}
+	
+	
+	@Override
+	public PersonDatingProfile findMatch(PersonDatingProfile profile, OperatorCountry opco) throws DatingServiceException{
+	
+		PersonDatingProfile persondatingProfile = null;
+		try {
+			
+			ProfileLocation profileLocation  = location_ejb.findProfileLocation(profile);
+			
+			if(profileLocation!=null && profileLocation.getProfile()!=null){
+				
+				CellIdRanges cellidRanges = null;//location_ejb.getCellIdRangesByLocationId(profileLocation.getLocation().getLocation_id());
+				
+				Long min_cell_id = cellidRanges!=null?cellidRanges.getMin_cell_id() : 0;
+				Long max_cell_id = cellidRanges!=null?cellidRanges.getMax_cell_id() : 0;
+			
+				//Date dob = calculateDobFromAge(profile.getPreferred_age());
+				
+				Query qry = em.createQuery("   FROM "
+											+ "	ProfileLocation pl "
+											+ "WHERE "
+											+ "   (   (pl.profile.username <> pl.profile.person.msisdn) "
+											+ "	   AND  "
+											+ "      pl.profile.person.active=:active "
+											+ "    AND "
+											+ "      pl.profile.person.opco=:opco"
+											+ "    AND "
+											//+ "      pl.profile.dob<=:dob "
+											//+ "    AND "
+											+ "      pl.profile.gender=:prefGender "
+											+ "    AND "
+											+ "        (  pl.location.location_id=:location_id "
+										//	+ "				OR "
+										//	+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
+											+ "				OR  "
+											+ "					pl.location.cellid=:cellid"
+											+(max_cell_id.longValue()>0 ? (  
+											 "				OR  "
+											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
+													) : "")
+											+ "				OR "
+											+ "				   lower(pl.location.locationName) like lower(:locationName)  "
+											+ "		   ) "
+											+ "   )  AND "
+											+ "    (   pl.profile.person.id "
+											+ "				NOT IN "
+											+ "					(SELECT "
+											+ "						DISTINCT person_b_id "
+											+ "					 FROM "
+											+ "						SystemMatchLog sml "
+											+ "					 WHERE "
+											+ "                     sml.person_a_id = :person_a_id"
+											+ "                 )"
+											+ "   )"
+											+ " order by "
+											+ "    pl.timeStamp desc, pl.profile.dob desc");
+				qry.setFirstResult(0);
+				qry.setMaxResults(1);
+				qry.setParameter("opco", opco);
+				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
+				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
+				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
+				if(max_cell_id.longValue()>0){
+					qry.setParameter("min_cell_id", min_cell_id);
+					qry.setParameter("max_cell_id", max_cell_id);
+				} 
+				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
+				qry.setParameter("prefGender", profile.getPreferred_gender());
+				qry.setParameter("person_a_id",profile.getPerson().getId());
+				//qry.setParameter("dob", dob);
+				qry.setParameter("active", new Boolean(true));
+				ProfileLocation pl = (ProfileLocation) qry.getSingleResult();
+				
+				persondatingProfile = pl.getProfile();
+				logger.info("REAL_LOCATION_SEARCH SUCCESS YAY!! we found tweo people in "+profileLocation.getLocation().getLocationName());
+			
+			}
+		
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+			throw new DatingServiceException("Problem finding match.",e);
+		}
+		
+		return persondatingProfile;
+	}
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location, Long curPersonId,OperatorCountry opco) throws DatingServiceException{
+		PersonDatingProfile person = null;
+		try{
+			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
+			alreadyMatched.add(curPersonId);
+			
+			Date dob = calculateDobFromAge(pref_age);
+			
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.opco=:opco AND p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched)");//AND p.dob>=:dob
+			qry.setParameter("active", new Boolean(true));
+			qry.setParameter("gender", pref_gender);
+			qry.setParameter("location", "%"+location+"%");
+			qry.setParameter("dob", dob);
+			qry.setParameter("opco", opco);
+			qry.setParameter("person_a_id", curPersonId);
+			
+			try{
+				watch.start();
+			}catch(Exception exp){
+				logger.error(exp);
+			}
+			
+			List<PersonDatingProfile> ps = qry.getResultList();
+			
+			if(ps.size()>0){
+				person = ps.get(0);
+				try{
+					watch.stop();
+					logger.info("::::::::::It took "+(Double.parseDouble(watch.elapsedTime(java.util.concurrent.TimeUnit.MILLISECONDS)+"")) + " mili-seconds to search a member");
+					watch.reset();
+				}catch(Exception exp){
+					logger.error(exp);
+				}
+			}
+		}catch(javax.persistence.NoResultException ex){
+			logger.error(ex.getMessage());
+		}
+		return person;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -1529,5 +1698,36 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}
 		
 		return msg;
+	}
+
+	@Override
+	public PersonDatingProfile searchMatch(PersonDatingProfile profile) throws DatingServiceException {
+		Person person = profile.getPerson();
+		Gender pref_gender = profile.getPreferred_gender();
+		BigDecimal pref_age = profile.getPreferred_age();
+		String location = profile.getLocation();
+		//location_ejb
+		PersonDatingProfile match =  findMatch(profile);
+		
+		try{
+			match = findMatch(profile, profile.getPerson().getOpco());//try find by their location
+		}catch(DatingServiceException exp){
+			logger.error(exp.getMessage(),exp);
+		}
+		
+		if(match==null)
+			match = findMatch(pref_gender,pref_age, location,person.getId(), profile.getPerson().getOpco());
+		if(match==null)
+			 match = findMatch(pref_gender,pref_age,person.getId(), profile.getPerson().getOpco());
+		if(match==null)
+			 match = findMatch(pref_gender,person.getId(), profile.getPerson().getOpco());
+		if(match==null)
+			match = findMatch(pref_gender,pref_age, location,person.getId());
+		if(match==null)
+			 match = findMatch(pref_gender,pref_age,person.getId());
+		if(match==null)
+			 match = findMatch(pref_gender,person.getId());
+		
+		return match;
 	}
 }

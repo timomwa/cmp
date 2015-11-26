@@ -40,10 +40,14 @@ public interface DatingServiceI extends BaseEntityI {
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException;
 
 	public PersonDatingProfile getperSonUsingChatName(String chat_username) throws DatingServiceException;
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location,Long curProfileId,OperatorCountry opco) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age, String location,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender,Long curProfileId) throws DatingServiceException;
 	public PersonDatingProfile findMatch(PersonDatingProfile profile) throws DatingServiceException;
+	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curPersonId, OperatorCountry opco) throws DatingServiceException;
+	public PersonDatingProfile findMatch(PersonDatingProfile profile, OperatorCountry opco) throws DatingServiceException;
+	public PersonDatingProfile findMatch(Gender pref_gender, Long curPersonId, OperatorCountry opco) throws DatingServiceException;
 	public OutgoingSMS renewSubscription(IncomingSMS icomingsms, Long serviceId, AlterationMethod method) throws DatingServiceException;
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException;
 
@@ -74,6 +78,8 @@ public interface DatingServiceI extends BaseEntityI {
 	public List<PersonDatingProfile> listCompleteProfiles(int first, int limit);
 
 	public String findMatchString(PersonDatingProfile profile);
+
+	public PersonDatingProfile searchMatch(PersonDatingProfile profile) throws DatingServiceException;
 
 	
 

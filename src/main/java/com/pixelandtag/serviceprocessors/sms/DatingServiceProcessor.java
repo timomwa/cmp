@@ -24,6 +24,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
@@ -166,22 +167,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}
 				
 				Gender pref_gender = profile.getPreferred_gender();
-				BigDecimal pref_age = profile.getPreferred_age();
-				String location = profile.getLocation();
-				//location_ejb
-				PersonDatingProfile match = null;
-				try{
-					match = datingBean.findMatch(profile);//try find by their location
-				}catch(DatingServiceException exp){
-					logger.error(exp.getMessage(),exp);
-				}
 				
-				if(match==null)
-					match = datingBean.findMatch(pref_gender,pref_age, location,person.getId());
-				if(match==null)
-					 match = datingBean.findMatch(pref_gender,pref_age,person.getId());
-				if(match==null)
-					 match = datingBean.findMatch(pref_gender,person.getId());
+				PersonDatingProfile match =  datingBean.searchMatch(profile);
+				
 				
 				if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
 					String msg = datingBean.getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, incomingsms.getOpco().getId());
@@ -712,9 +700,17 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					OutgoingSMS outgoingchatsms  = incomingSMS.convertToOutgoing();
 					outgoingchatsms.setMsisdn(destination_person.getPerson().getMsisdn());
 					String msg = "";
+					OpcoSMSService opcosmsserv = opcosmsserviceejb.getOpcoSMSService(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
+					
 					if(!directMsg){//if it's not a direct message, then put advice
-						msg = source_user+CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
-						msg += NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-";
+						msg = datingBean.getMessage(CHAT_MESSAGE_TEMPLATE, language_id,person.getOpco().getId());
+						msg = msg.replaceAll(SOURCE_USERNAME_TAG, source_user);
+						msg = msg.replaceAll(CHAT_MESSAGE_TAG, CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*"))+NEW_LINE);
+						msg = msg.replaceAll(PRONOUN_TAG, pronoun);
+						msg = msg.replaceAll(MSG_PRICE_TAG, opcosmsserv.getPrice().toString());
+						
+						//msg = source_user+CHAT_USERNAME_SEPERATOR+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
+						//msg += NEW_LINE+" to continue chatting with "+pronoun+", reply starting with "+source_user+" SMS cost 0.0/-";
 					}else{
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
@@ -727,7 +723,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					outgoingchatsms.setPrice(BigDecimal.ZERO);
 					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
 					outgoingchatsms.setOpcosenderprofile(opcotrxprofile);
-					String shortcode = opcosmsserviceejb.getShortcodeByServiceIdAndOpcoId(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
+					String shortcode = opcosmsserv.getMoprocessor().getShortcode();//opcosmsserviceejb.getShortcodeByServiceIdAndOpcoId(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
 					logger.info("\n\n\n\n\n\t\toutgoing shortcode >>>>> "+shortcode);
 					outgoingchatsms.setShortcode(shortcode);
 					
