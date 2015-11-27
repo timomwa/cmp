@@ -252,7 +252,7 @@ public class ProfileQuestionsPrompter {
 				//You're missing out <USERNAME>! There are <POTENTIAL_MATES_COUNT> single ladies here waiting to chat but your profile is incomplete. 
 				//Please complete the following questions sent to you on <LAST_QUESTION_DATE>.
 				logger.info(" MSG:: "+message+ " size : "+message.length());
-				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),5);
+				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),0);
 				
 				String question = null;
 				
@@ -266,7 +266,7 @@ public class ProfileQuestionsPrompter {
 				
 				logger.info((previousQuestion!=null ? "PREVIOUS ": "NEW") +" QUESTION ::: "+question + " msisdn : "+person.getMsisdn());
 			
-				mtcreatorEJB.sendMT(question,serviceid, person.getMsisdn(), person.getOpco(),5);
+				mtcreatorEJB.sendMT(question,serviceid, person.getMsisdn(), person.getOpco(),4);
 				
 				profilecompletionreminderLoggerEJB.log(profile);
 				
