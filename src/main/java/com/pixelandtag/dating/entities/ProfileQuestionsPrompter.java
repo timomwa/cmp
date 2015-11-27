@@ -149,10 +149,10 @@ public class ProfileQuestionsPrompter {
 				String msisdn = person.getMsisdn();
 				
 				logger.info("msisdn == ["+msisdn+"], opcoid  = ["+person.getOpco().getId()+"]");
-				logger.info("msisdn.equalsIgnoreCase(\"254721912151\") : "+msisdn.equalsIgnoreCase("254721912151"));
-				logger.info("msisdn.equalsIgnoreCase(\"254720988636\") : "+msisdn.equalsIgnoreCase("254720988636"));
+				//logger.info("msisdn.equalsIgnoreCase(\"254721912151\") : "+msisdn.equalsIgnoreCase("254721912151"));
+				//logger.info("msisdn.equalsIgnoreCase(\"254720988636\") : "+msisdn.equalsIgnoreCase("254720988636"));
 				
-				if(msisdn.trim().equalsIgnoreCase("254721912151") || msisdn.trim().equalsIgnoreCase("254720988636")){
+				//if(msisdn.trim().equalsIgnoreCase("254721912151") || msisdn.trim().equalsIgnoreCase("254720988636")){
 				
 					if(username.equals(person.getMsisdn()))
 						username = "";
@@ -168,9 +168,9 @@ public class ProfileQuestionsPrompter {
 					matchesLogEJB.log(profile);
 					
 					
-				}else{
-					continue;
-				}
+				//}else{
+				//	continue;
+				//}
 				
 				
 			}catch(Exception exp){
@@ -251,8 +251,8 @@ public class ProfileQuestionsPrompter {
 				message = message.replaceAll(GenericServiceProcessor.LAST_QUESTION_DATE_TAG, Matcher.quoteReplacement(prettyTime));
 				//You're missing out <USERNAME>! There are <POTENTIAL_MATES_COUNT> single ladies here waiting to chat but your profile is incomplete. 
 				//Please complete the following questions sent to you on <LAST_QUESTION_DATE>.
-				logger.info(" MSG:: "+message);
-				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),0);
+				logger.info(" MSG:: "+message+ " size : "+message.length());
+				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),5);
 				
 				String question = null;
 				

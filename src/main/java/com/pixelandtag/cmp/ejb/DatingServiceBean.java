@@ -1577,7 +1577,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		List<PersonDatingProfile> persondatingprofiles = new ArrayList<PersonDatingProfile>();
 		try{
 			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete"
-					+ " AND dp.person.loggedin=:loggedin AND dp not in "
+					+ " AND dp.person.loggedin=:loggedin AND dp.person.agreed_to_tnc=:agreedtnc AND dp not in "
 					+ "(SELECT pcl.profile from ProfileCompletionReminderLog pcl WHERE "
 					+ "("
 					+ "date(pcl.timeStamp)=year(:todaysdate)"
@@ -1589,6 +1589,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ ")");
 			query.setParameter("profilecomplete", Boolean.FALSE);
 			query.setParameter("loggedin", Boolean.TRUE);
+			query.setParameter("agreedtnc", Boolean.TRUE);
 			query.setParameter("todaysdate", new Date());
 			query.setFirstResult(start.intValue());
 			query.setMaxResults(records_per_run.intValue());

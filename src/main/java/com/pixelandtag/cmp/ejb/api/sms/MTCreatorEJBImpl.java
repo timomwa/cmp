@@ -73,7 +73,7 @@ public class MTCreatorEJBImpl implements MTCreatorEJBI {
 			outgoingsms.setShortcode(opcosmsservice.getMoprocessor().getShortcode());
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			outgoingsms.setIsSubscription(Boolean.TRUE);
-			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+			outgoingsms.setCmp_tx_id(String.valueOf( System.nanoTime() ));
 			outgoingsms.setMsisdn(msisdn);
 			outgoingsms.setOpcosenderprofile(opcosenderprofile);
 			outgoingsms.setTimestamp(ealiestSendTime);
