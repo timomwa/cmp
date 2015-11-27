@@ -703,7 +703,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					OpcoSMSService opcosmsserv = opcosmsserviceejb.getOpcoSMSService(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
 					
 					if(!directMsg){//if it's not a direct message, then put advice
-						msg = datingBean.getMessage(CHAT_MESSAGE_TEMPLATE, language_id,person.getOpco().getId());
+						msg = datingBean.getMessage(CHAT_MESSAGE_TEMPLATE, language_id,destination_person.getPerson().getOpco().getId());
 						msg = msg.replaceAll(SOURCE_USERNAME_TAG, source_user);
 						msg = msg.replaceAll(CHAT_MESSAGE_TAG, (allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*"))+NEW_LINE);
 						msg = msg.replaceAll(PRONOUN_TAG, pronoun);
