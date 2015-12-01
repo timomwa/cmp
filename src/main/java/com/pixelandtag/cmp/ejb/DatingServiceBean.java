@@ -1280,7 +1280,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public OutgoingSMS renewSubscription(IncomingSMS incomingsms, Long serviceid, AlterationMethod method) throws DatingServiceException{
+	public OutgoingSMS renewSubscription(IncomingSMS incomingsms, Long serviceid, AlterationMethod method,OperatorCountry opco) throws DatingServiceException{
 		
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
@@ -1334,7 +1334,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				outgoingsms.setPriority(0);
 				
 				try{
-					subscriptionBean.updateQueueStatus(2L, incomingsms.getMsisdn(), serviceid,method);
+					subscriptionBean.updateQueueStatus(2L, incomingsms.getMsisdn(), serviceid,method, person.getOpco());
 				}catch(Exception exp){
 					logger.error("ERROR DURING SUBSCRIPTION RENEWAL:: "+exp.getMessage(),exp);
 				}

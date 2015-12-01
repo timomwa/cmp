@@ -231,7 +231,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(!subvalid || allow_multiple_plans  ){
 					
 					try{
-						outgoingsms = datingBean.renewSubscription(incomingsms,smsservice0.getId(),AlterationMethod.self_via_sms);
+						outgoingsms = datingBean.renewSubscription(incomingsms,smsservice0.getId(),AlterationMethod.self_via_sms, incomingsms.getOpco()); 
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);

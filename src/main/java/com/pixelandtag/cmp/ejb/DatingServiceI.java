@@ -48,7 +48,7 @@ public interface DatingServiceI extends BaseEntityI {
 	public PersonDatingProfile findMatch(Gender pref_gender,BigDecimal pref_age,Long curPersonId, OperatorCountry opco) throws DatingServiceException;
 	public PersonDatingProfile findMatch(PersonDatingProfile profile, OperatorCountry opco) throws DatingServiceException;
 	public PersonDatingProfile findMatch(Gender pref_gender, Long curPersonId, OperatorCountry opco) throws DatingServiceException;
-	public OutgoingSMS renewSubscription(IncomingSMS icomingsms, Long serviceId, AlterationMethod method) throws DatingServiceException;
+	public OutgoingSMS renewSubscription(IncomingSMS icomingsms, Long serviceId, AlterationMethod method, OperatorCountry opco) throws DatingServiceException;
 	public PersonDatingProfile getProfileOfLastPersonIsentMessageTo(Person person, Long period, TimeUnit timeUnit) throws DatingServiceException;
 
 	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException;

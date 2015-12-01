@@ -52,8 +52,8 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
 	 */
-	
-	public void updateCredibilityIndex(String msisdn, Long service_id, int change){
+	@Override
+	public void updateCredibilityIndex(String msisdn, Long service_id, int change, OperatorCountry opco){
 		try{
 			Subscription subsc = getSubscription(msisdn, service_id);
 			if(subsc!=null){
@@ -65,7 +65,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 				}
 				subsc = em.merge(subsc);
 			}else{
-				subsc = subscribe(msisdn,service_id,MediumType.ussd,AlterationMethod.system_autorenewal);
+				subsc = subscribe(msisdn,service_id,MediumType.ussd,AlterationMethod.system_autorenewal, opco);
 				if(change>=1){
 					int prev_index = subsc.getCredibility_index().intValue();
 					subsc.setCredibility_index(prev_index>=0 ? (change+prev_index) : 0);//we re-set their index if they previously had a bad record, but now they have credit
@@ -84,7 +84,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 
 	
 	@Override
-	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method) {
+	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method,  OperatorCountry opco) { 
 		Subscription subscription = null;
 		try{
 			subscription = new Subscription();
@@ -95,6 +95,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			subscription.setRenewal_count(0L);
 			subscription.setQueue_status(0L);
 			subscription.setRequest_medium(medium);
+			subscription.setOpco(opco);
 			subscription.setSubscription_status(SubscriptionStatus.confirmed);
 			
 			
@@ -153,11 +154,11 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateQueueStatus(java.lang.String, java.lang.String, java.lang.Long)
 	 */
 	@Override
-	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id, AlterationMethod method) throws Exception{
+	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id, AlterationMethod method, OperatorCountry opco) throws Exception{
 		try{
 			Subscription sub = getSubscription(msisdn, sms_service_id);
 			if(sub==null)
-				sub = subscribe(msisdn, sms_service_id,MediumType.ussd,method);
+				sub = subscribe(msisdn, sms_service_id,MediumType.ussd,method, opco);
 			updateQueueStatus(status,sub.getId(), method);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);

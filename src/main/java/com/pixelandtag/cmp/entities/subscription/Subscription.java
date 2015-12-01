@@ -223,6 +223,20 @@ public class Subscription implements Serializable {
 	public void setOpco(OperatorCountry opco) {
 		this.opco = opco;
 	}
+
+	@Override
+	public String toString() {
+		return "Subscription [id=" + id + ",\n subscription_status="
+				+ subscription_status + ",\n isValid=" + isValid
+				+ ",\n sms_service_id_fk=" + sms_service_id_fk + ",\n msisdn="
+				+ msisdn + ",\n subscription_timeStamp="
+				+ subscription_timeStamp + ",\n smsmenu_levels_id_fk="
+				+ smsmenu_levels_id_fk + ",\n request_medium=" + request_medium
+				+ ",\n expiryDate=" + expiryDate + ",\n renewal_count="
+				+ renewal_count + ",\n subActive=" + subActive
+				+ ",\n queue_status=" + queue_status + ",\n credibility_index="
+				+ credibility_index + ",\n opco=" + opco + "]";
+	}
 	
 	
 	

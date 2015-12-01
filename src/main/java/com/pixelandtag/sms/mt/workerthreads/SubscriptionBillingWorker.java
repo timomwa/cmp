@@ -153,9 +153,10 @@ public class SubscriptionBillingWorker implements Runnable {
 				
 				try {
 					
-					Long sub_id = SubscriptionRenewal.getBillable();
-					Subscription sub = sub_id!=null ? cmp_ejb.find(Subscription.class, sub_id) : null;
+					Subscription sub = SubscriptionRenewal.getBillable();
+					//Subscription sub = sub_id!=null ? cmp_ejb.find(Subscription.class, sub_id) : null;
 					Billable billable = null;
+					Long sub_id = sub.getId();
 					
 					if(sub_id!=null && sub_id.compareTo(negative_one)==0){//poison pill
 						setRun(false);
@@ -206,7 +207,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										if(capped){
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												
-												SubscriptionRenewal.putPackToQueue(sub_id);
+												SubscriptionRenewal.putPackToQueue(sub);
 												//We've been throttled. Let's slow down a little bit.
 												logger.debug("Throttling! We've been capped.");
 												SubscriptionRenewal.setEnable_biller_random_throttling(true);
@@ -254,7 +255,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											billable.setSuccess(Boolean.FALSE);
 											
 											if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
-												subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+												subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, sub.getOpco());
 												//we'll try again. 1 means that we let it sit there, but the cron will set it to 2 so that it's picked
 												//subscriptionejb.updateQueueStatus(1L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 											}
@@ -267,7 +268,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
 											sub = subscriptionejb.renewSubscription(billable.getOpco(), billable.getMsisdn(), Long.valueOf(billable.getService_id()), AlterationMethod.system_autorenewal); 
-											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
+											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1, sub.getOpco());
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//Resume back to normal. No throttling
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
@@ -313,7 +314,7 @@ public class SubscriptionBillingWorker implements Runnable {
 							
 							logger.error(exp.getMessage(),exp);
 							logger.info("SUBSCRIPTION_RENEWAL:::::::::SOMETHING WENT WRONG, WE TRY AGAIN ");
-							subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()),AlterationMethod.system_autorenewal);
+							subscriptionejb.updateQueueStatus(0L, billable.getMsisdn(), Long.valueOf(billable.getService_id()),AlterationMethod.system_autorenewal, sub.getOpco());
 							
 						}
 					}else{

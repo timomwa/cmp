@@ -331,7 +331,7 @@ public class HttpBillingWorker implements Runnable {
 					}
 					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
 						try{
-							subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+							subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, billable.getOpco());
 						}catch(NumberFormatException nfe){
 							logger.warn("Number format exception. billable.getService_id() : "+billable.getService_id()+ " billable : "+billable.toString());
 						}
@@ -344,7 +344,7 @@ public class HttpBillingWorker implements Runnable {
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
-					subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
+					subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1, billable.getOpco());
 					
 					
 					

@@ -592,7 +592,7 @@ public class BaseEntityBean implements BaseEntityI {
 					billable.setResp_status_code(err);
 					
 					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
-						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1);
+						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, billable.getOpco());
 					}
 					try{
 						String transactionId = getTransactionId(resp);
@@ -608,7 +608,7 @@ public class BaseEntityBean implements BaseEntityI {
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
-					subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1);
+					subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1, billable.getOpco());
 					cmp_ejb.createSuccesBillRec(billable);
 					
 					

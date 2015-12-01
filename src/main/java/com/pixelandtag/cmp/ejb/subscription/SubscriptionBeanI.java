@@ -95,7 +95,7 @@ public interface SubscriptionBeanI {
 	 * @param sms_service_id
 	 * @throws Exception
 	 */
-	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id, AlterationMethod method) throws Exception;
+	public void updateQueueStatus(Long status, String msisdn, Long sms_service_id, AlterationMethod method, OperatorCountry opco) throws Exception;
 
 	/**
 	 * 
@@ -103,7 +103,7 @@ public interface SubscriptionBeanI {
 	 * @param valueOf
 	 * @param change
 	 */
-	public void updateCredibilityIndex(String msisdn, Long valueOf, int change);
+	public void updateCredibilityIndex(String msisdn, Long valueOf, int change, OperatorCountry opco);
 	
 	/**
 	 * 
@@ -111,7 +111,7 @@ public interface SubscriptionBeanI {
 	 * @param service_id
 	 * @return
 	 */
-	public Subscription subscribe(String msisdn, Long service_id, MediumType medium, AlterationMethod method) ;
+	public Subscription subscribe(String msisdn, Long service_id, MediumType medium, AlterationMethod method, OperatorCountry opco) ;
 	
 	/**
 	 * 
