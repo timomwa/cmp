@@ -279,7 +279,7 @@ public class BaseEntityBean implements BaseEntityI {
 			sb.append("\n\t\t (subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0) :: "+((subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)));
 			logger.info(sb.toString());
 			sb.setLength(0);
-			if(subvalid){// || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0){
+			if(subvalid  || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0){
 				return true;
 			}
 		}
@@ -567,8 +567,8 @@ public class BaseEntityBean implements BaseEntityI {
 			 
 			 String resp = convertStreamToString(resEntity.getContent());
 			
-			 logger.debug("RESP CODE : "+RESP_CODE);
-			 logger.debug("RESP XML : "+resp);
+			 logger.info("RESP CODE : "+RESP_CODE);
+			 logger.info("RESP XML : "+resp);
 			 
 			
 			
