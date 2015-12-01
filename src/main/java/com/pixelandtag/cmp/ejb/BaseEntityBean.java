@@ -66,11 +66,13 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dao.generic.GenericDAO;
+import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
+import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 
@@ -270,10 +272,16 @@ public class BaseEntityBean implements BaseEntityI {
 		for(String kwd: services){
 			OpcoSMSService opcosmsservice = opcosmsserviceejb.getOpcoSMSService(kwd, opco);
 			SMSService smsservice = opcosmsservice.getSmsservice();
-			
-			if(subscriptionEjb.subscriptionValid(msisdn, smsservice.getId()) || smsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)
+			boolean subvalid = subscriptionEjb.subscriptionValid(msisdn, smsservice.getId());
+			StringBuffer sb = new StringBuffer();
+			sb.append("\n\n\t\t opcosmsservice.getPrice():: "+opcosmsservice.getPrice());
+			sb.append("\n\t\t subvalid :: "+subvalid);
+			sb.append("\n\t\t (subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0) :: "+((subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)));
+			logger.info(sb.toString());
+			sb.setLength(0);
+			if(subvalid){// || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0){
 				return true;
-			
+			}
 		}
 		return isAtive;
 	}

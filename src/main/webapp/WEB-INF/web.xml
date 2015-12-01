@@ -360,6 +360,10 @@
 		<servlet-name>SafaricomMOReceiver</servlet-name>
 		<url-pattern>/safchat</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>seinbound</servlet-name>
+		<url-pattern>/seinbound</url-pattern>
+	</servlet-mapping>
 	
 	
 	<servlet>
@@ -391,6 +395,13 @@
 		<display-name>SafaricomMOReceiver</display-name>
 		<servlet-name>SafaricomMOReceiver</servlet-name>
 		<servlet-class>com.pixelandtag.mo.sms.SafaricomMOReceiver</servlet-class>
+	</servlet>
+	<servlet>
+		<description>
+		Subscription Engine</description>
+		<display-name>seinbound</display-name>
+		<servlet-name>seinbound</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.SEInboundAirtel</servlet-class>
 	</servlet>
 	
 	

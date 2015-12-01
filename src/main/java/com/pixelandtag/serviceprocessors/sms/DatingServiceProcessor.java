@@ -222,7 +222,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				SMSService smsservice0 = datingBean.getSMSService(KEYWORD, incomingsms.getOpco());
 				List<String> services = new ArrayList<String>();
 				services.add("BILLING_SERV5");
-				services.add("DATE");
 				services.add("BILLING_SERV15");
 				services.add("BILLING_SERV30");
 				
