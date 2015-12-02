@@ -104,62 +104,65 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		String resp = "";
 		
-		final String MSISDN = ro.getMsisdn();
-		
-		Person person = getPerson(MSISDN,ro.getOpco());
-		
-		if(person==null)
-			person = register(MSISDN,ro.getOpco());
-		
-		PersonDatingProfile profile = getProfile(person);
-		
-		if( (profile!=null && profile.getProfileComplete()) //If profile is already created and valid, 
-				&& //and no keyword or message passed along, then we find a match for them
-			 (ro.getKeyword()==null || ro.getMsg()==null || ro.getMsg().isEmpty() || ro.getKeyword().isEmpty() 
-			 || (ro.getCode()!=null && ro.getMsg().equals(ro.getCode()))  )){
+		try{
 			
-			String msg = findMatch(ro,person,profile);
+			final String MSISDN = ro.getMsisdn();
 			
+			Person person = getPerson(MSISDN,ro.getOpco());
 			
-			SMSService smsserv = getSMSService("DATE",ro.getOpco());
-			MOProcessor proc = smsserv.getMoprocessor();
+			if(person==null)
+				person = register(MSISDN,ro.getOpco());
 			
-			if(smsserv!=null  && proc!=null){
-				OutgoingSMS outgoingsms = new OutgoingSMS();
-				outgoingsms.setMsisdn(MSISDN);
-				outgoingsms.setPrice(BigDecimal.ZERO);
-				outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED); 
-				outgoingsms.setSms(msg);
-				outgoingsms.setServiceid(smsserv.getId());
-				outgoingsms.setMoprocessor(proc);
-				outgoingsms.setShortcode(proc.getShortcode());
+			PersonDatingProfile profile = getProfile(person);
+			
+			if( (profile!=null && profile.getProfileComplete()) //If profile is already created and valid, 
+					&& //and no keyword or message passed along, then we find a match for them
+				 (ro.getKeyword()==null || ro.getMsg()==null || ro.getMsg().isEmpty() || ro.getKeyword().isEmpty() 
+				 || (ro.getCode()!=null && ro.getMsg().equals(ro.getCode()))  )){
 				
-				if(!ro.getTransactionID().equals("1"))
-					outgoingsms.setCmp_tx_id(ro.getTransactionID());
-				else
+				String msg = findMatch(ro,person,profile);
+				
+				
+				SMSService smsserv = getSMSService("DATE",ro.getOpco());
+				MOProcessor proc = smsserv.getMoprocessor();
+				
+				if(smsserv!=null  && proc!=null){
+					OutgoingSMS outgoingsms = new OutgoingSMS();
+					outgoingsms.setMsisdn(MSISDN);
+					outgoingsms.setPrice(BigDecimal.ZERO);
+					outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED); 
+					outgoingsms.setSms(msg);
+					outgoingsms.setServiceid(smsserv.getId());
+					outgoingsms.setMoprocessor(proc);
+					outgoingsms.setShortcode(proc.getShortcode());
+					
 					outgoingsms.setCmp_tx_id(generateNextTxId());
+					
+					outgoingsms.setSplit(false);
+					outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+					outgoingsms.setIsSubscription(false);
+					sendMT(outgoingsms);
+				}
 				
-				outgoingsms.setSplit(false);
-				outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-				outgoingsms.setIsSubscription(false);
-				sendMT(outgoingsms);
-			}
 			
-		
-		}else if(person.getId()>0 && profile==null){//Success registering/registered but no profile
-			
-			resp = startProfileQuestions(ro,person);
-		
-		}else{
-			
-			if(!profile.getProfileComplete()){
+			}else if(person.getId()>0 && profile==null){//Success registering/registered but no profile
 				
-				resp = completeProfile(ro,person,profile);
+				resp = startProfileQuestions(ro,person);
 			
 			}else{
-				//force process to go to another method
-				resp = null;
+				
+				if(!profile.getProfileComplete()){
+					
+					resp = completeProfile(ro,person,profile);
+				
+				}else{
+					//force process to go to another method
+					resp = null;
+				}
 			}
+			
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
 		}
 		
 		return resp;
