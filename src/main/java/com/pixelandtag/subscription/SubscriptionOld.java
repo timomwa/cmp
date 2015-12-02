@@ -1,5 +1,6 @@
 package com.pixelandtag.subscription;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -369,7 +370,7 @@ public class SubscriptionOld {
 				sm.setPush_unique(rs.getBoolean("push_unique"));
 				sm.setService_name(rs.getString("service_name"));
 				sm.setService_description(rs.getString("service_description"));
-				sm.setPrice(rs.getBigDecimal("price"));
+				sm.setPrice(new BigDecimal(rs.getDouble("price")));
 				sm.setCmp_keyword(rs.getString("CMP_Keyword"));
 				sm.setCmp_skeyword(rs.getString("CMP_SKeyword"));
 				sm.setEnabled(rs.getBoolean("enabled"));
@@ -424,7 +425,7 @@ public class SubscriptionOld {
 				sm.setPush_unique(rs.getBoolean("push_unique"));
 				sm.setService_name(rs.getString("service_name"));
 				sm.setService_description(rs.getString("service_description"));
-				sm.setPrice(rs.getBigDecimal("price"));
+				sm.setPrice(new BigDecimal(rs.getDouble("price")));
 				sm.setCmp_keyword(rs.getString("CMP_Keyword"));
 				sm.setCmp_skeyword(rs.getString("CMP_SKeyword"));
 				sm.setEnabled(rs.getBoolean("enabled"));
@@ -589,7 +590,7 @@ public class SubscriptionOld {
 				sm.setPush_unique(rs.getBoolean("push_unique"));
 				sm.setService_name(rs.getString("service_name"));
 				sm.setService_description(rs.getString("service_description"));
-				sm.setPrice(rs.getBigDecimal("price"));
+				sm.setPrice(new BigDecimal(rs.getDouble("price")));
 				sm.setCmp_keyword(rs.getString("CMP_Keyword"));
 				sm.setCmp_skeyword(rs.getString("CMP_SKeyword"));
 				sm.setEnabled(rs.getBoolean("enabled"));
