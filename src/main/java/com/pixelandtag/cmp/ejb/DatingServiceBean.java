@@ -1258,6 +1258,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			qry.setParameter("dob", dob);
 			Object o = qry.getSingleResult();
 			age = (BigInteger) o;
+			age = age.compareTo(BigInteger.valueOf(18L))<0 ? BigInteger.valueOf(18L) : age;
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 			throw new DatingServiceException(exp.getMessage(), exp);

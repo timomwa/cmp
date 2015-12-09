@@ -274,7 +274,7 @@ public class BaseEntityBean implements BaseEntityI {
 			SMSService smsservice = opcosmsservice.getSmsservice();
 			boolean subvalid = subscriptionEjb.subscriptionValid(msisdn, smsservice.getId());
 			StringBuffer sb = new StringBuffer();
-			sb.append("\n\n\t\t opcosmsservice.getPrice():: "+opcosmsservice.getPrice());
+			sb.append("\n\n\t\t opcosmsservice.getPrice():: "+opcosmsservice.getPrice()+" opcosmsservice : "+opcosmsservice.getId());
 			sb.append("\n\t\t subvalid :: "+subvalid);
 			sb.append("\n\t\t (subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0) :: "+((subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)));
 			logger.info(sb.toString());
