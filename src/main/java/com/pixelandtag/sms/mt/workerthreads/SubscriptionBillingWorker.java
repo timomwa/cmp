@@ -156,7 +156,7 @@ public class SubscriptionBillingWorker implements Runnable {
 					Subscription sub = SubscriptionRenewal.getBillable();
 					//Subscription sub = sub_id!=null ? cmp_ejb.find(Subscription.class, sub_id) : null;
 					Billable billable = null;
-					Long sub_id = sub.getId();
+					Long sub_id = sub!=null ? sub.getId() : null;
 					
 					if(sub_id!=null && sub_id.compareTo(negative_one)==0){//poison pill
 						setRun(false);
