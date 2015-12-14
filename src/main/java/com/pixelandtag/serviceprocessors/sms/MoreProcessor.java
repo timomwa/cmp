@@ -584,7 +584,8 @@ public class MoreProcessor extends GenericServiceProcessor {
 						//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
 						msg = cmpbean.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id, incomingsms.getOpco().getId());
 						msg = msg.replaceAll(SERVICENAME_TAG, cmpbean.getMessage(MessageType.ALL_SERVICES, language_id, incomingsms.getOpco().getId()));
-						outgoingsms.setSms(DND_TG+(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+SPACE+msg).trim());
+						msg = (RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+SPACE+msg).trim();
+						outgoingsms.setSms(msg);
 					/*}else if(second_keyword!=null || stop_number>-1){
 						
 						if(second_keyword_is_digit){
@@ -636,10 +637,11 @@ public class MoreProcessor extends GenericServiceProcessor {
 							
 				}else{
 					msg = cmpbean.getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId());
-					msg = DND_TG+msg;
-				}
 					
-				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+msg);
+				}
+				msg = RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+msg;
+				msg = DND_TG+msg;
+				outgoingsms.setSms(msg);
 				
 
 			}else if(KEYWORD.equals("HELP")){

@@ -107,8 +107,8 @@ public class SenderThreadWorker implements Runnable{
 							
 							if(sms.getSms()!=null && !sms.getSms().isEmpty()){
 								if(sms.getSms().trim().startsWith(GenericServiceProcessor.DND_TG)){
-									logger.info("\n\n\n\n\n\n\t\t\t :::PUTTING "+sms.getMsisdn()+" INTO DND!! \n\n\n\n\n\n\n");
 									dndEJB.putInDNDList(sms.getMsisdn());
+									logger.info("\n\n\n\n\n\n\t\t\t :::PUTTING "+sms.getMsisdn()+" INTO DND!! \n\n\n\n\n\n\n");
 								}
 								sms.setSms(sms.getSms().replaceAll(GenericServiceProcessor.DND_TG, ""));
 							}
