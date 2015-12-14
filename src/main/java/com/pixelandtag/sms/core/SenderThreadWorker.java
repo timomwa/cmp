@@ -99,24 +99,22 @@ public class SenderThreadWorker implements Runnable{
 						
 						SenderResp response = null;
 						
-						boolean putindnd = false;
-						
-						if(sms.getSms()!=null && !sms.getSms().isEmpty()){
-							if(sms.getSms().trim().startsWith(GenericServiceProcessor.DND_TG))
-								putindnd = true;
-							sms.setSms(sms.getSms().replaceAll(GenericServiceProcessor.DND_TG, ""));
-						}
-						
 						if(dndEJB.isinDNDList(sms.getMsisdn())){
 							response = new SenderResp();
 							response.setSuccess(Boolean.TRUE);
 							sms.setTtl(-1L);
 						}else{
+							
+							if(sms.getSms()!=null && !sms.getSms().isEmpty()){
+								if(sms.getSms().trim().startsWith(GenericServiceProcessor.DND_TG)){
+									logger.info("\n\n\n\t\t\t :::PUTTING "+sms.getMsisdn()+" INTO DND!! \n\n\n\n");
+									dndEJB.putInDNDList(sms.getMsisdn());
+								}
+								sms.setSms(sms.getSms().replaceAll(GenericServiceProcessor.DND_TG, ""));
+							}
 							response = sender.sendSMS(sms);
 						}
 						
-						if(putindnd)
-							dndEJB.putInDNDList(sms.getMsisdn());
 						
 						MessageStatus mtstatus;
 						
