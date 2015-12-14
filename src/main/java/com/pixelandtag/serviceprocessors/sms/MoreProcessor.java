@@ -565,7 +565,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 			}else if(KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
 				
-				String msg = cmpbean.getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId());
+				String msg = "";//cmpbean.getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId());
 				
 				int stop_number = -1;
 				
@@ -577,7 +577,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed  = cmpbean.getAllSubscribedServices(incomingsms.getMsisdn());
 				//LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = subscription.getAllSubscribedServices(mo.getMsisdn(),conn);
 				
-				if(allsubscribed!=null){
+				if(allsubscribed!=null && allsubscribed.size()>0){
 				
 					//if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
 						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_sms); 

@@ -1536,7 +1536,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				try{
 					Query query3 = em.createQuery("delete from Subscription where msisdn=:msisdn");
-					query3.setParameter("msisdn", profile.getPerson().getId());
+					query3.setParameter("msisdn", profile.getPerson().getMsisdn());
 					query3.executeUpdate();
 				}catch(Exception exp){
 					logger.error(exp.getMessage(), exp);
