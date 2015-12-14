@@ -33,7 +33,6 @@ public class GenericDaoImpl<T, ID extends Serializable> implements GenericDAO<T,
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
-	//protected EntityManager em;
 	
 	public void setEm(EntityManager em){
 		this.em = em;

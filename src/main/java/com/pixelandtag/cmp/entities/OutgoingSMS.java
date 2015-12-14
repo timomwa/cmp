@@ -47,15 +47,15 @@ import com.pixelandtag.subscription.dto.MediumType;
 @NamedQueries({
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UNSENT_ORDER_BY_PRIORITY_DESC,
-			query = "select que from OutgoingSMS que where que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc, que.timestamp asc"
+			query = "select que from OutgoingSMS que where que.re_tries<que.ttl AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority desc, que.timestamp asc"
 	),
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UNSENT_BY_PROFILEID_ORDER_BY_PRIORITY_DESC,
-			query = "select que from OutgoingSMS que where que.opcosenderprofile.id=:opcosenderprofileid AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority asc, que.timestamp asc"
+			query = "select que from OutgoingSMS que where que.re_tries<que.ttl AND que.opcosenderprofile.id=:opcosenderprofileid AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority asc, que.timestamp asc"
 	),
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UNSENT_BY_PROFILE_ORDER_BY_PRIORITY_DESC,
-			query = "select que from OutgoingSMS que where que.opcosenderprofile=:opcosenderprofile AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority asc, que.timestamp asc"
+			query = "select que from OutgoingSMS que where que.re_tries<que.ttl AND que.opcosenderprofile=:opcosenderprofile AND que.timestamp<=:timestamp AND que.billing_status in (:billstatus) AND que.in_outgoing_queue=0 AND que.sent=0  order by que.priority asc, que.timestamp asc"
 	),
 	@NamedQuery(
 			name = OutgoingSMS.NQ_LIST_UPDATE_QUEUE_STATUS_BY_ID,
@@ -166,7 +166,7 @@ public class OutgoingSMS extends GenericMessage implements Serializable {
 	}
 
 	public Long getTtl() {
-		return ttl;
+		return ttl!=null ? ttl : 1L;
 	}
 
 	public void setTtl(Long ttl) {

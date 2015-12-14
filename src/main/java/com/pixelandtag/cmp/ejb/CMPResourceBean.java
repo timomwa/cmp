@@ -37,6 +37,7 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
 import com.pixelandtag.cmp.entities.ClassStatus;
@@ -82,6 +83,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private DatingServiceI datingserviceEJB;
+	
+	@EJB
+	private DNDListEJBI dndEJB;
 	
 	private Random rand = new Random();
 	
@@ -268,6 +272,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		boolean success = true;
 		
 		try{
+			
+			dndEJB.putInDNDList(msisdn);
 			
 			List<Subscription> subscriptions = subscriptionBean.listSubscriptions(msisdn);
 			

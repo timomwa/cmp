@@ -138,9 +138,24 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	}
 
 	
+	@Override
+	public void deleteProfileLocations(PersonDatingProfile profile){
+		try{
+			Query query = em.createQuery("delete from ProfileLocation pl WHERE pl.profile=:profile");
+			query.setParameter("profile", profile);
+			query.executeUpdate();
+		}catch(javax.persistence.NoResultException ex){
+			logger.warn(ex.getMessage());
+		}catch(Exception exp){
+			logger.error(exp.getMessage());
+		}
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#getLastKnownLocationWithNameUsingLac(java.lang.Long)
 	 */
+	@Override
 	public Location getLastKnownLocationWithNameUsingLac(Long locationId) {
 		
 		Location location = null;

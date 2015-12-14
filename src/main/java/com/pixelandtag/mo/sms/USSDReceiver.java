@@ -27,6 +27,7 @@ import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
+import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
@@ -84,6 +85,9 @@ public class USSDReceiver extends HttpServlet {
 	
 	@EJB
 	private QueueProcessorEJBI queueprocEJB;
+	
+	@EJB
+	private DNDListEJBI dndEJB;
 
 
 	/**
@@ -177,6 +181,9 @@ public class USSDReceiver extends HttpServlet {
 				incomingsms.setOpco(opco);
 				logger.info(" >> processor = "+processor);
 				incomingsms.setMoprocessor(processor);
+				
+				dndEJB.removeFromDNDList(incomingsms.getMsisdn());
+				
 				messageID = datingBean.logMO(incomingsms).getId();
 				ro.setMessageId(messageID);
 				ro.setOpco(opco);

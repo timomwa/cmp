@@ -1511,17 +1511,41 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	public boolean deactivate(String msisdn) {
 		boolean success = false;
 		try{
+			
 			PersonDatingProfile profile = getProfile(msisdn);
+			
 			if(profile!=null){
-				Person person = profile.getPerson();
-				if(person!=null){
-					person.setActive(Boolean.FALSE);
-					person.setLoggedin(Boolean.FALSE);
-					person = saveOrUpdate(person);
+				
+				location_ejb.deleteProfileLocations(profile);
+				
+				try{
+					Query query = em.createQuery("delete from PersonDatingProfile where id=:id");
+					query.setParameter("id", profile.getId());
+					query.executeUpdate();
+				}catch(Exception exp){
+					logger.error(exp.getMessage(), exp);
 				}
-					
+				
+				try{
+					Query query2 = em.createQuery("delete from Person where id=:id");
+					query2.setParameter("id", profile.getPerson().getId());
+					query2.executeUpdate();
+				}catch(Exception exp){
+					logger.error(exp.getMessage(), exp);
+				}
+				
+				try{
+					Query query3 = em.createQuery("delete from Subscription where msisdn=:msisdn");
+					query3.setParameter("msisdn", profile.getPerson().getId());
+					query3.executeUpdate();
+				}catch(Exception exp){
+					logger.error(exp.getMessage(), exp);
+				}
+				
 			}
+			
 			success = true;
+			
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}
@@ -1611,7 +1635,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		List<PersonDatingProfile> persondatingprofiles = new ArrayList<PersonDatingProfile>();
 		try{
 			Query query = em.createQuery("from PersonDatingProfile dp WHERE dp.profileComplete = :profilecomplete"
-					+ " AND dp.person.loggedin=:loggedin AND dp not in "
+					+ " AND dp.person.loggedin=:loggedin AND dp.person.active=:actived AND dp not in "
 					+ "(SELECT pcl.profile from MatchesLog pcl WHERE "
 					+ "("
 					+ "date(pcl.timeStamp)=year(:todaysdate)"
@@ -1622,6 +1646,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ ")"
 					+ ")");
 			query.setParameter("profilecomplete", Boolean.TRUE);
+			query.setParameter("actived", Boolean.TRUE);
 			query.setParameter("loggedin", Boolean.TRUE);
 			query.setParameter("todaysdate", new Date());
 			query.setFirstResult(first);

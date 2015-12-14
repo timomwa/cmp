@@ -13,6 +13,7 @@ import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
+import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
@@ -37,6 +38,7 @@ public class SenderThreadWorker implements Runnable{
 	private Sender sender;
 	private OpcoSenderReceiverProfile opcosenderprofile;
 	private ConfigsEJBI configsEJB;
+	private DNDListEJBI dndEJB;
 	private QueueProcessorEJBI queueprocbean;
 	private Context context;
 	private boolean run = true;
@@ -61,6 +63,7 @@ public class SenderThreadWorker implements Runnable{
 	 	context = new InitialContext(props);
 	 	configsEJB =  (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");
 	 	queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
+	 	dndEJB  =  (DNDListEJBI) context.lookup("cmp/DNDListEJBImpl!com.pixelandtag.cmp.ejb.subscription.DNDListEJBI");
 	 	logger.info(getClass().getSimpleName()+": Successfully initialized EJB QueueProcessorEJBImpl !!");
 	}
 
@@ -93,7 +96,15 @@ public class SenderThreadWorker implements Runnable{
 						if(sms.getIn_outgoing_queue()==Boolean.FALSE)
 							sms = queueprocbean.saveOrUpdate(sms);//Lock out anyone.
 						
-						SenderResp response = sender.sendSMS(sms);
+						SenderResp response = null;
+						
+						if(dndEJB.isinDNDList(sms.getMsisdn())){
+							response = new SenderResp();
+							response.setSuccess(Boolean.TRUE);
+							sms.setTtl(-1L);
+						}else{
+							response = sender.sendSMS(sms);
+						}
 						
 						MessageStatus mtstatus;
 						
@@ -109,9 +120,10 @@ public class SenderThreadWorker implements Runnable{
 							sms.setIn_outgoing_queue(Boolean.FALSE);
 							sms.setRe_tries(sms.getRe_tries().longValue()+1L);
 							sms.setPriority(sms.getPriority()+1);//keep decreasing the priority if we have a problem sending this message.
+							
 							sms = queueprocbean.saveOrUpdate(sms);
 							
-							if(sms.getRe_tries().intValue()<=sms.getTtl())
+							if(sms.getRe_tries().intValue()<=sms.getTtl().intValue())
 								mtstatus = MessageStatus.FAILED_TEMPORARILY;
 							else
 								mtstatus = MessageStatus.FAILED_PERMANENTLY;

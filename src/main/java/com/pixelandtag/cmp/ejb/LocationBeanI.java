@@ -75,6 +75,12 @@ public interface LocationBeanI extends BaseEntityI {
 	 * @return
 	 */
 	public Location getLastKnownLocationWithNameUsingLac(Long locationId) ;
+
+	/**
+	 * 
+	 * @param profile
+	 */
+	public void deleteProfileLocations(PersonDatingProfile profile);
 	
 }
 

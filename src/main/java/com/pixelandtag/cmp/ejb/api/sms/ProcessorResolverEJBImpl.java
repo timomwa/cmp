@@ -29,6 +29,7 @@ import com.pixelandtag.cmp.dao.core.MessageExtraParamsDAOI;
 import com.pixelandtag.cmp.dao.core.MessageLogDAOI;
 import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
+import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.MessageExtraParams;
@@ -37,6 +38,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
+import com.pixelandtag.cmp.entities.subscription.DNDList;
 import com.pixelandtag.smssenders.JsonUtilI;
 import com.pixelandtag.smssenders.Receiver;
 import com.pixelandtag.subscription.dto.MediumType;
@@ -86,6 +88,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	
 	@EJB
 	private OpcoEJBI opcoEJB;
+	
+	@EJB
+	private DNDListEJBI dndEJB;
 	
 	
 	@Override
@@ -198,6 +203,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			throw new  ConfigurationException("shortcode not provided in request. Please provide this");
 		
 		
+		dndEJB.removeFromDNDList(msisdn);
 		
 		IncomingSMS incomingsms = new IncomingSMS();
 		incomingsms.setMediumType(type);
