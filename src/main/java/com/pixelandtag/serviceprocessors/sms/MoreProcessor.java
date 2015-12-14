@@ -635,7 +635,8 @@ public class MoreProcessor extends GenericServiceProcessor {
 					}*/
 							
 				}else{
-					msg = cmpbean.getMessage(DND_TG+MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId());
+					msg = cmpbean.getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId());
+					msg = DND_TG+msg;
 				}
 					
 				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+msg);
