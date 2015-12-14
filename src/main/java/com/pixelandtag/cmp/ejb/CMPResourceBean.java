@@ -273,8 +273,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		try{
 			
-			dndEJB.putInDNDList(msisdn);
-			
 			List<Subscription> subscriptions = subscriptionBean.listSubscriptions(msisdn);
 			
 			for(Subscription subscr : subscriptions){

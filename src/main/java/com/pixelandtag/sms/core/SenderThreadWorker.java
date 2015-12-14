@@ -9,6 +9,7 @@ import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
@@ -98,6 +99,14 @@ public class SenderThreadWorker implements Runnable{
 						
 						SenderResp response = null;
 						
+						boolean putindnd = false;
+						
+						if(sms.getSms()!=null && !sms.getSms().isEmpty()){
+							if(sms.getSms().trim().startsWith(GenericServiceProcessor.DND_TG))
+								putindnd = true;
+							sms.setSms(sms.getSms().replaceAll(GenericServiceProcessor.DND_TG, ""));
+						}
+						
 						if(dndEJB.isinDNDList(sms.getMsisdn())){
 							response = new SenderResp();
 							response.setSuccess(Boolean.TRUE);
@@ -105,6 +114,9 @@ public class SenderThreadWorker implements Runnable{
 						}else{
 							response = sender.sendSMS(sms);
 						}
+						
+						if(putindnd)
+							dndEJB.putInDNDList(sms.getMsisdn());
 						
 						MessageStatus mtstatus;
 						

@@ -66,6 +66,8 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String UNSUBSCRIBED_SINGLE_SERVICE_ADVICE = "UNSUBSCRIBED_SINGLE_SERVICE_ADVICE";
 	public static final String RM = "";//"RM<PRICE>\n";
 	public static final String PRICE_TG = "<PRICE>";
+	public static final String DND_TG = "####@";
+	
 	public static final String CHOSEN = "<CHOSEN>";
 	//private static final String COLON = ":";
 	public static final String SUBSCRIPTION_CONFIRMATION = "ON";

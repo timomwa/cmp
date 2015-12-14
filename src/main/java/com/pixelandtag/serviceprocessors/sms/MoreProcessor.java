@@ -584,7 +584,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 						//subscription.unsubscribeAll(conn,MSISDN,SubscriptionStatus.unsubscribed);
 						msg = cmpbean.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id, incomingsms.getOpco().getId());
 						msg = msg.replaceAll(SERVICENAME_TAG, cmpbean.getMessage(MessageType.ALL_SERVICES, language_id, incomingsms.getOpco().getId()));
-						outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+SPACE+msg);
+						outgoingsms.setSms(DND_TG+RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+SPACE+msg);
 					/*}else if(second_keyword!=null || stop_number>-1){
 						
 						if(second_keyword_is_digit){
