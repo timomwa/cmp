@@ -16,7 +16,6 @@ import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.web.beans.RequestObject;
 

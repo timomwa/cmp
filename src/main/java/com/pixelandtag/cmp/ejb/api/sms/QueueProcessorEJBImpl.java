@@ -125,6 +125,7 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				messagelog.setShortcode(sms.getShortcode());
 				messagelog.setSource(sms.getMediumType().name());
 				messagelog.setStatus(status.name());
+				messagelog.setRetryCount(sms.getRe_tries());
 			}
 			
 			messagelog = messagelogDAO.save(messagelog);

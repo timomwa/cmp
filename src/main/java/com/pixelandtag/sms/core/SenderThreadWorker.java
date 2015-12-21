@@ -101,8 +101,9 @@ public class SenderThreadWorker implements Runnable{
 						
 						if(dndEJB.isinDNDList(sms.getMsisdn())){
 							response = new SenderResp();
-							response.setSuccess(Boolean.TRUE);
-							sms.setTtl(-1L);
+							response.setSuccess(Boolean.FALSE);
+							sms.setTtl(-3L);
+							
 						}else{
 							
 							if(sms.getSms()!=null && !sms.getSms().isEmpty()){
@@ -133,7 +134,7 @@ public class SenderThreadWorker implements Runnable{
 							
 							sms = queueprocbean.saveOrUpdate(sms);
 							
-							if(sms.getRe_tries().intValue()<=sms.getTtl().intValue())
+							if(sms.getRe_tries().intValue()<=sms.getTtl().intValue() && sms.getTtl().compareTo(0L)>0)
 								mtstatus = MessageStatus.FAILED_TEMPORARILY;
 							else
 								mtstatus = MessageStatus.FAILED_PERMANENTLY;
