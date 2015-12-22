@@ -64,6 +64,8 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String UNSUBSCRIBED_ALL_ADVICE = "UNSUBSCRIBED_ALL_ADVICE";
 	public static final String UNKNOWN_KEYWORD_ADVICE = "UNKNOWN_KEYWORD_ADVICE";
 	public static final String UNSUBSCRIBED_SINGLE_SERVICE_ADVICE = "UNSUBSCRIBED_SINGLE_SERVICE_ADVICE";
+	public static final String ACCEPTED_STANDARD_CHAT_CHARGES = "ACCEPTED_STANDARD_CHAT_CHARGES";
+	public static final String PROMPT_USER_TO_ACCEPT_STANDARD_CHARGE = "PROMPT_USER_TO_ACCEPT_STANDARD_CHARGE";
 	public static final String RM = "";//"RM<PRICE>\n";
 	public static final String PRICE_TG = "<PRICE>";
 	public static final String DND_TG = "####@";

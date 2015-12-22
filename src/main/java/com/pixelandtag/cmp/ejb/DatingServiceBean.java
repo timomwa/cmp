@@ -27,6 +27,7 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
+import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -91,6 +92,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@EJB
 	private TimeStampSequenceEJBI timeStampEJB;
+	
+	@EJB
+	private FreeLoaderEJBI freeloaderEJB;
+	
+	
 	
 	private StopWatch watch = new StopWatch();
 	
@@ -1302,13 +1308,16 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		
 		
 			int language_id = 1;
+			
+			try{
+				freeloaderEJB.removeFromFreeloaderList(MSISDN);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+			}
 	
 			final Person person = getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
 			
-			logger.info( "\n\n\n\t\t ********************************************************* in DatingServiceBean... ::: incomingsms.getOpco() : "+incomingsms.getOpco());
-		
 			Billable billable = createBillable(incomingsms);
-			
 			
 			billable = charge(billable);
 			
@@ -1509,7 +1518,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	 */
 	@Override
 	public boolean deactivate(String msisdn) {
+		
 		boolean success = false;
+		
 		try{
 			
 			PersonDatingProfile profile = getProfile(msisdn);

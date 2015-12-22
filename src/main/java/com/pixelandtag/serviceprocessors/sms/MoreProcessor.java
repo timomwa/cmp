@@ -23,9 +23,12 @@ import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.Message;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.connections.DriverUtilities;
@@ -61,6 +64,9 @@ public class MoreProcessor extends GenericServiceProcessor {
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
 	private SubscriptionBeanI subscriptionBean;
+	private FreeLoaderEJBI freeloaderEJB;
+	private MessageEJBI messageEJB;
+	
     
     public void initEJB() throws NamingException{
     	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
@@ -75,7 +81,8 @@ public class MoreProcessor extends GenericServiceProcessor {
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 this.subscriptionBean = (SubscriptionBeanI) 
 		    		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
-		 
+		 freeloaderEJB =  (FreeLoaderEJBI) this.context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
+		 messageEJB =  (MessageEJBI) context.lookup("cmp/MessageEJBImpl!com.pixelandtag.cmp.ejb.MessageEJBI");
 		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
@@ -302,7 +309,19 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 			}else if(kw_is_digit){
 				
-				
+		
+				if(freeloaderEJB.isInFreeloaderList(MSISDN)){
+					
+					freeloaderEJB.removeFromFreeloaderList(MSISDN);
+					Message message = messageEJB.getMessage(GenericServiceProcessor.ACCEPTED_STANDARD_CHAT_CHARGES, Long.valueOf(language_id), incomingsms.getOpco().getId());
+					
+					if(message!=null){
+						outgoingsms.setSms(message.getMessage());
+						outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+						outgoingsms.setPrice(BigDecimal.ZERO);
+						return outgoingsms;
+					}
+				}
 				
 				mo_processor_logger.error("\n\n\nGUGAMUGA CURRENT MENU >> "+current_menu+"\n\n");
 				LinkedHashMap<Integer,MenuItem> submenu = current_menu.getSub_menus();

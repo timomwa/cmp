@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.sms.core.OutgoingQueueRouter;
@@ -42,6 +43,7 @@ public class SubscriptionRenewal extends  Thread {
 	public static int min_throttle_billing = 1000;
 	private static boolean adaptive_throttling  = false;
 	private static boolean we_ve_been_capped  = false;
+	private FreeLoaderEJBI freeloaderEJB;
 	
 	private static Context context = null;
 	
@@ -73,6 +75,8 @@ public class SubscriptionRenewal extends  Thread {
        		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		 subscriptio_nejb =  (SubscriptionBeanI) 
 		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
+		 freeloaderEJB =  (FreeLoaderEJBI) this.context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
+			
 	}
 	
 	
@@ -308,7 +312,8 @@ public class SubscriptionRenewal extends  Thread {
 				}
 			}
 			
-			subscriptions.offer(sub);
+			if(!freeloaderEJB.isInFreeloaderList(sub.getMsisdn()))//Don't bill them if they're in the freeloader list
+				subscriptions.offer(sub);
 
 			
 		}
