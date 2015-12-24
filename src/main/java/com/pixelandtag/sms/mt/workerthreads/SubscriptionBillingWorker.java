@@ -178,7 +178,7 @@ public class SubscriptionBillingWorker implements Runnable {
 					//if such a billable exists
 					if(billable!=null){
 						try{
-							logger.info(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
+							logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 							
 								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 									setBusy(true);
@@ -377,7 +377,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		Billable billable = null;
 	
 		
-		logger.info(" sub "+sub);
+		logger.debug(" sub "+sub);
 		Long sms_service_id = sub.getSms_service_id_fk();
 		
 		SMSService service = sms_serviceCache.get(sms_service_id);
@@ -393,7 +393,7 @@ public class SubscriptionBillingWorker implements Runnable {
 			}
 		}
 
-		logger.info(">>service :: "+service);
+		logger.debug(">>service :: "+service);
 		if (service != null) {
 			MOProcessor processor = service.getMoprocessor();
 			
