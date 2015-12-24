@@ -1,5 +1,7 @@
 package com.pixelandtag.sms.producerthreads;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -35,12 +37,14 @@ public class SubscriptionRenewal extends  Thread {
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
 	private int mandatory_throttle = 60112;
 	private int workers = 1;
+	private int tps = 5;
 	private int billables_per_batch = 1000;
 	private Properties mtsenderprops;
 	private int idleWorkers;
 	public static int max_throttle_billing = 60000;
 	private static boolean enable_biller_random_throttling=false;
 	public static int min_throttle_billing = 1000;
+	public static int throttle;
 	private static boolean adaptive_throttling  = false;
 	private static boolean we_ve_been_capped  = false;
 	private FreeLoaderEJBI freeloaderEJB;
@@ -83,6 +87,12 @@ public class SubscriptionRenewal extends  Thread {
 	private void init() {
 		
 		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
+	
+		try{
+			tps =  Integer.valueOf(mtsenderprops.getProperty("tps"));
+		}catch(NumberFormatException nfe){
+			logger.warn(nfe.getMessage(), nfe);
+		}
 		
 		try{
 			enable_biller_random_throttling = mtsenderprops.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
@@ -127,6 +137,8 @@ public class SubscriptionRenewal extends  Thread {
 
 		semaphore = new Semaphore(1, true);
 		serialsemaphore = new Semaphore(1, true);
+		
+		throttle = BigDecimal.valueOf(1000).divide(BigDecimal.valueOf(tps), 3, RoundingMode.HALF_EVEN).intValue();
 		
 	}
 
@@ -181,9 +193,12 @@ public class SubscriptionRenewal extends  Thread {
 		try{
 			
 			
-			logger.debug(">>Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
+			
+			logger.debug(">>throttle::: "+throttle+", Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!
+			
+			Thread.sleep(throttle);
 			
 			logger.debug(">>Threads waiting to retrieve message after: " + semaphore.getQueueLength() );
 			if(subscriptions.size()>0)
