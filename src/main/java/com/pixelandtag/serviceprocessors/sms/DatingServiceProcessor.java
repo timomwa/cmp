@@ -62,7 +62,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private InitialContext context;
 	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = true;
-	private boolean allow_multiple_plans = true;
+	private boolean allow_multiple_plans = false;
 	
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
@@ -248,7 +248,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
-				if(!subvalid || allow_multiple_plans  ){
+				if(!subvalid ||  allow_multiple_plans ){
 					
 					try{
 						outgoingsms = datingBean.renewSubscription(incomingsms,smsservice0.getId(),AlterationMethod.self_via_sms, incomingsms.getOpco()); 
