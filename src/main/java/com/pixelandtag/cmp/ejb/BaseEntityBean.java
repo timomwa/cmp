@@ -269,17 +269,17 @@ public class BaseEntityBean implements BaseEntityI {
 		if(msisdn==null || services==null || services.size()<1 )
 			return false;
 		
+		StringBuffer sb = new StringBuffer();
 		for(String kwd: services){
 			OpcoSMSService opcosmsservice = opcosmsserviceejb.getOpcoSMSService(kwd, opco);
 			SMSService smsservice = opcosmsservice.getSmsservice();
 			boolean subvalid = subscriptionEjb.subscriptionValid(msisdn, smsservice.getId());
-			StringBuffer sb = new StringBuffer();
 			sb.append("\n\n\t\t opcosmsservice.getPrice():: "+opcosmsservice.getPrice()+" opcosmsservice : "+opcosmsservice.getId());
-			sb.append("\n\t\t subvalid :: "+subvalid+" msisdn: "+msisdn);
+			sb.append("\n\t\t subvalid :: "+subvalid+" msisdn: "+msisdn+" cmd:"+smsservice.getCmd());
 			sb.append("\n\t\t (subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0) :: "+((subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)));
 			logger.info(sb.toString());
 			sb.setLength(0);
-			if(subvalid  || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0){
+			if(subvalid){//  || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0){
 				return true;
 			}
 		}

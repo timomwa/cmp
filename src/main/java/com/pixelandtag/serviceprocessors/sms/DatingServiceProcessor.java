@@ -248,7 +248,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
-				if(!subvalid || allow_multiple_plans  ){
+				if(!subvalid && allow_multiple_plans  ){
 					
 					try{
 						outgoingsms = datingBean.renewSubscription(incomingsms,smsservice0.getId(),AlterationMethod.self_via_sms, incomingsms.getOpco()); 
