@@ -16,6 +16,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
@@ -199,14 +200,29 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 					logger.warn("No subscription wit sms_service_id_fk="+smsService.getId()+" and msisdn = "+msisdn);
 				}
 				
+				operatorCountry = em.merge(operatorCountry);
+				Date todaysdate = new Date();
+				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(todaysdate, "America/New_York", operatorCountry.getCountry().getTimeZone());//"Africa/Nairobi");
+				
 				if(sub==null){
+				
 					sub = new Subscription();
 					sub.setMsisdn(msisdn);
 					sub.setSms_service_id_fk(smsService.getId());
+				
+				}else{
+				
+					DateTime expiryDate = new DateTime(sub.getExpiryDate());
+					DateTime timeNow = new DateTime(nowInNairobiTz); 
+					
+					if(expiryDate.compareTo(timeNow)>=0){
+						logger.info("\n\t\tNot yet epired. We extend current subscription\n\n");
+						nowInNairobiTz = sub.getExpiryDate();
+					}
 				}
-				operatorCountry = em.merge(operatorCountry);
+				
 				sub.setOpco(operatorCountry);
-				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+				
 				qry = em.createNativeQuery("select DATE_ADD(:curdate_local, INTERVAL :sub_length "+smsService.getSubscription_length_time_unit()+") ");
 				qry.setParameter("curdate_local", nowInNairobiTz);
 				qry.setParameter("sub_length", smsService.getSubscription_length());
