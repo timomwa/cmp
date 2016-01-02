@@ -62,7 +62,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private InitialContext context;
 	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = true;
-	private boolean allow_multiple_plans = false;
+	private boolean allow_multiple_plans = true;
 	
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
