@@ -37,6 +37,7 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
@@ -45,6 +46,7 @@ import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.Message;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
@@ -108,6 +110,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private SubscriptionBeanI subscriptionBean;
+
+
+	@EJB
+	private OpcoSMSServiceEJBI opcosmserviceEJB;
 	
 	
 	@EJB
@@ -2434,7 +2440,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 								int serviceid = chosenMenu==null ? menu_from_session.getService_id() : chosenMenu.getService_id() ;
 								int parent_level_id = chosenMenu==null ? menu_from_session.getParent_level_id() : chosenMenu.getId() ;
 								int menuid_ = chosenMenu==null ? menu_from_session.getMenu_id() : chosenMenu.getMenu_id() ;
-								SMSService smsserv = em.find(SMSService.class, Long.valueOf(serviceid+""));
+								
+								
+								OpcoSMSService smsservice  = opcosmserviceEJB.getOpcoSMSService(Long.valueOf(serviceid), req.getOpco());
+								SMSService smsserv = smsservice.getSmsservice();//em.find(SMSService.class, Long.valueOf(serviceid+""));
 								
 								logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid:: "+serviceid+ " CMD :"+(smsserv!=null ? smsserv.getCmd() : null));
 								
@@ -2457,30 +2466,44 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									
 								}else{
 									
-									MOProcessor proc = smsserv.getMoprocessor();
 									
-									IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-									incomingsms.setMsisdn(MSISDN);
-									incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
-									incomingsms.setSms(smsserv.getCmd());
-									incomingsms.setShortcode(proc.getShortcode());
-									incomingsms.setPrice(smsserv.getPrice());
-									incomingsms.setCmp_tx_id(generateNextTxId());
-									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
-									incomingsms.setServiceid(smsserv.getId());
-									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
-									incomingsms.setId(req.getMessageId());
-									incomingsms.setMoprocessor(proc);
-									incomingsms.setOpco(req.getOpco());
-									logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
-									
-									logMO(incomingsms);
-									
-									if(smsserv.getCmd().equals("FIND")){
-										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+									if(menuid_==2){
+										
+										MOProcessor proc = smsserv.getMoprocessor();
+										
+										IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+										incomingsms.setMsisdn(MSISDN);
+										incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
+										incomingsms.setSms(smsserv.getCmd());
+										incomingsms.setShortcode(proc.getShortcode());
+										incomingsms.setPrice(smsserv.getPrice());
+										incomingsms.setCmp_tx_id(generateNextTxId());
+										incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
+										incomingsms.setServiceid(smsserv.getId());
+										incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
+										incomingsms.setId(req.getMessageId());
+										incomingsms.setMoprocessor(proc);
+										incomingsms.setOpco(req.getOpco());
+										logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
+										
+										logMO(incomingsms);
+										
+										if(smsserv.getCmd().equals("FIND")){
+											resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+										}else{
+											resp = "Request received and is being processed.";
+										}
 									}else{
-										resp = "Request received and is being processed.";
+										
+										resp = "Select subscription bundle\n "
+											 + "1. 5/- per day\n "
+											 + "2. 15/- per week\n "
+											 + "3. 30/- per month\n "
+											 + "Reply with number to select bundle.0 to go back";
+										
 									}
+									
+									
 								}
 								updateSession(language_id,MSISDN, parent_level_id,sess,menuid_,req.getSessionid());//update session to upper menu.
 							}

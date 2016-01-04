@@ -1530,6 +1530,14 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				location_ejb.deleteProfileLocations(profile);
 				
 				try{
+					Query query = em.createQuery("delete from ProfileCompletionReminderLog where profile=:profile");
+					query.setParameter("profile", profile);
+					query.executeUpdate();
+				}catch(Exception exp){
+					logger.error(exp.getMessage(), exp);
+				}
+				
+				try{
 					Query query = em.createQuery("delete from PersonDatingProfile where id=:id");
 					query.setParameter("id", profile.getId());
 					query.executeUpdate();

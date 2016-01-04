@@ -76,6 +76,10 @@ public class OpcoSMSService implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private BillingType billingType;
 	
+	//Double confirm before subscribing someone
+	@Column(name="doubleconfirm")
+	private Boolean doubleconfirm;
+	
 	@PreUpdate
 	@PrePersist
 	public void update(){
@@ -83,6 +87,8 @@ public class OpcoSMSService implements Serializable {
 			price = BigDecimal.ZERO;
 		if(billingType==null)
 			billingType = BillingType.NONE;
+		if(doubleconfirm==null)
+			doubleconfirm = Boolean.FALSE;
 	}
 
 	public Long getId() {
@@ -133,12 +139,20 @@ public class OpcoSMSService implements Serializable {
 		this.billingType = billingType;
 	}
 
+	public Boolean getDoubleconfirm() {
+		return doubleconfirm!=null ? doubleconfirm : Boolean.FALSE;
+	}
+
+	public void setDoubleconfirm(Boolean doubleconfirm) {
+		this.doubleconfirm = doubleconfirm;
+	}
+
 	@Override
 	public String toString() {
 		return "OpcoSMSService [id=" + id + ",\n smsservice=" + smsservice
 				+ ",\n opco=" + opco + ",\n moprocessor=" + moprocessor
 				+ ",\n price=" + price + ",\n billingType=" + billingType
-				+ "]";
+				+ ",\n doubleconfirm=" + doubleconfirm + "]";
 	}
 	
 	
