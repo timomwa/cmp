@@ -158,6 +158,17 @@ public class USSDSession  implements Serializable{
 	public void setMenu_item(MenuItem menu_item) {
 		this.menu_item = menu_item;
 	}
+
+
+
+	@Override
+	public String toString() {
+		return "USSDSession [menu_item=" + menu_item + ",\n id=" + id
+				+ ",\n msisdn=" + msisdn + ",\n smsmenu_levels_id_fk="
+				+ smsmenu_levels_id_fk + ",\n language_id=" + language_id
+				+ ",\n timeStamp=" + timeStamp + ",\n menuid=" + menuid
+				+ ",\n sessionId=" + sessionId + "]";
+	}
 	
 	
 	
