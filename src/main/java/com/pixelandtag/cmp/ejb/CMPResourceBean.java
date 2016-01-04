@@ -2184,6 +2184,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					logger.info("\t\t KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 					logger.info("\t\t MSG ::::::::::::::::::::::::: ["+msg+"]");
 					logger.info("\t\t THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
+					logger.info("\t\t req.getMenuid() ::::::::::::::::::::::::: ["+req.getMenuid()+"]");
 					
 					USSDSession sess = getSession(req.getSessionid(),MSISDN);
 					
@@ -2191,7 +2192,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					
 					int language_id = 1;// default language is always 1 
 					int menuid = req.getMenuid()==-1 ? (req.getMediumType()==MediumType.ussd ? 2 : 1) : req.getMenuid();//first menu is always default
-					
+					logger.info("\t\t menuid ::::::::::::::::::::::::: ["+menuid+"]");
 					if(sess!=null){
 						smsmenu_level_id_fk = sess.getSmsmenu_levels_id_fk().intValue();
 						language_id = sess.getLanguage_id().intValue();
