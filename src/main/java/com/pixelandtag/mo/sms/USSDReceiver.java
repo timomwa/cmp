@@ -155,8 +155,10 @@ public class USSDReceiver extends HttpServlet {
 				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+menuid);
 				String tx_id = cmpBean.generateNextTxId();
 				final RequestObject ro = new RequestObject(req,tx_id,false);
+				OperatorCountry opco = configsEJB.getOperatorByIpAddress(req.getRemoteAddr());
 				ro.setMediumType(MediumType.ussd);
 				ro.setMenuid(Integer.valueOf(menuid));
+				ro.setOpco(opco);
 				response = cmpBean.processUSSD(ro);
 			}else{
 				response = handleGeneralQuery(req);
