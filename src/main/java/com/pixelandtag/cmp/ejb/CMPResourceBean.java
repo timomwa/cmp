@@ -2338,7 +2338,6 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										
 										resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
 										
-										return resp;
 										
 									}else if(smsserv.getCmd().equals("FIND")){
 										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
@@ -2349,33 +2348,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									clearUssdSesion(sess);
 									//updateSession(language_id,MSISDN, -1,sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 								
-									
+									return resp;
 								}
-							}else{
-								
-								SMSService smsserv = em.find(SMSService.class, Long.valueOf(menu_from_session.getService_id()+""));
-								MOProcessor proc = smsserv.getMoprocessor();
-								
-								IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
-								incomingsms.setMsisdn(MSISDN);
-								incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
-								incomingsms.setSms(smsserv.getCmd());
-								incomingsms.setShortcode(proc.getShortcode());
-								incomingsms.setPrice(smsserv.getPrice());
-								incomingsms.setCmp_tx_id(generateNextTxId());
-								incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
-								incomingsms.setServiceid( Long.valueOf(smsserv.getId().intValue()));
-								incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
-								incomingsms.setOpco(req.getOpco());
-								logger.info(">>>>>>>>>>>> req: "+req);
-								logger.info(">>>>>>>>>>>> req.getMessageId(): "+req.getMessageId());
-								incomingsms.setId(req.getMessageId());
-								incomingsms.setMoprocessor(smsserv.getMoprocessor());
-								
-								
-								logMO(incomingsms); 
-								
-								resp = "Request received and is being processed.";
 							}/*else{
 								sess.setSessionId(req.getSessionid());
 								clearUssdSesion(sess);
