@@ -158,6 +158,9 @@ public class USSDReceiver extends HttpServlet {
 			if(sess!=null){
 				menuid_ = sess.getMenuid()!=null ? sess.getMenuid().intValue() : -1;
 			}
+			logger.info("\n\n\n\t\t    sess = "+sess+"     \n\n "
+					+ "\n\n\n\t\t    menuid_ = "+menuid_+"     \n\n "
+					+ "\n\n\n\t\t    msg = "+msg+"     \n\n");
 			if(msg.contains("*") || (menuid_ != 2 && menuid_ > -1) ){
 				
 				String menuid = msg.split("[\\*]")[1];
