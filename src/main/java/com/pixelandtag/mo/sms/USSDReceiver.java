@@ -162,7 +162,7 @@ public class USSDReceiver extends HttpServlet {
 					+ "\n\n\n\t\t    menuid_ = "+menuid_
 					+ "\n\n\n\t\t    msg = "+msg
 					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());
-			if(msg.contains("*") ){// || (menuid_!=2 && menuid_>-1) ){
+			if(msg.contains("*")){//  || (menuid_!=2 && menuid_>-1) ){
 				
 				String menuid = msg.split("[\\*]")[1];
 				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+menuid);

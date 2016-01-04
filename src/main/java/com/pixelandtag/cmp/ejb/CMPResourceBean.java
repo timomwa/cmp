@@ -2226,7 +2226,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					
 					if( KEYWORD.contains("*") && req.getMediumType()==MediumType.ussd ){
 					
-						updateSession(language_id,MSISDN, menu_from_session.getMenu_id(),sess,menu_from_session.getParent_level_id(),req.getSessionid());//update session to upper menu.
+						updateSession(language_id,MSISDN, menu_from_session.getParent_level_id(),sess,menu_from_session.getMenu_id(),req.getSessionid());//update session to upper menu.
 						resp = menu_from_session.enumerate()+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, req.getOpco().getId());
 						return resp;
 						
@@ -2899,7 +2899,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		USSDSession sess = null;
 		try{
 			Query qry = em.createQuery("from USSDSession s WHERE s.sessionId=:sessionId AND s.msisdn=:msisdn order by s.timeStamp desc");
-			qry.setParameter("sessionId", sessionid);
+			//qry.setParameter("sessionId", sessionid);
 			qry.setParameter("msisdn", msisdn);
 			qry.setFirstResult(0);
 			qry.setMaxResults(1);
