@@ -2190,7 +2190,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					int smsmenu_level_id_fk = -1;
 					
 					int language_id = 1;// default language is always 1 
-					int menuid = req.getMediumType()==MediumType.ussd ? 2 : 1;//first menu is always default
+					int menuid = req.getMenuid()==-1 ? (req.getMediumType()==MediumType.ussd ? 2 : 1) : req.getMenuid();//first menu is always default
 					
 					if(sess!=null){
 						smsmenu_level_id_fk = sess.getSmsmenu_levels_id_fk().intValue();

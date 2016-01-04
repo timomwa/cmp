@@ -38,6 +38,7 @@ public class RequestObject implements Serializable{
 	private BigInteger sessionid = null;
 	private MediumType mediumType;
 	private OperatorCountry opco;
+	private int menuid;
 	
 	public RequestObject(IncomingSMS incomingsms) throws Exception {
 		
@@ -191,6 +192,7 @@ public class RequestObject implements Serializable{
 		String telcoid, msisdn, msg, keyword,testBalance,tripWire = null, litmus = null;
 		int price;
 		Long serviceid=-1L;
+		menuid = -1;
 		telcoid = null;
 		msisdn = null;
 		msg = "";
@@ -455,6 +457,18 @@ public class RequestObject implements Serializable{
 
 	public void setOpco(OperatorCountry opco) {
 		this.opco = opco;
+	}
+
+
+
+	public int getMenuid() {
+		return menuid;
+	}
+
+
+
+	public void setMenuid(int menuid) {
+		this.menuid = menuid;
 	}
 
 	
