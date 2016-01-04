@@ -880,7 +880,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				menuItem.setParent_level_id(parent_level_id);
 				menuItem.setLanguage_id(language_id);
 				menuItem.setSub_menus(topMenus);
-			
+				menuItem.setMenu_id(menuid);
 		
 		}catch(javax.persistence.NoResultException ex){
 			logger.error(ex.getMessage());
