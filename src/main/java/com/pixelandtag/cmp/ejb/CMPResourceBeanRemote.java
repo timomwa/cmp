@@ -220,6 +220,9 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	public String getBillingStats(String fromTz, String toTz) throws JSONException;
 
 	public String getCurrentSubDistribution() throws  Exception;
+	
+	
+	public USSDSession getSession(BigInteger sessionid, String msisdn);
 
 	
 	

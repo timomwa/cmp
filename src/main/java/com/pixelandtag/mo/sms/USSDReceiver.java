@@ -38,6 +38,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.sms.producerthreads.USSDSession;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.util.StopWatch;
 import com.pixelandtag.web.beans.RequestObject;
@@ -149,13 +150,18 @@ public class USSDReceiver extends HttpServlet {
 		
 		try{
 			
-			if(msg.contains("*")){
+			String tx_id = cmpBean.generateNextTxId();
+			final RequestObject ro = new RequestObject(req,tx_id,false);
+			OperatorCountry opco = configsEJB.getOperatorByIpAddress(req.getRemoteAddr());
+			USSDSession sess = cmpBean.getSession(ro.getSessionid(),ro.getMsisdn());
+			int menuid_ = -1;
+			if(sess!=null){
+				menuid_ = sess.getMenuid()!=null ? sess.getMenuid().intValue() : -1;
+			}
+			if(msg.contains("*") || menuid_ >-1){
 				
 				String menuid = msg.split("[\\*]")[1];
 				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+menuid);
-				String tx_id = cmpBean.generateNextTxId();
-				final RequestObject ro = new RequestObject(req,tx_id,false);
-				OperatorCountry opco = configsEJB.getOperatorByIpAddress(req.getRemoteAddr());
 				ro.setMediumType(MediumType.ussd);
 				ro.setMenuid(Integer.valueOf(menuid));
 				ro.setOpco(opco);
