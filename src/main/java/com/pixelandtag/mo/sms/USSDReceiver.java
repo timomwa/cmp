@@ -167,8 +167,9 @@ public class USSDReceiver extends HttpServlet {
 				if(msg.contains("*") ){
 					String menuid = msg.split("[\\*]")[1];
 					ro.setMenuid(Integer.valueOf(menuid));
+				}else{
+					ro.setMenuid(menuid_);
 				}
-				ro.setMenuid(menuid_);
 				
 				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
 				
