@@ -164,10 +164,15 @@ public class USSDReceiver extends HttpServlet {
 					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());
 			if(msg.contains("*")  || (menuid_!=2 && menuid_>-1) ){
 				
-				String menuid = msg.split("[\\*]")[1];
-				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+menuid);
+				if(msg.contains("*") ){
+					String menuid = msg.split("[\\*]")[1];
+					ro.setMenuid(Integer.valueOf(menuid));
+				}
+				ro.setMenuid(menuid_);
+				
+				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
+				
 				ro.setMediumType(MediumType.ussd);
-				ro.setMenuid(Integer.valueOf(menuid));
 				ro.setOpco(opco);
 				response = cmpBean.processUSSD(ro);
 			}else{
