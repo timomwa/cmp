@@ -2898,8 +2898,8 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	public USSDSession getSession(BigInteger sessionid, String msisdn) {
 		USSDSession sess = null;
 		try{
-			Query qry = em.createQuery("from USSDSession s WHERE s.msisdn=:msisdn order by s.timeStamp desc");//s.sessionId=:sessionId AND
-			//qry.setParameter("sessionId", sessionid);
+			Query qry = em.createQuery("from USSDSession s WHERE s.sessionId=:sessionId AND s.msisdn=:msisdn order by s.timeStamp desc");//
+			qry.setParameter("sessionId", sessionid);
 			qry.setParameter("msisdn", msisdn);
 			qry.setFirstResult(0);
 			qry.setMaxResults(1);
