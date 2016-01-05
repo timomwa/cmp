@@ -49,6 +49,7 @@ public Logger logger = Logger.getLogger(getClass());
 	
 	@Override
 	public void dequeue(DoubleConfirmationQueue doubleConfirmationQueue) throws Exception{
+		doubleConfirmationQueue = em.merge(doubleConfirmationQueue);
 		doubleconfirmationQueueDAO.delete(doubleConfirmationQueue);
 	}
 }
