@@ -2524,25 +2524,26 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 											
 											DoubleConfirmationQueue doubleConfirmationQueue = doubleconfirmationEJB.getQueue(MSISDN,smsservice);
 											
-											if(subscr.getSubscription_status()==SubscriptionStatus.waiting_confirmation){
-												
-												if(KEYWORD.equals("1")  ){
-													resp = "Purchase daily bundle for 5/- ? Confirm";
-												}
-												if(KEYWORD.equals("2")  ){
-													resp = "Purchase weekly bundle for 15/- ? Confirm";
-												}
-												if(KEYWORD.equals("3")  ){
-													resp = "Purchase monthly bundle for 30/- ? Confirm";
-												}
-												
-												resp += "\n1. Accept"
-												       +"\n2. Decline";
-												
-												if(doubleConfirmationQueue==null)
+											if(doubleConfirmationQueue==null){
+												if(subscr.getSubscription_status()==SubscriptionStatus.waiting_confirmation){
+													
+													if(KEYWORD.equals("1")  ){
+														resp = "Purchase daily bundle for 5/- ? Confirm";
+													}
+													if(KEYWORD.equals("2")  ){
+														resp = "Purchase weekly bundle for 15/- ? Confirm";
+													}
+													if(KEYWORD.equals("3")  ){
+														resp = "Purchase monthly bundle for 30/- ? Confirm";
+													}
+													
+													resp += "\n1. Accept"
+													       +"\n2. Decline";
+													
 													doubleconfirmationEJB.enqueue(MSISDN,smsservice);
-												
-												return resp;
+													
+													return resp;
+												}
 											}
 											
 											
