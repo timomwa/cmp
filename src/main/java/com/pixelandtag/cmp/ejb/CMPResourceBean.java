@@ -39,6 +39,8 @@ import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
+import com.pixelandtag.cmp.ejb.subscription.DoubleConfirmationQueueEJBI;
+import com.pixelandtag.cmp.ejb.subscription.SMSServiceBundleEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
 import com.pixelandtag.cmp.entities.ClassStatus;
@@ -52,6 +54,7 @@ import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.SMSServiceMetaData;
+import com.pixelandtag.cmp.entities.subscription.DoubleConfirmationQueue;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
@@ -87,6 +90,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	private DatingServiceI datingserviceEJB;
 	
 	@EJB
+	private SMSServiceBundleEJBI smsserviceBundleEJB;
+	
+	@EJB
 	private DNDListEJBI dndEJB;
 	
 	private Random rand = new Random();
@@ -114,6 +120,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 
 	@EJB
 	private OpcoSMSServiceEJBI opcosmserviceEJB;
+	
+	@EJB
+	private SubscriptionBeanI subscriptionEJB;
+	
+	@EJB
+	private DoubleConfirmationQueueEJBI doubleconfirmationEJB;
 	
 	
 	@EJB
@@ -2493,13 +2505,105 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										}else{
 											resp = "Request received and is being processed.";
 										}
+										
 									}else{
 										
-										resp = "Select subscription bundle\n "
-											 + "1. 5/- per day\n "
-											 + "2. 15/- per week\n "
-											 + "3. 30/- per month\n "
-											 + "Reply with number to select bundle.0 to go back";
+										Subscription subscr = subscriptionEJB.getSubscription(MSISDN, smsserv.getId());
+										
+										if(subscr==null){
+											
+											resp = "Select bundle\n"
+												 + "1. 5/- per day\n"
+												 + "2. 15/- per week\n"
+												 + "3. 30/- per month\n"
+												 + "Reply with number to select bundle.0 to go back";
+											
+											subscr = subscriptionEJB.subscribe(MSISDN, smsserv.getId(), MediumType.ussd, AlterationMethod.self_via_ussd, SubscriptionStatus.waiting_confirmation, req.getOpco());
+										
+										}else{
+											
+											DoubleConfirmationQueue doubleConfirmationQueue = doubleconfirmationEJB.getQueue(MSISDN,smsservice);
+											
+											if(subscr.getSubscription_status()==SubscriptionStatus.waiting_confirmation){
+												
+												if(KEYWORD.equals("1")  ){
+													resp = "Purchase daily bundle for 5/- ? Confirm";
+												}
+												if(KEYWORD.equals("2")  ){
+													resp = "Purchase weekly bundle for 15/- ? Confirm";
+												}
+												if(KEYWORD.equals("3")  ){
+													resp = "Purchase monthly bundle for 30/- ? Confirm";
+												}
+												
+												resp += "\n1. Accept"
+												       +"\n2. Decline";
+												
+												if(doubleConfirmationQueue==null)
+													doubleconfirmationEJB.enqueue(MSISDN,smsservice);
+												
+												return resp;
+											}
+											
+											
+											if(doubleConfirmationQueue!=null){//They need now to confirm somethig
+												
+												smsservice = doubleConfirmationQueue.getOpcosmsservice();
+												smsserv = smsservice.getSmsservice();
+												
+												if(KEYWORD.equals("1") || KEYWORD.equalsIgnoreCase("accept")){
+													
+													
+													MOProcessor proc = smsserv.getMoprocessor();
+													
+													IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+													incomingsms.setMsisdn(MSISDN);
+													incomingsms.setServiceid(Long.valueOf(menu_from_session.getService_id()));
+													incomingsms.setSms(smsserv.getCmd());
+													incomingsms.setShortcode(proc.getShortcode());
+													incomingsms.setPrice(smsserv.getPrice());
+													incomingsms.setCmp_tx_id(generateNextTxId());
+													incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
+													incomingsms.setServiceid(smsserv.getId());
+													incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
+													incomingsms.setId(req.getMessageId());
+													incomingsms.setMoprocessor(proc);
+													incomingsms.setOpco(req.getOpco());
+													logger.info("\n\n\n\n\n 2::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
+													
+													logMO(incomingsms);
+													
+													Subscription subscription = subscriptionEJB.getSubscription(MSISDN, smsserv.getId());
+													
+													subscriptionEJB.updateSubscription(subscription.getId().intValue(), SubscriptionStatus.confirmed, AlterationMethod.self_via_ussd);
+													
+													resp = "Request to subscribe to "
+															+smsserv.getService_name()+" Received.";
+													
+													doubleconfirmationEJB.dequeue(doubleConfirmationQueue);
+													
+												}else if(KEYWORD.equals("2") || KEYWORD.equalsIgnoreCase("decline")){
+													
+													resp = "Request cancelled.";
+													
+													doubleconfirmationEJB.dequeue(doubleConfirmationQueue);
+												
+												}else{
+													
+													resp = "Please confirm subscription to "+smsserv.getService_name()
+															 +"\n1. Accept"
+														     +"\n2. Decline"
+														     +"\nReply with either 1 or 2";
+												}
+
+												
+											}
+										
+										}
+										
+										//subscribe(MSISDN, smsserv, chosenMenu.getId(), AlterationMethod.self_via_ussd);
+										
+										//create subscription record - status - pending confirmation
 										
 									}
 									

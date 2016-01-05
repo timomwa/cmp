@@ -46,9 +46,8 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	@EJB
 	private SubscriptionRenewalNotificationI subrenewalnotificationEJB;
 	
-	
-	
-	
+	@EJB
+	private SMSServiceBundleEJBI smsserviceBundleEJB;
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
@@ -83,6 +82,40 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	}
 	
 
+	@Override
+	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method,  SubscriptionStatus status, OperatorCountry opco) { 
+		
+		Subscription subscription = null;
+		
+		try{
+			subscription = new Subscription();
+			subscription.setMsisdn(msisdn);
+			subscription.setSms_service_id_fk(service_id);
+			subscription.setSubActive(Boolean.TRUE);
+			subscription.setSmsmenu_levels_id_fk(-1);
+			subscription.setRenewal_count(0L);
+			subscription.setQueue_status(0L);
+			subscription.setRequest_medium(medium);
+			subscription.setOpco(opco);
+			subscription.setSubscription_status(status);
+			
+			
+			
+			subscription = em.merge(subscription);
+			
+			SubscriptionHistory sh = new SubscriptionHistory();
+			sh.setEvent(  (status ==  SubscriptionStatus.confirmed && subscription.getRenewal_count()<=0) ? SubscriptionEvent.subscrition.getCode() : 
+				(status ==  SubscriptionStatus.unsubscribed ? SubscriptionEvent.unsubscrition.getCode() : SubscriptionEvent.renewal.getCode() ));
+			sh.setMsisdn(msisdn);
+			sh.setService_id(service_id);
+			sh.setTimeStamp(new Date());
+			sh.setAlteration_method(method);
+			sh = em.merge(sh);
+		}catch(Exception e){
+			logger.error(e.getMessage());
+		}
+		return subscription;
+	}
 	
 	@Override
 	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method,  OperatorCountry opco) { 
@@ -102,6 +135,14 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			
 			
 			subscription = em.merge(subscription);
+			
+			SubscriptionHistory sh = new SubscriptionHistory();
+			sh.setEvent( SubscriptionEvent.subscrition.getCode() );
+			sh.setMsisdn(msisdn);
+			sh.setService_id(service_id);
+			sh.setTimeStamp(new Date());
+			sh.setAlteration_method(method);
+			sh = em.merge(sh);
 		}catch(Exception e){
 			logger.error(e.getMessage());
 		}

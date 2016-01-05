@@ -185,5 +185,18 @@ public interface SubscriptionBeanI {
 	 * @throws Exception
 	 */
 	public boolean hasSubscribedToAnyOfTheseServices(String msisdn, List<String> keywords) throws Exception;
+	
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param service_id
+	 * @param medium
+	 * @param method
+	 * @param status
+	 * @param opco
+	 * @return
+	 */
+	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method,  SubscriptionStatus status, OperatorCountry opco);
 
 }
