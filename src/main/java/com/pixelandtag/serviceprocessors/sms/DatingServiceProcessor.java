@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -224,11 +225,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					sb.append("Location : ").append(locationName).append("\n");
 					sb.append("Gender : ").append(match.getGender()).append("\n");
 					String msg = datingBean.getMessage(DatingMessages.MATCH_FOUND, language_id, incomingsms.getOpco().getId());
-					msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
-					msg = msg.replaceAll(GENDER_PRONOUN_TAG, gender_pronoun);
-					msg = msg.replaceAll(GENDER_PRONOUN_TAG2, gender_pronoun2);
-					msg = msg.replaceAll(DEST_USERNAME_TAG, match.getUsername());
-					msg = msg.replaceAll(PROFILE_TAG, sb.toString());
+					msg = msg.replaceAll(USERNAME_TAG, Matcher.quoteReplacement( profile.getUsername() ));
+					msg = msg.replaceAll(GENDER_PRONOUN_TAG, Matcher.quoteReplacement( gender_pronoun ) );
+					msg = msg.replaceAll(GENDER_PRONOUN_TAG2, Matcher.quoteReplacement( gender_pronoun2 ) );
+					msg = msg.replaceAll(DEST_USERNAME_TAG, Matcher.quoteReplacement( match.getUsername() ) );
+					msg = msg.replaceAll(PROFILE_TAG, Matcher.quoteReplacement( sb.toString() ) );
 					outgoingsms.setSms(msg);
 					
 				}
@@ -303,15 +304,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						if(dest!=null){//if they were chatting with someone.
 							msg = datingBean.getMessage(DatingMessages.RENEW_CHAT_SUBSCRIPTION, lang, incomingsms.getOpco().getId());
 							logger.info("\n\n\n\t1. msg::::>>> "+msg);
-							msg = msg.replaceAll(DEST_USERNAME_TAG,  dest.getUsername());
+							msg = msg.replaceAll(DEST_USERNAME_TAG,  Matcher.quoteReplacement( dest.getUsername()) );
 							
 						}else{//else generic renew message
 							msg  = datingBean.getMessage(DatingMessages.RENEW_SUBSCRIPTION, lang, incomingsms.getOpco().getId());
 							logger.info("\n\n\n\t2. msg::::>>> "+msg);
 						}
 						logger.info("\n\n\n\tmsg::::>>> "+msg);
-						msg = msg.replaceAll(USERNAME_TAG,  profile.getUsername());
-						msg = msg.replaceAll(SERVICENAME_TAG, dating.getService_name());
+						msg = msg.replaceAll(USERNAME_TAG, Matcher.quoteReplacement( profile.getUsername()));
+						msg = msg.replaceAll(SERVICENAME_TAG, Matcher.quoteReplacement( dating.getService_name()));
 						outgoingsms.setPrice(BigDecimal.ZERO);//set price to zero so they receive msg
 						outgoingsms.setSms(msg);//tell them to renew
 						outgoingsms.setPriority(3);
@@ -322,7 +323,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}
 			}else{
 				String msg = datingBean.getMessage(UNKNOWN_KEYWORD_ADVICE, language_id, incomingsms.getOpco().getId());
-				outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, KEYWORD));
+				outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, Matcher.quoteReplacement(KEYWORD)));
 			}
 			
 		} catch (Exception e) {

@@ -301,7 +301,10 @@ public class PlainHttpSender extends GenericSender {
 		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success
 			response.setSuccess(Boolean.TRUE);
 		
-		
+		if(resp.getBody()!=null && !resp.getBody().isEmpty()){
+			if(resp.getBody().trim().equalsIgnoreCase("Congestion"))
+				response.setSuccess(Boolean.FALSE);
+		}
 		
 		//How do we parse the responses and get meaningful data that will match com.pixelandtag.smssenders.PlainHttpSender.sendSMS(MTsms).response?
 		if(resp.getContenttype()!=null && resp.getContenttype().toLowerCase().contains("json")){
