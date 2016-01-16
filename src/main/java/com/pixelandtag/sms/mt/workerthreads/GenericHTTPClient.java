@@ -196,7 +196,7 @@ public class GenericHTTPClient implements Serializable{
 						}
 					}
 			}catch(Exception exp){
-				logger.error(exp.getMessage());
+				logger.error(exp.getMessage()+genericparams.getUrl(), exp);
 			}
 			watch.reset();
 			

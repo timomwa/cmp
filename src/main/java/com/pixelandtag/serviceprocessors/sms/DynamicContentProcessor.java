@@ -41,9 +41,9 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
     	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
 		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 		 props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
 		 cmpbean =  (CMPResourceBeanRemote) 
@@ -51,8 +51,9 @@ public class DynamicContentProcessor extends GenericServiceProcessor{
 		 cr = new ContentRetriever(cmpbean);
 		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
-	public DynamicContentProcessor(){
+	public DynamicContentProcessor() throws Exception{
 		init_datasource();
+		initEJB();
 		subscription = new SubscriptionOld();
 	}
 	
