@@ -26,6 +26,7 @@ import com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI;
 import com.pixelandtag.entities.URLParams;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClientWorker;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
+import com.pixelandtag.util.FileUtils;
 
 /**
  * 
@@ -62,14 +63,16 @@ public class BulkSMSProducer extends Thread {
 	private  Context context = null;
 	private int queueSize;
 	private int throttle;
+	private Properties mtsenderprop;
 
 	public void initEJB() throws NamingException{
+			mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 			 Properties props = new Properties();
 			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-			 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-			 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+			 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+			 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+			 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 			 props.put("jboss.naming.client.ejb.context", true);
 			 context = new InitialContext(props);
 			 cmpbean =  (CMPResourceBeanRemote) 

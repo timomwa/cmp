@@ -24,6 +24,7 @@ import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.smssenders.SenderResp;
+import com.pixelandtag.util.FileUtils;
 /**
  * Generic sender.
  * Uses the opco profile to send out messages.
@@ -44,11 +45,13 @@ public class SenderThreadWorker implements Runnable{
 	private Context context;
 	private boolean run = true;
 	private boolean stopped  = false;
+	private Properties mtsenderprop;
 	
 	
 	public SenderThreadWorker(Queue<OutgoingSMS> outqueue_, OpcoSenderReceiverProfile opcosenderprofile_) throws Exception{
 		this.outqueue = outqueue_;
 		this.opcosenderprofile = opcosenderprofile_;
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJBs();
 		initsender();
 	}
@@ -57,9 +60,9 @@ public class SenderThreadWorker implements Runnable{
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 	 	Properties props = new Properties();
 	 	props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-	 	props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-	 	props.put(Context.SECURITY_PRINCIPAL, "testuser");
-	 	props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+	 	props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+	 	props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+	 	props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 	 	props.put("jboss.naming.client.ejb.context", true);
 	 	context = new InitialContext(props);
 	 	configsEJB =  (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");

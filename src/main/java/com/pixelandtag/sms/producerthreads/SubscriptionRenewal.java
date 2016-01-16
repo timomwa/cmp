@@ -39,7 +39,7 @@ public class SubscriptionRenewal extends  Thread {
 	private int workers = 1;
 	private int tps = 5;
 	private int billables_per_batch = 1000;
-	private Properties mtsenderprops;
+	private Properties mtsenderprop;
 	private int idleWorkers;
 	public static int max_throttle_billing = 60000;
 	private static boolean enable_biller_random_throttling=false;
@@ -67,12 +67,12 @@ public class SubscriptionRenewal extends  Thread {
 
 	
 	private void initEJB() throws Exception{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
 		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 		 props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
 		 cmpbean =  (CMPResourceBeanRemote) 
@@ -86,50 +86,51 @@ public class SubscriptionRenewal extends  Thread {
 	
 	private void init() {
 		
-		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
+    	
 	
 		try{
-			tps =  Integer.valueOf(mtsenderprops.getProperty("tps"));
+			tps =  Integer.valueOf(mtsenderprop.getProperty("tps"));
 		}catch(NumberFormatException nfe){
 			logger.warn(nfe.getMessage(), nfe);
 		}
 		
 		try{
-			enable_biller_random_throttling = mtsenderprops.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
+			enable_biller_random_throttling = mtsenderprop.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		
 		try{
-			mandatory_throttle = Integer.valueOf(mtsenderprops.getProperty("mandatory_throttle"));
+			mandatory_throttle = Integer.valueOf(mtsenderprop.getProperty("mandatory_throttle"));
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		try{
-			min_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("min_throttle_billing"));
+			min_throttle_billing = Integer.valueOf(mtsenderprop.getProperty("min_throttle_billing"));
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		try{
-			max_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("max_throttle_billing"));
+			max_throttle_billing = Integer.valueOf(mtsenderprop.getProperty("max_throttle_billing"));
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		try{
-			adaptive_throttling = mtsenderprops.getProperty("adaptive_throttling").trim().equalsIgnoreCase("true");
+			adaptive_throttling = mtsenderprop.getProperty("adaptive_throttling").trim().equalsIgnoreCase("true");
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		
 		try {
-			billables_per_batch = Integer.valueOf(mtsenderprops
+			billables_per_batch = Integer.valueOf(mtsenderprop
 					.getProperty("billables_per_batch"));
 		} catch (Exception e) {
 			logger.warn(e.getMessage(), e);
 		}
 
 		try {
-			workers = Integer.valueOf(mtsenderprops
+			workers = Integer.valueOf(mtsenderprop
 					.getProperty("billing_workers"));
 		} catch (Exception e) {
 			logger.warn(e.getMessage(), e);

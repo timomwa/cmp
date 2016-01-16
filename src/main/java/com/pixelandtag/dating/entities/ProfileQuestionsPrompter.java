@@ -36,7 +36,7 @@ public class ProfileQuestionsPrompter {
 	public Logger logger = Logger.getLogger(getClass());
 	private  Context context = null;
 	private Properties log4J;
-	private Properties properties;
+	private Properties properties,mtsenderprop;
 	private DatingServiceI datingserviceEJB = null;
 	private TimezoneConverterI timezoneconverterEJB;
 	private BigInteger records_per_run = BigInteger.valueOf(10000);
@@ -53,6 +53,7 @@ public class ProfileQuestionsPrompter {
 			
 			log4J = FileUtils.getPropertyFile("log4j.dating.properties");
 			properties= FileUtils.getPropertyFile("dating.properties");
+			mtsenderprop= FileUtils.getPropertyFile("mtsender.properties");
 			
 			if(log4J!=null)
 				PropertyConfigurator.configure(log4J);
@@ -84,9 +85,9 @@ public class ProfileQuestionsPrompter {
 			String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";;
 			Properties props = new Properties();
 			props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-			props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-			props.put(Context.SECURITY_PRINCIPAL, "testuser");
-			props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+			props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+			props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+			props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 			props.put("jboss.naming.client.ejb.context", true);
 			context = new InitialContext(props);
 			datingserviceEJB = (DatingServiceI) context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");

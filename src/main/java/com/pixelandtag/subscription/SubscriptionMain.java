@@ -32,9 +32,9 @@ public class SubscriptionMain extends Thread{
 	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 			 Properties props = new Properties();
 			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-			 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-			 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+			 props.put(Context.PROVIDER_URL, "remote://"+subscription_props.getProperty("ejbhost")+":"+subscription_props.getProperty("ejbhostport"));
+			 props.put(Context.SECURITY_PRINCIPAL, subscription_props.getProperty("SECURITY_PRINCIPAL"));
+			 props.put(Context.SECURITY_CREDENTIALS, subscription_props.getProperty("SECURITY_CREDENTIALS"));
 			 props.put("jboss.naming.client.ejb.context", true);
 			 context = new InitialContext(props);
 			 cmpbean =  (CMPResourceBeanRemote) 

@@ -24,6 +24,7 @@ import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.NoServiceProcessorException;
+import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.StopWatch;
 
 /**
@@ -49,15 +50,16 @@ public class MOProcessorThread extends Thread {
 	private DBPoolDataSource ds;
 	private Context context;
 	private QueueProcessorEJBI queueprocbean;
-	
+	private Properties mtsenderprop;
 	
 	private void initEJBs() throws NamingException {
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 	 	Properties props = new Properties();
 	 	props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-	 	props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-	 	props.put(Context.SECURITY_PRINCIPAL, "testuser");
-	 	props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+	 	props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+	 	props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+	 	props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 	 	props.put("jboss.naming.client.ejb.context", true);
 	 	context = new InitialContext(props);
 	 	queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");

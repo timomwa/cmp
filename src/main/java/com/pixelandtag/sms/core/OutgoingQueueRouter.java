@@ -22,6 +22,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.util.FileUtils;
 
 /**
  * An improvement of com.pixelandtag.sms.producerthreads.MTProducer
@@ -32,6 +33,7 @@ import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
  */
 public class OutgoingQueueRouter extends Thread {
 
+	private Properties mtsenderprop;
 	private boolean run = true;
 	private Logger logger = Logger.getLogger(getClass());
 	private Long maxsizeofqueue = 100000L;//TODO externalize
@@ -77,6 +79,7 @@ public class OutgoingQueueRouter extends Thread {
 	
 	
 	private void initialize() throws Exception {
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
 		startWorkers();
 		setDaemon(true);//I don't know what I am doing here 
@@ -124,10 +127,10 @@ public class OutgoingQueueRouter extends Thread {
     	 String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
 		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
-		 props.put("jboss.naming.client.ejb.context", true);
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
+		props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
 		 queueprocEJB =  (QueueProcessorEJBI) 
        		context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");

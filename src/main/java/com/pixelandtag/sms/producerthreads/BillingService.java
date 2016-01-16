@@ -65,7 +65,7 @@ public class BillingService extends Thread{
 	
 	private static BillingService instance;
 	private Properties log4J;
-	private Properties mtsenderprops;
+	private Properties mtsenderprop;
 	
 	
 	static{
@@ -75,19 +75,23 @@ public class BillingService extends Thread{
 	private CMPResourceBeanRemote cmpbean;
 	private  Context context = null;
 	public void initEJB() throws NamingException{
-	    	 String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-			 Properties props = new Properties();
-			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-			 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-			 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-			 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
-			 props.put("jboss.naming.client.ejb.context", true);
-			 context = new InitialContext(props);
-			 cmpbean =  (CMPResourceBeanRemote) 
-	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-			 
-			 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
-	 }
+			
+		
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
+		
+		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		Properties props = new Properties();
+		props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
+		props.put("jboss.naming.client.ejb.context", true);
+		context = new InitialContext(props);
+		cmpbean =  (CMPResourceBeanRemote) 
+	   		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
+	 
+	}
 	 
 	
 	private int workers = 1;
@@ -118,35 +122,35 @@ public class BillingService extends Thread{
 	private void initWorkers() throws Exception{
 		log4J = FileUtils.getPropertyFile("log4j.billing.properties");
 		PropertyConfigurator.configure(log4J);
-		mtsenderprops = FileUtils.getPropertyFile("mtsender.properties");
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		
-		server_tz = mtsenderprops.getProperty("SERVER_TZ");
-		client_tz = mtsenderprops.getProperty("CLIENT_TZ");
+		server_tz = mtsenderprop.getProperty("SERVER_TZ");
+		client_tz = mtsenderprop.getProperty("CLIENT_TZ");
 		
 		try{
-			enable_biller_random_throttling = mtsenderprops.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
+			enable_biller_random_throttling = mtsenderprop.getProperty("enable_biller_random_throttling").trim().equalsIgnoreCase("true");
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		try{
-			min_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("min_throttle_billing"));
+			min_throttle_billing = Integer.valueOf(mtsenderprop.getProperty("min_throttle_billing"));
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		try{
-			max_throttle_billing = Integer.valueOf(mtsenderprops.getProperty("max_throttle_billing"));
-		}catch(Exception e){
-			logger.warn(e.getMessage(),e);
-		}
-		
-		try{
-			billables_per_batch = Integer.valueOf(mtsenderprops.getProperty("billables_per_batch"));
+			max_throttle_billing = Integer.valueOf(mtsenderprop.getProperty("max_throttle_billing"));
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}
 		
 		try{
-			workers = Integer.valueOf(mtsenderprops.getProperty("billing_workers"));
+			billables_per_batch = Integer.valueOf(mtsenderprop.getProperty("billables_per_batch"));
+		}catch(Exception e){
+			logger.warn(e.getMessage(),e);
+		}
+		
+		try{
+			workers = Integer.valueOf(mtsenderprop.getProperty("billing_workers"));
 		}catch(Exception e){
 			logger.warn(e.getMessage(),e);
 		}

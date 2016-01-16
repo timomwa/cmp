@@ -49,6 +49,7 @@ import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
+import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.StopWatch;
 
 public class HttpBillingWorker implements Runnable {
@@ -68,6 +69,7 @@ public class HttpBillingWorker implements Runnable {
 	private SSLContextBuilder builder = new SSLContextBuilder();
 	private PoolingHttpClientConnectionManager cm;
 	private SubscriptionBeanI subscriptionejb;
+	private Properties mtsenderprop;
 	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
 		@Override
         public boolean isTrusted(X509Certificate[] certificate, String authType) {
@@ -152,13 +154,13 @@ public class HttpBillingWorker implements Runnable {
 	}
 
 	public HttpBillingWorker(String server_tz,String client_tz, String name_, CMPResourceBeanRemote cmpbean) throws Exception{
-		
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
 		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://localhost:4447");
-		 props.put(Context.SECURITY_PRINCIPAL, "testuser");
-		 props.put(Context.SECURITY_CREDENTIALS, "testpassword123!");
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 		 props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
 		 this.cmp_ejb  =  (CMPResourceBeanRemote) 
