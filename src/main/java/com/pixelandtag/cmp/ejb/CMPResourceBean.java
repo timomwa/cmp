@@ -2227,10 +2227,10 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					}
 					
 					
-					logger.info("\t\tsession :: "+sess);
-					logger.info("\t\tsmsmenu_level_id_fk :: "+smsmenu_level_id_fk);
-					logger.info("\t\tlanguage_id :: "+language_id);
-					logger.info("\t\tmenuid :: "+menuid);
+					logger.debug("\t\tsession :: "+sess);
+					logger.debug("\t\tsmsmenu_level_id_fk :: "+smsmenu_level_id_fk);
+					logger.debug("\t\tlanguage_id :: "+language_id);
+					logger.debug("\t\tmenuid :: "+menuid);
 					
 					MenuItem menu_from_session = null;
 					
@@ -2239,7 +2239,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					else
 						menu_from_session = getMenuByParentLevelId(language_id,smsmenu_level_id_fk,menuid);//get root menu
 					
-					logger.info("FROM SESSION___________________________"+menu_from_session);
+					logger.debug("FROM SESSION___________________________"+menu_from_session);
 					
 					
 					if( KEYWORD.contains("*") && req.getMediumType()==MediumType.ussd ){

@@ -158,7 +158,7 @@ public class USSDReceiver extends HttpServlet {
 			if(sess!=null){
 				menuid_ = sess.getMenuid()!=null ? sess.getMenuid().intValue() : -1;
 			}
-			logger.info("\n\n\n\t\t    sess = "+sess
+			logger.debug("\n\n\n\t\t    sess = "+sess
 					+ "\n\n\n\t\t    menuid_ = "+menuid_
 					+ "\n\n\n\t\t    msg = "+msg
 					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());

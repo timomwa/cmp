@@ -41,7 +41,7 @@ public class MessageEJBImpl implements MessageEJBI {
 			language_id = 1L;
 	
 		String msg = "State 130 :  language_id = "+language_id+" key = "+key+" opcoid = "+opcoid;
-		logger.info(msg);
+		logger.debug(msg);
 		
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("language_id", language_id);
@@ -55,7 +55,7 @@ public class MessageEJBImpl implements MessageEJBI {
 			msg = message.getMessage();
 		}
 	
-		logger.info("looking for :[" + key + "], found [" + msg + "]");
+		logger.debug("looking for :[" + key + "], found [" + msg + "]");
 	
 		return message;
 		

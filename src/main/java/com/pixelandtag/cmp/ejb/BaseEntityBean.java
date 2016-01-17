@@ -277,7 +277,7 @@ public class BaseEntityBean implements BaseEntityI {
 			sb.append("\n\n\t\t opcosmsservice.getPrice():: "+opcosmsservice.getPrice()+" opcosmsservice : "+opcosmsservice.getId());
 			sb.append("\n\t\t subvalid :: "+subvalid+" msisdn: "+msisdn+" cmd:"+smsservice.getCmd());
 			sb.append("\n\t\t (subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0) :: "+((subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)));
-			logger.info(sb.toString());
+			logger.debug(sb.toString());
 			sb.setLength(0);
 			if(subvalid){//  || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0){
 				return true;
@@ -550,7 +550,7 @@ public class BaseEntityBean implements BaseEntityI {
 			httsppost.setHeader("SOAPAction","");
 			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
 			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			
+			//billable.gets
 			StringEntity se = new StringEntity(xml);
 			httsppost.setEntity(se);
 			

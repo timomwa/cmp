@@ -164,7 +164,7 @@ public class ProfileQuestionsPrompter {
 					
 					logger.info("match == "+match);
 					
-					mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),0);
+					mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),6);
 					
 					matchesLogEJB.log(profile);
 					
@@ -253,7 +253,7 @@ public class ProfileQuestionsPrompter {
 				//You're missing out <USERNAME>! There are <POTENTIAL_MATES_COUNT> single ladies here waiting to chat but your profile is incomplete. 
 				//Please complete the following questions sent to you on <LAST_QUESTION_DATE>.
 				logger.info(" MSG:: "+message+ " size : "+message.length());
-				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),0);
+				mtcreatorEJB.sendMT(message,serviceid, person.getMsisdn(), person.getOpco(),6);
 				
 				String question = null;
 				

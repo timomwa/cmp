@@ -746,7 +746,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
 					outgoingchatsms.setOpcosenderprofile(opcotrxprofile);
 					String shortcode = opcosmsserv.getMoprocessor().getShortcode();//opcosmsserviceejb.getShortcodeByServiceIdAndOpcoId(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
-					logger.info("\n\n\n\n\n\t\toutgoing shortcode >>>>> "+shortcode);
+					logger.debug("\n\n\n\n\n\t\toutgoing shortcode >>>>> "+shortcode);
 					outgoingchatsms.setShortcode(shortcode);
 					
 					sendMT(outgoingchatsms);

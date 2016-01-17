@@ -276,7 +276,7 @@ public class MOProcessorThread extends Thread {
 	 */
 	public ServiceProcessorI getFreeProcessor(Long mo_processor_id) throws NoServiceProcessorException{
 		
-		logger.info("gugamuga_processor_pool: : "+processor_pool);
+		logger.debug("gugamuga_processor_pool: : "+processor_pool);
 		
 		ArrayList<ServiceProcessorI> processorPool = processor_pool.get(mo_processor_id.intValue());
 		
