@@ -54,7 +54,7 @@ public class LinkLatencyStatEJBImpl implements LinkLatencyStatEJBI {
 		
 		try{
 			
-			Query query  = em.createNativeQuery("select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 1 ");
+			Query query  = em.createNativeQuery("select date(convert_tz(timeStamp,'-05:00','+03:00')) dt, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 1 ");
 			
 			List<Object[]> recs = query.getResultList();
 			for(Object[] o : recs)

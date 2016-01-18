@@ -1277,7 +1277,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
 			String dateNbi = timezoneEJB.dateToString(timeInNairobi);
 			logger.info("QRY: select DATE_SUB('"+dateNbi+"' ,INTERVAL :age YEAR) ");
-			Query qry = em.createNativeQuery("select DATE_SUB(CONVERT_TZ(CURRENT_TIMESTAMP,'-04:00','+03:00') ,INTERVAL :age YEAR) ");
+			Query qry = em.createNativeQuery("select DATE_SUB(CONVERT_TZ(CURRENT_TIMESTAMP,'-05:00','+03:00') ,INTERVAL :age YEAR) ");
 			qry.setParameter("age", age.longValue());
 			Object o = qry.getSingleResult();
 			date = (Date) o;

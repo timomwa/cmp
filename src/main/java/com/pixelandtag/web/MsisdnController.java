@@ -40,7 +40,7 @@ public class MsisdnController extends HttpServlet {
 	private JSONObject responseJSON = null;
 	private PrintWriter writer;
 
-	private final String SERVER_TIMEZONE = "-04:00";
+	private final String SERVER_TIMEZONE = "-05:00";
 	private final String CLIENT_TIMEZONE = "+03:00";
 	
 	private String DB = "pixeland_content360";
