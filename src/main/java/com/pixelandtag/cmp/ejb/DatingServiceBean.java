@@ -1344,7 +1344,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				outgoingsms.setSms(message);
 				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price
-				outgoingsms.setPriority(0);
+				outgoingsms.setPriority(1);
+				outgoingsms.setTimestamp(new Date());
 				
 				try{
 					subscriptionBean.updateQueueStatus(2L, incomingsms.getMsisdn(), serviceid,method, person.getOpco());
@@ -1371,7 +1372,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				msg = msg.replaceAll(BaseEntityI.FREQUENCY, smsserv.getSubscription_length_time_unit().toString().toLowerCase());
 				outgoingsms.setSms(msg);
 				outgoingsms.setPrice(incomingsms.getPrice());//set price to subscription price
-				outgoingsms.setPriority(0);
+				outgoingsms.setPriority(1);
+				outgoingsms.setTimestamp(new Date());
 			}
 			
 			billable.setIn_outgoing_queue(0L);

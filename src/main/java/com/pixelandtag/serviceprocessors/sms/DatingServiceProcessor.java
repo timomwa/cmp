@@ -748,6 +748,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					String shortcode = opcosmsserv.getMoprocessor().getShortcode();//opcosmsserviceejb.getShortcodeByServiceIdAndOpcoId(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
 					logger.debug("\n\n\n\n\n\t\toutgoing shortcode >>>>> "+shortcode);
 					outgoingchatsms.setShortcode(shortcode);
+					outgoingchatsms.setTimestamp(new Date());
 					
 					sendMT(outgoingchatsms);
 					String tailmsg = "";
@@ -756,6 +757,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 					
 					outgoingsms.setSms("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
+					outgoingsms.setTimestamp(new Date());
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					incomingSMS.setPrice(BigDecimal.ZERO);
