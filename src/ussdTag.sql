@@ -80,6 +80,20 @@ insert into dating_disallowedwords select next_val+1,'HOW' from hibernate_sequen
 update hibernate_sequence set next_val=next_val+1;
 
 
+insert into dating_disallowedwords select next_val+1,'which' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'yes' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+
+insert into dating_disallowedwords select next_val+1,'maybe' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+insert into dating_disallowedwords select next_val+1,'no' from hibernate_sequence;
+update hibernate_sequence set next_val=next_val+1;
+
+
 insert into subscription_history select next_val+1,2,'254736338689','439','2015-05-02 08:49:27' from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 
 

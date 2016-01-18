@@ -44,6 +44,7 @@ public class OutgoingQueueRouter extends Thread {
 	private static ConcurrentMap<Long,Queue<OutgoingSMS>> opcoqueuemap = new ConcurrentHashMap<Long,Queue<OutgoingSMS>>();
 	private static Map<Long,OpcoSenderReceiverProfile> profilemap = new HashMap<Long,OpcoSenderReceiverProfile>();
 	private static Semaphore queueSemaphore;
+	private int mandatoryqueuewaittime = 0;
 	static{
 		queueSemaphore = new Semaphore(1, true);
 	}
@@ -80,6 +81,13 @@ public class OutgoingQueueRouter extends Thread {
 	
 	private void initialize() throws Exception {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
+		try{
+			mandatoryqueuewaittime = Integer.valueOf( mtsenderprop.getProperty("mandatoryqueuewaittime") );
+		}catch(NumberFormatException  nfe){
+			logger.error(nfe.getMessage(), nfe);
+		}catch(Exception  nfe){
+			logger.error(nfe.getMessage(), nfe);
+		}
 		initEJB();
 		startWorkers();
 		setDaemon(true);//I don't know what I am doing here 
@@ -154,7 +162,7 @@ public class OutgoingQueueRouter extends Thread {
 				}
 				
 				try {
-					Thread.sleep(1000);//TODO extenalize this sleep value
+					Thread.sleep(mandatoryqueuewaittime);//TODO extenalize this sleep value
 				} catch (InterruptedException e) {
 					logger.error(e);
 				}

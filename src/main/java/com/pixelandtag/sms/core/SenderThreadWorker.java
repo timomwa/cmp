@@ -159,7 +159,7 @@ public class SenderThreadWorker implements Runnable{
 				}
 				
 				int sleeptime = outqueue.size()>0 ? 0 : 1000;
-				
+				logger.info("\n\n \t\t>>>>>> sleeptime :: "+sleeptime);
 				Thread.sleep(sleeptime);
 				
 			}catch(InterruptedException ie){

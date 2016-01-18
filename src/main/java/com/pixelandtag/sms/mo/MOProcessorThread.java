@@ -51,9 +51,17 @@ public class MOProcessorThread extends Thread {
 	private Context context;
 	private QueueProcessorEJBI queueprocbean;
 	private Properties mtsenderprop;
+	private int internalqueue = 5;
 	
 	private void initEJBs() throws NamingException {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
+		try{
+			internalqueue = Integer.valueOf( mtsenderprop.getProperty("internalqueue") );
+		}catch(NumberFormatException exp){
+			logger.error(exp.getMessage(), exp);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 	 	Properties props = new Properties();
 	 	props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
@@ -88,7 +96,7 @@ public class MOProcessorThread extends Thread {
 				for(int x = 0;x<processor_threads; x++){
 					p = MOProcessorFactory.getProcessorClass(servicep.getProcessorClassName(),ServiceProcessorI.class);//Create new instances of each proccessor pool item
 					p.setName(x+"_"+servicep.getId()+"_"+servicep.getShortcode()+"_"+"_"+servicep.getServiceName());
-					p.setInternalQueue(5);
+					p.setInternalQueue(internalqueue);
 					p.setSubscriptionText(servicep.getSubscriptionText());
 					p.setUnsubscriptionText(servicep.getUnsubscriptionText());
 					p.setTailTextSubscribed(servicep.getTailTextSubscribed());
