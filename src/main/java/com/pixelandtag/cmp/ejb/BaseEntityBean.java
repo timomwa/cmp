@@ -262,6 +262,11 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 
 
+
+	
+
+
+	@Override
     public boolean hasAnyActiveSubscription(String msisdn, List<String> services, OperatorCountry opco) throws Exception{
 		
     	boolean isAtive = false;

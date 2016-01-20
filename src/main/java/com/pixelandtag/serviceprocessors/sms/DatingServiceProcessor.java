@@ -254,6 +254,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				if(!subvalid ||  allow_multiple_plans ){
 					
 					try{
+						
+						try{
+							subscriptionBean.unsubscribe(MSISDN, services, incomingsms.getOpco());
+						}catch(Exception exp){
+							logger.error(exp.getMessage(), exp);
+						}
+						
+						datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
+						
 						outgoingsms = datingBean.renewSubscription(incomingsms,smsservice0.getId(),AlterationMethod.self_via_sms, incomingsms.getOpco()); 
 						
 					}catch(DatingServiceException dse){

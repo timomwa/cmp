@@ -11,6 +11,7 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -19,8 +20,11 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.dao.subscription.SubscriptionDAOI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -37,6 +41,9 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 
 	public Logger logger = Logger.getLogger(getClass());
 	
+	@Inject
+	private SubscriptionDAOI subscriptionDAO;
+	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 
@@ -48,6 +55,9 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@EJB
 	private SMSServiceBundleEJBI smsserviceBundleEJB;
+	
+	@EJB
+	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
@@ -621,8 +631,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			List<Subscription> sublist = qry.getResultList();
 			if(sublist.size()>0){
 				Subscription s = sublist.get(0);
-				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
-				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
 				subValid = true;//(s.getSubscription_status() == SubscriptionStatus.confirmed);
 			}
 		}catch(javax.persistence.NoResultException ex){
@@ -651,8 +659,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			List<Subscription> sublist = qry.getResultList();
 			if(sublist.size()>0){
 				Subscription s = sublist.get(0);
-				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} s.getSubscription_status() : "+s.getSubscription_status());
-				logger.info("\n\n\n\t\t\t GRRR{{}{}{}{}{}{}{}{}{}{}{}{{}{{}{}{} (s.getSubscription_status() == SubscriptionStatus.confirmed) : "+(s.getSubscription_status() == SubscriptionStatus.confirmed)+" \n\n");
 				subValid = true;//(s.getSubscription_status() == SubscriptionStatus.confirmed);
 			}
 		}catch(javax.persistence.NoResultException ex){
@@ -666,4 +672,47 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		return subValid;
 	}
 
+	@Override
+	public void unsubscribe(String msisdn, OpcoSMSService opcosmsservice){
+		try{
+			opcosmsservice = em.merge(opcosmsservice);
+			SMSService smsservice = opcosmsservice.getSmsservice();
+			Subscription subscription = getSubscription(msisdn, smsservice.getId());
+			unsubscribe(subscription);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+	}
+	
+	@Override
+	public void unsubscribe(String msisdn, Long serviceid){
+		try{
+			Subscription subscription = getSubscription(msisdn, serviceid);
+			unsubscribe(subscription);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+	}
+	
+	@Override
+	public void unsubscribe(Subscription subscription) throws Exception{
+		subscriptionDAO.delete(subscription);
+	}
+	
+	
+	@Override
+	public boolean unsubscribe(String msisdn, List<String> services, OperatorCountry opco) throws Exception{
+		
+    	boolean isAtive = false;
+		
+		if(msisdn==null || services==null || services.size()<1 )
+			return false;
+		
+		StringBuffer sb = new StringBuffer();
+		for(String kwd: services){
+			OpcoSMSService opcosmsservice = opcosmsserviceejb.getOpcoSMSService(kwd, opco);
+			unsubscribe(msisdn,opcosmsservice);
+		}
+		return isAtive;
+	}
 }

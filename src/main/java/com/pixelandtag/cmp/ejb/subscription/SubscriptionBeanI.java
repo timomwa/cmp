@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.ejb.subscription;
 
 import java.util.List;
 
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -198,5 +199,37 @@ public interface SubscriptionBeanI {
 	 * @return
 	 */
 	public Subscription subscribe(String msisdn, Long service_id,MediumType medium, AlterationMethod method,  SubscriptionStatus status, OperatorCountry opco);
+
+
+	/**
+	 * 
+	 * @param msisdn
+	 * @param opcosmsservice
+	 */
+	public void unsubscribe(String msisdn, OpcoSMSService opcosmsservice);
+	
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param serviceid
+	 */
+	public void unsubscribe(String msisdn, Long serviceid);
+	
+	/**
+	 * 
+	 * @param subscription
+	 */
+	public void unsubscribe(Subscription subscription)  throws Exception;
+	
+	/**
+	 * 
+	 * @param msisdn
+	 * @param services
+	 * @param opco
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean unsubscribe(String msisdn, List<String> services, OperatorCountry opco) throws Exception;
 
 }

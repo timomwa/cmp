@@ -46,6 +46,7 @@ public interface BaseEntityI {
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
 	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid);
 	
+	
 
 
 }
