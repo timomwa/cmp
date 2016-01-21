@@ -675,10 +675,15 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	@Override
 	public void unsubscribe(String msisdn, OpcoSMSService opcosmsservice){
 		try{
-			opcosmsservice = em.merge(opcosmsservice);
-			SMSService smsservice = opcosmsservice.getSmsservice();
-			Subscription subscription = getSubscription(msisdn, smsservice.getId());
-			unsubscribe(subscription);
+			if(opcosmsservice!=null){
+				opcosmsservice = em.merge(opcosmsservice);
+				SMSService smsservice = opcosmsservice.getSmsservice();
+				if(smsservice!=null){
+					Subscription subscription = getSubscription(msisdn, smsservice.getId());
+					if(subscription!=null)
+						unsubscribe(subscription);
+				}
+			}
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}
@@ -696,7 +701,8 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@Override
 	public void unsubscribe(Subscription subscription) throws Exception{
-		subscriptionDAO.delete(subscription);
+		if(subscription!=null)
+			subscriptionDAO.delete(subscription);
 	}
 	
 	
