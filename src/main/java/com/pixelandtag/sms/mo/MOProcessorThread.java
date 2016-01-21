@@ -20,6 +20,7 @@ import snaq.db.DBPoolDataSource;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.sms.MoProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
@@ -49,7 +50,7 @@ public class MOProcessorThread extends Thread {
 	//private volatile Map<Integer, ServiceProcessorDTO> processorDtos;
 	private DBPoolDataSource ds;
 	private Context context;
-	private QueueProcessorEJBI queueprocbean;
+	private MoProcessorEJBI moprocessorEJB;
 	private Properties mtsenderprop;
 	private int internalqueue = 5;
 	private int mopollwait = 1000;
@@ -81,7 +82,7 @@ public class MOProcessorThread extends Thread {
 	 	props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 	 	props.put("jboss.naming.client.ejb.context", true);
 	 	context = new InitialContext(props);
-	 	queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
+	 	moprocessorEJB =  (MoProcessorEJBI) context.lookup("cmp/MoProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.MoProcessorEJBI");
 	 	cmpejb =  (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 	 	logger.info(getClass().getSimpleName()+": Successfully initialized EJB QueueProcessorEJBImpl !!");
 	}
@@ -189,7 +190,7 @@ public class MOProcessorThread extends Thread {
 
 			try {
 				
-				final List<IncomingSMS> incomingsmses =  queueprocbean.getLatestMO(1000);
+				final List<IncomingSMS> incomingsmses =  moprocessorEJB.getLatestMO(1000);
 				
 				if (incomingsmses != null) {
 
@@ -219,7 +220,7 @@ public class MOProcessorThread extends Thread {
 										try{
 											incomingsms.setMo_ack(Boolean.TRUE); 
 											incomingsms.setProcessed(Boolean.TRUE);
-											incomingsms = queueprocbean.saveOrUpdate(incomingsms);
+											incomingsms = moprocessorEJB.saveOrUpdate(incomingsms);
 										}catch(Exception exp){
 											logger.error(exp.getMessage(),exp);
 										}
