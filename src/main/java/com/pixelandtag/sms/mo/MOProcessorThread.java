@@ -185,108 +185,116 @@ public class MOProcessorThread extends Thread {
 
 	
 	public void run() {
+		
+		try{
 
-		while (run) {
-
-			try {
-				
-				final List<IncomingSMS> incomingsmses =  moprocessorEJB.getLatestMO(1000);
-				
-				if (incomingsmses != null) {
-
-					size = incomingsmses.size();
-
-					if (size > 0) {
-
-						setBusy(true);
-
-						watch.start();
-						
-						for (IncomingSMS incomingsms : incomingsmses) {
-							
-							logger.debug(">>>>>>>>>>> moSms.getMoprocessor().getId() : "+incomingsms.getMoprocessor().getId());
-							
-							try{
-								
-								final ServiceProcessorI servp = getFreeProcessor(incomingsms.getMoprocessor().getId());
-								
-								logger.debug(processor_pool+" gugamuga_processor : \n\n"+servp);
-								
-								if(servp!=null){
-
-									boolean success = servp.submit(incomingsms);  
-									
-									if(success){
-										try{
-											incomingsms.setMo_ack(Boolean.TRUE); 
-											incomingsms.setProcessed(Boolean.TRUE);
-											incomingsms = moprocessorEJB.saveOrUpdate(incomingsms);
-										}catch(Exception exp){
-											logger.error(exp.getMessage(),exp);
-										}
-									}
-										
-								}else{
-									logger.warn(":::::: COULD not get a free processor with processor id: "+incomingsms.getMoprocessor().getId()+" at the moment");
-								}
-								
-							}catch(NoServiceProcessorException spe){
-								
-								logger.error(spe.getMessage());
-							
-							}finally{
-							}
-						
-						}
-
-						logger.debug(getClass().getSimpleName()+": it took "+(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)+" to process "+size+" MO messages");
-
-						watch.reset();
-
-						setBusy(false);
-
-					}
-
-					size = 0;
-
-				}
-
-				// TO-DO Get all new MO Messages
-				// TO-DO Find the appropriate application to process the MO
-				// TO-DO Process the MO and get the response text.
-				// TO-DO Determine whether to bill or not, if billing required
-				// do the necessary.
-				// TO-DO Put in outgoing queue.
-				// TO-DO Outgoing queue processors should mark the message as
-				// sent if its the case...
-
+			while (run) {
+	
 				try {
-
-					Thread.sleep(mopollwait);
-
-				} catch (InterruptedException e) {
-
+					
+					final List<IncomingSMS> incomingsmses =  moprocessorEJB.getLatestMO(1000);
+					
+					if (incomingsmses != null) {
+	
+						size = incomingsmses.size();
+	
+						if (size > 0) {
+	
+							setBusy(true);
+	
+							watch.start();
+							
+							for (IncomingSMS incomingsms : incomingsmses) {
+								
+								logger.debug(">>>>>>>>>>> moSms.getMoprocessor().getId() : "+incomingsms.getMoprocessor().getId());
+								
+								try{
+									
+									final ServiceProcessorI servp = getFreeProcessor(incomingsms.getMoprocessor().getId());
+									
+									logger.debug(processor_pool+" gugamuga_processor : \n\n"+servp);
+									
+									if(servp!=null){
+	
+										boolean success = servp.submit(incomingsms);  
+										
+										if(success){
+											try{
+												incomingsms.setMo_ack(Boolean.TRUE); 
+												incomingsms.setProcessed(Boolean.TRUE);
+												incomingsms = moprocessorEJB.saveOrUpdate(incomingsms);
+											}catch(Exception exp){
+												logger.error(exp.getMessage(),exp);
+											}
+										}
+											
+									}else{
+										logger.warn(":::::: COULD not get a free processor with processor id: "+incomingsms.getMoprocessor().getId()+" at the moment");
+									}
+									
+								}catch(NoServiceProcessorException spe){
+									
+									logger.error(spe.getMessage());
+								
+								}finally{
+								}
+							
+							}
+	
+							logger.debug(getClass().getSimpleName()+": it took "+(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)+" to process "+size+" MO messages");
+	
+							watch.reset();
+	
+							setBusy(false);
+	
+						}
+	
+						size = 0;
+	
+					}
+	
+					// TO-DO Get all new MO Messages
+					// TO-DO Find the appropriate application to process the MO
+					// TO-DO Process the MO and get the response text.
+					// TO-DO Determine whether to bill or not, if billing required
+					// do the necessary.
+					// TO-DO Put in outgoing queue.
+					// TO-DO Outgoing queue processors should mark the message as
+					// sent if its the case...
+	
+					try {
+	
+						Thread.sleep(mopollwait);
+	
+					} catch (InterruptedException e) {
+	
+						logger.error(e.getMessage(), e);
+	
+					}catch (Exception e) {
+	
+						logger.error(e.getMessage(), e);
+	
+					}
+	
+				} catch (Exception e) {
+	
 					logger.error(e.getMessage(), e);
-
-				}catch (Exception e) {
-
-					logger.error(e.getMessage(), e);
-
+	
+				} finally {
+					
 				}
-
-			} catch (Exception e) {
-
-				logger.error(e.getMessage(), e);
-
-			} finally {
-				finalizeMe();
+	
 			}
-
+			
+			
+			
+			logger.info("MO Processor was shut down safely");
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}finally{
+			setFinished(true);
+			finalizeMe();
 		}
-		
-		setFinished(true);
-		
-		logger.info("MO Processor was shut down safely");
 
 	}
 	
@@ -296,6 +304,7 @@ public class MOProcessorThread extends Thread {
 		try {
 			context.close();
 		} catch (Exception e) {
+			logger.warn(e.getMessage(), e);
 		}
 		
 	}
