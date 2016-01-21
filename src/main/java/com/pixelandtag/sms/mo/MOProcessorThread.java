@@ -52,6 +52,7 @@ public class MOProcessorThread extends Thread {
 	private QueueProcessorEJBI queueprocbean;
 	private Properties mtsenderprop;
 	private int internalqueue = 5;
+	private int mopollwait = 1000;
 	
 	private void initEJBs() throws NamingException {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
@@ -62,6 +63,16 @@ public class MOProcessorThread extends Thread {
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}
+		
+		try{
+			mopollwait = Integer.valueOf( mtsenderprop.getProperty("mopollwait") );
+		}catch(NumberFormatException exp){
+			logger.error(exp.getMessage(), exp);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		
+		
 		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 	 	Properties props = new Properties();
 	 	props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
@@ -250,9 +261,13 @@ public class MOProcessorThread extends Thread {
 
 				try {
 
-					Thread.sleep(500);
+					Thread.sleep(mopollwait);
 
 				} catch (InterruptedException e) {
+
+					logger.error(e.getMessage(), e);
+
+				}catch (Exception e) {
 
 					logger.error(e.getMessage(), e);
 
@@ -263,7 +278,7 @@ public class MOProcessorThread extends Thread {
 				logger.error(e.getMessage(), e);
 
 			} finally {
-
+				finalizeMe();
 			}
 
 		}
@@ -276,6 +291,16 @@ public class MOProcessorThread extends Thread {
 	
 	
 	
+	private void finalizeMe() {
+		try {
+			context.close();
+		} catch (Exception e) {
+		}
+		
+	}
+
+
+
 	/**
 	 * Gets a free processor Thread for the processor class passed.
 	 * @param mo_processor_id int
