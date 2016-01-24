@@ -314,7 +314,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	 */
 	public boolean queueFull(){
 		
-		logger.info("max_queue_size:: "+max_queue_size);
+		logger.debug("max_queue_size:: "+max_queue_size);
 		if(max_queue_size==-1)
 			return false;
 		if(max_queue_size==moMsgs.size())
