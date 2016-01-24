@@ -33,5 +33,14 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/systech/.m2/repository/org/apache/openejb/javaee-api/6.0-6/javaee-api-6.0-6.jar" sourcepath="/home/systech/.m2/repository/org/apache/openejb/javaee-api/6.0-6/javaee-api-6.0-6-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.apache.openejb"/>
+			<attribute name="maven.artifactId" value="javaee-api"/>
+			<attribute name="maven.version" value="6.0-6"/>
+			<attribute name="maven.scope" value="test"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

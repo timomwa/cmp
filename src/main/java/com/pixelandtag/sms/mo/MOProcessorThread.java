@@ -55,6 +55,7 @@ public class MOProcessorThread extends Thread {
 	private int internalqueue = 5;
 	private int mopollwait = 1000;
 	
+	
 	private void initEJBs() throws NamingException {
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		try{

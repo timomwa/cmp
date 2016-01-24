@@ -352,6 +352,11 @@
 			<!--scope>provided</scope -->
 		</dependency>
 
+		<dependency>
+			<groupId>javax.resource</groupId>
+			<artifactId>connector-api</artifactId>
+			<version>1.5</version>
+		</dependency>
 
 		<dependency>
 			<groupId>net.sourceforge.stripes</groupId>
