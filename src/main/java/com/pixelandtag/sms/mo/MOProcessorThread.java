@@ -230,7 +230,7 @@ public class MOProcessorThread extends Thread {
 										}
 											
 									}else{
-										logger.warn(":::::: COULD not get a free processor with processor id: "+incomingsms.getMoprocessor().getId()+" at the moment");
+										logger.debug(":::::: COULD not get a free processor with processor id: "+incomingsms.getMoprocessor().getId()+" at the moment");
 									}
 									
 								}catch(NoServiceProcessorException spe){
@@ -342,7 +342,7 @@ public class MOProcessorThread extends Thread {
 			}
 			busy++;
 		}
-		logger.info("We have "+poolsize+" processors for the processor with id "+mo_processor_id+", busy: "+busy+", availabe: "+ (poolsize-busy));
+		logger.debug("We have "+poolsize+" processors for the processor with id "+mo_processor_id+", busy: "+busy+", availabe: "+ (poolsize-busy));
 		
 		
 		return null;
