@@ -7,26 +7,16 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
-
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.staticcontent.ContentRetriever;
-
-import snaq.db.DBPoolDataSource;
 
 public class PaulTestService extends GenericServiceProcessor {
 
-	private final Logger log = Logger.getLogger(PaulTestService.class);
-
-	private DBPoolDataSource ds;
-
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
-	private ContentRetriever cr = null;
 
 	public void initEJB() throws NamingException {
 		String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";
@@ -40,7 +30,6 @@ public class PaulTestService extends GenericServiceProcessor {
 		context = new InitialContext(props);
 		cmpbean = (CMPResourceBeanRemote) context
 				.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		cr = new ContentRetriever(cmpbean);
 		logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 
@@ -62,33 +51,11 @@ public class PaulTestService extends GenericServiceProcessor {
 			logger.error(e.getMessage(), e);
 
 		}
-
-		try {
-
-			ds.releaseConnectionPool();
-
-		} catch (Exception e) {
-
-			log.error(e.getMessage(), e);
-
-		}
 	}
 
 	@Override
 	public Connection getCon() {
-		try {
-
-			return ds.getConnection();
-
-		} catch (Exception e) {
-
-			log.error(e.getMessage(), e);
-
-			return null;
-
-		} finally {
-
-		}
+		return null;
 	}
 
 	@Override
