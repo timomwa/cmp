@@ -18,6 +18,10 @@ public class PaulTestService extends GenericServiceProcessor {
 	private InitialContext context;
 	private CMPResourceBeanRemote cmpbean;
 
+	public PaulTestService() throws NamingException{
+		initEJB();
+	}
+	
 	public void initEJB() throws NamingException {
 		String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";
 		Properties props = new Properties();
