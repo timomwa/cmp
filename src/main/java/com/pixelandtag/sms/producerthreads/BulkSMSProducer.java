@@ -180,7 +180,7 @@ public class BulkSMSProducer extends Thread {
 				populateQueue();
 				
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(60000);//Wait a minute
 				} catch (InterruptedException e) {
 					log(e);
 				}

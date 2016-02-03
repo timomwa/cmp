@@ -12,6 +12,7 @@ import javax.ejb.Remote;
 import javax.ejb.Stateless;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 @Stateless
 @Remote
@@ -174,7 +175,7 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	}
 	
 	public boolean isDateInThePast(Date date){
-		Date d = new Date();
+		Date d = DateTime.now().toDate();
 		return date.before(d);
 	}
 	

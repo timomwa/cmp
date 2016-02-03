@@ -31,6 +31,7 @@ import javax.transaction.UserTransaction;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -143,7 +144,11 @@ public class BulkSMSEJB implements BulkSMSI {
 		}
 		Date sheduledate_server_time = null;
 		try {
-			sheduledate_server_time = timezoneEJB.convertFromOneTimeZoneToAnother(timezoneEJB.stringToDate(schedule), timezone,"America/New_York");
+			if(schedule==null || schedule.isEmpty()){
+				sheduledate_server_time = timezoneEJB.convertFromOneTimeZoneToAnother(timezoneEJB.stringToDate(schedule), timezone,TimeZone.getDefault().getID());
+			}else{
+				sheduledate_server_time = DateTime.now().toDate();
+			}
 			boolean isinthepast = timezoneEJB.isDateInThePast(sheduledate_server_time);
 			if(isinthepast)
 				throw new ParameterException("The schedule date is in the past.");
