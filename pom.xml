@@ -32,6 +32,13 @@
 			<version>6.0</version> <scope>compile</scope> </dependency -->
 
 		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>7.0</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 			<version>1.2</version>
