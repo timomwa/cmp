@@ -346,6 +346,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 		return incomingsms;
 	}
+		
+	
 	
 	@Override
 	public IncomingSMS processMo(IncomingSMS incomingsms) {

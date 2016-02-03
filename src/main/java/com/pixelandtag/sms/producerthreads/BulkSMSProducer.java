@@ -19,6 +19,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI;
 import com.pixelandtag.cmp.ejb.sequences.SequenceGenI;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.entities.URLParams;
@@ -57,13 +58,6 @@ public class BulkSMSProducer extends Thread {
 
 	public void initEJB() throws NamingException{
 		
-			log4jProps = FileUtils.getPropertyFile("bulksmslog4j.properties");
-			
-			if(log4jProps!=null)
-				PropertyConfigurator.configure(log4jProps); 
-			else
-				PropertyConfigurator.configure(createProps());
-			
 			mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 			 Properties props = new Properties();
@@ -224,8 +218,11 @@ public class BulkSMSProducer extends Thread {
 					 }catch(NumberFormatException nfe){
 						 logger.warn(nfe.getMessage()+" "+telcoid+" isn't a digit");
 					 }
+					 BulkSMSText text = bulktext.getText();
 					 
+					 MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
 					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
+					 outgoingsms.setMoprocessor(moproc);
 					 outgoingsms.setCmp_tx_id(cpTxId);
 					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
@@ -234,7 +231,7 @@ public class BulkSMSProducer extends Thread {
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
 					
-					 BulkSMSText text = bulktext.getText();
+					
 					 BulkSMSPlan plan =  text.getPlan();
 					
 					 logger.info(">>::protocol:"+plan.getProtocol());
