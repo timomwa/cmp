@@ -117,17 +117,18 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 			
 			keyword = "DEFAULT";
 			
-			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
+			
 			rows = qry.getResultList();
+			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
 		}
-			
 		
-		Object[] row = rows.get(0);
-			
-		Long mo_processor_id = (Long) row[0];
-					
-		MOProcessor proc = moprocDAO.findById(mo_processor_id);		
-			
+		MOProcessor proc = null;
+		
+		if(rows!=null && rows.size()>0){
+			Object[] row = rows.get(0);
+			Long mo_processor_id = (Long) row[0];
+			proc = moprocDAO.findById(mo_processor_id);		
+		}
 			
 		return proc;
 	}
