@@ -1,6 +1,7 @@
 package com.pixelandtag.bulksms;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -25,8 +26,12 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.MessageStatus;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.subscription.dto.MediumType;
 
 @NamedQueries({
 	@NamedQuery(
@@ -208,6 +213,36 @@ public class BulkSMSQueue implements Serializable{
 
 	public void setMax_retries(Integer max_retries) {
 		this.max_retries = max_retries;
+	}
+	
+	
+	/**
+	 * Converts a bulk SMS quque object into
+	 * an outgoing queue object
+	 * @return
+	 */
+	public OutgoingSMS convertToOutGoingSMS(){
+		OutgoingSMS outgoingsms = new OutgoingSMS();
+		outgoingsms.setBilling_status(getText().getPrice().compareTo(BigDecimal.ZERO)>0 ? BillingStatus.WAITING_BILLING : BillingStatus.NO_BILLING_REQUIRED);
+		outgoingsms.setCharged(Boolean.FALSE);
+		outgoingsms.setCmp_tx_id(getCptxId());
+		outgoingsms.setEvent_type(EventType.SUBSCRIPTION_PURCHASE.getName());
+		outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
+		outgoingsms.setIsSubscription(Boolean.FALSE);
+		outgoingsms.setMediumType(MediumType.sms);
+		outgoingsms.setMsisdn(getMsisdn());
+		//outgoingsms.setOpco_tx_id( );
+		outgoingsms.setPrice(getText().getPrice());
+		//outgoingsms.setPrice_point_keyword(price_point_keyword);
+		outgoingsms.setPriority(getPriority());
+		outgoingsms.setRe_tries(0L);
+		outgoingsms.setSent(Boolean.FALSE);
+		outgoingsms.setShortcode(getText().getSenderid());
+		outgoingsms.setSms(getText().getContent());
+		outgoingsms.setSplit(Boolean.FALSE);
+		outgoingsms.setTimestamp(getText().getSheduledate());
+		outgoingsms.setTtl(3L);
+		return outgoingsms;
 	}
 	
 }

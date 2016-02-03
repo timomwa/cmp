@@ -3,7 +3,11 @@ package com.pixelandtag.cmp.ejb.sequences;
 import java.math.BigInteger;
 
 import javax.annotation.Resource;
+import javax.ejb.AccessTimeout;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Remote;
+import javax.ejb.Singleton;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -19,25 +23,18 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.cmp.entities.CMPSequence;
 import com.pixelandtag.cmp.exceptions.CMPSequenceException;
 
-@Stateless
+@Singleton
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class SequenceGenEJB implements SequenceGenI{
 	
 	private Logger logger = Logger.getLogger(getClass());
 
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
-	
-
-	@Resource
-	private UserTransaction utx;
-	
+		
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.SequenceGenI#getSequenceCreateIfNotExists(java.lang.String)
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	//@Override
 	private CMPSequence getSequenceCreateIfNotExists(String name) throws CMPSequenceException{
 		CMPSequence cmp_sequence = findSequenceByName(name);
 		
@@ -50,15 +47,9 @@ public class SequenceGenEJB implements SequenceGenI{
 			cmp_sequence.setNextval(BigInteger.ZERO);
 			cmp_sequence.setPrefix(name);
 			cmp_sequence.setSuffix(String.valueOf(name.hashCode()));
-			utx.begin();
 			cmp_sequence = em.merge(cmp_sequence);
-			utx.commit();
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-			}
 		}
 		
 		return cmp_sequence;
@@ -85,27 +76,22 @@ public class SequenceGenEJB implements SequenceGenI{
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Lock(LockType.READ)
+	@AccessTimeout(unit=java.util.concurrent.TimeUnit.SECONDS, value = 15)
 	@Override
 	public CMPSequence getOrCreateNextSequence(String name) throws CMPSequenceException{
 		
 		try{
 			CMPSequence sequence = getSequenceCreateIfNotExists(name);
 			BigInteger nextVal = sequence.getNextval().add(BigInteger.ONE);
-			utx.begin();
 			Query qry = em.createQuery("update CMPSequence cs SET cs.nextval=:nextval_ where cs.name=:name_");
 			qry.setParameter("nextval_", nextVal);
 			qry.setParameter("name_", name);
 			qry.executeUpdate();
-			utx.commit();
 			return sequence;
 		}catch(Exception e) {
 			logger.error(e.getMessage(),e);
 			
-			try {
-				utx.rollback();
-			} catch (Exception e1) {
-			}
 			throw new CMPSequenceException("Could not get new sequence",e);
 		}
 		

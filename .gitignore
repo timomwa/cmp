@@ -2,6 +2,7 @@
 **/*.gitignore
 **/*.settings/org.eclipse.jdt.core.prefs
 **/*.settings/org.eclipse.wst.common.component
+**/*.settings/*
 settings/
 log/*
 /target/
@@ -997,3 +998,4 @@ log/*
 /target/
 /target/
 /target/
+.settings/*

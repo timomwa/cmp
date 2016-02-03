@@ -40,16 +40,12 @@ import com.pixelandtag.cmp.exceptions.CMPSequenceException;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class BulkSmsMTEJB implements BulkSmsMTI {
 
 	private Logger logger = Logger.getLogger(getClass());
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
-
-	@Resource
-	private UserTransaction utx;
 
 	@EJB
 	private BulkSMSUtilBeanI util_ejb;
@@ -88,7 +84,6 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI#enqueue(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
 	public String enqueue(String sourceIp, String apiKey, String username,
 			String password, String jsonString)
@@ -253,7 +248,6 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 		
 		cptxid = seq.getSeqNumber();
 		try {
-			utx.begin();
 
 			textb = em.merge(textb);
 
@@ -266,13 +260,8 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 			queue = em.merge(queue);
 			
 
-			utx.commit();
 		}catch (Exception exp) {
 			logger.error(exp.getMessage(), exp);
-			try {
-				utx.rollback();
-			} catch (Exception esp) {
-			}
 			throw new PersistenceException(
 					"Could not enqueue this batch. Please try again.", exp);
 		} finally {

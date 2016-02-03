@@ -342,8 +342,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			incomingsms.setSplit(split_mt);
 			incomingsms.setEvent_type(event_type);
 			incomingsms.setPrice_point_keyword(price_point_keyword);
-			
-			
 		}
 		
 		return incomingsms;

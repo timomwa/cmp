@@ -90,6 +90,7 @@ public class SenderPlatform {
 		    public void run() { 
 		    	System.out.println("SHUTTING DOWN!");
 		    	OutgoingQueueRouter.stopApp();
+		    	BulkSMSProducer.stopApp();
 		    }
 		});
 		
@@ -102,9 +103,7 @@ public class SenderPlatform {
 		MOProcessorThread moproc = new MOProcessorThread();
 		moproc.start();
 		
-		
-		
-		BulkSMSProducer bp = new BulkSMSProducer(senderplatform.workers, senderplatform.throttle, senderplatform.queueSize, senderplatform.urlparams);
+		BulkSMSProducer bp = new BulkSMSProducer();
 		bp.start();
 		
 	}

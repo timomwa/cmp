@@ -45,7 +45,6 @@ import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class BulkSMSEJB implements BulkSMSI {
 	
 	
@@ -53,11 +52,7 @@ public class BulkSMSEJB implements BulkSMSI {
 
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
-	
-
-	@Resource
-	private UserTransaction utx;
-	
+		
 	@EJB
 	BulkSMSUtilBeanI util_ejb;
 	
@@ -65,7 +60,6 @@ public class BulkSMSEJB implements BulkSMSI {
 	TimezoneConverterI timezoneEJB;
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
 	public void enqueue(String sourceIp, String apiKey,String username, String password,String jsonString) throws  Exception{//PlanException, APIAuthenticationException,ParameterException,PlanException, PersistenceException,JSONException,QueueFullException,PlanBalanceException{
 	
@@ -201,7 +195,6 @@ public class BulkSMSEJB implements BulkSMSI {
 		textb.setTimezone(timezone);
 		textb.setPrice(new BigDecimal(price));
 		try{
-			utx.begin();
 			
 			textb = em.merge(textb);
 			
@@ -214,12 +207,8 @@ public class BulkSMSEJB implements BulkSMSI {
 				queue = em.merge(queue);
 			}
 			
-			utx.commit();
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
-			try{
-				utx.rollback();
-			}catch(Exception esp){}
 			throw new PersistenceException("Could not enqueue this batch. Please try again.",exp);
 		}finally{
 			
