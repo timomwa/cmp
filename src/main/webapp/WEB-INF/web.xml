@@ -364,6 +364,14 @@
 		<servlet-name>seinbound</servlet-name>
 		<url-pattern>/seinbound</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OrangeUSSD</servlet-name>
+		<url-pattern>/orangeussd</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>OrangeUSSD</servlet-name>
+		<url-pattern>/orangeussd.php</url-pattern>
+	</servlet-mapping>
 	
 	
 	<servlet>
@@ -402,6 +410,13 @@
 		<display-name>seinbound</display-name>
 		<servlet-name>seinbound</servlet-name>
 		<servlet-class>com.pixelandtag.mo.sms.SEInboundAirtel</servlet-class>
+	</servlet>
+	<servlet>
+		<description>
+		orangeussd</description>
+		<display-name>OrangeUSSD</display-name>
+		<servlet-name>OrangeUSSD</servlet-name>
+		<servlet-class>com.pixelandtag.mo.sms.OrangeUSSD</servlet-class>
 	</servlet>
 	
 	
