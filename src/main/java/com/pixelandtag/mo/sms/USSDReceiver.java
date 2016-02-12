@@ -61,7 +61,7 @@ public class USSDReceiver extends HttpServlet {
 	
 	private byte[] OK_200 =  "200 OK".getBytes();
 	private final String SERVER_TIMEZONE = "-05:00";
-	private final String CLIENT_TIMEZONE = "+03:00";
+	private final String CLIENT_TIMEZONE = "+04:00";
 
 	
 	@EJB
