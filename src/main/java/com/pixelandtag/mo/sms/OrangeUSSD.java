@@ -136,39 +136,26 @@ public class OrangeUSSD extends HttpServlet {
 		watch.start();
 		
 		PrintWriter pw = resp.getWriter();
-		String response =""; 
+		String response ="<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
+					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
+					+" <pages descr=\"News\">"
+					+" <page>"
+					+" Headlines<br/>"
+					+" <a href=\"#item1\">Interest rates cut</a><br/>"
+					+" <a href=\"#item2\">Concorde resumes service</a><br/>"
+					+" </page>"
+					+" <page tag=\"item1\">"
+					+" WASHINGTON-In a much anticipated move, the Federal Reserve"
+					+" announced new rate cuts amid growing economic concerns.<br/>"
+					+" <a href=\"#item2\">Next article</a>"
+					+" </page>"
+					+" <page tag=\"item2\">"
+					+" PARIS-Air France resumed its Concorde service Monday."
+					+" The plane had been grounded following a tragic accident."
+					+" </page>"
+					+" </pages>"; 
 		
 		try{
-			
-			String tx_id = cmpBean.generateNextTxId();
-			final RequestObject ro = new RequestObject(req,tx_id,false);
-			OperatorCountry opco = configsEJB.getOperatorByIpAddress(req.getRemoteAddr());
-			USSDSession sess = cmpBean.getSession(ro.getSessionid(),ro.getMsisdn());
-			int menuid_ = -1;
-			if(sess!=null){
-				menuid_ = sess.getMenuid()!=null ? sess.getMenuid().intValue() : -1;
-			}
-			logger.debug("\n\n\n\t\t    sess = "+sess
-					+ "\n\n\n\t\t    menuid_ = "+menuid_
-					+ "\n\n\n\t\t    msg = "+msg
-					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());
-			if(msg.contains("*")  || (menuid_!=2 && menuid_>-1) ){
-				
-				if(msg.contains("*") ){
-					String menuid = msg.split("[\\*]")[1];
-					ro.setMenuid(Integer.valueOf(menuid));
-				}else{
-					ro.setMenuid(menuid_);
-				}
-				
-				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
-				
-				ro.setMediumType(MediumType.ussd);
-				ro.setOpco(opco);
-				response = cmpBean.processUSSD(ro);
-			}else{
-				response = handleGeneralQuery(req);
-			}
 			
 			pw.write(response);
 			
