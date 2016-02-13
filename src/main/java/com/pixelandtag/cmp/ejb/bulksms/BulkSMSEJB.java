@@ -144,7 +144,7 @@ public class BulkSMSEJB implements BulkSMSI {
 		}
 		Date sheduledate_server_time = null;
 		try {
-			if(schedule==null || schedule.isEmpty()){
+			if(schedule!=null && !schedule.isEmpty()){
 				sheduledate_server_time = timezoneEJB.convertFromOneTimeZoneToAnother(timezoneEJB.stringToDate(schedule), timezone,TimeZone.getDefault().getID());
 			}else{
 				sheduledate_server_time = DateTime.now().toDate();
