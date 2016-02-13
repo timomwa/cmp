@@ -754,18 +754,22 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					OpcoSenderReceiverProfile opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(destination_person.getPerson().getOpco().getId());
 					outgoingchatsms.setOpcosenderprofile(opcotrxprofile);
 					String shortcode = opcosmsserv.getMoprocessor().getShortcode();//opcosmsserviceejb.getShortcodeByServiceIdAndOpcoId(incomingSMS.getServiceid(), destination_person.getPerson().getOpco());
-					logger.debug("\n\n\n\n\n\t\toutgoing shortcode >>>>> "+shortcode);
 					outgoingchatsms.setShortcode(shortcode);
 					outgoingchatsms.setTimestamp(new Date());
 					
 					sendMT(outgoingchatsms);
 					String tailmsg = "";
 					if(!person.getLoggedin()){
-						tailmsg = ". However, you're offline. This means you'll not be able to receive any messages from anyone or '"+destination_person.getUsername()+"'. Reply with the word LOGIN to log in.";
+						String offlineNotifier = datingBean.getMessage(OFFLINE_NOTIFIER, language_id,person.getOpco().getId());
+						offlineNotifier = offlineNotifier.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
+						tailmsg = ". "+offlineNotifier;
 					}
 					
-					outgoingsms.setSms("Message sent to '"+destination_person.getUsername()+"'"+tailmsg);
+					String msgsentto = datingBean.getMessage(MESSAGE_SENT_NOTIFICATION, language_id,person.getOpco().getId());
+					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
+					outgoingsms.setSms(msgsentto+tailmsg);
 					outgoingsms.setTimestamp(new Date());
+					
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					incomingSMS.setPrice(BigDecimal.ZERO);

@@ -144,10 +144,10 @@ public class BulkSMSEJB implements BulkSMSI {
 		}
 		Date sheduledate_server_time = null;
 		try {
+			sheduledate_server_time = DateTime.now().toDate();
+			
 			if(schedule!=null && !schedule.isEmpty()){
 				sheduledate_server_time = timezoneEJB.convertFromOneTimeZoneToAnother(timezoneEJB.stringToDate(schedule), timezone,TimeZone.getDefault().getID());
-			}else{
-				sheduledate_server_time = DateTime.now().toDate();
 			}
 			boolean isinthepast = timezoneEJB.isDateInThePast(sheduledate_server_time);
 			if(isinthepast)
