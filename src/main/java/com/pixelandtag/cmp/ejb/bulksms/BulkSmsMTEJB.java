@@ -22,6 +22,7 @@ import javax.persistence.Query;
 import javax.transaction.UserTransaction;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -169,20 +170,21 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 			throw new ParameterException("You have some missing. Parameters: ["
 					+ sb.toString() + "]");
 		}
-		boolean tz_valid = timezoneBean.validateTimezone(timezone);
-		if (!tz_valid) {
-			throw new ParameterException(
-					"Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
+		if(timezone!=null && !timezone.isEmpty()){
+			boolean tz_valid = timezoneBean.validateTimezone(timezone);
+			if (!tz_valid) {
+				throw new ParameterException(
+						"Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
+			}
 		}
 		Date sheduledate_server_time = null;
 
 		if (schedule == null || schedule.isEmpty())
-			sheduledate_server_time = new Date();
+			sheduledate_server_time = DateTime.now().toDate();
 		try {
 			if (timezone == null || timezone.isEmpty())
 				throw new ParameterException(
 						"Scheule found without timezone. Please supply timezone. Timezone example : Africa/Nairobi");
-
 			sheduledate_server_time =  timezoneBean.convertFromOneTimeZoneToAnother(timezoneBean.stringToDate(schedule), timezone,"America/New_York");
 			boolean isinthepast = timezoneBean.isDateInThePast(sheduledate_server_time);
 			if (isinthepast)

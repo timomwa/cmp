@@ -122,7 +122,7 @@ public class BulkSMSEJB implements BulkSMSI {
 		try{
 			timezone = inJso.getString("timezone");
 		}catch(JSONException jse){
-			logger.warn("priority not provided");
+			logger.warn("timezone not provided");
 		}
 		StringBuffer sb = new StringBuffer();
 		sb.append("planid").append(" : ").append(planid).append("\n");
@@ -138,9 +138,11 @@ public class BulkSMSEJB implements BulkSMSI {
 		if((schedule!=null && timezone==null || timezone.isEmpty()) || (planid==null|| planid.isEmpty())||(text==null|| text.isEmpty())||(telcoid==null|| telcoid.isEmpty())||(senderid==null|| senderid.isEmpty())||(price==null || price.isEmpty())||(msisdnlist==null || msisdnlist.length()==0)||priority<0){
 			throw new ParameterException("Missing parameters. Parameters: ["+sb.toString()+"]");
 		}
-		boolean tz_valid = timezoneEJB.validateTimezone(timezone);
-		if(!tz_valid){
-			throw new ParameterException("Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
+		if(timezone!=null && !timezone.isEmpty()){
+			boolean tz_valid = timezoneEJB.validateTimezone(timezone);
+			if(!tz_valid){
+				throw new ParameterException("Timezone format wrong. Examples of timezone. \"America/New_York\", \"Africa/Nairobi\"");
+			}
 		}
 		Date sheduledate_server_time = null;
 		try {
