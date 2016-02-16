@@ -43,6 +43,19 @@ public interface Sender{
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
 	public final String HTTP_ALLOW_SENDING_BLANK_TEXT = "http_allow_send_blank_text";
 	
+	
+	public final String SMPP_IP = "smpp_ip";
+	public final String SMPP_PORT = "smpp_port";
+	public final String SMPP_TYPE = "smpp_type";
+	public final String SMPP_USERNAME = "smpp_username";
+	public final String SMPP_PASSWORD = "smpp_password";
+	public final String SMPP_TON = "smpp_ton";
+	public final String SMPP_NPI = "smpp_npi";
+	public final String SMPP_DESTON = "smpp_destinationton";
+	public final String SMPP_DESNPI = "smpp_destinationnpi";
+	public final String SMPP_SHORTCODE = "smpp_shortcode";
+	public final String SMPP_VERSION = "smpp_version";
+	
 	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException;
 	public void validateMandatory()  throws MessageSenderException;
 
