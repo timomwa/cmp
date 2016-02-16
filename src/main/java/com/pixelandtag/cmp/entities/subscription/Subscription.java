@@ -90,7 +90,7 @@ public class Subscription implements Serializable {
 	
 	@JoinColumn(name="opco_id_fk", nullable=false)
 	@Index(name="opsscfkidx")
-	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToOne(cascade=CascadeType.MERGE, fetch=FetchType.EAGER)
 	private OperatorCountry opco;
 	
 	
