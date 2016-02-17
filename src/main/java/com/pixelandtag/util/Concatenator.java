@@ -1,12 +1,13 @@
 package com.pixelandtag.util;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
 public class Concatenator {
-	
-	private Logger LOGGER = Logger.getLogger(getClass());
+
+	private static Logger LOGGER = Logger.getLogger(Concatenator.class);
 
     /**
      * @param args

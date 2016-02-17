@@ -1,6 +1,7 @@
 package com.pixelandtag.sms.smpp;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,9 +42,10 @@ import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.util.Concatenator;
 
-public class Transceiver extends Thread implements ServerPDUEventListener {
+public class Transceiver extends Thread implements ServerPDUEventListener{
 	
-	private Logger logger = Logger.getLogger(getClass());
+
+	private Logger logger = Logger.getLogger(Transceiver.class);
 
 	private Connection smppconn = null;
 
@@ -327,7 +329,7 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 		if ((messageId != null) && (messageId.length() != 0)) {
 			sent = 1;
 		}
-		logger.info("submit response for id:" + id + " with SMSC MSGID: " + messageId + " status:" + commandStatus);
+		logger.info("<<< submit response for id:" + id + " with SMSC MSGID: " + messageId + " status:" + commandStatus);
 
 		// update message status
 		response.put("messageid", id);
@@ -338,8 +340,8 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 	}
 	
 	
-	public SubmitSMResp send(OutgoingSMS outgoingsms) {
-		SubmitSMResp respose = null;
+	public boolean send(OutgoingSMS outgoingsms) {
+		logger.info(" >>> outgoing msgid: "+outgoingsms.getId());
 		String txt = outgoingsms.getSms();
 		if (txt.trim().length() <= 160) {
 			logger.debug("sendConcat: before session");
@@ -368,34 +370,29 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 					msg.setShortMessageData(buffer);
 
 					msg.setDataCoding((byte) 0);
-					logger.info("this.session.isBound() : "+this.session.isBound() );
-					logger.info("this.session.isOpened() : "+this.session.isOpened() );
-					
-					/*
-					 * 15072 [main] INFO com.pixelandtag.sms.smpp.Transceiver  - this.session.isBound() : true
-					 * 15072 [main] INFO com.pixelandtag.sms.smpp.Transceiver  - this.session.isOpened() : false
-					 */
 					if (!this.session.isBound() || !this.session.isOpened()) {
 						reconnect();
 					}
-					if(this.session.isOpened())
-						respose = this.session.submit(msg);
-					else
-						logger.info("Session isn't open... We are not sending message..::");
+					if(this.session.isOpened()){
+						this.session.submit(msg);
+						return true;
+					}else{
+						logger.info("\n\n\n\tSession isn't open... We are not sending message..\n\n");
+						return false;
+					}
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
 		} else {
-			respose = sendConcat(outgoingsms);
+			sendConcat(outgoingsms);
 		}
-		return respose;
+		return false;
 	}
 	
 	
-	private SubmitSMResp sendConcat(OutgoingSMS outgoingsms) {
+	private boolean sendConcat(OutgoingSMS outgoingsms) {
 
-		SubmitSMResp submitresp = null;
 		String txt = outgoingsms.getSms();
 		try {
 			synchronized (this.session) {
@@ -425,18 +422,24 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 					if (!this.session.isBound() || !this.session.isOpened()) {
 						reconnect();
 					}
-					submitresp = session.submit(msg);
-					logger.info(msg.debugString());
-
-					logger.info("After submit concat " + (i + 1) + "/"
-							+ split.length + " ref : "
-							+ msg.getSequenceNumber());
+					if(this.session.isOpened()){
+						this.session.submit(msg);
+						session.submit(msg);
+						logger.info(msg.debugString());
+						logger.info("After submit concat " + (i + 1) + "/"
+								+ split.length + " ref : "
+								+ msg.getSequenceNumber());
+						return true;
+					}else{
+						logger.info("\n\n\n\tSession isn't open... We are not sending message..\n\n");
+						return false;
+					}
 				}
 			}
 		} catch (Exception e) {
 			logger.error(e, e);
 		}
-		return submitresp;
+		return false;
 	}
 
 	public Connection getSmppconn() {

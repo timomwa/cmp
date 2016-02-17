@@ -42,9 +42,10 @@ public class SMPPTest {
 				OutgoingSMS outgoingsms = new OutgoingSMS();
 				outgoingsms.setMsisdn("254720988636");
 				outgoingsms.setId(Long.valueOf(6666660+c));
+				
 				outgoingsms.setShortcode("32329");
-				outgoingsms.setSms("SMS # "+c);
-				tranceiver.send(outgoingsms);
+				outgoingsms.setSms(">>> SMS # "+c);
+				boolean success =  tranceiver.send(outgoingsms);
 				Thread.sleep(5000);
 				
 			}
