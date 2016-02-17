@@ -1,6 +1,5 @@
 package com.pixelandtag.util;
 
-import java.io.Serializable;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
