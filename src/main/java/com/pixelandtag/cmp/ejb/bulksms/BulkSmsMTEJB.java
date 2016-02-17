@@ -179,25 +179,31 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 		}
 		Date sheduledate_server_time = null;
 
-		if (schedule == null || schedule.isEmpty())
+		if (schedule == null || schedule.isEmpty()){
+			
 			sheduledate_server_time = DateTime.now().toDate();
-		try {
-			if (timezone == null || timezone.isEmpty())
+		
+		}else{
+			
+			try {
+				if (timezone == null || timezone.isEmpty())
+					throw new ParameterException(
+							"Scheule found without timezone. Please supply timezone. Timezone example : Africa/Nairobi");
+				sheduledate_server_time =  timezoneBean.convertFromOneTimeZoneToAnother(timezoneBean.stringToDate(schedule), timezone,"America/New_York");
+				boolean isinthepast = timezoneBean.isDateInThePast(sheduledate_server_time);
+				if (isinthepast)
+					throw new ParameterException(
+							"The schedule date is in the past.");
+			} catch (ParseException e) {
 				throw new ParameterException(
-						"Scheule found without timezone. Please supply timezone. Timezone example : Africa/Nairobi");
-			sheduledate_server_time =  timezoneBean.convertFromOneTimeZoneToAnother(timezoneBean.stringToDate(schedule), timezone,"America/New_York");
-			boolean isinthepast = timezoneBean.isDateInThePast(sheduledate_server_time);
-			if (isinthepast)
-				throw new ParameterException(
-						"The schedule date is in the past.");
-		} catch (ParseException e) {
-			throw new ParameterException(
-					"Could not parse the scheduledate. Check if your date format and timezone is correct. Timezone example : Africa/Nairobi . Date format should be yyyy-MM-dd HH:mm:ss where"
-							+ "\n yyyy – The year, e.g 2015 "
-							+ "\n MM – The date, e,g 01 for January "
-							+ "\n dd – The day of the month e.g 31 "
-							+ "\n HH – the hour of the day between 0 and 23 "
-							+ "\n mm – the minute, e,g 03. between 0 and 59 ");
+						"Could not parse the scheduledate. Check if your date format and timezone is correct. Timezone example : Africa/Nairobi . Date format should be yyyy-MM-dd HH:mm:ss where"
+								+ "\n yyyy – The year, e.g 2015 "
+								+ "\n MM – The date, e,g 01 for January "
+								+ "\n dd – The day of the month e.g 31 "
+								+ "\n HH – the hour of the day between 0 and 23 "
+								+ "\n mm – the minute, e,g 03. between 0 and 59 ");
+			}
+		
 		}
 
 		sb.append("sheduledate").append(" : ").append(sheduledate_server_time).append("\n");
