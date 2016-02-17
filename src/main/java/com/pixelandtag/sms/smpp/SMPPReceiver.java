@@ -33,7 +33,7 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 
 	private String serverip;
 	private int serverport;
-	private String type;
+	private String type;//
 	private String username;
 	private String password;
 	private String shortcode;
@@ -232,6 +232,6 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 	}
 
 	private void updateSMPP(boolean status) {
-
+		
 	}
 }

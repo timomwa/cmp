@@ -27,6 +27,7 @@ import org.smpp.pdu.PDU;
 import org.smpp.pdu.PDUException;
 import org.smpp.pdu.Request;
 import org.smpp.pdu.Response;
+import org.smpp.pdu.SubmitMultiSMResp;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.pdu.Unbind;
@@ -73,6 +74,7 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 	public static boolean running = true;
 	
 	public Transceiver(SenderConfiguration configs){
+		debug = new LoggerDebug("smpp");
 		concatenator = new Concatenator();
 		serverip = configs.getOpcoconfigs().get(Sender.SMPP_IP).getValue();
 		serverport = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_PORT).getValue());
@@ -92,6 +94,20 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 		} catch (IOException e) {
 			logger.error(e);
 		}
+	}
+	
+	
+	private boolean createTCPIPConnection(){
+		try{
+			if(this.smppconn==null){
+				this.smppconn = new TCPIPConnection(this.serverip, this.serverport);
+			}
+			this.smppconn.open();
+			return true;
+		}catch(Exception e){
+			logger.error(e);
+		}
+		return false;
 	}
 	
 	
@@ -178,7 +194,7 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 		}
 	}
 
-	private void disconnect() {
+	public void disconnect() {
 
 		try {
 			if (this.session != null) {
@@ -311,7 +327,7 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 		if ((messageId != null) && (messageId.length() != 0)) {
 			sent = 1;
 		}
-		logger.error("submit response for id:" + id + " with SMSC MSGID: " + messageId + " status:" + commandStatus);
+		logger.info("submit response for id:" + id + " with SMSC MSGID: " + messageId + " status:" + commandStatus);
 
 		// update message status
 		response.put("messageid", id);
@@ -322,12 +338,17 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 	}
 	
 	
-	public void send(OutgoingSMS outgoingsms) {
-
+	public SubmitSMResp send(OutgoingSMS outgoingsms) {
+		SubmitSMResp respose = null;
 		String txt = outgoingsms.getSms();
 		if (txt.trim().length() <= 160) {
 			logger.debug("sendConcat: before session");
 			try {
+				
+				if(this.session==null)
+					if(createTCPIPConnection())
+						connect();
+				
 				synchronized (this.session) {
 
 					SubmitSM msg = new SubmitSM();
@@ -347,22 +368,34 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 					msg.setShortMessageData(buffer);
 
 					msg.setDataCoding((byte) 0);
-					if (!this.session.isBound() && !this.session.isOpened()) {
+					logger.info("this.session.isBound() : "+this.session.isBound() );
+					logger.info("this.session.isOpened() : "+this.session.isOpened() );
+					
+					/*
+					 * 15072 [main] INFO com.pixelandtag.sms.smpp.Transceiver  - this.session.isBound() : true
+					 * 15072 [main] INFO com.pixelandtag.sms.smpp.Transceiver  - this.session.isOpened() : false
+					 */
+					if (!this.session.isBound() || !this.session.isOpened()) {
 						reconnect();
 					}
-					this.session.submit(msg);
+					if(this.session.isOpened())
+						respose = this.session.submit(msg);
+					else
+						logger.info("Session isn't open... We are not sending message..::");
 				}
 			} catch (Exception e) {
-				logger.error(e, e);
+				logger.error(e.getMessage(), e);
 			}
 		} else {
-			sendConcat(outgoingsms);
+			respose = sendConcat(outgoingsms);
 		}
+		return respose;
 	}
 	
 	
-	private void sendConcat(OutgoingSMS outgoingsms) {
+	private SubmitSMResp sendConcat(OutgoingSMS outgoingsms) {
 
+		SubmitSMResp submitresp = null;
 		String txt = outgoingsms.getSms();
 		try {
 			synchronized (this.session) {
@@ -389,10 +422,10 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 
 					msg.setEsmClass((byte) 64);
 					msg.setDataCoding((byte) 0);
-					if (!this.session.isBound() && !this.session.isOpened()) {
+					if (!this.session.isBound() || !this.session.isOpened()) {
 						reconnect();
 					}
-					session.submit(msg);
+					submitresp = session.submit(msg);
 					logger.info(msg.debugString());
 
 					logger.info("After submit concat " + (i + 1) + "/"
@@ -403,6 +436,7 @@ public class Transceiver extends Thread implements ServerPDUEventListener {
 		} catch (Exception e) {
 			logger.error(e, e);
 		}
+		return submitresp;
 	}
 
 	public Connection getSmppconn() {
