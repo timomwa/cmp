@@ -240,6 +240,7 @@ public class Transceiver extends Thread implements ServerPDUEventListener{
 					response.setCommandLength(pdu.getCommandLength());
 					response.setSequenceNumber(pdu.getSequenceNumber());
 					if ((response != null) && (response.getCommandStatus() == 0)) {
+						
 						logger.debug("Is alive ");
 						// update DB
 					} else {
