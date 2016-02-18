@@ -9,6 +9,8 @@ import org.apache.log4j.BasicConfigurator;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
+import com.pixelandtag.sms.smpp.workers.PDUWorker;
+import com.pixelandtag.sms.smpp.workers.Transceiver;
 import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.util.Pair;
 
@@ -40,7 +42,7 @@ public class SMPPTest {
 			SenderConfiguration configs = new SenderConfiguration();
 			configs.setOpcoconfigs(opcoconfigs);
 			
-			tranceiver = new Transceiver(configs);
+			tranceiver = new Transceiver(configs,queue);
 			
 			pduWorker = new PDUWorker(queue);
 			pduWorker.start();
