@@ -4,6 +4,8 @@
 **/*.settings/org.eclipse.wst.common.component
 **/*.settings/*
 .settings/
+.classpath
+.gitignore
 settings/
 log/*
 /target/
