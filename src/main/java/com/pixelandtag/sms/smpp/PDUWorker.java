@@ -21,7 +21,7 @@ import com.pixelandtag.util.Pair;
  */
 public class PDUWorker extends Thread{
 	
-	private Logger LOGGER = Logger.getLogger(getClass());
+	private Logger logger = Logger.getLogger(getClass());
 	
 	private BlockingQueue<Pair> queue;
 
@@ -45,7 +45,7 @@ public class PDUWorker extends Thread{
 				if (null != p) {
 					event = (ServerPDUEvent) p.getB();
 					pdu = event.getPDU();
-					this.LOGGER.debug("PDU Command " + pdu.getCommandId());
+					this.logger.debug("PDU Command " + pdu.getCommandId());
 					switch (pdu.getCommandId()) {
 						case Data.DELIVER_SM :
 							response = (DeliverSMResp) ((DeliverSM) pdu)
@@ -61,25 +61,25 @@ public class PDUWorker extends Thread{
 									try {
 										processMessage(sm);
 									} catch (Exception e) {
-										this.LOGGER.error(e);
+										this.logger.error(e);
 									}
 									break;
 								case Data.SM_SMSC_DLV_RCPT_TYPE :
 									try {
 										processDeliveryRequest(sm);
 									} catch (Exception e) {
-										this.LOGGER.error(e);
+										this.logger.error(e);
 									}
 									break;
 								default :
-									this.LOGGER.debug("Unhandled EsmClass:"
+									this.logger.debug("Unhandled EsmClass:"
 											+ sm.getEsmClass());
 									break;
 							}
 							break;
 
 						case 259 :
-							this.LOGGER.debug("DataSM: " + pdu.debugString());
+							this.logger.debug("DataSM: " + pdu.debugString());
 							dataSM = (DataSM) pdu;
 							switch (dataSM.getEsmClass()) {
 								case -128 :
@@ -89,25 +89,25 @@ public class PDUWorker extends Thread{
 									try {
 										processMessage(dataSM);
 									} catch (Exception e) {
-										this.LOGGER.error(e);
+										this.logger.error(e);
 									}
 									break;
 								case Data.SM_SMSC_DLV_RCPT_TYPE :
 									try {
 										processDeliveryRequest(sm);
 									} catch (Exception e) {
-										this.LOGGER.error(e);
+										this.logger.error(e);
 									}
 									break;
 								default :
-									this.LOGGER.debug("Unhandled EsmClass:"
+									this.logger.debug("Unhandled EsmClass:"
 											+ dataSM.getEsmClass());
 									break;
 							}
 							break;
 
 						default :
-							this.LOGGER.debug("Unhandled commandId:"
+							this.logger.debug("Unhandled commandId:"
 									+ pdu.getCommandId());
 							break;
 					}
@@ -115,7 +115,7 @@ public class PDUWorker extends Thread{
 				}
 
 			} catch (Exception e) {
-				this.LOGGER.error(e);
+				this.logger.error(e);
 			}
 	}
 
@@ -127,7 +127,8 @@ public class PDUWorker extends Thread{
 		}
 		String message = sm.getShortMessage();
 		String msisdn = sm.getSourceAddr().getAddress();
-		
+
+		logger.info("msisdn = "+msisdn+", message = "+message);
 
 	}
 
@@ -149,7 +150,7 @@ public class PDUWorker extends Thread{
 			} catch (Exception ex) {
 			}
 		else {
-			this.LOGGER
+			this.logger
 					.debug("new String(sm2.getMessagePayload().getBuffer()):"
 							+ message);
 		}
@@ -160,12 +161,12 @@ public class PDUWorker extends Thread{
 			} catch (Exception ex) {
 			}
 		else {
-			this.LOGGER.debug("new String(sm2.getData().getBuffer()):"
+			this.logger.debug("new String(sm2.getData().getBuffer()):"
 					+ message);
 		}
 
 		if (message == null) {
-			this.LOGGER.error("message is null :-(");
+			this.logger.error("message is null :-(");
 		}
 
 		String msisdn = dataSM.getSourceAddr().getAddress();
@@ -181,7 +182,7 @@ public class PDUWorker extends Thread{
 		}
 
 		String str = sm.getShortMessage();
-		LOGGER.info("Delivery request : >> " + str);
+		logger.info("Delivery request : >> " + str);
 		String stat = "";
 		if ((str.indexOf(" stat:") > 0)) {
 			stat = str.substring(str.indexOf("stat:") + 5,
@@ -192,19 +193,19 @@ public class PDUWorker extends Thread{
 			} catch (Exception e) {
 			}
 		}
-		LOGGER.debug("delevery status: " + stat);
+		logger.debug("delevery status: " + stat);
 		String msgid = "";
 		String msisdn = sm.getSourceAddr().getAddress();
 		if (str.startsWith("id:")) {
 			msgid = str.substring(3, str.indexOf(" ", 4));
 			if (msgid != null)
 				msgid = msgid.trim();
-			LOGGER.debug("msgid before: " + msgid);
+			logger.debug("msgid before: " + msgid);
 			// msgid =
 			// Long.toHexString(Long.parseLong(msgid));
 			while (msgid.length() < 8)
 				msgid = "0" + msgid;
-			LOGGER.debug("msgid after: " + msgid);
+			logger.debug("msgid after: " + msgid);
 		} 
 
 		//update delivery

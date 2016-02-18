@@ -22,7 +22,7 @@ public class SMPPTest {
 			Map<String,ProfileConfigs> opcoconfigs = new HashMap<String,ProfileConfigs>();
 			opcoconfigs.put(Sender.SMPP_IP, ProfileConfigs.createBasic(Sender.SMPP_IP, "104.131.90.133") );
 			opcoconfigs.put(Sender.SMPP_PORT, ProfileConfigs.createBasic(Sender.SMPP_PORT, "5019") );
-			opcoconfigs.put(Sender.SMPP_TYPE, ProfileConfigs.createBasic(Sender.SMPP_TYPE, "smpp") );
+			opcoconfigs.put(Sender.SMPP_TYPE, ProfileConfigs.createBasic(Sender.SMPP_TYPE, "trx") );
 			opcoconfigs.put(Sender.SMPP_USERNAME, ProfileConfigs.createBasic(Sender.SMPP_USERNAME, "KYSDP") );
 			opcoconfigs.put(Sender.SMPP_PASSWORD, ProfileConfigs.createBasic(Sender.SMPP_PASSWORD, "KYSDP") );
 			opcoconfigs.put(Sender.SMPP_TON, ProfileConfigs.createBasic(Sender.SMPP_TON, "0") );
@@ -36,16 +36,17 @@ public class SMPPTest {
 			
 			tranceiver = new Transceiver(configs);
 			
+			OutgoingSMS outgoingsms = new OutgoingSMS();
+			outgoingsms.setMsisdn("254202407004");
+			outgoingsms.setId(Long.valueOf(6666660+23));
+			
+			outgoingsms.setShortcode("32329");
+			outgoingsms.setSms(">>> SMS # "+23);
+			boolean success =  tranceiver.send(outgoingsms);
 			int c = 0;
 			while(true){
 				c++;
-				/*OutgoingSMS outgoingsms = new OutgoingSMS();
-				outgoingsms.setMsisdn("254202407004");
-				outgoingsms.setId(Long.valueOf(6666660+c));
 				
-				outgoingsms.setShortcode("32329");
-				outgoingsms.setSms(">>> SMS # "+c);
-				boolean success =  tranceiver.send(outgoingsms);*/
 				Thread.sleep(5000);
 				
 			}

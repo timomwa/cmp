@@ -1,0 +1,58 @@
+2016-02-18 16:14:45,015 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:14:45,958 943  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:15:35,469 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP1 Password:KYSDP ShortCode:32329
+2016-02-18 16:15:36,353 884  [main] ERROR smpp.Transceiver  - BindException: Error:15 Username:KYSDP1 Password:KYSDP ShortCode:32329
+2016-02-18 16:15:54,344 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:15:55,243 899  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:16:44,582 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:16:45,501 919  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:16:45,502 920  [main] INFO  smpp.Transceiver  -  >>> outgoing msgid: 6666683
+2016-02-18 16:16:45,502 920  [main] DEBUG smpp.Transceiver  - sendConcat: before session
+2016-02-18 16:16:46,106 1524 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
+2016-02-18 16:16:46,107 1525 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C6964BA0 status:0
+2016-02-18 16:18:36,653 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:18:37,552 899  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:18:37,553 900  [main] INFO  smpp.Transceiver  -  >>> outgoing msgid: 6666683
+2016-02-18 16:18:37,553 900  [main] DEBUG smpp.Transceiver  - sendConcat: before session
+2016-02-18 16:18:38,158 1505 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
+2016-02-18 16:18:38,158 1505 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C696F2E8 status:0
+2016-02-18 16:18:43,625 6972 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: DeliverSM
+2016-02-18 16:18:48,682 12029 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:18:48,683 12030 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:18:58,698 22045 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:18:58,698 22045 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:19:08,639 31986 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:19:08,639 31986 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:19:18,648 41995 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:19:18,648 41995 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:19:28,651 51998 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:19:28,651 51998 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:19:38,658 62005 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:19:38,659 62006 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:19:48,645 71992 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:19:48,645 71992 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:30:12,766 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:30:13,685 919  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:30:13,686 920  [main] INFO  smpp.Transceiver  -  >>> outgoing msgid: 6666683
+2016-02-18 16:30:13,686 920  [main] DEBUG smpp.Transceiver  - sendConcat: before session
+2016-02-18 16:30:14,309 1543 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
+2016-02-18 16:30:14,310 1544 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C69AECB0 status:0
+2016-02-18 16:30:18,118 5352 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: DeliverSM
+2016-02-18 16:30:23,777 11011 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:30:23,777 11011 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:30:33,671 20905 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:30:33,671 20905 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:30:43,683 30917 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:30:43,683 30917 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:30:53,613 40847 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:30:53,613 40847 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:31:03,676 50910 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:31:03,677 50911 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:31:13,680 60914 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:31:13,681 60915 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:31:46,663 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:31:47,412 749  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:31:47,413 750  [main] INFO  smpp.Transceiver  -  >>> outgoing msgid: 6666683
+2016-02-18 16:31:47,413 750  [main] DEBUG smpp.Transceiver  - sendConcat: before session
+2016-02-18 16:31:47,970 1307 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
+2016-02-18 16:31:47,970 1307 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C69B7620 status:0
