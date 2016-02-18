@@ -144,7 +144,12 @@ public class ProfileConfigs implements Serializable{
 		this.profile = profile;
 	}
 	
-	
+	public static ProfileConfigs createBasic(String name, String value){
+		ProfileConfigs config_ = new ProfileConfigs();
+		config_.setName(name);
+		config_.setValue(value);
+		return config_;
+	}
 	
 	
 

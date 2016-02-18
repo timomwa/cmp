@@ -43,7 +43,7 @@ public interface Sender{
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
 	public final String HTTP_ALLOW_SENDING_BLANK_TEXT = "http_allow_send_blank_text";
 	
-	
+	public final String SMPP_ID = "smpp_id";
 	public final String SMPP_IP = "smpp_ip";
 	public final String SMPP_PORT = "smpp_port";
 	public final String SMPP_TYPE = "smpp_type";
