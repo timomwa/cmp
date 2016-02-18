@@ -2,20 +2,26 @@ package com.pixelandtag.sms.smpp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.BasicConfigurator;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
-import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.smssenders.Sender;
+import com.pixelandtag.util.Pair;
 
 public class SMPPTest {
+	
+	public static BlockingQueue<Pair> queue = new LinkedBlockingQueue<Pair>(10000);
 	
 	public static void main(String[] args) throws InterruptedException {
 		BasicConfigurator.configure();
 		
 		Transceiver tranceiver = null;
+		
+		PDUWorker pduWorker = null;
 		
 		try{
 			
@@ -36,6 +42,8 @@ public class SMPPTest {
 			
 			tranceiver = new Transceiver(configs);
 			
+			pduWorker = new PDUWorker(queue);
+			pduWorker.start();
 			int c = 0;
 			while(true){
 				c++;
@@ -56,6 +64,8 @@ public class SMPPTest {
 			try{
 				if(tranceiver!=null)
 					tranceiver.disconnect();
+				if(pduWorker != null)
+					pduWorker.stop();
 			}catch(Exception exp){
 				exp.printStackTrace();
 			}
