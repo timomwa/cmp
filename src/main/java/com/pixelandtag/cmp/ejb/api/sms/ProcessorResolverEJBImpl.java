@@ -320,8 +320,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			
 			keyword = "DEFAULT";
 			
-			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
 			rows = qry.getResultList();
+			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
+			
 		}
 			
 		

@@ -115,15 +115,19 @@ public class LoginLogoutAction extends BaseActionBean  {
 				}
 				
 		    } catch ( UnknownAccountException uae ) {
+		    	logger.error(uae.getMessage(), uae);
 		    	resp.put("success", false);
 				resp.put("message", "No user with that name");
 			} catch ( IncorrectCredentialsException ice ) {
+				logger.error(ice.getMessage(), ice);
 		    	resp.put("success", false);
 				resp.put("message", "Incorrect password");
 			} catch ( LockedAccountException lae ) {
+				logger.error(lae.getMessage(), lae);
 		    	resp.put("success", false);
 				resp.put("message", "Your account is locked");
 			} catch ( AuthenticationException ae ) {
+				logger.error(ae.getMessage(), ae);
 		    	resp.put("success", false);
 				resp.put("message", "Wrong username and password");
 			}catch(Exception e){

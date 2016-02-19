@@ -19,16 +19,19 @@ import com.pixelandtag.util.Pair;
  * @author Paul
  *
  */
-public class PDUWorker extends Thread{
+public class PDUWorker implements Runnable{
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
 	private BlockingQueue<Pair> queue;
+	
+	private Thread thread;
+	
+	private boolean running = true;
 
 	public PDUWorker(BlockingQueue<Pair> queue) {
 
 		this.queue = queue;
-		start();
 	}
 
 	public void run() {
@@ -39,7 +42,7 @@ public class PDUWorker extends Thread{
 		DeliverSMResp response = null;
 		DeliverSM sm = null;
 		DataSM dataSM = null;
-		while (true)
+		while (running)
 			try {
 				p = this.queue.poll(500L, TimeUnit.SECONDS);
 				if (null != p) {
@@ -127,9 +130,8 @@ public class PDUWorker extends Thread{
 		}
 		String message = sm.getShortMessage();
 		String msisdn = sm.getSourceAddr().getAddress();
-
-		logger.info("msisdn = "+msisdn+", message = "+message);
-
+		
+		logger.info("Incoming from " + msisdn+" : "+message);
 	}
 
 	private void processMessage(DataSM dataSM) {
@@ -209,5 +211,25 @@ public class PDUWorker extends Thread{
 		} 
 
 		//update delivery
+	}
+	
+	public void start() {
+		if (this.thread != null) {
+			stop();
+		}
+		running = true;
+		this.thread = new Thread(this);
+		this.thread.start();
+	}
+
+	public void stop() {
+		running = false;
+		try {
+			synchronized (this.thread) {
+				this.thread.wait();
+			}
+		} catch (InterruptedException e) {
+			this.logger.error(e, e);
+		}
 	}
 }

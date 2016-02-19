@@ -56,3 +56,41 @@
 2016-02-18 16:31:47,413 750  [main] DEBUG smpp.Transceiver  - sendConcat: before session
 2016-02-18 16:31:47,970 1307 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
 2016-02-18 16:31:47,970 1307 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C69B7620 status:0
+2016-02-18 16:45:04,415 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:45:05,156 741  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:45:05,158 743  [main] INFO  smpp.Transceiver  -  >>> outgoing msgid: 6666683
+2016-02-18 16:45:05,158 743  [main] DEBUG smpp.Transceiver  - sendConcat: before session
+2016-02-18 16:45:05,763 1348 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
+2016-02-18 16:45:05,763 1348 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C6A016C8 status:0
+2016-02-18 16:45:10,695 6280 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: DeliverSM
+2016-02-18 16:45:18,631 14216 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:45:18,632 14217 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:45:28,623 24208 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: true - type: EnquireLink
+2016-02-18 16:45:28,623 24208 [Receiver-1] DEBUG smpp.Transceiver  - Is alive 
+2016-02-18 16:51:50,410 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:51:51,291 881  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:52:49,005 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:52:49,877 872  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:53:24,594 0    [main] INFO  smpp.Transceiver  - Trying to bind  Username:KYSDP Password:KYSDP ShortCode:32329
+2016-02-18 16:53:25,496 902  [main] INFO  smpp.Transceiver  - Binding successful :104.131.90.133
+2016-02-18 16:53:25,760 1166 [main] INFO  smpp.Transceiver  -  >>> outgoing msgid: 6666683
+2016-02-18 16:53:25,760 1166 [main] DEBUG smpp.Transceiver  - sendConcat: before session
+2016-02-18 16:53:26,388 1794 [Receiver-1] DEBUG smpp.Transceiver  - Got event  - isRequest: false - type: SubmitSMResp
+2016-02-18 16:53:26,388 1794 [Receiver-1] INFO  smpp.Transceiver  - <<< submit response for id:6666683 with SMSC MSGID: C6A30DF0 status:0
+2016-02-18 16:55:03,413 1    [main] ERROR smpp.SMPPReceiver  - java.net.SocketException: Network is unreachable
+java.net.SocketException: Network is unreachable
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:339)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:200)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:579)
+	at java.net.Socket.connect(Socket.java:528)
+	at java.net.Socket.<init>(Socket.java:425)
+	at java.net.Socket.<init>(Socket.java:208)
+	at javax.net.DefaultSocketFactory.createSocket(SocketFactory.java:271)
+	at org.smpp.TCPIPConnection.open(TCPIPConnection.java:244)
+	at com.pixelandtag.sms.smpp.SMPPReceiver.load(SMPPReceiver.java:70)
+	at com.pixelandtag.sms.smpp.SMPPReceiver.<init>(SMPPReceiver.java:61)
+	at com.pixelandtag.sms.smpp.SMPPTest.main(SMPPTest.java:48)
+2016-02-18 16:57:22,565 0    [main] INFO  smpp.SMPPReceiver  - Successfully loaded! serverip = 104.131.90.133, port = 5019

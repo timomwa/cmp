@@ -2,6 +2,8 @@ package com.pixelandtag.sms.smpp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.BasicConfigurator;
 
@@ -9,13 +11,19 @@ import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.smssenders.Sender;
+import com.pixelandtag.util.Pair;
 
 public class SMPPTest {
+	
+	public static BlockingQueue<Pair> queue = new LinkedBlockingQueue<Pair>(10000);
 	
 	public static void main(String[] args) throws InterruptedException {
 		BasicConfigurator.configure();
 		
 		Transceiver tranceiver = null;
+		SMPPReceiver receiver = null;
+		
+		PDUWorker pduWorker = null;
 		
 		try{
 			
@@ -31,10 +39,13 @@ public class SMPPTest {
 			opcoconfigs.put(Sender.SMPP_DESNPI, ProfileConfigs.createBasic(Sender.SMPP_DESNPI, "0") );
 			opcoconfigs.put(Sender.SMPP_SHORTCODE, ProfileConfigs.createBasic(Sender.SMPP_SHORTCODE, "32329") );
 			opcoconfigs.put(Sender.SMPP_VERSION, ProfileConfigs.createBasic(Sender.SMPP_VERSION, "52") );
+			opcoconfigs.put(Sender.SMPP_ID, ProfileConfigs.createBasic(Sender.SMPP_ID, "1") );
+			
 			SenderConfiguration configs = new SenderConfiguration();
 			configs.setOpcoconfigs(opcoconfigs);
 			
-			tranceiver = new Transceiver(configs);
+			//tranceiver = new Transceiver(configs);
+			receiver  = new SMPPReceiver(configs);
 			
 			OutgoingSMS outgoingsms = new OutgoingSMS();
 			outgoingsms.setMsisdn("254202407004");
@@ -42,7 +53,10 @@ public class SMPPTest {
 			
 			outgoingsms.setShortcode("32329");
 			outgoingsms.setSms(">>> SMS # "+23);
-			boolean success =  tranceiver.send(outgoingsms);
+			//boolean success =  tranceiver.send(outgoingsms);
+
+			/*pduWorker = new PDUWorker(queue);
+			pduWorker.start();*/
 			int c = 0;
 			while(true){
 				c++;
@@ -57,6 +71,8 @@ public class SMPPTest {
 			try{
 				if(tranceiver!=null)
 					tranceiver.disconnect();
+				if(pduWorker != null)
+					pduWorker.stop();
 			}catch(Exception exp){
 				exp.printStackTrace();
 			}

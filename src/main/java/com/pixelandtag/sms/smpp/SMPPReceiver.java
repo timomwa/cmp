@@ -71,6 +71,8 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 		} catch (IOException e) {
 			logger.error(e, e);
 		}
+		
+		logger.info("Successfully loaded! serverip = "+serverip+", port = "+serverport);
 	}
 
 	public void run() {
