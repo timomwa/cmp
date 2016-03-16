@@ -124,6 +124,8 @@ public class OrangeUSSD extends HttpServlet {
 		String value  = "";
 		String msg =  req.getParameter("msg");
 		
+		final StringBuffer sb = new StringBuffer();
+		sb.append("\n");
 		while(enums.hasMoreElements()){
 			
 			paramName = (String) enums.nextElement();
@@ -132,12 +134,12 @@ public class OrangeUSSD extends HttpServlet {
 			
 			String ip_addr = req.getRemoteAddr();
 			
-			System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
+			sb.append("\t\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value).append("\n");
 			
 		}
 		
-		System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"  : paramName: "+paramName+ " value: "+value);
-		
+		logger.info(sb.toString());
+		sb.setLength(0);
 		
 		watch.start();
 		
