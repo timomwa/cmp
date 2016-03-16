@@ -104,7 +104,7 @@ public class OrangeUSSD extends HttpServlet {
 		
 		logger.info("MO_ORANGE_USSD:"+body+"\n\n");
 		
-		String contextpath = getServletContext().getContextPath();
+		String contextpath = req.getRequestURI();
 		
 		logger.info("MO_ORANGE_USSD_CONTEXT_PATH:"+contextpath+"\n\n");
 		
