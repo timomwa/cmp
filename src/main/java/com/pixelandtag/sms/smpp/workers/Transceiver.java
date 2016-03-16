@@ -1,9 +1,9 @@
-package com.pixelandtag.sms.smpp;
+package com.pixelandtag.sms.smpp.workers;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.smpp.Connection;
@@ -28,7 +28,6 @@ import org.smpp.pdu.PDU;
 import org.smpp.pdu.PDUException;
 import org.smpp.pdu.Request;
 import org.smpp.pdu.Response;
-import org.smpp.pdu.SubmitMultiSMResp;
 import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.pdu.Unbind;
@@ -39,11 +38,14 @@ import org.smpp.util.ByteBuffer;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.sms.smpp.beans.ReceiverBean;
 import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.util.Concatenator;
+import com.pixelandtag.util.Pair;
 
 public class Transceiver extends Thread implements ServerPDUEventListener{
 	
+	private BlockingQueue<Pair> queue;
 
 	private Logger logger = Logger.getLogger(Transceiver.class);
 
@@ -72,10 +74,14 @@ public class Transceiver extends Thread implements ServerPDUEventListener{
 	private int destinationnpi;
 	private String shortcode;
 	private int version;
+	private int smppid;
+	private int altsmppid;
+	
+	private ReceiverBean receiverBean = null;
 	
 	public static boolean running = true;
 	
-	public Transceiver(SenderConfiguration configs){
+	public Transceiver(SenderConfiguration configs,BlockingQueue<Pair> queue){
 		debug = new LoggerDebug("smpp");
 		concatenator = new Concatenator();
 		serverip = configs.getOpcoconfigs().get(Sender.SMPP_IP).getValue();
@@ -89,6 +95,13 @@ public class Transceiver extends Thread implements ServerPDUEventListener{
 		destinationnpi = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_DESNPI).getValue());
 		shortcode = configs.getOpcoconfigs().get(Sender.SMPP_SHORTCODE).getValue();
 		version = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_VERSION).getValue());
+		
+		smppid = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_ID).getValue());
+		altsmppid = Integer.parseInt(configs.getOpcoconfigs().get(Sender.ALT_SMPP_ID).getValue());
+		receiverBean = new ReceiverBean(smppid, serverip, serverport, type, username, password, shortcode, version,
+				altsmppid);
+		
+		this.queue = queue;
 		this.smppconn = new TCPIPConnection(serverip, serverport);
 		try {
 			this.smppconn.open();
@@ -224,12 +237,12 @@ public class Transceiver extends Thread implements ServerPDUEventListener{
 		try {
 			if (pdu.isRequest()) {
 				if (((pdu instanceof DeliverSM)) || ((pdu.isRequest()) && ((pdu instanceof DataSM)))) {
+					this.queue.add(new Pair(this.receiverBean, event));
 					if ((pdu instanceof DataSM))
 						response = ((DataSM) pdu).getResponse();
 					else {
 						response = (DeliverSMResp) ((DeliverSM) pdu).getResponse();
 					}
-
 					response.setCommandId(-2147483643);
 					response.setCommandStatus(0);
 					response.setCommandLength(pdu.getCommandLength());

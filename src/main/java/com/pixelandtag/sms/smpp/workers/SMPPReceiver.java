@@ -1,6 +1,7 @@
-package com.pixelandtag.sms.smpp;
+package com.pixelandtag.sms.smpp.workers;
 
 import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.smpp.Connection;
@@ -23,9 +24,13 @@ import org.smpp.pdu.Response;
 import org.smpp.pdu.SubmitSM;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
+import com.pixelandtag.sms.smpp.beans.ReceiverBean;
 import com.pixelandtag.smssenders.Sender;
+import com.pixelandtag.util.Pair;
 
 public class SMPPReceiver extends Thread implements ServerPDUEventListener {
+
+	private BlockingQueue<Pair> queue;
 
 	private Logger logger = Logger.getLogger(getClass());
 
@@ -39,15 +44,18 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 	private String shortcode;
 	private int version;
 	private int smppid;
+	private int altsmppid;
 
 	private Session session;
 	private Connection smppconn = null;
 
 	public static boolean isalive = false;
-	
+
 	public static boolean running = true;
 
-	public SMPPReceiver(SenderConfiguration configs) {
+	private ReceiverBean receiverBean = null;
+
+	public SMPPReceiver(SenderConfiguration configs, BlockingQueue<Pair> queue) {
 		serverip = configs.getOpcoconfigs().get(Sender.SMPP_IP).getValue();
 		serverport = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_PORT).getValue());
 		type = configs.getOpcoconfigs().get(Sender.SMPP_TYPE).getValue();
@@ -56,8 +64,12 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 		shortcode = configs.getOpcoconfigs().get(Sender.SMPP_SHORTCODE).getValue();
 		version = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_VERSION).getValue());
 		smppid = Integer.parseInt(configs.getOpcoconfigs().get(Sender.SMPP_ID).getValue());
+		altsmppid = Integer.parseInt(configs.getOpcoconfigs().get(Sender.ALT_SMPP_ID).getValue());
 
+		receiverBean = new ReceiverBean(smppid, serverip, serverport, type, username, password, shortcode, version,
+				altsmppid);
 		this.debug = new LoggerDebug("SMPPReceiver");
+		this.queue = queue;
 		load();
 	}
 
@@ -101,6 +113,7 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 		try {
 			if (pdu.isRequest()) {
 				if (((pdu instanceof DeliverSM)) || ((pdu.isRequest()) && ((pdu instanceof DataSM)))) {
+					this.queue.add(new Pair(this.receiverBean, event));
 					if ((pdu instanceof DataSM))
 						response = ((DataSM) pdu).getResponse();
 					else {
@@ -222,7 +235,7 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 						isalive = true;
 					}
 				}
-			}else{
+			} else {
 				logger.error("SMPP Connection not open");
 			}
 		} catch (Exception e) {
@@ -234,6 +247,6 @@ public class SMPPReceiver extends Thread implements ServerPDUEventListener {
 	}
 
 	private void updateSMPP(boolean status) {
-		
+
 	}
 }

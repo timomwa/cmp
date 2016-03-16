@@ -1,4 +1,4 @@
-package com.pixelandtag.sms.smpp;
+package com.pixelandtag.sms.smpp.workers;
 
 import java.io.IOException;
 import java.util.HashMap;

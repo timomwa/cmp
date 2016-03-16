@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.sms.smpp.Transceiver;
+import com.pixelandtag.sms.smpp.workers.Transceiver;
 
 public class SMPPSender extends GenericSender {
 

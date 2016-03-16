@@ -1,4 +1,4 @@
-package com.pixelandtag.sms.smpp;
+package com.pixelandtag.sms.smpp.workers;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +11,7 @@ import org.smpp.pdu.DeliverSM;
 import org.smpp.pdu.DeliverSMResp;
 import org.smpp.pdu.PDU;
 
+import com.pixelandtag.sms.smpp.beans.ReceiverBean;
 import com.pixelandtag.util.Pair;
 
 /**
@@ -37,6 +38,7 @@ public class PDUWorker implements Runnable{
 	public void run() {
 
 		Pair p = null;
+		ReceiverBean receiverBean = null;
 		ServerPDUEvent event = null;
 		PDU pdu = null;
 		DeliverSMResp response = null;
@@ -46,6 +48,7 @@ public class PDUWorker implements Runnable{
 			try {
 				p = this.queue.poll(500L, TimeUnit.SECONDS);
 				if (null != p) {
+					receiverBean = (ReceiverBean) p.getA();
 					event = (ServerPDUEvent) p.getB();
 					pdu = event.getPDU();
 					this.logger.debug("PDU Command " + pdu.getCommandId());
@@ -62,14 +65,14 @@ public class PDUWorker implements Runnable{
 								case 1 :
 								case 3 :
 									try {
-										processMessage(sm);
+										processMessage(sm,receiverBean);
 									} catch (Exception e) {
 										this.logger.error(e);
 									}
 									break;
 								case Data.SM_SMSC_DLV_RCPT_TYPE :
 									try {
-										processDeliveryRequest(sm);
+										processDeliveryRequest(sm,receiverBean);
 									} catch (Exception e) {
 										this.logger.error(e);
 									}
@@ -90,14 +93,14 @@ public class PDUWorker implements Runnable{
 								case 1 :
 								case 3 :
 									try {
-										processMessage(dataSM);
+										processMessage(dataSM,receiverBean);
 									} catch (Exception e) {
 										this.logger.error(e);
 									}
 									break;
 								case Data.SM_SMSC_DLV_RCPT_TYPE :
 									try {
-										processDeliveryRequest(sm);
+										processDeliveryRequest(sm,receiverBean);
 									} catch (Exception e) {
 										this.logger.error(e);
 									}
@@ -122,7 +125,7 @@ public class PDUWorker implements Runnable{
 			}
 	}
 
-	private void processMessage(DeliverSM sm) {
+	private void processMessage(DeliverSM sm,ReceiverBean receiverBean) {
 
 		String shortcode = sm.getDestAddr().getAddress();
 		if (shortcode.indexOf(43) >= 0) {
@@ -131,10 +134,32 @@ public class PDUWorker implements Runnable{
 		String message = sm.getShortMessage();
 		String msisdn = sm.getSourceAddr().getAddress();
 		
+		if (null == message)
+			message = "";
+		message = message.replace((char) 17, '_');
+		message = message.trim();
+		if (((message.contains("_")) && (message.length() == 18))
+				|| ((message.startsWith("5")) && (message.length() == 19))) {
+			message = message.replace("_", " ");
+		}
+		try {
+			message = message.replace((char) 0, '@');
+			message = message.replace((char) 5, 'é');
+			message = message.replace((char) 2, '$');
+			message = message.replace((char) 4, 'ê');
+			message = message.replace((char) 6, 'ù');
+			message = message.replace((char) 8, 'ò');
+			message = message.replace((char) 9, 'ç');
+			message = message.replace((char) 31, 'È');
+		} catch (Exception e) {
+		}
+		message = message.replace("\n", "").replace("\r", "");
+		
 		logger.info("Incoming from " + msisdn+" : "+message);
+		logger.info("This message needs to go to a service.");
 	}
 
-	private void processMessage(DataSM dataSM) {
+	private void processMessage(DataSM dataSM,ReceiverBean receiverBean) {
 
 		String shortcode = dataSM.getDestAddr().getAddress();
 		if (shortcode.indexOf(43) >= 0) {
@@ -173,10 +198,34 @@ public class PDUWorker implements Runnable{
 
 		String msisdn = dataSM.getSourceAddr().getAddress();
 		
+		
+		if (null == message)
+			message = "";
+		message = message.replace((char) 17, '_');
+		message = message.trim();
+		if (((message.contains("_")) && (message.length() == 18))
+				|| ((message.startsWith("5")) && (message.length() == 19))) {
+			message = message.replace("_", " ");
+		}
+		try {
+			message = message.replace((char) 0, '@');
+			message = message.replace((char) 5, 'é');
+			message = message.replace((char) 2, '$');
+			message = message.replace((char) 4, 'ê');
+			message = message.replace((char) 6, 'ù');
+			message = message.replace((char) 8, 'ò');
+			message = message.replace((char) 9, 'ç');
+			message = message.replace((char) 31, 'È');
+		} catch (Exception e) {
+		}
+		message = message.replace("\n", "").replace("\r", "");
+		
 		//process
+		logger.info("Incoming from " + msisdn+" : "+message);
+		logger.info("This message needs to go to a service.");
 	}
 
-	public void processDeliveryRequest(DeliverSM sm) {
+	public void processDeliveryRequest(DeliverSM sm,ReceiverBean receiverBean) {
 
 		String shortcode = sm.getDestAddr().getAddress();
 		if (shortcode.indexOf(43) >= 0) {
@@ -210,6 +259,7 @@ public class PDUWorker implements Runnable{
 			logger.debug("msgid after: " + msgid);
 		} 
 
+		logger.info("Delivery request " + msisdn+" : "+msgid);
 		//update delivery
 	}
 	

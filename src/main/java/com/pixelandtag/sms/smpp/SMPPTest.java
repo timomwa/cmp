@@ -10,6 +10,8 @@ import org.apache.log4j.BasicConfigurator;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
+import com.pixelandtag.sms.smpp.workers.PDUWorker;
+import com.pixelandtag.sms.smpp.workers.Transceiver;
 import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.util.Pair;
 
@@ -21,7 +23,6 @@ public class SMPPTest {
 		BasicConfigurator.configure();
 		
 		Transceiver tranceiver = null;
-		SMPPReceiver receiver = null;
 		
 		PDUWorker pduWorker = null;
 		
@@ -40,20 +41,21 @@ public class SMPPTest {
 			opcoconfigs.put(Sender.SMPP_SHORTCODE, ProfileConfigs.createBasic(Sender.SMPP_SHORTCODE, "32329") );
 			opcoconfigs.put(Sender.SMPP_VERSION, ProfileConfigs.createBasic(Sender.SMPP_VERSION, "52") );
 			opcoconfigs.put(Sender.SMPP_ID, ProfileConfigs.createBasic(Sender.SMPP_ID, "1") );
+			opcoconfigs.put(Sender.ALT_SMPP_ID, ProfileConfigs.createBasic(Sender.ALT_SMPP_ID, "1") );
 			
 			SenderConfiguration configs = new SenderConfiguration();
 			configs.setOpcoconfigs(opcoconfigs);
 			
-			//tranceiver = new Transceiver(configs);
-			receiver  = new SMPPReceiver(configs);
 			
 			OutgoingSMS outgoingsms = new OutgoingSMS();
 			outgoingsms.setMsisdn("254202407004");
+			outgoingsms.setMsisdn("254773442134");
 			outgoingsms.setId(Long.valueOf(6666660+23));
+			tranceiver = new Transceiver(configs,queue);
 			
 			outgoingsms.setShortcode("32329");
 			outgoingsms.setSms(">>> SMS # "+23);
-			//boolean success =  tranceiver.send(outgoingsms);
+			boolean success =  tranceiver.send(outgoingsms);
 
 			/*pduWorker = new PDUWorker(queue);
 			pduWorker.start();*/
