@@ -104,6 +104,10 @@ public class OrangeUSSD extends HttpServlet {
 		
 		logger.info("MO_ORANGE_USSD:"+body+"\n\n");
 		
+		String contextpath = req.getContextPath();
+		
+		logger.info("MO_ORANGE_USSD_CONTEXT_PATH:"+contextpath+"\n\n");
+		
 		Enumeration<String> headernames = req.getHeaderNames();
 		String headerstr = "\n";
 		 while (headernames.hasMoreElements()) { 
@@ -149,15 +153,15 @@ public class OrangeUSSD extends HttpServlet {
 					+" <pages descr=\"News\">"
 					+" <page>"
 					+" Headlines<br/>"
-					+" <a href=\"#item1\">Interest rates cut</a><br/>"
-					+" <a href=\"#item2\">Concorde resumes service</a><br/>"
+					+" <a href=\""+contextpath+"?item=1\">Interest rates cut</a><br/>"
+					+" <a href=\""+contextpath+"?item=2\">Concorde resumes service</a><br/>"
 					+" </page>"
-					+" <page tag=\"item1\">"
+					+" <page tag=\""+contextpath+"?item=3\">"
 					+" WASHINGTON-In a much anticipated move, the Federal Reserve"
 					+" announced new rate cuts amid growing economic concerns.<br/>"
-					+" <a href=\"#item2\">Next article</a>"
+					+" <a href=\""+contextpath+"?item=4\">Next article</a>"
 					+" </page>"
-					+" <page tag=\"item2\">"
+					+" <page tag=\""+contextpath+"?item=5\">"
 					+" PARIS-Air France resumed its Concorde service Monday."
 					+" The plane had been grounded following a tragic accident."
 					+" </page>"
