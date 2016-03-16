@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="WebApp_ID" version="3.0"
-	xmlns="http://java.sun.com/xml/ns/javaee"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-	<display-name>CMP_HOME</display-name>
-	 <session-config>
-	     <tracking-mode>COOKIE</tracking-mode>
-	</session-config>
-	<listener>
-    	<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
-	</listener>
-	
-	<filter>
-   	 	<filter-name>ShiroFilter</filter-name>
-    	<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
-	</filter>
-	
-	
-	<filter>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>CMP_HOME</display-name>
+  <session-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+  <listener>
+    <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+  </listener>
+  <filter>
+    <filter-name>ShiroFilter</filter-name>
+    <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+  </filter>
+  <filter>
     <filter-name>Resteasy</filter-name>
     <filter-class>
              org.jboss.resteasy.plugins.server.servlet.FilterDispatcher
@@ -30,404 +25,300 @@
     <filter-name>Resteasy</filter-name>
     <url-pattern>/rest/*</url-pattern>
   </filter-mapping>
-	
-	 
-	
-	<filter>
-			<filter-name>DynamicMappingFilter</filter-name>
-			<filter-class>net.sourceforge.stripes.controller.DynamicMappingFilter
+  <filter>
+    <filter-name>DynamicMappingFilter</filter-name>
+    <filter-class>net.sourceforge.stripes.controller.DynamicMappingFilter
 	</filter-class>
-	</filter>
-	
-	<filter>
-	
-	 
-
-	<filter-name>StripesFilter</filter-name>
-			<filter-class>net.sourceforge.stripes.controller.StripesFilter
+  </filter>
+  <filter>
+    <filter-name>StripesFilter</filter-name>
+    <filter-class>net.sourceforge.stripes.controller.StripesFilter
 	</filter-class>
-	
-	<init-param>
-		<param-name>ActionResolver.Packages</param-name>
-		<param-value>com.pixelandtag.action</param-value>
-	</init-param>
-	<init-param>
-    	<param-name>LocalePicker.Locales</param-name>
-    	<param-value>en_US:UTF-8,ja:Shift_JIS</param-value>
-	</init-param>
-	<init-param>
-   		<param-name>LocalePicker.Locales</param-name>
-    	<param-value>en_US,ja</param-value>
-	</init-param>
-	
-	<init-param>
-        <param-name>Extension.Packages</param-name><!-- com.pixelandtag.cmp,com.pixelandtag.ext, -->
-        <param-value>org.stripesstuff.plugin,com.ext,com.pixelandtag.cmp,com.pixelandtag.ext,com.samaxes.stripes.inject</param-value>
-    </init-param>
-     <init-param>
-         <param-name>UnauthorizedResolutionURL</param-name>
-         <param-value>/unauthorized.jsp</param-value>
-     </init-param>
-    <!--init-param>
-        <param-name>SecurityManager.Class</param-name>
-        <param-value>com.pixelandtag.cmp.security.CMPSecurityManager</param-value>
-    </init-param-->
-    
     <init-param>
-   	 	<param-name>ExceptionHandler.Class</param-name>
-    	<param-value>com.pixelandtag.cmp.handlers.CMPExceptionHandler</param-value>
-	</init-param>
-	
-    <!--init-param> 
- 		 <param-name>Interceptor.Classes</param-name> 
-  			<param-value> org.stripesstuff.plugin.security.SecurityInterceptor</param-value> 
-		</init-param--> 
-	</filter>
-
-
-<servlet>
-	<servlet-name>DispatcherServlet</servlet-name>
-	<servlet-class>net.sourceforge.stripes.controller.DispatcherServlet</servlet-class>
-	<load-on-startup>1</load-on-startup>
-</servlet>
-
-
-<filter-mapping>
-	<filter-name>StripesFilter</filter-name>
-	<servlet-name>DispatcherServlet</servlet-name>
-	<dispatcher>REQUEST</dispatcher>
-	<dispatcher>FORWARD</dispatcher>
-</filter-mapping>
-
-<filter-mapping>
-     <filter-name>StripesFilter</filter-name>
-     <url-pattern>*.jsp</url-pattern>
-     <dispatcher>REQUEST</dispatcher>
- </filter-mapping>
- 
- <filter-mapping>
+      <param-name>ActionResolver.Packages</param-name>
+      <param-value>com.pixelandtag.action</param-value>
+    </init-param>
+    <init-param>
+      <param-name>LocalePicker.Locales</param-name>
+      <param-value>en_US:UTF-8,ja:Shift_JIS</param-value>
+    </init-param>
+    <init-param>
+      <param-name>LocalePicker.Locales</param-name>
+      <param-value>en_US,ja</param-value>
+    </init-param>
+    <init-param>
+      <param-name>Extension.Packages</param-name>
+      <param-value>org.stripesstuff.plugin,com.ext,com.pixelandtag.cmp,com.pixelandtag.ext,com.samaxes.stripes.inject</param-value>
+    </init-param>
+    <init-param>
+      <param-name>UnauthorizedResolutionURL</param-name>
+      <param-value>/unauthorized.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>ExceptionHandler.Class</param-name>
+      <param-value>com.pixelandtag.cmp.handlers.CMPExceptionHandler</param-value>
+    </init-param>
+  </filter>
+  <servlet>
+    <servlet-name>DispatcherServlet</servlet-name>
+    <servlet-class>net.sourceforge.stripes.controller.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <filter-mapping>
+    <filter-name>StripesFilter</filter-name>
+    <servlet-name>DispatcherServlet</servlet-name>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>StripesFilter</filter-name>
+    <url-pattern>*.jsp</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+  <filter-mapping>
     <filter-name>ShiroFilter</filter-name>
     <url-pattern>/*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>INCLUDE</dispatcher>
     <dispatcher>ERROR</dispatcher>
-</filter-mapping>
-
-<servlet-mapping>
-	<servlet-name>DispatcherServlet</servlet-name>
-	<url-pattern>*.action</url-pattern>
-</servlet-mapping>
-	
-	
-	<servlet>
-		<description>
+  </filter-mapping>
+  <servlet-mapping>
+    <servlet-name>DispatcherServlet</servlet-name>
+    <url-pattern>*.action</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>CMPHome</display-name>
-		<servlet-name>CMPHome</servlet-name>
-		<servlet-class>com.pixelandtag.cmp.CMPHome</servlet-class>
-	</servlet>
-	
-	<servlet-mapping>
-		<servlet-name>CMPHome</servlet-name>
-		<url-pattern>/cmp</url-pattern>
-	</servlet-mapping>
-	
-
-	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
-	</welcome-file-list>
-
-
-
-	<servlet>
-		<description>
+    <display-name>CMPHome</display-name>
+    <servlet-name>CMPHome</servlet-name>
+    <servlet-class>com.pixelandtag.cmp.CMPHome</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CMPHome</servlet-name>
+    <url-pattern>/cmp</url-pattern>
+  </servlet-mapping>
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <description>
 		</description>
-		<display-name>MakeDraw</display-name>
-		<servlet-name>MakeDraw</servlet-name>
-		<servlet-class>com.pixelandtag.web.draw.MakeDraw
+    <display-name>MakeDraw</display-name>
+    <servlet-name>MakeDraw</servlet-name>
+    <servlet-class>com.pixelandtag.web.draw.MakeDraw
 		</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>MakeDraw</servlet-name>
-		<url-pattern>/makedraw</url-pattern>
-	</servlet-mapping>
-
-
-
-
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>MakeDraw</servlet-name>
+    <url-pattern>/makedraw</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>MakeTriviaDraw</display-name>
-		<servlet-name>MakeTriviaDraw</servlet-name>
-		<servlet-class>com.pixelandtag.web.draw.MakeTriviaDraw
+    <display-name>MakeTriviaDraw</display-name>
+    <servlet-name>MakeTriviaDraw</servlet-name>
+    <servlet-class>com.pixelandtag.web.draw.MakeTriviaDraw
 		</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>MakeTriviaDraw</servlet-name>
-		<url-pattern>/maketriviadraw</url-pattern>
-	</servlet-mapping>
-
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>MakeTriviaDraw</servlet-name>
+    <url-pattern>/maketriviadraw</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>Logout</display-name>
-		<servlet-name>Logout</servlet-name>
-		<servlet-class>com.pixelandtag.web.draw.Logout
+    <display-name>Logout</display-name>
+    <servlet-name>Logout</servlet-name>
+    <servlet-class>com.pixelandtag.web.draw.Logout
 		</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>Logout</servlet-name>
-		<url-pattern>/logout</url-pattern>
-	</servlet-mapping>
-
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Logout</servlet-name>
+    <url-pattern>/logout</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>TriviaInteract</display-name>
-		<servlet-name>TriviaInteract</servlet-name>
-		<servlet-class>com.pixelandtag.web.draw.TriviaInteract
+    <display-name>TriviaInteract</display-name>
+    <servlet-name>TriviaInteract</servlet-name>
+    <servlet-class>com.pixelandtag.web.draw.TriviaInteract
 		</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>TriviaInteract</servlet-name>
-		<url-pattern>/triviainteract</url-pattern>
-	</servlet-mapping>
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>TriviaInteract</servlet-name>
+    <url-pattern>/triviainteract</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>USSDReceiver</display-name>
-		<servlet-name>USSDReceiver</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.USSDReceiver</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>USSDReceiver</servlet-name>
-		<url-pattern>/ussd</url-pattern>
-	</servlet-mapping>
-
-
-
-	<servlet>
-		<description>
+    <display-name>USSDReceiver</display-name>
+    <servlet-name>USSDReceiver</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.USSDReceiver</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>USSDReceiver</servlet-name>
+    <url-pattern>/ussd</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>DNReceiver</display-name>
-		<servlet-name>DNReceiver</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.DNReceiver
+    <display-name>DNReceiver</display-name>
+    <servlet-name>DNReceiver</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.DNReceiver
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>DNReceiver</servlet-name>
-		<url-pattern>/dnotifications</url-pattern>
-	</servlet-mapping>
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DNReceiver</servlet-name>
+    <url-pattern>/dnotifications</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>triviasearch</display-name>
-		<servlet-name>triviasearch</servlet-name>
-		<servlet-class>com.pixelandtag.web.draw.TriviaSearch
+    <display-name>triviasearch</display-name>
+    <servlet-name>triviasearch</servlet-name>
+    <servlet-class>com.pixelandtag.web.draw.TriviaSearch
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>triviasearch</servlet-name>
-		<url-pattern>/triviasearch</url-pattern>
-	</servlet-mapping>
-
-
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>triviasearch</servlet-name>
+    <url-pattern>/triviasearch</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>triviastats</display-name>
-		<servlet-name>triviastats</servlet-name>
-		<servlet-class>com.pixelandtag.web.draw.TriviaStats
+    <display-name>triviastats</display-name>
+    <servlet-name>triviastats</servlet-name>
+    <servlet-class>com.pixelandtag.web.draw.TriviaStats
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>triviastats</servlet-name>
-		<url-pattern>/triviastats</url-pattern>
-	</servlet-mapping>
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>triviastats</servlet-name>
+    <url-pattern>/triviastats</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>respEditor</display-name>
-		<servlet-name>respEditor</servlet-name>
-		<servlet-class>com.pixelandtag.web.ResponseTextEditor
+    <display-name>respEditor</display-name>
+    <servlet-name>respEditor</servlet-name>
+    <servlet-class>com.pixelandtag.web.ResponseTextEditor
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>respEditor</servlet-name>
-		<url-pattern>/responseEditor</url-pattern>
-	</servlet-mapping>
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>respEditor</servlet-name>
+    <url-pattern>/responseEditor</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>controller</display-name>
-		<servlet-name>controller</servlet-name>
-		<servlet-class>com.pixelandtag.web.ResEditorControler
+    <display-name>controller</display-name>
+    <servlet-name>controller</servlet-name>
+    <servlet-class>com.pixelandtag.web.ResEditorControler
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>controller</servlet-name>
-		<url-pattern>/controller</url-pattern>
-	</servlet-mapping>
-
-
-
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>controller</servlet-name>
+    <url-pattern>/controller</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>msisdncontroller</display-name>
-		<servlet-name>msisdncontroller</servlet-name>
-		<servlet-class>com.pixelandtag.web.MsisdnController
+    <display-name>msisdncontroller</display-name>
+    <servlet-name>msisdncontroller</servlet-name>
+    <servlet-class>com.pixelandtag.web.MsisdnController
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>msisdncontroller</servlet-name>
-		<url-pattern>/msisdnController</url-pattern>
-	</servlet-mapping>
-
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>msisdncontroller</servlet-name>
+    <url-pattern>/msisdnController</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>msisdncheck</display-name>
-		<servlet-name>msisdncheck</servlet-name>
-		<servlet-class>com.pixelandtag.web.MsisdnChecker
+    <display-name>msisdncheck</display-name>
+    <servlet-name>msisdncheck</servlet-name>
+    <servlet-class>com.pixelandtag.web.MsisdnChecker
 		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>msisdncheck</servlet-name>
-		<url-pattern>/msisdncheck</url-pattern>
-	</servlet-mapping>
-
-
-
-	<servlet>
-		<description>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>msisdncheck</servlet-name>
+    <url-pattern>/msisdncheck</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>giant</display-name>
-		<servlet-name>giant</servlet-name>
-		<servlet-class>com.pixelandtag.web.Giant</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>giant</servlet-name>
-		<url-pattern>/giant</url-pattern>
-	</servlet-mapping>
-	
-	
-	<servlet-mapping>
-		<servlet-name>MOreceiver</servlet-name>
-		<url-pattern>/sms</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>OrangeMOReceiver</servlet-name>
-		<url-pattern>/dn</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>SafaricomMOReceiver</servlet-name>
-		<url-pattern>/safchat</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>seinbound</servlet-name>
-		<url-pattern>/seinbound</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>OrangeUSSD</servlet-name>
-		<url-pattern>/orangeussd</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>OrangeUSSD</servlet-name>
-		<url-pattern>/orangeussd.php</url-pattern>
-	</servlet-mapping>
-	
-	
-	<servlet>
-		<description>
+    <display-name>giant</display-name>
+    <servlet-name>giant</servlet-name>
+    <servlet-class>com.pixelandtag.web.Giant</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>giant</servlet-name>
+    <url-pattern>/giant</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MOreceiver</servlet-name>
+    <url-pattern>/sms</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>OrangeMOReceiver</servlet-name>
+    <url-pattern>/dn</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>SafaricomMOReceiver</servlet-name>
+    <url-pattern>/safchat</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>seinbound</servlet-name>
+    <url-pattern>/seinbound</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>OrangeUSSD</servlet-name>
+    <url-pattern>/orangeussd</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>OrangeUSSD</servlet-name>
+    <url-pattern>/orangeussd.php</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description>
 		</description>
-		<display-name>report</display-name>
-		<servlet-name>report</servlet-name>
-		<servlet-class>com.pixelandtag.reports.Report</servlet-class>
-	</servlet>
-	<servlet>
-		<description>
+    <display-name>report</display-name>
+    <servlet-name>report</servlet-name>
+    <servlet-class>com.pixelandtag.reports.Report</servlet-class>
+  </servlet>
+  <servlet>
+    <description>
 		</description>
-		<display-name>MOreceiver</display-name>
-		<servlet-name>MOreceiver</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.MOReceiver</servlet-class>
-	</servlet>
-	<servlet>
-		<description>
+    <display-name>MOreceiver</display-name>
+    <servlet-name>MOreceiver</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.MOReceiver</servlet-class>
+  </servlet>
+  <servlet>
+    <description>
 		</description>
-		<display-name>OrangeMOReceiver</display-name>
-		<servlet-name>OrangeMOReceiver</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.OrangeMOReceiver</servlet-class>
-	</servlet>
-	
-	
-	<servlet>
-		<description>
+    <display-name>OrangeMOReceiver</display-name>
+    <servlet-name>OrangeMOReceiver</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.OrangeMOReceiver</servlet-class>
+  </servlet>
+  <servlet>
+    <description>
 		</description>
-		<display-name>SafaricomMOReceiver</display-name>
-		<servlet-name>SafaricomMOReceiver</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.SafaricomMOReceiver</servlet-class>
-	</servlet>
-	<servlet>
-		<description>
+    <display-name>SafaricomMOReceiver</display-name>
+    <servlet-name>SafaricomMOReceiver</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.SafaricomMOReceiver</servlet-class>
+  </servlet>
+  <servlet>
+    <description>
 		Subscription Engine</description>
-		<display-name>seinbound</display-name>
-		<servlet-name>seinbound</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.SEInboundAirtel</servlet-class>
-	</servlet>
-	<servlet>
-		<description>
+    <display-name>seinbound</display-name>
+    <servlet-name>seinbound</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.SEInboundAirtel</servlet-class>
+  </servlet>
+  <servlet>
+    <description>
 		orangeussd</description>
-		<display-name>OrangeUSSD</display-name>
-		<servlet-name>OrangeUSSD</servlet-name>
-		<servlet-class>com.pixelandtag.mo.sms.OrangeUSSD</servlet-class>
-	</servlet>
-	
-	
-	
-	
-	
-	
-	
-
-
-
-
-
+    <display-name>OrangeUSSD</display-name>
+    <servlet-name>OrangeUSSD</servlet-name>
+    <servlet-class>com.pixelandtag.mo.sms.OrangeUSSD</servlet-class>
+  </servlet>
 </web-app>

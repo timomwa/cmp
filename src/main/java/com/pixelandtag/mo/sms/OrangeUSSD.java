@@ -1,6 +1,9 @@
 package com.pixelandtag.mo.sms;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 
@@ -97,6 +100,9 @@ public class OrangeUSSD extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
+		final String body = getBody(req);
+		
+		logger.info("MO_ORANGE_USSD:"+body+"\n\n");
 		
 		Enumeration<String> headernames = req.getHeaderNames();
 		String headerstr = "\n";
@@ -324,6 +330,49 @@ public class OrangeUSSD extends HttpServlet {
 		}
 
 	    
+	}
+	
+	
+	
+	public String getBody(HttpServletRequest request) throws IOException {
+
+	    String body = null;
+	    StringBuilder stringBuilder = new StringBuilder();
+	    BufferedReader bufferedReader = null;
+	    InputStream inputStream = null;
+	    
+	    try {
+	        inputStream = request.getInputStream();
+	        if (inputStream != null) {
+	            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+	            char[] charBuffer = new char[128];
+	            int bytesRead = -1;
+	            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+	                stringBuilder.append(charBuffer, 0, bytesRead);
+	            }
+	        } else {
+	            stringBuilder.append("");
+	        }
+	    } catch (IOException ex) {
+	        logger.error(ex.getMessage(),ex);
+	    } finally {
+	    	
+	        if (bufferedReader != null) {
+	            try {
+	                bufferedReader.close();
+	            } catch (IOException ex) {
+	            	 logger.error(ex.getMessage(),ex);
+	            }
+	        }
+	        
+	        try {
+	        	inputStream.close();
+            } catch (IOException ex) {
+            }
+	    }
+
+	    body = stringBuilder.toString();
+	    return body;
 	}
 
 }
