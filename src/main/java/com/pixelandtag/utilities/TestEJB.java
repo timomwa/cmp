@@ -67,7 +67,7 @@ public class TestEJB {
 			
 			 configsEJB = (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");
 			 
-			 OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
+			 /*OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
 			 
 			 System.out.println("\n"+opco+"\n");
 			 
@@ -79,11 +79,11 @@ public class TestEJB {
 			 
 			 
 			 for(String ke : profileconfigs.keySet())
-				 System.out.println(ke+" : "+profileconfigs.get(ke).getValue());
+				 System.out.println(ke+" : "+profileconfigs.get(ke).getValue());*/
 			 
 			 
-			 if(true)
-				 return;
+			/* if(true)
+				 return;*/
 			 
 			/* MTsms mtsms = new MTsms();
 			 mtsms.setMsisdn("254770178979");//0770178979
@@ -95,13 +95,13 @@ public class TestEJB {
 			 
 			 OutgoingSMS mtsms = new OutgoingSMS();
 			 
-			 mtsms.setSms("Hello Tim, welcome to the pixelAndTag cross-platform SMS Gateway!");
+			 mtsms.setSms("Sent via Orange gateway - oneAPI");
 			 mtsms.setShortcode("32329");
 			 mtsms.setCmp_tx_id(String.valueOf(4654534354L));//Random val
 			 
 			 
-			 mtsms.setMsisdn("254735594326");//0770178979////254734606096//0772079509
-			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-3");
+			 mtsms.setMsisdn("254202407004");//0770178979////254734606096//0772079509//254733446767//254202407004
+			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-7");
 			 
 			 
 			 

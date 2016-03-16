@@ -19,6 +19,7 @@ import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
 import com.pixelandtag.cmp.dao.opco.OpcoSenderProfileDAOI;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 
 
@@ -54,9 +55,9 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 	}
 	
 	@Override
-	public OpcoSenderReceiverProfile getActiveProfileForOpco(String opcocode){
+	public OpcoSenderReceiverProfile getActiveProfileForOpco(String opcocode) throws ConfigurationException{
 		OperatorCountry opco = opcoEJB.findOpcoByCode(opcocode);
-		return opcosenderprofDAO.findBy("opco", opco);
+		return opcosenderprofDAO.findActiveProfile(opco);
 	}
 	
 	@Override

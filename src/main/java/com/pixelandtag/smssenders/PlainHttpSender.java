@@ -295,7 +295,9 @@ public class PlainHttpSender extends GenericSender {
 		logger.info("\n\n\t\t>>>url>>> : ["+url
 				+"]\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
-				"\n\t\t>>>response>>> : "+resp.getBody()+"\n\n");
+				"\n\n\t\t<<<response<<< : "+resp.getBody()+"\n\n");
+		
+		logger.info("\n\t\t<<< http resp cpde <<< : "+resp.getResp_code());
 		
 		response.setRespcode(String.valueOf(resp.getResp_code()));
 		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success
