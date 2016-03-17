@@ -49,7 +49,7 @@ public class SMPPTest {
 			
 			OutgoingSMS outgoingsms = new OutgoingSMS();
 			outgoingsms.setMsisdn("254202407004");
-			outgoingsms.setMsisdn("254773442134");
+			//outgoingsms.setMsisdn("254773442134");
 			outgoingsms.setId(Long.valueOf(6666660+23));
 			tranceiver = new Transceiver(configs,queue);
 			
