@@ -95,16 +95,16 @@ public class TestEJB {
 			 
 			 OutgoingSMS mtsms = new OutgoingSMS();
 			 
-			 mtsms.setSms("Sent via Orange gateway - oneAPI");
-			 mtsms.setShortcode("32329");
-			 mtsms.setCmp_tx_id(String.valueOf(4654534354L));//Random val
+			 mtsms.setSms("Sent via Safaricom gateway - parlay x");
+			 mtsms.setShortcode("20419");
+			 mtsms.setCmp_tx_id(String.valueOf(4654534358L));//Random val
 			 
 			 
-			 mtsms.setMsisdn("254202407004");//0770178979////254734606096//0772079509//254733446767//254202407004
-			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-7");
+			 mtsms.setMsisdn("254720988636");//0770178979////254734606096//0772079509//254733446767//254202407004
+			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-02");
 			 
 			 
-			 
+			 mtsms.setParlayx_serviceid("6017272000116315");
 			 mtsms.setOpcosenderprofile(opcosenderprofile);
 			
 			 

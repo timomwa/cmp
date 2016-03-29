@@ -78,7 +78,7 @@ public class ProfileTemplate implements Serializable{
 	@Enumerated(EnumType.STRING)
 	private TemplateType type;
 	
-	@Column(name="name")
+	@Column(name="name", unique=true, nullable=false)
 	@Index(name="opctpltfidx")
 	private String name;
 	

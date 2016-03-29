@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 
 import org.apache.commons.codec.binary.Hex;
 
+@SuppressWarnings("restriction")
 public class EncryptorImpl implements Encryptor {
 	
 	private sun.misc.BASE64Encoder encoder = null;
@@ -16,7 +17,7 @@ public class EncryptorImpl implements Encryptor {
 	
 
 	@Override
-	public String encrypt(String username, String password, String method) throws Exception {
+	public String encode(String username, String password, String method) throws Exception {
 		
 		if(method.equalsIgnoreCase(Encryptor.BASIC_BASE64)){
 			
@@ -25,6 +26,21 @@ public class EncryptorImpl implements Encryptor {
 		}else if(method.equalsIgnoreCase(Encryptor.BASIC_MD5)){
 			md5digestor.reset();
 			md5digestor.update(password.getBytes(Charset.forName("UTF8")));
+			return new String(Hex.encodeHex(md5digestor.digest()));
+		}
+		return null;
+	}
+	
+	@Override
+	public String encode(String encodable, String method) throws Exception {
+		
+		if(method.equalsIgnoreCase(Encryptor.BASIC_BASE64)){
+			
+			return encoder.encode( encodable.getBytes() ); 
+			
+		}else if(method.equalsIgnoreCase(Encryptor.BASIC_MD5)){
+			md5digestor.reset();
+			md5digestor.update(encodable.getBytes(Charset.forName("UTF8")));
 			return new String(Hex.encodeHex(md5digestor.digest()));
 		}
 		return null;

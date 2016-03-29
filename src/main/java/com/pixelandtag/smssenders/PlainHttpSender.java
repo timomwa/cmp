@@ -2,6 +2,7 @@ package com.pixelandtag.smssenders;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,6 +94,16 @@ public class PlainHttpSender extends GenericSender {
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),outgoingsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),outgoingsms.getMsisdn()));//"msisdn"
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
+		if(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME).getValue(),outgoingsms.getParlayx_serviceid()));//"parlayxserviceid"
+		try {
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TIMESTAMP_PARAM_NAME).getValue(),dateToString(outgoingsms.getTimestamp(),HTTP_PAYLOAD_TIMESTAMP_FORMAT)));
+		} catch (ParseException e1) {
+			logger.error(e1.getMessage(), e1);
+			throw new MessageSenderException(" Could not convert the timestamp "+outgoingsms.getTimestamp()
+					+" to the format "+HTTP_PAYLOAD_TIMESTAMP_FORMAT);
+		}
+		
 		
 		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("yes")){
 			
@@ -137,7 +148,7 @@ public class PlainHttpSender extends GenericSender {
 				
 				String digest = "";
 				try {
-					digest = encryptor.encrypt(username,password, encryptionmethod);
+					digest = encryptor.encode(username,password, encryptionmethod);
 				} catch (Exception e) {
 					logger.error(e.getMessage(),e);
 					throw new MessageSenderException("Could not encrypt header params",e);
@@ -210,6 +221,48 @@ public class PlainHttpSender extends GenericSender {
 						+http_payload_template_name+"\" for this profile ("+httppayloadtemplate.getProfile().toString()+") "
 						+ "hasn't been found. First check if the name is "
 						+ "correct in the opco_configs table and matches in the opco_templates table");
+			
+			
+			ProfileConfigs encryptionmode = this.configuration.get(HTTP_PAYLOAD_ENCRYPTION_MODE);
+			
+			String digest = "";
+			
+			if(encryptionmode!=null){//WE assume parlay x
+				if(this.configuration.get(HTTP_PAYLOAD_PARAM_PREFIX+"spId")==null){
+					throw new MessageSenderException("could not find the configuration "+(HTTP_PAYLOAD_PARAM_PREFIX+"spId")
+							+". If this is a parlay x config, this value must be provided");
+				}
+				
+				if(this.configuration.get(HTTP_PAYLOAD_PLAIN_PASSWORD)==null){
+					throw new MessageSenderException("Could not find the configuration "+HTTP_PAYLOAD_PLAIN_PASSWORD
+							+". If this is a parlayx config, this value must be provided!");
+				}
+				
+				if(this.configuration.get(HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME)==null){
+					throw new MessageSenderException("Could not find the configuration "+HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME
+							+". If this is a parlayx config, this value must be provided!");
+				}
+					
+				String spid_param_name = this.configuration.get(HTTP_PAYLOAD_PARAM_PREFIX+"spId").getValue();
+				String parlayx_password_plain = this.configuration.get(HTTP_PAYLOAD_PLAIN_PASSWORD).getValue();
+				String sppassword_param_name = this.configuration.get(HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME).getValue();
+				
+				if(this.configuration.get(sppassword_param_name)==null){
+					throw new MessageSenderException("Could not find the configuration "+sppassword_param_name
+							+". If this is a parlayx config, this value must be provided!");
+				}
+				
+				String parlayx_pass_param = this.configuration.get(sppassword_param_name).getValue();
+				String encryptionmethod = encryptionmode.getValue();
+				try {
+					digest = encryptor.encode(spid_param_name+parlayx_password_plain+dateToString(outgoingsms.getTimestamp(),HTTP_PAYLOAD_TIMESTAMP_FORMAT), encryptionmethod);
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+					throw new MessageSenderException("Could not encrypt header params",e);
+				}
+				payload_template = payload_template.replaceAll("\\$\\{"+parlayx_pass_param+"\\}", Matcher.quoteReplacement(digest) );
+			}
+			
 			
 			for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){//Any other header param
 				

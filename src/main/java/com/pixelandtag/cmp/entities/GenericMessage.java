@@ -90,6 +90,9 @@ public class GenericMessage implements Serializable{
 	@Column(name="isSubscription", nullable=false)
 	private Boolean isSubscription;
 	
+	@Column(name="parlayx_serviceid")
+	private String parlayx_serviceid;
+	
 	@PreUpdate
 	@PrePersist
 	public void onCreate(){
@@ -257,6 +260,16 @@ public class GenericMessage implements Serializable{
 	}
 
 
+	public String getParlayx_serviceid() {
+		return parlayx_serviceid;
+	}
+
+
+	public void setParlayx_serviceid(String parlayx_serviceid) {
+		this.parlayx_serviceid = parlayx_serviceid;
+	}
+
+
 	@Override
 	public String toString() {
 		return "GenericMessage [id=" + id + ", shortcode=" + shortcode
@@ -267,8 +280,9 @@ public class GenericMessage implements Serializable{
 				+ ", serviceid=" + serviceid + ", split=" + split
 				+ ", event_type=" + event_type + ", price_point_keyword="
 				+ price_point_keyword + ", moprocessor=" + moprocessor
-				+ ", isSubscription=" + isSubscription + "]";
+				+ ", isSubscription=" + isSubscription + ", parlayx_serviceid="
+				+ parlayx_serviceid + "]";
 	}
-	
+
 	
 }

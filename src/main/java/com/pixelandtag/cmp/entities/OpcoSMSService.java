@@ -80,6 +80,9 @@ public class OpcoSMSService implements Serializable {
 	@Column(name="doubleconfirm")
 	private Boolean doubleconfirm;
 	
+	@Column(name="serviceid")
+	private String serviceid;//for parlay x.
+	
 	@PreUpdate
 	@PrePersist
 	public void update(){
@@ -147,13 +150,21 @@ public class OpcoSMSService implements Serializable {
 		this.doubleconfirm = doubleconfirm;
 	}
 
+	public String getServiceid() {
+		return serviceid;
+	}
+
+	public void setServiceid(String serviceid) {
+		this.serviceid = serviceid;
+	}
+
 	@Override
 	public String toString() {
-		return "OpcoSMSService [id=" + id + ",\n smsservice=" + smsservice
-				+ ",\n opco=" + opco + ",\n moprocessor=" + moprocessor
-				+ ",\n price=" + price + ",\n billingType=" + billingType
-				+ ",\n doubleconfirm=" + doubleconfirm + "]";
+		return "OpcoSMSService [id=" + id + ", smsservice=" + smsservice
+				+ ", opco=" + opco + ", moprocessor=" + moprocessor
+				+ ", price=" + price + ", billingType=" + billingType
+				+ ", doubleconfirm=" + doubleconfirm + ", serviceid="
+				+ serviceid + "]";
 	}
-	
 	
 }
