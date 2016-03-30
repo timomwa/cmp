@@ -25,6 +25,8 @@ insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`
 insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080258,'string', now(),'http_payload_param_serviceid','34',89016857);
 
 
+
+
 INSERT INTO `pixeland_content360`.`profile_templates` (`id`, `effectiveDate`, `name`, `type`, `value`, `profile_id_fk`) VALUES (3, '2016-03-17 00:00:00', 'parlayx_template', 'PAYLOAD', '<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:v3=\"http://www.csapi.org/schema/parlayx/common/v3_1\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/send/v3_1/local\"><soapenv:Header><v3:RequestSOAPHeader><spId>${spId}</spId><spPassword>${spPassword}</spPassword><timeStamp></timeStamp><serviceId>${serviceid}</serviceId></v3:RequestSOAPHeader></soapenv:Header><soapenv:Body><loc:sendSms><loc:addresses>tel:${msisdn}</loc:addresses><loc:senderName>${shortcode}</loc:senderName><loc:message>${sms}</loc:message><loc:receiptRequest><endpoint></endpoint><interfaceName>${interfaceName}</interfaceName><correlator>${txid}</correlator></loc:receiptRequest></loc:sendSms></soapenv:Body></soapenv:Envelope>', 89016857);
 
 

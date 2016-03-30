@@ -1,5 +1,6 @@
 package com.pixelandtag.utilities;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class TestEJB {
 			 mtsms.setMsisdn("254720988636");//0770178979////254734606096//0772079509//254733446767//254202407004
 			 OpcoSenderReceiverProfile opcosenderprofile = opcosenderprofileEJB.getActiveProfileForOpco("KEN-639-02");
 			 
-			 
+			 mtsms.setTimestamp(new Date());
 			 mtsms.setParlayx_serviceid("6017272000116315");
 			 mtsms.setOpcosenderprofile(opcosenderprofile);
 			

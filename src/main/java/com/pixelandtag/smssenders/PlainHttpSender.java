@@ -260,7 +260,7 @@ public class PlainHttpSender extends GenericSender {
 					logger.error(e.getMessage(),e);
 					throw new MessageSenderException("Could not encrypt header params",e);
 				}
-				payload_template = payload_template.replaceAll("\\$\\{"+parlayx_pass_param+"\\}", Matcher.quoteReplacement(digest) );
+				payload_template = payload_template.replaceAll("\\$\\{"+sppassword_param_name+"\\}", Matcher.quoteReplacement(digest) );
 			}
 			
 			

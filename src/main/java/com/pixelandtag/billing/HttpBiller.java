@@ -111,7 +111,7 @@ public class HttpBiller extends GenericBiller {
 				
 				String digest = "";
 				try {
-					digest = encryptor.encrypt(username,password, encryptionmethod);
+					digest = encryptor.encode(username,password, encryptionmethod);
 				} catch (Exception e) {
 					logger.error(e.getMessage(),e);
 					throw new BillerConfigException("Could not encrypt header params",e);
