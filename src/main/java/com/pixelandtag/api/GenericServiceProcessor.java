@@ -12,6 +12,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
@@ -187,12 +188,16 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		OpcoSMSService opcosmsserv = opco_service_cache.get( key_ ) ;
 		
 		if(opcosmsserv==null){
-			opcosmsserv = getEJB().getOpcoSMSService(outgoingsms.getServiceid(), outgoingsms.getOpcosenderprofile().getOpco()); 
+			try {
+				opcosmsserv = getEJB().getOpcoSMSService(outgoingsms.getServiceid(), outgoingsms.getOpcosenderprofile().getOpco());
+			} catch (ServiceNotLinkedToOpcoException e) {
+				logger.error(e.getMessage(), e);
+			} 
 			opco_service_cache.put(key_  , opcosmsserv);
 		}
 		
 		outgoingsms.setPrice(opcosmsserv.getPrice());
-		outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid());
+		outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid()); 
 		
 		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0 || (opcosmsserv.getBillingType()!=null && opcosmsserv.getBillingType() == BillingType.MO_BILLING )){//if price is zero, or if it's MO billing
 			outgoingsms.setCharged(true);
