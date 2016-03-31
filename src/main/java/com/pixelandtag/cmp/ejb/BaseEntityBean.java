@@ -54,6 +54,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -877,6 +878,12 @@ public class BaseEntityBean implements BaseEntityI {
 	@Override
 	public OutgoingSMS sendMT(OutgoingSMS outgoingsms) throws Exception {
 		return queueprocEJB.saveOrUpdate(outgoingsms);
+	}
+
+
+	@Override
+	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco) throws  ServiceNotLinkedToOpcoException {
+		return opcosmsserviceejb.getOpcoSMSService(serviceid, opco);
 	}
 
 

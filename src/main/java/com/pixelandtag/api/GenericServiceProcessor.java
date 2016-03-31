@@ -2,6 +2,8 @@ package com.pixelandtag.api;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
@@ -10,7 +12,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
@@ -76,6 +80,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	//private static final String COLON = ":";
 	public static final String SUBSCRIPTION_CONFIRMATION = "ON";
 	public static final String SUBSCRIPTION_ADVICE = "SUBSCRIPTION_ADVICE";
+	private Map<Long, OpcoSMSService> opco_service_cache = new HashMap<Long, OpcoSMSService>();
 
 	
 	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, price, subscription) " +
@@ -177,9 +182,22 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(OutgoingSMS) ");
 		logger.debug("mo_.getPrice().doubleValue() "+outgoingsms.getPrice().doubleValue());
 		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+outgoingsms.getPrice().compareTo(BigDecimal.ZERO));
-		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0){//if price is zero
+		
+		Long key_ = ( outgoingsms.getServiceid().longValue() +  outgoingsms.getOpcosenderprofile().getOpco().getId().longValue() );
+		OpcoSMSService opcosmsserv = opco_service_cache.get( key_ ) ;
+		
+		if(opcosmsserv==null){
+			opcosmsserv = getEJB().getOpcoSMSService(outgoingsms.getServiceid(), outgoingsms.getOpcosenderprofile().getOpco()); 
+			opco_service_cache.put(key_  , opcosmsserv);
+		}
+		
+		outgoingsms.setPrice(opcosmsserv.getPrice());
+		outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid());
+		
+		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0 || (opcosmsserv.getBillingType()!=null && opcosmsserv.getBillingType() == BillingType.MO_BILLING )){//if price is zero, or if it's MO billing
 			outgoingsms.setCharged(true);
-			outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+			BillingStatus status = opcosmsserv.getBillingType() == BillingType.MO_BILLING ? BillingStatus.SUCCESSFULLY_BILLED : BillingStatus.NO_BILLING_REQUIRED;
+			outgoingsms.setBilling_status(status);
 			logger.debug(" returning.... price is zero ");
 			return outgoingsms;
 		}

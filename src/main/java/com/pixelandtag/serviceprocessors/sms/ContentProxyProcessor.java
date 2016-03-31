@@ -6,7 +6,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -24,9 +26,11 @@ import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
@@ -42,6 +46,9 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	private CMPResourceBeanRemote cmpbean;
 	private GenericHTTPClient httpclient;
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
+	private OpcoSenderProfileEJBI opcosenderprofileEJB;
+	private Map<Long, OpcoSenderReceiverProfile> opco_sender_profile_cache = new HashMap<Long, OpcoSenderReceiverProfile>();
+	
 	
 
 	public ContentProxyProcessor() throws NamingException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
@@ -64,7 +71,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
-		
+		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 
@@ -75,15 +82,19 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		
 		try {
 			logger.info(" >>> incoming "+incomingsms.toString());
-			OpcoSMSService opcosmsserv = opcosmsserviceejb.getOpcoSMSService(incomingsms.getServiceid(), incomingsms.getOpco());
-			outgoingsms.setPrice(opcosmsserv.getPrice());
-			outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid());
-			// TODO Auto-generated method stub
-			final RequestObject req = new RequestObject(incomingsms);
-			final String KEYWORD = req.getKeyword().trim();
-			final String MESSAGE = req.getMsg().trim();
-			final Long serviceid = incomingsms.getServiceid();
-			final String MSISDN = req.getMsisdn();
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMoprocessor().getForwarding_url() ::: "+incomingsms.getMoprocessor().getForwarding_url());
+			
+			OpcoSenderReceiverProfile opcotrxprofile = opco_sender_profile_cache.get(incomingsms.getOpco().getId());
+			if(opcotrxprofile==null){
+				opcotrxprofile = opcosenderprofileEJB.getActiveProfileForOpco(incomingsms.getOpco().getId());
+				opco_sender_profile_cache.put(incomingsms.getOpco().getId(), opcotrxprofile);
+			}
+			
+			
+			outgoingsms.setOpcosenderprofile(opcotrxprofile);
+			
+			
+			
 			
 			GenericHTTPParam param = new GenericHTTPParam();
 			param.setUrl(incomingsms.getMoprocessor().getForwarding_url());
@@ -95,11 +106,12 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
 			//incomingsms.getMoprocessor()
 			
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMoprocessor().getForwarding_url() ::: "+incomingsms.getMoprocessor().getForwarding_url());
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms());
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getCmp_tx_id() ::: "+incomingsms.getCmp_tx_id());
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getShortcode() ::: "+incomingsms.getShortcode());
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getSms() ::: "+incomingsms.getSms());
-			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
+			
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
 			

@@ -7,7 +7,9 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
@@ -44,7 +46,8 @@ public interface BaseEntityI {
 	public void createSuccesBillRec(Billable billable);
 	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
-	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid);
+	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid) throws ServiceNotLinkedToOpcoException;
+	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco);
 	
 	
 
