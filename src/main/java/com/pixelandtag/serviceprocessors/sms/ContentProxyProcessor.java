@@ -74,7 +74,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		try {
-			
+			logger.info(" >>> incoming "+incomingsms.toString());
 			OpcoSMSService opcosmsserv = opcosmsserviceejb.getOpcoSMSService(incomingsms.getServiceid(), incomingsms.getOpco());
 			outgoingsms.setPrice(opcosmsserv.getPrice());
 			outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid());
@@ -90,11 +90,15 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			param.setId(incomingsms.getId());
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 			qparams.add(new BasicNameValuePair("cptxid", incomingsms.getCmp_tx_id()));
-			qparams.add(new BasicNameValuePair("sourceaddress",incomingsms.getSms()));	
+			qparams.add(new BasicNameValuePair("sourceaddress",incomingsms.getShortcode()));	
 			qparams.add(new BasicNameValuePair("msisdn",incomingsms.getMsisdn()));
+			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
 			//incomingsms.getMoprocessor()
 			
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms());
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getCmp_tx_id() ::: "+incomingsms.getCmp_tx_id());
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getShortcode() ::: "+incomingsms.getShortcode());
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getSms() ::: "+incomingsms.getSms());
 			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
