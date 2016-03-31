@@ -145,7 +145,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		String type_ = incomingparams.get(Receiver.HTTP_RECEIVER_TYPE);
 		MediumType type = ( type_!=null && !type_.isEmpty() ) ? MediumType.get(type_) : MediumType.sms;
 		
-		
+		logger.info(">>> receiver_has_payload.getValue() >>> "+receiver_has_payload.getValue());
 		if(receiver_has_payload.getValue().equalsIgnoreCase("yes")){
 		
 			if(expectedcontenttype==null || 
@@ -157,18 +157,14 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			String payload = incomingparams.get(Receiver.HTTP_RECEIVER_PAYLOAD);
 			
 			String contenttype = expectedcontenttype.getValue();
-			
+			logger.info("contenttype>>> "+contenttype);
 			if(contenttype.equalsIgnoreCase("xml")){
 				msisdn = getValue(payload, msisdn_param_name_cfg.getValue());
-				msisdn = stripStrippables(msisdn,strippable_string);
 				shortcode = getValue(payload, shortcode_param_name_cfg.getValue());
-				shortcode = stripStrippables(shortcode,strippable_string);
 				sms = getValue(payload, sms_param_name_cfg.getValue());
 				if(txid_param_name_cfg!=null && (txid_param_name_cfg.getValue()!=null || 
 						!txid_param_name_cfg.getValue().isEmpty())){
 					opcotxid = getValue(payload, txid_param_name_cfg.getValue() );
-					opcotxid = stripStrippables(opcotxid,strippable_string);
-					
 				}
 			}
 			
@@ -208,6 +204,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(shortcode==null || shortcode.isEmpty())
 			throw new  ConfigurationException("shortcode not provided in request. Please provide this");
 		
+		opcotxid = stripStrippables(opcotxid,strippable_string);
+		msisdn = stripStrippables(msisdn,strippable_string);
+		shortcode = stripStrippables(shortcode,strippable_string);
 		
 		dndEJB.removeFromDNDList(msisdn);
 		
@@ -399,8 +398,10 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			return  originalStr;
 		if(strippable_string!=null && strippable_string.getValue()!=null && !strippable_string.getValue().isEmpty()){
 			String[] strippables = strippable_string.getValue().split(",");
-			for(String strippable : strippables)
+			for(String strippable : strippables){
+				logger.info(">>>> strippable : "+strippable);
 				originalStr = originalStr.replaceAll(  Matcher.quoteReplacement(strippable), Matcher.quoteReplacement("") )   ;
+			}
 		}
 		return originalStr.trim();
 	}
