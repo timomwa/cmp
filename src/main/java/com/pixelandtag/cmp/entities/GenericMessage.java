@@ -166,7 +166,7 @@ public class GenericMessage implements Serializable{
 
 
 	public BigDecimal getPrice() {
-		return price;
+		return price==null ? BigDecimal.ZERO : price;
 	}
 
 

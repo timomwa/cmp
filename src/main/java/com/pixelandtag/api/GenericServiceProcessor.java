@@ -186,6 +186,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		Billable billable = null;
 		
+		
 		try{
 			
 			billable = getEJB().find(Billable.class, "cp_tx_id",outgoingsms.getCmp_tx_id());

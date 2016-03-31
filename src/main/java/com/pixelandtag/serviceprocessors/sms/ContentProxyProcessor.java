@@ -23,7 +23,9 @@ import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
@@ -39,6 +41,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	private StopWatch watch;
 	private CMPResourceBeanRemote cmpbean;
 	private GenericHTTPClient httpclient;
+	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	
 
 	public ContentProxyProcessor() throws NamingException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
@@ -60,6 +63,8 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		context = new InitialContext(props);
 		cmpbean =  (CMPResourceBeanRemote) 
 	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
+		
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 
@@ -69,6 +74,10 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		try {
+			
+			OpcoSMSService opcosmsserv = opcosmsserviceejb.getOpcoSMSService(incomingsms.getServiceid(), incomingsms.getOpco());
+			outgoingsms.setPrice(opcosmsserv.getPrice());
+			outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid());
 			// TODO Auto-generated method stub
 			final RequestObject req = new RequestObject(incomingsms);
 			final String KEYWORD = req.getKeyword().trim();
