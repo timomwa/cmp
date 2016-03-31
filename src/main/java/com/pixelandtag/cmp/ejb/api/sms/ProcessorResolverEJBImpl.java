@@ -400,9 +400,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(strippable_string!=null && strippable_string.getValue()!=null && !strippable_string.getValue().isEmpty()){
 			String[] strippables = strippable_string.getValue().split(",");
 			for(String strippable : strippables)
-				originalStr = originalStr.replaceAll("\\$\\{"+strippable+"\\}", Matcher.quoteReplacement("") )   ;
+				originalStr = originalStr.replaceAll(  Matcher.quoteReplacement(strippable), Matcher.quoteReplacement("") )   ;
 		}
-		return originalStr;
+		return originalStr.trim();
 	}
 	
 	

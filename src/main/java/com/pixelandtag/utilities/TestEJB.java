@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -38,11 +39,27 @@ public class TestEJB {
 	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private static ConfigsEJBI configsEJB;
 	
+	
+	
+	public static String stripStrippables(String originalStr, String strippable_string){
+		if((originalStr==null || originalStr.isEmpty()))
+			return  originalStr;
+		if(strippable_string!=null && strippable_string!=null && !strippable_string.isEmpty()){
+			String[] strippables = strippable_string.split(",");
+			for(String strippable : strippables){
+				originalStr = originalStr.replaceAll( Matcher.quoteReplacement(strippable), Matcher.quoteReplacement("") );   
+			}
+		}
+		return originalStr;
+	}
+	
+	
 	public static void main(String[] args) throws Exception {
 		try{
 			String[] repla = "tel:,skits:,loc:".split(",");
-			for(String seg : repla)
-				System.out.println(">> seg = "+seg);
+			String originalstr = "<smsServiceActivationNumber>tel:40235</smsServiceActivationNumber>";
+			
+				System.out.println(  stripStrippables(originalstr,"tel:,skits:,loc:") );
 			
 			if(true)
 				return;
