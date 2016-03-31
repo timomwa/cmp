@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -127,7 +128,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		ProfileConfigs txid_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_OPCO_TX_ID_PARAM_NAME);
 		ProfileConfigs receiver_has_payload = profileconfigs.get(Receiver.HTTP_RECEIVER_HAS_PAYLOAD);
 		ProfileConfigs expectedcontenttype = profileconfigs.get(Receiver.HTTP_RECEIVER_EXPECTED_CONTENTTYPE);
-		ProfileConfigs mo_medium_source = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
+	    ProfileConfigs mo_medium_source = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
+	    ProfileConfigs strippable_string = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
 		
 		
 		for(String param : mandatory)
@@ -158,11 +160,15 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			
 			if(contenttype.equalsIgnoreCase("xml")){
 				msisdn = getValue(payload, msisdn_param_name_cfg.getValue());
+				msisdn = stripStrippables(msisdn,strippable_string);
 				shortcode = getValue(payload, shortcode_param_name_cfg.getValue());
+				shortcode = stripStrippables(shortcode,strippable_string);
 				sms = getValue(payload, sms_param_name_cfg.getValue());
 				if(txid_param_name_cfg!=null && (txid_param_name_cfg.getValue()!=null || 
 						!txid_param_name_cfg.getValue().isEmpty())){
 					opcotxid = getValue(payload, txid_param_name_cfg.getValue() );
+					opcotxid = stripStrippables(opcotxid,strippable_string);
+					
 				}
 			}
 			
@@ -385,6 +391,18 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		int start = xml.indexOf(startTag)+startTag.length();
 		int end  = xml.indexOf(endTag);
 		return xml.substring(start, end);
+	}
+	
+	
+	private String stripStrippables(String originalStr, ProfileConfigs strippable_string){
+		if((originalStr==null || originalStr.isEmpty()))
+			return  originalStr;
+		if(strippable_string!=null && strippable_string.getValue()!=null && !strippable_string.getValue().isEmpty()){
+			String[] strippables = strippable_string.getValue().split(",");
+			for(String strippable : strippables)
+				originalStr = originalStr.replaceAll("\\$\\{"+strippable+"\\}", Matcher.quoteReplacement("") )   ;
+		}
+		return originalStr;
 	}
 	
 	

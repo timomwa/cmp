@@ -40,7 +40,12 @@ public class TestEJB {
 	
 	public static void main(String[] args) throws Exception {
 		try{
+			String[] repla = "tel:,skits:,loc:".split(",");
+			for(String seg : repla)
+				System.out.println(">> seg = "+seg);
 			
+			if(true)
+				return;
 			BasicConfigurator.configure();
 			mtsenderprop  = FileUtils.getPropertyFile("mtsender.properties");
 			String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
