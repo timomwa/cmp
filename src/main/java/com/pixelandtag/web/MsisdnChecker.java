@@ -336,7 +336,7 @@ public class MsisdnChecker extends HttpServlet {
 		password = req.getParameter("password") != null ? req.getParameter("password") : password;
 		
 		boolean isUserLoggedIn = false;
-		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM "+DB+".user WHERE username = ? AND password = ?");
+		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM "+DB+".user WHERE u_name = ? AND u_pwd = ?");
 		pstmt.setString(1,username);
 		pstmt.setString(2,password);
 		ResultSet rs = pstmt.executeQuery();
