@@ -97,7 +97,8 @@ public class SafaricomUSSD extends HttpServlet {
 			PrintWriter pw = response.getWriter();
 			try{
 				
-				pw.write("200 OK");
+				pw.write("CON <message>1. Menu 1</message>"
+						+ "");
 				
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
