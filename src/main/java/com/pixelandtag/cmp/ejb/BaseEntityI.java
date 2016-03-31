@@ -46,8 +46,8 @@ public interface BaseEntityI {
 	public void createSuccesBillRec(Billable billable);
 	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
-	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid) throws ServiceNotLinkedToOpcoException;
-	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco);
+	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid) ;
+	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco) throws ServiceNotLinkedToOpcoException;
 	
 	
 

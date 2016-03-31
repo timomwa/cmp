@@ -883,7 +883,7 @@ public class BaseEntityBean implements BaseEntityI {
 
 	@Override
 	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco) throws  ServiceNotLinkedToOpcoException {
-		return opcosmsserviceejb.getOpcoSMSService(serviceid, opco);
+		return opcosmsserviceejb.getOpcoSMSService(serviceid, opco); 
 	}
 
 
