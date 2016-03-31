@@ -129,7 +129,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		ProfileConfigs receiver_has_payload = profileconfigs.get(Receiver.HTTP_RECEIVER_HAS_PAYLOAD);
 		ProfileConfigs expectedcontenttype = profileconfigs.get(Receiver.HTTP_RECEIVER_EXPECTED_CONTENTTYPE);
 	    ProfileConfigs mo_medium_source = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
-	    ProfileConfigs strippable_string = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
+	    ProfileConfigs strippable_string = profileconfigs.get(Receiver.STRIPPABLE_STRING);
 		
 		
 		for(String param : mandatory)
