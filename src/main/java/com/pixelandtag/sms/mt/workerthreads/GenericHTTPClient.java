@@ -400,17 +400,17 @@ public class GenericHTTPClient implements Serializable{
 			if(httpclient!=null)
 				httpclient.close();
 			httpclient = null;
-		}catch(Exception e){}
+		}catch(Exception e){logger.error(e.getMessage(), e);}
 		try{
 			cm.close();
 			if(cm!=null)
 				cm.close();
-		}catch(Exception e){}
+		}catch(Exception e){logger.error(e.getMessage(), e);}
 		try{
 			if(cm!=null)
 				cm.shutdown();
 			cm = null;
-		}catch(Exception e){}
+		}catch(Exception e){logger.error(e.getMessage(), e);}
 	}
 	
 }
