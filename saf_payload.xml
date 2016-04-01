@@ -1,24 +1,2 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Header>
-		<ns1:NotifySOAPHeader xmlns:ns1="http://www.huawei.com.cn/schema/common/v2_1">
-			<ns1:spId>601727</ns1:spId>
-			<ns1:serviceId>6017272000120157</ns1:serviceId>
-			<ns1:linkid>31191220075803041123</ns1:linkid>
-			<ns1:traceUniqueID>404090102571603311612208716004</ns1:traceUniqueID>
-		</ns1:NotifySOAPHeader>
-	</soapenv:Header>
-	<soapenv:Body>
-		<ns2:notifySmsReception
-			xmlns:ns2="http://www.csapi.org/schema/parlayx/sms/notification/v2_2/local">
-			<ns2:correlator>1232</ns2:correlator>
-			<ns2:message>
-				<message>CITAM</message>
-				<senderAddress>tel:720988636</senderAddress>
-				<smsServiceActivationNumber>tel:40235</smsServiceActivationNumber>
-				<dateTime>2016-03-31T16:12:20Z</dateTime>
-			</ns2:message>
-		</ns2:notifySmsReception>
-	</soapenv:Body>
-</soapenv:Envelope>
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:comm3="http://www.csapi.org/schema/parlayx/common/v3_1" xmlns:sms7="http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local"><SOAP-ENV:Header><comm3:NotifySOAPHeader><spId>36</spId><SAN>32329</SAN></comm3:NotifySOAPHeader></SOAP-ENV:Header><SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><sms7:notifySmsReception><sms7:correlator></sms7:correlator><sms7:message><message>K</message><senderAddress>254202407004</senderAddress><smsServiceActivationNumber>32329</smsServiceActivationNumber><dateTime>2016-04-01T08:11:33+03:00</dateTime></sms7:message></sms7:notifySmsReception></SOAP-ENV:Body></SOAP-ENV:Envelope>

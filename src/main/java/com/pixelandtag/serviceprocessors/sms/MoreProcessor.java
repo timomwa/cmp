@@ -226,7 +226,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				
 			}catch(Exception e){
-				
+				logger.error(e.getMessage(), e);
 			}
 			
 			
