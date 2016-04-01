@@ -97,7 +97,8 @@ public class PlainHttpSender extends GenericSender {
 		if(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME).getValue(),outgoingsms.getParlayx_serviceid()));//"parlayxserviceid"
 		try {
-			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TIMESTAMP_PARAM_NAME).getValue(),dateToString(outgoingsms.getTimestamp(),HTTP_PAYLOAD_TIMESTAMP_FORMAT)));
+			if(this.configuration.get(HTTP_TIMESTAMP_PARAM_NAME)!=null)
+				qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TIMESTAMP_PARAM_NAME).getValue(),dateToString(outgoingsms.getTimestamp(),HTTP_PAYLOAD_TIMESTAMP_FORMAT)));
 		} catch (ParseException e1) {
 			logger.error(e1.getMessage(), e1);
 			throw new MessageSenderException(" Could not convert the timestamp "+outgoingsms.getTimestamp()
