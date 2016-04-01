@@ -93,7 +93,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			
 			outgoingsms.setOpcosenderprofile(opcotrxprofile);
 			
-			
+			String isdcode = incomingsms.getOpco().getCountry().getIsdcode();
 			
 			
 			GenericHTTPParam param = new GenericHTTPParam();
@@ -102,15 +102,15 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 			qparams.add(new BasicNameValuePair("cptxid", incomingsms.getCmp_tx_id()));
 			qparams.add(new BasicNameValuePair("code",incomingsms.getShortcode()));	
-			qparams.add(new BasicNameValuePair("msisdn",incomingsms.getMsisdn()));
+			qparams.add(new BasicNameValuePair("msisdn",isdcode+incomingsms.getMsisdn()));
 			qparams.add(new BasicNameValuePair("text",incomingsms.getSms()));
 			//incomingsms.getMoprocessor()
 			
-			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMoprocessor().getForwarding_url() ::: "+incomingsms.getMoprocessor().getForwarding_url());
-			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms());
-			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getCmp_tx_id() ::: "+incomingsms.getCmp_tx_id());
-			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getShortcode() ::: "+incomingsms.getShortcode());
-			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getSms() ::: "+incomingsms.getSms());
+			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMoprocessor().getForwarding_url() ::: "+incomingsms.getMoprocessor().getForwarding_url()
+					+"\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms()
+					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getCmp_tx_id() ::: "+incomingsms.getCmp_tx_id()
+					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getShortcode() ::: "+incomingsms.getShortcode()
+					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMsisdn() ::: "+isdcode+incomingsms.getMsisdn());
 			
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
