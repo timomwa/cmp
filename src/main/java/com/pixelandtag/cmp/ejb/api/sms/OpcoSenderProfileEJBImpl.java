@@ -55,6 +55,11 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 	}
 	
 	@Override
+	public List<OpcoSenderReceiverProfile> getAllActiveSenderOrTranceiverProfiles() throws Exception{ 
+		return opcosenderprofDAO.getAllActiveSenderOrTranceiverProfiles();
+	}
+	
+	@Override
 	public OpcoSenderReceiverProfile getActiveProfileForOpco(String opcocode) throws ConfigurationException{
 		OperatorCountry opco = opcoEJB.findOpcoByCode(opcocode);
 		return opcosenderprofDAO.findActiveProfile(opco);

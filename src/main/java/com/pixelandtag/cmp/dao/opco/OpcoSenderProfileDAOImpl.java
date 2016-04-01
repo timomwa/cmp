@@ -43,4 +43,14 @@ public class OpcoSenderProfileDAOImpl extends  GenericDaoImpl<OpcoSenderReceiver
 				+ " . There can only be one active sender profile config at a time. Please disable all except one!");
 		return profiles!=null ? profiles.get(0) : null;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<OpcoSenderReceiverProfile> getAllActiveSenderOrTranceiverProfiles(){
+		Query qry = em.createQuery("select osp from OpcoSenderReceiverProfile osp where osp.active=:active AND (osp.profile.profiletype=:profiletype OR osp.profile.profiletype=:profiletypealt)  order by osp.pickorder desc");
+		qry.setParameter("active", Boolean.TRUE);
+		qry.setParameter("profiletype", ProfileType.SENDER);
+		qry.setParameter("profiletypealt", ProfileType.TRANCEIVER);
+		return qry.getResultList();
+	}
 }

@@ -16,5 +16,7 @@ public interface OpcoSenderProfileEJBI {
 	public OpcoSenderReceiverProfile getActiveProfileForOpco(Long opcoid);
 	
 	public MOProcessor getMOProcessorByTelcoShortcodeAndKeyword(String keyword, String shortcode, OperatorCountry opco);
+	
+	public List<OpcoSenderReceiverProfile> getAllActiveSenderOrTranceiverProfiles() throws Exception;
 
 }

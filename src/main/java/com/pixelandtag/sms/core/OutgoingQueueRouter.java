@@ -93,9 +93,9 @@ public class OutgoingQueueRouter extends Thread {
 		setDaemon(true);//I don't know what I am doing here 
 	}
 	
-	private void startWorkers() {
+	private void startWorkers() throws Exception {
 		
-		List<OpcoSenderReceiverProfile> profiles = opcosenderprofEJB.getAllActiveProfiles();
+		List<OpcoSenderReceiverProfile> profiles = opcosenderprofEJB.getAllActiveSenderOrTranceiverProfiles();
 		
 		for(OpcoSenderReceiverProfile opcoprofile : profiles){
 			
