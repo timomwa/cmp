@@ -16,10 +16,12 @@ import com.pixelandtag.cmp.dao.opco.OpcoIPAddressMapDAOI;
 import com.pixelandtag.cmp.dao.opco.ProfileConfigsDAOI;
 import com.pixelandtag.cmp.dao.opco.ProfileTemplatesDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoIPAddressMap;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileType;
 import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
@@ -173,6 +175,12 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 		else
 			return null;
 		
+	}
+	
+	
+	@Override
+	public OpcoSenderReceiverProfile findActiveProfileByTypeOrTranceiver(OperatorCountry opco, ProfileType type) throws ConfigurationException{
+		return opcoprofilesDAO.findActiveReceiverOrTranceiver(opco, type);
 	}
 	
 	
