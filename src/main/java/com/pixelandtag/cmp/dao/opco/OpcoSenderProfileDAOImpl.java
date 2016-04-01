@@ -37,6 +37,11 @@ public class OpcoSenderProfileDAOImpl extends  GenericDaoImpl<OpcoSenderReceiver
 		qry.setParameter("profiletype", type);
 		qry.setParameter("profiletypealt", ProfileType.TRANCEIVER);
 		List<OpcoSenderReceiverProfile> profiles =  qry.getResultList();
+		if(profiles!=null && profiles.size()>0)
+		for(OpcoSenderReceiverProfile repr : profiles){
+			if(repr.getProfile().getProfiletype() == ProfileType.RECEIVER)
+				return repr;
+		}
 		if(profiles!=null && profiles.size()>1)
 			throw new ConfigurationException("The opco with id "+opco.getId()+", and operator name "
 		+opco.getOperator().getName()+", has more than one active sender receiver profile in the table opco_senderprofiles"

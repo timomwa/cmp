@@ -99,11 +99,16 @@ public class SenderReceiverProfile implements Serializable{
 	}
 
 
-	@Override
-	public String toString() {
-		return "SenderReceiverProfile [id=" + id + ", name=" + name
-				+ ", effectiveDate=" + effectiveDate + ", profiletype="
-				+ profiletype + ", active=" + active + "]";
+	public ProfileType getProfiletype() {
+		return profiletype;
 	}
+
+
+	public void setProfiletype(ProfileType profiletype) {
+		this.profiletype = profiletype;
+	}
+
+
+	
 	
 }
