@@ -39,6 +39,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileType;
 import com.pixelandtag.cmp.entities.subscription.DNDList;
 import com.pixelandtag.smssenders.JsonUtilI;
 import com.pixelandtag.smssenders.Receiver;
@@ -110,7 +111,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			throw new ConfigurationException("No operator identified by the IP address => "+ip_address);
 		
 	
-		OpcoSenderReceiverProfile profile = configsEJB.getActiveOpcoSenderReceiverProfile(opco);
+		OpcoSenderReceiverProfile profile = configsEJB.findActiveProfileByTypeOrTranceiver(opco, ProfileType.RECEIVER);
 		
 		if(profile==null)
 			throw new ConfigurationException(" The operator \""+opco.toString()
