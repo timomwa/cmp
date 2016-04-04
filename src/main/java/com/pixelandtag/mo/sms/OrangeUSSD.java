@@ -151,13 +151,19 @@ public class OrangeUSSD extends HttpServlet {
 		
 		watch.start();
 		
-		String menuid = req.getParameter("menuid");
+		int menuid = setdefaultifnull( req.getParameter("menuid") );
+		int languageid = setdefaultifnull( req.getParameter("languageid") );
+		int serviceid = setdefaultifnull( req.getParameter("serviceid") );
+		int menuitemid = setdefaultifnull( req.getParameter("menuitemid") );
+		int parent_level_id = setdefaultifnull( req.getParameter("parent_level_id") );
+		
 		
 		//String respxml = ussdmenuEJB.getMenu(1, -1, 1);
 		
 		
 		PrintWriter pw = resp.getWriter();
-		String response =  ussdmenuEJB.getMenu(1, -1, 1);
+		
+		String response =  ussdmenuEJB.getMenu(contextpath, languageid, parent_level_id, menuid); 
 		String x = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
 					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
 					+" <pages descr=\"News\">"
@@ -204,6 +210,17 @@ public class OrangeUSSD extends HttpServlet {
 		}
 		
 		
+	}
+
+	private int setdefaultifnull(String string) {
+		if(string==null || string.isEmpty())
+			return -1;
+		int i = -1;
+		try{
+			i = Integer.valueOf(string);
+		}catch(NumberFormatException nfe){
+		}
+		return i;
 	}
 
 	private String handleGeneralQuery(HttpServletRequest req) throws Exception {

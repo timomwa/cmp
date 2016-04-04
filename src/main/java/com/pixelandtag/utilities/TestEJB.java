@@ -88,7 +88,7 @@ public class TestEJB {
 			 
 			 ussdmenuEJB = (USSDMenuEJBI) context.lookup("cmp/USSDMenuEJBImpl!com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI");
 			 
-			 System.out.println(ussdmenuEJB.getMenu(1, -1, 1));
+			 System.out.println(ussdmenuEJB.getMenu("test",1, -1, 1));
 			 
 			 /*OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
 			 
