@@ -94,6 +94,13 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			outgoingsms.setOpcosenderprofile(opcotrxprofile);
 			
 			String isdcode = incomingsms.getOpco().getCountry().getIsdcode();
+			String msisdn = incomingsms.getMsisdn();
+			if(msisdn!=null){
+				if(!msisdn.trim().startsWith(isdcode)){
+					msisdn = isdcode+(msisdn.trim());
+					incomingsms.setMsisdn(msisdn);
+				}
+			}
 			
 			
 			GenericHTTPParam param = new GenericHTTPParam();
@@ -102,7 +109,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 			qparams.add(new BasicNameValuePair("cptxid", incomingsms.getCmp_tx_id()));
 			qparams.add(new BasicNameValuePair("code",incomingsms.getShortcode()));	
-			qparams.add(new BasicNameValuePair("msisdn",isdcode+incomingsms.getMsisdn()));
+			qparams.add(new BasicNameValuePair("msisdn",incomingsms.getMsisdn()));
 			qparams.add(new BasicNameValuePair("text",incomingsms.getSms()));
 			//incomingsms.getMoprocessor()
 			
@@ -110,7 +117,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 					+"\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms()
 					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getCmp_tx_id() ::: "+incomingsms.getCmp_tx_id()
 					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getShortcode() ::: "+incomingsms.getShortcode()
-					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMsisdn() ::: "+isdcode+incomingsms.getMsisdn());
+					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMsisdn() ::: "+incomingsms.getMsisdn());
 			
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
