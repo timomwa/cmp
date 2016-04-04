@@ -73,6 +73,7 @@ public class OrangeUSSD extends HttpServlet {
 	@EJB
 	private OpcoEJBI opcoEJB;
 	
+
 	@EJB
 	private ConfigsEJBI configsEJB;
 	
@@ -163,7 +164,7 @@ public class OrangeUSSD extends HttpServlet {
 		
 		PrintWriter pw = resp.getWriter();
 		
-		String response =  ussdmenuEJB.getMenu(contextpath, languageid, parent_level_id, menuid, menuitemid); 
+		String response =  ussdmenuEJB.getMenu(contextpath, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
 		String x = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
 					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
 					+" <pages descr=\"News\">"

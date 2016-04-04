@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -18,6 +19,9 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.smsmenu.MenuItem;
 
 @Stateless
@@ -26,6 +30,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
+	
+	@EJB
+	private OpcoSMSServiceEJBI opcosmserviceEJB;
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
@@ -39,7 +46,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI#getMenu(int, int, int)
 	 */
-	public String getMenu(String contextpath,int language_id, int parent_level_id, int menuid, int menuitemid){
+	public String getMenu(String contextpath,int language_id, int parent_level_id, int menuid, int menuitemid, OperatorCountry opco){
 		
 		language_id = language_id==-1 ? 1 : language_id;
 		menuid = menuid==-1 ? 1 : menuid;
@@ -58,26 +65,40 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			MenuItem menuitem =   menuitemid>-1 ? getMenuById(menuitemid) : getMenuByParentLevelId(language_id, parent_level_id, menuid);
 			LinkedHashMap<Integer, MenuItem> topMenus = menuitem.getSub_menus();
 			
-			Element page = new Element("page");
-			StringBuffer sb = new StringBuffer();
-			sb.append(menuitem.getName()+"<br/>");
-			for (Entry<Integer, MenuItem> entry : topMenus.entrySet()){
-				String menuname = entry.getValue().getName();
-				int menuitemid_ = entry.getValue().getId();
-				int languageid = entry.getValue().getLanguage_id();
-				int serviceid = entry.getValue().getService_id();
-				int menuid_ = entry.getValue().getMenu_id();
-				int parent_level_id_ = entry.getValue().getParent_level_id();
-				sb.append("<a href=\""+contextpath+"?menuitemid="
-				+menuitemid_+"&languageid="
-				+languageid+"&serviceid="
-				+serviceid+"&menuid="
-				+menuid_+"&parent_level_id="
-				+parent_level_id_+"\">"+menuname+"</a><br/>");
+			int serviceid = menuitem.getService_id();
+			
+			
+			if(topMenus!=null && topMenus.entrySet()!=null){
+				
+				Element page = new Element("page");
+				StringBuffer sb = new StringBuffer();
+				sb.append(menuitem.getName()+"<br/>");
+				
+				
+				for (Entry<Integer, MenuItem> entry : topMenus.entrySet()){
+					String menuname = entry.getValue().getName();
+					int menuitemid_ = entry.getValue().getId();
+					int languageid = entry.getValue().getLanguage_id();
+					int serviceid_ = entry.getValue().getService_id();
+					int menuid_ = entry.getValue().getMenu_id();
+					int parent_level_id_ = entry.getValue().getParent_level_id();
+					sb.append("<a href=\""+contextpath+"?menuitemid="
+					+menuitemid_+"&languageid="
+					+languageid+"&serviceid="
+					+serviceid_+"&menuid="
+					+menuid_+"&parent_level_id="
+					+parent_level_id_+"\">"+menuname+"</a><br/>");
+				}
+				page.setText(sb.toString());
+				sb.setLength(0);
+				rootelement.addContent(page);
+			
+			}else if(serviceid>-1){
+				
+				OpcoSMSService smsservice  = opcosmserviceEJB.getOpcoSMSService(Long.valueOf(serviceid), opco);
+				
 			}
-			page.setText(sb.toString());
-			sb.setLength(0);
-			rootelement.addContent(page);
+			
 			
 			xml = xmlOutput.outputString(doc);
 		} catch (Exception e) {

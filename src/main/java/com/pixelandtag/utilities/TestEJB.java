@@ -15,6 +15,7 @@ import org.apache.log4j.BasicConfigurator;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI;
 import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
@@ -40,6 +41,7 @@ public class TestEJB {
 	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private static USSDMenuEJBI ussdmenuEJB;
 	private static ConfigsEJBI configsEJB;
+	private static OpcoEJBI opcoEJB;
 	
 	
 	
@@ -88,7 +90,9 @@ public class TestEJB {
 			 
 			 ussdmenuEJB = (USSDMenuEJBI) context.lookup("cmp/USSDMenuEJBImpl!com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI");
 			 
-			 System.out.println(ussdmenuEJB.getMenu("test",1, -1, 1,-1)); 
+			 opcoEJB = (OpcoEJBI) context.lookup("cmp/OpcoEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI");
+			 
+			 System.out.println(ussdmenuEJB.getMenu("test",1, -1, 1,-1, opcoEJB.findOpcoByCode("KEN-639-7"))); 
 			 
 			 /*OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
 			 
