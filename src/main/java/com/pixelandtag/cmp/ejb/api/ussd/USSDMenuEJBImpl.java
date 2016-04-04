@@ -20,8 +20,13 @@ import org.jdom.output.XMLOutputter;
 
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
+import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.smsmenu.MenuItem;
 
 @Stateless
@@ -33,6 +38,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	@EJB
 	private OpcoSMSServiceEJBI opcosmserviceEJB;
+	
+	@EJB
+	private ProcessorResolverEJBI processorEJB;
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
@@ -46,7 +54,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI#getMenu(int, int, int)
 	 */
-	public String getMenu(String contextpath,int language_id, int parent_level_id, int menuid, int menuitemid, OperatorCountry opco){
+	public String getMenu(String contextpath, String msisdn, int language_id, int parent_level_id, int menuid, int menuitemid, OperatorCountry opco){
 		
 		language_id = language_id==-1 ? 1 : language_id;
 		menuid = menuid==-1 ? 1 : menuid;
@@ -67,12 +75,12 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 			int serviceid = menuitem.getService_id();
 			
+			Element page = new Element("page");
+			StringBuffer sb = new StringBuffer();
+			sb.append(menuitem.getName()+"<br/>");
+			
 			
 			if(topMenus!=null && topMenus.entrySet()!=null){
-				
-				Element page = new Element("page");
-				StringBuffer sb = new StringBuffer();
-				sb.append(menuitem.getName()+"<br/>");
 				
 				
 				for (Entry<Integer, MenuItem> entry : topMenus.entrySet()){
@@ -89,17 +97,48 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					+menuid_+"&parent_level_id="
 					+parent_level_id_+"\">"+menuname+"</a><br/>");
 				}
-				page.setText(sb.toString());
-				sb.setLength(0);
-				rootelement.addContent(page);
+				
 			
 			}else if(serviceid>-1){
 				
 				OpcoSMSService smsservice  = opcosmserviceEJB.getOpcoSMSService(Long.valueOf(serviceid), opco);
+				SMSService smsserv = smsservice.getSmsservice();//em.find(SMSService.class, Long.valueOf(serviceid+""));
+				logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid:: "+serviceid+ " CMD :"+(smsserv!=null ? smsserv.getCmd() : null));
+				
+				
+				MOProcessor proc = smsserv.getMoprocessor();
+				
+				IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+				incomingsms.setMsisdn(msisdn);
+				incomingsms.setServiceid(Long.valueOf( serviceid ));
+				incomingsms.setSms(smsserv.getCmd());
+				incomingsms.setShortcode(proc.getShortcode());
+				incomingsms.setPrice(smsserv.getPrice());
+				incomingsms.setCmp_tx_id(generateNextTxId());
+				incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
+				incomingsms.setServiceid(smsserv.getId());
+				incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
+				//incomingsms.setId(req.getMessageId());
+				incomingsms.setMoprocessor(proc);
+				incomingsms.setOpco(opco);
+				logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
+				
+				processorEJB.processMo(incomingsms);
+				
+				String resp = "";
+				if(smsserv.getCmd().equals("FIND")){
+					resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+				}else{
+					resp = "Request received and is being processed.";
+				}
+				
+				sb.append(resp+"<br/>");
 				
 			}
 			
-			
+			page.setText(sb.toString());
+			sb.setLength(0);
+			rootelement.addContent(page);
 			xml = xmlOutput.outputString(doc);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -263,6 +302,17 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		}
 		
 		return items;
+	}
+	
+	
+	
+	public String generateNextTxId(){
+		try {
+			Thread.sleep(3);
+		} catch (Exception e) {
+			logger.warn("\n\t\t::"+e.getMessage());
+		}
+		return String.valueOf(System.nanoTime());
 	}
 
 }

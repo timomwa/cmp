@@ -11,7 +11,7 @@ public interface USSDMenuEJBI {
 	 * @param menuid
 	 * @return
 	 */
-	public String getMenu(String contextpath, int language_id, int parent_level_id, int menuid, int menuitemid, OperatorCountry opco);
+	public String getMenu(String contextpath, String msisdn, int language_id, int parent_level_id, int menuid, int menuitemid, OperatorCountry opco);
 	
 	
 

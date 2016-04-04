@@ -92,7 +92,7 @@ public class TestEJB {
 			 
 			 opcoEJB = (OpcoEJBI) context.lookup("cmp/OpcoEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI");
 			 
-			 System.out.println(ussdmenuEJB.getMenu("test",1, -1, 1,-1, opcoEJB.findOpcoByCode("KEN-639-7"))); 
+			 System.out.println(ussdmenuEJB.getMenu("test","254202407004",1, -1, 1,-1, opcoEJB.findOpcoByCode("KEN-639-7"))); 
 			 
 			 /*OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
 			 

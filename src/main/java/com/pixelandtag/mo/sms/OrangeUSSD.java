@@ -120,7 +120,8 @@ public class OrangeUSSD extends HttpServlet {
 		     String headerValue = req.getHeader(headerName);  
 		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
 		 }
-		
+		 
+		   
 		 
 		 logger.info(headerstr+"\n\n");
 		 
@@ -158,13 +159,17 @@ public class OrangeUSSD extends HttpServlet {
 		int menuitemid = setdefaultifnull( req.getParameter("menuitemid") );
 		int parent_level_id = setdefaultifnull( req.getParameter("parent_level_id") );
 		
+		String msisdn = req.getHeader("user-msisdn");
+		String imsi = req.getHeader("user-imsi");
+		String sessionid = req.getHeader("http_gateway-session_id");
+		
 		
 		//String respxml = ussdmenuEJB.getMenu(1, -1, 1);
 		
 		
 		PrintWriter pw = resp.getWriter();
 		
-		String response =  ussdmenuEJB.getMenu(contextpath, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
+		String response =  ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
 		String x = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
 					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
 					+" <pages descr=\"News\">"
