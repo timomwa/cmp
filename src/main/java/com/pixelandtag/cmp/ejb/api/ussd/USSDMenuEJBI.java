@@ -9,7 +9,7 @@ public interface USSDMenuEJBI {
 	 * @param menuid
 	 * @return
 	 */
-	public String getMenu(String contextpath, int language_id, int parent_level_id, int menuid);
+	public String getMenu(String contextpath, int language_id, int parent_level_id, int menuid, int menuitemid);
 	
 	
 

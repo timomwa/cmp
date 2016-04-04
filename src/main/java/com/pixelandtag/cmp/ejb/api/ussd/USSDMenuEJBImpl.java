@@ -39,7 +39,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI#getMenu(int, int, int)
 	 */
-	public String getMenu(String contextpath,int language_id, int parent_level_id, int menuid){
+	public String getMenu(String contextpath,int language_id, int parent_level_id, int menuid, int menuitemid){
 		
 		language_id = language_id==-1 ? 1 : language_id;
 		menuid = menuid==-1 ? 1 : menuid;
@@ -55,20 +55,21 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		String xml = "";
 		
 		try {
-			MenuItem menuitem = getMenuByParentLevelId(language_id, parent_level_id, menuid);
+			MenuItem menuitem =   menuitemid>-1 ? getMenuById(menuitemid) : getMenuByParentLevelId(language_id, parent_level_id, menuid);
 			LinkedHashMap<Integer, MenuItem> topMenus = menuitem.getSub_menus();
 			
 			Element page = new Element("page");
 			StringBuffer sb = new StringBuffer();
+			sb.append(menuitem.getName()+"<br/>");
 			for (Entry<Integer, MenuItem> entry : topMenus.entrySet()){
 				String menuname = entry.getValue().getName();
-				int menuitemid = entry.getValue().getId();
+				int menuitemid_ = entry.getValue().getId();
 				int languageid = entry.getValue().getLanguage_id();
 				int serviceid = entry.getValue().getService_id();
 				int menuid_ = entry.getValue().getMenu_id();
 				int parent_level_id_ = entry.getValue().getParent_level_id();
 				sb.append("<a href=\""+contextpath+"?menuitemid="
-				+menuitemid+"&languageid="
+				+menuitemid_+"&languageid="
 				+languageid+"&serviceid="
 				+serviceid+"&menuid="
 				+menuid_+"&parent_level_id="

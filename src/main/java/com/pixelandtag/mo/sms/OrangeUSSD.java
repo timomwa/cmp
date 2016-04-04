@@ -163,7 +163,7 @@ public class OrangeUSSD extends HttpServlet {
 		
 		PrintWriter pw = resp.getWriter();
 		
-		String response =  ussdmenuEJB.getMenu(contextpath, languageid, parent_level_id, menuid); 
+		String response =  ussdmenuEJB.getMenu(contextpath, languageid, parent_level_id, menuid, menuitemid); 
 		String x = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
 					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
 					+" <pages descr=\"News\">"
