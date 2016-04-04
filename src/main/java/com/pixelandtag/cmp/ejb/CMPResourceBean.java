@@ -760,6 +760,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		return items;
 	}
+	
 	@SuppressWarnings("unchecked")
 	public MenuItem getTopMenu(int menu_id, int language_id)  throws Exception{
 

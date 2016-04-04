@@ -17,6 +17,7 @@ import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayI;
+import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
@@ -37,6 +38,7 @@ public class TestEJB {
 	private static TimezoneConverterI tzconvert;
 	private static SMSGatewayI smsgw;
 	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
+	private static USSDMenuEJBI ussdmenuEJB;
 	private static ConfigsEJBI configsEJB;
 	
 	
@@ -56,13 +58,7 @@ public class TestEJB {
 	
 	public static void main(String[] args) throws Exception {
 		try{
-			String[] repla = "tel:,skits:,loc:".split(",");
-			String originalstr = "<smsServiceActivationNumber>tel:40235</smsServiceActivationNumber>";
 			
-				System.out.println(  stripStrippables(originalstr,"tel:,skits:,loc:") );
-			
-			if(true)
-				return;
 			BasicConfigurator.configure();
 			mtsenderprop  = FileUtils.getPropertyFile("mtsender.properties");
 			String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
@@ -90,6 +86,10 @@ public class TestEJB {
 			
 			 configsEJB = (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");
 			 
+			 ussdmenuEJB = (USSDMenuEJBI) context.lookup("cmp/USSDMenuEJBImpl!com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI");
+			 
+			 System.out.println(ussdmenuEJB.getMenu(1, -1, 1));
+			 
 			 /*OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
 			 
 			 System.out.println("\n"+opco+"\n");
@@ -116,7 +116,7 @@ public class TestEJB {
 			 mtsms.setOpcoid(79497164L);
 			 */
 			 
-			 OutgoingSMS mtsms = new OutgoingSMS();
+			/* OutgoingSMS mtsms = new OutgoingSMS();
 			 
 			 mtsms.setSms("Sent via Safaricom gateway - parlay x");
 			 mtsms.setShortcode("20419");
@@ -131,7 +131,7 @@ public class TestEJB {
 			 mtsms.setOpcosenderprofile(opcosenderprofile);
 			
 			 
-			 smsgw.sendMT(mtsms);
+			 smsgw.sendMT(mtsms);*/
 			 
 			 //TODO - Have different configurations - Done!
 			 //TODO - Have Default configurations Airtel HTTP, parlayx, oneapi - introduce a profile field or something like that - Done!

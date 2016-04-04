@@ -28,6 +28,7 @@ import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
+import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -83,6 +84,9 @@ public class OrangeUSSD extends HttpServlet {
 	
 	@EJB
 	private DNDListEJBI dndEJB;
+	
+	@EJB
+	private USSDMenuEJBI ussdmenuEJB;
 
 
 	/**
@@ -147,8 +151,14 @@ public class OrangeUSSD extends HttpServlet {
 		
 		watch.start();
 		
+		String menuid = req.getParameter("menuid");
+		
+		//String respxml = ussdmenuEJB.getMenu(1, -1, 1);
+		
+		
 		PrintWriter pw = resp.getWriter();
-		String response ="<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
+		String response =  ussdmenuEJB.getMenu(1, -1, 1);
+		String x = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
 					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
 					+" <pages descr=\"News\">"
 					+" <page>"
@@ -169,6 +179,7 @@ public class OrangeUSSD extends HttpServlet {
 		
 		try{
 			
+			logger.info(">>> "+response);
 			pw.write(response);
 			
 		}catch(Exception e){
