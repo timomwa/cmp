@@ -145,11 +145,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		}
 		
 		sb.setLength(0);
-		sb.append("<page>Weather service<br/><form action=\"/cgi/weather\">");
-		sb.append("<entry kind=\"digits\" var=\"zip\">");
-		sb.append("<prompt>Zip code?</prompt>");
-		sb.append("</entry></form></page>");
+		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"); 
+		sb.append("<!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">");
+		sb.append("<pages>");
 		
+		sb.append("<page>");
+		sb.append(" Headlines <br /> <a href=\"/test.php?item=1\">Interest rates cut</a>");
+		sb.append("</page>");
+		
+		sb.append("</pages>");
 		xml = sb.toString();
 		rootelement.setText(sb.toString());
 		Document doc = new Document(rootelement); 
