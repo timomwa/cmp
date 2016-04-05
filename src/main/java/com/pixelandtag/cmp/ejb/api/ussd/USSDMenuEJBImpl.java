@@ -146,7 +146,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		
 		sb.setLength(0);
 		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"); 
-		sb.append("<!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">");
+		sb.append("<!DOCTYPE form SYSTEM \"cellflash-1.3.dtd\">");
 		sb.append("<pages>");
 		
 		sb.append("<page>");
