@@ -145,7 +145,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		}
 		
 		sb.setLength(0);
-		sb.append("<page>Weather service<form action=\"/cgi/weather\">");
+		sb.append("<page>Weather service<br/><form action=\"/cgi/weather\">");
 		sb.append("<entry kind=\"digits\" var=\"zip\">");
 		sb.append("<prompt>Zip code?</prompt>");
 		sb.append("</entry></form></page>");
