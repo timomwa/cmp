@@ -67,18 +67,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     
     public String getNextQuestionOrange(String baseurl, IncomingSMS incomingsms){
     	
-    	Element rootelement = new Element("pages");
-		rootelement.setAttribute("descr", "dating");
+    	//Element rootelement = new Element("pages");
+		//rootelement.setAttribute("descr", "dating");
 		
-		Document doc = new Document(rootelement); 
-		DocType doctype = new DocType("pages");
-		doctype.setSystemID("cellflash-1.3.dtd");
-		doc.setDocType(doctype);
+		
 		
 		String xml = "";
 		
 		
-		Element page = new Element("page");
+		Element rootelement = new Element("page");
 		StringBuffer sb = new StringBuffer();
 		
 		
@@ -147,9 +144,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 		}
 		
-		page.setText(sb.toString());
+		rootelement.setText(sb.toString());
+		Document doc = new Document(rootelement); 
+		DocType doctype = new DocType("pages");
+		doctype.setSystemID("cellflash-1.3.dtd");
+		doc.setDocType(doctype);
+		
+		
 		sb.setLength(0);
-		rootelement.addContent(page);
 		xml = xmlOutput.outputString(doc);
 		
 		return xml;
