@@ -145,11 +145,12 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		}
 		
 		sb.setLength(0);
-		sb.append("<form action=\"/cgi/weather\">");
+		sb.append("<page>Weather service<form action=\"/cgi/weather\">");
 		sb.append("<entry kind=\"digits\" var=\"zip\">");
 		sb.append("<prompt>Zip code?</prompt>");
-		sb.append("</entry></form>");
+		sb.append("</entry></form></page>");
 		
+		xml = sb.toString();
 		rootelement.setText(sb.toString());
 		Document doc = new Document(rootelement); 
 		DocType doctype = new DocType("pages");
@@ -158,7 +159,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		
 		
 		sb.setLength(0);
-		xml = xmlOutput.outputString(doc);
+		//xml = xmlOutput.outputString(doc);
 		
 		return xml;
 	}
