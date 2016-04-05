@@ -19,6 +19,8 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import com.pixelandtag.api.CelcomImpl;
+import com.pixelandtag.cmp.ejb.DatingServiceException;
+import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -26,6 +28,10 @@ import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.dating.entities.Person;
+import com.pixelandtag.dating.entities.PersonDatingProfile;
+import com.pixelandtag.dating.entities.ProfileAttribute;
+import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.smsmenu.MenuItem;
 
@@ -33,6 +39,8 @@ import com.pixelandtag.smsmenu.MenuItem;
 @Remote
 public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
+	private static final Object BR_NEW_LINE = "<br/>";
+
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
@@ -42,6 +50,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
 	
+	@EJB
+	private DatingServiceI datingBean;
+	
+	private String SPACE = " ";
+	
 	private Logger logger = Logger.getLogger(getClass());
 	
 	private XMLOutputter xmlOutput = new XMLOutputter(Format.getPrettyFormat().setEncoding("ISO-8859-1")) {
@@ -50,6 +63,142 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
         	return str;
         }
     };
+    
+    
+    public String getNextQuestionOrange(String baseurl, IncomingSMS incomingsms){
+    	
+    	Element rootelement = new Element("pages");
+		rootelement.setAttribute("descr", "dating");
+		
+		Document doc = new Document(rootelement); 
+		DocType doctype = new DocType("pages");
+		doctype.setSystemID("cellflash-1.3.dtd");
+		doc.setDocType(doctype);
+		
+		String xml = "";
+		
+		
+		Element page = new Element("page");
+		StringBuffer sb = new StringBuffer();
+		
+		
+		ProfileQuestion profileQuestion = getNextQuestion(incomingsms);
+		
+		
+		if(profileQuestion!=null){
+			
+			String question = profileQuestion.getQuestion();
+			ProfileAttribute attrib = profileQuestion.getAttrib();
+			Long questionid = profileQuestion.getId();
+			Long languageid = profileQuestion.getLanguage_id();
+			
+			baseurl = baseurl+"?attrib="+attrib+"&questionid="+questionid+"&languageid="+languageid;
+			
+			sb.append(question);
+			sb.append(BR_NEW_LINE);
+			
+			if(attrib==ProfileAttribute.DISCLAIMER){
+				sb.append("<a href=\""+baseurl+"?questionid=4\">1. Yes</a>");
+				sb.append(BR_NEW_LINE);
+				sb.append("<a href=\"test.php?item=4\">2. No</a>");
+			}
+			
+			if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
+				sb.setLength(0);
+				sb.append("<form action="+baseurl+">");
+				sb.append("<entry kind=\"alpha\" var=\"answer\">");
+				sb.append("<prompt>"+question+"</prompt>");
+				sb.append("</entry></form>");
+			}
+			
+			if(attrib==ProfileAttribute.GENDER){
+				sb.append("<a href=\""+baseurl+"&answer=female\">1. Female</a>");
+				sb.append(BR_NEW_LINE);
+				sb.append("<a href=\""+baseurl+"&answer=male\">2. Male</a>");
+			}
+			if(attrib==ProfileAttribute.AGE){
+				sb.setLength(0);
+				sb.append("<form action="+baseurl+">");
+				sb.append("<entry kind=\"digits\" var=\"answer\">");
+				sb.append("<prompt>"+question+"</prompt>");
+				sb.append("</entry></form>");
+			}
+			if(attrib==ProfileAttribute.LOCATION){
+				sb.setLength(0);
+				sb.append("<form action="+baseurl+">");
+				sb.append("<entry kind=\"alpha\" var=\"answer\">");
+				sb.append("<prompt>"+question+"</prompt>");
+				sb.append("</entry></form>");
+			}
+			if(attrib==ProfileAttribute.PREFERRED_AGE){
+				sb.setLength(0);
+				sb.append("<form action="+baseurl+">");
+				sb.append("<entry kind=\"digits\" var=\"answer\">");
+				sb.append("<prompt>"+question+"</prompt>");
+				sb.append("</entry></form>");
+			}
+			if(attrib==ProfileAttribute.PREFERRED_GENDER){
+				sb.append("<a href=\""+baseurl+"&answer=female\">1. Female</a>");
+				sb.append(BR_NEW_LINE);
+				sb.append("<a href=\""+baseurl+"&answer=male\">2. Male</a>");
+			}
+			
+		}else{
+			
+		}
+		
+		page.setText(sb.toString());
+		sb.setLength(0);
+		rootelement.addContent(page);
+		xml = xmlOutput.outputString(doc);
+		
+		return xml;
+	}
+    
+    
+    public String startDatingQuestions(IncomingSMS incomingsms){
+    	
+    	ProfileQuestion profileQuestion = getNextQuestion(incomingsms);
+    	
+    	String question = "";
+    	if(profileQuestion!=null){
+    		logger.debug("QUESTION::: "+profileQuestion.getQuestion());
+    		question =  SPACE +profileQuestion.getQuestion();
+    	}
+    	
+    	return question;
+    }
+    
+    
+    public ProfileQuestion getNextQuestion(IncomingSMS incomingsms){
+    	
+		try {
+			Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
+			
+			if(person==null)
+				person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
+			
+			PersonDatingProfile profile = datingBean.getProfile(person);
+			
+			if(profile==null){
+				profile = new PersonDatingProfile();
+				profile.setPerson(person);
+				profile.setUsername(incomingsms.getMsisdn());
+				profile = datingBean.saveOrUpdate(profile);
+			}
+			
+			return datingBean.getNextProfileQuestion(profile.getId());
+			
+		}catch (DatingServiceException e) {
+			logger.error(e.getMessage(), e);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		
+		return null;
+		
+    }
+    
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI#getMenu(int, int, int)
