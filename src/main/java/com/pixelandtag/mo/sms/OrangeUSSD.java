@@ -180,7 +180,7 @@ public class OrangeUSSD extends HttpServlet {
 		incomingsms.setPrice(BigDecimal.ZERO);
 		
 		
-		String response =  ussdmenuEJB.startDatingQuestions(incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
+		String response =  ussdmenuEJB.getNextQuestionOrange(contextpath,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
 		
 		
 		try{

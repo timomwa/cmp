@@ -29,6 +29,14 @@ public interface USSDMenuEJBI {
 	 */
 	public String startDatingQuestions(IncomingSMS incomingsms);
 	
+	/**
+	 * 
+	 * @param baseurl
+	 * @param incomingsms
+	 * @return
+	 */
+	public String getNextQuestionOrange(String baseurl, IncomingSMS incomingsms);
+	
 	
 
 }
