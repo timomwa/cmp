@@ -105,7 +105,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 			if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
 				sb.setLength(0);
-				sb.append("<form action="+baseurl+">");
+				sb.append("<form action=\""+baseurl+"\">");
 				sb.append("<entry kind=\"alpha\" var=\"answer\">");
 				sb.append("<prompt>"+question+"</prompt>");
 				sb.append("</entry></form>");
@@ -118,21 +118,21 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			}
 			if(attrib==ProfileAttribute.AGE){
 				sb.setLength(0);
-				sb.append("<form action="+baseurl+">");
+				sb.append("<form action=\""+baseurl+"\">");
 				sb.append("<entry kind=\"digits\" var=\"answer\">");
 				sb.append("<prompt>"+question+"</prompt>");
 				sb.append("</entry></form>");
 			}
 			if(attrib==ProfileAttribute.LOCATION){
 				sb.setLength(0);
-				sb.append("<form action="+baseurl+">");
+				sb.append("<form action=\""+baseurl+"\">");
 				sb.append("<entry kind=\"alpha\" var=\"answer\">");
 				sb.append("<prompt>"+question+"</prompt>");
 				sb.append("</entry></form>");
 			}
 			if(attrib==ProfileAttribute.PREFERRED_AGE){
 				sb.setLength(0);
-				sb.append("<form action="+baseurl+">");
+				sb.append("<form action=\""+baseurl+"\">");
 				sb.append("<entry kind=\"digits\" var=\"answer\">");
 				sb.append("<prompt>"+question+"</prompt>");
 				sb.append("</entry></form>");
