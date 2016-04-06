@@ -323,7 +323,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.setLength(0);
 					sb.append("<form action=\""+baseurl+"\">");
 					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question+"</prompt>");
+					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 					sb.append("</entry></form>");
 				}
 				
@@ -336,21 +336,21 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.setLength(0);
 					sb.append("<form action=\""+baseurl+"\">");
 					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question+"</prompt>");
+					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 					sb.append("</entry></form>");
 				}
 				if(attrib==ProfileAttribute.LOCATION){
 					sb.setLength(0);
 					sb.append("<form action=\""+baseurl+"\">");
 					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question+"</prompt>");
+					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 					sb.append("</entry></form>");
 				}
 				if(attrib==ProfileAttribute.PREFERRED_AGE){
 					sb.setLength(0);
 					sb.append("<form action=\""+baseurl+"\">");
 					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question+"</prompt>");
+					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 					sb.append("</entry></form>");
 				}
 				if(attrib==ProfileAttribute.PREFERRED_GENDER){
