@@ -217,10 +217,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 			if(attr.equals(ProfileAttribute.GENDER)){
 				
-				if(answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("M") ||  answers.equalsIgnoreCase("MALE") ||  answers.equalsIgnoreCase("MAN") ||  answers.equalsIgnoreCase("BOY") ||  answers.equalsIgnoreCase("MUME") ||  answers.equalsIgnoreCase("MWANAMME")  ||  answers.equalsIgnoreCase("MWANAUME")){ 
+				if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("M") ||  answers.equalsIgnoreCase("MALE") ||  answers.equalsIgnoreCase("MAN") ||  answers.equalsIgnoreCase("BOY") ||  answers.equalsIgnoreCase("MUME") ||  answers.equalsIgnoreCase("MWANAMME")  ||  answers.equalsIgnoreCase("MWANAUME"))){ 
 					profile.setGender(Gender.MALE);
 					profile.setPreferred_gender(Gender.FEMALE);
-				}else if(answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("F") ||  answers.equalsIgnoreCase("FEMALE") ||  answers.equalsIgnoreCase("LADY") ||  answers.equalsIgnoreCase("GIRL") ||  answers.equalsIgnoreCase("MKE") ||  answers.equalsIgnoreCase("MWANAMKE")  ||  answers.equalsIgnoreCase("MWANAMUKE")){ 
+				}else if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("F") ||  answers.equalsIgnoreCase("FEMALE") ||  answers.equalsIgnoreCase("LADY") ||  answers.equalsIgnoreCase("GIRL") ||  answers.equalsIgnoreCase("MKE") ||  answers.equalsIgnoreCase("MWANAMKE")  ||  answers.equalsIgnoreCase("MWANAMUKE"))){ 
 					profile.setGender(Gender.FEMALE);
 					profile.setPreferred_gender(Gender.MALE);
 				}else{
@@ -239,8 +239,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			if(attr.equals(ProfileAttribute.AGE)){
 				
 				Date dob = new Date();
-				BigDecimal age = null;
+				BigDecimal age = BigDecimal.ONE;
 				try{
+					if(answers!=null)
 					age = new BigDecimal(answers);
 				}catch(java.lang.NumberFormatException nfe){
 					String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
@@ -270,11 +271,13 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			if(attr.equals(ProfileAttribute.LOCATION)){
 				boolean location_is_only_number = false;
 				try{
-					new BigDecimal(answers);
-					location_is_only_number = true;
+					if(answers!=null){
+						new BigDecimal(answers);
+						location_is_only_number = true;
+					}
 				}catch(java.lang.NumberFormatException nfe){
 				}
-				if(answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number){
+				if(answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number)){
 					String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
 					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
 					
