@@ -141,10 +141,17 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			ql.setQuestion_id_fk(question.getId());
 			ql = datingBean.saveOrUpdate(ql);
 			
-			sb.append(msg+ SPACE +question.getQuestion());
+			sb.append(question.getQuestion());
 			sb.append("<a href=\""+baseurl+"?answers=1\">1. No</a>");
 			sb.append(BR_NEW_LINE);
-			sb.append("<a href=\"test.php?answers=2\">2. Yes</a>");
+			sb.append("<a href=\""+baseurl+"?answers=2\">2. Yes</a>");
+			
+			page.setText(sb.toString());
+			rootelement.addContent(page);
+			sb.setLength(0);
+			xml = xmlOutput.outputString(doc);
+			
+			return xml;
 			
 		}
 		
