@@ -193,9 +193,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
 					sb.append(previousQuestion.getQuestion());
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"?answers=1\">No</a>");
+					sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"?answers=2\">Yes</a>");
+					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");
 				}
 			}
 			
