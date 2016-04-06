@@ -68,7 +68,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     public String getNextQuestionOrange(String baseurl, IncomingSMS incomingsms){
     	
     	Element rootelement = new Element("pages");
-		rootelement.setAttribute("descr", "dating");
+		//rootelement.setAttribute("descr", "dating");
 		
 		Document doc = new Document(rootelement); 
 		DocType doctype = new DocType("pages");
@@ -105,9 +105,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 			if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
 				sb.setLength(0);
-				sb.append("<form action=\""+baseurl+"\">");
-				sb.append("<entry kind=\"alpha\" var=\"answer\">");
-				sb.append("<prompt>"+question+"</prompt>");
+				sb.append("<form action=\"test.php\">");
+				sb.append("<entry kind=\"digits\" var=\"answers\">");
+				sb.append("<prompt>There there?</prompt>");
 				sb.append("</entry></form>");
 			}
 			
