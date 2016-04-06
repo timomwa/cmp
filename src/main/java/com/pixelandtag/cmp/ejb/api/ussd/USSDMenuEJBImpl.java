@@ -247,7 +247,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		}
 		
 		
-		if(sb.toString()!=null && !sb.toString().isEmpty()){// we move to the next question
+		if(sb.toString()==null || sb.toString().isEmpty()){// we move to the next question
 		
 			ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
 			if(profileQuestion!=null){
