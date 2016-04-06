@@ -105,7 +105,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 			if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
 				sb.setLength(0);
-				sb.append("<form action=\"test.php\">");
+				sb.append("<form action=\""+baseurl+"\">");
 				sb.append("<entry kind=\"digits\" var=\"answers\">");
 				sb.append("<prompt>"+question+"</prompt>");
 				sb.append("</entry></form>");
