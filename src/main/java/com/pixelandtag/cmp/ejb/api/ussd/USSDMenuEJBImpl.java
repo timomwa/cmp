@@ -142,9 +142,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			ql = datingBean.saveOrUpdate(ql);
 			
 			sb.append(question.getQuestion());
-			sb.append("<a href=\""+baseurl+"?answers=1\">1. No</a>");
 			sb.append(BR_NEW_LINE);
-			sb.append("<a href=\""+baseurl+"?answers=2\">2. Yes</a>");
+			sb.append("<a href=\""+baseurl+"&answers=2\">No</a>");
+			sb.append(BR_NEW_LINE);
+			sb.append("<a href=\""+baseurl+"&answers=1\">Yes</a>");
 			
 			page.setText(sb.toString());
 			rootelement.addContent(page);
@@ -326,9 +327,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				sb.append(BR_NEW_LINE);
 				
 				if(attrib==ProfileAttribute.DISCLAIMER){
-					sb.append("<a href=\""+baseurl+"?answers=1\">1. Yes</a>");
+					sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\"test.php?answers=2\">2. No</a>");
+					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");
 				}
 				
 				if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
