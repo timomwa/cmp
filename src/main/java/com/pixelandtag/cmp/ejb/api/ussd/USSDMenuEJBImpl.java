@@ -231,6 +231,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						logger.error(dse.getMessage(), dse);
 					}
 					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers));
+					sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
+					sb.append(BR_NEW_LINE);
+					sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");
 					
 				}
 				
