@@ -1,21 +1,10 @@
-<?xml version="1.0" encoding="ISO-8859-1"?> 
-<!DOCTYPE pages SYSTEM "cellflash-1.3.dtd">
-
-<pages descr="News">
+<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE pages SYSTEM "cellflash-1.3.dtd">
+<pages>
 	<page>
-		Headlines
-		<br />
-		<a href="test.php?item=1">Interest rates cut</a>
-		<br />
-		<a href="test.php?item=2">Concorde resumes service</a>
-		<br />
+		<form action="test.php">
+			<entry kind="digits" var="answers">
+				<prompt>There there?</prompt>
+			</entry>
+		</form>
 	</page>
-	<page tag="test.php?item=3">
-		WASHINGTON-In a much anticipated move, the Federal Reserve announced
-		new rate cuts amid growing economic concerns.
-		<br />
-		<a href="test.php?item=4">Next article</a>
-	</page>
-	<page tag="test.php?item=5"> PARIS-Air France resumed its Concorde service Monday.
-		The plane had been grounded following a tragic accident. </page>
 </pages>

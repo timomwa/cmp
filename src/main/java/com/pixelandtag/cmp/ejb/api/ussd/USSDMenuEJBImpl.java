@@ -67,15 +67,18 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     
     public String getNextQuestionOrange(String baseurl, IncomingSMS incomingsms){
     	
-    	//Element rootelement = new Element("pages");
-		//rootelement.setAttribute("descr", "dating");
+    	Element rootelement = new Element("pages");
+		rootelement.setAttribute("descr", "dating");
 		
-		
+		Document doc = new Document(rootelement); 
+		DocType doctype = new DocType("pages");
+		doctype.setSystemID("cellflash-1.3.dtd");
+		doc.setDocType(doctype);
 		
 		String xml = "";
 		
 		
-		Element rootelement = new Element("page");
+		Element page = new Element("page");
 		StringBuffer sb = new StringBuffer();
 		
 		
@@ -144,7 +147,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 		}
 		
-		sb.setLength(0);
+		/*sb.setLength(0);
 		sb.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"); 
 		sb.append("<!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">");
 		sb.append("<pages>");
@@ -158,16 +161,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		sb.append("</page>");
 		
 		sb.append("</pages>");
-		xml = sb.toString();
-		rootelement.setText(sb.toString());
-		Document doc = new Document(rootelement); 
-		DocType doctype = new DocType("pages");
-		doctype.setSystemID("cellflash-1.3.dtd");
-		doc.setDocType(doctype);
-		
-		
+		xml = sb.toString();*/
+		page.setText(sb.toString());
+		rootelement.addContent(page);
 		sb.setLength(0);
-		//xml = xmlOutput.outputString(doc);
+		xml = xmlOutput.outputString(doc);
 		
 		return xml;
 	}
