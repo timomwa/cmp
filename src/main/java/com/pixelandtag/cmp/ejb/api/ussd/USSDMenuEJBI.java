@@ -1,7 +1,10 @@
 package com.pixelandtag.cmp.ejb.api.ussd;
 
+import java.util.Map;
+
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 
 public interface USSDMenuEJBI {
@@ -17,25 +20,27 @@ public interface USSDMenuEJBI {
 	
 	/**
 	 * 
+	 * @param profile
 	 * @param incomingsms
 	 * @return
 	 */
-	public ProfileQuestion getNextQuestion(IncomingSMS incomingsms);
+	public ProfileQuestion getNextQuestion(PersonDatingProfile profile, IncomingSMS incomingsms);
 
 	/**
 	 * 
 	 * @param incomingsms
 	 * @return
+	 * @throws Exception
 	 */
-	public String startDatingQuestions(IncomingSMS incomingsms);
+	public String startDatingQuestions(IncomingSMS incomingsms) throws Exception;
 	
 	/**
 	 * 
-	 * @param baseurl
+	 * @param attribz
 	 * @param incomingsms
 	 * @return
 	 */
-	public String getNextQuestionOrange(String baseurl, IncomingSMS incomingsms);
+	public String getNextQuestionOrange(Map<String, String> attribz, IncomingSMS incomingsms)  throws Exception;
 	
 	
 

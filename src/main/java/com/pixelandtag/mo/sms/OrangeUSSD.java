@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.naming.Context;
@@ -138,11 +140,14 @@ public class OrangeUSSD extends HttpServlet {
 		
 		final StringBuffer sb = new StringBuffer();
 		sb.append("\n");
+		Map<String, String> attribz = new HashMap<String, String>();
 		while(enums.hasMoreElements()){
 			
 			paramName = (String) enums.nextElement();
 			
 			value = req.getParameter(paramName);
+			
+			attribz.put(paramName, value);
 			
 			String ip_addr = req.getRemoteAddr();
 			
@@ -160,6 +165,11 @@ public class OrangeUSSD extends HttpServlet {
 		int serviceid = setdefaultifnull( req.getParameter("serviceid") );
 		int menuitemid = setdefaultifnull( req.getParameter("menuitemid") );
 		int parent_level_id = setdefaultifnull( req.getParameter("parent_level_id") );
+		int questionid = setdefaultifnull( req.getParameter("questionid") );
+		
+		
+		String answers = req.getParameter("answers") ;
+		String attrib = req.getParameter("attrib") ;
 		
 		String msisdn = req.getHeader("user-msisdn");
 		String imsi = req.getHeader("user-imsi");
@@ -179,11 +189,15 @@ public class OrangeUSSD extends HttpServlet {
 		incomingsms.setOpco(opcoEJB.findOpcoByCode("KEN-639-7"));
 		incomingsms.setPrice(BigDecimal.ZERO);
 		
+		attribz.put("contextpath", contextpath);
 		
-		String response =  ussdmenuEJB.getNextQuestionOrange(contextpath,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
 		
+		
+		String response = "";
 		
 		try{
+			
+			response =  ussdmenuEJB.getNextQuestionOrange(attribz,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
 			
 			logger.info(">>> "+response);
 			pw.write(response);
@@ -212,7 +226,7 @@ public class OrangeUSSD extends HttpServlet {
 		
 	}
 
-	private int setdefaultifnull(String string) {
+	public static int setdefaultifnull(String string) {
 		if(string==null || string.isEmpty())
 			return -1;
 		int i = -1;
