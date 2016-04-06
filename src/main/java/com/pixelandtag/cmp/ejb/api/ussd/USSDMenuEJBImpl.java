@@ -92,12 +92,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		String xml = "";
 		
 		Element page = new Element("page");
+		page.setAttribute("nav", "end");
+		
+
 		final StringBuffer sb = new StringBuffer();
 		
 		String answers = attribz.get("answers");
 		int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
 		String attrib_ =  attribz.get("attrib") ;
-		int questionid_ = OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
+		int questionid_ = OrangeUSSD.setdefaultifnull( attribz.get("questionid") );
 		
 		Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
 		if(person==null)
@@ -108,6 +111,43 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		
 		PersonDatingProfile profile = datingBean.getProfile(person);
 		
+		
+		if(person.getId()>0 && profile==null){
+			
+			String msg = null;
+			try{
+				msg = datingBean.getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, languageid_, incomingsms.getOpco().getId());
+			}catch(DatingServiceException dse){
+				logger.error(dse.getMessage(), dse);
+			}
+			
+			profile = datingBean.getProfile(person);
+			
+			if(profile==null){
+				profile = new PersonDatingProfile();
+				profile.setPerson(person);
+				profile.setUsername(incomingsms.getMsisdn());
+			}
+			
+			profile = datingBean.saveOrUpdate(profile);
+			
+			ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
+			logger.debug("QUESTION::: "+question.getQuestion());
+			
+			
+			QuestionLog ql = new QuestionLog();
+			
+			ql.setProfile_id_fk(profile.getId());
+			ql.setQuestion_id_fk(question.getId());
+			ql = datingBean.saveOrUpdate(ql);
+			
+			sb.append(msg+ SPACE +question.getQuestion());
+			sb.append("<a href=\""+baseurl+"?answers=1\">1. No</a>");
+			sb.append(BR_NEW_LINE);
+			sb.append("<a href=\"test.php?answers=2\">2. Yes</a>");
+			
+		}
+		
 		if(profile==null){
 			profile = new PersonDatingProfile();
 			profile.setPerson(person);
@@ -116,7 +156,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		}
 		
 		
-		if(answers!=null && !answers.isEmpty()){//We set the profile answer
+		if(!profile.getProfileComplete()){//answers!=null && !answers.isEmpty() ){//We set the profile answer
 			
 			ProfileQuestion previousQuestion =  getPreviousQuestion(person, incomingsms);
 			
