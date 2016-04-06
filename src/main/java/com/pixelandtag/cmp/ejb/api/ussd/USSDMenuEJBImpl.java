@@ -92,7 +92,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		String xml = "";
 		
 		Element page = new Element("page");
-		page.setAttribute("nav", "end");
+		//page.setAttribute("nav", "end");
 		
 
 		final StringBuffer sb = new StringBuffer();
@@ -186,7 +186,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.append("Ok. Bye");
 				}else{
 					String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
-					sb.append(msg+SPACE+previousQuestion.getQuestion());
+					sb.append(previousQuestion.getQuestion());
+					sb.append("<a href=\""+baseurl+"?answers=1\">No</a>");
+					sb.append(BR_NEW_LINE);
+					sb.append("<a href=\""+baseurl+"?answers=2\">Yes</a>");
 				}
 			}
 			
@@ -293,7 +296,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 		}
 		
-		
+		logger.info(">>>>>>>>>>> "+sb.toString());
 		if(sb.toString()==null || sb.toString().isEmpty()){// we move to the next question
 		
 			ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
