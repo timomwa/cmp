@@ -107,7 +107,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				sb.setLength(0);
 				sb.append("<form action=\"test.php\">");
 				sb.append("<entry kind=\"digits\" var=\"answers\">");
-				sb.append("<prompt>There there?</prompt>");
+				sb.append("<prompt>"+question+"</prompt>");
 				sb.append("</entry></form>");
 			}
 			
