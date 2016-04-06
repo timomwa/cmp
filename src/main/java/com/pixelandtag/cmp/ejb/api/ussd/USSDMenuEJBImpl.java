@@ -174,7 +174,6 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+answers);
 			logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
 			
-			baseurl = baseurl+"?attrib="+attr+"&questionid="+previousQuestion.getId()+"&languageid="+previousQuestion.getLanguage_id();
 			
 			if(attr.equals(ProfileAttribute.DISCLAIMER)){
 				boolean keywordIsNumber = false;
