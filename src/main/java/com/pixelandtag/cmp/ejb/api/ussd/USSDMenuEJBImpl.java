@@ -165,11 +165,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		
 		if(!profile.getProfileComplete()){//answers!=null && !answers.isEmpty() ){//We set the profile answer
 			
+			
+			
 			ProfileQuestion previousQuestion =  getPreviousQuestion(person, incomingsms);
 			
 			ProfileAttribute attr = previousQuestion.getAttrib();
 			logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+answers);
 			logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
+			
+			baseurl = baseurl+"?attrib="+attr+"&questionid="+previousQuestion.getId()+"&languageid="+previousQuestion.getLanguage_id();
 			
 			if(attr.equals(ProfileAttribute.DISCLAIMER)){
 				boolean keywordIsNumber = false;
@@ -187,6 +191,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				}else{
 					String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
 					sb.append(previousQuestion.getQuestion());
+					sb.append(BR_NEW_LINE);
 					sb.append("<a href=\""+baseurl+"?answers=1\">No</a>");
 					sb.append(BR_NEW_LINE);
 					sb.append("<a href=\""+baseurl+"?answers=2\">Yes</a>");
@@ -231,9 +236,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						logger.error(dse.getMessage(), dse);
 					}
 					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers));
-					sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");
+					sb.append("<a href=\""+baseurl+"&answers=1\">Female</a>");
+					sb.append(BR_NEW_LINE);
+					sb.append("<a href=\""+baseurl+"&answers=2\">Male</a>");
 					
 				}
 				
