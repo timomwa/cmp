@@ -239,11 +239,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(), dse);
 					}
-					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername()));
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=1\">Female</a>");
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">Male</a>");
+					sb.setLength(0);
+					sb.append("<form action=\""+baseurl+"\">");
+					sb.append("<entry kind=\"digits\" var=\"answers\">");
+					sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+					sb.append("</entry></form>");
 					
 				}
 				
