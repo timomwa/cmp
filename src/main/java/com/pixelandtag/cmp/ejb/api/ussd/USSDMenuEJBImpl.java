@@ -211,7 +211,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					profile.setUsername(answers);
 				}else{
 					String msg = "";
-					if(answers.equalsIgnoreCase("329")){
+					if(answers!=null && answers.equalsIgnoreCase("329")){
 						msg = datingBean.getMessage(DatingMessages.REPLY_WITH_USERNAME, languageid_,person.getOpco().getId());
 					}else{
 						msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
