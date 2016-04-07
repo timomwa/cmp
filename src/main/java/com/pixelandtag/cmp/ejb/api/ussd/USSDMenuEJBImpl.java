@@ -330,9 +330,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				sb.append(BR_NEW_LINE);
 				
 				if(attrib==ProfileAttribute.DISCLAIMER){
-					sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
+					sb.setLength(0);
+					sb.append("<form action=\""+baseurl+"\">");
+					sb.append("<entry kind=\"digits\" var=\"answers\">");
+					sb.append("<prompt>"+question+"</prompt>");
+					sb.append("</entry></form>");
+					
+					/*sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");
+					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");*/
 				}
 				
 				if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
@@ -375,9 +381,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.append("</entry></form>");
 				}
 				if(attrib==ProfileAttribute.PREFERRED_GENDER){
-					sb.append("<a href=\""+baseurl+"&answers=female\">1. Female</a>");
+					sb.setLength(0);
+					sb.append("<form action=\""+baseurl+"\">");
+					sb.append("<entry kind=\"digits\" var=\"answers\">");
+					sb.append("<prompt>"+question+"</prompt>");
+					sb.append("</entry></form>");
+					/*sb.append("<a href=\""+baseurl+"&answers=female\">1. Female</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=male\">2. Male</a>");
+					sb.append("<a href=\""+baseurl+"&answers=male\">2. Male</a>");*/
 				}
 				
 				
