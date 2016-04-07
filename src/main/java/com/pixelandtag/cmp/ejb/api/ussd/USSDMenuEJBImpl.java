@@ -71,12 +71,12 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
-	private XMLOutputter xmlOutput = new XMLOutputter(Format.getPrettyFormat().setEncoding("ISO-8859-1")) {
+	private XMLOutputter xmlOutput = new XMLOutputter(Format.getPrettyFormat().setEncoding("ISO-8859-1"));/* {
         @Override
         public String escapeElementEntities(String str) {
         	return str;
         }
-    };
+    };*/
     
     @Override
     public String getNextQuestionOrange(Map<String,String> attribz, IncomingSMS incomingsms) throws Exception{
