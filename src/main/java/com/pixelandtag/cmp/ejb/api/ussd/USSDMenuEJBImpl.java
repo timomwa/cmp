@@ -190,11 +190,12 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.append("Ok. Bye");
 				}else{
 					String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
-					sb.append(previousQuestion.getQuestion());
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");
+					
+					sb.setLength(0);
+					sb.append("<form action=\""+baseurl+"\">");
+					sb.append("<entry kind=\"digits\" var=\"answers\">");
+					sb.append("<prompt>"+msg+"</prompt>");
+					sb.append("</entry></form>");
 				}
 			}
 			
@@ -401,10 +402,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			}else{
 				
 			}
-		}else{
-			
 		}
-		
 		page.setText(sb.toString());
 		rootelement.addContent(page);
 		sb.setLength(0);
