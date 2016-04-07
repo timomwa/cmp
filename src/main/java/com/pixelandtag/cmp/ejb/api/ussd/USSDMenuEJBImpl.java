@@ -216,7 +216,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}else{
 						msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
 					}
-					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers));
+					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername()));
 				}
 			}
 			
@@ -235,7 +235,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(), dse);
 					}
-					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers));
+					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername()));
 					sb.append(BR_NEW_LINE);
 					sb.append("<a href=\""+baseurl+"&answers=1\">Female</a>");
 					sb.append(BR_NEW_LINE);
