@@ -250,7 +250,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				//language_id = UtilCelcom.getSubscriberLanguage(mo.getMsisdn(), conn);//get from db
 			}
 			
-			int menuid = 1;
+			int menuid = 2;
 			mo_processor_logger.debug("session :: "+sess);
 			mo_processor_logger.debug("smsmenu_level_id_fk :: "+smsmenu_level_id_fk);
 			mo_processor_logger.debug("language_id :: "+language_id);
