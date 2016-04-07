@@ -216,7 +216,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}else{
 						msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
 					}
-					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername()));
+					sb.append(0);
+					sb.append("<form action=\""+baseurl+"\">");
+					sb.append("<entry kind=\"digits\" var=\"answers\">");
+					sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername())+"</prompt>");
+					sb.append("</entry></form>");
 				}
 			}
 			
