@@ -216,7 +216,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}else{
 						msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
 					}
-					sb.append(0);
+					sb.setLength(0);
 					sb.append("<form action=\""+baseurl+"\">");
 					sb.append("<entry kind=\"digits\" var=\"answers\">");
 					sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername())+"</prompt>");
@@ -344,9 +344,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				}
 				
 				if(attrib==ProfileAttribute.GENDER){
-					sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
+					sb.setLength(0);
+					sb.append("<form action=\""+baseurl+"\">");
+					sb.append("<entry kind=\"digits\" var=\"answers\">");
+					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+					sb.append("</entry></form>");
+					/*sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");
+					sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");*/
 				}
 				if(attrib==ProfileAttribute.AGE){
 					sb.setLength(0);
