@@ -2,7 +2,6 @@ package com.pixelandtag.sms.mt.workerthreads;
 
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -10,10 +9,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
 
-import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -21,10 +20,10 @@ import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
+import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
 
@@ -41,6 +40,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private boolean busy = false;
 	private GenericHTTPClient genericHttpClient;
 	private SubscriptionBeanI subscriptionejb;
+	private BillingGatewayEJBI billinggatewayEJB;
 	private static Random r = new Random();
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
 	private Map<Long, MOProcessor> mo_processorCache = new HashMap<Long, MOProcessor>();
@@ -66,8 +66,6 @@ public class SubscriptionBillingWorker implements Runnable {
 	private void setFinished(boolean finished) {
 		this.finished = finished;
 	}
-	
-	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
 
 	private CMPResourceBeanRemote cmp_ejb;
 
@@ -103,12 +101,16 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 	}
 
-	public SubscriptionBillingWorker(String name_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, int mandatory_throttle_) throws Exception{
+	public SubscriptionBillingWorker(String name_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, BillingGatewayEJBI billinggatewayEJB, int mandatory_throttle_) throws Exception{
 		 
 		if(cmpbean_==null)
 			throw new Exception("CMP EJB is nulll");
 		if(subscriptionejb_==null)
 			throw new Exception("CMP EJB is nulll");
+		if(billinggatewayEJB==null)
+			throw new Exception("Billing gateway is nulll");
+		
+		this.billinggatewayEJB = billinggatewayEJB;
 		this.cmp_ejb = cmpbean_;
 		this.subscriptionejb = subscriptionejb_;
 		
@@ -125,7 +127,6 @@ public class SubscriptionBillingWorker implements Runnable {
   
 	}
 
-	@SuppressWarnings("restriction")
 	public void run() {
 		
 		try{
@@ -134,19 +135,6 @@ public class SubscriptionBillingWorker implements Runnable {
 			logger.info(getName()+" STARTED AFTER :::::RELEASED_BY_PRODUCER after "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 			watch.reset();
 			
-			GenericHTTPParam param = new GenericHTTPParam();
-			param.setUrl(mtUrl);
-			
-			Map<String,String> headerattrs = new HashMap<String,String>();
-			
-			String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
-			String encoding = null;
-			sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
-			encoding = encoder.encode( usernamePassword.getBytes() ); 
-			headerattrs.put("Authorization", "Basic " + encoding);
-			headerattrs.put("SOAPAction","");
-			headerattrs.put("Content-Type","text/xml; charset=utf-8");
-
 			Long negative_one = new Long(-1);
 			
 			while(run){
@@ -182,22 +170,18 @@ public class SubscriptionBillingWorker implements Runnable {
 							
 								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 									setBusy(true);
-									String xml = billable.getChargeXML(BillableI.plainchargeXML);
-									logger.info("BILLABLE: "+billable.toString());
-									param.setStringentity(xml);
-									param.setHeaderParams(headerattrs);
 									watch.start();
-									final GenericHttpResp genresp = genericHttpClient.call(param);
-									final int RESP_CODE = genresp.getResp_code();
+									
+									SenderResp senderresp = billinggatewayEJB.bill(billable);
 									watch.stop();
-									logger.info(getName()+" PROXY_LATENCY_ON  ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
-									final String resp = genresp.getBody();
-									logger.info("\n\n\t\t::::::BILLING::::RESP_CODE=["+RESP_CODE+"]:::::PROXY_RESPONSE: "+resp);
-									billable.setResp_status_code(String.valueOf(RESP_CODE));
+									final String resp = senderresp.getResponseMsg();
+									logger.info("\n\n\t\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::::PROXY_RESPONSE: "+resp);
+									billable.setResp_status_code( senderresp.getRespcode() );
 									billable.setProcessed(1L);
 									
-									if (RESP_CODE == HttpStatus.SC_OK) {
+									if (senderresp.getSuccess()) {
 										boolean capped= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
 										String debug = "capped\t\t ::"+capped;
 										debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
@@ -278,7 +262,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										}
 										
 										
-									}else if(RESP_CODE==0){
+									}else if(senderresp.getRespcode()==null || senderresp.getRespcode().equals("0")){
 										logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
 										//subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 									
@@ -292,9 +276,6 @@ public class SubscriptionBillingWorker implements Runnable {
 									logger.debug("DONE! ");
 									
 									billable = cmp_ejb.saveOrUpdate(billable);
-									
-									if(genresp.getLatencyLog()!=null && RESP_CODE>0)
-										cmp_ejb.saveOrUpdate(genresp.getLatencyLog());
 									
 									setBusy(false);
 									

@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
@@ -32,6 +33,7 @@ public class SubscriptionRenewal extends  Thread {
 	private boolean run = true;
 	private CMPResourceBeanRemote cmpbean;
 	private SubscriptionBeanI subscriptio_nejb;
+	private BillingGatewayEJBI billingGatewayEJB;
 	private volatile static ConcurrentLinkedQueue<Subscription> subscriptions = new ConcurrentLinkedQueue<Subscription>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
@@ -80,6 +82,7 @@ public class SubscriptionRenewal extends  Thread {
 		 subscriptio_nejb =  (SubscriptionBeanI) 
 		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 freeloaderEJB =  (FreeLoaderEJBI) this.context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
+		 billingGatewayEJB  =  (BillingGatewayEJBI) this.context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
 			
 	}
 	
@@ -167,7 +170,7 @@ public class SubscriptionRenewal extends  Thread {
 		Thread t1;
 		for (int i = 0; i < this.workers; i++) {
 			SubscriptionBillingWorker worker;
-			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, cmpbean,subscriptio_nejb, mandatory_throttle); 
+			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, cmpbean,subscriptio_nejb,billingGatewayEJB, mandatory_throttle); 
 			t1 = new Thread(worker);
 			t1.start();
 			billingsubscriptionWorkers.add(worker);

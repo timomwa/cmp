@@ -50,6 +50,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.ERROR;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
@@ -73,6 +74,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
+import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.StopWatch;
@@ -84,20 +86,10 @@ public class BaseEntityBean implements BaseEntityI {
 	private Logger logger = Logger.getLogger(BaseEntityBean.class);
 	private String server_tz = "-04:00";//TODO externalize
 	private String client_tz = "+03:00";//TODO externalize
-	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";//TODO externalize this
 	private StopWatch watch;
-	private int recursiveCounter = 0;
-	private SSLContextBuilder builder = new SSLContextBuilder();
-	private static PoolingHttpClientConnectionManager cm;
-	private CloseableHttpClient httpclient = null;
-	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
-		@Override
-        public boolean isTrusted(X509Certificate[] certificate, String authType) {
-            return true;
-        }
 		
-	};
-	
+	@EJB
+	private BillingGatewayEJBI billingGatewayEJB;
 	
 	@EJB
 	private CMPResourceBeanRemote cmp_ejb;
@@ -294,27 +286,8 @@ public class BaseEntityBean implements BaseEntityI {
   
 	public BaseEntityBean() throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException{
 		
-		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(30 * 1000).build();
-
 		watch = new StopWatch();
-		builder.loadTrustMaterial(null, trustSelfSignedStrategy);
 		
-		SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-	        public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-	            return true;
-	        }
-	    }).build();
-	 org.apache.http.conn.ssl.X509HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-	 SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-	    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-	            .register("http", PlainConnectionSocketFactory.getSocketFactory())
-	            .register("https", sslSocketFactory)
-	            .build();
-		cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-		cm.setDefaultMaxPerRoute(1);
-		cm.setMaxTotal(1);
-		httpclient = HttpClientBuilder.create().setSslcontext( sslContext).setDefaultRequestConfig(requestConfig).setConnectionManager(cm).build();
-
 	}
 
 	
@@ -538,78 +511,48 @@ public class BaseEntityBean implements BaseEntityI {
 	@Override
 	public Billable charge(Billable billable) throws Exception {
 		
-		HttpPost httsppost = new HttpPost(this.mtUrl);
-
-		HttpEntity resEntity = null;;
-		
 		boolean success = false;
 		
-		CloseableHttpResponse response = null;
-		
+		SenderResp response = null;
 		try {
 			
-			String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
-			String encoding = null;
-			sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
-			encoding = encoder.encode( usernamePassword.getBytes() ); 
-			httsppost.setHeader("Authorization", "Basic " + encoding);
-			httsppost.setHeader("SOAPAction","");
-			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
-			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			//billable.gets
-			StringEntity se = new StringEntity(xml);
-			httsppost.setEntity(se);
-			
-			
 			watch.start();
-			response = httpclient.execute(httsppost);
+			response = billingGatewayEJB.bill(billable);
 			watch.stop();
 			logger.info("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
 			 
-			 final int RESP_CODE = response.getStatusLine().getStatusCode();
+			 final int RESP_CODE = Integer.valueOf( response.getRespcode() );
 			 
-			 resEntity = response.getEntity();
-			 
-			 String resp = convertStreamToString(resEntity.getContent());
-			
 			 logger.info("RESP CODE : "+RESP_CODE);
-			 logger.info("RESP XML : "+resp);
+			 logger.info("RESP MSG : "+response.getResponseMsg());
 			 
-			
-			
 			 billable.setProcessed(1L);
 			
-			if (RESP_CODE == HttpStatus.SC_OK) {
+			 if (RESP_CODE == HttpStatus.SC_OK) {
 				
 				
 				billable.setRetry_count(billable.getRetry_count()+1);
 				
-				success  = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
+				success  = response.getSuccess();
 				billable.setSuccess(success );
 				
 				if(!success){
 					
-					String err = getErrorCode(resp);
-					String errMsg = getErrorMessage(resp);
-					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
-					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-					billable.setResp_status_code(err);
+					logger.info("FAILED TO BILL, ERROR_MESSAGE="+response.getResponseMsg()+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+					billable.setResp_status_code(response.getResponseMsg());
 					
-					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+					if(response.getResponseMsg().toUpperCase().contains("Insufficient".toUpperCase())){
 						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, billable.getOpco());
 					}
 					try{
-						String transactionId = getTransactionId(resp);
-						billable.setTransactionId(transactionId);
+						billable.setTransactionId(response.getRefvalue());
 					}catch(Exception exp){
 						logger.warn("No transaction id found");
 					}
 					
 				}else{
-					String transactionId = getTransactionId(resp);
-					billable.setTransactionId(transactionId);
+					billable.setTransactionId(response.getRefvalue());
 					billable.setResp_status_code("Success");
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
@@ -652,8 +595,6 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				success  = false;
 				
-				httsppost.abort();
-				
 				throw ioe;
 				
 			} finally{
@@ -662,23 +603,6 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				
 				logger.debug(" ::::::: finished attempt to bill via HTTP");
-				
-				//removeAllParams(qparams);
-				
-				 // When HttpClient instance is no longer needed,
-	            // shut down the connection manager to ensure
-	            // immediate deallocation of all system resources
-				try {
-					
-					if(resEntity!=null)
-						EntityUtils.consume(resEntity);
-				
-				} catch (Exception e) {
-					
-					logger.error(e.getMessage(),e);
-				
-				}
-				
 				
 				try{
 					
@@ -717,13 +641,8 @@ public class BaseEntityBean implements BaseEntityI {
 						//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 						
 						//on third try, we abort
-						httsppost.abort();
-						
-						
 					}else{
 						
-						recursiveCounter = 0;
-						//logger.warn(message+" >>MESSAGE_NOT_SENT> "+mt.toString());
 					}
 					
 				
@@ -733,12 +652,6 @@ public class BaseEntityBean implements BaseEntityI {
 				}
 				
 				watch.reset();
-				
-				try {
-					response.close();
-				} catch (Exception e) {
-					logger.error(e.getMessage(),e);
-				}
 				
 				logger.debug("DONE! ");
 				

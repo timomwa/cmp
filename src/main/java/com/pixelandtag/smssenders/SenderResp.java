@@ -48,6 +48,12 @@ public class SenderResp implements Serializable{
 	public void setSuccess(Boolean success) {
 		this.success = success;
 	}
+	@Override
+	public String toString() {
+		return "SenderResp [respcode=" + respcode + ", responseMsg="
+				+ responseMsg + ", refvalue=" + refvalue + ", othervalues="
+				+ othervalues + ", success=" + success + "]";
+	}
 	
 	
 

@@ -25,14 +25,15 @@ import com.pixelandtag.smssenders.SenderResp;
 
 @Stateless
 @Remote
-public class BillingGatewayImpl implements BillingGatewayI {
+public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 	
 	@EJB
 	private BillerConfigsI billerConfigEJB;
 	
 	private Logger logger = Logger.getLogger(getClass());
 	
-	public boolean bill(Billable billable) throws BillingGatewayException{
+	@Override
+	public SenderResp bill(Billable billable) throws BillingGatewayException{
 		
 		if(billable==null)
 			throw new BillingGatewayException("Billable object passed is null!");
@@ -59,7 +60,7 @@ public class BillingGatewayImpl implements BillingGatewayI {
 			Biller biller = BillerFactory.getInstance(billerconfigs);
 			biller.validateMandatory();//Validates mandatory configs.
 			SenderResp resp = biller.charge(billable);
-			return resp.getSuccess();
+			return resp;
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);
 			throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage()+" Do you have entries in biller_profile_configs having profile_id_fk =  "+billerprofile.getProfile().getId());

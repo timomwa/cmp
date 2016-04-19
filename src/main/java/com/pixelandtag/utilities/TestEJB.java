@@ -15,7 +15,7 @@ import org.apache.log4j.BasicConfigurator;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
-import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayI;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
@@ -30,6 +30,7 @@ import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
+import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.util.FileUtils;
 
 public class TestEJB {
@@ -44,7 +45,7 @@ public class TestEJB {
 	private static SMSGatewayI smsgw;
 	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private static USSDMenuEJBI ussdmenuEJB;
-	private static BillingGatewayI billinggatewayEJB;
+	private static BillingGatewayEJBI billinggatewayEJB;
 	private static ConfigsEJBI configsEJB;
 	private static OpcoEJBI opcoEJB;
 	
@@ -97,7 +98,7 @@ public class TestEJB {
 			 
 			 opcoEJB = (OpcoEJBI) context.lookup("cmp/OpcoEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI");
 			 
-			 billinggatewayEJB  = (BillingGatewayI) context.lookup("cmp/BillingGatewayImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayI");
+			 billinggatewayEJB  = (BillingGatewayEJBI) context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
 			 
 			 System.out.println(ussdmenuEJB.getMenu("test","254202407004",1, -1, 1,-1, opcoEJB.findOpcoByCode("KEN-639-7"))); 
 			 
@@ -163,8 +164,9 @@ public class TestEJB {
 			 billable.setTimeStamp(new Date());
 			 billable.setTransferIn(false);
 			 billable.setValid(true);
-			 boolean success = billinggatewayEJB.bill(billable); 
+			 SenderResp success = billinggatewayEJB.bill(billable);  
 			 
+			 System.out.println("\n\n >>>> "+success+"\n\n");
 			 //TODO - Have different configurations - Done!
 			 //TODO - Have Default configurations Airtel HTTP, parlayx, oneapi - introduce a profile field or something like that - Done!
 			//TODO - Create threads that will proccess these incoming messages - in progress

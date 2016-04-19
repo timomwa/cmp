@@ -359,7 +359,6 @@ public class HttpBiller extends GenericBiller {
 			if(respmsg==null || respmsg.trim().isEmpty())
 				respmsg =  getValue(resp.getBody(),respmsgcnf_success.getValue());
 			response.setResponseMsg(respmsg);
-			response.setRespcode(respmsg);
 			response.setSuccess(  respmsg.contains(  success_string.getValue().trim()  )    );
 			
 		}else{
