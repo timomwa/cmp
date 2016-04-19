@@ -385,6 +385,8 @@ public class HttpBiller extends GenericBiller {
 		String endTag = "</"+tagname+">";
 		int start = xml.indexOf(startTag)+startTag.length();
 		int end  = xml.indexOf(endTag);
+		if(start<0 || end<0)
+			return "";
 		return xml.substring(start, end);
 	}
 	
