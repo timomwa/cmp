@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
@@ -45,7 +46,6 @@ public class SMSGatewayImpl implements SMSGatewayI {
 			throw new SMSGatewayException("No sender profile set. Please finish this configuration and try agian.!");
 		
 		SenderReceiverProfile profile = opcosenderProfile.getProfile();
-		
 		Map<String,ProfileConfigs> opcoconfigs = configsEJB.getAllConfigs(profile);
 		Map<String,ProfileTemplate> opcotemplates = configsEJB.getAllTemplates(profile,TemplateType.PAYLOAD);
 		

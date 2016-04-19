@@ -14,6 +14,7 @@ import org.apache.log4j.BasicConfigurator;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
@@ -26,6 +27,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.entities.MTsms;
+import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.util.FileUtils;
 
 public class TestEJB {
@@ -40,6 +42,7 @@ public class TestEJB {
 	private static SMSGatewayI smsgw;
 	private static OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private static USSDMenuEJBI ussdmenuEJB;
+	private static BillingGatewayI billinggatewayEJB;
 	private static ConfigsEJBI configsEJB;
 	private static OpcoEJBI opcoEJB;
 	
@@ -92,6 +95,8 @@ public class TestEJB {
 			 
 			 opcoEJB = (OpcoEJBI) context.lookup("cmp/OpcoEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI");
 			 
+			 billinggatewayEJB  = (BillingGatewayI) context.lookup("cmp/BillingGatewayImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayI");
+			 
 			 System.out.println(ussdmenuEJB.getMenu("test","254202407004",1, -1, 1,-1, opcoEJB.findOpcoByCode("KEN-639-7"))); 
 			 
 			 /*OperatorCountry opco = configsEJB.getOperatorByIpAddress("127.0.0.1");
@@ -120,7 +125,7 @@ public class TestEJB {
 			 mtsms.setOpcoid(79497164L);
 			 */
 			 
-			/* OutgoingSMS mtsms = new OutgoingSMS();
+			 /*OutgoingSMS mtsms = new OutgoingSMS();
 			 
 			 mtsms.setSms("Sent via Safaricom gateway - parlay x");
 			 mtsms.setShortcode("20419");
@@ -136,6 +141,10 @@ public class TestEJB {
 			
 			 
 			 smsgw.sendMT(mtsms);*/
+			 
+			 
+			 Billable billable = new Billable();
+			 boolean success = billinggatewayEJB.bill(billable); 
 			 
 			 //TODO - Have different configurations - Done!
 			 //TODO - Have Default configurations Airtel HTTP, parlayx, oneapi - introduce a profile field or something like that - Done!

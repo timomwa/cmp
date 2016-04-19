@@ -17,20 +17,12 @@ import com.pixelandtag.billing.BillerProfileConfig;
 import com.pixelandtag.billing.BillingConfigSet;
 import com.pixelandtag.billing.OpcoBillingProfile;
 import com.pixelandtag.billing.entities.BillerProfileTemplate;
+import com.pixelandtag.cmp.ejb.api.billing.BillableQueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
-import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
-import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
-import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
-import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
-import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
-import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
-import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.util.FileUtils;
 
@@ -46,6 +38,7 @@ public class BillingWorker implements Runnable {
 	private boolean stopped  = false;
 	private BillerConfigsI billerConfigEJB;
 	private DNDListEJBI dndEJB;
+	private BillableQueueProcessorEJBI billablequeueprocEJB;
 	
 	public BillingWorker(Queue<Billable> billableQueue, OpcoBillingProfile opcoBillingProfile) throws Exception{
 		this.billableQueue = billableQueue;
@@ -65,7 +58,7 @@ public class BillingWorker implements Runnable {
 	 	props.put("jboss.naming.client.ejb.context", true);
 	 	context = new InitialContext(props);
 	 	billerConfigEJB =  (BillerConfigsI) context.lookup("cmp/BillerConfigsImpl!com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI");
-	 	//queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
+	 	billablequeueprocEJB =  (BillableQueueProcessorEJBI) context.lookup("cmp/BillableQueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillableQueueProcessorEJBI");
 	 	dndEJB  =  (DNDListEJBI) context.lookup("cmp/DNDListEJBImpl!com.pixelandtag.cmp.ejb.subscription.DNDListEJBI");
 	 	logger.info(getClass().getSimpleName()+": Successfully initialized EJB QueueProcessorEJBImpl !!");
 	}
@@ -98,7 +91,10 @@ public class BillingWorker implements Runnable {
 				if(billable!=null && billable.getId().compareTo(-1L)>0){
 					
 					billable.setIn_outgoing_queue(1L);
-					//TODO save
+					
+					if(billable.getIn_outgoing_queue()==0)
+						billable = billablequeueprocEJB.saveOrUpdate(billable);//Lock out anyone.
+					
 					SenderResp response = null;
 					
 					if(dndEJB.isinDNDList(billable.getMsisdn())){
@@ -109,11 +105,14 @@ public class BillingWorker implements Runnable {
 					
 					response = biller.charge(billable);
 					billable.setResp_status_code(response.getResponseMsg());
+					billable.setOpco_tx_id(response.getRefvalue());
 					billable.setProcessed(1L);
+					billable.setRetry_count(billable.getRetry_count()!=null ? billable.getRetry_count() + (1L) : 1L);
+					
 					if(response.getSuccess()==Boolean.TRUE){
-						
+						billable.setSuccess(Boolean.TRUE);
 					}else{
-						
+						billable.setSuccess(Boolean.FALSE);
 					}
 					
 					
