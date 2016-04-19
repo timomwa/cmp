@@ -1,5 +1,6 @@
 package com.pixelandtag.billing;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -40,8 +41,13 @@ import org.hibernate.annotations.Index;
 			query = "select oc from BillerProfileConfig oc where oc.profile.id=:profileid order by oc.effectiveDate desc"
 	)
 })
-public class BillerProfileConfig {
+public class BillerProfileConfig implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8651518353733746595L;
+
 	@Transient
 	public static final String NQ_FIND_BY_PROFILE_AND_NAME = "bpprofileconfigs.byprofileandname";
 	

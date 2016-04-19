@@ -64,14 +64,13 @@ public class BillingWorker implements Runnable {
 	}
 	
 	private void initbiller() throws Exception{
-		BillerProfile profile = opcoBillingProfile.getProfile();
-		Map<String,BillerProfileConfig> opcoconfigs = billerConfigEJB.getAllConfigs(profile);
-		Map<String,BillerProfileTemplate> opcotemplates = billerConfigEJB.getAllTemplates(profile,TemplateType.PAYLOAD);
+		Map<String,BillerProfileConfig> opcoconfigs = billerConfigEJB.getAllConfigs(opcoBillingProfile);
+		Map<String,BillerProfileTemplate> opcotemplates = billerConfigEJB.getAllTemplates(opcoBillingProfile,TemplateType.PAYLOAD);
 		BillingConfigSet billerconfigs = new BillingConfigSet();
 		billerconfigs.setOpcoconfigs(opcoconfigs);
 		billerconfigs.setOpcotemplates(opcotemplates);
 		biller = BillerFactory.getInstance(billerconfigs);
-		biller.validateMandatory();//Validates mandatory configs.
+		biller.validateMandatory();//Validates mandatory configs. 
 		
 	}
 

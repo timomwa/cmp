@@ -3,8 +3,6 @@ package com.pixelandtag.billing;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
-import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
-
 public class BillerFactory {
 
 	@SuppressWarnings("unchecked")
@@ -16,7 +14,7 @@ public class BillerFactory {
 		Class<GenericBiller> theClass;
 		Biller classinstance = null;
 		theClass = (Class<GenericBiller>) Class.forName(billerimpl.getValue());
-		Constructor<?> cons = theClass.getConstructor(SenderConfiguration.class);
+		Constructor<?> cons = theClass.getConstructor(BillingConfigSet.class);
 		classinstance = (Biller) cons.newInstance(billerconfigs);		
 		return classinstance;
 	}

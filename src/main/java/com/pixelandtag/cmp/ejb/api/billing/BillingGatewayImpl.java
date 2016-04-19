@@ -13,6 +13,7 @@ import com.pixelandtag.billing.BillerFactory;
 import com.pixelandtag.billing.BillerProfile;
 import com.pixelandtag.billing.BillerProfileConfig;
 import com.pixelandtag.billing.BillingConfigSet;
+import com.pixelandtag.billing.OpcoBillingProfile;
 import com.pixelandtag.billing.entities.BillerProfileTemplate;
 import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayException;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
@@ -41,7 +42,11 @@ public class BillingGatewayImpl implements BillingGatewayI {
 		if(opco==null)
 			throw new BillingGatewayException("No opco linked with this billable!");
 		
-		BillerProfile billerprofile = billerConfigEJB.getActiveOpcoSenderReceiverProfile(opco);
+		OpcoBillingProfile billerprofile = billerConfigEJB.getActiveBillerProfile(opco);
+		
+		if(billerprofile==null)
+			throw new BillingGatewayException("No opco billing profile for opco with id "+opco.getId()
+					+". Please insert a record in the table opco_biller_profile");
 		
 		Map<String,BillerProfileConfig> opcoconfigs = billerConfigEJB.getAllConfigs(billerprofile);
 		Map<String,BillerProfileTemplate> opcotemplates = billerConfigEJB.getAllTemplates(billerprofile,TemplateType.PAYLOAD);
@@ -57,7 +62,7 @@ public class BillingGatewayImpl implements BillingGatewayI {
 			return resp.getSuccess();
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);
-			throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());
+			throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage()+" Do you have entries in biller_profile_configs having profile_id_fk =  "+billerprofile.getProfile().getId());
 		}
 	}
 

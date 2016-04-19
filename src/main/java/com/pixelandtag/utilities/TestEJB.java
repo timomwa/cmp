@@ -1,5 +1,6 @@
 package com.pixelandtag.utilities;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
@@ -28,6 +29,7 @@ import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.util.FileUtils;
 
 public class TestEJB {
@@ -142,8 +144,25 @@ public class TestEJB {
 			 
 			 smsgw.sendMT(mtsms);*/
 			 
-			 
 			 Billable billable = new Billable();
+			 billable.setOpco(opcoEJB.findOpcoByCode("KEN-639-3"));
+			 billable.setMsisdn("254734252504");
+			 billable.setCp_id("CONTENT360_KE");
+			 billable.setCp_tx_id("082920kddg");
+			 billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
+			 billable.setIn_outgoing_queue(0L);
+			 billable.setKeyword("BILLSERV5");
+			 billable.setOperation("debit");
+			 billable.setPrice(BigDecimal.valueOf(5));
+			 billable.setPricePointKeyword("32329LOVECHAT");
+			 billable.setPriority(0L);
+			 billable.setProcessed(0L);
+			 billable.setRetry_count(0L);
+			 billable.setService_id("415");
+			 billable.setShortcode("32329");
+			 billable.setTimeStamp(new Date());
+			 billable.setTransferIn(false);
+			 billable.setValid(true);
 			 boolean success = billinggatewayEJB.bill(billable); 
 			 
 			 //TODO - Have different configurations - Done!
@@ -164,5 +183,59 @@ public class TestEJB {
 		}
 		 
 	}
+	
+	
+	public static final String plainchargeXML =  "" +
+		      "<soapenv:Envelope\r\n" +
+		      "xmlns:soapenv=" + 
+		      "\"http://schemas.xmlsoap.org/soap/envelope/\"\r\n" + 
+		      "xmlns:char=" + 
+		      "\"http://ChargingProcess/com/ibm/sdp/services/charging/abstraction/Charging\">\r\n" +  
+		      "<soapenv:Header />\r\n" + 
+		      "<soapenv:Body>\r\n" + 
+		      "<char:charge>\r\n" + 
+		      "<inputMsg>\r\n" + 
+		      "<operation>${OPERATION}</operation>\r\n" + 
+		      "<userId>${MSISDN}</userId>\r\n" + 
+		     // "<contentId>{SHORTCODE}_{KEYWORD}</contentId>\r\n" + 
+		      //"<itemName>{SHORTCODE}_{KEYWORD}</itemName>\r\n" +
+		      "<contentId>${KEYWORD}</contentId>\r\n" + 
+		      "<itemName>${KEYWORD}</itemName>\r\n" + 
+		      "<contentDescription>${KEYWORD}</contentDescription>\r\n" +
+		     "<circleId></circleId>\r\n" +
+		      "<lineOfBusiness></lineOfBusiness>\r\n" + 
+		     "<customerSegment></customerSegment>\r\n" +
+		      "<contentMediaType>${KEYWORD}</contentMediaType>\r\n" + 
+		     "<serviceId>${SERVICE_ID}</serviceId>\r\n" + 
+		    "<parentId></parentId>\r\n" +
+		      "<actualPrice>${PRICE}</actualPrice>\r\n" + 
+		      "<basePrice>${PRICE}</basePrice>\r\n" +
+		      "<discountApplied>0</discountApplied>\r\n" +
+		     "<paymentMethod></paymentMethod>\r\n" +
+		    "<revenuePercent></revenuePercent>\r\n" +
+		   "<netShare>0</netShare>\r\n" +
+		      "<cpId>${CP_ID}</cpId>\r\n" +
+		     "<customerClass></customerClass>\r\n" +
+		      "<eventType>${EVENT_TYPE}</eventType>\r\n" +//very important
+		     "<localTimeStamp></localTimeStamp>\r\n" +
+		    "<transactionId>${TX_ID}</transactionId>\r\n" +
+		   "<subscriptionTypeCode>abcd</subscriptionTypeCode>\r\n" +
+		  "<subscriptionName>0</subscriptionName>\r\n" +
+		 "<parentType></parentType>\r\n" +
+		      "<deliveryChannel>SMS</deliveryChannel>\r\n" +
+		     "<subscriptionExternalId>0</subscriptionExternalId>\r\n" +
+		     "<contentSize></contentSize>\r\n" +
+		      "<currency>Kshs</currency>\r\n" + 
+		      "<copyrightId>mauj</copyrightId>\r\n" + 
+		     "<cpTransactionId>${CP_TX_ID}</cpTransactionId>\r\n" + 
+		    "<copyrightDescription>copyright</copyrightDescription>\r\n" + 
+		      "<sMSkeyword>${KEYWORD}</sMSkeyword>\r\n" + 
+		      "<srcCode>${SHORTCODE}</srcCode>\r\n" + 
+		     "<contentUrl>www.content360.co.ke</contentUrl>\r\n" + 
+		    "<subscriptiondays>2</subscriptiondays>\r\n" +
+		      "</inputMsg>\r\n" + 	      
+		      "</char:charge>\r\n" + 		      
+		      "</soapenv:Body>\r\n" +  
+		      "</soapenv:Envelope>\r\n";
 
 }

@@ -328,7 +328,7 @@ public class PlainHttpSender extends GenericSender {
 		ProfileConfigs httpmethod = this.configuration.get(HTTP_REQUEST_METHOD);
 		
 		if(httpmethod!=null){
-			generic_http_parameters.setHttpmethod(httpmethod.getValue());
+			generic_http_parameters.setHttpmethod(httpmethod.getValue().trim().toUpperCase());
 		}else{
 			generic_http_parameters.setHttpmethod(HttpMethod.POST);
 			logger.warn("No configuration for \""+HTTP_REQUEST_METHOD
