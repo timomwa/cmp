@@ -46,15 +46,6 @@ public class ConfigsEJBImpl implements ConfigsEJBI {
 	@Inject 
 	ProfileTemplatesDAOI profileTemlatesDAO;
 	
-	@PostConstruct
-	private void init() {
-		//profileconfigsDAO.setEm(em);
-		//opcoprofilesDAO.setEm(em);
-		//profileTemlatesDAO.setEm(em);
-		//opcoipAddressMapDAO.setEm(em);
-		
-	}
-	
 
 	@Override
 	public ProfileConfigs getConfig(Long opcoid, String name) {

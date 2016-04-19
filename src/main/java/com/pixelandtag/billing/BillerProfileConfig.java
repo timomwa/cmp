@@ -24,23 +24,23 @@ import org.hibernate.annotations.Index;
 @Table(name = "biller_profile_configs")
 @NamedQueries({
 	@NamedQuery(
-			name = BillerProfilerConfig.NQ_FIND_BY_PROFILE_AND_NAME,
-			query = "select oc from BillerProfilerConfig oc where oc.name=:name AND oc.profile=:profile  order by oc.effectiveDate desc"
+			name = BillerProfileConfig.NQ_FIND_BY_PROFILE_AND_NAME,
+			query = "select oc from BillerProfileConfig oc where oc.name=:name AND oc.profile=:profile  order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = BillerProfilerConfig.NQ_FIND_BY_PROFILEID_AND_NAME,
-			query = "select oc from BillerProfilerConfig oc where oc.name=:name AND oc.profile.id=:profileid order by oc.effectiveDate desc"
+			name = BillerProfileConfig.NQ_FIND_BY_PROFILEID_AND_NAME,
+			query = "select oc from BillerProfileConfig oc where oc.name=:name AND oc.profile.id=:profileid order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = BillerProfilerConfig.NQ_FIND_BY_PROFILE,
-			query = "select oc from BillerProfilerConfig oc where oc.profile=:profile order by oc.effectiveDate desc"
+			name = BillerProfileConfig.NQ_FIND_BY_PROFILE,
+			query = "select oc from BillerProfileConfig oc where oc.profile=:profile order by oc.effectiveDate desc"
 	),
 	@NamedQuery(
-			name = BillerProfilerConfig.NQ_FIND_BY_PROFILEID,
-			query = "select oc from BillerProfilerConfig oc where oc.profile.id=:profileid order by oc.effectiveDate desc"
+			name = BillerProfileConfig.NQ_FIND_BY_PROFILEID,
+			query = "select oc from BillerProfileConfig oc where oc.profile.id=:profileid order by oc.effectiveDate desc"
 	)
 })
-public class BillerProfilerConfig {
+public class BillerProfileConfig {
 	
 	@Transient
 	public static final String NQ_FIND_BY_PROFILE_AND_NAME = "bpprofileconfigs.byprofileandname";

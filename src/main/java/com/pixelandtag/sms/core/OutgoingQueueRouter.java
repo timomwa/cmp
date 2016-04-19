@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import javax.naming.Context;
@@ -22,6 +23,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.util.FileUtils;
 
 /**
@@ -42,11 +44,14 @@ public class OutgoingQueueRouter extends Thread {
 	private OpcoSenderProfileEJBI opcosenderprofEJB;
 	private static List<SenderThreadWorker> senderworkers = new ArrayList<SenderThreadWorker>();
 	private static ConcurrentMap<Long,Queue<OutgoingSMS>> opcoqueuemap = new ConcurrentHashMap<Long,Queue<OutgoingSMS>>();
+	private static Queue<Billable> billablequeue = new LinkedBlockingQueue<Billable>();
 	private static Map<Long,OpcoSenderReceiverProfile> profilemap = new HashMap<Long,OpcoSenderReceiverProfile>();
 	private static Semaphore queueSemaphore;
+	private static Semaphore queueSemaphorebillable;
 	private int mandatoryqueuewaittime = 0;
 	static{
 		queueSemaphore = new Semaphore(1, true);
+		queueSemaphorebillable = new Semaphore(1, true);
 	}
 	
 	public static OutgoingSMS poll(Long profileId) throws InterruptedException{
@@ -65,6 +70,34 @@ public class OutgoingQueueRouter extends Thread {
 					queueprocEJB.updateQueueStatus(myMt.getId(), Boolean.TRUE);
 				
 				return myMt;
+			}
+			
+			return null;
+		
+		}finally{
+			queueSemaphore.release(); 
+		}
+	}
+	
+	
+
+	public static Billable pollBillable(Long profileId) throws InterruptedException{
+		
+		try{
+			
+			queueSemaphore.acquire();
+			
+			Queue<OutgoingSMS> outqueue = opcoqueuemap.get(profileId);
+			
+			if(outqueue!=null){
+				
+				final Billable billable = billablequeue.poll();
+				
+				if(billable!=null && billable.getId()>-1){
+					//queueprocEJB.updateQueueStatus(myMt.getId(), Boolean.TRUE); update the billable, we tell system it's in queue
+				}
+				
+				return billable;
 			}
 			
 			return null;
