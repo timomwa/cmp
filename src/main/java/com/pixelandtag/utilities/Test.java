@@ -13,7 +13,7 @@ public class Test {
 	public static void main(String[] args) throws IOException {
 		String xml = "<logo/><transactionid>77</transactionid>";
 		System.out.println("1. "+getValue(xml, "transactionid"));
-		System.out.println("2. "+getValue(xml, "logo"));
+		System.out.println(!Boolean.TRUE+"2. "+getValue(xml, "logo"));
 	}
 	
 	

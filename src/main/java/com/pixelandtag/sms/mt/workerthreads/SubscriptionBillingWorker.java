@@ -241,9 +241,8 @@ public class SubscriptionBillingWorker implements Runnable {
 										}
 										
 										billable.setRetry_count(billable.getRetry_count()+1);
-										final Boolean success  = Boolean.valueOf(resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS"));
 										
-										if(success.booleanValue()==false){
+										if(!senderresp.getSuccess()){
 											String err = getErrorCode(resp);
 											String errMsg = getErrorMessage(resp);
 											logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
