@@ -11,11 +11,21 @@ import javax.naming.Context;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.billing.Biller;
+import com.pixelandtag.billing.BillerFactory;
+import com.pixelandtag.billing.BillerProfileConfig;
+import com.pixelandtag.billing.BillingConfigSet;
+import com.pixelandtag.billing.OpcoBillingProfile;
+import com.pixelandtag.billing.entities.BillerProfileTemplate;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayException;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.sms.core.OutgoingQueueRouter;
@@ -41,9 +51,11 @@ public class SubscriptionBillingWorker implements Runnable {
 	private GenericHTTPClient genericHttpClient;
 	private SubscriptionBeanI subscriptionejb;
 	private BillingGatewayEJBI billinggatewayEJB;
+	private BillerConfigsI billerConfigEJB;
 	private static Random r = new Random();
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
 	private Map<Long, MOProcessor> mo_processorCache = new HashMap<Long, MOProcessor>();
+	private Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
 	
 	
 	private int getRandom(){
@@ -101,16 +113,16 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 	}
 
-	public SubscriptionBillingWorker(String name_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, BillingGatewayEJBI billinggatewayEJB, int mandatory_throttle_) throws Exception{
+	public SubscriptionBillingWorker(String name_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, BillerConfigsI billerConfigEJB, int mandatory_throttle_) throws Exception{
 		 
 		if(cmpbean_==null)
 			throw new Exception("CMP EJB is nulll");
 		if(subscriptionejb_==null)
 			throw new Exception("CMP EJB is nulll");
-		if(billinggatewayEJB==null)
+		if(billerConfigEJB==null)
 			throw new Exception("Billing gateway is nulll");
 		
-		this.billinggatewayEJB = billinggatewayEJB;
+		this.billerConfigEJB = billerConfigEJB;
 		this.cmp_ejb = cmpbean_;
 		this.subscriptionejb = subscriptionejb_;
 		
@@ -172,7 +184,17 @@ public class SubscriptionBillingWorker implements Runnable {
 									setBusy(true);
 									watch.start();
 									
-									SenderResp senderresp = billinggatewayEJB.bill(billable);
+									
+									Biller biller = biller_cache.get(billable.getOpco().getId());
+									
+									if(biller==null){
+										logger.info("*******We didn't gave in cache, we've put one biller*****");
+										biller = getBiller(billable.getOpco());
+										biller_cache.put(billable.getOpco().getId(), biller);
+									}
+
+									
+									SenderResp senderresp = biller.charge(billable);
 									watch.stop();
 									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
@@ -349,6 +371,29 @@ public class SubscriptionBillingWorker implements Runnable {
 		
 	}
 	
+	private Biller getBiller(OperatorCountry opco) throws Exception{
+		Biller biller = null; 
+		OpcoBillingProfile billerprofile = billerConfigEJB.getActiveBillerProfile(opco);
+		if(billerprofile==null)
+			throw new BillingGatewayException("No opco billing profile for opco with id "+opco.getId()
+					+". Please insert a record in the table opco_biller_profile");
+		
+		Map<String,BillerProfileConfig> opcoconfigs = billerConfigEJB.getAllConfigs(billerprofile);
+		Map<String,BillerProfileTemplate> opcotemplates = billerConfigEJB.getAllTemplates(billerprofile,TemplateType.PAYLOAD);
+		
+		BillingConfigSet billerconfigs = new BillingConfigSet();
+		billerconfigs.setOpcoconfigs(opcoconfigs);
+		billerconfigs.setOpcotemplates(opcotemplates);
+		try {
+			biller = BillerFactory.getInstance(billerconfigs);
+			biller.validateMandatory();//Validates mandatory configs.
+		}catch (Exception exp) {
+			logger.error(exp.getMessage(),exp);
+			throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());
+		}
+		return biller;
+	}
+
 	public void finalizeMe() {
 		genericHttpClient.finalizeMe();
 	}
