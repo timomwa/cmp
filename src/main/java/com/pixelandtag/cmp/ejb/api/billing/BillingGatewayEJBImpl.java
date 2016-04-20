@@ -33,7 +33,7 @@ import com.pixelandtag.smssenders.SenderResp;
 @Remote
 public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 	
-	private static Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
+	//private static Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
 	
 	@EJB
 	private BillerConfigsI billerConfigEJB;
@@ -52,7 +52,7 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 		if(opco==null)
 			throw new BillingGatewayException("No opco linked with this billable!");
 	
-		Biller biller = biller_cache.get(opco.getId());
+		Biller biller = null;
 		
 		if(biller==null){
 			
@@ -71,7 +71,7 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 			try {
 				biller = BillerFactory.getInstance(billerconfigs);
 				biller.validateMandatory();//Validates mandatory configs.
-				biller_cache.put(opco.getId(), biller);
+				//biller_cache.put(opco.getId(), biller);
 			}catch (Exception exp) {
 				logger.error(exp.getMessage(),exp);
 				throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());
