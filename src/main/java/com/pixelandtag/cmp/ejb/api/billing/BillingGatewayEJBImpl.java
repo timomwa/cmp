@@ -2,11 +2,15 @@ package com.pixelandtag.cmp.ejb.api.billing;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
@@ -25,11 +29,11 @@ import com.pixelandtag.smssenders.Sender;
 import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.SenderResp;
 
-@Stateful
+@Stateless
 @Remote
 public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 	
-	private Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
+	private static Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
 	
 	@EJB
 	private BillerConfigsI billerConfigEJB;
@@ -67,6 +71,7 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 			try {
 				biller = BillerFactory.getInstance(billerconfigs);
 				biller.validateMandatory();//Validates mandatory configs.
+				biller_cache.put(opco.getId(), biller);
 			}catch (Exception exp) {
 				logger.error(exp.getMessage(),exp);
 				throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());

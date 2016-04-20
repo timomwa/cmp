@@ -282,7 +282,7 @@ public class HttpBiller extends GenericBiller {
 		
 		GenericHttpResp resp = httpclient.call(generic_HTTP_BILLER_parameters);
 		
-		logger.info("\n\n\t\t>>>url>>> : "+url
+		logger.debug("\n\n\t\t>>>url>>> : "+url
 				+"\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
 				"\n\t\t>>>response>>> : "+resp.getBody()+"\n"
