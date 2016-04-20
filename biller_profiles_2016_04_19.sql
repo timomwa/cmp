@@ -11,7 +11,6 @@ insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`eff
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(209,'string',now(),'biller_http_header_auth_hasmultiple_kv_pairs','yes',101);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(210,'string',now(),'biller_http_protocol','https',101);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(211,'string',now(),'biller_http_payload_template_name','airtelbillertemplate1',101);
-
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(212,'string',now(),'biller_http_request_method','POST',101);
 
 

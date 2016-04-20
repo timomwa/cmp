@@ -2,10 +2,12 @@ package com.pixelandtag.billing;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
@@ -25,11 +27,14 @@ import com.pixelandtag.sms.producerthreads.PricePointException;
 import com.pixelandtag.smssenders.Encryptor;
 import com.pixelandtag.smssenders.EncryptorImpl;
 import com.pixelandtag.smssenders.JsonUtilI;
+import com.pixelandtag.smssenders.JsonUtilImpl;
 import com.pixelandtag.smssenders.MessageSenderException;
 import com.pixelandtag.smssenders.SenderResp;
 
 public class HttpBiller extends GenericBiller {
 	
+
+
 	private GenericHTTPClient httpclient;
 	
 	
@@ -37,7 +42,7 @@ public class HttpBiller extends GenericBiller {
 	private Encryptor encryptor = new EncryptorImpl();
 	
 	@Inject
-	private static JsonUtilI jsonutil;
+	private static JsonUtilI jsonutil = new JsonUtilImpl();
 	
 	
 	private Map<String,BillerProfileConfig> configuration;
@@ -64,31 +69,31 @@ public class HttpBiller extends GenericBiller {
 		if(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME).getValue(), billable.getCp_tx_id()));//"cptxid"
 		
-		if(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME).getValue(),billable.getMsisdn()));//"msisdn"
 		
-		if(this.configuration.get(HTTP_BILLER_PRICE_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_PRICE_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_PRICE_PARAM_NAME).getValue(),billable.getPrice().toString()));//"price"
 		
-		if(this.configuration.get(HTTP_BILLER_SHORTCODE_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_SHORTCODE_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_SHORTCODE_PARAM_NAME).getValue(),billable.getShortcode()));//"shortcode"
 		
-		if(this.configuration.get(HTTP_BILLER_KEYWORD_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_KEYWORD_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_KEYWORD_PARAM_NAME).getValue(),billable.getKeyword()));//"keyword" 
 		
-		if(this.configuration.get(HTTP_BILLER_EVENT_TYPE_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_EVENT_TYPE_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_EVENT_TYPE_PARAM_NAME).getValue(),billable.getEvent_type().getName()));//"event_type" 
 		
-		if(this.configuration.get(HTTP_BILLER_CP_ID_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_CP_ID_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_CP_ID_PARAM_NAME).getValue(),billable.getCp_id()));//"cp_id" 
 		
-		if(this.configuration.get(HTTP_BILLER_OPERATION_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_OPERATION_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_OPERATION_PARAM_NAME).getValue(),billable.getOperation()));//"operation" 
 		
-		if(this.configuration.get(HTTP_BILLER_SERVICE_ID_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_SERVICE_ID_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_SERVICE_ID_PARAM_NAME).getValue(),billable.getService_id()));//"serviceid" 
 		
-		if(this.configuration.get(HTTP_BILLER_PRICE_POINT_PARAM_NAME).getValue()!=null)
+		if(this.configuration.get(HTTP_BILLER_PRICE_POINT_PARAM_NAME)!=null)
 			try {
 				qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_PRICE_POINT_PARAM_NAME).getValue(),billable.getPricePointKeyword()));
 			} catch (PricePointException e1) {
@@ -139,25 +144,48 @@ public class HttpBiller extends GenericBiller {
 				String username = usernamevalue.getValue();
 				String password = passwordvalue.getValue();
 				
+				BillerProfileConfig timestampFormat = this.configuration.get(HTTP_BILLER_TIMESTAMP_FORMAT);
+				
+				String httpBillertimeformat = timestampFormat!=null ? timestampFormat.getValue() : DEFAULT_TIMESTAMP_FORMAT;
+				
+				
+				BillerProfileConfig pre_encode_tpl = this.configuration.get(HTTP_BILLER_PRE_ENCODE_TEMPLATE);
+				
 				String digest = "";
 				try {
-					digest = encryptor.encode(username,password, encryptionmethod);
+					if(pre_encode_tpl==null){
+						digest = encryptor.encode(username,password, encryptionmethod);
+					}else{
+						String template = pre_encode_tpl.getValue();
+						logger.info("  \n\n >>>>>>>>>>>>>>>>>> B41 :  template = "+template);
+						template = template.replaceAll("\\$\\{PASSWORD\\}", Matcher.quoteReplacement(password));
+						template = template.replaceAll("\\$\\{USERNAME\\}", Matcher.quoteReplacement(username));
+						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString(billable.getTimeStamp(),httpBillertimeformat) ));
+						logger.info("  \n\n >>>>>>>>>>>>>>>>>> B42 :  template = "+template);
+						
+						digest = encryptor.encode(template, encryptionmethod);
+						logger.info("  \n\n >>>>>>>>>>>>>>>>>> AFTER :  digest = "+digest);
+						
+						
+					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(),e);
 					throw new BillerConfigException("Could not encrypt header params",e);
 				}
 				
 				BillerProfileConfig authmethodparamname = this.configuration.get(HTTP_BILLER_HEADER_AUTH_METHOD_PARAM_NAME);
-				if(authmethodparamname==null || authmethodparamname.getValue()==null || authmethodparamname.getValue().isEmpty()){
+				if(authmethodparamname==null || authmethodparamname.getValue()==null ){
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADER_AUTH_METHOD_PARAM_NAME+"\" for this opco");
 				}
-				String authmethod = authmethodparamname.getValue();//e.g Basic
 				
+				String authmethod =  authmethodparamname.getValue();//e.g Basic				
 				
 				BillerProfileConfig httpheaderauthparam = this.configuration.get(HTTP_BILLER_HEADERAUTH_PARAM_NAME);
 				if(httpheaderauthparam==null || httpheaderauthparam.getValue()==null || httpheaderauthparam.getValue().isEmpty()){
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADERAUTH_PARAM_NAME+"\" for this opco");
 				}
+				
+				
 				
 				if(this.configuration.get(HTTP_BILLER_HEADER_AUTH_HAS_MULTIPLE_KV_PAIRS).getValue().equalsIgnoreCase("yes")){
 					
@@ -168,17 +196,32 @@ public class HttpBiller extends GenericBiller {
 						
 						if(key.trim().toLowerCase().startsWith(HTTP_BILLER_HEADER_AUTH_PARAM_PREFIX)){//All other authentication header params MUST have this prefix
 							String param_name = key.split(HTTP_BILLER_HEADER_AUTH_PARAM_PREFIX)[1];
-							auth_header_value += " "+param_name+": "+config.getValue().getValue()+"\r\n";
-							headerParams.put(param_name, config.getValue().getValue());
+							
+							if(config.getValue().getValue().contains("${TIMESTAMP}")){
+								try {
+									auth_header_value += " "+param_name+": \""+config.getValue().getValue().replace("${TIMESTAMP}", dateToString(billable.getTimeStamp(),httpBillertimeformat))+"\"";
+								} catch (ParseException e) {
+									logger.error(e.getMessage(),e);
+									throw new BillerConfigException("Could format timestamp",e);
+								}
+							}else{
+								auth_header_value += " "+param_name+": \""+config.getValue().getValue()+"\"";
+							}
+							
+							
+							
+							//headerParams.put(param_name, config.getValue().getValue());
 						}
 						
 					}
 					
-					auth_header_value += httpheaderauthparam.getValue()+ ": "+authmethod+" "+digest+"\"";
+					auth_header_value += " "+password_param_name+"=\""+digest+"\"";
+					//auth_header_value += " "+httpheaderauthparam.getValue()+ ": \""+(authmethod+" "+digest).trim()+"\"";
 					
 				}else{
 					
-					auth_header_value = httpheaderauthparam.getValue()+ ": "+ authmethod+" "+digest;
+					//auth_header_value = " "+httpheaderauthparam.getValue()+ ": \""+ (authmethod+" "+digest).trim()+"\"";
+					auth_header_value =  authmethod+" "+digest;
 					
 				}
 				
@@ -191,8 +234,8 @@ public class HttpBiller extends GenericBiller {
 					}
 				}
 				
-				
-				headerParams.put(httpheaderauthparam.getValue(), authmethod+" "+digest);
+				System.out.println("\n\n::::::::::::::::::::::::::: "+httpheaderauthparam.getValue()+": "+auth_header_value.trim());
+				headerParams.put(httpheaderauthparam.getValue(), auth_header_value.trim());
 				
 				
 				
@@ -278,14 +321,14 @@ public class HttpBiller extends GenericBiller {
 					+"\" has been provided, so we will use "
 					+ "HTTP POST as default. If you wish to override this, "
 					+ "provide this config in db");
-		
+		logger.info(generic_HTTP_BILLER_parameters.toString() );
 		
 		GenericHttpResp resp = httpclient.call(generic_HTTP_BILLER_parameters);
 		
-		logger.debug("\n\n\t\t>>>url>>> : "+url
+		logger.info("\n\n\t\t>>>url>>> : "+url
 				+"\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
-				"\n\t\t>>>response>>> : "+resp.getBody()+"\n"
+				"\n\n\t\t>>>response>>> : "+resp.getBody()+"\n"
 			  + "\n\t\t>>>response code>>> : "+resp.getResp_code()
 			    + "\n\t\t>>>response contenttype>>> : "+resp.getContenttype()
 						+ "\n\n");

@@ -146,10 +146,10 @@ public class TestEJB {
 			 smsgw.sendMT(mtsms);*/
 			 
 			 Billable billable = new Billable();
-			 billable.setOpco(opcoEJB.findOpcoByCode("KEN-639-3"));
-			 billable.setMsisdn("254734252504");
+			 billable.setOpco(opcoEJB.findOpcoByCode("KEN-639-7"));
+			 billable.setMsisdn("254721252504");
 			 billable.setCp_id("CONTENT360_KE");
-			 billable.setCp_tx_id("082920kddg");
+			 billable.setCp_tx_id("082920kdd3g");
 			 billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
 			 billable.setIn_outgoing_queue(0L);
 			 billable.setKeyword("BILLSERV5");

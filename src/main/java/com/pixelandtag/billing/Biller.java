@@ -20,6 +20,8 @@ public interface Biller {
 	public final String HTTP_BILLER_OPERATION_PARAM_NAME = "biller_http_operation_param_name";
 	public final String HTTP_BILLER_SERVICE_ID_PARAM_NAME = "biller_http_serviceid_param_name";
 	public final String HTTP_BILLER_PRICE_POINT_PARAM_NAME = "biller_http_pricepoint_param_name";
+	public final String HTTP_BILLER_TIMESTAMP_FORMAT = "biller_http_header_timeStampFormat";
+	public final String HTTP_BILLER_PRE_ENCODE_TEMPLATE = "biller_http_pre_encode_template";
 	
 	public final String HTTP_BILLER_USE_HTTP_HEADER = "biller_http_useheader";
 	
