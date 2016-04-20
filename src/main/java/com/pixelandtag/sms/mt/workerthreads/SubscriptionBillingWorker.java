@@ -243,20 +243,15 @@ public class SubscriptionBillingWorker implements Runnable {
 										billable.setRetry_count(billable.getRetry_count()+1);
 										
 										if(!senderresp.getSuccess()){
-											String err = getErrorCode(resp);
-											String errMsg = getErrorMessage(resp);
-											logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-											logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
-											logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+											logger.info("FAILED TO BILL ERROR_MESSAGE="+senderresp.getResponseMsg()+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											//billable.setSuccess(false);
 											try{
-												String transactionId = getTransactionId(resp);
-												billable.setTransactionId(transactionId);
+												billable.setTransactionId(senderresp.getRefvalue());
 											}catch(Exception exp){
 												logger.warn("No transaction id found");
 											}
 											
-											billable.setResp_status_code(errMsg);
+											billable.setResp_status_code(senderresp.getRespcode());
 											billable.setSuccess(Boolean.FALSE);
 											
 											if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
@@ -267,8 +262,7 @@ public class SubscriptionBillingWorker implements Runnable {
 											
 										}else{
 											
-											String transactionId = getTransactionId(resp);
-											billable.setTransactionId(transactionId);
+											billable.setTransactionId(senderresp.getRefvalue());
 											billable.setResp_status_code("Success");
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
@@ -459,22 +453,5 @@ public class SubscriptionBillingWorker implements Runnable {
 		logger.error(e.getMessage(),e);
 		
 	}
-		
-	private String getTransactionId(String resp) {
-		int start = resp.indexOf("<transactionId>")+"<transactionId>".length();
-		int end  = resp.indexOf("</transactionId>");
-		return resp.substring(start, end);
-	}
-	private  String getErrorMessage(String resp) {
-		int start = resp.indexOf("<errorMessage>")+"<errorMessage>".length();
-		int end  = resp.indexOf("</errorMessage>");
-		return resp.substring(start, end);
-	}
-	private String getErrorCode(String resp) {
-		int start = resp.indexOf("<errorCode>")+"<errorCode>".length();
-		int end  = resp.indexOf("</errorCode>");
-		return resp.substring(start, end);
-	}
-
 
 }
