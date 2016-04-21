@@ -51,10 +51,11 @@ public interface Biller {
 	public final String HTTP_BILLER_RESP_JSON_RESP_MSG_KEY = "biller_http_resp_json_resp_msg_key";
 	public final String HTTP_BILLER_RESP_JSON_RESPCODE_KEY = "biller_http_resp_json_respcode_key";
 	
-	public final String HTTP_BILLER_RESP_XML_REF_VALUE_KEY = "biller_http_resp_xml_ref_value_key";
-	public final String HTTP_BILLER_RESP_XML_RESP_MSG_KEY_FAILURE = "biller_http_resp_xml_resp_msg_key_failure";
-	public final String HTTP_BILLER_RESP_XML_RESP_MSG_KEY_SUCCESS = "biller_http_resp_xml_resp_msg_key_success";
-	public final String HTTP_BILLER_RESP_XML_RESPCODE_KEY = "biller_http_resp_xml_respcode_key";
+	public final String HTTP_BILLER_RESP_REF_VALUE_KEY = "biller_http_resp_xml_ref_value_key";
+	public final String HTTP_BILLER_RESP_RESP_MSG_KEY_FAILURE = "biller_http_resp_xml_resp_msg_key_failure";
+	public final String HTTP_BILLER_RESP_RESP_MSG_KEY_SUCCESS = "biller_http_resp_xml_resp_msg_key_success";
+	public final String HTTP_BILLER_RESP_RESPCODE_KEY = "biller_http_resp_xml_respcode_key";
+	
 	public final String HTTP_BILLER_RESP_SUCCESS_STRING = "biller_http_resp_success_string";
 	public final String HTTP_BILLER_ALLOW_SENDING_BLANK_TEXT = "biller_http_allow_send_blank_text";
 

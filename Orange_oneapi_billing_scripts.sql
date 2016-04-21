@@ -27,12 +27,20 @@ insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`eff
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(324,'string',now(),'biller_http_header_auth_param_timeStamp','${TIMESTAMP}',102);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(325,'string',now(),'biller_http_header_auth_param_serviceId','49',102);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(326,'string',now(),'biller_http_header_timeStampFormat','yyyyMMdd',102);
-
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(327,'string',now(),'biller_http_pre_encode_template','${PASSWORD}',102);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(328,'string',now(),'biller_http_expectedcontenttype','json',102);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(329,'string',now(),'biller_http_resp_json_ref_value_key','serverReferenceCode',102);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(330,'string',now(),'biller_http_resp_json_resp_msg_key','transactionOperationStatus',102);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(331,'string',now(),'biller_http_resp_json_respcode_key','referenceCode',102);
+insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(332,'string',now(),'biller_http_resp_xml_ref_value_key','serverReferenceCode',102);
+insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(333,'string',now(),'biller_http_resp_xml_resp_msg_key_failure','message',102);
+insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(334,'string',now(),'biller_http_resp_xml_resp_msg_key_success','transactionOperationStatus',102);
+insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(335,'string',now(),'biller_http_resp_success_string','Charged',102);
+
+
+
+
+
 
 
 

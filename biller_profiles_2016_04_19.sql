@@ -46,6 +46,12 @@ insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`eff
 
 
 
+update biller_profile_configs set `value`='no' where id = 209;
+insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(238,'string',now(),'biller_http_header_param_SOAPAction','',101);
+
+
+
+
 
 
 

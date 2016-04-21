@@ -147,9 +147,9 @@ public class TestEJB {
 			 
 			 Billable billable = new Billable();
 			 billable.setOpco(opcoEJB.findOpcoByCode("KEN-639-7"));
-			 billable.setMsisdn("254721252504");
+			 billable.setMsisdn("254775252504");//254734252504");//
 			 billable.setCp_id("CONTENT360_KE");
-			 billable.setCp_tx_id("082920kdd3g");
+			 billable.setCp_tx_id("082920kdsd399g");
 			 billable.setEvent_type(EventType.SUBSCRIPTION_PURCHASE);
 			 billable.setIn_outgoing_queue(0L);
 			 billable.setKeyword("BILLSERV5");
@@ -176,13 +176,13 @@ public class TestEJB {
 			// context.close();
 	}catch(Exception exp){
 			exp.printStackTrace();
-		}finally{
+	}finally{
 		 try{
-			 //context.close();
+			 context.close();
 		 }catch(Exception exp){
 			 
 		 }
-		}
+	}
 		 
 	}
 	
