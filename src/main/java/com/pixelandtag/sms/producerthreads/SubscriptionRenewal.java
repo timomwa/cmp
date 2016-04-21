@@ -34,8 +34,8 @@ public class SubscriptionRenewal extends  Thread {
 	private boolean run = true;
 	private CMPResourceBeanRemote cmpbean;
 	private SubscriptionBeanI subscriptio_nejb;
-	private BillingGatewayEJBI billingGatewayEJB;
-	private BillerConfigsI billerConfigEJB;
+	//private BillingGatewayEJBI billingGatewayEJB;
+	//private BillerConfigsI billerConfigEJB;
 	private volatile static ConcurrentLinkedQueue<Subscription> subscriptions = new ConcurrentLinkedQueue<Subscription>();
 	private static SubscriptionRenewal instance;
 	public volatile  BlockingQueue<SubscriptionBillingWorker> billingsubscriptionWorkers = new LinkedBlockingDeque<SubscriptionBillingWorker>();
@@ -84,8 +84,8 @@ public class SubscriptionRenewal extends  Thread {
 		 subscriptio_nejb =  (SubscriptionBeanI) 
 		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 freeloaderEJB =  (FreeLoaderEJBI) this.context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
-		 billingGatewayEJB  =  (BillingGatewayEJBI) this.context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
-		 billerConfigEJB =  (BillerConfigsI) this.context.lookup("cmp/BillerConfigsImpl!com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI");
+		 //billingGatewayEJB  =  (BillingGatewayEJBI) this.context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
+		 //billerConfigEJB =  (BillerConfigsI) this.context.lookup("cmp/BillerConfigsImpl!com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI");
 	}
 	
 	
@@ -172,7 +172,7 @@ public class SubscriptionRenewal extends  Thread {
 		Thread t1;
 		for (int i = 0; i < this.workers; i++) {
 			SubscriptionBillingWorker worker;
-			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, cmpbean,subscriptio_nejb,billerConfigEJB, mandatory_throttle); 
+			worker = new SubscriptionBillingWorker("THREAD_WORKER_#_" + i, mandatory_throttle); 
 			t1 = new Thread(worker);
 			t1.start();
 			billingsubscriptionWorkers.add(worker);

@@ -4,10 +4,12 @@ package com.pixelandtag.sms.mt.workerthreads;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
+import javax.naming.InitialContext;
 
 import org.apache.log4j.Logger;
 
@@ -21,6 +23,7 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayException;
+import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.SMSService;
@@ -35,6 +38,7 @@ import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
 import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
+import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.StopWatch;
 
 public class SubscriptionBillingWorker implements Runnable {
@@ -56,6 +60,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
 	private Map<Long, MOProcessor> mo_processorCache = new HashMap<Long, MOProcessor>();
 	private Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
+	private Properties mtsenderprop;
 	
 	
 	private int getRandom(){
@@ -112,20 +117,34 @@ public class SubscriptionBillingWorker implements Runnable {
 		
 		}
 	}
+	
 
-	public SubscriptionBillingWorker(String name_, CMPResourceBeanRemote cmpbean_, SubscriptionBeanI subscriptionejb_, BillerConfigsI billerConfigEJB, int mandatory_throttle_) throws Exception{
+	private void init() {
+		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
+	}
+	
+	private void initEJB() throws Exception{
+		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
+		 props.put("jboss.naming.client.ejb.context", true);
+		 context = new InitialContext(props);
+		 cmp_ejb =  (CMPResourceBeanRemote) 
+       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 subscriptionejb =  (SubscriptionBeanI) 
+		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
+		 billerConfigEJB =  (BillerConfigsI) this.context.lookup("cmp/BillerConfigsImpl!com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI");
+	}
+
+	public SubscriptionBillingWorker(String name_, int mandatory_throttle_) throws Exception{
+	
+		init();
+		
+		initEJB();
 		 
-		if(cmpbean_==null)
-			throw new Exception("CMP EJB is nulll");
-		if(subscriptionejb_==null)
-			throw new Exception("CMP EJB is nulll");
-		if(billerConfigEJB==null)
-			throw new Exception("Billing gateway is nulll");
-		
-		this.billerConfigEJB = billerConfigEJB;
-		this.cmp_ejb = cmpbean_;
-		this.subscriptionejb = subscriptionejb_;
-		
 		this.watch = new StopWatch();
 		
 		this.name = name_;
@@ -135,8 +154,6 @@ public class SubscriptionBillingWorker implements Runnable {
 		watch.start();
 		
 		genericHttpClient = new GenericHTTPClient("https");
-		
-  
 	}
 
 	public void run() {
