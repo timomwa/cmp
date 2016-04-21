@@ -215,11 +215,9 @@ public class HttpBiller extends GenericBiller {
 					}
 					
 					auth_header_value += " "+password_param_name+"=\""+digest+"\"";
-					//auth_header_value += " "+httpheaderauthparam.getValue()+ ": \""+(authmethod+" "+digest).trim()+"\"";
 					
 				}else{
 					
-					//auth_header_value = " "+httpheaderauthparam.getValue()+ ": \""+ (authmethod+" "+digest).trim()+"\"";
 					auth_header_value =  ""+(authmethod+" "+digest).trim()+"";
 					
 				}
@@ -233,7 +231,6 @@ public class HttpBiller extends GenericBiller {
 						headerParams.put(param_name, config.getValue().getValue());
 					}
 				}
-				System.out.println("\n\n::::::::::::::::::::::::::: "+httpheaderauthparam.getValue()+": "+auth_header_value.trim());
 				
 				headerParams.put(httpheaderauthparam.getValue(), auth_header_value.trim());
 				
@@ -243,11 +240,6 @@ public class HttpBiller extends GenericBiller {
 			
 			generic_HTTP_BILLER_parameters.setHeaderParams(headerParams);
 			
-			StringBuffer sb = new StringBuffer();
-			for(Map.Entry<String,String> set : headerParams.entrySet()){
-				sb.append("\t\t").append(set.getKey()).append(" : ").append(set.getValue()).append("\n");
-			}
-			System.out.println("\n\n::::::::::::::::::::\n\n"+sb.toString()+"\n\n::::::::::::::::::::\n\n");
 		}
 		
 		
@@ -328,11 +320,11 @@ public class HttpBiller extends GenericBiller {
 					+"\" has been provided, so we will use "
 					+ "HTTP POST as default. If you wish to override this, "
 					+ "provide this config in db");
-		logger.info(generic_HTTP_BILLER_parameters.toString() );
+		logger.debug(generic_HTTP_BILLER_parameters.toString() );
 		
 		GenericHttpResp resp = httpclient.call(generic_HTTP_BILLER_parameters);
 		
-		logger.info("\n\n\t\t>>>url>>> : "+url
+		logger.debug("\n\n\t\t>>>url>>> : "+url
 				+"\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
 				"\n\n\t\t>>>response>>> : "+resp.getBody()+"\n"
