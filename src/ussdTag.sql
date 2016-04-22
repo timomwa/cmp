@@ -186,33 +186,7 @@ END;
 $
 DELIMITER ;
 
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-06-30 00:00:00','-04:00','+03:00') AND convert_tz('2015-07-31 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-08-30 00:00:00','-04:00','+03:00') AND convert_tz('2015-10-01 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-11-30 00:00:00','-04:00','+03:00') AND convert_tz('2016-01-01 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-10-31 00:00:00','-04:00','+03:00') AND convert_tz('2015-12-01 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-12-31 00:00:00','-04:00','+03:00') AND convert_tz('2016-02-02 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-12-31 00:00:00','-04:00','+03:00') AND convert_tz('2016-02-02 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
+select msisdn,convert_tz(mo_timestamp,'-04:00','+03:00') mo_time, convert_tz(mt_timestamp,'-04:00','+03:00') mt_time,shortcode,source,replace(mo_sms,'\n',' ') mo_sms, replace(mt_sms,'\n',' '), status from message_log where msisdn='254756121523' order by mo_timestamp desc;
 
 select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
 and timeStamp between  convert_tz('2016-02-29 00:00:00','-04:00','+03:00') AND convert_tz('2016-04-02 23:59:59','-04:00','+03:00')

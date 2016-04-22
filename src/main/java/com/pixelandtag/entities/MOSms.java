@@ -61,8 +61,6 @@ public class MOSms extends GenericMO{
 			
 			value = request.getParameter(paramName);
 			
-			System.out.println("celcom : paramName: "+paramName+ " value: "+value);
-			
 			attribz.put(paramName, request.getParameter(paramName));
 			
 			

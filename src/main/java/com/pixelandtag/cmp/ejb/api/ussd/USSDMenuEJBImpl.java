@@ -190,7 +190,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.append("Ok. Bye");
 				}else{
 					String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
-					
+					msg += "1. Agreed\n2.Disagreed"; 
 					sb.setLength(0);
 					sb.append("<form action=\""+baseurl+"\">");
 					sb.append("<entry kind=\"digits\" var=\"answers\">");

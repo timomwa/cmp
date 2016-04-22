@@ -2,6 +2,10 @@ insert into `pixeland_content360`.`biller_profile`(`id`,`active`,`effectiveDate`
 insert into `pixeland_content360`.`opco_biller_profile`(`id`,`active`, `effectiveDate`, `pickorder`, `workers`, `opco_id_fk`, `profile_id_fk`) values(1,1,now(),0,1,79497102,101);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(201,'string',now(),'billerimpl','com.pixelandtag.billing.HttpBiller',101);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(202,'string',now(),'biller_http_base_url','https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1',101);
+
+update `pixeland_content360`.`biller_profile_configs` set `value`='https://airtelcgw:8443/ChargingServiceFlowWeb/sca/ChargingExport1' where id =  202;
+10.132.200.81
+
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(203,'string',now(),'biller_http_shortcode_param_name','SHORTCODE',101);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(204,'string',now(),'biller_http_msisdn_param_name','MSISDN',101);
 insert into `pixeland_content360`.`biller_profile_configs`(`id`,`data_type`,`effectiveDate`,`name`,`value`,`profile_id_fk`) VALUES(205,'string',now(),'biller_http_sms_msg_param_name','sms',101);
