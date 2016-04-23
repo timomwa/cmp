@@ -416,14 +416,16 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				
 				return xml;
     	}catch(Exception exp){
-    		logger.error(exp.getMessage(), exp);
     		sb.append("Looks like there's a problem with this request. Try again.");
     		page.setAttribute( "nav", "end");
     		page.setText(sb.toString());
 			rootelement.addContent(page);
 			sb.setLength(0);
 			xml = xmlOutput.outputString(doc);
-			logger.info("\n\nXML RESPONSE >>>>>> "+xml+"\n\n");
+			logger.info("\n\nXML_RESPONSE >>>>>> "+xml+"\n\n");
+			
+			logger.error(exp.getMessage(), exp);
+    		
     		return xml;
     	}
 	}
