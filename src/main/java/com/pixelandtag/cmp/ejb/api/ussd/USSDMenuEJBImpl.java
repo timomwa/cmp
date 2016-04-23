@@ -414,7 +414,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				
 				return xml;
     	}catch(Exception exp){
-    		sb.append("Looks like there's a problem with this request. Try again.");
+    		sb.append("Looks like this is not a genuine GSM call. Use a handset to dial *329# to access the menu or mimic a call from the operator by setting the required header parameters.");
     		page.setAttribute( "nav", "end");
     		page.setText(sb.toString());
 			rootelement.addContent(page);
