@@ -81,7 +81,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     @Override
     public String getNextQuestionOrange(Map<String,String> attribz, IncomingSMS incomingsms) throws Exception{
     	
-    	String baseurl = attribz.get("contextpath");
+    	String xml = "";
     	
     	Element rootelement = new Element("pages");
     	Document doc = new Document(rootelement); 
@@ -89,326 +89,343 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		doctype.setSystemID("cellflash-1.3.dtd");
 		doc.setDocType(doctype);
 		
-		String xml = "";
+		
 		
 		Element page = new Element("page");
-		//page.setAttribute("nav", "end");
-		
-
 		final StringBuffer sb = new StringBuffer();
 		
-		String answers = attribz.get("answers");
-		int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
-		String attrib_ =  attribz.get("attrib") ;
-		int questionid_ = OrangeUSSD.setdefaultifnull( attribz.get("questionid") );
-		
-		Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
-		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
-		
-		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
-		
-		PersonDatingProfile profile = datingBean.getProfile(person);
-		
-		
-		if(person.getId()>0 && profile==null){
-			
-			String msg = null;
-			try{
-				msg = datingBean.getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, languageid_, incomingsms.getOpco().getId());
-			}catch(DatingServiceException dse){
-				logger.error(dse.getMessage(), dse);
-			}
-			
-			profile = datingBean.getProfile(person);
-			
-			if(profile==null){
-				profile = new PersonDatingProfile();
-				profile.setPerson(person);
-				profile.setUsername(incomingsms.getMsisdn());
-			}
-			
-			profile = datingBean.saveOrUpdate(profile);
-			
-			ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
-			logger.debug("QUESTION::: "+question.getQuestion());
-			
-			
-			QuestionLog ql = new QuestionLog();
-			
-			ql.setProfile_id_fk(profile.getId());
-			ql.setQuestion_id_fk(question.getId());
-			ql = datingBean.saveOrUpdate(ql);
-			
-			sb.append(question.getQuestion());
-			sb.append(BR_NEW_LINE);
-			sb.append("<a href=\""+baseurl+"&answers=2\">No</a>");
-			sb.append(BR_NEW_LINE);
-			sb.append("<a href=\""+baseurl+"&answers=1\">Yes</a>");
-			
-			page.setText(sb.toString());
-			rootelement.addContent(page);
-			sb.setLength(0);
-			xml = xmlOutput.outputString(doc);
-			
-			return xml;
-			
-		}
-		
-		if(profile==null){
-			profile = new PersonDatingProfile();
-			profile.setPerson(person);
-			profile.setUsername(incomingsms.getMsisdn());
-			profile = datingBean.saveOrUpdate(profile);
-		}
-		
-		
-		if(!profile.getProfileComplete()){//answers!=null && !answers.isEmpty() ){//We set the profile answer
-			
-			
-			
-			ProfileQuestion previousQuestion =  getPreviousQuestion(person, incomingsms);
-			
-			ProfileAttribute attr = previousQuestion.getAttrib();
-			logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+answers);
-			logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
-			
-			
-			if(attr.equals(ProfileAttribute.DISCLAIMER)){
-				boolean keywordIsNumber = false;
-				int agreed = -1;
-				try{
-					agreed = Integer.parseInt(answers);
-					keywordIsNumber = true;
-				}catch(Exception exp){}
+    	
+    	try{
+		    	String baseurl = attribz.get("contextpath");
+		    	
+		    	
+				//page.setAttribute("nav", "end");
 				
-				if( (keywordIsNumber && agreed==1 ) || (answers!=null && (answers.trim().equalsIgnoreCase("A") || answers.trim().equalsIgnoreCase("Y") || answers.trim().equalsIgnoreCase("YES") || answers.trim().equalsIgnoreCase("YEP")
-						|| answers.trim().equalsIgnoreCase("NDIO") || answers.trim().equalsIgnoreCase("NDIYO")  || answers.trim().equalsIgnoreCase("SAWA") || answers.trim().equalsIgnoreCase("OK") )) ){
-					person.setAgreed_to_tnc(Boolean.TRUE);
-				}else if((keywordIsNumber && agreed==1 ) || (answers!=null && (answers.trim().equalsIgnoreCase("A") || answers.trim().equalsIgnoreCase("N") || answers.trim().equalsIgnoreCase("NO")))){
-					sb.append("Ok. Bye");
-				}else{
-					String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
-					msg += "1. Agreed\n2.Disagreed"; 
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+msg+"</prompt>");
-					sb.append("</entry></form>");
-				}
-			}
-			
-			if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
+		
 				
-				boolean isunique = datingBean.isUsernameUnique(answers);
+				String answers = attribz.get("answers");
+				int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
+				String attrib_ =  attribz.get("attrib") ;
+				int questionid_ = OrangeUSSD.setdefaultifnull( attribz.get("questionid") );
 				
-				try{
-					if(isunique)
-						isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(answers).toString()));
-				}catch(Exception exp){}
+				Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
+				if(person==null)
+					person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
 				
-				if(isunique){
-					profile.setUsername(answers);
-				}else{
-					String msg = "";
-					if(answers!=null && answers.equalsIgnoreCase("329")){
-						msg = datingBean.getMessage(DatingMessages.REPLY_WITH_USERNAME, languageid_,person.getOpco().getId());
-					}else{
-						msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
-					}
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
-				}
-			}
-			
-			if(attr.equals(ProfileAttribute.GENDER)){
+				if(person==null)
+					person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
 				
-				if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("M") ||  answers.equalsIgnoreCase("MALE") ||  answers.equalsIgnoreCase("MAN") ||  answers.equalsIgnoreCase("BOY") ||  answers.equalsIgnoreCase("MUME") ||  answers.equalsIgnoreCase("MWANAMME")  ||  answers.equalsIgnoreCase("MWANAUME"))){ 
-					profile.setGender(Gender.MALE);
-					profile.setPreferred_gender(Gender.FEMALE);
-				}else if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("F") ||  answers.equalsIgnoreCase("FEMALE") ||  answers.equalsIgnoreCase("LADY") ||  answers.equalsIgnoreCase("GIRL") ||  answers.equalsIgnoreCase("MKE") ||  answers.equalsIgnoreCase("MWANAMKE")  ||  answers.equalsIgnoreCase("MWANAMUKE"))){ 
-					profile.setGender(Gender.FEMALE);
-					profile.setPreferred_gender(Gender.MALE);
-				}else{
+				PersonDatingProfile profile = datingBean.getProfile(person);
+				
+				
+				if(person.getId()>0 && profile==null){
+					
 					String msg = null;
 					try{
-						msg = datingBean.getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, languageid_,person.getOpco().getId());
+						msg = datingBean.getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, languageid_, incomingsms.getOpco().getId());
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(), dse);
 					}
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
 					
-				}
-				
-			}
-			
-			if(attr.equals(ProfileAttribute.AGE)){
-				
-				Date dob = new Date();
-				BigDecimal age = BigDecimal.ONE;
-				try{
-					if(answers!=null)
-					age = new BigDecimal(answers);
-				}catch(java.lang.NumberFormatException nfe){
-					String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
-					msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
-					msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
-					sb.append(msg);
-				}
-				
-				if(age.compareTo(new BigDecimal(100l))>=0){
-					String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, languageid_,person.getOpco().getId());
-					msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
-					msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
-					sb.append(msg);
-				}
-				
-				if(age.compareTo(new BigDecimal(18l))<0){
-					String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
-					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
-				}
-				
-				dob = datingBean.calculateDobFromAge(age);
-				profile.setDob( dob );
-				profile.setPreferred_age(BigDecimal.valueOf(18L));
-				
-			}
-			
-			if(attr.equals(ProfileAttribute.LOCATION)){
-				boolean location_is_only_number = false;
-				try{
-					if(answers!=null){
-						new BigDecimal(answers);
-						location_is_only_number = true;
+					profile = datingBean.getProfile(person);
+					
+					if(profile==null){
+						profile = new PersonDatingProfile();
+						profile.setPerson(person);
+						profile.setUsername(incomingsms.getMsisdn());
 					}
-				}catch(java.lang.NumberFormatException nfe){
+					
+					profile = datingBean.saveOrUpdate(profile);
+					
+					ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
+					logger.debug("QUESTION::: "+question.getQuestion());
+					
+					
+					QuestionLog ql = new QuestionLog();
+					
+					ql.setProfile_id_fk(profile.getId());
+					ql.setQuestion_id_fk(question.getId());
+					ql = datingBean.saveOrUpdate(ql);
+					
+					sb.append(question.getQuestion());
+					sb.append(BR_NEW_LINE);
+					sb.append("<a href=\""+baseurl+"&answers=2\">No</a>");
+					sb.append(BR_NEW_LINE);
+					sb.append("<a href=\""+baseurl+"&answers=1\">Yes</a>");
+					
+					page.setText(sb.toString());
+					rootelement.addContent(page);
+					sb.setLength(0);
+					xml = xmlOutput.outputString(doc);
+					
+					return xml;
+					
 				}
-				if(answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number)){
-					String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
-					sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
-					
-				}else{
-					profile.setLocation(answers);
-					
-					profile.setProfileComplete(true);
-					person.setActive(true);
+				
+				if(profile==null){
+					profile = new PersonDatingProfile();
 					profile.setPerson(person);
+					profile.setUsername(incomingsms.getMsisdn());
+					profile = datingBean.saveOrUpdate(profile);
+				}
+				
+				
+				if(!profile.getProfileComplete()){//answers!=null && !answers.isEmpty() ){//We set the profile answer
 					
-					SMSService smsservice = datingBean.getSMSService("DATE",person.getOpco());
 					
-					subscriptionBean.renewSubscription(incomingsms.getOpco(), incomingsms.getMsisdn(), smsservice, SubscriptionStatus.confirmed,AlterationMethod.self_via_ussd);
-				}
-			}
-			
-			
-			profile = datingBean.saveOrUpdate(profile);
-			
-		}
-		
-		logger.info(">>>>>>>>>>> "+sb.toString());
-		if(sb.toString()==null || sb.toString().isEmpty()){// we move to the next question
-		
-			ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
-			if(profileQuestion!=null){
-				
-				String question = profileQuestion.getQuestion();
-				ProfileAttribute attrib = profileQuestion.getAttrib();
-				Long questionid = profileQuestion.getId();
-				Long languageid = profileQuestion.getLanguage_id();
-				
-				
-				baseurl = baseurl+"?attrib="+attrib+"&questionid="+questionid+"&languageid="+languageid;
-				
-				sb.append(question);
-				sb.append(BR_NEW_LINE);
-				
-				if(attrib==ProfileAttribute.DISCLAIMER){
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question+"</prompt>");
-					sb.append("</entry></form>");
 					
-					/*sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");*/
+					ProfileQuestion previousQuestion =  getPreviousQuestion(person, incomingsms);
+					
+					ProfileAttribute attr = previousQuestion.getAttrib();
+					logger.debug("PREVIOUS QUESTION ::: "+previousQuestion.getQuestion() + " SUB ANSWER : "+answers);
+					logger.debug("ATRIBUTE ADDRESSING ::: "+attr.toString());
+					
+					
+					if(attr.equals(ProfileAttribute.DISCLAIMER)){
+						boolean keywordIsNumber = false;
+						int agreed = -1;
+						try{
+							agreed = Integer.parseInt(answers);
+							keywordIsNumber = true;
+						}catch(Exception exp){}
+						
+						if( (keywordIsNumber && agreed==1 ) || (answers!=null && (answers.trim().equalsIgnoreCase("A") || answers.trim().equalsIgnoreCase("Y") || answers.trim().equalsIgnoreCase("YES") || answers.trim().equalsIgnoreCase("YEP")
+								|| answers.trim().equalsIgnoreCase("NDIO") || answers.trim().equalsIgnoreCase("NDIYO")  || answers.trim().equalsIgnoreCase("SAWA") || answers.trim().equalsIgnoreCase("OK") )) ){
+							person.setAgreed_to_tnc(Boolean.TRUE);
+						}else if((keywordIsNumber && agreed==1 ) || (answers!=null && (answers.trim().equalsIgnoreCase("A") || answers.trim().equalsIgnoreCase("N") || answers.trim().equalsIgnoreCase("NO")))){
+							sb.append("Ok. Bye");
+						}else{
+							String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
+							msg += "1. Agreed\n2.Disagreed"; 
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+msg+"</prompt>");
+							sb.append("</entry></form>");
+						}
+					}
+					
+					if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
+						
+						boolean isunique = datingBean.isUsernameUnique(answers);
+						
+						try{
+							if(isunique)
+								isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(answers).toString()));
+						}catch(Exception exp){}
+						
+						if(isunique){
+							profile.setUsername(answers);
+						}else{
+							String msg = "";
+							if(answers!=null && answers.equalsIgnoreCase("329")){
+								msg = datingBean.getMessage(DatingMessages.REPLY_WITH_USERNAME, languageid_,person.getOpco().getId());
+							}else{
+								msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
+							}
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+						}
+					}
+					
+					if(attr.equals(ProfileAttribute.GENDER)){
+						
+						if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("M") ||  answers.equalsIgnoreCase("MALE") ||  answers.equalsIgnoreCase("MAN") ||  answers.equalsIgnoreCase("BOY") ||  answers.equalsIgnoreCase("MUME") ||  answers.equalsIgnoreCase("MWANAMME")  ||  answers.equalsIgnoreCase("MWANAUME"))){ 
+							profile.setGender(Gender.MALE);
+							profile.setPreferred_gender(Gender.FEMALE);
+						}else if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("F") ||  answers.equalsIgnoreCase("FEMALE") ||  answers.equalsIgnoreCase("LADY") ||  answers.equalsIgnoreCase("GIRL") ||  answers.equalsIgnoreCase("MKE") ||  answers.equalsIgnoreCase("MWANAMKE")  ||  answers.equalsIgnoreCase("MWANAMUKE"))){ 
+							profile.setGender(Gender.FEMALE);
+							profile.setPreferred_gender(Gender.MALE);
+						}else{
+							String msg = null;
+							try{
+								msg = datingBean.getMessage(DatingMessages.GENDER_NOT_UNDERSTOOD, languageid_,person.getOpco().getId());
+							}catch(DatingServiceException dse){
+								logger.error(dse.getMessage(), dse);
+							}
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+							
+						}
+						
+					}
+					
+					if(attr.equals(ProfileAttribute.AGE)){
+						
+						Date dob = new Date();
+						BigDecimal age = BigDecimal.ONE;
+						try{
+							if(answers!=null)
+							age = new BigDecimal(answers);
+						}catch(java.lang.NumberFormatException nfe){
+							String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
+							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
+							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
+							sb.append(msg);
+						}
+						
+						if(age.compareTo(new BigDecimal(100l))>=0){
+							String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, languageid_,person.getOpco().getId());
+							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
+							sb.append(msg);
+						}
+						
+						if(age.compareTo(new BigDecimal(18l))<0){
+							String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
+							sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
+						}
+						
+						dob = datingBean.calculateDobFromAge(age);
+						profile.setDob( dob );
+						profile.setPreferred_age(BigDecimal.valueOf(18L));
+						
+					}
+					
+					if(attr.equals(ProfileAttribute.LOCATION)){
+						boolean location_is_only_number = false;
+						try{
+							if(answers!=null){
+								new BigDecimal(answers);
+								location_is_only_number = true;
+							}
+						}catch(java.lang.NumberFormatException nfe){
+						}
+						if(answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number)){
+							String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
+							sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
+							
+						}else{
+							profile.setLocation(answers);
+							
+							profile.setProfileComplete(true);
+							person.setActive(true);
+							profile.setPerson(person);
+							
+							SMSService smsservice = datingBean.getSMSService("DATE",person.getOpco());
+							
+							subscriptionBean.renewSubscription(incomingsms.getOpco(), incomingsms.getMsisdn(), smsservice, SubscriptionStatus.confirmed,AlterationMethod.self_via_ussd);
+						}
+					}
+					
+					
+					profile = datingBean.saveOrUpdate(profile);
+					
 				}
 				
-				if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
-				}
+				logger.info(">>>>>>>>>>> "+sb.toString());
+				if(sb.toString()==null || sb.toString().isEmpty()){// we move to the next question
 				
-				if(attrib==ProfileAttribute.GENDER){
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
-					/*sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");*/
+					ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
+					if(profileQuestion!=null){
+						
+						String question = profileQuestion.getQuestion();
+						ProfileAttribute attrib = profileQuestion.getAttrib();
+						Long questionid = profileQuestion.getId();
+						Long languageid = profileQuestion.getLanguage_id();
+						
+						
+						baseurl = baseurl+"?attrib="+attrib+"&questionid="+questionid+"&languageid="+languageid;
+						
+						sb.append(question);
+						sb.append(BR_NEW_LINE);
+						
+						if(attrib==ProfileAttribute.DISCLAIMER){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question+"</prompt>");
+							sb.append("</entry></form>");
+							
+							/*sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");*/
+						}
+						
+						if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+						}
+						
+						if(attrib==ProfileAttribute.GENDER){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+							/*sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");*/
+						}
+						if(attrib==ProfileAttribute.AGE){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+						}
+						if(attrib==ProfileAttribute.LOCATION){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+						}
+						if(attrib==ProfileAttribute.PREFERRED_AGE){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("</entry></form>");
+						}
+						if(attrib==ProfileAttribute.PREFERRED_GENDER){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+question+"</prompt>");
+							sb.append("</entry></form>");
+							/*sb.append("<a href=\""+baseurl+"&answers=female\">1. Female</a>");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=male\">2. Male</a>");*/
+						}
+						
+						
+						QuestionLog ql = new QuestionLog();
+						
+						ql.setProfile_id_fk(profile.getId());
+						ql.setQuestion_id_fk(profileQuestion.getId());
+						ql = datingBean.saveOrUpdate(ql);
+						
+					}else{
+						
+					}
 				}
-				if(attrib==ProfileAttribute.AGE){
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
-				}
-				if(attrib==ProfileAttribute.LOCATION){
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
-				}
-				if(attrib==ProfileAttribute.PREFERRED_AGE){
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-					sb.append("</entry></form>");
-				}
-				if(attrib==ProfileAttribute.PREFERRED_GENDER){
-					sb.setLength(0);
-					sb.append("<form action=\""+baseurl+"\">");
-					sb.append("<entry kind=\"digits\" var=\"answers\">");
-					sb.append("<prompt>"+question+"</prompt>");
-					sb.append("</entry></form>");
-					/*sb.append("<a href=\""+baseurl+"&answers=female\">1. Female</a>");
-					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=male\">2. Male</a>");*/
-				}
+				page.setText(sb.toString());
+				rootelement.addContent(page);
+				sb.setLength(0);
+				xml = xmlOutput.outputString(doc);
 				
-				
-				QuestionLog ql = new QuestionLog();
-				
-				ql.setProfile_id_fk(profile.getId());
-				ql.setQuestion_id_fk(profileQuestion.getId());
-				ql = datingBean.saveOrUpdate(ql);
-				
-			}else{
-				
-			}
-		}
-		page.setText(sb.toString());
-		rootelement.addContent(page);
-		sb.setLength(0);
-		xml = xmlOutput.outputString(doc);
-		
-		return xml;
+				return xml;
+    	}catch(Exception exp){
+    		logger.error(exp.getMessage(), exp);
+    		sb.append("Looks like there's a problem with this request. Try again.");
+    		page.setAttribute( "nav", "end");
+    		page.setText(sb.toString());
+			rootelement.addContent(page);
+			sb.setLength(0);
+			xml = xmlOutput.outputString(doc);
+			logger.info("\n\nXML RESPONSE >>>>>> "+xml+"\n\n");
+    		return xml;
+    	}
 	}
     
     
@@ -493,16 +510,19 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		doctype.setSystemID("cellflash-1.3.dtd");
 		doc.setDocType(doctype);
 		
+
+		
+		Element page = new Element("page");
+		StringBuffer sb = new StringBuffer();
+		
 		String xml = "";
+		
 		
 		try {
 			MenuItem menuitem =   menuitemid>-1 ? getMenuById(menuitemid) : getMenuByParentLevelId(language_id, parent_level_id, menuid);
 			LinkedHashMap<Integer, MenuItem> topMenus = menuitem.getSub_menus();
 			
 			int serviceid = menuitem.getService_id();
-			
-			Element page = new Element("page");
-			StringBuffer sb = new StringBuffer();
 			sb.append(menuitem.getName()+"<br/>");
 			
 			
