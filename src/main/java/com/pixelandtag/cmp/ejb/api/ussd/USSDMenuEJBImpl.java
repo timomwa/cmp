@@ -96,6 +96,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		
     	
     	try{
+    		if(incomingsms.getMsisdn()==null || incomingsms.getMsisdn().isEmpty())
+    			throw new Exception("Looks like this is not a genuine GSM call.");
+    		
 		    	String baseurl = attribz.get("contextpath");
 				
 				String answers = attribz.get("answers");
