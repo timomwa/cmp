@@ -197,6 +197,7 @@ public class OrangeUSSD extends HttpServlet {
 		
 		try{
 			
+			
 			response =  ussdmenuEJB.getNextQuestionOrange(attribz,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7")); 
 			
 			logger.info(">>> "+response);
@@ -205,6 +206,7 @@ public class OrangeUSSD extends HttpServlet {
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			response = "Problem occurred. Please try again later";
+			pw.write(response);
 			try{
 				pw.close();
 			}catch(Exception ex){

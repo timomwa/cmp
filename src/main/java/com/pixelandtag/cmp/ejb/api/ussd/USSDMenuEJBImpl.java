@@ -79,7 +79,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     };
     
     @Override
-    public String getNextQuestionOrange(Map<String,String> attribz, IncomingSMS incomingsms) throws Exception{
+    public String getNextQuestionOrange(Map<String,String> attribz, IncomingSMS incomingsms){
     	
     	String xml = "";
     	
@@ -97,11 +97,6 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     	
     	try{
 		    	String baseurl = attribz.get("contextpath");
-		    	
-		    	
-				//page.setAttribute("nav", "end");
-				
-		
 				
 				String answers = attribz.get("answers");
 				int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
