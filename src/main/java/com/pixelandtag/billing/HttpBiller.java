@@ -49,7 +49,12 @@ public class HttpBiller extends GenericBiller {
 	
 	public HttpBiller(BillingConfigSet billingconfig) throws Exception {
 		super(billingconfig);
-		httpclient = new GenericHTTPClient(billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
+		try{
+			httpclient = new GenericHTTPClient(billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+			throw exp;
+		}
 	}
 
 	private Logger logger = Logger.getLogger(getClass());
