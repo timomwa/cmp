@@ -50,6 +50,7 @@ public class HttpBiller extends GenericBiller {
 	public HttpBiller(BillingConfigSet billingconfig) throws Exception {
 		super(billingconfig);
 		try{
+			logger.info(" >>>>>>>>> HTTP_BILLER_PROTOCOL ::: "+billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
 			httpclient = new GenericHTTPClient(billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
@@ -329,7 +330,7 @@ public class HttpBiller extends GenericBiller {
 		
 		GenericHttpResp resp = httpclient.call(generic_HTTP_BILLER_parameters);
 		
-		logger.debug("\n\n\t\t>>>url>>> : "+url
+		logger.info("\n\n\t\t>>>url>>> : "+url
 				+"\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
 				"\n\n\t\t>>>response>>> : "+resp.getBody()+"\n"
@@ -437,6 +438,8 @@ public class HttpBiller extends GenericBiller {
 	 * @return
 	 */
 	private String getValue(String xml,String tagname) {
+		if(xml==null || tagname==null || xml.isEmpty() || tagname.isEmpty())
+			return "";
 		String startTag = "<"+tagname+">";
 		String endTag = "</"+tagname+">";
 		int start = xml.indexOf(startTag)+startTag.length();
