@@ -89,16 +89,14 @@ public class SenderThreadWorker implements Runnable{
 			
 			try{
 			
-				OutgoingSMS sms = /*outqueue!=null ? (outqueue.size()>1000 ? outqueue.poll() : */OutgoingQueueRouter.poll(opcosenderprofile.getId())/* ) : null*/; 
+				OutgoingSMS sms = outqueue!=null ? (outqueue.size()>1000 ? outqueue.poll() : OutgoingQueueRouter.poll(opcosenderprofile.getId()) ) : null; 
 				
 				if(sms!=null && sms.getId().compareTo(-1L)>0){
 					
 					try{
 					
 						sms.setIn_outgoing_queue(Boolean.TRUE);
-						
-						if(sms.getIn_outgoing_queue()==Boolean.FALSE)
-							sms = queueprocbean.saveOrUpdate(sms);//Lock out anyone.
+						sms = queueprocbean.saveOrUpdate(sms);//Lock out anyone.
 						
 						SenderResp response = null;
 						

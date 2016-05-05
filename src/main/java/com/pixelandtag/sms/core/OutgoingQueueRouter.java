@@ -257,10 +257,10 @@ public class OutgoingQueueRouter extends Thread {
 				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profilemap.get(profileid));  
 				
 				for(OutgoingSMS outgoingsms : outqueuelist_){
-					if(outqueue.size()<1){
+					//if(outqueue.size()<1){
 						outqueue.offer(outgoingsms);
 						opcoqueuemap.put(profileid, outqueue);
-					}
+					//}
 				}
 			}
 		}
