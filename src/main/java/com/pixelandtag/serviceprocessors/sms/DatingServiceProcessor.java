@@ -356,6 +356,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		if(profile!=null && profile.getProfileComplete()){
 			
 			outgoingsms = chat(incomingsms,profile,person);
+			profile.setLastActive(new Date());
 			profile = datingBean.saveOrUpdate(profile);
 		}
 				
