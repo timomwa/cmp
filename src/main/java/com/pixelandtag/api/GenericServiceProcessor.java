@@ -51,6 +51,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String DEST_USERNAME_TAG = "<DEST_USERNAME>";
 	public static final String SOURCE_USERNAME_TAG = "<SOURCE_USERNAME>";
 	public static final String PRONOUN_TAG = "<PRONOUN>";
+	public static final String RESPONSE_ODDS = "<RESPONSE_ODDS>";
 	public static final String MSG_PRICE_TAG = "<PRICE>";
 	public static final String CHAT_MESSAGE_TAG = "<CHAT_MESSAGE>";
 	public static final String PROFILE_TAG = "<PROFILE>";

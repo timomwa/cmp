@@ -768,8 +768,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						tailmsg = ". "+offlineNotifier;
 					}
 					
+					
 					String msgsentto = datingBean.getMessage(MESSAGE_SENT_NOTIFICATION, language_id,person.getOpco().getId());
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
+					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
+					msgsentto = msgsentto.replaceAll(PRONOUN_TAG, dest_pronoun);
+					String probabilitytheyGetResponse = getProbabilityStr(destination_person);
+					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(RESPONSE_ODDS), Matcher.quoteReplacement(probabilitytheyGetResponse));
+					
 					outgoingsms.setSms(msgsentto+tailmsg);
 					outgoingsms.setTimestamp(new Date());
 					
@@ -811,6 +817,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			throw new DatingServiceException("Sorry, something went wrong. Please try again",exp);
 		}
 	}
+
+	private String getProbabilityStr(PersonDatingProfile destination_person) {
+		BigDecimal reply_probability = destination_person.getReplyProbability();
+		if(reply_probability==null || reply_probability.compareTo(BigDecimal.ZERO)<=0)
+			return "0%";
+		else
+			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
+	}
+
 
 	@Override
 	public void finalizeMe() {

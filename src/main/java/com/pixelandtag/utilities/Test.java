@@ -1,6 +1,8 @@
 package com.pixelandtag.utilities;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -8,23 +10,20 @@ import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import com.pixelandtag.dating.entities.PersonDatingProfile;
+
 public class Test {
 
 	public static void main(String[] args) throws IOException {
-		String xml = "<logo/><transactionid>77</transactionid>";
-		System.out.println("1. "+getValue(xml, "transactionid"));
-		System.out.println(!Boolean.TRUE+"2. "+getValue(xml, "logo"));
+		System.out.println(  getProbabilityStr(BigDecimal.valueOf(0.666632)) );
 	}
 	
 	
-	private static String getValue(String xml,String tagname) {
-		String startTag = "<"+tagname+">";
-		String endTag = "</"+tagname+">";
-		int start = xml.indexOf(startTag)+startTag.length();
-		int end  = xml.indexOf(endTag);
-		if(start<0 || end<0)
-			return "";
-		return xml.substring(start, end);
+	private static String getProbabilityStr(BigDecimal reply_probability) {
+		if(reply_probability==null || reply_probability.compareTo(BigDecimal.ZERO)<=0)
+			return "0%";
+		else
+			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
 	}
 
 }

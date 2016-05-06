@@ -80,9 +80,11 @@ public class PersonDatingProfile  implements Serializable  {
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "lastActive")
+	@Index(name="lastactvidx")
 	private Date lastActive;
 	
-	@Column(name = "replyProbability", precision=12, scale=5)
+	@Column(name = "replyProbability", precision=12, scale=7)
+	@Index(name="respProIdx")
 	private BigDecimal replyProbability;
 	
 	@PreUpdate
