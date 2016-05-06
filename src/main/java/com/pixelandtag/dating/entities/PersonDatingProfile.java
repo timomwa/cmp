@@ -82,10 +82,15 @@ public class PersonDatingProfile  implements Serializable  {
 	@Column(name = "lastActive")
 	private Date lastActive;
 	
+	@Column(name = "replyProbability", precision=1, scale=5)
+	private BigDecimal replyProbability;
+	
 	@PreUpdate
 	public void onUpdate(){
 		if(lastActive==null)
 			lastActive = new Date();
+		if(replyProbability==null)
+			replyProbability = BigDecimal.ZERO;
 	}
 	
 	
@@ -97,6 +102,8 @@ public class PersonDatingProfile  implements Serializable  {
 			creationDate = new Date();
 		if(lastActive==null)
 			lastActive = new Date();
+		if(replyProbability==null)
+			replyProbability = BigDecimal.ZERO;
 	}
 	
 	public Date getCreationDate() {
@@ -197,6 +204,15 @@ public class PersonDatingProfile  implements Serializable  {
 		this.lastActive = lastActive;
 	}
 
+	public BigDecimal getReplyProbability() {
+		return replyProbability;
+	}
+
+
+	public void setReplyProbability(BigDecimal replyProbability) {
+		this.replyProbability = replyProbability;
+	}
+
 
 	@Override
 	public String toString() {
@@ -225,6 +241,8 @@ public class PersonDatingProfile  implements Serializable  {
 		builder.append(creationDate);
 		builder.append(", \nlastActive=");
 		builder.append(lastActive);
+		builder.append(", \nreplyProbability=");
+		builder.append(replyProbability);
 		builder.append("]");
 		return builder.toString();
 	}
