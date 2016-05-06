@@ -821,13 +821,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				qry.setMaxResults(1);
 				
 				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
-				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
 				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
-				if(max_cell_id.longValue()>0){
+				/*if(max_cell_id.longValue()>0){
 					qry.setParameter("min_cell_id", min_cell_id);
 					qry.setParameter("max_cell_id", max_cell_id);
-				} 
+				} */
 				//qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
 				qry.setParameter("locationName", profileLocation.getLocation().getLocationName());
 				qry.setParameter("prefGender", profile.getPreferred_gender());
@@ -882,19 +882,21 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											//+ "    AND "
 											+ "      pl.profile.gender=:prefGender "
 											+ "    AND "
-											+ "        (  pl.location.location_id=:location_id "
+											+ "        (  "
+										//	+ "pl.location.location_id=:location_id "
 										//	+ "				OR "
 										//	+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
-											+ "				OR  "
+										//	+ "				OR  "
 											+ "					pl.location.cellid=:cellid"
-											+(max_cell_id.longValue()>0 ? (  
+											/*+(max_cell_id.longValue()>0 ? (  
 											 "				OR  "
 											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
-													) : "")
+													) : "")*/
 											+ "				OR "
-											+ "				   lower(pl.location.locationName) like lower(:locationName)  "
+											+ "				   lower(pl.location.locationName) = lower(:locationName)  "
 											+ "		   ) "
-											+ "   )  AND "
+											+ "   )  "
+											+ "   AND "
 											+ "    (   pl.profile.person.id "
 											+ "				NOT IN "
 											+ "					(SELECT "
@@ -908,20 +910,20 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											+ "   AND"
 											+ "    pl.profile.person.loggedin=:active"
 											+ " order by "
-											+ "    pl.profile.replyProbability desc, pl.profile.lastActive desc");
+											+ "    pl.profile.lastActive desc, pl.profile.replyProbability desc ");
 											//+ "    pl.timeStamp desc, pl.profile.dob desc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				qry.setParameter("opco", opco);
 				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
-				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
 				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
-				if(max_cell_id.longValue()>0){
+				/*if(max_cell_id.longValue()>0){
 					qry.setParameter("min_cell_id", min_cell_id);
 					qry.setParameter("max_cell_id", max_cell_id);
-				} 
-				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
+				} */
+				qry.setParameter("locationName", profileLocation.getLocation().getLocationName());
 				qry.setParameter("prefGender", profile.getPreferred_gender());
 				qry.setParameter("person_a_id",profile.getPerson().getId());
 				//qry.setParameter("dob", dob);
