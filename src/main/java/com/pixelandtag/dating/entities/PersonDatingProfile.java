@@ -82,7 +82,7 @@ public class PersonDatingProfile  implements Serializable  {
 	@Column(name = "lastActive")
 	private Date lastActive;
 	
-	@Column(name = "replyProbability", precision=1, scale=5)
+	@Column(name = "replyProbability", precision=12, scale=5)
 	private BigDecimal replyProbability;
 	
 	@PreUpdate
