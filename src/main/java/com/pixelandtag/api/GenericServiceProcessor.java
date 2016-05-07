@@ -57,6 +57,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String PROFILE_TAG = "<PROFILE>";
 	public static final String GENDER_PRONOUN_M = "GENDER_PRONOUN_M";
 	public static final String GENDER_PRONOUN_F = "GENDER_PRONOUN_F";
+	
+	public static final String GENDER_PRONOUN_HE = "GENDER_PRONOUN_HE";
+	public static final String GENDER_PRONOUN_SHE = "GENDER_PRONOUN_SHE";
+	
+	
 	public static final String GENDER_PRONOUN_INCHAT_F = "GENDER_PRONOUN_INCHAT_F";
 	public static final String OFFLINE_NOTIFIER = "OFFLINE_NOTIFIER";
 	public static final String MESSAGE_SENT_NOTIFICATION = "MESSAGE_SENT_NOTIFICATION";

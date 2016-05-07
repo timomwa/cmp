@@ -236,4 +236,4 @@ END;
 $
 DELIMITER ;
 call analyzeChatTrends;
-select person_id_fk,gender,lastActive,replyProbability from dating_profile order by lastActive desc, replyProbability desc limit 20;
+select person_id_fk,gender,lastActive,replyProbability, username from dating_profile order by lastActive desc, replyProbability desc limit 20;

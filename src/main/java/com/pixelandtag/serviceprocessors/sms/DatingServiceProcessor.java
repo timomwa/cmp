@@ -768,11 +768,12 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						tailmsg = ". "+offlineNotifier;
 					}
 					
+					String dest_plain_pronoun = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
 					
 					String msgsentto = datingBean.getMessage(MESSAGE_SENT_NOTIFICATION, language_id,person.getOpco().getId());
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
-					msgsentto = msgsentto.replaceAll(PRONOUN_TAG, dest_pronoun);
+					msgsentto = msgsentto.replaceAll(PRONOUN_TAG, dest_plain_pronoun);
 					String probabilitytheyGetResponse = getProbabilityStr(destination_person);
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(RESPONSE_ODDS), Matcher.quoteReplacement(probabilitytheyGetResponse));
 					
@@ -782,7 +783,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					incomingSMS.setPrice(BigDecimal.ZERO);
-					String pronoun2 = dest_pronoun.equalsIgnoreCase("her") ? "she" : "he";
+					String pronoun2 = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
+					//String pronoun2 = dest_pronoun.equalsIgnoreCase("her") ? "she" : "he";
 					outgoingsms.setSms("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with "+dest_pronoun+" when "+pronoun2+" gets back online.");
 				}
 				
@@ -821,7 +823,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private String getProbabilityStr(PersonDatingProfile destination_person) {
 		BigDecimal reply_probability = destination_person.getReplyProbability();
 		if(reply_probability==null || reply_probability.compareTo(BigDecimal.ZERO)<=0)
-			return "0%";
+			return " < 10%";
 		else
 			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
 	}
