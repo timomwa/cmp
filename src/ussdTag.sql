@@ -237,3 +237,8 @@ $
 DELIMITER ;
 call analyzeChatTrends;
 select person_id_fk,gender,lastActive,replyProbability, username from dating_profile order by lastActive desc, replyProbability desc limit 20;
+
+--- SEARCHN CLEANUP SCRIPTS ---
+delete from dating_systemmatchlog where person_a_id not in (select id from dating_person);
+delete from dating_systemmatchlog where person_b_id not in (select id from dating_person);
+----- END -----

@@ -823,7 +823,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private String getProbabilityStr(PersonDatingProfile destination_person) {
 		BigDecimal reply_probability = destination_person.getReplyProbability();
 		if(reply_probability==null || reply_probability.compareTo(BigDecimal.ZERO)<=0)
-			return " < 10%";
+			return " < 4%";
 		else
 			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
 	}
