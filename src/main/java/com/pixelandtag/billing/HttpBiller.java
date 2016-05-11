@@ -407,7 +407,12 @@ public class HttpBiller extends GenericBiller {
 				}
 				response.setResponseMsg(respmsg);
 				response.setSuccess(  respmsg.contains(  success_string.getValue().trim()  )    );
-				sb.append("\t\t").append("E.  success_string > ").append( success_string );//.append("\n");
+				sb.append("\t\t").append("E.  success_string > ").append( success_string.getValue() );//.append("\n");
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
+				sb.append("\t\t").append("F.  response.getSuccess() > ").append( response.getSuccess() );//.append("\n");
 				if(testing){
 					logger.info(sb.toString());
 					sb.setLength(0);

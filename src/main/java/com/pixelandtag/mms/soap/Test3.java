@@ -18,6 +18,8 @@ public class Test3 {
 		
 		System.out.println("refvalue = "+jsonutil.getValue("amountTransaction.serverReferenceCode" ));
 		
+		System.out.println(  jsonstr.contains("Charged") );
+		
 	}
 
 }

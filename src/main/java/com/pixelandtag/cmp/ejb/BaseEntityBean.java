@@ -529,7 +529,7 @@ public class BaseEntityBean implements BaseEntityI {
 			 
 			 billable.setProcessed(1L);
 			
-			 if (RESP_CODE == HttpStatus.SC_OK) {
+			 if (RESP_CODE >= HttpStatus.SC_OK && RESP_CODE <= HttpStatus.SC_PARTIAL_CONTENT ) {
 				
 				
 				billable.setRetry_count(billable.getRetry_count()+1);
