@@ -149,9 +149,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 					sb.append(question.getQuestion());
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");
+					sb.append("<a href=\""+baseurl+"&answers=1\">Yes</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
+					sb.append("<a href=\""+baseurl+"&answers=2\">No</a>");
 					
 					page.setText(sb.toString());
 					rootelement.addContent(page);
@@ -280,6 +280,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						if(age.compareTo(new BigDecimal(18l))<0){
 							String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
 							sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
+							page.setAttribute( "nav", "end");
 						}
 						
 						dob = datingBean.calculateDobFromAge(age);
@@ -395,6 +396,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						String menuid = attribz.get("menuid");
 						String waitingdoubleconfirm = attribz.get("waitingdoubleconfirm");
 						
+						boolean emptystr = ( sb.toString()==null || sb.toString().isEmpty() ) ;
 						
 						if(finalquestion!=null && finalquestion.equalsIgnoreCase("true")){
 							sb.setLength(0);
@@ -410,9 +412,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">3. 30/- @ month 50sms</a>");
 							
 							//+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-						}
-						
-						if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
+						}else if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
 							
 							sb.setLength(0);
 							baseurl = baseurl+"&bundlepurchase=true";
@@ -433,9 +433,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append(BR_NEW_LINE);
 							sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">2. Decline</a>");
 							
-						}
-						
-						if(waitingdoubleconfirm!=null && waitingdoubleconfirm.equalsIgnoreCase("true")){
+						}else if(waitingdoubleconfirm!=null && waitingdoubleconfirm.equalsIgnoreCase("true")){
 							
 							if(answers!=null && answers.equalsIgnoreCase("1")){//Accepted
 								
