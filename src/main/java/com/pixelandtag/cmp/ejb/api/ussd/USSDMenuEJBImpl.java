@@ -25,11 +25,13 @@ import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.MessageEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.Message;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
@@ -55,6 +57,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
+	@EJB
+	private MessageEJBI messageEJB;
 	
 	@EJB
 	private OpcoSMSServiceEJBI opcosmserviceEJB;
@@ -395,10 +399,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						String serviceid = attribz.get("serviceid");
 						String menuid = attribz.get("menuid");
 						String waitingdoubleconfirm = attribz.get("waitingdoubleconfirm");
+						String action = attribz.get("action");
+						String existingsub = attribz.get("existingsub");
 						
 						boolean emptystr = ( sb.toString()==null || sb.toString().isEmpty() ) ;
 						
-						if(finalquestion!=null && finalquestion.equalsIgnoreCase("true")){
+						if((finalquestion!=null && finalquestion.equalsIgnoreCase("true")) 
+								|| 
+								(action!=null && action.equalsIgnoreCase("PURCHASE_CHAT_BUNDLES"))){
+							
 							sb.setLength(0);
 							baseurl = baseurl+"?bundlepurchase=true";
 							
@@ -448,7 +457,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 									bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
 								}
 								try{
-									purchaseBundle(serviceid,incomingsms);
+									
+									mimicMO(serviceid,incomingsms);
+									
 									sb.append("Request to purchase the ");
 									sb.append(bundle);
 									sb.append(" has been received and will be processed shortly. You'll receive a confirmation SMS.");
@@ -472,7 +483,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							}else{//Invalid input, ask the question again..
 								
 								sb.setLength(0);
-								baseurl = baseurl+"&bundlepurchase=true";
+								baseurl = baseurl+"?bundlepurchase=true";
 								String bundle = "";
 								if(serviceid!=null && serviceid.equals("439")){
 									bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
@@ -488,9 +499,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								sb.append("Please confirm purchase of the ");
 								sb.append(bundle);
 								sb.append(BR_NEW_LINE);
-								sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">1. Accept</a>");
+								sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Accept</a>");
 								sb.append(BR_NEW_LINE);
-								sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">2. Decline</a>");
+								sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Decline</a>");
 								
 								
 							}
@@ -498,12 +509,64 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							
 						}else{
 							
-							sb.setLength(0);
-							sb.append("Hey \"");
-							sb.append(profile.getUsername());
-							sb.append("\". You can purchase bundles.");
-							sb.append(BR_NEW_LINE);
-							page.setAttribute( "nav", "end");
+							
+							if(profile.getProfileComplete()){
+								
+								if(action!=null && action.equals("FIND_FRIEND")){
+									
+									mimicMO(serviceid,incomingsms);
+									
+									Message msg = messageEJB.getMessage(DatingMessages.FIND_FRND_RESPONSE.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId());
+									sb.append(msg.getMessage());
+									sb.append(BR_NEW_LINE);
+									page.setAttribute( "nav", "end");
+									
+									
+								}else if(action!=null && action.equals("LOGIN")){
+									
+									mimicMO(serviceid,incomingsms);
+									
+									Message msg = messageEJB.getMessage(DatingMessages.LOGIN_RESPONSE_MSG.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId());
+									sb.append(msg.getMessage());
+									sb.append(BR_NEW_LINE);
+									page.setAttribute( "nav", "end");
+									
+								}else if(action!=null && action.equals("LOGOUT")){
+									
+									mimicMO(serviceid,incomingsms);
+									
+									Message msg = messageEJB.getMessage(DatingMessages.LOGOUT_RESPONSE_MSG.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId());
+									sb.append(msg.getMessage());
+									sb.append(BR_NEW_LINE);
+									page.setAttribute( "nav", "end");
+									
+									
+								}else{
+								
+									sb.setLength(0);
+									String msg = messageEJB.getMessage(DatingMessages.PURCHASE_CHAT_BUNDLE.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
+									sb.append("<a href=\""+baseurl+"?existingsub=true&action=PURCHASE_CHAT_BUNDLES&doubleconfirm=true\">"+msg+"</a>");
+									sb.append(BR_NEW_LINE);
+									msg = messageEJB.getMessage(DatingMessages.FIND_FRIEND_NEAR.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
+									sb.append("<a href=\""+baseurl+"?existingsub=true&action=FIND_FRIEND&menuid=152&serviceid=442\">"+msg+"</a>");
+									sb.append(BR_NEW_LINE);
+									msg = messageEJB.getMessage(DatingMessages.LOGIN.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
+									sb.append("<a href=\""+baseurl+"?existingsub=true&action=LOGIN&menuid=153&serviceid=447\">"+msg+"</a>");
+									sb.append(BR_NEW_LINE);
+									msg = messageEJB.getMessage(DatingMessages.LOGOUT.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
+									sb.append("<a href=\""+baseurl+"?existingsub=true&action=LOGOUT&menuid=154&serviceid=448\">"+msg+"</a>");
+									
+								}
+								
+							
+							}else{
+								sb.setLength(0);
+								sb.append("Hey \"");
+								sb.append(profile.getUsername());
+								sb.append("\". You can purchase bundles.");
+								sb.append(BR_NEW_LINE);
+								page.setAttribute( "nav", "end");
+							}
 						}
 						
 						
@@ -532,7 +595,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     
    
 
-	private boolean purchaseBundle(String serviceid, IncomingSMS insms) throws Exception {
+	private boolean mimicMO(String serviceid, IncomingSMS insms) throws Exception {
 		OpcoSMSService smsservice  = opcosmserviceEJB.getOpcoSMSService(Long.valueOf(serviceid), insms.getOpco());
 		SMSService smsserv = smsservice.getSmsservice();//em.find(SMSService.class, Long.valueOf(serviceid+""));
 		logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid:: "+serviceid+ " CMD :"+(smsserv!=null ? smsserv.getCmd() : null));
