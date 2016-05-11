@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import javax.ejb.EJB;
+import javax.ejb.Remote;
 import javax.ejb.Stateless;
 
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import com.pixelandtag.dating.entities.ChatBundle;
 import com.pixelandtag.dating.entities.Person;
 
 @Stateless
+@Remote
 public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	
 	private Logger logger = Logger.getLogger(getClass());
