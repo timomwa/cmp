@@ -625,6 +625,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile getProfile(Person person) throws DatingServiceException{
 		
+		if(person==null)
+			return null;
+		
 		PersonDatingProfile profile = null;
 		
 		try{

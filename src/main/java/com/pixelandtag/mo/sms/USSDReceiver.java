@@ -239,9 +239,9 @@ public class USSDReceiver extends HttpServlet {
 			incomingsms.setMo_ack(Boolean.TRUE);
 			incomingsms.setMsisdn(moMessage.getMsisdn());
 			MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
+			incomingsms.setMoprocessor(processor);
 			incomingsms.setOpco(opco);
 			logger.info(" >> processor = "+processor);
-			incomingsms.setMoprocessor(processor);
 			
 			dndEJB.removeFromDNDList(incomingsms.getMsisdn());
 			

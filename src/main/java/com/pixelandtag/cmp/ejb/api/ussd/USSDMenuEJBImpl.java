@@ -55,6 +55,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
+	
 	@EJB
 	private OpcoSMSServiceEJBI opcosmserviceEJB;
 	
@@ -100,7 +101,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     			throw new Exception("Looks like this is not a genuine GSM call.");
     		
 		    	String baseurl = attribz.get("contextpath");
-				
+				String finalquestion = attribz.get("finalquestion");
+				String bundlepurchase = attribz.get("bundlepurchase");
 				String answers = attribz.get("answers");
 				int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
 				String attrib_ =  attribz.get("attrib") ;
@@ -147,9 +149,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 					sb.append(question.getQuestion());
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">No</a>");
+					sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=1\">Yes</a>");
+					sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
 					
 					page.setText(sb.toString());
 					rootelement.addContent(page);
@@ -372,30 +374,13 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append("</entry></form>");
 						}
 						if(attrib==ProfileAttribute.LOCATION){
+							baseurl = baseurl+"&finalquestion=true";
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
 							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 							sb.append("</entry></form>");
 						}
-						if(attrib==ProfileAttribute.PREFERRED_AGE){
-							sb.setLength(0);
-							sb.append("<form action=\""+baseurl+"\">");
-							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
-							sb.append("</entry></form>");
-						}
-						if(attrib==ProfileAttribute.PREFERRED_GENDER){
-							sb.setLength(0);
-							sb.append("<form action=\""+baseurl+"\">");
-							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+question+"</prompt>");
-							sb.append("</entry></form>");
-							/*sb.append("<a href=\""+baseurl+"&answers=female\">1. Female</a>");
-							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=male\">2. Male</a>");*/
-						}
-						
 						
 						QuestionLog ql = new QuestionLog();
 						
@@ -404,6 +389,116 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						ql = datingBean.saveOrUpdate(ql);
 						
 					}else{
+						
+						String doubleconfirm = attribz.get("doubleconfirm");
+						String serviceid = attribz.get("serviceid");
+						String menuid = attribz.get("menuid");
+						String waitingdoubleconfirm = attribz.get("waitingdoubleconfirm");
+						
+						
+						if(finalquestion!=null && finalquestion.equalsIgnoreCase("true")){
+							sb.setLength(0);
+							baseurl = baseurl+"&bundlepurchase=true";
+							
+							
+							sb.append("Select chat bundle");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=1&menuid=148&serviceid=439&doubleconfirm=true\">1. 5/- @ day 20sms</a>");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=2&menuid=149&serviceid=440&doubleconfirm=true\">2. 15/- @ week 30sms</a>");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">3. 30/- @ month 50sms</a>");
+							
+							//+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+						}
+						
+						if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
+							
+							sb.setLength(0);
+							baseurl = baseurl+"&bundlepurchase=true";
+							String bundle = "";
+							if(serviceid!=null && serviceid.equals("439")){
+								bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
+							}
+							if(serviceid!=null && serviceid.equals("440")){
+								bundle="15/- chat bundle with 30 sms per week."; // 50 cts per sms
+							}
+							if(serviceid!=null && serviceid.equals("440")){
+								bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
+							}
+							sb.append("Please confirm purchase of the ");
+							sb.append(bundle);
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">1. Accept</a>");
+							sb.append(BR_NEW_LINE);
+							sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">2. Decline</a>");
+							
+						}
+						
+						if(waitingdoubleconfirm!=null && waitingdoubleconfirm.equalsIgnoreCase("true")){
+							
+							if(answers!=null && answers.equalsIgnoreCase("1")){//Accepted
+								
+								String bundle = "";
+								if(serviceid!=null && serviceid.equals("439")){
+									bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
+								}
+								if(serviceid!=null && serviceid.equals("440")){
+									bundle="15/- chat bundle with 30 sms per week."; // 50 cts per sms
+								}
+								if(serviceid!=null && serviceid.equals("440")){
+									bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
+								}
+								try{
+									purchaseBundle(serviceid,incomingsms);
+									sb.append("Request to purchase the ");
+									sb.append(bundle);
+									sb.append(" has been received and will be processed shortly. You'll receive a confirmation SMS.");
+									sb.append(BR_NEW_LINE);
+									page.setAttribute( "nav", "end");
+								}catch(Exception exp){
+									logger.error(exp.getMessage(),exp);
+									throw exp;
+								}
+								
+								
+							}else if(answers!=null && answers.equalsIgnoreCase("2")){//Accepted
+								
+								sb.append("Thanks \"");
+								sb.append(profile.getUsername());
+								sb.append("\". Please note that off-bundles chatting is charged 1/- per SMS.");
+								sb.append(BR_NEW_LINE);
+								page.setAttribute( "nav", "end");
+								
+							}else{//Invalid input, ask the question again..
+								
+								sb.setLength(0);
+								baseurl = baseurl+"&bundlepurchase=true";
+								String bundle = "";
+								if(serviceid!=null && serviceid.equals("439")){
+									bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
+								}
+								if(serviceid!=null && serviceid.equals("440")){
+									bundle="15/- chat bundle with 30 sms per week."; // 50 cts per sms
+								}
+								if(serviceid!=null && serviceid.equals("440")){
+									bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
+								}
+								sb.append("Invalid input.");
+								sb.append(BR_NEW_LINE);
+								sb.append("Please confirm purchase of the ");
+								sb.append(bundle);
+								sb.append(BR_NEW_LINE);
+								sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">1. Accept</a>");
+								sb.append(BR_NEW_LINE);
+								sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">2. Decline</a>");
+								
+								
+							}
+							
+							
+						}
+						
 						
 					}
 				}
@@ -418,18 +513,44 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     		page.setAttribute( "nav", "end");
     		page.setText(sb.toString());
 			rootelement.addContent(page);
-			sb.setLength(0);
 			xml = xmlOutput.outputString(doc);
 			logger.info("\n\nXML_RESPONSE >>>>>> "+xml+"\n\n");
 			
 			logger.error(exp.getMessage(), exp);
-    		
+			sb.setLength(0);
     		return xml;
     	}
 	}
     
     
    
+
+	private boolean purchaseBundle(String serviceid, IncomingSMS insms) throws Exception {
+		OpcoSMSService smsservice  = opcosmserviceEJB.getOpcoSMSService(Long.valueOf(serviceid), insms.getOpco());
+		SMSService smsserv = smsservice.getSmsservice();//em.find(SMSService.class, Long.valueOf(serviceid+""));
+		logger.info("\t\t\t:::::::::::::::::::::::::::::: serviceid:: "+serviceid+ " CMD :"+(smsserv!=null ? smsserv.getCmd() : null));
+		MOProcessor proc = smsserv.getMoprocessor();
+		
+		IncomingSMS incomingsms =  new IncomingSMS();//getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
+		incomingsms.setMsisdn(insms.getMsisdn());
+		incomingsms.setServiceid(smsserv.getId());
+		incomingsms.setSms(smsserv.getCmd());
+		incomingsms.setShortcode(proc.getShortcode());
+		incomingsms.setPrice(smsserv.getPrice());
+		incomingsms.setCmp_tx_id(generateNextTxId());
+		incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
+		incomingsms.setServiceid(smsserv.getId());
+		incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
+		incomingsms.setMoprocessor(proc);
+		incomingsms.setOpco(insms.getOpco());
+		logger.info("\n\n\n\n\n::::::::::::::::proc.getId().intValue() "+proc.getId().intValue()+"::::::::::::::\n\n\n");
+		
+		incomingsms = processorEJB.processMo(incomingsms);
+		return incomingsms.getId()!=null;
+	}
+
+
+
 
 	public String startDatingQuestions(IncomingSMS incomingsms) throws Exception{
     	
