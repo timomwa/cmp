@@ -330,13 +330,17 @@ public class HttpBiller extends GenericBiller {
 		
 		GenericHttpResp resp = httpclient.call(generic_HTTP_BILLER_parameters);
 		
-		logger.debug("\n\n\t\t>>>url>>> : "+url
+		String dbg = "\n\n\t\t>>>url>>> : "+url
 				+"\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
 				"\n\n\t\t>>>response>>> : "+resp.getBody()+"\n"
 			  + "\n\t\t>>>response code>>> : "+resp.getResp_code()
 			    + "\n\t\t>>>response contenttype>>> : "+resp.getContenttype()
-						+ "\n\n");
+						+ "\n\n";
+		if(billable.getMsisdn().trim().equalsIgnoreCase("254776165280"))
+			logger.info(dbg);
+		else
+			logger.debug(dbg);
 		
 		response.setRespcode(String.valueOf(resp.getResp_code()));
 		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success

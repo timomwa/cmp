@@ -400,7 +400,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						
 						if(finalquestion!=null && finalquestion.equalsIgnoreCase("true")){
 							sb.setLength(0);
-							baseurl = baseurl+"&bundlepurchase=true";
+							baseurl = baseurl+"?bundlepurchase=true";
 							
 							
 							sb.append("Select chat bundle");
@@ -415,7 +415,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						}else if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
 							
 							sb.setLength(0);
-							baseurl = baseurl+"&bundlepurchase=true";
+							baseurl = baseurl+"?bundlepurchase=true";
 							String bundle = "";
 							if(serviceid!=null && serviceid.equals("439")){
 								bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
