@@ -5,7 +5,9 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 
@@ -23,8 +25,10 @@ import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -34,6 +38,7 @@ import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OperatorCountryRules;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
@@ -61,6 +66,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private FreeLoaderEJBI freeloaderEJB;
 	private MessageEJBI messageEJB;
 	private InitialContext context;
+	private OperatorCountryRulesEJBI opcorulesEJB;
+	private ChatCounterEJBI chatcounterEJB;
+	private Map<String,OperatorCountryRules> rulescache = new HashMap<String,OperatorCountryRules>();
+	
 	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = true;
 	private boolean allow_multiple_plans = false;
@@ -89,6 +98,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 		freeloaderEJB =  (FreeLoaderEJBI) context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
 		messageEJB =  (MessageEJBI) context.lookup("cmp/MessageEJBImpl!com.pixelandtag.cmp.ejb.MessageEJBI");
+		opcorulesEJB =  (OperatorCountryRulesEJBI) context.lookup("cmp/OperatorCountryRulesEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI");
+		chatcounterEJB =  (ChatCounterEJBI) context.lookup("cmp/ChatCounterEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
@@ -257,6 +268,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 						try{
 							subscriptionBean.unsubscribe(MSISDN, services, incomingsms.getOpco());
+							
 						}catch(Exception exp){
 							logger.error(exp.getMessage(), exp);
 						}
@@ -690,7 +702,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		return outgoingsms;
 	}
 
-	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person) throws DatingServiceException {
+	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person) throws DatingServiceException { 
 			
 		OutgoingSMS outgoingsms = incomingSMS.convertToOutgoing();
 		
@@ -748,6 +760,22 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
 					
+					OperatorCountryRules chatbundlerule = rulescache.get("chatbundles_enabled"+person.getOpco().getId());
+					
+					if(chatbundlerule==null){
+						chatbundlerule = opcorulesEJB.getConfig("chatbundles_enabled", person.getOpco()); 
+						if(chatbundlerule==null){
+							chatbundlerule = new OperatorCountryRules();
+							chatbundlerule.setActive(false);
+							chatbundlerule.setRule_value("false");
+						}
+						rulescache.put("chatbundles_enabled"+person.getOpco().getId(), chatbundlerule);
+					}
+					boolean isoffbundle = false;
+					if(chatbundlerule!=null && chatbundlerule.getActive() && chatbundlerule.getRule_value().equalsIgnoreCase("true")){
+						isoffbundle = chatcounterEJB.isoffBundle(person);
+					}
+					
 					
 					outgoingchatsms.setSms(msg);
 					outgoingchatsms.setCmp_tx_id(generateNextTxId());//Is a totally new message
@@ -761,12 +789,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					outgoingchatsms.setTimestamp(new Date());
 					
 					sendMT(outgoingchatsms);
+					
+					if(!isoffbundle)
+						chatcounterEJB.updateBundles(person, -1L);
+					
 					String tailmsg = "";
 					if(!person.getLoggedin()){
 						String offlineNotifier = datingBean.getMessage(OFFLINE_NOTIFIER, language_id,person.getOpco().getId());
 						offlineNotifier = offlineNotifier.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
 						tailmsg = ". "+offlineNotifier;
 					}
+					
+					
 					
 					String dest_plain_pronoun = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
 					
@@ -779,6 +813,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					outgoingsms.setSms(msgsentto+tailmsg);
 					outgoingsms.setTimestamp(new Date());
+					
+					if(isoffbundle){
+						outgoingsms.setPrice(BigDecimal.ONE);//We charge a shilling for off bundle chatting. Notify the sub they're off bundle ?? Naah..
+						outgoingsms.setBilling_status(BillingStatus.WAITING_BILLING);
+					}
 					
 				}else{
 					log.setOffline_msg(Boolean.TRUE);

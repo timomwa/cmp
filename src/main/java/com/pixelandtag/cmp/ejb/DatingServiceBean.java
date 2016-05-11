@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
@@ -39,6 +40,7 @@ import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.dating.entities.ChatBundle;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Location;
@@ -97,6 +99,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	private FreeLoaderEJBI freeloaderEJB;
 	
 	
+	@EJB
+	private ChatCounterEJBI chatcounterEJB;
 	
 	private StopWatch watch = new StopWatch();
 	
@@ -696,11 +700,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.opco=:opco AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("person_a_id", curPersonId);
-			qry.setParameter("opco", opco);
+			//qry.setParameter("opco", opco);
 			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
@@ -719,12 +723,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.opco=:opco AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");// + "    pl.profile.lastActive desc"); :alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");// + "    pl.profile.lastActive desc"); :alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("active", Boolean.TRUE);
 			//qry.setParameter("dob", dob);
 			qry.setParameter("person_a_id", curPersonId);
-			qry.setParameter("opco", opco);
+			//qry.setParameter("opco", opco);
 			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
@@ -878,8 +882,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											+ "   (   (pl.profile.username <> pl.profile.person.msisdn) "
 											+ "	   AND  "
 											+ "      pl.profile.person.active=:active "
-											+ "    AND "
-											+ "      pl.profile.person.opco=:opco"
+										//	+ "    AND "
+										//	+ "      pl.profile.person.opco=:opco"
 											+ "    AND "
 											//+ "      pl.profile.dob<=:dob "
 											//+ "    AND "
@@ -917,7 +921,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											//+ "    pl.timeStamp desc, pl.profile.dob desc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
-				qry.setParameter("opco", opco);
+				//qry.setParameter("opco", opco);
 				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
 				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
@@ -959,12 +963,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			
 			Date dob = calculateDobFromAge(pref_age);
 			
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.opco=:opco AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.location = :location  AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched)");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.location = :location  AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched)");//AND p.dob>=:dob
 			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("location", location);
 			//qry.setParameter("dob", dob);
-			qry.setParameter("opco", opco);
+			//qry.setParameter("opco", opco);
 			qry.setParameter("person_a_id", curPersonId);
 			
 			try{
@@ -1376,6 +1380,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				Subscription sub = subscriptionBean.renewSubscription(incomingsms.getOpco(), MSISDN, smsserv,SubscriptionStatus.confirmed,method);
 				
+				ChatBundle chatbundle  = chatcounterEJB.createChatBundle(sub);
+				logger.info(" >>>>> chatbundle >> "+chatbundle);
 				logger.info(" ::::????****  sub.getExpiryDate()  : "+(sub!=null ? sub.getExpiryDate() : null));
 				DatingMessages message_key = sub.getRenewal_count().compareTo(1L)==0 ? DatingMessages.FIRST_SUBSCRIPTION_WELCOME  : DatingMessages.SUBSCRIPTION_RENEWED;
 				

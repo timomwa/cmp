@@ -11,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -19,16 +21,26 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
 @Table(name = "opco_rules")
+@NamedQueries({
+	@NamedQuery(
+			name = OperatorCountryRules.NQ_FIND_BY_NAME_AND_OPCO,
+			query = "from OperatorCountryRules ocrl WHERE ocrl.opco=:opco AND ocrl.rule_name=:rule_name"
+	)}
+)
 public class OperatorCountryRules implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1001805634163403994L;
+
+
+	public static final String NQ_FIND_BY_NAME_AND_OPCO = "opco_rules.nq_findbynameandopco";
 	
 	
 	@Id

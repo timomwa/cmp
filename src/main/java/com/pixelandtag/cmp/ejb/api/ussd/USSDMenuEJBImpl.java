@@ -230,7 +230,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername())+"</prompt>");
+							sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers)+"</prompt>");
 							sb.append("</entry></form>");
 						}
 					}

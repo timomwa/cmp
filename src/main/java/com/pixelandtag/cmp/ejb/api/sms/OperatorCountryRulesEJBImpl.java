@@ -1,6 +1,9 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.ejb.EJB;
@@ -15,6 +18,7 @@ import org.joda.time.DateTime;
 
 import com.pixelandtag.cmp.dao.opco.OperatorCountryRulesDAOI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.OperatorCountryRules;
 
@@ -112,6 +116,19 @@ public class OperatorCountryRulesEJBImpl implements OperatorCountryRulesEJBI {
 			throw new OpcoRuleException(e.getMessage(),e);
 		}
 		
+	}
+
+
+	@Override
+	public OperatorCountryRules getConfig(String rulename, OperatorCountry opco) {
+		Map<String,Object> params= new HashMap<String,Object>();
+		params.put("rule_name", rulename);
+		params.put("opco", opco);
+		List<OperatorCountryRules> rules =   opcoRulesDAO.findByNamedQuery(OperatorCountryRules.NQ_FIND_BY_NAME_AND_OPCO, params);
+		if(rules!=null && rules.size()>0)
+			return rules.get(0);
+		else
+			return null;
 	}
 
 }

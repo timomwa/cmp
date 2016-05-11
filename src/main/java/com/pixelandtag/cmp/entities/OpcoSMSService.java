@@ -83,6 +83,10 @@ public class OpcoSMSService implements Serializable {
 	@Column(name="serviceid")
 	private String serviceid;//for parlay x.
 	
+	
+	@Column(name="bundlesize")
+	private Long bundlesize;
+	
 	@PreUpdate
 	@PrePersist
 	public void update(){
@@ -92,6 +96,8 @@ public class OpcoSMSService implements Serializable {
 			billingType = BillingType.NONE;
 		if(doubleconfirm==null)
 			doubleconfirm = Boolean.FALSE;
+		if(bundlesize==null)
+			bundlesize = 0L;
 	}
 
 	public Long getId() {
@@ -158,13 +164,39 @@ public class OpcoSMSService implements Serializable {
 		this.serviceid = serviceid;
 	}
 
+	public Long getBundlesize() {
+		return bundlesize;
+	}
+
+	public void setBundlesize(Long bundlesize) {
+		this.bundlesize = bundlesize;
+	}
+
 	@Override
 	public String toString() {
-		return "OpcoSMSService [id=" + id + ", smsservice=" + smsservice
-				+ ", opco=" + opco + ", moprocessor=" + moprocessor
-				+ ", price=" + price + ", billingType=" + billingType
-				+ ", doubleconfirm=" + doubleconfirm + ", serviceid="
-				+ serviceid + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("OpcoSMSService [id=");
+		builder.append(id);
+		builder.append(", \nsmsservice=");
+		builder.append(smsservice);
+		builder.append(", \nopco=");
+		builder.append(opco);
+		builder.append(", \nmoprocessor=");
+		builder.append(moprocessor);
+		builder.append(", \nprice=");
+		builder.append(price);
+		builder.append(", \nbillingType=");
+		builder.append(billingType);
+		builder.append(", \ndoubleconfirm=");
+		builder.append(doubleconfirm);
+		builder.append(", \nserviceid=");
+		builder.append(serviceid);
+		builder.append(", \nbundlesize=");
+		builder.append(bundlesize);
+		builder.append("]");
+		return builder.toString();
 	}
+
+	
 	
 }

@@ -542,8 +542,7 @@ public class MoreProcessor extends GenericServiceProcessor {
 				
 				}
 				
-			}else if(KEYWORD.equalsIgnoreCase(SUBSCRIPTION_CONFIRMATION+SPACE)){//This step is frozen by adding a space. Requested by Michael Juhl 20th June 2013
-				
+			}else if(KEYWORD.equalsIgnoreCase(SUBSCRIPTION_CONFIRMATION+SPACE)){
 				
 				//TODO - if a subscriber just sends "ON" or "BUY" Without the number, then, we give them the main menu, or the sub menu that they previously were in
 				SubscriptionDTO sub =  cmpbean.checkAnyPending(MSISDN);
