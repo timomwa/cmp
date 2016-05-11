@@ -71,6 +71,8 @@ public class HttpBiller extends GenericBiller {
 		GenericHTTPParam generic_HTTP_BILLER_parameters = new GenericHTTPParam();
 		generic_HTTP_BILLER_parameters.setId(billable.getId());
 		
+		boolean testing = billable.getMsisdn().trim().equalsIgnoreCase("254776165280");
+			
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		if(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME).getValue(), billable.getCp_tx_id()));//"cptxid"
@@ -207,7 +209,7 @@ public class HttpBiller extends GenericBiller {
 									auth_header_value += " "+param_name+": \""+config.getValue().getValue().replace("${TIMESTAMP}", dateToString(billable.getTimeStamp(),httpBillertimeformat))+"\"";
 								} catch (ParseException e) {
 									logger.error(e.getMessage(),e);
-									throw new BillerConfigException("Could format timestamp",e);
+									throw new BillerConfigException("Couldn't format timestamp",e);
 								}
 							}else{
 								auth_header_value += " "+param_name+": \""+config.getValue().getValue()+"\"";
@@ -337,7 +339,7 @@ public class HttpBiller extends GenericBiller {
 			  + "\n\t\t>>>response code>>> : "+resp.getResp_code()
 			    + "\n\t\t>>>response contenttype>>> : "+resp.getContenttype()
 						+ "\n\n";
-		if(billable.getMsisdn().trim().equalsIgnoreCase("254776165280"))
+		if(testing)
 			logger.info(dbg);
 		else
 			logger.debug(dbg);
@@ -377,19 +379,52 @@ public class HttpBiller extends GenericBiller {
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_SUCCESS_STRING+"\" for this opco");
 				}
 				
+				StringBuffer sb = new StringBuffer();
+				
+				sb.append("\n\t\t").append("A. resp.getBody() > ").append(resp.getBody());//.append("\n");
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 				jsonutil.loadJson(jsonobject);
 				response.setRefvalue((String)jsonutil.getValue(pathtorefval.getValue()));
+				sb.append("\t\t").append("B. response.getrefValue() > ").append(response.getRefvalue());//.append("\n");	
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 				String respmsg = (String)jsonutil.getValue(respmsgcnf_failure.getValue());
+				sb.append("\t\t").append("C.  1. respmsg  > ").append( respmsg );//.append("\n");	
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 				if(respmsg==null || respmsg.trim().isEmpty())
 					respmsg =   (String)jsonutil.getValue(respmsgcnf_success.getValue());
-				
+				sb.append("\t\t").append("D.  2. respmsg  > ").append( respmsg );//.append("\n");	
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 				response.setResponseMsg(respmsg);
 				response.setSuccess(  respmsg.contains(  success_string.getValue().trim()  )    );
+				sb.append("\t\t").append("E.  success_string > ").append( success_string );//.append("\n");
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 				jsonutil.reset();
 				
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 			} catch (JSONException e) {
 				logger.error(e.getMessage(),e);
 				throw new BillerConfigException("Could not parse the json response json -> "+resp.getBody(),e);
+			}catch (Exception e) {
+				logger.error(e.getMessage(),e);
+				throw new BillerConfigException(" Problem reading json response",e);
 			}
 			
 		}else if((resp.getContenttype()!=null &&  resp.getContenttype().toLowerCase().trim().contains("xml")) || expected_contenttype.getValue().trim().equalsIgnoreCase("xml")){
