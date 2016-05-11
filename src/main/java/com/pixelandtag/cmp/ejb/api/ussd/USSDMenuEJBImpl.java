@@ -464,6 +464,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								
 							}else if(answers!=null && answers.equalsIgnoreCase("2")){//Accepted
 								
+								sb.setLength(0);
 								sb.append("Thanks \"");
 								sb.append(profile.getUsername());
 								sb.append("\". Please note that off-bundles chatting is charged 1/- per SMS.");
@@ -497,6 +498,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							}
 							
 							
+						}else{
+							
+							sb.setLength(0);
+							sb.append("Hey \"");
+							sb.append(profile.getUsername());
+							sb.append("\". You can purchase bundles.");
+							sb.append(BR_NEW_LINE);
+							page.setAttribute( "nav", "end");
 						}
 						
 						
