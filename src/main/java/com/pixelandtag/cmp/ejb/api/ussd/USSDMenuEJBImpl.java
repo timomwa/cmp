@@ -149,9 +149,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 					sb.append(question.getQuestion());
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=1\">Yes</a>");
+					sb.append("<a href=\""+baseurl+"?answers=1\">Yes</a>");
 					sb.append(BR_NEW_LINE);
-					sb.append("<a href=\""+baseurl+"&answers=2\">No</a>");
+					sb.append("<a href=\""+baseurl+"?answers=2\">No</a>");
 					
 					page.setText(sb.toString());
 					rootelement.addContent(page);
@@ -405,11 +405,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							
 							sb.append("Select chat bundle");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=1&menuid=148&serviceid=439&doubleconfirm=true\">1. 5/- @ day 20sms</a>");
+							sb.append("<a href=\""+baseurl+"&answers=1&menuid=148&serviceid=439&doubleconfirm=true\">5/- @ day 20sms</a>");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=2&menuid=149&serviceid=440&doubleconfirm=true\">2. 15/- @ week 30sms</a>");
+							sb.append("<a href=\""+baseurl+"&answers=2&menuid=149&serviceid=440&doubleconfirm=true\">15/- @ week 30sms</a>");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">3. 30/- @ month 50sms</a>");
+							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">30/- @ month 50sms</a>");
 							
 							//+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 						}else if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
@@ -429,9 +429,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append("Please confirm purchase of the ");
 							sb.append(bundle);
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">1. Accept</a>");
+							sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Accept</a>");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">2. Decline</a>");
+							sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Decline</a>");
 							
 						}else if(waitingdoubleconfirm!=null && waitingdoubleconfirm.equalsIgnoreCase("true")){
 							

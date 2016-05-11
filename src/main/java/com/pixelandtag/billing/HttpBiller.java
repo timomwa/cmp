@@ -41,7 +41,6 @@ public class HttpBiller extends GenericBiller {
 	@Inject
 	private Encryptor encryptor = new EncryptorImpl();
 	
-	@Inject
 	private static JsonUtilI jsonutil = new JsonUtilImpl();
 	
 	
