@@ -267,7 +267,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
-				if(!subvalid ||  allow_multiple_plans ){
+				if(!subvalid ||  allow_multiple_plans || chatcounterEJB.isoffBundle(MSISDN, incomingsms.getOpco()) ){
 					
 					try{
 						
@@ -820,6 +820,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						billable.setPrice(BigDecimal.ONE);
 						SenderResp response = billinggateway.bill(billable);
 						chargeSucess = response.getSuccess();
+						if(chargeSucess)
+							billinggateway.createSuccesBillRec(billable);
 					}
 					
 					if(isoffbundle && chargeSucess){

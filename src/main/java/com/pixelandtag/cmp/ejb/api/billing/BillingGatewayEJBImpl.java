@@ -1,32 +1,25 @@
 package com.pixelandtag.cmp.ejb.api.billing;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
-import javax.ejb.Stateful;
 import javax.ejb.Stateless;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.billing.Biller;
 import com.pixelandtag.billing.BillerFactory;
-import com.pixelandtag.billing.BillerProfile;
 import com.pixelandtag.billing.BillerProfileConfig;
 import com.pixelandtag.billing.BillingConfigSet;
 import com.pixelandtag.billing.OpcoBillingProfile;
 import com.pixelandtag.billing.entities.BillerProfileTemplate;
-import com.pixelandtag.cmp.ejb.api.sms.SMSGatewayException;
+import com.pixelandtag.cmp.dao.core.SuccessfullyBillingRequestsDAOI;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.sms.producerthreads.Billable;
-import com.pixelandtag.smssenders.Sender;
-import com.pixelandtag.smssenders.SenderFactory;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.smssenders.SenderResp;
 
 @Stateless
@@ -39,6 +32,34 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 	private BillerConfigsI billerConfigEJB;
 	
 	private Logger logger = Logger.getLogger(getClass());
+	
+	@Inject
+	private SuccessfullyBillingRequestsDAOI successfullbillingDAO;
+	
+	@Override
+	public void createSuccesBillRec(Billable billable){
+    	try{
+    		
+    		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
+    		successfulBill.setCp_tx_id(billable.getCp_tx_id());
+    		successfulBill.setKeyword(billable.getKeyword());
+    		successfulBill.setMsisdn(billable.getMsisdn());
+    		successfulBill.setOperation(billable.getOperation());
+    		successfulBill.setPrice(billable.getPrice());
+    		successfulBill.setPricePointKeyword(billable.getPricePointKeyword());
+    		successfulBill.setResp_status_code(billable.getResp_status_code());
+    		successfulBill.setShortcode(billable.getShortcode());
+    		successfulBill.setSuccess(billable.getSuccess());
+    		successfulBill.setTimeStamp(billable.getTimeStamp());
+    		successfulBill.setTransactionId(billable.getTransactionId());
+    		successfulBill.setTransferin(billable.getTransferIn());
+    		successfulBill.setOpco(billable.getOpco());
+    		successfulBill = successfullbillingDAO.save(successfulBill);
+    		
+    	}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
+    }
 	
 	@Override
 	public SenderResp bill(Billable billable) throws BillingGatewayException{

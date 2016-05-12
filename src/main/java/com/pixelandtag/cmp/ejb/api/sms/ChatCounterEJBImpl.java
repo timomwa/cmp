@@ -54,28 +54,45 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 		
 	}
 	
-	
 	@Override
-	public boolean isoffBundle(Person person){
-		
+	public boolean isoffBundle(String msisdn, OperatorCountry opco) throws Exception{
 		boolean isoffbundle = false;
 		try{
-			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", person.getMsisdn());
+			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", msisdn);
 		
 		if(chatbundle!=null){
 			isoffbundle = chatbundle.getSms().compareTo(0L)<=0;
 			if(!isoffbundle){
-				Date expiryInServer = timeZoneConverterEJB.convertFromOneTimeZoneToAnother(chatbundle.getExpiryDate(), person.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
+				Date expiryInServer = timeZoneConverterEJB.convertFromOneTimeZoneToAnother(chatbundle.getExpiryDate(), opco.getCountry().getTimeZone(), TimeZone.getDefault().getID());
 				isoffbundle = timeZoneConverterEJB.isDateInThePast( expiryInServer );//bundle has expired
 			}
 		}else{
 			logger.info("**********No previous data. we're creating new bundle!");
-			createChatBundle(person.getMsisdn(), person.getOpco());
+			createChatBundle(msisdn, opco);
 		}
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}
 		return isoffbundle;
+	}
+	
+	
+	
+	@Override
+	public boolean isoffBundle(Person person){
+		
+		boolean isoffbundle = false;
+		
+		try{
+			
+			isoffbundle = isoffBundle(person.getMsisdn(), person.getOpco());
+		
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+		
+		return isoffbundle;
+
 	}
 
 

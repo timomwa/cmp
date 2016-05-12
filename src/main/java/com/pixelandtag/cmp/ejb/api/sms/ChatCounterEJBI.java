@@ -13,6 +13,8 @@ public interface ChatCounterEJBI {
 
 	public boolean isoffBundle(Person person);
 	
+	public boolean isoffBundle(String mSISDN, OperatorCountry opco) throws Exception;
+	
 	public ChatBundle saveOrUpdate(ChatBundle chatBundle) throws Exception;
 	
 	public ChatBundle createChatBundle(Date expiryDate, String msisdn,Long bundlesize ) throws Exception;
@@ -20,5 +22,7 @@ public interface ChatCounterEJBI {
 	public ChatBundle createChatBundle(Subscription subscription) throws Exception;
 	
 	public void createChatBundle(String msisdn, OperatorCountry opco) throws Exception;
+
+	;
 
 }

@@ -6,5 +6,7 @@ import com.pixelandtag.smssenders.SenderResp;
 public interface BillingGatewayEJBI {
 
 	public SenderResp bill(Billable billable) throws BillingGatewayException;
+	
+	public void createSuccesBillRec(Billable billable);
 
 }
