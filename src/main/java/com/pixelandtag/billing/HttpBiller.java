@@ -344,7 +344,7 @@ public class HttpBiller extends GenericBiller {
 			logger.debug(dbg);
 		
 		response.setRespcode(String.valueOf(resp.getResp_code()));
-		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success
+		if(resp.getResp_code()>=200 && resp.getResp_code()<=299)//All http 200 series are treated as success. For Orange
 			response.setSuccess(Boolean.TRUE);
 		
 		

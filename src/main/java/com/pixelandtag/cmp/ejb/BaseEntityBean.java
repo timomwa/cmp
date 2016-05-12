@@ -521,7 +521,7 @@ public class BaseEntityBean implements BaseEntityI {
 			watch.stop();
 			logger.info("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
-			 
+			
 			 final int RESP_CODE = Integer.valueOf( response.getRespcode() );
 			 
 			 logger.info("RESP CODE : "+RESP_CODE);
@@ -529,7 +529,8 @@ public class BaseEntityBean implements BaseEntityI {
 			 
 			 billable.setProcessed(1L);
 			
-			 if (RESP_CODE >= HttpStatus.SC_OK && RESP_CODE <= HttpStatus.SC_PARTIAL_CONTENT ) {
+			 if ( (RESP_CODE >= HttpStatus.SC_OK && RESP_CODE <= HttpStatus.SC_PARTIAL_CONTENT) 
+					 || (response.getResponseMsg()!=null && !response.getResponseMsg().isEmpty()) ) {
 				
 				
 				billable.setRetry_count(billable.getRetry_count()+1);
@@ -544,7 +545,8 @@ public class BaseEntityBean implements BaseEntityI {
 					logger.info("FAILED TO BILL, ERROR_MESSAGE="+response.getResponseMsg()+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					billable.setResp_status_code(response.getResponseMsg());
 					
-					if(response.getResponseMsg().toUpperCase().contains("Insufficient".toUpperCase())){
+					if(response.getResponseMsg().toUpperCase().contains("Insufficient".toUpperCase())
+							|| response.getResponseMsg().toUpperCase().contains("Balance not enough".toUpperCase())){
 						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, billable.getOpco());
 					}
