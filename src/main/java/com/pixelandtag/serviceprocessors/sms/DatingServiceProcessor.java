@@ -814,6 +814,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					boolean chargeSucess = true;
 					//Risk here is if billing gateway is slow, the whole chat becomes slow
 					if(isoffbundle){//TODO find a way to make this fault tollerant. If we don't succeed here, try again somewhere in a different process.
+						OpcoSenderReceiverProfile opcosenderreceiverprofile = opcosenderprofileEJB.getActiveProfileForOpco(person.getOpco().getId());
+						outgoingsms.setOpcosenderprofile(opcosenderreceiverprofile);
 						Billable billable = datingBean.createBillable(outgoingsms);
 						billable.setPrice(BigDecimal.ONE);
 						SenderResp response = billinggateway.bill(billable);
