@@ -1355,10 +1355,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						|| "OL405".equals(billable.getResp_status_code())  
 						|| "OL406".equals(billable.getResp_status_code())){
 				
-					 message_key =  billable.getResp_status_code();
+					 message_key =  BillingStatus.INSUFFICIENT_FUNDS.toString();
 				}
 				
-				String message = message_key!=BILLING_FAILED ? getMessage(message_key, language_id, person.getOpco().getId()) : null;
+				String message =  getMessage(message_key, language_id, person.getOpco().getId());//message_key!=BILLING_FAILED ? : null;
 				
 				outgoingsms.setSms(message);
 				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price

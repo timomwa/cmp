@@ -536,6 +536,8 @@ public class BaseEntityBean implements BaseEntityI {
 				
 				success  = response.getSuccess();
 				billable.setSuccess(success );
+				billable.setTransactionId(response.getRefvalue());
+				billable.setResp_status_code(response.getRespcode());
 				
 				if(!success){
 					
@@ -551,9 +553,11 @@ public class BaseEntityBean implements BaseEntityI {
 						logger.warn("No transaction id found");
 					}
 					
+					
 				}else{
 					billable.setTransactionId(response.getRefvalue());
 					billable.setResp_status_code("Success");
+					
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					

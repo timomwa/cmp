@@ -83,6 +83,7 @@ public class OperatorCountryRulesEJBImpl implements OperatorCountryRulesEJBI {
 			sb.append("\n").append("----------------------------------------------------");
 			sb.append("\n").append("Hour in opco "+current_opco_hour);
 			sb.append("\n").append("latest_message_send_hour "+latest_message_send_hour);
+			sb.append("\n").append("earliest_message_send_hour "+earliest_message_send_hour);
 			sb.append("\n").append("current_opco_hour "+current_opco_hour);
 			sb.append("\n").append(" (current_opco_hour>=earliest_message_send_hour && current_opco_hour<=latest_message_send_hour) : "+(current_opco_hour>=earliest_message_send_hour && current_opco_hour<=latest_message_send_hour));
 			sb.append("\n").append("----------------------------------------------------");
