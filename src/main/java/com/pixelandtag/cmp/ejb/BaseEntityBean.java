@@ -545,6 +545,7 @@ public class BaseEntityBean implements BaseEntityI {
 					billable.setResp_status_code(response.getResponseMsg());
 					
 					if(response.getResponseMsg().toUpperCase().contains("Insufficient".toUpperCase())){
+						billable.setResp_status_code(BillingStatus.INSUFFICIENT_FUNDS.toString());
 						subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, billable.getOpco());
 					}
 					try{
