@@ -6,10 +6,10 @@ import java.util.TimeZone;
 import javax.ejb.EJB;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 
-import com.google.inject.Inject;
 import com.pixelandtag.cmp.dao.core.ChatBundleDAOI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
@@ -27,7 +27,7 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	@Inject
 	private ChatBundleDAOI chatbundleDAO;
 	
-	@Inject
+	@EJB
 	private OpcoSMSServiceEJBI opcoSMSServiceDAO;
 	
 	@EJB
