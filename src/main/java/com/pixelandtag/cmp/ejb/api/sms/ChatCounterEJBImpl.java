@@ -40,6 +40,9 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	@Override
 	public void updateBundles(Person person, Long value){
 		try{
+			logger.info(" chatbundleDAO >> "+chatbundleDAO);
+			logger.info(" person >> "+person);
+			logger.info(" person.getMsisdn() >> "+(person!=null ? person.getMsisdn() : null));
 			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", person.getMsisdn());
 			Long availablesms = chatbundle.getSms();
 			if(availablesms.compareTo(0L)>0){

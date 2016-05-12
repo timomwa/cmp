@@ -45,7 +45,7 @@ public class GenericDaoImpl<T, ID extends Serializable> implements GenericDAO<T,
 	@Override
 	public T findBy(String fieldName, Object value) {
 		Query query = em
-				.createQuery(getQuery(fieldName, null))
+				.createQuery(getQuery(fieldName))
 				.setParameter(fieldName, value);
 		return getSingleResult(query);
 	}
@@ -62,12 +62,9 @@ public class GenericDaoImpl<T, ID extends Serializable> implements GenericDAO<T,
 	}
 	
 	
-	private String getQuery(String fieldName, User user) {
+	private String getQuery(String fieldName) {
 		String query = "from " + persistentClass.getName() + " t " + "where t."
 				+ fieldName + " = :" + fieldName;
-		if (user == null) {
-			return query;
-		}
 		return query;
 	}
 	
