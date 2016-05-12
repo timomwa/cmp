@@ -102,6 +102,7 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 		
 		try {
 			SenderResp resp = biller.charge(billable);
+			
 			return resp;
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);

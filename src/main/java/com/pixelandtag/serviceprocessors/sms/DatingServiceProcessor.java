@@ -820,8 +820,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						billable.setPrice(BigDecimal.ONE);
 						SenderResp response = billinggateway.bill(billable);
 						chargeSucess = response.getSuccess();
-						if(chargeSucess)
+						if(chargeSucess){
+							billable.setSuccess(response.getSuccess());
+							billable.setResp_status_code(response.getRespcode());
 							billinggateway.createSuccesBillRec(billable);
+						}
 					}
 					
 					if(isoffbundle && chargeSucess){
