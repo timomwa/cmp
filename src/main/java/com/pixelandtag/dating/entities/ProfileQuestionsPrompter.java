@@ -25,6 +25,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
+import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
@@ -39,6 +40,7 @@ public class ProfileQuestionsPrompter {
 	private Properties properties,mtsenderprop;
 	private DatingServiceI datingserviceEJB = null;
 	private TimezoneConverterI timezoneconverterEJB;
+	private DNDListEJBI dndlistEJB;
 	private BigInteger records_per_run = BigInteger.valueOf(10000);
 	private MTCreatorEJBI mtcreatorEJB;
 	private ProfileCompletionReminderLogEJBI profilecompletionreminderLoggerEJB;
@@ -95,6 +97,7 @@ public class ProfileQuestionsPrompter {
 			timezoneconverterEJB = (TimezoneConverterI) context.lookup("cmp/TimezoneConverterEJB!com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI");
 			mtcreatorEJB = (MTCreatorEJBI) context.lookup("cmp/MTCreatorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI");
 			matchesLogEJB = (MatchesLogEJBI) context.lookup("cmp/MatchesLogEJBImpl!com.pixelandtag.cmp.ejb.MatchesLogEJBI");
+			dndlistEJB = (DNDListEJBI) context.lookup("cmp/DNDListEJBImpl!com.pixelandtag.cmp.ejb.subscription.DNDListEJBI"); 
 			logger.info("Successfully initialized EJBs..");
 		
 		}catch(Exception exp){
@@ -140,43 +143,37 @@ public class ProfileQuestionsPrompter {
 		
 		
 		for(PersonDatingProfile profile : profiles){
-			try{
-				
-				Person person = profile.getPerson();
-				//if(person.getOpco()==null || person.getOpco().getId().intValue()!=128023537)
-				//	continue;
-				
-				String username = profile.getUsername();
-				String msisdn = person.getMsisdn();
-				
-				logger.info("msisdn == ["+msisdn+"], opcoid  = ["+person.getOpco().getId()+"]");
-				//logger.info("msisdn.equalsIgnoreCase(\"254721912151\") : "+msisdn.equalsIgnoreCase("254721912151"));
-				//logger.info("msisdn.equalsIgnoreCase(\"254720988636\") : "+msisdn.equalsIgnoreCase("254720988636"));
-				
-				//if(msisdn.trim().equalsIgnoreCase("254721912151") || msisdn.trim().equalsIgnoreCase("254720988636")){
-				
-					if(username.equals(person.getMsisdn()))
-						username = "";
+			
+			//if(dndlistEJB.isinDNDList(profile.getPerson().getMsisdn())){
+			//	logger.info(profile.getPerson().getMsisdn()+" is in DND list, so we won't send them any message.");
+			//}else{
+			
+				try{
 					
-					logger.info("username == ["+username+"]");
+					Person person = profile.getPerson();
 					
-					String match = datingserviceEJB.findMatchString(profile);
+					String username = profile.getUsername();
+					String msisdn = person.getMsisdn();
 					
-					logger.info("match == "+match);
-					
-					mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),6);
-					
-					matchesLogEJB.log(profile);
-					
-					
-				//}else{
-				//	continue;
-				//}
-				
-				
-			}catch(Exception exp){
-				logger.error(exp.getMessage(), exp);
-			}
+					logger.info("msisdn == ["+msisdn+"], opcoid  = ["+person.getOpco().getId()+"]");
+						
+						if(username.equals(person.getMsisdn()))
+							username = "";
+						
+						logger.info("username == ["+username+"]");
+						
+						String match = datingserviceEJB.findMatchString(profile);
+						
+						logger.info("match == "+match);
+						
+						mtcreatorEJB.sendMT(match,find_kw_serviceid, person.getMsisdn(), person.getOpco(),6);
+						
+						matchesLogEJB.log(profile);
+						
+				}catch(Exception exp){
+					logger.error(exp.getMessage(), exp);
+				}
+			//}
 		}
 		
 		

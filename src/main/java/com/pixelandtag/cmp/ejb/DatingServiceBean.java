@@ -1698,6 +1698,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ " AND "
 					+ " day(pcl.timeStamp)=day(:todaysdate)"
 					+ ")"
+					+ ")"
+					+ "AND"
+					+ "("
+					+ "  dp.person.msisdn not in (select msisdn from DNDList)"
 					+ ")");
 			query.setParameter("profilecomplete", Boolean.FALSE);
 			query.setParameter("loggedin", Boolean.TRUE);
@@ -1728,6 +1732,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ " AND "
 					+ " day(pcl.timeStamp)=day(:todaysdate)"
 					+ ")"
+					+ ")"
+					+ "AND"
+					+ "( "
+					+ "  dp.person.msisdn not in (select msisdn from DNDList)"
 					+ ")");
 			query.setParameter("profilecomplete", Boolean.TRUE);
 			query.setParameter("actived", Boolean.TRUE);
