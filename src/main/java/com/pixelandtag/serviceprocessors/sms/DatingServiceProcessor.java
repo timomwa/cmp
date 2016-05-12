@@ -38,6 +38,7 @@ import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.OperatorCountryRules;
 import com.pixelandtag.dating.entities.AlterationMethod;
@@ -314,8 +315,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				//if(!subvalid) //TODO - have a config per opco to decide whether to auto renew or not.
 				//	cmp_bean.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
+				OperatorCountryRules chatbundlerule = getChatBundleRules( incomingsms.getOpco() );
 				
-				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
+				if((subvalid && profile!=null && profile.getProfileComplete()) || 
+						(profile!=null && profile.getProfileComplete() && chatbundlerule.getRule_value().equalsIgnoreCase("true"))){//if subscription is valid && their profile is complete
 					
 					outgoingsms = processDating(incomingsms,person);
 						
@@ -765,18 +768,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
 					
-					OperatorCountryRules chatbundlerule = rulescache.get("chatbundles_enabled"+person.getOpco().getId());
-					
-					if(chatbundlerule==null){
-						chatbundlerule = opcorulesEJB.getConfig("chatbundles_enabled", person.getOpco()); 
-						if(chatbundlerule==null){
-							chatbundlerule = new OperatorCountryRules();
-							chatbundlerule.setActive(false);
-							chatbundlerule.setRule_value("false");
-							logger.info("faked a rule!! ");
-						}
-						rulescache.put("chatbundles_enabled"+person.getOpco().getId(), chatbundlerule);
-					}
+					OperatorCountryRules chatbundlerule = getChatBundleRules(person.getOpco());
 					
 					
 					boolean isoffbundle = false;
@@ -891,6 +883,23 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			throw new DatingServiceException("Sorry, something went wrong. Please try again",exp);
 		}
 	}
+
+	private OperatorCountryRules getChatBundleRules(OperatorCountry opco) {
+		OperatorCountryRules chatbundlerule = rulescache.get("chatbundles_enabled"+opco.getId());
+		
+		if(chatbundlerule==null){
+			chatbundlerule = opcorulesEJB.getConfig("chatbundles_enabled", opco); 
+			if(chatbundlerule==null){
+				chatbundlerule = new OperatorCountryRules();
+				chatbundlerule.setActive(false);
+				chatbundlerule.setRule_value("false");
+				logger.info("faked a rule!! ");
+			}
+			rulescache.put("chatbundles_enabled"+opco.getId(), chatbundlerule);
+		}
+		return chatbundlerule;
+	}
+
 
 	private String getProbabilityStr(PersonDatingProfile destination_person) {
 		BigDecimal reply_probability = destination_person.getReplyProbability();
