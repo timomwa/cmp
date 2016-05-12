@@ -348,7 +348,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						outgoingsms.setPriority(3);
 						
 					}else{
-						outgoingsms = processDating(incomingsms,person);
+						outgoingsms = processDating(incomingsms,person,offbundle);
 					}
 				}
 			}else{
