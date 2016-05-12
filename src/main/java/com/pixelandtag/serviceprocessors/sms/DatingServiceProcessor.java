@@ -809,6 +809,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 					
 					
+					String msg_key = MESSAGE_SENT_NOTIFICATION;
 					
 					boolean chargeSucess = true;
 					//Risk here is if billing gateway is slow, the whole chat becomes slow
@@ -819,13 +820,15 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						chargeSucess = response.getSuccess();
 					}
 					
-					String msg_key = "";
-					if(chargeSucess){
-						sendMT(outgoingchatsms);
-						msg_key = MESSAGE_SENT_NOTIFICATION;
-					}else{
+					if(isoffbundle && chargeSucess){
+						msg_key = MESSAGE_SENT_NOTIFICATION_OFFBUNDLE;
+					}else if(!chargeSucess){
 						msg_key = MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION;
 					}
+				
+					if(chargeSucess)
+						sendMT(outgoingchatsms);
+					
 					
 					String dest_plain_pronoun = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
 					
