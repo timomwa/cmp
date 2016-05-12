@@ -42,7 +42,7 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 		try{
 			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", person.getMsisdn());
 			if(chatbundle==null)
-				chatbundle = createChatBundle( timeZoneConverterEJB.convertDateToDestinationTimezone(new Date(), person.getOpco().getCountry().getTimeZone()) , person.getMsisdn(), 20L);
+				chatbundle = createChatBundle( timeZoneConverterEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), person.getOpco().getCountry().getTimeZone()) , person.getMsisdn(), 5L);
 			Long availablesms = chatbundle.getSms();
 			if(availablesms.compareTo(0L)>0){
 				chatbundle.setSms((availablesms + value));
@@ -63,12 +63,13 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", person.getMsisdn());
 		
 		if(chatbundle!=null){
-			isoffbundle = chatbundle.getSms().compareTo(0L)>=0;
+			isoffbundle = chatbundle.getSms().compareTo(0L)<=0;
 			if(!isoffbundle){
 				Date expiryInServer = timeZoneConverterEJB.convertFromOneTimeZoneToAnother(chatbundle.getExpiryDate(), person.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
 				isoffbundle = timeZoneConverterEJB.isDateInThePast( expiryInServer );//bundle has expired
 			}
 		}else{
+			logger.info("**********No previous data. we're creating new bundle!");
 			createChatBundle(person.getMsisdn(), person.getOpco());
 		}
 		}catch(Exception exp){

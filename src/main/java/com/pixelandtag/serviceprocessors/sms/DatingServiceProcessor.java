@@ -773,9 +773,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 					boolean isoffbundle = false;
 					if(chatbundlerule!=null && chatbundlerule.getActive() && chatbundlerule.getRule_value().equalsIgnoreCase("true")){
+						logger.info("*************This opco has bundle capping... so we check for msisdn ="+person.getMsisdn()+"**************");
 						isoffbundle = chatcounterEJB.isoffBundle(person);
 					}
 					
+					logger.info("************* >>> msisdn ="+person.getMsisdn()+", bundles finished/expired? "+isoffbundle+"**************");
 					
 					outgoingchatsms.setSms(msg);
 					outgoingchatsms.setCmp_tx_id(generateNextTxId());//Is a totally new message
@@ -815,6 +817,9 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					outgoingsms.setTimestamp(new Date());
 					
 					if(isoffbundle){
+						
+						outgoingsms.setPriority(0);
+						outgoingsms.setCharged(Boolean.FALSE);
 						outgoingsms.setPrice(BigDecimal.ONE);//We charge a shilling for off bundle chatting. Notify the sub they're off bundle ?? Naah..
 						outgoingsms.setBilling_status(BillingStatus.WAITING_BILLING);
 					}
