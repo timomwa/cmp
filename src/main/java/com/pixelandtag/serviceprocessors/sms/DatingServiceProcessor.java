@@ -318,10 +318,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				//	cmp_bean.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
 				OperatorCountryRules chatbundlerule = getChatBundleRules( incomingsms.getOpco() );
 				
-				boolean offbundle = (profile!=null && profile.getProfileComplete() && chatbundlerule.getRule_value().equalsIgnoreCase("true"));
-				if((subvalid && profile!=null && profile.getProfileComplete()) || offbundle){//if subscription is valid && their profile is complete
+				boolean allowOffBundle = (profile!=null && profile.getProfileComplete() && chatbundlerule.getRule_value().equalsIgnoreCase("true"));
+				if((subvalid && profile!=null && profile.getProfileComplete())
+						|| ((!subvalid && profile!=null && profile.getProfileComplete()) && allowOffBundle)){//if subscription is valid && their profile is complete
 					
-					outgoingsms = processDating(incomingsms,person, offbundle);
+					outgoingsms = processDating(incomingsms,person, allowOffBundle);
 						
 				}else if((profile==null || !profile.getProfileComplete() || !subvalid) ){//No profile or incomplete profile
 					
@@ -349,7 +350,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						outgoingsms.setPriority(3);
 						
 					}else{
-						outgoingsms = processDating(incomingsms,person,offbundle);
+						outgoingsms = processDating(incomingsms,person,allowOffBundle);
 					}
 				}
 			}else{
@@ -365,7 +366,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 
 
-	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person, boolean offbundle) throws Exception { 
+	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person, boolean allowOffBundle) throws Exception { 
 					  
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		if(person==null)
@@ -376,7 +377,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		
 		if(profile!=null && profile.getProfileComplete()){
 			
-			outgoingsms = chat(incomingsms,profile,person,offbundle);
+			outgoingsms = chat(incomingsms,profile,person,allowOffBundle);
 			profile.setLastActive(new Date());
 			profile = datingBean.saveOrUpdate(profile);
 		}
@@ -536,7 +537,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}catch(java.lang.NumberFormatException nfe){
 						String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id,person.getOpco().getId());
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
-						msg = msg.replaceAll(AGE_TAG, age.intValue()+"");
+						msg = msg.replaceAll(AGE_TAG, (age!=null ? age.intValue(): 0)+"");
 						outgoingsms.setSms(msg);
 						return outgoingsms;
 					}
@@ -711,7 +712,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		return outgoingsms;
 	}
 
-	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person, Boolean offbundle) throws DatingServiceException { 
+	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person, Boolean allowOffBundle) throws DatingServiceException { 
 			
 		OutgoingSMS outgoingsms = incomingSMS.convertToOutgoing();
 		
@@ -772,8 +773,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					OperatorCountryRules chatbundlerule = getChatBundleRules(person.getOpco());
 					
 					
-					boolean isoffbundle = offbundle;
-					if(!isoffbundle)//try double check whether they're off bundle
+					boolean isoffbundle = false;
+					if(allowOffBundle)//try double check whether they're off bundle
 					if(chatbundlerule!=null && chatbundlerule.getActive() && chatbundlerule.getRule_value().equalsIgnoreCase("true")){
 						logger.info("*************This opco has bundle capping... so we check for msisdn ="+person.getMsisdn()+"**************");
 						isoffbundle = chatcounterEJB.isoffBundle(person);
