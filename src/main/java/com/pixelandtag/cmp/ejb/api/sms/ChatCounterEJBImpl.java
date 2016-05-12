@@ -69,6 +69,7 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 		}else{
 			logger.info("**********No previous data. we're creating new bundle!");
 			createChatBundle(msisdn, opco);
+			isoffbundle = true;
 		}
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
@@ -102,7 +103,7 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 		Date expiryDate = timeZoneConverterEJB.convertDateToDestinationTimezone(new Date(), opco.getCountry().getTimeZone());
 		chatBundle.setExpiryDate(expiryDate);
 		chatBundle.setMsisdn(msisdn);
-		chatBundle.setSms(20L);
+		chatBundle.setSms(0L);
 		chatbundleDAO.save(chatBundle);
 	}
 	

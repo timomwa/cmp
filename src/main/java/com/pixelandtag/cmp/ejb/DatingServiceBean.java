@@ -1358,6 +1358,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					 message_key =  BillingStatus.INSUFFICIENT_FUNDS.toString();
 				}
 				
+				logger.info("\n\t\t message_key>>>>> from billing when not success=== "+message_key);
 				String message =  getMessage(message_key, language_id, person.getOpco().getId());//message_key!=BILLING_FAILED ? : null;
 				
 				outgoingsms.setSms(message);
