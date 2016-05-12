@@ -225,7 +225,7 @@ public class OutgoingQueueRouter extends Thread {
 		int lowestsize = 10;
 		
 		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet())
-			if(lowestsize>entryset.getValue().size())
+			if(lowestsize>=entryset.getValue().size())
 				lowestsize = entryset.getValue().size();
 		
 		return lowestsize;
@@ -252,7 +252,7 @@ public class OutgoingQueueRouter extends Thread {
 			Long profileid = entryset.getKey();
 			Queue<OutgoingSMS> outqueue = entryset.getValue();
 			
-			if(outqueue.size()<1){
+			if(outqueue.size()==0){
 				
 				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profilemap.get(profileid));  
 				
