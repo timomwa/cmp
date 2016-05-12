@@ -77,7 +77,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	
 	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = true;
-	private boolean allow_multiple_plans = false;
+	private boolean allow_multiple_plans = true;
 	
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
@@ -268,7 +268,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
-				if((!subvalid ||  allow_multiple_plans) ||  ( (!subvalid && chatcounterEJB.isoffBundle(MSISDN, incomingsms.getOpco())) ||  allow_multiple_plans  ) ){
+				if((!subvalid ||  allow_multiple_plans) ||  ( (!subvalid && chatcounterEJB.isoffBundle(MSISDN, incomingsms.getOpco()) ) 
+						||  allow_multiple_plans  ) ){
 					
 					try{
 						

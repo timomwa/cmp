@@ -239,6 +239,10 @@ public class GenericHTTPClient implements Serializable{
 			logger.error(e.getMessage(),e);
 			httpmethod.abort();
 			this.success = false;
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			httpmethod.abort();
+			this.success = false;
 		}finally{
 			setBusy(false);
 			try {
