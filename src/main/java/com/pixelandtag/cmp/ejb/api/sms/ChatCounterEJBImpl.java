@@ -40,10 +40,9 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	@Override
 	public void updateBundles(Person person, Long value){
 		try{
-			logger.info(" chatbundleDAO >> "+chatbundleDAO);
-			logger.info(" person >> "+person);
-			logger.info(" person.getMsisdn() >> "+(person!=null ? person.getMsisdn() : null));
 			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", person.getMsisdn());
+			if(chatbundle==null)
+				chatbundle = createChatBundle( timeZoneConverterEJB.convertDateToDestinationTimezone(new Date(), person.getOpco().getCountry().getTimeZone()) , person.getMsisdn(), 20L);
 			Long availablesms = chatbundle.getSms();
 			if(availablesms.compareTo(0L)>0){
 				chatbundle.setSms((availablesms + value));
@@ -108,7 +107,12 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 		if(chatbundle==null){
 			return createChatBundle(subscription.getExpiryDate(),subscription.getMsisdn(),opcosmsservice.getBundlesize());
 		}else{
-			chatbundle.setSms(opcosmsservice.getBundlesize());
+			Date expiryInServer = timeZoneConverterEJB.convertFromOneTimeZoneToAnother(chatbundle.getExpiryDate(), subscription.getOpco().getCountry().getTimeZone(), TimeZone.getDefault().getID());
+			boolean bundleexpired = timeZoneConverterEJB.isDateInThePast( expiryInServer );//bundle has expired
+			if(bundleexpired)
+				chatbundle.setSms(opcosmsservice.getBundlesize());
+			else
+				chatbundle.setSms(chatbundle.getSms() + opcosmsservice.getBundlesize());
 			chatbundle.setExpiryDate(subscription.getExpiryDate());
 			return chatbundleDAO.save(chatbundle);
 		}
