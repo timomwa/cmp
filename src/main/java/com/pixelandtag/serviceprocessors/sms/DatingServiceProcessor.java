@@ -824,6 +824,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 							billable.setSuccess(response.getSuccess());
 							billable.setResp_status_code(response.getResponseMsg());
 							billable.setOpco_tx_id(response.getRefvalue());
+							billable.setTransactionId(response.getRefvalue());
 							billinggateway.createSuccesBillRec(billable);
 						}
 					}
