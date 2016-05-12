@@ -1410,10 +1410,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 
-	private Billable createBillable(IncomingSMS incomingsms) {
+	public Billable createBillable(IncomingSMS incomingsms) {
 		Billable billable =  new Billable();
 			
-		System.out.println("\n\n\t\t    incomingsms.getOpco(): "+incomingsms.getOpco());
+		logger.info("\n\n\t\t    incomingsms.getOpco(): "+incomingsms.getOpco());
 		billable.setOpco(incomingsms.getOpco());
 		billable.setCp_id("CONTENT360_KE");
 		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
@@ -1436,6 +1436,37 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setShortcode(incomingsms.getShortcode());		
 		billable.setEvent_type((incomingsms.getEvent_type()!=null ?  EventType.get(incomingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(incomingsms.getPrice_point_keyword());
+		
+		return billable;
+	}
+	
+	
+	public Billable createBillable(OutgoingSMS outgoingsms) {
+		Billable billable =  new Billable();
+			
+		logger.info("\n\n\t\t    incomingsms.getOpco(): "+outgoingsms.getOpcosenderprofile().getOpco());
+		billable.setOpco(outgoingsms.getOpcosenderprofile().getOpco());
+		billable.setCp_id("CONTENT360_KE");
+		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
+		billable.setOpco_tx_id(outgoingsms.getOpco_tx_id());
+		billable.setDiscount_applied("0");
+		billable.setIn_outgoing_queue(0l);
+		billable.setKeyword(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setMaxRetriesAllowed(1L);
+		billable.setMessage_id(outgoingsms.getId());
+		billable.setMsisdn(outgoingsms.getMsisdn());
+		billable.setOperation(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+		billable.setPrice(outgoingsms.getPrice());
+		billable.setPriority(0l);
+		billable.setProcessed(0L);
+		billable.setRetry_count(0L);
+		if(outgoingsms.getServiceid()>0)
+			billable.setService_id(outgoingsms.getServiceid()+"");
+		else
+			billable.setService_id(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setShortcode(outgoingsms.getShortcode());		
+		billable.setEvent_type((outgoingsms.getEvent_type()!=null ?  EventType.get(outgoingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
+		billable.setPricePointKeyword(outgoingsms.getPrice_point_keyword());
 		
 		return billable;
 	}

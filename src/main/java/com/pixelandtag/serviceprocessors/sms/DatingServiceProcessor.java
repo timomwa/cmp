@@ -25,6 +25,7 @@ import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
@@ -50,6 +51,8 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
@@ -68,6 +71,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private InitialContext context;
 	private OperatorCountryRulesEJBI opcorulesEJB;
 	private ChatCounterEJBI chatcounterEJB;
+	private BillingGatewayEJBI billinggateway;
 	private Map<String,OperatorCountryRules> rulescache = new HashMap<String,OperatorCountryRules>();
 	
 	//private Properties mtsenderprop;
@@ -100,6 +104,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		messageEJB =  (MessageEJBI) context.lookup("cmp/MessageEJBImpl!com.pixelandtag.cmp.ejb.MessageEJBI");
 		opcorulesEJB =  (OperatorCountryRulesEJBI) context.lookup("cmp/OperatorCountryRulesEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI");
 		chatcounterEJB =  (ChatCounterEJBI) context.lookup("cmp/ChatCounterEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI");
+		billinggateway =  (BillingGatewayEJBI) context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
@@ -775,13 +780,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					
 					boolean isoffbundle = false;
-					logger.info("\t\t****** THE_RULE??? "+chatbundlerule+" , opcoid = "+person.getOpco().getId()+" *******");
 					if(chatbundlerule!=null && chatbundlerule.getActive() && chatbundlerule.getRule_value().equalsIgnoreCase("true")){
 						logger.info("*************This opco has bundle capping... so we check for msisdn ="+person.getMsisdn()+"**************");
 						isoffbundle = chatcounterEJB.isoffBundle(person);
 					}
-					
-					logger.info("************* >>> msisdn ="+person.getMsisdn()+", bundles finished/expired? "+isoffbundle+"**************");
 					
 					outgoingchatsms.setSms(msg);
 					outgoingchatsms.setCmp_tx_id(generateNextTxId());//Is a totally new message
@@ -794,7 +796,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					outgoingchatsms.setShortcode(shortcode);
 					outgoingchatsms.setTimestamp(new Date());
 					
-					sendMT(outgoingchatsms);
+					
 					
 					if(!isoffbundle)
 						chatcounterEJB.updateBundles(person, -1L);
@@ -808,9 +810,26 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					
 					
 					
+					boolean chargeSucess = true;
+					//Risk here is if billing gateway is slow, the whole chat becomes slow
+					if(isoffbundle){//TODO find a way to make this fault tollerant. If we don't succeed here, try again somewhere in a different process.
+						Billable billable = datingBean.createBillable(outgoingsms);
+						billable.setPrice(BigDecimal.ONE);
+						SenderResp response = billinggateway.bill(billable);
+						chargeSucess = response.getSuccess();
+					}
+					
+					String msg_key = "";
+					if(chargeSucess){
+						sendMT(outgoingchatsms);
+						msg_key = MESSAGE_SENT_NOTIFICATION;
+					}else{
+						msg_key = MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION;
+					}
+					
 					String dest_plain_pronoun = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
 					
-					String msgsentto = datingBean.getMessage(MESSAGE_SENT_NOTIFICATION, language_id,person.getOpco().getId());
+					String msgsentto = datingBean.getMessage(msg_key, language_id,person.getOpco().getId());
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
 					msgsentto = msgsentto.replaceAll(PRONOUN_TAG, dest_plain_pronoun);
@@ -820,13 +839,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					outgoingsms.setSms(msgsentto+tailmsg);
 					outgoingsms.setTimestamp(new Date());
 					
-					if(isoffbundle){
-						
-						outgoingsms.setPriority(0);
-						outgoingsms.setCharged(Boolean.FALSE);
-						outgoingsms.setPrice(BigDecimal.ONE);//We charge a shilling for off bundle chatting. Notify the sub they're off bundle ?? Naah..
-						outgoingsms.setBilling_status(BillingStatus.WAITING_BILLING);
-					}
 					
 				}else{
 					log.setOffline_msg(Boolean.TRUE);

@@ -65,6 +65,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String GENDER_PRONOUN_INCHAT_F = "GENDER_PRONOUN_INCHAT_F";
 	public static final String OFFLINE_NOTIFIER = "OFFLINE_NOTIFIER";
 	public static final String MESSAGE_SENT_NOTIFICATION = "MESSAGE_SENT_NOTIFICATION";
+	public static final String MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION = "MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION";
 	public static final String CHAT_MESSAGE_TEMPLATE = "CHAT_MESSAGE_TEMPLATE";
 	public static final String GENDER_PRONOUN_INCHAT_M = "GENDER_PRONOUN_INCHAT_M";
 	public static final String CHAT_USERNAME_SEPERATOR = " Says: ";
