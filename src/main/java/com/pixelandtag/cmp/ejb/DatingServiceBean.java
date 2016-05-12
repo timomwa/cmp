@@ -1451,7 +1451,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setOpco_tx_id(outgoingsms.getOpco_tx_id());
 		billable.setDiscount_applied("0");
 		billable.setIn_outgoing_queue(0l);
-		billable.setKeyword(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		if(outgoingsms.getSms()!=null)
+			billable.setKeyword(outgoingsms.getSms().split("\\s")[0].toUpperCase());
 		billable.setMaxRetriesAllowed(1L);
 		billable.setMessage_id(outgoingsms.getId());
 		billable.setMsisdn(outgoingsms.getMsisdn());
@@ -1460,10 +1461,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setPriority(0l);
 		billable.setProcessed(0L);
 		billable.setRetry_count(0L);
-		if(outgoingsms.getServiceid()>0)
+		if(outgoingsms.getServiceid()>0){
 			billable.setService_id(outgoingsms.getServiceid()+"");
-		else
+		}else{
+			if(outgoingsms.getSms()!=null)
 			billable.setService_id(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		}
 		billable.setShortcode(outgoingsms.getShortcode());		
 		billable.setEvent_type((outgoingsms.getEvent_type()!=null ?  EventType.get(outgoingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(outgoingsms.getPrice_point_keyword());
