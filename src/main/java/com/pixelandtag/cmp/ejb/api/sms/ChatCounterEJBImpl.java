@@ -36,6 +36,18 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	@EJB
 	private OperatorCountryRulesEJBI opcorulesEJB;
 	
+	@Override
+	public void removeAllBundles(String msisdn){
+		try{
+			ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", msisdn);
+			if(chatbundle!=null)
+				chatbundleDAO.delete(chatbundle);
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+		}
+	}
+	
+	
 	
 	@Override
 	public void updateBundles(Person person, Long value){
@@ -51,7 +63,6 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 		}
-		
 	}
 	
 	@Override

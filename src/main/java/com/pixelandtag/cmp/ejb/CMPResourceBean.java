@@ -37,6 +37,7 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DoubleConfirmationQueueEJBI;
@@ -94,6 +95,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private DNDListEJBI dndEJB;
+	
+	@EJB
+	private ChatCounterEJBI chatcounterEJB;
 	
 	private Random rand = new Random();
 	
@@ -306,6 +310,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			try{
 				datingserviceEJB.deactivate(msisdn);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+			}
+			
+			try{
+				chatcounterEJB.removeAllBundles(msisdn);
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
 			}

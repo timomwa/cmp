@@ -271,7 +271,7 @@ public class BaseEntityBean implements BaseEntityI {
 		for(String kwd: services){
 			OpcoSMSService opcosmsservice = opcosmsserviceejb.getOpcoSMSService(kwd, opco);
 			SMSService smsservice = opcosmsservice.getSmsservice();
-			boolean subvalid = subscriptionEjb.subscriptionValid(msisdn, smsservice.getId());
+			boolean subvalid = subscriptionEjb.subscriptionValid(msisdn, smsservice.getId(), opco);
 			sb.append("\n\n\t\t opcosmsservice.getPrice():: "+opcosmsservice.getPrice()+" opcosmsservice : "+opcosmsservice.getId());
 			sb.append("\n\t\t subvalid :: "+subvalid+" msisdn: "+msisdn+" cmd:"+smsservice.getCmd());
 			sb.append("\n\t\t (subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0) :: "+((subvalid || opcosmsservice.getPrice().compareTo(BigDecimal.ZERO)<=0)));

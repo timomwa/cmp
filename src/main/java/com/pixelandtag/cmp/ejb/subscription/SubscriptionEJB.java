@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
@@ -647,10 +648,10 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{
+	public boolean subscriptionValid(String msisdn, Long serviceid, OperatorCountry opco) throws Exception{
 		boolean subValid = false;
 		try{
-			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), opco.getCountry().getTimeZone());
 			Query qry = em.createQuery("from Subscription sub WHERE sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :timeInNairobi ");
 			qry.setParameter("msisdn", msisdn);
 			qry.setParameter("serviceid", serviceid);
@@ -667,7 +668,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			throw e;
-			
 		}
 		return subValid;
 	}

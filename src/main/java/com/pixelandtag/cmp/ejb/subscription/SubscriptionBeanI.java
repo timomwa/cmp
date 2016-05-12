@@ -176,7 +176,7 @@ public interface SubscriptionBeanI {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception;
+	public boolean subscriptionValid(String msisdn, Long serviceid,OperatorCountry opco) throws Exception;
 	
 	/**
 	 * 

@@ -268,7 +268,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
-				if(!subvalid ||  allow_multiple_plans || chatcounterEJB.isoffBundle(MSISDN, incomingsms.getOpco()) ){
+				if((!subvalid ||  allow_multiple_plans) ||  ( (!subvalid && chatcounterEJB.isoffBundle(MSISDN, incomingsms.getOpco())) ||  allow_multiple_plans  ) ){
 					
 					try{
 						

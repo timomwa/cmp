@@ -23,6 +23,6 @@ public interface ChatCounterEJBI {
 	
 	public void createChatBundle(String msisdn, OperatorCountry opco) throws Exception;
 
-	;
+	public void removeAllBundles(String msisdn);
 
 }
