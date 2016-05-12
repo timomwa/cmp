@@ -768,10 +768,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 							chatbundlerule = new OperatorCountryRules();
 							chatbundlerule.setActive(false);
 							chatbundlerule.setRule_value("false");
+							logger.info("faked a rule!! ");
 						}
 						rulescache.put("chatbundles_enabled"+person.getOpco().getId(), chatbundlerule);
 					}
+					
+					
 					boolean isoffbundle = false;
+					logger.info("\t\t****** THE_RULE??? "+chatbundlerule+" , opcoid = "+person.getOpco().getId()+" *******");
 					if(chatbundlerule!=null && chatbundlerule.getActive() && chatbundlerule.getRule_value().equalsIgnoreCase("true")){
 						logger.info("*************This opco has bundle capping... so we check for msisdn ="+person.getMsisdn()+"**************");
 						isoffbundle = chatcounterEJB.isoffBundle(person);

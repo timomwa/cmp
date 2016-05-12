@@ -157,10 +157,25 @@ public class OperatorCountryRules implements Serializable {
 
 	@Override
 	public String toString() {
-		return "OperatorCountryRules [id=" + id + ", opco=" + opco
-				+ ", rule_name=" + rule_name + ", rule_value=" + rule_value
-				+ ", data_type=" + data_type + ", effectiveDate="
-				+ effectiveDate + ", active=" + active + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("OperatorCountryRules [id=");
+		builder.append(id);
+		builder.append(", \nopco=");
+		builder.append(opco);
+		builder.append(", \nrule_name=");
+		builder.append(rule_name);
+		builder.append(", \nrule_value=");
+		builder.append(rule_value);
+		builder.append(", \ndata_type=");
+		builder.append(data_type);
+		builder.append(", \neffectiveDate=");
+		builder.append(effectiveDate);
+		builder.append(", \nactive=");
+		builder.append(active);
+		builder.append("]");
+		return builder.toString();
 	}
+
+	
 	
 }
