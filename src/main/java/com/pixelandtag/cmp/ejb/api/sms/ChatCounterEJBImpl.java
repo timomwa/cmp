@@ -1,6 +1,8 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.ejb.EJB;
@@ -35,6 +37,13 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	
 	@EJB
 	private OperatorCountryRulesEJBI opcorulesEJB;
+	
+	public static List<String> services = new ArrayList<String>();
+	static{
+		services.add("BILLING_SERV5");
+		services.add("BILLING_SERV15");
+		services.add("BILLING_SERV30");
+	}
 	
 	@Override
 	public void removeAllBundles(String msisdn){
@@ -133,6 +142,18 @@ public class ChatCounterEJBImpl implements ChatCounterEJBI {
 	public ChatBundle createChatBundle(Subscription subscription) throws Exception{
 		Long smsserviceid = subscription.getSms_service_id_fk();
 		OpcoSMSService opcosmsservice = opcoSMSServiceDAO.getOpcoSMSService(smsserviceid, subscription.getOpco());
+		if(opcosmsservice.getSmsservice()!=null && opcosmsservice.getSmsservice().getCmd()!=null){
+			boolean isinBundleServices = false;
+			for(String cmd_ : services){
+				if(cmd_.equalsIgnoreCase(opcosmsservice.getSmsservice().getCmd())){
+					isinBundleServices = true;
+					break;
+				}
+			}
+			if(!isinBundleServices)
+				return null;
+		}
+		
 		ChatBundle chatbundle = chatbundleDAO.findBy("msisdn", subscription.getMsisdn());
 		if(chatbundle==null){
 			return createChatBundle(subscription.getExpiryDate(),subscription.getMsisdn(),opcosmsservice.getBundlesize());

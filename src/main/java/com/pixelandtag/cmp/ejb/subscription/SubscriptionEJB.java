@@ -23,6 +23,7 @@ import org.joda.time.DateTime;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.dao.subscription.SubscriptionDAOI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
@@ -30,6 +31,7 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.dating.entities.ChatBundle;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
 import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.subscription.dto.MediumType;
@@ -59,6 +61,9 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@EJB
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
+	
+	@EJB
+	private ChatCounterEJBI chatcounterEJB;
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
@@ -196,6 +201,8 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			sub = renewSubscription(operatorCountry,msisdn, service, SubscriptionStatus.confirmed, method);
 			updateQueueStatus(0L,sub.getId(),method);
 			subrenewalnotificationEJB.sendSubscriptionRenewalMessage(operatorCountry,service,msisdn, sub); 
+			ChatBundle chatbundle  = chatcounterEJB.createChatBundle(sub);
+			logger.info(" >>>>> chatbundle >> "+chatbundle);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}

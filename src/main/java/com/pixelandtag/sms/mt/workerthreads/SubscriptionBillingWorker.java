@@ -23,9 +23,12 @@ import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayException;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
@@ -57,7 +60,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private BillingGatewayEJBI billinggatewayEJB;
 	private BillerConfigsI billerConfigEJB;
 	private static Random r = new Random();
-	private Map<Long, SMSService> sms_serviceCache = new HashMap<Long, SMSService>();
+	private Map<Long, OpcoSMSService> sms_serviceCache = new HashMap<Long, OpcoSMSService>();
 	private Map<Long, MOProcessor> mo_processorCache = new HashMap<Long, MOProcessor>();
 	private Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
 	private Properties mtsenderprop;
@@ -85,6 +88,8 @@ public class SubscriptionBillingWorker implements Runnable {
 	}
 
 	private CMPResourceBeanRemote cmp_ejb;
+	
+	private OpcoSMSServiceEJBI opcosmsserviceEJB;
 
 	public String getName() {
 		return name;
@@ -137,6 +142,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		 subscriptionejb =  (SubscriptionBeanI) 
 		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 billerConfigEJB =  (BillerConfigsI) this.context.lookup("cmp/BillerConfigsImpl!com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI");
+		 opcosmsserviceEJB = (OpcoSMSServiceEJBI)  this.context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 	}
 
 	public SubscriptionBillingWorker(String name_, int mandatory_throttle_) throws Exception{
@@ -416,13 +422,25 @@ public class SubscriptionBillingWorker implements Runnable {
 		logger.debug(" sub "+sub);
 		Long sms_service_id = sub.getSms_service_id_fk();
 		
-		SMSService service = sms_serviceCache.get(sms_service_id);
+		OpcoSMSService service = sms_serviceCache.get(sms_service_id);
 		
 		if (service == null) {
 			try {
-				service = cmp_ejb.find(SMSService.class, sms_service_id);
-				if(service!=null)
-				sms_serviceCache.put(sms_service_id, service);
+				try{
+					service = opcosmsserviceEJB.getOpcoSMSService(sms_service_id, sub.getOpco());
+				}catch(ServiceNotLinkedToOpcoException se){
+					logger.error(se.getMessage());
+				}
+				
+				if(service!=null){
+					if(service.getPrice()!=null && service.getPrice().compareTo(BigDecimal.ZERO)>0){
+						sms_serviceCache.put(sms_service_id, service);
+					}else{
+						service = new OpcoSMSService();
+						service.setId(-1L);//Set id to -1 so that it's cached and we don't have to hit db. Also so that it's not picked in the next if block
+						sms_serviceCache.put(sms_service_id, service);
+					}
+				}
 			} catch (Exception e) {
 				logger.warn("Couldn't find service with id "
 						+ sms_service_id);
@@ -430,14 +448,14 @@ public class SubscriptionBillingWorker implements Runnable {
 		}
 
 		logger.debug(">>service :: "+service);
-		if (service != null) {
+		if (service != null && service.getId().compareTo(-1L)>0) {
 			MOProcessor processor = service.getMoprocessor();
 			
 			billable = new Billable();
 			billable.setCp_id("CONTENT360_KE");
 			billable.setCp_tx_id(SubscriptionRenewal.generateNextId());
 			billable.setDiscount_applied("0");
-			billable.setKeyword(service.getCmd());
+			billable.setKeyword(service.getSmsservice().getCmd());
 			billable.setService_id(service.getId().toString());
 			billable.setMaxRetriesAllowed(0L);
 			billable.setMsisdn(sub.getMsisdn());
@@ -449,10 +467,10 @@ public class SubscriptionBillingWorker implements Runnable {
 			billable.setProcessed(1L);
 			billable.setRetry_count(0L);
 			billable.setShortcode(processor.getShortcode());
-			billable.setEvent_type((EventType.get(service.getEvent_type()) != null ? EventType
-					.get(service.getEvent_type())
+			billable.setEvent_type((EventType.get(service.getSmsservice().getEvent_type()) != null ? EventType
+					.get(service.getSmsservice().getEvent_type())
 					: EventType.SUBSCRIPTION_PURCHASE));
-			billable.setPricePointKeyword(service.getPrice_point_keyword());
+			billable.setPricePointKeyword(service.getSmsservice().getPrice_point_keyword());
 			billable.setSuccess(Boolean.FALSE);
 			billable.setOpco(sub.getOpco());
 			logger.debug(" before queue transaction_id" + billable.getCp_tx_id());
