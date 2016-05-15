@@ -304,12 +304,22 @@ public class SubscriptionBillingWorker implements Runnable {
 										}
 										
 										//Sanity check!
-										if(billable.getSuccess() && successrecid.compareTo(-1L)<=0){
+										
+										if(billable.getSuccess()!=senderresp.getSuccess()){
+											setRun(false);
+											setFinished(true);
+											setBusy(false);
+											throw new Exception("Inconsistent state of the billable status response and the billable record. For this reason, this thread must stop!");
+											
+										}
+										
+										if((billable.getSuccess() && successrecid.compareTo(-1L)<=0)){
 											setRun(false);
 											setFinished(true);
 											setBusy(false);
 											throw new Exception("There was successful billing but no successbillingrequest record created!!!! And we're not doing another run coz of this!!");
 										}else{
+											if(billable.getSuccess())
 											logger.info("SUCCESS BILLING correspondingsuccess_recid="+successrecid+", msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											
 										}
