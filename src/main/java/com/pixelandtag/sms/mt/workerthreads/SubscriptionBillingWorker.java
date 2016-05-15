@@ -221,6 +221,8 @@ public class SubscriptionBillingWorker implements Runnable {
 									Long successrecid = -1L;
 									
 									SenderResp senderresp = biller.charge(billable);
+									senderresp.setSuccess(true);
+									senderresp.setResponseMsg("Success");
 									watch.stop();
 									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
@@ -372,6 +374,11 @@ public class SubscriptionBillingWorker implements Runnable {
 				}catch (Exception e){
 					log(e);
 				}finally{
+					
+					//For testing only!!
+					setRun(false);
+					setFinished(true);
+					setBusy(false);
 				}
 				
 				
