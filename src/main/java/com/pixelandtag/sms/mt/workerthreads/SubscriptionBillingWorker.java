@@ -309,6 +309,9 @@ public class SubscriptionBillingWorker implements Runnable {
 											setFinished(true);
 											setBusy(false);
 											throw new Exception("There was successful billing but no successbillingrequest record created!!!! And we're not doing another run coz of this!!");
+										}else{
+											logger.info("SUCCESS BILLING correspondingsuccess_recid="+successrecid+", msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+											
 										}
 										
 										
