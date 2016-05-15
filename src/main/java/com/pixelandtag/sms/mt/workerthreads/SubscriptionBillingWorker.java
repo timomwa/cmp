@@ -218,11 +218,9 @@ public class SubscriptionBillingWorker implements Runnable {
 										biller = getBiller(billable.getOpco());
 										biller_cache.put(billable.getOpco().getId(), biller);
 									}
-									Long successrecid = -1L;
 									
 									SenderResp senderresp = biller.charge(billable);
-									senderresp.setSuccess(true);
-									senderresp.setResponseMsg("Success");
+									
 									watch.stop();
 									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
@@ -295,44 +293,14 @@ public class SubscriptionBillingWorker implements Runnable {
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
 											sub = subscriptionejb.renewSubscription(billable.getOpco(), billable.getMsisdn(), Long.valueOf(billable.getService_id()), AlterationMethod.system_autorenewal); 
-											StringBuffer sb = new StringBuffer();
-											sb.append("\n");
-											sb.append("\t\t").append("billable.getMsisdn()       = ").append(billable.getMsisdn()).append("\n");
-											sb.append("\t\t").append("billable.getService_id()   = ").append(billable.getService_id()).append("\n");
-											sb.append("\t\t").append("sub                        = ").append(sub).append("\n");
-											sb.append("\t\t").append("sub.getOpco()              = ").append( (sub!=null ? sub.getOpco()  : null)  ).append("\n");
-											logger.info(sb.toString());
 											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1, sub.getOpco());
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//Resume back to normal. No throttling
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
 												SubscriptionRenewal.setWe_ve_been_capped(false);
 											}
-											SuccessfullyBillingRequests success = subscriptionejb.createSuccesBillRec(billable);
-											successrecid = success.getId();
+											subscriptionejb.createSuccesBillRec(billable);
 										}
-										
-										//Sanity check!
-										
-										if(billable.getSuccess()!=senderresp.getSuccess()){
-											setRun(false);
-											setFinished(true);
-											setBusy(false);
-											throw new Exception("Inconsistent state of the billable status response and the billable record. For this reason, this thread must stop!");
-											
-										}
-										
-										if((billable.getSuccess() && successrecid.compareTo(-1L)<=0)){
-											setRun(false);
-											setFinished(true);
-											setBusy(false);
-											throw new Exception("There was successful billing but no successbillingrequest record created!!!! And we're not doing another run coz of this!!");
-										}else{
-											if(billable.getSuccess())
-											logger.info("SUCCESS BILLING correspondingsuccess_recid="+successrecid+", msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
-											
-										}
-										
 										
 									}else if(senderresp.getRespcode()==null || senderresp.getRespcode().equals("0")){
 										logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
@@ -381,11 +349,6 @@ public class SubscriptionBillingWorker implements Runnable {
 				}catch (Exception e){
 					log(e);
 				}finally{
-					
-					//For testing only!!
-					setRun(false);
-					setFinished(true);
-					setBusy(false);
 				}
 				
 				

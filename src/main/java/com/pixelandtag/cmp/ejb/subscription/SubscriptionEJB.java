@@ -205,10 +205,11 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			subrenewalnotificationEJB.sendSubscriptionRenewalMessage(operatorCountry,service,msisdn, sub); 
 			ChatBundle chatbundle  = chatcounterEJB.createChatBundle(sub);
 			logger.info(" >>>>> chatbundle >> "+chatbundle);
+			return sub;
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
+			throw exp;
 		}
-		return sub;
 	}
 	
 	

@@ -406,7 +406,6 @@ public class GenericHTTPClient implements Serializable{
 			httpclient = null;
 		}catch(Exception e){logger.error(e.getMessage(), e);}
 		try{
-			cm.close();
 			if(cm!=null)
 				cm.close();
 		}catch(Exception e){logger.error(e.getMessage(), e);}
