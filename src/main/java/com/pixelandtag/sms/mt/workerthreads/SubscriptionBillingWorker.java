@@ -495,7 +495,7 @@ public class SubscriptionBillingWorker implements Runnable {
 			billable.setCp_tx_id(SubscriptionRenewal.generateNextId());
 			billable.setDiscount_applied("0");
 			billable.setKeyword(service.getSmsservice().getCmd());
-			billable.setService_id(service.getId().toString());
+			billable.setService_id(service.getSmsservice().getId().toString());
 			billable.setMaxRetriesAllowed(0L);
 			billable.setMsisdn(sub.getMsisdn());
 			billable.setOperation(service.getPrice()
