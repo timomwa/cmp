@@ -34,6 +34,8 @@ import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatBundle;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
 import com.pixelandtag.dating.entities.SubscriptionHistory;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
@@ -728,4 +730,32 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		}
 		return isAtive;
 	}
+
+
+	@Override
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception {
+		
+    	try{
+    		
+    		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
+    		successfulBill.setCp_tx_id(billable.getCp_tx_id());
+    		successfulBill.setKeyword(billable.getKeyword());
+    		successfulBill.setMsisdn(billable.getMsisdn());
+    		successfulBill.setOperation(billable.getOperation());
+    		successfulBill.setPrice(billable.getPrice());
+    		successfulBill.setPricePointKeyword(billable.getPricePointKeyword());
+    		successfulBill.setResp_status_code(billable.getResp_status_code());
+    		successfulBill.setShortcode(billable.getShortcode());
+    		successfulBill.setSuccess(billable.getSuccess());
+    		successfulBill.setTimeStamp(billable.getTimeStamp());
+    		successfulBill.setTransactionId(billable.getTransactionId());
+    		successfulBill.setTransferin(billable.getTransferIn());
+    		successfulBill.setOpco(em.merge(billable.getOpco()));
+    		return em.merge(successfulBill);
+    		
+    	}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+			throw exp;
+		}
+    }
 }

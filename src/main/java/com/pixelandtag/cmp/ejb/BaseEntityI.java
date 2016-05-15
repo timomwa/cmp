@@ -16,6 +16,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public interface BaseEntityI {
@@ -43,7 +44,7 @@ public interface BaseEntityI {
 	public OutgoingSMS sendMT(OutgoingSMS mo) throws Exception;
 	public String generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
-	public void createSuccesBillRec(Billable billable);
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception;
 	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
 	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid) ;

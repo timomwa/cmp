@@ -169,8 +169,8 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 	
 	@Override
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void createSuccesBillRec(Billable billable){
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception {
+		
     	try{
     		
     		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
@@ -187,10 +187,11 @@ public class BaseEntityBean implements BaseEntityI {
     		successfulBill.setTransactionId(billable.getTransactionId());
     		successfulBill.setTransferin(billable.getTransferIn());
     		successfulBill.setOpco(em.merge(billable.getOpco()));
-    		successfulBill = em.merge(successfulBill);
+    		return em.merge(successfulBill);
     		
     	}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
+			throw exp;
 		}
     }
     

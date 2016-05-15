@@ -19,6 +19,7 @@ import com.pixelandtag.billing.BillerProfileConfig;
 import com.pixelandtag.billing.BillingConfigSet;
 import com.pixelandtag.billing.OpcoBillingProfile;
 import com.pixelandtag.billing.entities.BillerProfileTemplate;
+import com.pixelandtag.cmp.dao.core.SuccessfullyBillingRequestsDAOI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
@@ -39,6 +40,7 @@ import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SubscriptionRenewal;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.FileUtils;
@@ -203,7 +205,8 @@ public class SubscriptionBillingWorker implements Runnable {
 						try{
 							logger.debug(getName()+":the service id in worker!::::: mtsms.getServiceID():: "+billable.toString());
 							
-								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() && billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
+								if(billable.getMsisdn()!=null && !billable.getMsisdn().isEmpty() 
+										&& billable.getPrice()!=null && billable.getPrice().compareTo(BigDecimal.ZERO)>0){
 									setBusy(true);
 									watch.start();
 									
@@ -215,7 +218,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										biller = getBiller(billable.getOpco());
 										biller_cache.put(billable.getOpco().getId(), biller);
 									}
-
+									Long successrecid = -1L;
 									
 									SenderResp senderresp = biller.charge(billable);
 									watch.stop();
@@ -296,7 +299,16 @@ public class SubscriptionBillingWorker implements Runnable {
 												SubscriptionRenewal.setEnable_biller_random_throttling(false);
 												SubscriptionRenewal.setWe_ve_been_capped(false);
 											}
-											cmp_ejb.createSuccesBillRec(billable);
+											SuccessfullyBillingRequests success = subscriptionejb.createSuccesBillRec(billable);
+											successrecid = success.getId();
+										}
+										
+										//Sanity check!
+										if(billable.getSuccess() && successrecid.compareTo(-1L)<=0){
+											setRun(false);
+											setFinished(true);
+											setBusy(false);
+											throw new Exception("There was successful billing but no successbillingrequest record created!!!! And we're not doing another run coz of this!!");
 										}
 										
 										
@@ -447,8 +459,8 @@ public class SubscriptionBillingWorker implements Runnable {
 			}
 		}
 
-		logger.debug(">>service :: "+service);
-		if (service != null && service.getId().compareTo(-1L)>0) {
+		logger.info(">>service :: "+service+"  passes ? "+(service != null && (service.getId().compareTo(-1L)>0)));
+		if (service != null && (service.getId().compareTo(-1L)>0)) {
 			MOProcessor processor = service.getMoprocessor();
 			
 			billable = new Billable();

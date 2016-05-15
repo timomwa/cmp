@@ -7,6 +7,8 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
@@ -231,5 +233,14 @@ public interface SubscriptionBeanI {
 	 * @throws Exception
 	 */
 	public boolean unsubscribe(String msisdn, List<String> services, OperatorCountry opco) throws Exception;
+
+
+	/**
+	 * 
+	 * @param billable
+	 * @return
+	 * @throws Exception
+	 */
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception;
 
 }
