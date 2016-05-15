@@ -295,6 +295,13 @@ public class SubscriptionBillingWorker implements Runnable {
 											logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 											billable.setSuccess(Boolean.TRUE);
 											sub = subscriptionejb.renewSubscription(billable.getOpco(), billable.getMsisdn(), Long.valueOf(billable.getService_id()), AlterationMethod.system_autorenewal); 
+											StringBuffer sb = new StringBuffer();
+											sb.append("\n");
+											sb.append("\t\t").append("billable.getMsisdn()       = ").append(billable.getMsisdn()).append("\n");
+											sb.append("\t\t").append("billable.getService_id()   = ").append(billable.getService_id()).append("\n");
+											sb.append("\t\t").append("sub                        = ").append(sub).append("\n");
+											sb.append("\t\t").append("sub.getOpco()              = ").append( (sub!=null ? sub.getOpco()  : null)  ).append("\n");
+											logger.info(sb.toString());
 											subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1, sub.getOpco());
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												//Resume back to normal. No throttling
