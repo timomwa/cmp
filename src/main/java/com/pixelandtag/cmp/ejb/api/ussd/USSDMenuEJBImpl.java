@@ -414,11 +414,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							
 							sb.append("Select chat bundle");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=1&menuid=148&serviceid=439&doubleconfirm=true\">5/- @ day 20sms</a>");
+							sb.append("<a href=\""+baseurl+"&answers=1&menuid=148&serviceid=439&doubleconfirm=true\">5/- per day</a>");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=2&menuid=149&serviceid=440&doubleconfirm=true\">15/- @ week 30sms</a>");
+							sb.append("<a href=\""+baseurl+"&answers=2&menuid=149&serviceid=440&doubleconfirm=true\">15/- per week</a>");
 							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">30/- @ month 50sms</a>");
+							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">30/- per month</a>");
 							
 							//+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
 						}else if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
@@ -427,13 +427,13 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							baseurl = baseurl+"?bundlepurchase=true";
 							String bundle = "";
 							if(serviceid!=null && serviceid.equals("439")){
-								bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
+								bundle="5/- daily chat bundle."; // 40 cts per sms
 							}
 							if(serviceid!=null && serviceid.equals("440")){
-								bundle="15/- chat bundle with 30 sms per week."; // 50 cts per sms
+								bundle="15/- weekly chat bundle."; // 50 cts per sms
 							}
 							if(serviceid!=null && serviceid.equals("440")){
-								bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
+								bundle="30/- monthly chat bundle."; // 60 cts per sms
 							}
 							sb.append("Please confirm purchase of the ");
 							sb.append(bundle);
@@ -448,13 +448,13 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								
 								String bundle = "";
 								if(serviceid!=null && serviceid.equals("439")){
-									bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
+									bundle="5/- daily chat bundle."; // 40 cts per sms
 								}
 								if(serviceid!=null && serviceid.equals("440")){
-									bundle="15/- chat bundle with 30 sms per week."; // 50 cts per sms
+									bundle="15/- weekly chat bundle."; // 50 cts per sms
 								}
 								if(serviceid!=null && serviceid.equals("440")){
-									bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
+									bundle="30/- monthly chat bundle."; // 60 cts per sms
 								}
 								try{
 									
@@ -486,13 +486,13 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								baseurl = baseurl+"?bundlepurchase=true";
 								String bundle = "";
 								if(serviceid!=null && serviceid.equals("439")){
-									bundle="5/- chat bundle with 20 sms per day."; // 40 cts per sms
+									bundle="5/- daily chat bundle."; // 40 cts per sms
 								}
 								if(serviceid!=null && serviceid.equals("440")){
-									bundle="15/- chat bundle with 30 sms per week."; // 50 cts per sms
+									bundle="15/- weekly chat bundle."; // 50 cts per sms
 								}
 								if(serviceid!=null && serviceid.equals("440")){
-									bundle="30/- chat bundle with 50 sms per month."; // 60 cts per sms
+									bundle="30/- monthly chat bundle."; // 60 cts per sms
 								}
 								sb.append("Invalid input.");
 								sb.append(BR_NEW_LINE);

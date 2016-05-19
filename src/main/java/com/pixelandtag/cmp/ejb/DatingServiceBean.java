@@ -1775,6 +1775,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(language_id<1)
 				language_id = 1;
 			if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
+				//TODO cache message here
 				msg = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, person.getOpco().getId());
 				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 			}else{
@@ -1787,6 +1788,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				}catch(Exception exp){
 					logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n",exp);
 				}
+				//TODO - cache the pronouns.
 				String gender_pronoun = profile.getPreferred_gender().equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id, person.getOpco().getId());
 				String gender_pronoun2 = profile.getPreferred_gender().equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id, person.getOpco().getId());
 				StringBuffer sb = new StringBuffer();
@@ -1806,6 +1808,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				}
 				sb.append("Location : ").append(locationName).append("\n");
 				sb.append("Gender : ").append(match.getGender()).append("\n");
+				//TODO cache the match found message
 				msg = getMessage(DatingMessages.MATCH_FOUND, language_id, person.getOpco().getId());
 				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG, gender_pronoun);
