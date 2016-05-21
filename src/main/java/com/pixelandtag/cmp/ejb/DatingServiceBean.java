@@ -680,7 +680,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.replyProbability desc, p.lastActive desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("person_a_id", curPersonId);
@@ -747,7 +747,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
 			//Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.replyProbability desc, p.lastActive desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("active", Boolean.TRUE);
 			//qry.setParameter("dob", dob);
