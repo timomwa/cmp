@@ -95,7 +95,7 @@ public class PlainHttpSender extends GenericSender {
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),outgoingsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),outgoingsms.getMsisdn()));//"msisdn"
 		if(this.configuration.get(HTTP_REQUEST_PAYLOAD_CONTENTTYPE)!=null && this.configuration.get(HTTP_REQUEST_PAYLOAD_CONTENTTYPE).getValue().equalsIgnoreCase("json")){
-			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),StringEscapeUtils.escapeJavaScript(outgoingsms.getSms())));//"sms"
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms().replaceAll(Matcher.quoteReplacement("\""), Matcher.quoteReplacement("'"))));//"sms"
 		}else{
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
 		}
