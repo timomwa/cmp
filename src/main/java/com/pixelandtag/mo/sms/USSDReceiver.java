@@ -2,6 +2,7 @@ package com.pixelandtag.mo.sms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.TimeZone;
@@ -98,9 +99,20 @@ public class USSDReceiver extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 14512222156L;
 	public static final String SESSION_TERMINATION_TAG = "####ST";
-	private static final String FREEFLOW_BREAK = "FB";
-	private static final String FREEFLOW_CONTINUE = "FC";
-	private static final String FREEFLOW_HEADER = "Freeflow";
+	private static final String HEADER_FREEFLOW_BREAK = "FB";
+	private static final String HEADER_FREEFLOW_CONTINUE = "FC";
+	private static final String HEADER_FREEFLOW = "Freeflow";
+	private static final String HEADER_CHARGE = "charge";
+	private static final String HEADER_AMOUNT = "amount";
+	private static final String HEADER_EXPIRES = "Expires";
+	private static final String HEADER_PRAGMA = "Pragma";
+	private static final String NO = "N";
+	private static final String NO_CACHE = "no-cache";
+	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	private static final String MAX_AGE = "max-age=0";
+	private static final String HEADER_CONTENT_TYPE = "Content-Type";
+	private static final String UTF_8 = "UTF-8";
+	
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -150,7 +162,7 @@ public class USSDReceiver extends HttpServlet {
 		
 		watch.start();
 		
-		PrintWriter pw = resp.getWriter();
+		PrintWriter pw = null;
 		String response =""; 
 		
 		try{
@@ -187,18 +199,25 @@ public class USSDReceiver extends HttpServlet {
 			
 			if(response.trim().startsWith(SESSION_TERMINATION_TAG)){
 				response = response.replace(SESSION_TERMINATION_TAG, "");
-				resp.setHeader(FREEFLOW_HEADER, FREEFLOW_BREAK);
+				resp.setHeader(HEADER_FREEFLOW, HEADER_FREEFLOW_BREAK);
+				resp.setHeader(HEADER_CHARGE, NO);
+				resp.setHeader(HEADER_AMOUNT, BigDecimal.ZERO.toString());
+				resp.setHeader(HEADER_EXPIRES, BigDecimal.ONE.negate().toString());
+				resp.setHeader(HEADER_PRAGMA, NO_CACHE);
+				resp.setHeader(HEADER_CACHE_CONTROL, MAX_AGE);
+				resp.setHeader(HEADER_CONTENT_TYPE, UTF_8);
 			}else{
-				resp.setHeader(FREEFLOW_HEADER, FREEFLOW_CONTINUE);
+				resp.setHeader(HEADER_FREEFLOW, HEADER_FREEFLOW_CONTINUE);
 			}
-			
+			pw =  resp.getWriter();
 			pw.write(response);
 			
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			response = "Problem occurred. Please try again later";
 			try{
-				pw.close();
+				if(pw!=null)
+					pw.close();
 			}catch(Exception ex){
 				logger.error(e.getMessage(),e);
 				response = "Problem occurred. Please try again later";
@@ -207,7 +226,8 @@ public class USSDReceiver extends HttpServlet {
 		}finally{
 			
 			try{
-				pw.close();
+				if(pw!=null)
+					pw.close();
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 				response = "Problem occurred. Please try again later";
