@@ -1,7 +1,14 @@
 package com.pixelandtag.cmp.ejb.api.ussd;
 
-public class USSDResponseWrapper {
+import java.io.Serializable;
+
+public class USSDResponseWrapper implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4982858458514021233L;
+
 	/**
 	 * The loggable message in the db.
 	 * This is only for the purposes of
