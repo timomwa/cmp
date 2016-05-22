@@ -63,6 +63,7 @@ import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
+import com.pixelandtag.mo.sms.USSDReceiver;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
@@ -2365,13 +2366,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 											||
 											smsserv.getCmd().equals("DATE")){
 										
-										resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
+										resp = USSDReceiver.SESSION_TERMINATION_TAG+"Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
 										
 										
 									}else if(smsserv.getCmd().equals("FIND")){
-										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+										resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request to find friend near your area received. You shall receive an sms shortly.";
 									}else{
-										resp = "Request received and is being processed.";
+										resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request received and is being processed.";
 									}
 									sess.setSessionId(req.getSessionid());
 									clearUssdSesion(sess);
@@ -2512,9 +2513,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										logMO(incomingsms);
 										
 										if(smsserv.getCmd().equals("FIND")){
-											resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+											resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request to find friend near your area received. You shall receive an sms shortly.";
 										}else{
-											resp = "Request received and is being processed.";
+											resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request received and is being processed.";
 										}
 										
 									}else{
@@ -2589,14 +2590,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 													
 													subscriptionEJB.updateSubscription(subscription.getId().intValue(), SubscriptionStatus.confirmed, AlterationMethod.self_via_ussd);
 													
-													resp = "Request to subscribe to "
+													resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request to subscribe to "
 															+smsserv.getService_name()+" Received.";
 													
 													doubleconfirmationEJB.dequeue(doubleConfirmationQueue);
 													
 												}else if(KEYWORD.equals("2") || KEYWORD.equalsIgnoreCase("decline")){
 													
-													resp = "Request cancelled.";
+													resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request cancelled.";
 													
 													doubleconfirmationEJB.dequeue(doubleConfirmationQueue);
 												

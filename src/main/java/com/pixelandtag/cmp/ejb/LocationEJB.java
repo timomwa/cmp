@@ -105,28 +105,37 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	
 	
 	/* (non-Javadoc)
-	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#createLocation(java.lang.Long, java.lang.Long, java.lang.String, com.pixelandtag.dating.entities.PersonDatingProfile)
+	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#createLocation(java.lang.Long, java.lang.Long, java.lang.String, com.pixelandtag.dating.entities.PersonDatingProfile, boolean)
 	 */
 	public ProfileLocation findOrCreateLocation(Long cellid, Long locationId, String locationName,
-			PersonDatingProfile profile) throws Exception {
+			PersonDatingProfile profile, boolean authoritative) throws Exception {
 		
-		Location location = findLocation(cellid,locationId,locationName);
-				
+		
+		Location location = findLocation(cellid,locationId);
+		
+		ProfileLocation profLoc = findProfileLocation(location,profile);
+		
+		if(profLoc!=null)
+			return profLoc;
+		
+		
 		if(location==null){
 			location = new Location();
 			location.setCellid(cellid);
 			location.setLocation_id(locationId);
 			if(locationName==null || locationName.trim().isEmpty()){
-				Location interimLoc = getLastKnownLocationWithNameUsingLac(locationId);
+				Location interimLoc = getLastKnownLocationWithNameUsingLac(locationId, cellid);
 				if(interimLoc!=null)
 					location.setLocationName(interimLoc.getLocationName());
+				else
+					location.setLocationName(profile.getLocation());
 			}else{
 				location.setLocationName(locationName);
 			}
-			location = saveOrUpdate(location);
 		}
 		
-		ProfileLocation profLoc = findProfileLocation(location,profile);
+		location.setAuthoritative(authoritative);
+		location = saveOrUpdate(location);
 		
 		if(profLoc==null){
 			profLoc = new ProfileLocation();
@@ -156,15 +165,17 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#getLastKnownLocationWithNameUsingLac(java.lang.Long)
 	 */
 	@Override
-	public Location getLastKnownLocationWithNameUsingLac(Long locationId) {
+	public Location getLastKnownLocationWithNameUsingLac(Long locationId, Long cellid) {
 		
 		Location location = null;
 		
 		try{
-			Query query = em.createQuery("from Location l WHERE l.locationName is not null AND l.locationName <> '' AND l.location_id=:location_id order by l.timeStamp desc");
+			Query query = em.createQuery("from Location l WHERE l.locationName is not null AND l.locationName <> '' AND l.authoritative=:authoritative AND l.location_id=:location_id AND l.cellid =:cellid order by l.timeStamp desc");
 			query.setFirstResult(0);
 			query.setMaxResults(1);
 			query.setParameter("location_id", locationId);
+			query.setParameter("cellid", cellid);
+			query.setParameter("authoritative", Boolean.TRUE);
 			location = (Location) query.getSingleResult();
 			
 		}catch(javax.persistence.NoResultException ex){
@@ -206,19 +217,18 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.LocationBeanI#findLocation(java.lang.Long, java.lang.Long, java.lang.String)
 	 */
-	public Location findLocation(Long cellid, Long locationId,
-			String locationName) throws Exception{
+	@Override
+	public Location findLocation(Long cellid, Long locationId) throws Exception{
 		
 		Location location = null;
 		
 		try{
-			Query query = em.createQuery("from Location l WHERE l.cellid=:cellid AND l.location_id=:locationid AND l.locationName=:locationName order by l.timeStamp desc");
+			Query query = em.createQuery("from Location l WHERE l.cellid=:cellid AND l.location_id=:locationid order by l.timeStamp desc");
 			query.setFirstResult(0);
 			query.setMaxResults(1);
 			
 			query.setParameter("cellid", cellid);
 			query.setParameter("locationid", locationId);
-			query.setParameter("locationName", locationName);
 			
 			location = (Location) query.getSingleResult();
 			
@@ -267,7 +277,8 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			Long cellid = Long.valueOf(ro.getCellid());
 			Long locationid = Long.valueOf(ro.getLac());
 			PersonDatingProfile prof =  dating_ejb.getProfile(ro.getMsisdn());
-			findOrCreateLocation(cellid,locationid,ro.getLocation(),prof);
+			if(prof!=null && prof.getProfileComplete())
+				findOrCreateLocation(cellid,locationid,ro.getLocation(),prof,false);
 			
 		} catch (Exception exp) {
 			logger.error(exp.getMessage(),exp);

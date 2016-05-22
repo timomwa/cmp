@@ -40,7 +40,7 @@ public interface USSDMenuEJBI {
 	 * @param incomingsms
 	 * @return
 	 */
-	public String getNextQuestionOrange(Map<String, String> attribz, IncomingSMS incomingsms);
+	public USSDResponseWrapper getNextQuestionOrange(Map<String, String> attribz, IncomingSMS incomingsms);
 	
 	
 

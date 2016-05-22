@@ -51,6 +51,7 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
+import com.pixelandtag.mo.sms.USSDReceiver;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
@@ -216,7 +217,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					if(pl!=null && pl.getLocation()!=null){
 						locationName = pl.getLocation().getLocationName();
 						if(locationName==null || locationName.trim().isEmpty()){
-							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 							if(loc!=null)
 								locationName = loc.getLocationName();
 						}
@@ -372,7 +373,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					profile.setLocation(MESSAGE);
 					if((req.getCellid()!=null && !req.getCellid().isEmpty()) && (req.getLac()!=null && !req.getLac().isEmpty())){
 						try{
-							location_ejb.findOrCreateLocation(Long.valueOf(req.getCellid()), Long.valueOf(req.getLac()), MESSAGE, profile);
+							location_ejb.findOrCreateLocation(Long.valueOf(req.getCellid()), Long.valueOf(req.getLac()), MESSAGE, profile, true);
 						}catch(Exception exp){
 							logger.error(exp.getMessage(), exp);
 						}
@@ -524,7 +525,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 								resp = "Select your chat bundles.\n"+ resp+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, person.getOpco().getId());
 							}
 						}else{
-							resp = "Request received but we couldn't process your request. Do try again later.";
+							resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request received but we couldn't process your request. Do try again later.";
 						}
 						
 										
@@ -533,7 +534,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 			//throw new DatingServiceException("Something went Wrong. Kindly try again.",exp);
-			resp = "Could not process request. Kindly try again later";
+			resp = USSDReceiver.SESSION_TERMINATION_TAG+"Could not process request. Kindly try again later";
 			
 		}
 		
@@ -1800,7 +1801,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					if(pl!=null && pl.getLocation()!=null){
 						locationName = pl.getLocation().getLocationName();
 						if(locationName==null || locationName.trim().isEmpty()){
-							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 							if(loc!=null)
 								locationName = loc.getLocationName();
 						}

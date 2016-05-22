@@ -52,7 +52,8 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 @Remote
 public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
-	private static final Object BR_NEW_LINE = "<br/>";
+	private static final String BR_NEW_LINE = "<br/>";
+	private static final String RETURN_CARRIAGE = "\n";
 
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
@@ -83,11 +84,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
         }
     };
     
-    @Override
-    public String getNextQuestionOrange(Map<String,String> attribz, IncomingSMS incomingsms){
+    @Override 
+    public USSDResponseWrapper getNextQuestionOrange(Map<String,String> attribz, IncomingSMS incomingsms){
     	
     	String xml = "";
-    	
+    	USSDResponseWrapper resp = new USSDResponseWrapper();
     	Element rootelement = new Element("pages");
     	Document doc = new Document(rootelement); 
 		DocType doctype = new DocType("pages");
@@ -98,7 +99,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		
 		Element page = new Element("page");
 		final StringBuffer sb = new StringBuffer();
-		
+		final StringBuffer loggingSB = new StringBuffer();
     	
     	try{
     		if(incomingsms.getMsisdn()==null || incomingsms.getMsisdn().isEmpty())
@@ -157,12 +158,21 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					sb.append(BR_NEW_LINE);
 					sb.append("<a href=\""+baseurl+"?answers=2\">No</a>");
 					
+					
+					loggingSB.append(question.getQuestion());
+					loggingSB.append(RETURN_CARRIAGE);
+					loggingSB.append("Yes");
+					loggingSB.append(RETURN_CARRIAGE);
+					loggingSB.append("No");
+					
 					page.setText(sb.toString());
 					rootelement.addContent(page);
 					sb.setLength(0);
 					xml = xmlOutput.outputString(doc);
 					
-					return xml;
+					resp.setLoggableMessage(loggingSB.toString());
+					resp.setResponseMessage(xml);
+					return resp;
 					
 				}
 				
@@ -198,6 +208,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							person.setAgreed_to_tnc(Boolean.TRUE);
 						}else if((keywordIsNumber && agreed==1 ) || (answers!=null && (answers.trim().equalsIgnoreCase("A") || answers.trim().equalsIgnoreCase("N") || answers.trim().equalsIgnoreCase("NO")))){
 							sb.append("Ok. Bye");
+							loggingSB.append(sb.toString());
 						}else{
 							String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
 							msg += "1. Agreed\n2.Disagreed"; 
@@ -206,6 +217,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
 							sb.append("<prompt>"+msg+"</prompt>");
 							sb.append("</entry></form>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append(msg);
 						}
 					}
 					
@@ -227,11 +241,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							}else{
 								msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
 							}
+							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers);
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers)+"</prompt>");
+							sb.append("<prompt>"+msg+"</prompt>");
 							sb.append("</entry></form>");
+							
+							loggingSB.append(msg);
 						}
 					}
 					
@@ -250,11 +267,16 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							}catch(DatingServiceException dse){
 								logger.error(dse.getMessage(), dse);
 							}
+							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("<prompt>"+msg+"</prompt>");
 							sb.append("</entry></form>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append(msg);
+						
 							
 						}
 						
@@ -272,6 +294,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
 							sb.append(msg);
+							loggingSB.append(msg);
 						}
 						
 						if(age.compareTo(new BigDecimal(100l))>=0){
@@ -279,11 +302,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
 							sb.append(msg);
+							loggingSB.append(msg);
 						}
 						
 						if(age.compareTo(new BigDecimal(18l))<0){
 							String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
-							sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
+							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+							sb.append(msg);
+							loggingSB.append(msg);
 							page.setAttribute( "nav", "end");
 						}
 						
@@ -304,8 +330,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						}
 						if(answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number)){
 							String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
-							sb.append(msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername()));
-							
+							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
+							sb.append(msg);
+							loggingSB.append(msg);
 						}else{
 							profile.setLocation(answers);
 							
@@ -341,6 +368,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						sb.append(question);
 						sb.append(BR_NEW_LINE);
 						
+						loggingSB.append(question);
+						loggingSB.append(RETURN_CARRIAGE);
+						
 						if(attrib==ProfileAttribute.DISCLAIMER){
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
@@ -348,43 +378,58 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append("<prompt>"+question+"</prompt>");
 							sb.append("</entry></form>");
 							
-							/*sb.append("<a href=\""+baseurl+"&answers=1\">No</a>");
-							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=2\">Yes</a>");*/
+							loggingSB.setLength(0);
+							loggingSB.append(question);
+							
 						}
 						
 						if(attrib==ProfileAttribute.CHAT_USERNAME){//Form
+							question = question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("<prompt>"+question+"</prompt>");
 							sb.append("</entry></form>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append(question);
+							
 						}
 						
 						if(attrib==ProfileAttribute.GENDER){
+							question = question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("<prompt>"+question+"</prompt>");
 							sb.append("</entry></form>");
-							/*sb.append("<a href=\""+baseurl+"&answers=1\">1. Female</a>");
-							sb.append(BR_NEW_LINE);
-							sb.append("<a href=\""+baseurl+"&answers=2\">2. Male</a>");*/
+							
+							loggingSB.setLength(0);
+							loggingSB.append(question);
+						
 						}
 						if(attrib==ProfileAttribute.AGE){
+							question = question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("<prompt>"+question+"</prompt>");
 							sb.append("</entry></form>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append(question);
 						}
 						if(attrib==ProfileAttribute.LOCATION){
+							question = question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							baseurl = baseurl+"&finalquestion=true";
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
-							sb.append("<prompt>"+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							sb.append("<prompt>"+question+"</prompt>");
 							sb.append("</entry></form>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append(question);
 						}
 						
 						QuestionLog ql = new QuestionLog();
@@ -408,10 +453,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								|| 
 								(action!=null && action.equalsIgnoreCase("PURCHASE_CHAT_BUNDLES"))){
 							
-							sb.setLength(0);
 							baseurl = baseurl+"?bundlepurchase=true";
 							
-							
+							sb.setLength(0);
 							sb.append("Select chat bundle");
 							sb.append(BR_NEW_LINE);
 							sb.append("<a href=\""+baseurl+"&answers=1&menuid=148&serviceid=439&doubleconfirm=true\">5/- per day</a>");
@@ -420,10 +464,22 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append(BR_NEW_LINE);
 							sb.append("<a href=\""+baseurl+"&answers=3&menuid=150&serviceid=441&doubleconfirm=true\">30/- per month</a>");
 							
-							//+question.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername())+"</prompt>");
+							
+							
+							loggingSB.setLength(0);
+							loggingSB.append("Select chat bundle");
+							loggingSB.append(RETURN_CARRIAGE);
+							loggingSB.append("1. 5/- per day");
+							loggingSB.append(RETURN_CARRIAGE);
+							loggingSB.append("2. 15/- per week");
+							loggingSB.append(RETURN_CARRIAGE);
+							loggingSB.append("3. 30/- per month");
+							
+							
+							
+							
 						}else if(doubleconfirm!=null && doubleconfirm.equalsIgnoreCase("true")){
 							
-							sb.setLength(0);
 							baseurl = baseurl+"?bundlepurchase=true";
 							String bundle = "";
 							if(serviceid!=null && serviceid.equals("439")){
@@ -435,12 +491,24 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							if(serviceid!=null && serviceid.equals("440")){
 								bundle="30/- monthly chat bundle."; // 60 cts per sms
 							}
+							sb.setLength(0);
 							sb.append("Please confirm purchase of the ");
 							sb.append(bundle);
 							sb.append(BR_NEW_LINE);
 							sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Accept</a>");
 							sb.append(BR_NEW_LINE);
 							sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Decline</a>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append("Please confirm purchase of the ");
+							loggingSB.append(bundle);
+							loggingSB.append(RETURN_CARRIAGE);
+							loggingSB.append("1. Accept");
+							loggingSB.append(RETURN_CARRIAGE);
+							loggingSB.append("2. Decline");
+							
+							
+							
 							
 						}else if(waitingdoubleconfirm!=null && waitingdoubleconfirm.equalsIgnoreCase("true")){
 							
@@ -459,12 +527,17 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								try{
 									
 									mimicMO(serviceid,incomingsms);
-									
+									sb.setLength(0);
 									sb.append("Request to purchase the ");
 									sb.append(bundle);
 									sb.append(" has been received and will be processed shortly. You'll receive a confirmation SMS.");
 									sb.append(BR_NEW_LINE);
 									page.setAttribute( "nav", "end");
+									
+									
+									loggingSB.setLength(0);
+									loggingSB.append(sb.toString());
+									
 								}catch(Exception exp){
 									logger.error(exp.getMessage(),exp);
 									throw exp;
@@ -477,12 +550,14 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								sb.append("Thanks \"");
 								sb.append(profile.getUsername());
 								sb.append("\". Please note that off-bundles chatting is charged 1/- per SMS.");
-								sb.append(BR_NEW_LINE);
+								
+								loggingSB.setLength(0);
+								loggingSB.append(sb.toString());
+								
 								page.setAttribute( "nav", "end");
 								
 							}else{//Invalid input, ask the question again..
 								
-								sb.setLength(0);
 								baseurl = baseurl+"?bundlepurchase=true";
 								String bundle = "";
 								if(serviceid!=null && serviceid.equals("439")){
@@ -494,6 +569,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								if(serviceid!=null && serviceid.equals("440")){
 									bundle="30/- monthly chat bundle."; // 60 cts per sms
 								}
+								
+								sb.setLength(0);
 								sb.append("Invalid input.");
 								sb.append(BR_NEW_LINE);
 								sb.append("Please confirm purchase of the ");
@@ -502,6 +579,19 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								sb.append("<a href=\""+baseurl+"&answers=1&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Accept</a>");
 								sb.append(BR_NEW_LINE);
 								sb.append("<a href=\""+baseurl+"&answers=2&menuid="+menuid+"&serviceid="+serviceid+"&waitingdoubleconfirm=true\">Decline</a>");
+								
+								
+								
+								
+								loggingSB.setLength(0);
+								loggingSB.append("Invalid input.");
+								loggingSB.append(RETURN_CARRIAGE);
+								loggingSB.append("Please confirm purchase of the ");
+								loggingSB.append(bundle);
+								loggingSB.append(RETURN_CARRIAGE);
+								loggingSB.append("1. Accept");
+								loggingSB.append(RETURN_CARRIAGE);
+								loggingSB.append("2. Decline");
 								
 								
 							}
@@ -519,6 +609,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 									Message msg = messageEJB.getMessage(DatingMessages.FIND_FRND_RESPONSE.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId());
 									sb.append(msg.getMessage());
 									sb.append(BR_NEW_LINE);
+									
+									loggingSB.append(sb.toString());
+									
 									page.setAttribute( "nav", "end");
 									
 									
@@ -529,6 +622,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 									Message msg = messageEJB.getMessage(DatingMessages.LOGIN_RESPONSE_MSG.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId());
 									sb.append(msg.getMessage());
 									sb.append(BR_NEW_LINE);
+									
+									loggingSB.append(sb.toString());
+									
 									page.setAttribute( "nav", "end");
 									
 								}else if(action!=null && action.equals("LOGOUT")){
@@ -538,23 +634,47 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 									Message msg = messageEJB.getMessage(DatingMessages.LOGOUT_RESPONSE_MSG.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId());
 									sb.append(msg.getMessage());
 									sb.append(BR_NEW_LINE);
+									
+									loggingSB.append(sb.toString());
+									
 									page.setAttribute( "nav", "end");
 									
 									
 								}else{
 								
 									sb.setLength(0);
+									loggingSB.setLength(0);
+									
 									String msg = messageEJB.getMessage(DatingMessages.PURCHASE_CHAT_BUNDLE.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
+									
 									sb.append("<a href=\""+baseurl+"?existingsub=true&action=PURCHASE_CHAT_BUNDLES&doubleconfirm=true\">"+msg+"</a>");
 									sb.append(BR_NEW_LINE);
+									
+									loggingSB.append("1. "+msg);
+									loggingSB.append(RETURN_CARRIAGE);
+									
 									msg = messageEJB.getMessage(DatingMessages.FIND_FRIEND_NEAR.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
 									sb.append("<a href=\""+baseurl+"?existingsub=true&action=FIND_FRIEND&menuid=152&serviceid=442\">"+msg+"</a>");
 									sb.append(BR_NEW_LINE);
+									
+									loggingSB.append("2. "+msg);
+									loggingSB.append(RETURN_CARRIAGE);
+									
+									
 									msg = messageEJB.getMessage(DatingMessages.LOGIN.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
+									
 									sb.append("<a href=\""+baseurl+"?existingsub=true&action=LOGIN&menuid=153&serviceid=447\">"+msg+"</a>");
 									sb.append(BR_NEW_LINE);
+									
+									loggingSB.append("3. "+msg);
+									loggingSB.append(RETURN_CARRIAGE);
+									
+									
 									msg = messageEJB.getMessage(DatingMessages.LOGOUT.name(), Long.valueOf(profile.getLanguage_id()), incomingsms.getOpco().getId()).getMessage();
 									sb.append("<a href=\""+baseurl+"?existingsub=true&action=LOGOUT&menuid=154&serviceid=448\">"+msg+"</a>");
+									
+									loggingSB.append("4. "+msg);
+									loggingSB.append(RETURN_CARRIAGE);
 									
 								}
 								
@@ -566,18 +686,26 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								sb.append("\". You can purchase bundles.");
 								sb.append(BR_NEW_LINE);
 								page.setAttribute( "nav", "end");
+								
+								
+								loggingSB.setLength(0);
+								loggingSB.append(sb.toString());
 							}
 						}
 						
 						
 					}
 				}
+				
 				page.setText(sb.toString());
 				rootelement.addContent(page);
 				sb.setLength(0);
 				xml = xmlOutput.outputString(doc);
 				
-				return xml;
+				resp.setLoggableMessage(loggingSB.toString());
+				resp.setResponseMessage(xml);
+				
+				return resp;
     	}catch(Exception exp){
     		sb.append("Looks like this is not a genuine GSM call. Use a handset to dial *329# to access the menu or mimic a call from the operator by setting the required header parameters.");
     		page.setAttribute( "nav", "end");
@@ -588,7 +716,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			
 			logger.error(exp.getMessage(), exp);
 			sb.setLength(0);
-    		return xml;
+			
+			resp.setLoggableMessage(sb.toString());
+			resp.setResponseMessage(xml);
+    		return resp;
     	}
 	}
     

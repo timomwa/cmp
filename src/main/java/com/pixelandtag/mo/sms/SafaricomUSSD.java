@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -14,6 +15,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -26,9 +28,25 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
+import com.pixelandtag.api.BillingStatus;
+import com.pixelandtag.api.MessageStatus;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.DatingServiceI;
+import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
+import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
+import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.MessageLog;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
+import com.pixelandtag.subscription.dto.MediumType;
 
 /**
  * Servlet implementation class SafaricomUSSD
@@ -40,6 +58,37 @@ import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 				"/safUSSD"
 		})
 public class SafaricomUSSD extends HttpServlet {
+	
+	
+	@EJB
+	private CMPResourceBeanRemote cmpBean;
+	
+	@EJB
+	private DatingServiceI datingBean;
+	
+	@EJB
+	private LocationBeanI locationBean;
+	
+	@EJB
+	private ProcessorResolverEJBI processorEJB;
+	
+	@EJB
+	private OpcoEJBI opcoEJB;
+
+	@EJB
+	private ConfigsEJBI configsEJB;
+	
+	@EJB
+	private TimezoneConverterI timezoneEJB;
+	
+	@EJB
+	private QueueProcessorEJBI queueprocEJB;
+	
+	@EJB
+	private DNDListEJBI dndEJB;
+	
+	@EJB
+	private USSDMenuEJBI ussdmenuEJB;
 	
 	private Logger logger = Logger.getLogger(SafaricomUSSD.class);
     /**
@@ -144,7 +193,7 @@ public class SafaricomUSSD extends HttpServlet {
 			sb.append("\t\tMSISDN = ").append(MSISDN).append("\n");
 			
 			GenericHTTPParam param = new GenericHTTPParam();
-			param.setUrl("http://139.162.223.21/ussd.php");
+			param.setUrl("http://139.162.223.21/ussd.php");//TODO externalize
 			
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 			qparams.add(new BasicNameValuePair("USSD_STRING", USSD_STRING));
@@ -160,6 +209,39 @@ public class SafaricomUSSD extends HttpServlet {
 			try{
 				
 				
+				String cmp_tx_id = cmpBean.generateNextTxId();
+				IncomingSMS incomingsms = new IncomingSMS();
+				incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+				incomingsms.setCmp_tx_id(cmp_tx_id);
+				incomingsms.setIsSubscription(Boolean.FALSE);
+				incomingsms.setMediumType(MediumType.ussd);
+				incomingsms.setSms(  USSD_STRING );
+				incomingsms.setShortcode(SERVICE_CODE);
+				incomingsms.setProcessed(Boolean.TRUE);
+				incomingsms.setMo_ack(Boolean.TRUE);
+				incomingsms.setMsisdn(MSISDN);
+				MOProcessor processor = processorEJB.getMOProcessor( SERVICE_CODE );
+				incomingsms.setMoprocessor(processor);
+				incomingsms.setOpco(opcoEJB.findOpcoByCode("KEN-639-02"));
+				incomingsms.setPrice(BigDecimal.ZERO);
+				
+				logger.info(" >> processor = "+processor);
+				
+				dndEJB.removeFromDNDList(incomingsms.getMsisdn());
+				datingBean.logMO(incomingsms).getId();
+				
+				
+				MessageLog messagelog = new MessageLog();
+				messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
+				messagelog.setMo_processor_id_fk(incomingsms.getMoprocessor().getId());
+				messagelog.setMsisdn(incomingsms.getMsisdn());
+				messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());
+				messagelog.setShortcode(incomingsms.getShortcode());
+				messagelog.setSource(incomingsms.getMediumType().name());
+				messagelog.setStatus(MessageStatus.RECEIVED.name());
+				messagelog.setMo_sms( USSD_STRING );
+				messagelog = processorEJB.saveMessageLog(messagelog);
+				
 				watch.start();
 				final GenericHttpResp resp = httpclient.call(param);
 				final int RESP_CODE = resp.getResp_code();
@@ -170,15 +252,20 @@ public class SafaricomUSSD extends HttpServlet {
 				
 				logger.info(" RESP CODE "+RESP_CODE);
 				logger.info(" message "+message);
+				String respStr = message;
 				if(RESP_CODE==HttpStatus.SC_OK){
-					pw.write(message);
+					respStr = message;
 				}else if(RESP_CODE==HttpStatus.SC_CREATED || RESP_CODE==HttpStatus.SC_NO_CONTENT){
-					pw.write("END Request received. Thank you.");
+					respStr = "END Request received. Thank you.";
 				}else if(RESP_CODE==HttpStatus.SC_INTERNAL_SERVER_ERROR){
-					pw.write("END Problem occurred. Kindly try again later.");
+					respStr = "END Problem occurred. Kindly try again later.";
 				}else if(RESP_CODE ==HttpStatus.SC_NOT_FOUND){
-					pw.write("END Problem occurred. Service currently unavailable.");
+					respStr = "END Problem occurred. Service currently unavailable.";
 				}
+				
+				pw.write(respStr);
+				messagelog.setMt_sms(respStr);
+				messagelog = processorEJB.saveMessageLog(messagelog);
 				//httpclient.finalizeMe(); confirm whether we should do this
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);

@@ -16,10 +16,11 @@ public interface LocationBeanI extends BaseEntityI {
 	 * @param locationId -  java.lang.Long - operator provided location id
 	 * @param locationName - java.lang.String - location name as provided by the subscriber
 	 * @param profile - com.pixelandtag.dating.entities.PersonDatingProfile 
+	 * @param authoritative - whether it's authoritative or not
 	 * @return ProfileLocation
 	 * @throws Exception
 	 */
-	public ProfileLocation findOrCreateLocation(Long cellid, Long locationId, String locationName,PersonDatingProfile profile) throws Exception;
+	public ProfileLocation findOrCreateLocation(Long cellid, Long locationId, String locationName,PersonDatingProfile profile, boolean authoritative) throws Exception;
 
 	/**
 	 * Finds Location using the cellid
@@ -30,8 +31,7 @@ public interface LocationBeanI extends BaseEntityI {
 	 * @return
 	 * @throws Exception
 	 */
-	public Location findLocation(Long cellid, Long locationId,
-			String locationName) throws Exception;
+	public Location findLocation(Long cellid, Long locationId) throws Exception;
 	
 	/**
 	 * Gets the profile's location object
@@ -72,9 +72,10 @@ public interface LocationBeanI extends BaseEntityI {
 	/**
 	 * 
 	 * @param locationId
+	 * @param cellid
 	 * @return
 	 */
-	public Location getLastKnownLocationWithNameUsingLac(Long locationId) ;
+	public Location getLastKnownLocationWithNameUsingLac(Long locationId, Long cellid) ;
 
 	/**
 	 * 

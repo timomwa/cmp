@@ -38,6 +38,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
+import com.pixelandtag.cmp.ejb.api.ussd.USSDResponseWrapper;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -190,6 +191,7 @@ public class OrangeUSSD extends HttpServlet {
 			
 			String answers = req.getParameter("answers") ;
 			String attrib = req.getParameter("attrib") ;
+			String action = req.getParameter("action") ;
 			
 			String msisdn = req.getHeader("user-msisdn");
 			String imsi = req.getHeader("user-imsi");
@@ -206,7 +208,7 @@ public class OrangeUSSD extends HttpServlet {
 			incomingsms.setCmp_tx_id(cmp_tx_id);
 			incomingsms.setIsSubscription(Boolean.FALSE);
 			incomingsms.setMediumType(MediumType.ussd);
-			incomingsms.setSms(answers);
+			incomingsms.setSms(  (answers!=null ? answers  : action) );
 			incomingsms.setShortcode(SHORTCODE);
 			incomingsms.setProcessed(Boolean.TRUE);
 			incomingsms.setMo_ack(Boolean.TRUE);
@@ -229,25 +231,22 @@ public class OrangeUSSD extends HttpServlet {
 			messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
 			messagelog.setMo_processor_id_fk(incomingsms.getMoprocessor().getId());
 			messagelog.setMsisdn(incomingsms.getMsisdn());
-			messagelog.setMt_sms(incomingsms.getSms());
 			messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());
 			messagelog.setShortcode(incomingsms.getShortcode());
 			messagelog.setSource(incomingsms.getMediumType().name());
 			messagelog.setStatus(MessageStatus.RECEIVED.name());
-			messagelog.setMo_sms( answers );
+			messagelog.setMo_sms( (answers!=null ? answers  : action) );
 			messagelog = processorEJB.saveMessageLog(messagelog);
 			
 			
-			//Person person = datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
-			//PersonDatingProfile profile = datingBean.getProfile(person);
+			 USSDResponseWrapper wrapper =  ussdmenuEJB.getNextQuestionOrange(attribz,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7"));
+			 response = wrapper.getResponseMessage();
 			
-			//if(person==null || profile==null || !profile.getProfileComplete()){
-			response =  ussdmenuEJB.getNextQuestionOrange(attribz,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7"));
-			/*}else{
-				response = ussdmenuEJB
-			}*/
-			
-			logger.info(">>> "+response);
+			 messagelog.setMt_sms(wrapper.getLoggableMessage());
+			 messagelog = processorEJB.saveMessageLog(messagelog);
+				
+			logger.info("\n>>> xml "+response);
+			logger.info("\n>>> loggable  "+wrapper.getLoggableMessage());
 			pw.write(response);
 			
 		}catch(Exception e){

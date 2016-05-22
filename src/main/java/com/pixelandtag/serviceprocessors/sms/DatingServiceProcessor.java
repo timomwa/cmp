@@ -210,7 +210,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				PersonDatingProfile match =  datingBean.searchMatch(profile);
 				
-				
 				if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
 					String msg = datingBean.getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, incomingsms.getOpco().getId());
 					outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
@@ -235,7 +234,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						if(pl!=null && pl.getLocation()!=null){
 							locationName = pl.getLocation().getLocationName();
 							if(locationName==null || locationName.trim().isEmpty()){
-								Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+								Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 								if(loc!=null)
 									locationName = loc.getLocationName();
 							}
@@ -685,7 +684,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 							if(pl!=null && pl.getLocation()!=null){
 								locationName = pl.getLocation().getLocationName();
 								if(locationName==null || locationName.trim().isEmpty()){
-									Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+									Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 									if(loc!=null)
 										locationName = loc.getLocationName();
 								}

@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
@@ -96,6 +97,10 @@ public class USSDReceiver extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 14512222156L;
+	public static final String SESSION_TERMINATION_TAG = "####ST";
+	private static final String FREEFLOW_BREAK = "FB";
+	private static final String FREEFLOW_CONTINUE = "FC";
+	private static final String FREEFLOW_HEADER = "Freeflow";
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -178,6 +183,13 @@ public class USSDReceiver extends HttpServlet {
 				response = cmpBean.processUSSD(ro);
 			}else{
 				response = handleGeneralQuery(req);
+			}
+			
+			if(response.trim().startsWith(SESSION_TERMINATION_TAG)){
+				response = response.replace(SESSION_TERMINATION_TAG, "");
+				resp.setHeader(FREEFLOW_HEADER, FREEFLOW_BREAK);
+			}else{
+				resp.setHeader(FREEFLOW_HEADER, FREEFLOW_CONTINUE);
 			}
 			
 			pw.write(response);
