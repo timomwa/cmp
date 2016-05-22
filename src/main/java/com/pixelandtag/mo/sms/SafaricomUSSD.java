@@ -193,8 +193,6 @@ public class SafaricomUSSD extends HttpServlet {
 			sb.append("\t\tMSISDN = ").append(MSISDN).append("\n");
 			
 			GenericHTTPParam param = new GenericHTTPParam();
-			param.setUrl("http://139.162.223.21/ussd.php");//TODO externalize
-			
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 			qparams.add(new BasicNameValuePair("USSD_STRING", USSD_STRING));
 			qparams.add(new BasicNameValuePair("SESSION_ID",SESSION_ID));	
@@ -241,7 +239,7 @@ public class SafaricomUSSD extends HttpServlet {
 				messagelog.setStatus(MessageStatus.RECEIVED.name());
 				messagelog.setMo_sms( USSD_STRING );
 				messagelog = processorEJB.saveMessageLog(messagelog);
-				
+				param.setUrl( processor.getForwarding_url() );
 				watch.start();
 				final GenericHttpResp resp = httpclient.call(param);
 				final int RESP_CODE = resp.getResp_code();
