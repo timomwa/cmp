@@ -800,12 +800,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 										//	+ "				OR "
 										//	+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
 										//	+ "				OR  "
-											+ "					pl.location.cellid=:cellid"
+											//+ "					pl.location.cellid=:cellid"
 											/*+(max_cell_id.longValue()>0 ? (  
 											 "				OR  "
 											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
 													) : "")*/
-											+ "				OR "
+									//		+ "				OR "
 											+ "				   lower(pl.location.locationName) = lower(:locationName)  "
 											+ "		   ) "
 											+ "   )  "
@@ -828,7 +828,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				
-				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
+				//qry.setParameter("cellid", profileLocation.getLocation().getCellid());
 				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
 				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
@@ -895,12 +895,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 										//	+ "				OR "
 										//	+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
 										//	+ "				OR  "
-											+ "					pl.location.cellid=:cellid"
+										//	+ "					pl.location.cellid=:cellid"
 											/*+(max_cell_id.longValue()>0 ? (  
 											 "				OR  "
 											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
 													) : "")*/
-											+ "				OR "
+											//+ "				OR "
 											+ "				   lower(pl.location.locationName) = lower(:locationName)  "
 											+ "		   ) "
 											+ "   )  "
@@ -923,7 +923,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				//qry.setParameter("opco", opco);
-				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
+				//qry.setParameter("cellid", profileLocation.getLocation().getCellid());
 				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
 				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
