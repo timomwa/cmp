@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
@@ -93,7 +94,11 @@ public class PlainHttpSender extends GenericSender {
 		
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),outgoingsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),outgoingsms.getMsisdn()));//"msisdn"
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
+		if(this.configuration.get(HTTP_REQUEST_PAYLOAD_CONTENTTYPE)!=null && this.configuration.get(HTTP_REQUEST_PAYLOAD_CONTENTTYPE).getValue().equalsIgnoreCase("json")){
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),StringEscapeUtils.escapeJavaScript(outgoingsms.getSms())));//"sms"
+		}else{
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
+		}
 		if(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME).getValue(),outgoingsms.getParlayx_serviceid()));//"parlayxserviceid"
 		try {
@@ -274,10 +279,11 @@ public class PlainHttpSender extends GenericSender {
 				}
 			}
 			for(NameValuePair valuep : qparams){
-				if(valuep.getValue()!=null)
+				if(valuep.getValue()!=null){
 					payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", Matcher.quoteReplacement( valuep.getValue()) );
-				else
+				}else{
 					logger.warn("Value for valuep.getName()-> '"+valuep.getName()+"' is valuep.getValue()-> '"+valuep.getValue()+"'");
+				}
 			}
 			
 			generic_http_parameters.setStringentity(payload_template);

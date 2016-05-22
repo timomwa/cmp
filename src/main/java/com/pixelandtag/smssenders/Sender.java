@@ -51,6 +51,7 @@ public interface Sender{
 	public final String HTTP_RESP_XML_RESP_MSG_KEY = "http_resp_xml_resp_msg_key";
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
 	public final String HTTP_ALLOW_SENDING_BLANK_TEXT = "http_allow_send_blank_text";
+	public final String HTTP_REQUEST_PAYLOAD_CONTENTTYPE = "http_payload_contenttype";
 	
 	public final String SMPP_ID = "smpp_id";
 	public final String ALT_SMPP_ID = "alt_smpp_id";

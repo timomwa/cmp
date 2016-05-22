@@ -198,6 +198,7 @@ public class USSDReceiver extends HttpServlet {
 			}
 			
 			if(response.trim().startsWith(SESSION_TERMINATION_TAG)){
+				
 				response = response.replace(SESSION_TERMINATION_TAG, "");
 				resp.setHeader(HEADER_FREEFLOW, HEADER_FREEFLOW_BREAK);
 				resp.setHeader(HEADER_CHARGE, NO);
