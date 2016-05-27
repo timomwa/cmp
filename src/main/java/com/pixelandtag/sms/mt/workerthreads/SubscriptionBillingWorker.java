@@ -225,7 +225,7 @@ public class SubscriptionBillingWorker implements Runnable {
 									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
 									final String resp = senderresp.getResponseMsg();
-									logger.info("\n\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::: Success ["+senderresp.getSuccess()+"] :PROXY_RESPONSE: "+resp);
+									logger.info("\n\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::: Success flag-> ["+senderresp.getSuccess()+"] :PROXY_RESPONSE: "+resp);
 									billable.setResp_status_code( senderresp.getRespcode() );
 									billable.setProcessed(1L);
 									
