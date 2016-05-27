@@ -225,7 +225,7 @@ public class SubscriptionBillingWorker implements Runnable {
 									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
 									final String resp = senderresp.getResponseMsg();
-									logger.info("\n\n\t\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::: Success ["+senderresp.getSuccess()+"] :PROXY_RESPONSE: "+resp);
+									logger.info("\n\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::: Success ["+senderresp.getSuccess()+"] :PROXY_RESPONSE: "+resp);
 									billable.setResp_status_code( senderresp.getRespcode() );
 									billable.setProcessed(1L);
 									
@@ -235,7 +235,7 @@ public class SubscriptionBillingWorker implements Runnable {
 										String debug = "capped\t\t ::"+capped;
 										debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
 										
-										logger.info("THROTTLING PARAMS :::::: "+debug);
+										logger.debug("THROTTLING PARAMS :::::: "+debug);
 										if(resp!=null)
 										if(capped){
 											if(SubscriptionRenewal.isAdaptive_throttling()){
