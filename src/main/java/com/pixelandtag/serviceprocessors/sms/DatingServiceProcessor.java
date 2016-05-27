@@ -429,8 +429,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				profile = datingBean.saveOrUpdate(profile);
 				
 				ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
-				logger.debug("QUESTION::: "+question.getQuestion());
-				outgoingsms.setSms(msg+ SPACE +question.getQuestion());
+				outgoingsms.setSms(msg+ SPACE +question.getQuestion()+GenericServiceProcessor.RETURN_CARRIAGE+datingBean.getMessage(DatingMessages.YES_NO_PROMPT, language_id, person.getOpco().getId()));
 				
 				QuestionLog ql = new QuestionLog();
 				
@@ -474,16 +473,16 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						keywordIsNumber = true;
 					}catch(Exception exp){}
 					
-					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES") || KEYWORD.trim().equalsIgnoreCase("YEP")
+					if( (keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES") || KEYWORD.trim().equalsIgnoreCase("YEP")
 							|| KEYWORD.trim().equalsIgnoreCase("NDIO") || KEYWORD.trim().equalsIgnoreCase("NDIYO")  || KEYWORD.trim().equalsIgnoreCase("SAWA") || KEYWORD.trim().equalsIgnoreCase("OK") )) ){
 						person.setAgreed_to_tnc(Boolean.TRUE);
 						person = datingBean.saveOrUpdate(person);
-					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
+					}else if((keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
 						outgoingsms.setSms("Ok. Bye");
 						return outgoingsms;
 					}else{
 						String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId());
-						outgoingsms.setSms(msg+SPACE+previousQuestion.getQuestion());
+						outgoingsms.setSms(msg+SPACE+previousQuestion.getQuestion()+GenericServiceProcessor.RETURN_CARRIAGE+datingBean.getMessage(DatingMessages.YES_NO_PROMPT, language_id, person.getOpco().getId()));
 						return outgoingsms;
 					}
 						

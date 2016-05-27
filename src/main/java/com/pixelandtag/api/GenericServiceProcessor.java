@@ -94,6 +94,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
 	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, price, subscription) " +
 						"VALUES(?,?,?,?,?)";
+	public static final String RETURN_CARRIAGE = "\n";
 	
 
 	protected String subscriptionText;

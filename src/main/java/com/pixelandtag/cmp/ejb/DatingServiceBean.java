@@ -271,14 +271,14 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						keywordIsNumber = true;
 					}catch(Exception exp){}
 					
-					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
+					if( (keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
 						person.setAgreed_to_tnc(true);
 						person = saveOrUpdate(person);
-					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
+					}else if((keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
 						resp = "Ok. Bye";
 						return resp;
 					}else{
-						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.SPACE +"Proceed?\n1. No\n2. Yes" ;
+						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.RETURN_CARRIAGE + messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(language_id), person.getOpco().getId());//"Proceed?\n1. Yes\n2. No" ;
 						return resp;
 					}
 						
@@ -572,8 +572,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				profile = saveOrUpdate(profile);
 				
 				ProfileQuestion question = getNextProfileQuestion(profile.getId());
-				logger.debug("QUESTION::: "+question.getQuestion());
-				resp =  GenericServiceProcessor.SPACE +question.getQuestion();
+				resp =  question.getQuestion()+GenericServiceProcessor.RETURN_CARRIAGE+getMessage(DatingMessages.YES_NO_PROMPT, language_id, person.getOpco().getId());
 				
 				QuestionLog ql = new QuestionLog();
 				

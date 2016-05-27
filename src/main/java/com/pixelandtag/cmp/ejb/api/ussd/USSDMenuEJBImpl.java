@@ -135,8 +135,6 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						profile = datingBean.saveOrUpdate(profile);
 					}
 					
-					
-					
 					ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
 					logger.debug("QUESTION::: "+question.getQuestion());
 					
@@ -202,11 +200,12 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								|| answers.trim().equalsIgnoreCase("NDIO") || answers.trim().equalsIgnoreCase("NDIYO")  || answers.trim().equalsIgnoreCase("SAWA") || answers.trim().equalsIgnoreCase("OK") )) ){
 							person.setAgreed_to_tnc(Boolean.TRUE);
 						}else if((keywordIsNumber && agreed==1 ) || (answers!=null && (answers.trim().equalsIgnoreCase("A") || answers.trim().equalsIgnoreCase("N") || answers.trim().equalsIgnoreCase("NO")))){
-							sb.append("Ok. Bye");
+							sb.append("Ok. Bye.");
 							loggingSB.append(sb.toString());
 						}else{
 							String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
-							msg += "1. Agreed\n2.Disagreed"; 
+							msg += SPACE+messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(languageid_), person.getOpco().getId());
+							
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
@@ -373,6 +372,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						loggingSB.append(RETURN_CARRIAGE);
 						
 						if(attrib==ProfileAttribute.DISCLAIMER){
+							question = question+SPACE+messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), languageid, person.getOpco().getId());
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");

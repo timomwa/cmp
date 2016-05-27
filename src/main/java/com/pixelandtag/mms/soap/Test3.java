@@ -18,7 +18,11 @@ public class Test3 {
 	private static Map<Long, String> sms_serviceCache = new HashMap<Long, String>();
 	public static void main(String[] args) throws JSONException {
 		
-		System.out.println("<sms7:notifySmsDeliveryReceipt></sms7:notifySmsDeliveryReceipt>".contains("<sms7:notifySmsDeliveryReceipt>"));
+		String key = "HELLO";
+		Long language_id = null;//1l;
+		Long opcoid = 765302l;
+		String op = String.format("%s%d%s", key,language_id,opcoid);
+		System.out.println(op);
 	}
 
 }
