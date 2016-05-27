@@ -35,8 +35,8 @@ public class MessageEJBImpl implements MessageEJBI {
 
 	private Logger logger = Logger.getLogger(getClass());
 	
-	@PersistenceContext(unitName = "EjbComponentPU4")
-	private EntityManager em;
+	//@PersistenceContext(unitName = "EjbComponentPU4")
+	//private EntityManager em;
 	
 	
 	@Inject
