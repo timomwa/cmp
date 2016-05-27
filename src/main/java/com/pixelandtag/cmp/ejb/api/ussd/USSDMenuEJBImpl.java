@@ -328,7 +328,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							}
 						}catch(java.lang.NumberFormatException nfe){
 						}
-						if(answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number)){
+						if(answers==null || answers.isEmpty() || (answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number))){
 							String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							sb.append(msg);
