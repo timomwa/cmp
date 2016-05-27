@@ -54,6 +54,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	private static final String BR_NEW_LINE = "<br/>";
 	private static final String RETURN_CARRIAGE = "\n";
+	private static final String PROBLEM_OCCURRED = "Sorry, a problem occurred. This has been noted and will be fixed as soon as possible.";
 
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
@@ -103,7 +104,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     	
     	try{
     		if(incomingsms.getMsisdn()==null || incomingsms.getMsisdn().isEmpty())
-    			throw new Exception("Looks like this is not a genuine GSM call.");
+    			throw new OrangeUSSDException("Looks like this is not a genuine GSM call.");
     		
 		    	String baseurl = attribz.get("contextpath");
 				String finalquestion = attribz.get("finalquestion");
@@ -356,7 +357,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 				}
 				
-				logger.info(">>>>>>>>>>> "+sb.toString());
+				//logger.info(">>>>>>>>>>> "+sb.toString());
 				if(sb.toString()==null || sb.toString().isEmpty()){// we move to the next question
 				
 					ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
@@ -714,19 +715,25 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				resp.setResponseMessage(xml);
 				
 				return resp;
-    	}catch(Exception exp){
+    	}catch(OrangeUSSDException exp){
     		sb.append("Looks like this is not a genuine GSM call. Use a handset to dial *329# to access the menu or mimic a call from the operator by setting the required header parameters.");
     		page.setAttribute( "nav", "end");
     		page.setText(sb.toString());
 			rootelement.addContent(page);
 			xml = xmlOutput.outputString(doc);
-			logger.info("\n\nXML_RESPONSE >>>>>> "+xml+"\n\n");
 			
 			logger.error(exp.getMessage(), exp);
 			sb.setLength(0);
 			
 			resp.setLoggableMessage(sb.toString());
 			resp.setResponseMessage(xml);
+    		return resp;
+    	}catch(Exception exp){
+    		
+    		logger.error(exp.getMessage(), exp);
+			resp.setResponseMessage(PROBLEM_OCCURRED);
+    		resp.setLoggableMessage(PROBLEM_OCCURRED);
+    		
     		return resp;
     	}
 	}
