@@ -109,6 +109,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				String finalquestion = attribz.get("finalquestion");
 				String bundlepurchase = attribz.get("bundlepurchase");
 				String answers = attribz.get("answers");
+				if(answers!=null && !answers.isEmpty())
+					answers = answers.trim();
 				int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
 				String attrib_ =  attribz.get("attrib") ;
 				int questionid_ = OrangeUSSD.setdefaultifnull( attribz.get("questionid") );
@@ -257,7 +259,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("M") ||  answers.equalsIgnoreCase("MALE") ||  answers.equalsIgnoreCase("MAN") ||  answers.equalsIgnoreCase("BOY") ||  answers.equalsIgnoreCase("MUME") ||  answers.equalsIgnoreCase("MWANAMME")  ||  answers.equalsIgnoreCase("MWANAUME"))){ 
 							profile.setGender(Gender.MALE);
 							profile.setPreferred_gender(Gender.FEMALE);
-						}else if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("F") ||  answers.equalsIgnoreCase("FEMALE") ||  answers.equalsIgnoreCase("LADY") ||  answers.equalsIgnoreCase("GIRL") ||  answers.equalsIgnoreCase("MKE") ||  answers.equalsIgnoreCase("MWANAMKE")  ||  answers.equalsIgnoreCase("MWANAMUKE"))){ 
+						}else if(answers!=null && (answers.equalsIgnoreCase("1") || answers.equalsIgnoreCase("F") ||  answers.equalsIgnoreCase("FEMALE") ||  answers.equalsIgnoreCase("LADY") ||  answers.equalsIgnoreCase("GIRL") ||  answers.equalsIgnoreCase("MKE") ||  answers.equalsIgnoreCase("MWANAMKE")  ||  answers.equalsIgnoreCase("MWANAMUKE"))){ 
 							profile.setGender(Gender.FEMALE);
 							profile.setPreferred_gender(Gender.MALE);
 						}else{
@@ -288,16 +290,19 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						BigDecimal age = BigDecimal.ONE;
 						try{
 							if(answers!=null)
-							age = new BigDecimal(answers);
+								age = new BigDecimal(answers);
+							else
+								age = null;
 						}catch(java.lang.NumberFormatException nfe){
 							String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
 							sb.append(msg);
 							loggingSB.append(msg);
+							age = null;
 						}
 						
-						if(age.compareTo(new BigDecimal(100l))>=0){
+						if(age!=null && age.compareTo(new BigDecimal(100l))>=0){
 							String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
@@ -305,7 +310,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							loggingSB.append(msg);
 						}
 						
-						if(age.compareTo(new BigDecimal(18l))<0){
+						if(age!=null && age.compareTo(new BigDecimal(18l))<0){
 							String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							sb.append(msg);
@@ -488,7 +493,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							if(serviceid!=null && serviceid.equals("440")){
 								bundle="15/- weekly chat bundle."; // 50 cts per sms
 							}
-							if(serviceid!=null && serviceid.equals("440")){
+							if(serviceid!=null && serviceid.equals("441")){
 								bundle="30/- monthly chat bundle."; // 60 cts per sms
 							}
 							sb.setLength(0);
@@ -521,7 +526,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								if(serviceid!=null && serviceid.equals("440")){
 									bundle="15/- weekly chat bundle."; // 50 cts per sms
 								}
-								if(serviceid!=null && serviceid.equals("440")){
+								if(serviceid!=null && serviceid.equals("441")){
 									bundle="30/- monthly chat bundle."; // 60 cts per sms
 								}
 								try{
@@ -536,7 +541,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 									
 									
 									loggingSB.setLength(0);
-									loggingSB.append(sb.toString());
+									loggingSB.append("Request to purchase the ");
+									loggingSB.append(bundle);
+									loggingSB.append(" has been received and will be processed shortly. You'll receive a confirmation SMS.");
+									
 									
 								}catch(Exception exp){
 									logger.error(exp.getMessage(),exp);
@@ -566,7 +574,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								if(serviceid!=null && serviceid.equals("440")){
 									bundle="15/- weekly chat bundle."; // 50 cts per sms
 								}
-								if(serviceid!=null && serviceid.equals("440")){
+								if(serviceid!=null && serviceid.equals("441")){
 									bundle="30/- monthly chat bundle."; // 60 cts per sms
 								}
 								
@@ -900,11 +908,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					resp = "Request received and is being processed.";
 				}
 				
-				sb.append(resp+"<br/>");
+				sb.append(resp);
 				
 			}
 			
-			page.setText(sb.toString());
+			page.setText(sb.toString()+"<br/>");
 			sb.setLength(0);
 			rootelement.addContent(page);
 			xml = xmlOutput.outputString(doc);

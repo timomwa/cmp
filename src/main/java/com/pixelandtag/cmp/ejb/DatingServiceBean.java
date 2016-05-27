@@ -1291,6 +1291,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return age;
 	}
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException{
+		if(age==null)
+			return null;
 		Date date = null;
 		try{
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");

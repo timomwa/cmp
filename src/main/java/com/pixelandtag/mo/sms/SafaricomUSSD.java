@@ -11,6 +11,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +36,7 @@ import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
@@ -89,6 +91,9 @@ public class SafaricomUSSD extends HttpServlet {
 	
 	@EJB
 	private USSDMenuEJBI ussdmenuEJB;
+	
+	@EJB
+	private OpcoSMSServiceEJBI opcosmsserviceEJB;
 	
 	private Logger logger = Logger.getLogger(SafaricomUSSD.class);
     /**
@@ -236,7 +241,7 @@ public class SafaricomUSSD extends HttpServlet {
 				messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());
 				messagelog.setShortcode(incomingsms.getShortcode());
 				messagelog.setSource(incomingsms.getMediumType().name());
-				messagelog.setStatus(MessageStatus.RECEIVED.name());
+				messagelog.setStatus(MessageStatus.SENT_SUCCESSFULLY.name());
 				messagelog.setMo_sms( USSD_STRING );
 				messagelog = processorEJB.saveMessageLog(messagelog);
 				param.setUrl( processor.getForwarding_url() );
@@ -262,6 +267,7 @@ public class SafaricomUSSD extends HttpServlet {
 				}
 				
 				pw.write(respStr);
+				messagelog.setMt_timestamp(new Date());
 				messagelog.setMt_sms(respStr);
 				messagelog = processorEJB.saveMessageLog(messagelog);
 				//httpclient.finalizeMe(); confirm whether we should do this

@@ -285,8 +285,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
-						outgoingsms.setSms(null);//set nul so that we don't send it out..
-						outgoingsms.setPrice(BigDecimal.ZERO);
+						//outgoingsms.setSms(outgoingsms.getSms());//set nul so that we don't send it out..
+						//outgoingsms.setPrice(BigDecimal.ZERO);
 					}
 					
 				}else{
