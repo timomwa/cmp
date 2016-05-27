@@ -716,6 +716,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				
 				return resp;
     	}catch(OrangeUSSDException exp){
+    		exp.printStackTrace();
     		sb.append("Looks like this is not a genuine GSM call. Use a handset to dial *329# to access the menu or mimic a call from the operator by setting the required header parameters.");
     		page.setAttribute( "nav", "end");
     		page.setText(sb.toString());
@@ -729,7 +730,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 			resp.setResponseMessage(xml);
     		return resp;
     	}catch(Exception exp){
-    		
+    		exp.printStackTrace();
     		logger.error(exp.getMessage(), exp);
 			resp.setResponseMessage(PROBLEM_OCCURRED);
     		resp.setLoggableMessage(PROBLEM_OCCURRED);

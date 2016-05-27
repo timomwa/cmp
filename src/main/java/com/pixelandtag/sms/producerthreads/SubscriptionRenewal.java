@@ -42,7 +42,7 @@ public class SubscriptionRenewal extends  Thread {
 	private int mandatory_throttle = 60112;
 	private int workers = 1;
 	private int tps = 5;
-	private int billables_per_batch = 1000;
+	private int billables_per_batch = 300000;
 	private Properties mtsenderprop;
 	private int idleWorkers;
 	public static int max_throttle_billing = 60000;

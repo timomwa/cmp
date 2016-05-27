@@ -225,25 +225,26 @@ public class SubscriptionBillingWorker implements Runnable {
 									logger.info(getName()+" BILLING TIME   "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 									watch.reset();
 									final String resp = senderresp.getResponseMsg();
-									logger.info("\n\n\t\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::::PROXY_RESPONSE: "+resp);
+									logger.info("\n\n\t\t::::::BILLING::::RESP_CODE=["+senderresp.getRespcode()+"]:::: Success ["+senderresp.getSuccess()+"] :PROXY_RESPONSE: "+resp);
 									billable.setResp_status_code( senderresp.getRespcode() );
 									billable.setProcessed(1L);
 									
 									if (senderresp.getSuccess()) {
-										boolean capped= resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase());
+										boolean capped = resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase()) ||
+												resp.toUpperCase().contains("Service TPS Control".toUpperCase()) ;
 										String debug = "capped\t\t ::"+capped;
 										debug = debug +"SubscriptionRenewal.isAdaptive_throttling():\t\t "+SubscriptionRenewal.isAdaptive_throttling();
 										
-										logger.debug("THROTTLING PARAMS :::::: "+debug);
+										logger.info("THROTTLING PARAMS :::::: "+debug);
 										if(resp!=null)
 										if(capped){
 											if(SubscriptionRenewal.isAdaptive_throttling()){
 												
-												SubscriptionRenewal.putPackToQueue(sub);
+												//SubscriptionRenewal.putPackToQueue(sub);
 												//We've been throttled. Let's slow down a little bit.
 												logger.debug("Throttling! We've been capped.");
-												SubscriptionRenewal.setEnable_biller_random_throttling(true);
-												SubscriptionRenewal.setWe_ve_been_capped(true);
+												//SubscriptionRenewal.setEnable_biller_random_throttling(true);
+												//SubscriptionRenewal.setWe_ve_been_capped(true);
 												long wait_time = SubscriptionRenewal.getRandomWaitTime();
 												logger.info(getName()+" ::: CHILAXING::::::: Trying to chillax for "+wait_time+" milliseconds");
 												if(wait_time>-1){
