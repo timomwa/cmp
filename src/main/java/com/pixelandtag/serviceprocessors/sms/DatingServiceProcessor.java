@@ -367,34 +367,39 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person, boolean allowOffBundle) throws Exception { 
 					  
-		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
-		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn(),incomingsms.getOpco());
-		
-		
-		PersonDatingProfile profile = datingBean.getProfile(person);
-		
-		if(profile!=null && profile.getProfileComplete()){
+		try{
+			OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
+			if(person==null)
+				person = datingBean.register(incomingsms.getMsisdn(),incomingsms.getOpco());
 			
-			outgoingsms = chat(incomingsms,profile,person,allowOffBundle);
-			profile.setLastActive(new Date());
-			profile = datingBean.saveOrUpdate(profile);
-		}
+			
+			PersonDatingProfile profile = datingBean.getProfile(person);
+			
+			if(profile!=null && profile.getProfileComplete()){
 				
-		if(person.getId()>0 && profile==null){//Success registering/registered but no profile
-			
-			outgoingsms = startProfileQuestions(incomingsms,person);
-		
-		}else{
-			
-			if(!profile.getProfileComplete()){
-				
-				outgoingsms = completeProfile(incomingsms,person,profile);
-			
+				outgoingsms = chat(incomingsms,profile,person,allowOffBundle);
+				profile.setLastActive(new Date());
+				profile = datingBean.saveOrUpdate(profile);
 			}
+					
+			if(person.getId()>0 && profile==null){//Success registering/registered but no profile
+				
+				outgoingsms = startProfileQuestions(incomingsms,person);
+			
+			}else{
+				
+				if(!profile.getProfileComplete()){
+					
+					outgoingsms = completeProfile(incomingsms,person,profile);
+				
+				}
+			}
+			
+			return outgoingsms;
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		
-		return outgoingsms;
 	}
 
 	private OutgoingSMS startProfileQuestions(IncomingSMS incomingsms, Person person) throws DatingServiceException {

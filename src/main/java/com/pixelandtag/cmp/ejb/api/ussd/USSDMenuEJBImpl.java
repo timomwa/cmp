@@ -141,9 +141,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						profile = new PersonDatingProfile();
 						profile.setPerson(person);
 						profile.setUsername(incomingsms.getMsisdn());
+						profile = datingBean.saveOrUpdate(profile);
 					}
 					
-					profile = datingBean.saveOrUpdate(profile);
+					
 					
 					ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
 					logger.debug("QUESTION::: "+question.getQuestion());
@@ -715,6 +716,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				resp.setResponseMessage(xml);
 				
 				return resp;
+				
+    	}catch(NullPointerException exp){
+    		
+    		exp.printStackTrace();
+    		logger.error(exp.getMessage(), exp);
+			resp.setResponseMessage(PROBLEM_OCCURRED);
+    		resp.setLoggableMessage(PROBLEM_OCCURRED);
+    		
+    		return resp;
     	}catch(OrangeUSSDException exp){
     		exp.printStackTrace();
     		sb.append("Looks like this is not a genuine GSM call. Use a handset to dial *329# to access the menu or mimic a call from the operator by setting the required header parameters.");
@@ -771,33 +781,37 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 
 	public String startDatingQuestions(IncomingSMS incomingsms) throws Exception{
     	
-		
-		Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
-		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
-		
-		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
-		
-		PersonDatingProfile profile = datingBean.getProfile(person);
-		
-		if(profile==null){
-			profile = new PersonDatingProfile();
-			profile.setPerson(person);
-			profile.setUsername(incomingsms.getMsisdn());
-			profile = datingBean.saveOrUpdate(profile);
+		try{
+			Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
+			if(person==null)
+				person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
+			
+			if(person==null)
+				person = datingBean.register(incomingsms.getMsisdn(), incomingsms.getOpco());
+			
+			PersonDatingProfile profile = datingBean.getProfile(person);
+			
+			if(profile==null){
+				profile = new PersonDatingProfile();
+				profile.setPerson(person);
+				profile.setUsername(incomingsms.getMsisdn());
+				profile = datingBean.saveOrUpdate(profile);
+			}
+			
+			
+	    	ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
+	    	
+	    	String question = "";
+	    	if(profileQuestion!=null){
+	    		logger.debug("QUESTION::: "+profileQuestion.getQuestion());
+	    		question =  SPACE +profileQuestion.getQuestion();
+	    	}
+	    	
+	    	return question;	
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		
-		
-    	ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
-    	
-    	String question = "";
-    	if(profileQuestion!=null){
-    		logger.debug("QUESTION::: "+profileQuestion.getQuestion());
-    		question =  SPACE +profileQuestion.getQuestion();
-    	}
-    	
-    	return question;
     }
     
     

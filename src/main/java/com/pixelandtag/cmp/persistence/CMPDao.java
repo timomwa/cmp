@@ -50,8 +50,12 @@ public class CMPDao  extends BaseDao {
 	}
 	
 	public <T> T saveOrUpdate(T t) throws Exception {
-		t = resource_bean.saveOrUpdate(t);
-        return t;
+		try{
+			return resource_bean.saveOrUpdate(t);
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
 	} 
 
 	public <T> T find(Class<T> entityClass, Long primaryKey) throws Exception {

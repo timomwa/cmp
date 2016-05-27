@@ -353,7 +353,11 @@ public class BaseEntityBean implements BaseEntityI {
 
 
 	public <T> T saveOrUpdate(T t) throws Exception{
-		return em.merge(t);
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
 	}
 	
 /**

@@ -2992,7 +2992,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		try {
 			sess = saveOrUpdate(sess);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 	public String stringFyServiceList(LinkedHashMap<Integer,SMSServiceDTO> allsubscribed) {

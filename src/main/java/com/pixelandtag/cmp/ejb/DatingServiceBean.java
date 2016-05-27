@@ -666,11 +666,16 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@Override
 	public Person register(String msisdn, OperatorCountry opco) throws Exception {
-		Person person = new Person();
-		person.setMsisdn(msisdn);
-		person.setActive(false);
-		person.setOpco(opco);
-		return saveOrUpdate(person);
+		try{
+			Person person = new Person();
+			person.setMsisdn(msisdn);
+			person.setActive(false);
+			person.setOpco(opco);
+			return saveOrUpdate(person);
+		}catch(Exception ex){
+			logger.error(ex.getMessage());
+			throw ex;
+		}
 	}
 
 	

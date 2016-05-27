@@ -110,40 +110,45 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 	public ProfileLocation findOrCreateLocation(Long cellid, Long locationId, String locationName,
 			PersonDatingProfile profile, boolean authoritative) throws Exception {
 		
+		try{
 		
-		Location location = findLocation(cellid,locationId);
-		
-		ProfileLocation profLoc = findProfileLocation(location,profile);
-		
-		if(profLoc!=null)
-			return profLoc;
-		
-		
-		if(location==null){
-			location = new Location();
-			location.setCellid(cellid);
-			location.setLocation_id(locationId);
-			if(locationName==null || locationName.trim().isEmpty()){
-				Location interimLoc = getLastKnownLocationWithNameUsingLac(locationId, cellid);
-				if(interimLoc!=null)
-					location.setLocationName(interimLoc.getLocationName());
-				else
-					location.setLocationName(profile.getLocation());
-			}else{
-				location.setLocationName(locationName);
+			Location location = findLocation(cellid,locationId);
+			
+			ProfileLocation profLoc = findProfileLocation(location,profile);
+			
+			if(profLoc!=null)
+				return profLoc;
+			
+			
+			if(location==null){
+				location = new Location();
+				location.setCellid(cellid);
+				location.setLocation_id(locationId);
+				if(locationName==null || locationName.trim().isEmpty()){
+					Location interimLoc = getLastKnownLocationWithNameUsingLac(locationId, cellid);
+					if(interimLoc!=null)
+						location.setLocationName(interimLoc.getLocationName());
+					else
+						location.setLocationName(profile.getLocation());
+				}else{
+					location.setLocationName(locationName);
+				}
 			}
+			
+			location.setAuthoritative(authoritative);
+			location = saveOrUpdate(location);
+			
+			if(profLoc==null){
+				profLoc = new ProfileLocation();
+				profLoc.setLocation(location);
+				profLoc.setProfile(profile);
+				profLoc = saveOrUpdate(profLoc);
+			}
+			return profLoc;
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		
-		location.setAuthoritative(authoritative);
-		location = saveOrUpdate(location);
-		
-		if(profLoc==null){
-			profLoc = new ProfileLocation();
-			profLoc.setLocation(location);
-			profLoc.setProfile(profile);
-			profLoc = saveOrUpdate(profLoc);
-		}
-		return profLoc;
 	}
 
 	

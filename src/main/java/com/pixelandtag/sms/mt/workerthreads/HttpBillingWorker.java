@@ -408,7 +408,7 @@ public class HttpBillingWorker implements Runnable {
 				}
 				
 			}catch(Exception e){
-					logger.error(e.getMessage(),e);
+				logger.error(e.getMessage(),e);
 			}
 				
 			watch.reset();
