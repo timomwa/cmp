@@ -146,7 +146,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		String type_ = incomingparams.get(Receiver.HTTP_RECEIVER_TYPE);
 		MediumType type = ( type_!=null && !type_.isEmpty() ) ? MediumType.get(type_) : MediumType.sms;
 		
-		logger.info(">>> receiver_has_payload.getValue() >>> "+receiver_has_payload.getValue());
 		if(receiver_has_payload.getValue().equalsIgnoreCase("yes")){
 		
 			if(expectedcontenttype==null || 
@@ -158,11 +157,12 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			String payload = incomingparams.get(Receiver.HTTP_RECEIVER_PAYLOAD);
 			
 			String contenttype = expectedcontenttype.getValue();
-			logger.info("contenttype>>> "+contenttype);
 			if(contenttype.equalsIgnoreCase("xml")){
 				msisdn = getValue(payload, msisdn_param_name_cfg.getValue());
 				shortcode = getValue(payload, shortcode_param_name_cfg.getValue());
 				sms = getValue(payload, sms_param_name_cfg.getValue());
+				if(sms!=null)
+					sms = sms.trim();
 				if(txid_param_name_cfg!=null && (txid_param_name_cfg.getValue()!=null || 
 						!txid_param_name_cfg.getValue().isEmpty())){
 					opcotxid = getValue(payload, txid_param_name_cfg.getValue() );
@@ -278,7 +278,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	@SuppressWarnings("unchecked")
 	@Override
 	public IncomingSMS populateProcessorDetails(IncomingSMS incomingsms) {
-		
 		String keyword = (incomingsms.getSms()!=null && !incomingsms.getSms().isEmpty()) 
 				? replaceAllIllegalCharacters(incomingsms.getSms().split("[\\s]")[0].toUpperCase()) : "DEFAULT";
 				
@@ -301,8 +300,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		qry.setParameter("opco", incomingsms.getOpco());
 		
 		List<Object[]> rows = qry.getResultList();
-		
-		System.out.println("\n\n\n 1. rows.size()  :::::   "+rows.size());
 		
 		if(rows.size()<1){
 			
@@ -327,7 +324,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			keyword = "DEFAULT";
 			
 			rows = qry.getResultList();
-			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
 			
 		}
 			
@@ -400,7 +396,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(strippable_string!=null && strippable_string.getValue()!=null && !strippable_string.getValue().isEmpty()){
 			String[] strippables = strippable_string.getValue().split(",");
 			for(String strippable : strippables){
-				logger.info(">>>> strippable : "+strippable);
 				originalStr = originalStr.replaceAll(  Matcher.quoteReplacement(strippable), Matcher.quoteReplacement("") )   ;
 			}
 		}

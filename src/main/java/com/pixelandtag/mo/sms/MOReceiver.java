@@ -74,22 +74,22 @@ public class MOReceiver extends HttpServlet {
 		String ip_addr = request.getRemoteAddr();
 		
 		
-		Enumeration<String> headernames = request.getHeaderNames();
-		String headerstr = "\n";
+		/*Enumeration<String> headernames = request.getHeaderNames();
+		//String headerstr = "\n";
 		 while (headernames.hasMoreElements()) { 
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = request.getHeader(headerName);  
-		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
+		     //headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
 		     //incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
-		 }
+		 }*/
 		
 		 
-		 logger.info(headerstr+"\n\n");
+		// logger.info(headerstr+"\n\n");
 		
 		
 		incomingparams.put(Receiver.IP_ADDRESS, ip_addr);
 		
-		String params = "\n\n\t:: ip_addr "+ip_addr;
+		//String params = "\n\n\t:: ip_addr "+ip_addr;
 		
 		while(enums.hasMoreElements()){
 			
@@ -99,11 +99,11 @@ public class MOReceiver extends HttpServlet {
 			
 			incomingparams.put(paramName, value);
 						
-			params += "\n\t:: "+   paramName +" : "+value;
+			//params += "\n\t:: "+   paramName +" : "+value;
 			
 		}
 		
-		logger.info(params+"\n\n");
+		//logger.info(params+"\n\n");
 		
 		final String body = getBody(request);
 		
@@ -116,8 +116,8 @@ public class MOReceiver extends HttpServlet {
 		
 		try {
 			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
-			logger.info("incomingsms = "+incomingsms);
-			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
+			//logger.info("incomingsms = "+incomingsms);
+			//logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
 		} catch (ConfigurationException e) {
 			logger.error(e.getMessage(),e);
 		}

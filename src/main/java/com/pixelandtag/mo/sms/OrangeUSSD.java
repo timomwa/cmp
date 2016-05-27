@@ -110,6 +110,8 @@ public class OrangeUSSD extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 14512222156L;
 	private static final String SHORTCODE = "329";
+	private static final String MSG_TAG = "msg";
+	private static final String PROBLEM_OCCURRED = "There was a problem processing this request. Kindly try again later.";
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -122,31 +124,31 @@ public class OrangeUSSD extends HttpServlet {
 			throws ServletException, IOException {
 		
 		
-		final StringBuffer sb = new StringBuffer();
+		//final StringBuffer sb = new StringBuffer();
 		String response = "";
 		PrintWriter pw = resp.getWriter();
 		
 		
 		try{
 			
-			final String body = getBody(req);
+			//final String body = getBody(req);
 			
-			logger.info("MO_ORANGE_USSD:"+body+"\n\n");
+			//logger.info("MO_ORANGE_USSD:"+body+"\n\n");
 			
 			String contextpath = req.getRequestURI();
 			
-			logger.info("MO_ORANGE_USSD_CONTEXT_PATH:"+contextpath+"\n\n");
+			//logger.info("MO_ORANGE_USSD_CONTEXT_PATH:"+contextpath+"\n\n");
 			
-			Enumeration<String> headernames = req.getHeaderNames();
-			String headerstr = "\n";
-			 while (headernames.hasMoreElements()) { 
-				 String headerName = (String) headernames.nextElement();  
-			     String headerValue = req.getHeader(headerName);  
-			     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
-			 }
+			//Enumeration<String> headernames = req.getHeaderNames();
+			//String headerstr = "\n";
+			// while (headernames.hasMoreElements()) { 
+				 //String headerName = (String) headernames.nextElement();  
+			    // String headerValue = req.getHeader(headerName);  
+			    // headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
+			 //}
 			 
 			 
-			 logger.info(headerstr+"\n\n");
+			// logger.info(headerstr+"\n\n");
 			 
 			
 			 ServletOutputStream sOutStream = null;
@@ -157,10 +159,10 @@ public class OrangeUSSD extends HttpServlet {
 			Long messageID = -1L;
 			String paramName = "";
 			String value  = "";
-			String msg =  req.getParameter("msg");
+			String msg =  req.getParameter(MSG_TAG);
 			
 			
-			sb.append("\n");
+			//sb.append("\n");
 			Map<String, String> attribz = new HashMap<String, String>();
 			while(enums.hasMoreElements()){
 				
@@ -172,12 +174,12 @@ public class OrangeUSSD extends HttpServlet {
 				
 				String ip_addr = req.getRemoteAddr();
 				
-				sb.append("\t\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value).append("\n");
+				//sb.append("\t\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value).append("\n");
 				
 			}
 			
-			logger.info(sb.toString());
-			sb.setLength(0);
+			//logger.info(sb.toString());
+			//sb.setLength(0);
 			
 			watch.start();
 			
@@ -218,7 +220,7 @@ public class OrangeUSSD extends HttpServlet {
 			incomingsms.setOpco(opcoEJB.findOpcoByCode("KEN-639-7"));
 			incomingsms.setPrice(BigDecimal.ZERO);
 			
-			logger.info(" >> processor = "+processor);
+			//logger.info(" >> processor = "+processor);
 			
 			dndEJB.removeFromDNDList(incomingsms.getMsisdn());
 			
@@ -245,8 +247,8 @@ public class OrangeUSSD extends HttpServlet {
 			 messagelog.setMt_sms(wrapper.getLoggableMessage());
 			 messagelog = processorEJB.saveMessageLog(messagelog);
 				
-			logger.info("\n>>> xml "+response);
-			logger.info("\n>>> loggable  "+wrapper.getLoggableMessage());
+			//logger.info("\n>>> xml "+response);
+			//logger.info("\n>>> loggable  "+wrapper.getLoggableMessage());
 			pw.write(response);
 			
 		}catch(Exception e){
@@ -259,14 +261,12 @@ public class OrangeUSSD extends HttpServlet {
 			doctype.setSystemID("cellflash-1.3.dtd");
 			doc.setDocType(doctype);
 			
-			sb.setLength(0);
 			Element page = new Element("page");
-			sb.append("There was a problem processing this request. Kindly try again later.");
-    		page.setAttribute( "nav", "end");
-    		page.setText(sb.toString());
+			page.setAttribute( "nav", "end");
+    		page.setText(PROBLEM_OCCURRED);
 			rootelement.addContent(page);
 			response = xmlOutput.outputString(doc);
-			logger.info("\n\nXML_RESPONSE >>>>>> "+response+"\n\n");
+			//logger.info("\n\nXML_RESPONSE >>>>>> "+response+"\n\n");
 			
 			logger.error(e.getMessage(), e);
 			

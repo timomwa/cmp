@@ -126,15 +126,15 @@ public class USSDReceiver extends HttpServlet {
 		
 		
 		Enumeration<String> headernames = req.getHeaderNames();
-		String headerstr = "\n";
+		/*String headerstr = "\n";
 		 while (headernames.hasMoreElements()) { 
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = req.getHeader(headerName);  
 		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
-		 }
+		 }*/
 		
 		 
-		 logger.info(headerstr+"\n\n");
+		// logger.info(headerstr+"\n\n");
 		 
 		ServletOutputStream sOutStream = null;
 		
@@ -153,11 +153,11 @@ public class USSDReceiver extends HttpServlet {
 			
 			String ip_addr = req.getRemoteAddr();
 			
-			System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
+			//System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
 			
 		}
 		
-		System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"  : paramName: "+paramName+ " value: "+value);
+		//System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"  : paramName: "+paramName+ " value: "+value);
 		
 		
 		watch.start();
@@ -175,10 +175,10 @@ public class USSDReceiver extends HttpServlet {
 			if(sess!=null){
 				menuid_ = sess.getMenuid()!=null ? sess.getMenuid().intValue() : -1;
 			}
-			logger.debug("\n\n\n\t\t    sess = "+sess
+			/*logger.debug("\n\n\n\t\t    sess = "+sess
 					+ "\n\n\n\t\t    menuid_ = "+menuid_
 					+ "\n\n\n\t\t    msg = "+msg
-					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());
+					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());*/
 			if(msg.contains("*")  || (menuid_!=2 && menuid_>-1) ){
 				
 				if(msg.contains("*") ){
@@ -188,7 +188,7 @@ public class USSDReceiver extends HttpServlet {
 					ro.setMenuid(menuid_);
 				}
 				
-				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
+				//System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
 				
 				ro.setMediumType(MediumType.ussd);
 				ro.setOpco(opco);
@@ -274,7 +274,7 @@ public class USSDReceiver extends HttpServlet {
 			MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
 			incomingsms.setMoprocessor(processor);
 			incomingsms.setOpco(opco);
-			logger.info(" >> processor = "+processor);
+			//logger.info(" >> processor = "+processor);
 			
 			dndEJB.removeFromDNDList(incomingsms.getMsisdn());
 			
