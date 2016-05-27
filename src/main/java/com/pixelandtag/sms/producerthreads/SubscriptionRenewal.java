@@ -199,7 +199,7 @@ public class SubscriptionRenewal extends  Thread {
 		try{
 			
 			
-			logger.info("throttle::: "+throttle);
+			//logger.info("throttle::: "+throttle);
 			logger.debug(">>throttle::: "+throttle+", Threads waiting to retrieve message before : " + semaphore.getQueueLength() );
 			
 			semaphore.acquire();//now lock out everybody else!

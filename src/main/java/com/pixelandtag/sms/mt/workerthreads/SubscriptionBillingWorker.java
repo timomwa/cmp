@@ -449,7 +449,7 @@ public class SubscriptionBillingWorker implements Runnable {
 			}
 		}
 
-		logger.info(">>service :: "+service+"  passes ? "+(service != null && (service.getId().compareTo(-1L)>0)));
+		//logger.info(">>service :: "+service+"  passes ? "+(service != null && (service.getId().compareTo(-1L)>0)));
 		if (service != null && (service.getId().compareTo(-1L)>0)) {
 			MOProcessor processor = service.getMoprocessor();
 			
