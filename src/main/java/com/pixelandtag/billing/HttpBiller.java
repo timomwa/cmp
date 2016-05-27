@@ -43,7 +43,7 @@ public class HttpBiller extends GenericBiller {
 	
 	private static JsonUtilI jsonutil = new JsonUtilImpl();
 	
-	
+	private static final String TEST_MSIDN = "254776165280";
 	private Map<String,BillerProfileConfig> configuration;
 	
 	public HttpBiller(BillingConfigSet billingconfig) throws Exception {
@@ -70,7 +70,7 @@ public class HttpBiller extends GenericBiller {
 		GenericHTTPParam generic_HTTP_BILLER_parameters = new GenericHTTPParam();
 		generic_HTTP_BILLER_parameters.setId(billable.getId());
 		
-		boolean testing = billable.getMsisdn().trim().equalsIgnoreCase("254776165280");
+		boolean testing = billable.getMsisdn().trim().equalsIgnoreCase(TEST_MSIDN);
 			
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		if(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME)!=null)
@@ -164,14 +164,14 @@ public class HttpBiller extends GenericBiller {
 						digest = encryptor.encode(username,password, encryptionmethod);
 					}else{
 						String template = pre_encode_tpl.getValue();
-						logger.info("  \n\n >>>>>>>>>>>>>>>>>> B41 :  template = "+template);
+						
 						template = template.replaceAll("\\$\\{PASSWORD\\}", Matcher.quoteReplacement(password));
 						template = template.replaceAll("\\$\\{USERNAME\\}", Matcher.quoteReplacement(username));
 						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString(billable.getTimeStamp(),httpBillertimeformat) ));
-						logger.info("  \n\n >>>>>>>>>>>>>>>>>> B42 :  template = "+template);
+						
 						
 						digest = encryptor.encode(template, encryptionmethod);
-						logger.info("  \n\n >>>>>>>>>>>>>>>>>> AFTER :  digest = "+digest);
+						
 						
 						
 					}
