@@ -1222,7 +1222,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(username.contains("*"))
 				return false;
 			try{
-				BigDecimal bd = new BigDecimal(username);
+				new BigDecimal(username);
 				if(username.length()<4)
 					return false;
 			}catch(Exception exp){}

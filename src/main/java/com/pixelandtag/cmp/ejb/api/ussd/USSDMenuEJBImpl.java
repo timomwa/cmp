@@ -233,11 +233,12 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							String msg = "";
 							if(answers!=null && answers.equalsIgnoreCase("329")){
 								msg = datingBean.getMessage(DatingMessages.REPLY_WITH_USERNAME, languageid_,person.getOpco().getId());
+							}else if(answers==null || answers.trim().isEmpty()){
+								msg = previousQuestion.getQuestion();
 							}else{
 								msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
+								msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, ( answers!=null ? answers : profile.getUsername()) );
 							}
-							
-							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, ( answers!=null ? answers : profile.getUsername()) );
 							
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
