@@ -102,36 +102,41 @@ public class OrangeMOReceiver extends HttpServlet {
 		
 		logger.info("MO_ORANGE:"+body+"\n\n");
 		
-		if(!body.isEmpty())
+		if(body!=null && body.contains("<sms7:notifySmsDeliveryReceipt>") ){
+			logger.info(" ********* We received SMS delivery notification from Orange *********************");
+		}else if(!body.isEmpty()){
+			
 			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
 		
-		incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
-		
-		try {
-			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
-			logger.info("incomingsms = "+incomingsms);
-			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
-		} catch (ConfigurationException e) {
-			logger.error(e.getMessage(),e);
-		}
-		
-		PrintWriter pw = response.getWriter();
-		
-		try{
-		
-			String responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
-								   +"<soapenv:Header/>"
-								   +"<soapenv:Body>"
-								   +"<loc:notifySmsReceptionResponse/>"
-								   +"</soapenv:Body>"
-								   +"</soapenv:Envelope>";
-			pw.write(responsexml);//"Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
-		}catch(Exception exp){
-			logger.error(exp.getMessage(),exp);
-		}finally{
+			incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
+			
+			try {
+				IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
+				logger.info("incomingsms = "+incomingsms);
+				logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
+			} catch (ConfigurationException e) {
+				logger.error(e.getMessage(),e);
+			}
+			
+			PrintWriter pw = response.getWriter();
+			
 			try{
-				pw.close();
-			}catch(Exception es){}
+			
+				String responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
+									   +"<soapenv:Header/>"
+									   +"<soapenv:Body>"
+									   +"<loc:notifySmsReceptionResponse/>"
+									   +"</soapenv:Body>"
+									   +"</soapenv:Envelope>";
+				pw.write(responsexml);//"Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+			}finally{
+				try{
+					pw.close();
+				}catch(Exception es){}
+			}
+			
 		}
 		
 		

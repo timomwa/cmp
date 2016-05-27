@@ -204,7 +204,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			opco_service_cache.put(key_  , opcosmsserv);
 		}
 		
-		if(outgoingsms.getBilling_status()!=null && outgoingsms.getBilling_status()!=BillingStatus.WAITING_BILLING)
+		if(outgoingsms.getPrice()==null && outgoingsms.getBilling_status()!=null && outgoingsms.getBilling_status()!=BillingStatus.WAITING_BILLING)
 			outgoingsms.setPrice(opcosmsserv.getPrice());
 		outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid()); 
 		

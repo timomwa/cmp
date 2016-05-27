@@ -68,7 +68,7 @@ import com.pixelandtag.web.beans.RequestObject;
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
 
-	public Logger logger = Logger.getLogger(getClass());
+	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
@@ -1367,6 +1367,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				outgoingsms.setSms(message);
 				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price
 				outgoingsms.setPriority(1);
+				outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
 				//outgoingsms.setTimestamp(new Date());
 				
 				try{
