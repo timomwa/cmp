@@ -183,13 +183,6 @@ public class OrangeUSSD extends HttpServlet {
 			
 			watch.start();
 			
-			int menuid = setdefaultifnull( req.getParameter("menuid") );
-			int languageid = setdefaultifnull( req.getParameter("languageid") );
-			int serviceid = setdefaultifnull( req.getParameter("serviceid") );
-			int menuitemid = setdefaultifnull( req.getParameter("menuitemid") );
-			int parent_level_id = setdefaultifnull( req.getParameter("parent_level_id") );
-			int questionid = setdefaultifnull( req.getParameter("questionid") );
-			
 			
 			String answers = req.getParameter("answers") ;
 			String attrib = req.getParameter("attrib") ;
@@ -295,7 +288,7 @@ public class OrangeUSSD extends HttpServlet {
 
 	public static int setdefaultifnull(String string) {
 		if(string==null || string.isEmpty())
-			return -1;
+			return 1;
 		int i = -1;
 		try{
 			i = Integer.valueOf(string);

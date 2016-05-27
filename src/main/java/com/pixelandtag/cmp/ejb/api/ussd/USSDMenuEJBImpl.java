@@ -108,13 +108,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     		
 		    	String baseurl = attribz.get("contextpath");
 				String finalquestion = attribz.get("finalquestion");
-				String bundlepurchase = attribz.get("bundlepurchase");
 				String answers = attribz.get("answers");
 				if(answers!=null && !answers.isEmpty())
 					answers = answers.trim();
 				int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
-				String attrib_ =  attribz.get("attrib") ;
-				int questionid_ = OrangeUSSD.setdefaultifnull( attribz.get("questionid") );
+				
 				
 				Person person =  datingBean.getPerson(incomingsms.getMsisdn(), incomingsms.getOpco());
 				if(person==null)
@@ -127,13 +125,6 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				
 				
 				if(person.getId()>0 && profile==null){
-					
-					String msg = null;
-					try{
-						msg = datingBean.getMessage(DatingMessages.DATING_SUCCESS_REGISTRATION, languageid_, incomingsms.getOpco().getId());
-					}catch(DatingServiceException dse){
-						logger.error(dse.getMessage(), dse);
-					}
 					
 					profile = datingBean.getProfile(person);
 					
@@ -236,7 +227,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(answers).toString()));
 						}catch(Exception exp){}
 						
-						if(isunique){
+						if(isunique && answers!=null && !answers.trim().isEmpty()){
 							profile.setUsername(answers);
 						}else{
 							String msg = "";
@@ -245,7 +236,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							}else{
 								msg = datingBean.getMessage(DatingMessages.USERNAME_NOT_UNIQUE_TRY_AGAIN, languageid_,person.getOpco().getId());
 							}
-							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers);
+							if(answers!=null && !answers.trim().isEmpty())
+								msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, answers);
+							
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
@@ -452,9 +445,6 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						String menuid = attribz.get("menuid");
 						String waitingdoubleconfirm = attribz.get("waitingdoubleconfirm");
 						String action = attribz.get("action");
-						String existingsub = attribz.get("existingsub");
-						
-						boolean emptystr = ( sb.toString()==null || sb.toString().isEmpty() ) ;
 						
 						if((finalquestion!=null && finalquestion.equalsIgnoreCase("true")) 
 								|| 
@@ -949,6 +939,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	
 
+	@SuppressWarnings("unchecked")
 	public MenuItem getMenuByParentLevelId(int language_id, int parent_level_id, int menuid) throws Exception{
 		
 		MenuItem menuItem = null;
@@ -1010,6 +1001,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	
 
+	@SuppressWarnings("unchecked")
 	public MenuItem getMenuById(int menu_id) throws Exception{
 		
 		MenuItem mi = null;
@@ -1055,6 +1047,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	
 
+	@SuppressWarnings("unchecked")
 	public LinkedHashMap<Integer, MenuItem> getSubMenus(int parent_level_id_fk) throws Exception{
 		
 		LinkedHashMap<Integer,MenuItem> items = null;

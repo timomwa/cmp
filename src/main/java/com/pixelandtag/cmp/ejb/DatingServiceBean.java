@@ -1282,13 +1282,15 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException{
+		if(dob==null)
+			return null;
 		BigInteger age = null;
 		try{
 			Query qry = em.createNativeQuery("SELECT TIMESTAMPDIFF(YEAR, :dob, CURDATE()) as 'age'");
 			qry.setParameter("dob", dob);
 			Object o = qry.getSingleResult();
 			age = (BigInteger) o;
-			age = age.compareTo(BigInteger.valueOf(18L))<0 ? BigInteger.valueOf(18L) : age;
+			age = age!=null ? (age.compareTo(BigInteger.valueOf(18L))<0 ? BigInteger.valueOf(18L) : age) : null;
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 			throw new DatingServiceException(exp.getMessage(), exp);
