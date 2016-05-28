@@ -204,7 +204,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							loggingSB.append(sb.toString());
 						}else{
 							String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, languageid_, person.getOpco().getId());
-							msg += SPACE+messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(languageid_), person.getOpco().getId());
+							msg += SPACE+messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(languageid_), person.getOpco().getId()).getMessage();
 							
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
@@ -372,7 +372,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						loggingSB.append(RETURN_CARRIAGE);
 						
 						if(attrib==ProfileAttribute.DISCLAIMER){
-							question = question+SPACE+messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), languageid, person.getOpco().getId());
+							question = question+SPACE+messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), languageid, person.getOpco().getId()).getMessage();
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");

@@ -278,7 +278,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						resp = "Ok. Bye";
 						return resp;
 					}else{
-						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.RETURN_CARRIAGE + messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(language_id), person.getOpco().getId());//"Proceed?\n1. Yes\n2. No" ;
+						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.RETURN_CARRIAGE + messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(language_id), person.getOpco().getId()).getMessage();//"Proceed?\n1. Yes\n2. No" ;
 						return resp;
 					}
 						
