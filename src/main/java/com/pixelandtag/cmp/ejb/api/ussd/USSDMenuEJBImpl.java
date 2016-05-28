@@ -340,7 +340,6 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							sb.append("<prompt>"+msg+"</prompt>");
 							sb.append("</entry></form>");
 							
-							sb.append(sb.toString());
 							loggingSB.append(msg);
 						}else{
 							profile.setLocation(answers);
@@ -360,7 +359,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 				}
 				
-				//logger.info(">>>>>>>>>>> "+sb.toString());
+				logger.info(">>>>>>>>>>> "+sb.toString());
 				if(sb.toString()==null || sb.toString().isEmpty()){// we move to the next question
 				
 					ProfileQuestion profileQuestion = getNextQuestion(profile,incomingsms);
