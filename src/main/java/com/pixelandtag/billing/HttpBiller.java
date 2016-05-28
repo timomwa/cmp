@@ -168,7 +168,7 @@ public class HttpBiller extends GenericBiller {
 						
 						template = template.replaceAll("\\$\\{PASSWORD\\}", Matcher.quoteReplacement(password));
 						template = template.replaceAll("\\$\\{USERNAME\\}", Matcher.quoteReplacement(username));
-						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString( ( null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) ,httpBillertimeformat) ));
+						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString( ( billable.getTimeStamp()==null ? new Date() : billable.getTimeStamp()) ,httpBillertimeformat) ));
 						
 						
 						digest = encryptor.encode(template, encryptionmethod);
@@ -206,7 +206,7 @@ public class HttpBiller extends GenericBiller {
 							
 							if(config.getValue().getValue().contains("${TIMESTAMP}")){
 								try {
-									auth_header_value += " "+param_name+": \""+config.getValue().getValue().replace("${TIMESTAMP}", dateToString(billable.getTimeStamp(),httpBillertimeformat))+"\"";
+									auth_header_value += " "+param_name+": \""+config.getValue().getValue().replace("${TIMESTAMP}", dateToString( (billable.getTimeStamp()==null ? new Date() : billable.getTimeStamp()),httpBillertimeformat))+"\"";
 								} catch (ParseException e) {
 									logger.error(e.getMessage(),e);
 									throw new BillerConfigException("Couldn't format timestamp",e);
