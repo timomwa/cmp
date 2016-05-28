@@ -283,33 +283,39 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						
 						Date dob = new Date();
 						BigDecimal age = BigDecimal.ONE;
+						String msg  = "";
 						try{
 							if(answers==null || answers.trim().isEmpty())
 								throw new java.lang.NumberFormatException("answers is null or empty string");
 							age = new BigDecimal(answers);
 						}catch(java.lang.NumberFormatException nfe){
-							String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
+							msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
-							sb.append(msg);
-							loggingSB.append(msg);
 							age = null;
 						}
 						
 						if(age!=null && age.compareTo(new BigDecimal(100l))>=0){
-							String msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, languageid_,person.getOpco().getId());
+							msg = datingBean.getMessage(DatingMessages.UNREALISTIC_AGE, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							msg = msg.replaceAll(GenericServiceProcessor.AGE_TAG, age.intValue()+"");
-							sb.append(msg);
-							loggingSB.append(msg);
 						}
 						
 						if(age!=null && age.compareTo(new BigDecimal(18l))<0){
-							String msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
+							msg = datingBean.getMessage(DatingMessages.SERVICE_FOR_18_AND_ABOVE, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
-							sb.append(msg);
-							loggingSB.append(msg);
 							page.setAttribute( "nav", "end");
+						}
+						
+						if(msg!=null && !msg.trim().isEmpty()){
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+msg+"</prompt>");
+							sb.append("</entry></form>");
+							
+							loggingSB.setLength(0);
+							loggingSB.append(msg);
 						}
 						
 						if(age!=null){
