@@ -333,7 +333,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
 							
-							baseurl = baseurl+"&finalquestion=true";
+							baseurl = baseurl+"?finalquestion=true";
 							sb.setLength(0);
 							sb.append("<form action=\""+baseurl+"\">");
 							sb.append("<entry kind=\"digits\" var=\"answers\">");
