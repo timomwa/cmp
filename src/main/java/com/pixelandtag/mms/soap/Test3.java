@@ -1,5 +1,6 @@
 package com.pixelandtag.mms.soap;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,12 +18,8 @@ public class Test3 {
 	
 	private static Map<Long, String> sms_serviceCache = new HashMap<Long, String>();
 	public static void main(String[] args) throws JSONException {
-		
-		String key = "HELLO";
-		Long language_id = null;//1l;
-		Long opcoid = 765302l;
-		String op = String.format("%s%d%s", key,language_id,opcoid);
-		System.out.println(op);
+		String answers = null;
+		new BigDecimal(answers);
 	}
 
 }

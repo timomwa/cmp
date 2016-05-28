@@ -284,10 +284,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						Date dob = new Date();
 						BigDecimal age = BigDecimal.ONE;
 						try{
-							if(answers!=null)
-								age = new BigDecimal(answers);
-							else
-								age = null;
+							if(answers==null || answers.trim().isEmpty())
+								throw new java.lang.NumberFormatException("answers is null or empty string");
+							age = new BigDecimal(answers);
 						}catch(java.lang.NumberFormatException nfe){
 							String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
@@ -313,9 +312,11 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							page.setAttribute( "nav", "end");
 						}
 						
-						dob = datingBean.calculateDobFromAge(age);
-						profile.setDob( dob );
-						profile.setPreferred_age(BigDecimal.valueOf(18L));
+						if(age!=null){
+							dob = datingBean.calculateDobFromAge(age);
+							profile.setDob( dob );
+							profile.setPreferred_age(BigDecimal.valueOf(18L));
+						}
 						
 					}
 					
@@ -331,7 +332,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 						if(answers==null || answers.isEmpty() || (answers!=null && (answers.contains("*") || answers.equalsIgnoreCase("329")  || location_is_only_number))){
 							String msg = datingBean.getMessage(DatingMessages.LOCATION_INVALID, languageid_,person.getOpco().getId());
 							msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG,  profile.getUsername());
-							sb.append(msg);
+							
+							baseurl = baseurl+"&finalquestion=true";
+							sb.setLength(0);
+							sb.append("<form action=\""+baseurl+"\">");
+							sb.append("<entry kind=\"digits\" var=\"answers\">");
+							sb.append("<prompt>"+msg+"</prompt>");
+							sb.append("</entry></form>");
+							
+							sb.append(sb.toString());
 							loggingSB.append(msg);
 						}else{
 							profile.setLocation(answers);
