@@ -120,7 +120,7 @@ public class Billable implements Serializable {
 	private Date timeStamp;
 	
 	@Column(name = "maxRetriesAllowed")
-		private Long maxRetriesAllowed;
+	private Long maxRetriesAllowed;
 	
 	@Column(name = "retry_count")
 	@Index(name="bilblidx")
@@ -236,13 +236,6 @@ public class Billable implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	@PreUpdate
-	@PrePersist
-	public void updae(){
-		if(timeStamp==null)
-			timeStamp = new Date();
 	}
 	
 	public Date getTimeStamp() {
