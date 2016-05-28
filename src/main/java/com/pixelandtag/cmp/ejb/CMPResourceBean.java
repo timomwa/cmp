@@ -2215,7 +2215,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					}
 					
 					//conn = getCon();
-					
+					logger.info("\t\t MSISDN ::::::::::::::::::::::::: ["+MSISDN+"]");
 					logger.info("\t\t KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 					logger.info("\t\t MSG ::::::::::::::::::::::::: ["+msg+"]");
 					logger.info("\t\t THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");

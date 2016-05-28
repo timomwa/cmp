@@ -230,7 +230,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	@Override
-	
 	public void updateQueueStatus(Long status, Long id, AlterationMethod method) throws Exception{
 		try{
 			Query qry = em.createQuery("UPDATE Subscription s SET s.queue_status=:queue_status WHERE s.id=:id");

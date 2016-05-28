@@ -292,7 +292,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						if(isunique)
 							isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(KEYWORD).toString()));
 					}catch(Exception exp){
-						logger.error(exp.getMessage(),exp);
+						//logger.warn(exp.getMessage(),exp);
 					}
 					
 					if(isunique){
