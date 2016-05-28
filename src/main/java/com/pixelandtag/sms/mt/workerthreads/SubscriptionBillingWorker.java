@@ -229,6 +229,9 @@ public class SubscriptionBillingWorker implements Runnable {
 									billable.setResp_status_code( senderresp.getRespcode() );
 									billable.setProcessed(1L);
 									
+									
+									
+									
 									if (senderresp.getSuccess()) {
 										boolean capped = resp.toUpperCase().contains("SLAClusterEnforcementMediation".toUpperCase()) ||
 												resp.toUpperCase().contains("Service TPS Control".toUpperCase()) ;
@@ -307,6 +310,19 @@ public class SubscriptionBillingWorker implements Runnable {
 										logger.info(" HTTP FAILED. WE TRY AGAIN LATER");
 										//subscriptionejb.updateQueueStatus(2L, billable.getMsisdn(), Long.valueOf(billable.getService_id()));
 									
+									}else{
+										
+										boolean capped = resp.toUpperCase().contains("Service TPS Control".toUpperCase()) ;
+										if(capped){
+											logger.info("ORANGE CAPPING ...... CHILAXING FOR 15 seconds");
+											//For Orange. If we're capped, each thread sleeps for 15 seconds.
+											//TODO have a biller policy to match SLA TPS.
+											try{
+												Thread.sleep(15000);
+											}catch(InterruptedException ie){
+												ie.printStackTrace();
+											}
+										}
 									}
 									
 									logger.debug(getName()+" ::::::: finished attempt to bill via HTTP");
