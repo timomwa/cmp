@@ -44,6 +44,7 @@ import com.pixelandtag.cmp.ejb.subscription.DoubleConfirmationQueueEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SMSServiceBundleEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.ClassStatus;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -55,6 +56,7 @@ import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.SMSServiceMetaData;
+import com.pixelandtag.cmp.entities.TimeZoneConfig;
 import com.pixelandtag.cmp.entities.subscription.DoubleConfirmationQueue;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
@@ -99,6 +101,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private ChatCounterEJBI chatcounterEJB;
+	
+	@EJB
+	private TimezoneConverterI timezoneConverterEJB;
 	
 	private Random rand = new Random();
 	
@@ -1959,7 +1964,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter("valid", Boolean.FALSE);
 			qry.setParameter("msisdn", bill.getMsisdn());
 			qry.setParameter("service_id", bill.getService_id());
-			qry.setParameter("timestampC", bill.getTimeStamp());
+			qry.setParameter("timestampC", (null!=bill.getTimeStamp() ? bill.getTimeStamp() : new Date()) );
 			qry.setParameter("id", bill.getId());
 			res = qry.executeUpdate();
 			
@@ -3528,7 +3533,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 
 	@Override
-	public String getBillingStats(String fromTz, String toTz) throws JSONException {
+	@SuppressWarnings("unchecked")
+		public String getBillingStats(String fromTz, String toTz) throws JSONException {
+		
+		TimeZoneConfig timezoneConfig = timezoneConverterEJB.getLatestTimeZoneConfig(); 
+		if(timezoneConfig!=null){
+			fromTz = timezoneConfig.getUtcOffset();
+		}
 
 		Query qry = em.createNativeQuery("select date(convert_tz(timeStamp,'"+fromTz+"','"+toTz+"')) dt, count(*) count, price, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 31");
 		

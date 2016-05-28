@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb.api.billing;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.ejb.EJB;
@@ -50,7 +51,7 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
     		successfulBill.setResp_status_code(billable.getResp_status_code());
     		successfulBill.setShortcode(billable.getShortcode());
     		successfulBill.setSuccess(billable.getSuccess());
-    		successfulBill.setTimeStamp(billable.getTimeStamp());
+    		successfulBill.setTimeStamp( (null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) );
     		successfulBill.setTransactionId(billable.getTransactionId());
     		successfulBill.setTransferin(billable.getTransferIn());
     		successfulBill.setOpco(billable.getOpco());

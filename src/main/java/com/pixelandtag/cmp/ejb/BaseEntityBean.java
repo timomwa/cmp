@@ -13,6 +13,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -183,7 +184,7 @@ public class BaseEntityBean implements BaseEntityI {
     		successfulBill.setResp_status_code(billable.getResp_status_code());
     		successfulBill.setShortcode(billable.getShortcode());
     		successfulBill.setSuccess(billable.getSuccess());
-    		successfulBill.setTimeStamp(billable.getTimeStamp());
+    		successfulBill.setTimeStamp( (null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) );
     		successfulBill.setTransactionId(billable.getTransactionId());
     		successfulBill.setTransferin(billable.getTransferIn());
     		successfulBill.setOpco(em.merge(billable.getOpco()));
@@ -558,6 +559,7 @@ public class BaseEntityBean implements BaseEntityI {
 					
 					
 				}else{
+					
 					billable.setTransactionId(response.getRefvalue());
 					billable.setResp_status_code("Success");
 					
@@ -566,8 +568,6 @@ public class BaseEntityBean implements BaseEntityI {
 					
 					subscriptionEjb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),1, billable.getOpco());
 					cmp_ejb.createSuccesBillRec(billable);
-					
-					
 					
 				}
 				

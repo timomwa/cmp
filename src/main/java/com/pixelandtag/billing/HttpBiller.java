@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,7 +168,7 @@ public class HttpBiller extends GenericBiller {
 						
 						template = template.replaceAll("\\$\\{PASSWORD\\}", Matcher.quoteReplacement(password));
 						template = template.replaceAll("\\$\\{USERNAME\\}", Matcher.quoteReplacement(username));
-						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString(billable.getTimeStamp(),httpBillertimeformat) ));
+						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString( ( null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) ,httpBillertimeformat) ));
 						
 						
 						digest = encryptor.encode(template, encryptionmethod);

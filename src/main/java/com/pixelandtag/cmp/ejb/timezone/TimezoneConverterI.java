@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.pixelandtag.cmp.entities.TimeZoneConfig;
+
 public interface TimezoneConverterI {
 
 	
@@ -149,4 +151,10 @@ public interface TimezoneConverterI {
 	 * @return
 	 */
 	public boolean isDateInThePast(Date sheduledate_server_time);
+
+	/**
+	 * 
+	 * @return
+	 */
+	public TimeZoneConfig getLatestTimeZoneConfig();
 }

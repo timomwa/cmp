@@ -238,13 +238,14 @@ public class Billable implements Serializable {
 		this.id = id;
 	}
 
-
-	
-	
-
-	public Date getTimeStamp() {
+	@PreUpdate
+	@PrePersist
+	public void updae(){
 		if(timeStamp==null)
 			timeStamp = new Date();
+	}
+	
+	public Date getTimeStamp() {
 		return timeStamp;
 	}
 

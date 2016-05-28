@@ -748,7 +748,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
     		successfulBill.setResp_status_code(billable.getResp_status_code());
     		successfulBill.setShortcode(billable.getShortcode());
     		successfulBill.setSuccess(billable.getSuccess());
-    		successfulBill.setTimeStamp(billable.getTimeStamp());
+    		successfulBill.setTimeStamp( (null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) );
     		successfulBill.setTransactionId(billable.getTransactionId());
     		successfulBill.setTransferin(billable.getTransferIn());
     		successfulBill.setOpco(em.merge(billable.getOpco()));
