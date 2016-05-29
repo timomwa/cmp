@@ -185,12 +185,13 @@ public class OrangeUSSD extends HttpServlet {
 			
 			
 			String answers = req.getParameter("answers") ;
-			String attrib = req.getParameter("attrib") ;
+			answers = RequestObject.replaceAllIllegalCharacters(answers);
+			//String attrib = req.getParameter("attrib") ;
 			String action = req.getParameter("action") ;
 			
 			String msisdn = req.getHeader("user-msisdn");
-			String imsi = req.getHeader("user-imsi");
-			String sessionid = req.getHeader("http_gateway-session_id");
+			//String imsi = req.getHeader("user-imsi");
+			//String sessionid = req.getHeader("http_gateway-session_id");
 			
 			
 			//String respxml = ussdmenuEJB.getMenu(1, -1, 1);

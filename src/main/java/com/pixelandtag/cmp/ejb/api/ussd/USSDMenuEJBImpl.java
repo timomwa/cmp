@@ -47,6 +47,7 @@ import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.smsmenu.MenuItem;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
+import com.pixelandtag.web.beans.RequestObject;
 
 @Stateless
 @Remote
@@ -109,8 +110,10 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		    	String baseurl = attribz.get("contextpath");
 				String finalquestion = attribz.get("finalquestion");
 				String answers = attribz.get("answers");
-				if(answers!=null && !answers.isEmpty())
+				if(answers!=null && !answers.isEmpty()){
 					answers = answers.trim();
+					answers = RequestObject.replaceAllIllegalCharacters(answers);
+				}
 				int languageid_ =  OrangeUSSD.setdefaultifnull( attribz.get("languageid") );
 				
 				
@@ -189,6 +192,9 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 					
 					if(attr.equals(ProfileAttribute.DISCLAIMER)){
+						
+						answers = getfirstWord(answers);
+						
 						boolean keywordIsNumber = false;
 						int agreed = -1;
 						try{
@@ -218,6 +224,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}
 					
 					if(attr.equals(ProfileAttribute.CHAT_USERNAME)){
+						
+						answers = getfirstWord(answers);
 						
 						boolean isunique = datingBean.isUsernameUnique(answers);
 						
@@ -251,6 +259,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					
 					if(attr.equals(ProfileAttribute.GENDER)){
 						
+						answers = getfirstWord(answers);
+						
 						if(answers!=null && (answers.equalsIgnoreCase("2") || answers.equalsIgnoreCase("M") ||  answers.equalsIgnoreCase("MALE") ||  answers.equalsIgnoreCase("MAN") ||  answers.equalsIgnoreCase("BOY") ||  answers.equalsIgnoreCase("MUME") ||  answers.equalsIgnoreCase("MWANAMME")  ||  answers.equalsIgnoreCase("MWANAUME"))){ 
 							profile.setGender(Gender.MALE);
 							profile.setPreferred_gender(Gender.FEMALE);
@@ -280,6 +290,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 					}
 					
 					if(attr.equals(ProfileAttribute.AGE)){
+						
+						answers = getfirstWord(answers);
 						
 						Date dob = new Date();
 						BigDecimal age = BigDecimal.ONE;
@@ -524,6 +536,8 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 							
 						}else if(waitingdoubleconfirm!=null && waitingdoubleconfirm.equalsIgnoreCase("true")){
 							
+							answers = getfirstWord(answers);
+							
 							if(answers!=null && answers.equalsIgnoreCase("1")){//Accepted
 								
 								String bundle = "";
@@ -560,7 +574,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 								
 								
 							}else if(answers!=null && answers.equalsIgnoreCase("2")){//Accepted
-								
+								answers = getfirstWord(answers);
 								sb.setLength(0);
 								sb.append("Thanks \"");
 								sb.append(profile.getUsername());
@@ -756,6 +770,15 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
     
     
    
+
+	private String getfirstWord(String answers) {
+		if (answers != null && !answers.isEmpty())
+			answers = answers.split("[\\s]")[0];
+		return answers;
+	}
+
+
+
 
 	private boolean mimicMO(String serviceid, IncomingSMS insms) throws Exception {
 		OpcoSMSService smsservice  = opcosmserviceEJB.getOpcoSMSService(Long.valueOf(serviceid), insms.getOpco());
