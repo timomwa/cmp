@@ -278,8 +278,10 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	@SuppressWarnings("unchecked")
 	@Override
 	public IncomingSMS populateProcessorDetails(IncomingSMS incomingsms) {
-		String keyword = (incomingsms.getSms()!=null && !incomingsms.getSms().isEmpty()) 
-				? replaceAllIllegalCharacters(incomingsms.getSms().split("[\\s]")[0].toUpperCase()) : "DEFAULT";
+		String keyword = incomingsms.getSms();
+		
+		keyword = (keyword!=null && !keyword.isEmpty()) 
+				? replaceAllIllegalCharacters(keyword.split("[\\s]")[0].toUpperCase()) : "DEFAULT";
 				
 		Query qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0

@@ -780,7 +780,7 @@ public class BaseEntityBean implements BaseEntityI {
 	
 	public String generateNextTxId(){
 		try {
-			Thread.sleep(3);
+			Thread.sleep(5);
 		} catch (Exception e) {
 			logger.warn("\n\t\t::"+e.getMessage());
 		}

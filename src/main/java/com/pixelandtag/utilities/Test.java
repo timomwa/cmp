@@ -15,7 +15,8 @@ import com.pixelandtag.dating.entities.PersonDatingProfile;
 public class Test {
 
 	public static void main(String[] args) throws IOException {
-		System.out.println(  getProbabilityStr(BigDecimal.valueOf(0.666632)) );
+		//System.out.println("".isEmpty());
+		System.out.println(replaceAllIllegalCharacters( "".split("[\\s]")[0].toUpperCase() ) );
 	}
 	
 	
@@ -24,6 +25,32 @@ public class Test {
 			return "0%";
 		else
 			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
+	}
+	
+	
+	public static String replaceAllIllegalCharacters(String text){
+		
+		if(text==null)
+			return null;
+		
+		text = text.replaceAll("[\\r]", "");
+		text = text.replaceAll("[\\n]", "");
+		text = text.replaceAll("[\\t]", "");
+		text = text.replaceAll("[.]", "");
+		text = text.replaceAll("[,]", "");
+		text = text.replaceAll("[?]", "");
+		text = text.replaceAll("[@]", "");
+		text = text.replaceAll("[\"]", "");
+		text = text.replaceAll("[\\]]", "");
+		text = text.replaceAll("[\\[]", "");
+		text = text.replaceAll("[\\{]", "");
+		text = text.replaceAll("[\\}]", "");
+		text = text.replaceAll("[\\(]", "");
+		text = text.replaceAll("[\\)]", "");
+		text = text.trim();
+		
+		return text;
+		
 	}
 
 }

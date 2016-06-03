@@ -9,6 +9,11 @@ public class TimeStampSequenceEJBImpl implements TimeStampSequenceEJBI {
 
 	@Override
 	public Long getNextTimeStampNano() {
+		try {
+			Thread.sleep(5);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return System.nanoTime();
 	}
 
