@@ -730,6 +730,14 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		}
 		return isAtive;
 	}
+	
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
+	}
 
 
 	@Override

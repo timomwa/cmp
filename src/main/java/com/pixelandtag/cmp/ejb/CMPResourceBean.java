@@ -1842,7 +1842,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	 * To statslog
 	 */
 	
-	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
+	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception { 
 		boolean success = false;
 		try{
 		 
@@ -2995,7 +2995,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		sess.setMsisdn(msisdn);
 		sess.setTimeStamp(new Date());
 		try {
-			sess = saveOrUpdate(sess);
+			sess = em.merge(sess);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -3629,6 +3629,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	        color += letters[(rand.nextInt((15 - 0) + 1) + 0)];
 	    }
 	    return color;
+	}
+	
+	public <T> T saveUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
 	}
 
 }

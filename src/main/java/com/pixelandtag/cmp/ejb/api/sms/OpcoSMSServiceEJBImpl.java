@@ -59,5 +59,13 @@ public class OpcoSMSServiceEJBImpl implements OpcoSMSServiceEJBI {
 		return opcosmsservice.get(0);
 		
 	}
+	
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
+	}
 
 }

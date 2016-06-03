@@ -8,6 +8,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SubscriptionLog;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
@@ -242,5 +243,14 @@ public interface SubscriptionBeanI {
 	 * @throws Exception
 	 */
 	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception;
+
+
+	/**
+	 * 
+	 * @param t
+	 * @return
+	 * @throws Exception
+	 */
+	public <T> T saveOrUpdate(T t) throws Exception;
 
 }

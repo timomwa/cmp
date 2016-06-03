@@ -392,7 +392,7 @@ public class HttpBillingWorker implements Runnable {
 					billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 				}
 					
-				cmp_ejb.saveOrUpdate(billable);
+				subscriptionejb.saveOrUpdate(billable);
 					
 				if(billable.isSuccess()){//return back to queue if we did not succeed
 					//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing

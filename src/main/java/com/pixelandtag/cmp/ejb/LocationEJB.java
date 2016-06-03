@@ -89,7 +89,7 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 					cellRanges.setMax_cell_id(max_cell_id);
 					cellRanges.setMin_cell_id(min_cell_id);
 					cellRanges.setLocation_id(location_id);
-					cellRanges = saveOrUpdate(cellRanges);
+					cellRanges = em.merge(cellRanges);
 				}
 			}
 			
@@ -136,13 +136,13 @@ public class LocationEJB extends BaseEntityBean implements LocationBeanI{
 			}
 			
 			location.setAuthoritative(authoritative);
-			location = saveOrUpdate(location);
+			location = em.merge(location);
 			
 			if(profLoc==null){
 				profLoc = new ProfileLocation();
 				profLoc.setLocation(location);
 				profLoc.setProfile(profile);
-				profLoc = saveOrUpdate(profLoc);
+				profLoc = em.merge(profLoc);
 			}
 			return profLoc;
 		}catch(Exception e){

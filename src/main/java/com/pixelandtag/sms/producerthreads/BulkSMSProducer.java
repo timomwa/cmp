@@ -258,7 +258,7 @@ public class BulkSMSProducer extends Thread {
 				}finally{
 					
 					try{
-						bulktext =  cmpbean.saveOrUpdate(bulktext);
+						bulktext =  bulksmsBean.saveOrUpdate(bulktext);
 					}catch(Exception exp){
 						log(exp);
 					}

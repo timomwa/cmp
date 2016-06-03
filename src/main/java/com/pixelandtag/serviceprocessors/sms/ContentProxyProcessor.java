@@ -4,15 +4,12 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -23,53 +20,31 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
-import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
-import com.pixelandtag.util.FileUtils;
-import com.pixelandtag.web.beans.RequestObject;
 
 public class ContentProxyProcessor extends GenericServiceProcessor {
 
 	final Logger logger = Logger.getLogger(ContentProxyProcessor.class);
-	private InitialContext context;
-	private Properties mtsenderprop;
 	private StopWatch watch;
-	private CMPResourceBeanRemote cmpbean;
 	private GenericHTTPClient httpclient;
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	private OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private Map<Long, OpcoSenderReceiverProfile> opco_sender_profile_cache = new HashMap<Long, OpcoSenderReceiverProfile>();
 	
-	
-
 	public ContentProxyProcessor() throws NamingException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		initEJB();
 		httpclient = new GenericHTTPClient("http");
 		watch = new StopWatch();
 	}
 
 	public void initEJB() throws NamingException {
-		String JBOSS_CONTEXT = "org.jboss.naming.remote.client.InitialContextFactory";
-		
-		Properties props = new Properties();
-		props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		props.put("jboss.naming.client.ejb.context", true);
-		context = new InitialContext(props);
-		cmpbean =  (CMPResourceBeanRemote) 
-	       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
@@ -144,10 +119,10 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			}
 			
 			if(resp!=null && resp.getLatencyLog()!=null)
-				cmpbean.saveOrUpdate(resp.getLatencyLog());
+				opcosmsserviceejb.saveOrUpdate(resp.getLatencyLog());
 			
 			if(incomingsms.getMoprocessor().getProtocol().equalsIgnoreCase("smpp")){
-				cmpbean.sendMTSMPP(outgoingsms,incomingsms.getMoprocessor().getSmppid());
+				baseEntityEJB.sendMTSMPP(outgoingsms,incomingsms.getMoprocessor().getSmppid());
 			}
 			
 		} catch (Exception e) {
@@ -159,25 +134,13 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 
 	@Override
 	public void finalizeMe() {
-		// TODO Auto-generated method stub
 		try {
-			context.close();
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
+			if(context!=null)
+				context.close();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public Connection getCon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BaseEntityI getEJB() {
-
-		return cmpbean;
-	}
+	
 
 }

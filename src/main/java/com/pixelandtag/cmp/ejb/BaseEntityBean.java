@@ -242,7 +242,7 @@ public class BaseEntityBean implements BaseEntityI {
 				Subscription subscription = subscriptionEjb.getSubscription(msisdn, kwd);
 				if(subscription!=null){
 					subscription.setSubscription_status(status);
-					cmp_ejb.saveOrUpdate(subscription);
+					subscription = em.merge(subscription);
 				}
 				
 			}
@@ -353,13 +353,6 @@ public class BaseEntityBean implements BaseEntityI {
 	}
 
 
-	public <T> T saveOrUpdate(T t) throws Exception{
-		try{
-			return em.merge(t);
-		}catch(Exception e){
-			throw e;
-		}
-	}
 	
 /**
 	 * saves and commits

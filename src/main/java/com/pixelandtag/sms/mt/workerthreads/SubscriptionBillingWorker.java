@@ -21,6 +21,7 @@ import com.pixelandtag.billing.OpcoBillingProfile;
 import com.pixelandtag.billing.entities.BillerProfileTemplate;
 import com.pixelandtag.cmp.dao.core.SuccessfullyBillingRequestsDAOI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillableQueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayException;
@@ -59,6 +60,7 @@ public class SubscriptionBillingWorker implements Runnable {
 	private boolean busy = false;
 	private GenericHTTPClient genericHttpClient;
 	private SubscriptionBeanI subscriptionejb;
+	private BillableQueueProcessorEJBI billableQueProc;
 	private BillingGatewayEJBI billinggatewayEJB;
 	private BillerConfigsI billerConfigEJB;
 	private static Random r = new Random();
@@ -145,6 +147,7 @@ public class SubscriptionBillingWorker implements Runnable {
 		       		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 billerConfigEJB =  (BillerConfigsI) this.context.lookup("cmp/BillerConfigsImpl!com.pixelandtag.cmp.ejb.api.billing.BillerConfigsI");
 		 opcosmsserviceEJB = (OpcoSMSServiceEJBI)  this.context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
+		 billableQueProc  = (BillableQueueProcessorEJBI)  this.context.lookup("cmp/BillableQueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillableQueueProcessorEJBI");
 	}
 
 	public SubscriptionBillingWorker(String name_, int mandatory_throttle_) throws Exception{
@@ -332,7 +335,7 @@ public class SubscriptionBillingWorker implements Runnable {
 									
 									logger.debug("DONE! ");
 									
-									billable = cmp_ejb.saveOrUpdate(billable);
+									billable = billableQueProc.saveOrUpdate(billable);
 									
 									setBusy(false);
 									

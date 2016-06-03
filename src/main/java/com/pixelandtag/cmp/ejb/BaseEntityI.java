@@ -30,7 +30,6 @@ public interface BaseEntityI {
 	public <T> Collection<T> listAll(Class<T> entityClass) throws Exception;
 	public <T> T find(Class<T> entityClass, Long id) throws Exception;
 	public <T> Collection<T> find(Class<T> entityClass,	Map<String, Object> criteria, int start, int end)   throws Exception;
-	public <T> T saveOrUpdate(T t) throws Exception ;
 	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception;
 	public boolean toStatsLog(IncomingSMS incomingsms, String toStatsLog)  throws Exception ;
 	public boolean  acknowledge(long message_log_id) throws Exception;

@@ -16,5 +16,13 @@ public class SMSServiceBundleEJBImpl implements SMSServiceBundleEJBI{
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
 	
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
+	}
+	
 	
 }

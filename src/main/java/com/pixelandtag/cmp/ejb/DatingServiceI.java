@@ -86,4 +86,6 @@ public interface DatingServiceI extends BaseEntityI {
 	
 	public Billable createBillable(OutgoingSMS outgoingsms);
 
+	public <T> T saveOrUpdate(T t) throws Exception;
+
 }

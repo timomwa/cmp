@@ -224,7 +224,7 @@ public interface CMPResourceBeanRemote extends BaseEntityI {
 	
 	public USSDSession getSession(BigInteger sessionid, String msisdn);
 
-	
+	public <T> T saveUpdate(T t) throws Exception;
 	
 	
 

@@ -159,7 +159,7 @@ public class SubscriptionWorker extends Thread{
 						slog.setSubscription_id(sub.getId());
 						slog.setTimeStamp(new Date());
 						try{
-							cmpbean.saveOrUpdate(slog);
+							subscriptionbean.saveOrUpdate(slog);
 						}catch(Exception e){
 							logger.error(e.getMessage(),e);
 						}

@@ -9,9 +9,14 @@ import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -30,6 +35,8 @@ import com.pixelandtag.util.FileUtils;
  */
 public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
+	protected InitialContext context;
+	protected CMPResourceBeanRemote baseEntityEJB;
 	protected Properties mtsenderprop;
 	protected String host;
 	protected String dbName;
@@ -198,7 +205,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		if(opcosmsserv==null){
 			try {
-				opcosmsserv = getEJB().getOpcoSMSService(outgoingsms.getServiceid(), outgoingsms.getOpcosenderprofile().getOpco());
+				opcosmsserv = baseEntityEJB.getOpcoSMSService(outgoingsms.getServiceid(), outgoingsms.getOpcosenderprofile().getOpco());
 			} catch (ServiceNotLinkedToOpcoException e) {
 				logger.error(e.getMessage(), e);
 			} 
@@ -222,7 +229,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		try{
 			
-			billable = getEJB().find(Billable.class, "cp_tx_id",outgoingsms.getCmp_tx_id());
+			billable = baseEntityEJB.find(Billable.class, "cp_tx_id",outgoingsms.getCmp_tx_id());
 			
 			
 		}catch(Exception e){
@@ -261,7 +268,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.debug(" before save "+billable.getId());
 		
 		try{
-			billable = getEJB().saveOrUpdate(billable);
+			billable = baseEntityEJB.saveUpdate(billable);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
@@ -359,17 +366,30 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			return false;
 	}
 	
-	public GenericServiceProcessor(){
+	public GenericServiceProcessor() throws NamingException{
 		
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		
-		host = mtsenderprop.getProperty("db_host");
-		dbName = mtsenderprop.getProperty("DATABASE");
-		username = mtsenderprop.getProperty("db_username");
-		password = mtsenderprop.getProperty("db_password");
+		initEjb();
 		
 	}
 	
+	private void initEjb() throws NamingException {
+		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
+		 props.put("jboss.naming.client.ejb.context", true);
+		 context = new InitialContext(props);
+		 baseEntityEJB =  (CMPResourceBeanRemote) 
+      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
+		
+	}
+
+
 	public static Vector<String> splitText(String input){
   		int maxSize = 156;
 		Vector<String> ret=new Vector<String>();
@@ -402,7 +422,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		try {
 			
-			getEJB().toStatsLog(incomingsms,TO_STATS_LOG);	
+			baseEntityEJB.toStatsLog(incomingsms,TO_STATS_LOG);	
 			
 		} catch (Exception e) {
 			log(e);
@@ -442,7 +462,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 					IncomingSMS mo = this.moMsgs.takeFirst();//will block here while the queue is empty
 					
 					mo.setMo_ack(Boolean.TRUE);
-					mo = getEJB().saveOrUpdate(mo);
+					mo = baseEntityEJB.saveUpdate(mo);
 					
 					if(!(mo.getCmp_tx_id().isEmpty())){
 						
@@ -454,7 +474,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 						
 						if(outgoingsms.getOpcosenderprofile()==null){//In case no sender profile, use the incoming one's
 							OperatorCountry opco = mo.getOpco();
-							OpcoSenderReceiverProfile opcosenderprofile = getEJB().getopcosenderProfileFromOpcoId(opco.getId());
+							OpcoSenderReceiverProfile opcosenderprofile = baseEntityEJB.getopcosenderProfileFromOpcoId(opco.getId());
 							outgoingsms.setOpcosenderprofile(opcosenderprofile);
 						}
 						
@@ -522,7 +542,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		try {
 			
 			incomingsms.setMo_ack(Boolean.TRUE);
-			success = getEJB().saveOrUpdate(incomingsms).getId().compareTo(0L)>0;
+			success = baseEntityEJB.saveUpdate(incomingsms).getId().compareTo(0L)>0;
 			
 		} catch (Exception e) {
 			
@@ -548,16 +568,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		outgoingSMS  = bill(outgoingSMS);
 		
-		BaseEntityI cmpBean = getEJB();
-		
 		try {
 			
 			//int max_retry = 5;
 			//int count = 0;
 			
-			boolean success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
+			boolean success = baseEntityEJB.saveUpdate(outgoingSMS).getId().compareTo(0L)>0;
 			//while(!success && count<=max_retry){
-			//	success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
+			//	success = cmpBean.saveUpdate(outgoingSMS).getId().compareTo(0L)>0;
 			//}
 			
 			

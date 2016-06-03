@@ -2,25 +2,19 @@ package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
@@ -63,19 +57,16 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	final Logger logger = Logger.getLogger(DatingServiceProcessor.class);
 	private DatingServiceI datingBean;
 	private LocationBeanI location_ejb; 
-	private CMPResourceBeanRemote cmp_bean;
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	private SubscriptionBeanI subscriptionBean;
 	private OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private FreeLoaderEJBI freeloaderEJB;
 	private MessageEJBI messageEJB;
-	private InitialContext context;
 	private OperatorCountryRulesEJBI opcorulesEJB;
 	private ChatCounterEJBI chatcounterEJB;
 	private BillingGatewayEJBI billinggateway;
 	private Map<String,OperatorCountryRules> rulescache = new HashMap<String,OperatorCountryRules>();
 	
-	//private Properties mtsenderprop;
 	private boolean allow_number_sharing  = true;
 	private boolean allow_multiple_plans = true;
 	
@@ -86,18 +77,10 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	
 	
 	public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		 Properties props = new Properties();
-		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		 props.put("jboss.naming.client.ejb.context", true);
-		 context = new InitialContext(props);
-		 datingBean =  (DatingServiceI) 
+    	
+		datingBean =  (DatingServiceI) 
        		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
-		cmp_bean = (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
@@ -146,8 +129,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			PersonDatingProfile profile = datingBean.getProfile(person);
 			
 			if(KEYWORD.equalsIgnoreCase("BUNDLES")){
-				String submenustring = cmp_bean.getSubMenuString(KEYWORD,language_id);
-				outgoingsms.setSms(submenustring+cmp_bean.getMessage(MAIN_MENU_ADVICE,language_id, person.getOpco().getId()));//get all the sub menus there.
+				String submenustring = baseEntityEJB.getSubMenuString(KEYWORD,language_id);
+				outgoingsms.setSms(submenustring+baseEntityEJB.getMessage(MAIN_MENU_ADVICE,language_id, person.getOpco().getId()));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("LOGIN")){
 				
@@ -314,7 +297,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, person.getOpco());
 				
 				//if(!subvalid) //TODO - have a config per opco to decide whether to auto renew or not.
-				//	cmp_bean.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
+				//	baseEntityEJB.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
 				OperatorCountryRules chatbundlerule = getChatBundleRules( incomingsms.getOpco() );
 				
 				boolean allowOffBundle = (profile!=null && profile.getProfileComplete() && chatbundlerule.getRule_value().equalsIgnoreCase("true"));
@@ -910,7 +893,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	private String getProbabilityStr(PersonDatingProfile destination_person) {
 		BigDecimal reply_probability = destination_person.getReplyProbability();
 		if(reply_probability==null || reply_probability.compareTo(BigDecimal.ZERO)<=0)
-			return " < 4%";
+			return " < 3.5%";
 		else
 			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
 	}
@@ -919,21 +902,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	@Override
 	public void finalizeMe() {
 		try {
-			context.close();
-		} catch (NamingException e) {
+			if(context!=null)
+				context.close();
+		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
-	}
-
-	@Override
-	public Connection getCon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BaseEntityI getEJB() {
-		return this.datingBean;
 	}
 
 }

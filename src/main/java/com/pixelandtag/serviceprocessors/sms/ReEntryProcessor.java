@@ -30,7 +30,6 @@ public class ReEntryProcessor extends GenericServiceProcessor {
 	
 	private Logger logger = Logger.getLogger(getClass());
 	private SubscriptionBeanI subscriptionBean;
-	private InitialContext context;
 	private DatingServiceI datingBean;
 	private FreeLoaderEJBI freeloaderEJB;
 	private MessageEJBI messageEJB;
@@ -41,15 +40,7 @@ public class ReEntryProcessor extends GenericServiceProcessor {
 	}
 	
 	public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		Properties props = new Properties();
-		props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		props.put("jboss.naming.client.ejb.context", true);
-		context = new InitialContext(props);
-		subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
+    	subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		datingBean =  (DatingServiceI) context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		freeloaderEJB =  (FreeLoaderEJBI) context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
 		messageEJB =  (MessageEJBI) context.lookup("cmp/MessageEJBImpl!com.pixelandtag.cmp.ejb.MessageEJBI");
@@ -101,28 +92,17 @@ public class ReEntryProcessor extends GenericServiceProcessor {
 	}
 
 	private void isInFreeloaderList(String mSISDN) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void finalizeMe() {
 		try {
-			context.close();
-		} catch (NamingException e) {
+			if(context!=null)
+				context.close();
+		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 	}
 
-	@Override
-	public Connection getCon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BaseEntityI getEJB() {
-		return datingBean;
-	}
 
 }

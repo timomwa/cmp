@@ -1133,7 +1133,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	 * To statslog
 	 */
 	
-	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
+	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception { 
 		boolean success = false;
 		try{
 		 
@@ -1866,5 +1866,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			 match = findMatch(pref_gender,person.getId());
 		
 		return match;
+	}
+	
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
 	}
 }
