@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
@@ -22,7 +21,6 @@ import org.json.JSONObject;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
-import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;

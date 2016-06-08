@@ -140,9 +140,15 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	
 	
 	@Override
-	public boolean deleteFromQueue(OutgoingSMS sms)  throws Exception{
-		sms = em.merge(sms);
-		smsoutDAO.delete(sms);
+	public boolean deleteFromQueue(OutgoingSMS sms){
+		
+		try{
+			Query qry = em.createQuery("delete from OutgoingSMS WHERE id=:id");
+			qry.setParameter("id", sms.getId());
+			qry.executeUpdate();
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
 		return true;
 	}
 	
