@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.Context;
@@ -222,6 +223,8 @@ public class SubscriptionBillingWorker implements Runnable {
 										biller_cache.put(billable.getOpco().getId(), biller);
 									}
 									
+									
+									billable = billableQueProc.saveOrUpdate(billable);
 									SenderResp senderresp = biller.charge(billable);
 									
 									watch.stop();
@@ -475,7 +478,7 @@ public class SubscriptionBillingWorker implements Runnable {
 			
 			billable = new Billable();
 			billable.setCp_id("CONTENT360_KE");
-			billable.setCp_tx_id(SubscriptionRenewal.generateNextId());
+			billable.setCp_tx_id( UUID.randomUUID().toString() );
 			billable.setDiscount_applied("0");
 			billable.setKeyword(service.getSmsservice().getCmd());
 			billable.setService_id(service.getSmsservice().getId().toString());

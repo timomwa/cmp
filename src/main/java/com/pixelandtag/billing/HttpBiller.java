@@ -75,7 +75,7 @@ public class HttpBiller extends GenericBiller {
 			
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		if(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME)!=null)
-			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME).getValue(), billable.getCp_tx_id()));//"cptxid"
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME).getValue(), String.valueOf( billable.getId() ) ));//"cptxid"
 		
 		if(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME)!=null)
 			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME).getValue(),billable.getMsisdn()));//"msisdn"
