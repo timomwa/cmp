@@ -429,7 +429,7 @@ public class HttpBiller extends GenericBiller {
 				throw new BillerConfigException("Could not parse the json response json -> "+resp.getBody(),e);
 			}catch (Exception e) {
 				logger.error(e.getMessage(),e);
-				throw new BillerConfigException(" Problem reading json response",e);
+				throw new BillerConfigException(" Problem reading json response json -> "+resp.getBody(),e);
 			}
 			
 		}else if((resp.getContenttype()!=null &&  resp.getContenttype().toLowerCase().trim().contains("xml")) || expected_contenttype.getValue().trim().equalsIgnoreCase("xml")){
