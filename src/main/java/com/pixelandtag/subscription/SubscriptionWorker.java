@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -138,7 +139,7 @@ public class SubscriptionWorker extends Thread{
 					
 					IncomingSMS incomingsms = new IncomingSMS();
 					
-					incomingsms.setCmp_tx_id(cmpbean.generateNextTxId());
+					incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					incomingsms.setMsisdn(sub.getMsisdn());
 					incomingsms.setShortcode(dto.getShortcode());
 					incomingsms.setPrice(BigDecimal.valueOf(dto.getPrice()));

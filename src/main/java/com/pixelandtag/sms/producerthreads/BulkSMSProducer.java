@@ -2,6 +2,7 @@ package com.pixelandtag.sms.producerthreads;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -208,7 +209,6 @@ public class BulkSMSProducer extends Thread {
 			for(BulkSMSQueue bulktext : queue){
 				
 				try{
-					 String cpTxId = sequenceGen.getOrCreateNextSequence("BLK").getSeqNumber();
 					 String telcoid =  bulktext.getText().getPlan().getTelcoid();//could be the ISO opco code.
 					 OpcoSenderReceiverProfile opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco(telcoid);
 					 
@@ -223,11 +223,11 @@ public class BulkSMSProducer extends Thread {
 					 MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
 					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
 					 outgoingsms.setMoprocessor(moproc);
-					 outgoingsms.setCmp_tx_id(cpTxId);
+					 outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
 					 
-					 bulktext.setBulktxId(cpTxId);//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
+					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
 					

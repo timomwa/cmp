@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import javax.ejb.EJB;
@@ -2348,7 +2349,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									incomingsms.setSms(smsserv.getCmd());
 									incomingsms.setShortcode(proc.getShortcode());
 									incomingsms.setPrice(smsserv.getPrice());
-									incomingsms.setCmp_tx_id(generateNextTxId());
+									incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 									incomingsms.setServiceid( Long.valueOf(smsserv.getId().intValue()));
 									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
@@ -3304,7 +3305,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				incomingsms = new IncomingSMS();
-				incomingsms.setCmp_tx_id(generateNextTxId());
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 				incomingsms.setMsisdn(msisdn);
 				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);

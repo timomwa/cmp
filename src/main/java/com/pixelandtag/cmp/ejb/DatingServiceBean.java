@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
@@ -27,7 +28,6 @@ import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
@@ -93,8 +93,6 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	@EJB
 	TimezoneConverterI timezoneEJB;
 	
-	@EJB
-	private TimeStampSequenceEJBI timeStampEJB;
 	
 	@EJB
 	private FreeLoaderEJBI freeloaderEJB;
@@ -147,7 +145,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					outgoingsms.setMoprocessor(proc);
 					outgoingsms.setShortcode(proc.getShortcode());
 					
-					outgoingsms.setCmp_tx_id(generateNextTxId());
+					outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					
 					outgoingsms.setSplit(false);
 					outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
@@ -493,7 +491,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							outgoingsms.setServiceid(smsserv.getId());
 							outgoingsms.setMoprocessor(proc);
 							outgoingsms.setShortcode(proc.getShortcode());
-							outgoingsms.setCmp_tx_id(generateNextTxId());
+							outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 							
 							outgoingsms.setSplit(false);
 							outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
@@ -1322,7 +1320,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		if(outgoingsms.getCmp_tx_id()==null || outgoingsms.getCmp_tx_id().trim().isEmpty()){
-			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+			outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 		}
 		try{
 			

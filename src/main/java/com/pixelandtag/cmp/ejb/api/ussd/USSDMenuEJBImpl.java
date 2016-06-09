@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import javax.ejb.EJB;
@@ -792,7 +793,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 		incomingsms.setSms(smsserv.getCmd());
 		incomingsms.setShortcode(proc.getShortcode());
 		incomingsms.setPrice(smsserv.getPrice());
-		incomingsms.setCmp_tx_id(generateNextTxId());
+		incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  ); 
 		incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 		incomingsms.setServiceid(smsserv.getId());
 		incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
@@ -940,7 +941,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 				incomingsms.setSms(smsserv.getCmd());
 				incomingsms.setShortcode(proc.getShortcode());
 				incomingsms.setPrice(smsserv.getPrice());
-				incomingsms.setCmp_tx_id(generateNextTxId());
+				incomingsms.setCmp_tx_id(generateNextTxId()); 
 				incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 				incomingsms.setServiceid(smsserv.getId());
 				incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
@@ -1136,12 +1137,7 @@ public class USSDMenuEJBImpl implements USSDMenuEJBI {
 	
 	
 	public String generateNextTxId(){
-		try {
-			Thread.sleep(3);
-		} catch (Exception e) {
-			logger.warn("\n\t\t::"+e.getMessage());
-		}
-		return String.valueOf(System.nanoTime());
+		return UUID.randomUUID().toString() ;
 	}
 
 

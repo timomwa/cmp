@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 
 import javax.naming.NamingException;
@@ -767,7 +768,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}
 					
 					outgoingchatsms.setSms(msg);
-					outgoingchatsms.setCmp_tx_id(generateNextTxId());//Is a totally new message
+					outgoingchatsms.setCmp_tx_id( UUID.randomUUID().toString() );//Is a totally new message
 					outgoingchatsms.setOpco_tx_id(generateNextTxId());//Is a totally new message
 					outgoingchatsms.setPriority(0);//highest priority possible
 					outgoingchatsms.setPrice(BigDecimal.ZERO);

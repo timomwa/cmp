@@ -1,10 +1,10 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
@@ -17,10 +17,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.input.SAXBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +25,6 @@ import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
 import com.pixelandtag.cmp.dao.core.MessageExtraParamsDAOI;
 import com.pixelandtag.cmp.dao.core.MessageLogDAOI;
 import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
@@ -40,7 +35,6 @@ import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileType;
-import com.pixelandtag.cmp.entities.subscription.DNDList;
 import com.pixelandtag.smssenders.JsonUtilI;
 import com.pixelandtag.smssenders.Receiver;
 import com.pixelandtag.subscription.dto.MediumType;
@@ -81,9 +75,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		mandatory.add(Receiver.HTTP_RECEIVER_EXPECTED_CONTENTTYPE);
 		mandatory.add(Receiver.MO_MEDIUM_SOURCE);
 	}
-	
-	@EJB
-	private TimeStampSequenceEJBI timeStampEJB;
 	
 	@Inject
 	private static JsonUtilI jsonutil;
@@ -223,7 +214,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(incomingsms.getMoprocessor()==null)
 			throw new ConfigurationException("Couldn't find processor for shortcode =\""+incomingsms.getShortcode()+"\", opcoid=\""+incomingsms.getOpco().getId()+"\"");
 		
-		incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+		incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 		
 		incomingsms.setIsSubscription(Boolean.FALSE);
 		
@@ -358,7 +349,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	public IncomingSMS processMo(IncomingSMS incomingsms) {
 		try {
 			if(incomingsms.getCmp_tx_id()==null || incomingsms.getCmp_tx_id().isEmpty())
-				incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString() );
 			return incomingSMSDAO.save(incomingsms);
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

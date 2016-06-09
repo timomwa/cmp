@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJB;
@@ -212,10 +213,9 @@ public class SafaricomUSSD extends HttpServlet {
 			try{
 				
 				
-				String cmp_tx_id = cmpBean.generateNextTxId();
 				IncomingSMS incomingsms = new IncomingSMS();
 				incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-				incomingsms.setCmp_tx_id(cmp_tx_id);
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 				incomingsms.setIsSubscription(Boolean.FALSE);
 				incomingsms.setMediumType(MediumType.ussd);
 				incomingsms.setSms(  USSD_STRING );

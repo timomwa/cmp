@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.ejb.subscription;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
@@ -13,13 +14,11 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.Message;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
@@ -58,8 +57,6 @@ public class SubscriptionRenewalNotificationImpl implements
 	@EJB
 	private OperatorCountryRulesEJBI opcoRulesEJBI;
 	
-	@EJB
-	private TimeStampSequenceEJBI timeStampEJB;
 	
 	@EJB
 	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
@@ -107,7 +104,7 @@ public class SubscriptionRenewalNotificationImpl implements
 			outgoingsms.setShortcode(opcosmsservice.getMoprocessor().getShortcode());
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			outgoingsms.setIsSubscription(Boolean.TRUE);
-			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+			outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 			outgoingsms.setMsisdn(msisdn);
 			Date earliestsendtimeslot = opcoRulesEJBI.findEarliestSendtime(opcosenderprofile); 
 			outgoingsms.setTimestamp(earliestsendtimeslot);

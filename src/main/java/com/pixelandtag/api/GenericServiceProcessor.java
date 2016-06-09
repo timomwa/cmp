@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -436,12 +437,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	}
 
 	public String generateNextTxId(){
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			logger.warn(e.getMessage());
-		}
-		return String.valueOf(System.currentTimeMillis());
+		return UUID.randomUUID().toString() ;
 	}
 	
 	

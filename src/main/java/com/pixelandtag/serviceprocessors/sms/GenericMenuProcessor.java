@@ -2,6 +2,7 @@ package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import javax.naming.InitialContext;
@@ -701,7 +702,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				incomingsms = new IncomingSMS();
-				incomingsms.setCmp_tx_id(baseEntityEJB.generateNextTxId()); 
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  ); 
 				incomingsms.setMsisdn(msisdn);
 				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);

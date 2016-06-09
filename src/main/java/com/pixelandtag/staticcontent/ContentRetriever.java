@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 
@@ -373,7 +374,7 @@ public class ContentRetriever {
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				incomingsms = new IncomingSMS();
-				incomingsms.setCmp_tx_id(cmpresource.generateNextTxId());
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 				incomingsms.setMsisdn(msisdn);
 				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);

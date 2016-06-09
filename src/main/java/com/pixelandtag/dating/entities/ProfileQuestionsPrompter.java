@@ -1,8 +1,6 @@
 package com.pixelandtag.dating.entities;
 
 import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -20,13 +18,7 @@ import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.MatchesLogEJBI;
 import com.pixelandtag.cmp.ejb.ProfileCompletionReminderLogEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.MTCreatorEJBI;
-import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
-import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
-import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
-import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
-import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.util.FileUtils;

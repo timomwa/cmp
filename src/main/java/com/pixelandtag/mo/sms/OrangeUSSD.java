@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.naming.Context;
@@ -198,10 +199,9 @@ public class OrangeUSSD extends HttpServlet {
 			
 			
 			
-			String cmp_tx_id = cmpBean.generateNextTxId();
 			IncomingSMS incomingsms = new IncomingSMS();
 			incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-			incomingsms.setCmp_tx_id(cmp_tx_id);
+			incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 			incomingsms.setIsSubscription(Boolean.FALSE);
 			incomingsms.setMediumType(MediumType.ussd);
 			incomingsms.setSms(  (answers!=null ? answers  : action) );
@@ -301,7 +301,7 @@ public class OrangeUSSD extends HttpServlet {
 	private String handleGeneralQuery(HttpServletRequest req) throws Exception {
 		String response = "";
 		String ip_addr = req.getRemoteAddr();
-		String tx_id = cmpBean.generateNextTxId();
+		String tx_id = UUID.randomUUID().toString() ;
 		final RequestObject ro = new RequestObject(req,tx_id,false);
 		
 		ro.setMediumType(MediumType.ussd);
@@ -320,7 +320,7 @@ public class OrangeUSSD extends HttpServlet {
 			
 			
 			incomingsms.setBilling_status(moMessage.getBillingStatus());
-			incomingsms.setCmp_tx_id(moMessage.getCmp_tx_id());
+			incomingsms.setCmp_tx_id( moMessage.getCmp_tx_id());
 			incomingsms.setOpco_tx_id(moMessage.getOpco_tx_id());
 			incomingsms.setEvent_type(moMessage.getEventType()!=null ? moMessage.getEventType().toString() : "" );
 			incomingsms.setIsSubscription(Boolean.FALSE);
