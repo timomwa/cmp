@@ -96,6 +96,13 @@ public class SubscriptionBillingWorker implements Runnable {
 	
 	private OpcoSMSServiceEJBI opcosmsserviceEJB;
 
+	private long max_chill_time = 15000;
+	private long mandatory_sleep_time = 0;
+
+	private long change_val = 100;
+
+	private int uncapped_streak = 0;
+
 	public String getName() {
 		return name;
 	}
@@ -324,10 +331,20 @@ public class SubscriptionBillingWorker implements Runnable {
 											//For Orange. If we're capped, each thread sleeps for 15 seconds.
 											//TODO have a biller policy to match SLA TPS.
 											try{
-												Thread.sleep(15000);
+												Thread.sleep(max_chill_time);
+												if((mandatory_sleep_time+change_val)<=max_chill_time)//We start sleeping more per run
+													mandatory_sleep_time = mandatory_sleep_time+change_val;
 											}catch(InterruptedException ie){
 												ie.printStackTrace();
 											}
+											uncapped_streak--;
+										}else{
+											
+											if(uncapped_streak>=200)
+												if((mandatory_sleep_time-change_val)>=0)
+													mandatory_sleep_time = mandatory_sleep_time-change_val;
+											
+											uncapped_streak++;
 										}
 									}
 									
@@ -368,6 +385,8 @@ public class SubscriptionBillingWorker implements Runnable {
 							logger.warn(ie);
 						}
 					}
+					
+					Thread.sleep(mandatory_sleep_time);//Mandatory sleep time
 				
 				}catch (Exception e){
 					log(e);
