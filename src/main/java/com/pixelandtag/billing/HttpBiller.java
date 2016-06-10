@@ -42,7 +42,7 @@ public class HttpBiller extends GenericBiller {
 	@Inject
 	private Encryptor encryptor = new EncryptorImpl();
 	
-	private static JsonUtilI jsonutil = new JsonUtilImpl();
+	//private static JsonUtilI jsonutil = new JsonUtilImpl();
 	
 	private static final String TEST_MSIDN = "254776165280";
 	private Map<String,BillerProfileConfig> configuration;
@@ -386,6 +386,7 @@ public class HttpBiller extends GenericBiller {
 					logger.info(sb.toString());
 					sb.setLength(0);
 				}
+				JsonUtilI jsonutil = new JsonUtilImpl();
 				jsonutil.loadJson(jsonobject);
 				response.setRefvalue((String)jsonutil.getValue(pathtorefval.getValue()));
 				sb.append("\t\t").append("B. response.getrefValue() > ").append(response.getRefvalue());//.append("\n");	
