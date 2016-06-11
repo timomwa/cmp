@@ -40,8 +40,8 @@ import com.pixelandtag.subscription.dto.MediumType;
 			+ " year(bs.text.sheduledate)=year(:sheduledate) AND "
 			+ " month(bs.text.sheduledate)=month(:sheduledate) AND "
 			+ " day(bs.text.sheduledate)=day(:sheduledate) AND "
-			+ " hour(bs.text.sheduledate)>=hour(:sheduledate) AND "
-			+ " minute(bs.text.sheduledate)>=minute(:sheduledate) "
+			+ " hour(bs.text.sheduledate)<=hour(:sheduledate) AND "
+			+ " minute(bs.text.sheduledate)<=minute(:sheduledate) "
 			+ " ORDER BY bs.timelogged asc, bs.priority asc"
 	)
 })
