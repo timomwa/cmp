@@ -10,5 +10,6 @@ public interface OpcoSMSServiceEJBI {
 	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco) throws ServiceNotLinkedToOpcoException;
 	public OpcoSMSService getOpcoSMSService(String keyword, OperatorCountry opco) throws ServiceNotLinkedToOpcoException;
 	public <T> T saveOrUpdate(T t) throws Exception;
+	public OpcoSMSService getOpcoSMSService(String string, String shortcode, OperatorCountry opco)  throws ServiceNotLinkedToOpcoException;
 
 }

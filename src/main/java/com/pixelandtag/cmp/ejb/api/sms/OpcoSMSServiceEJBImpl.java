@@ -60,6 +60,17 @@ public class OpcoSMSServiceEJBImpl implements OpcoSMSServiceEJBI {
 		
 	}
 	
+	public OpcoSMSService getOpcoSMSService(String keyword, String shortcode, OperatorCountry opco)  throws ServiceNotLinkedToOpcoException{
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("keyword", keyword);
+		params.put("opco", opco);
+		params.put("shortcode", shortcode);
+		List<OpcoSMSService> opcosmsservice = opcosmsserviceDAO.findByNamedQuery(OpcoSMSService.NQ_FIND_BY_KEYWORD_SHORTCODE_AND_OPCO, params);
+		if(opcosmsservice==null || opcosmsservice.size()<1)
+			throw new ServiceNotLinkedToOpcoException("Looks like the service with keyword '"+keyword+"', shortcode='"+shortcode+"'  isn't enabled for the opco with id '"+opco.getId()+"'");
+		return opcosmsservice.get(0);
+	}
+	
 	public <T> T saveOrUpdate(T t) throws Exception{
 		try{
 			return em.merge(t);

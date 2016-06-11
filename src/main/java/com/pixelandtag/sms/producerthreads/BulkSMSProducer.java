@@ -225,7 +225,7 @@ public class BulkSMSProducer extends Thread {
 					 BulkSMSText text = bulktext.getText();
 					 
 					// MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
-					 OpcoSMSService opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService("DEFAULT", opcosenderprofile.getOpco());
+					 OpcoSMSService opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
 					 MOProcessor moproc = opcosmsservice.getMoprocessor();
 					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
 					 outgoingsms.setMoprocessor(moproc);
