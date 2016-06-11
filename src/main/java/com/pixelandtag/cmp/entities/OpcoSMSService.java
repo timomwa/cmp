@@ -38,7 +38,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 	),
 	@NamedQuery(
 			name = OpcoSMSService.NQ_FIND_BY_KEYWORD_SHORTCODE_AND_OPCO,
-			query = "from OpcoSMSService osms WHERE osms.smsservice.cmd=:keyword AND AND osms.moprocessor.shortcode=:shortcode AND osms.opco=:opco"
+			query = "from OpcoSMSService osms WHERE osms.smsservice.cmd=:keyword AND osms.moprocessor.shortcode=:shortcode AND osms.opco=:opco"
 	)
 })
 public class OpcoSMSService implements Serializable {
