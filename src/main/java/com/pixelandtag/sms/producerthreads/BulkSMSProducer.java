@@ -232,8 +232,7 @@ public class BulkSMSProducer extends Thread {
 					 outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
-					 logger.info("\n\n\t\t opcosmsservice.getServiceid()-> "+opcosmsservice.getServiceid()+"\n\n");
-					 outgoingsms.setServiceid( Long.valueOf( opcosmsservice.getServiceid() ) );
+					 outgoingsms.setParlayx_serviceid(  opcosmsservice.getServiceid()  );
 					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
@@ -245,6 +244,7 @@ public class BulkSMSProducer extends Thread {
 					 logger.info(">>::processorId:"+plan.getProcessor_id());
 					 logger.info(">>::sms ::: "+text.getContent());
 					 logger.info(">>::msisdn ::: "+bulktext.getMsisdn());
+					 logger.info(">>::opcosmsservice.getServiceid()-> "+opcosmsservice.getServiceid());
 						
 					if(bulktext.getRetrycount().compareTo(0)>0){
 						MessageStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
