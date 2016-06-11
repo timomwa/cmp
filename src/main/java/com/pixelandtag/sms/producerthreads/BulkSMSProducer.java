@@ -16,11 +16,13 @@ import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.bulksms.BulkSMSText;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI;
 import com.pixelandtag.cmp.ejb.sequences.SequenceGenI;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.entities.URLParams;
@@ -53,6 +55,7 @@ public class BulkSMSProducer extends Thread {
 	private QueueProcessorEJBI queueprocessor;
 	private BulkSmsMTI bulksmsBean;
 	private OpcoSenderProfileEJBI opcosenderProfileEJB;
+	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
 	private  Context context = null;
 	private Properties mtsenderprop;
 	private Properties log4jProps;
@@ -68,7 +71,8 @@ public class BulkSMSProducer extends Thread {
 			 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 			 props.put("jboss.naming.client.ejb.context", true);
 			 context = new InitialContext(props);
-			
+			 opcoSMSServiceEJB = (OpcoSMSServiceEJBI) 
+			       		context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 			 opcosenderProfileEJB = (OpcoSenderProfileEJBI) 
 			       		context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 			 sequenceGen  = (SequenceGenI) 
@@ -220,13 +224,15 @@ public class BulkSMSProducer extends Thread {
 					 }
 					 BulkSMSText text = bulktext.getText();
 					 
-					 MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
+					// MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
+					 OpcoSMSService opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService("DEFAULT", opcosenderprofile.getOpco());
+					 MOProcessor moproc = opcosmsservice.getMoprocessor();
 					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
 					 outgoingsms.setMoprocessor(moproc);
 					 outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
-					 
+					 outgoingsms.setServiceid( Long.valueOf( opcosmsservice.getServiceid() ) );
 					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
