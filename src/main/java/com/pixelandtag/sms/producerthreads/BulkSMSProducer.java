@@ -232,6 +232,7 @@ public class BulkSMSProducer extends Thread {
 					 outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
+					 logger.info("\n\n\t\t opcosmsservice.getServiceid()-> "+opcosmsservice.getServiceid()+"\n\n");
 					 outgoingsms.setServiceid( Long.valueOf( opcosmsservice.getServiceid() ) );
 					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
