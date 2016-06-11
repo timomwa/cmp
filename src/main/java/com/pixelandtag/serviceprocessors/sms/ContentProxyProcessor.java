@@ -104,7 +104,10 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			watch.stop();
 			logger.info(getName()+" PROXY_LATENCY_ON forwarding url ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
 			watch.reset();
-			final String message = resp.getBody();
+			String message = resp.getBody();
+			if(message==null || message.trim().isEmpty())
+				message = "Request received. To unsubscribe, send STOP to "+incomingsms.getShortcode();
+			
 			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESP_CODE: "+RESP_CODE);
 			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESPONSE: "+message);
 			
