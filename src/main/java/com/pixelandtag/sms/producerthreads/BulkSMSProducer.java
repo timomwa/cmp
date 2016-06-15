@@ -217,7 +217,7 @@ public class BulkSMSProducer extends Thread {
 			
 			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L); 
 			
-			logger.info("\n\t>>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size()+"\n");
+			logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size()+"\n");
 			for(BulkSMSQueue bulktext : queue){
 				
 				try{

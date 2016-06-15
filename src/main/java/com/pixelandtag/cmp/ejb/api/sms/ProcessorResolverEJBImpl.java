@@ -375,6 +375,10 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	 * @return
 	 */
 	private String getValue(String xml,String tagname) {
+		if(xml==null || xml.isEmpty() || tagname==null || tagname.isEmpty())
+			return "";
+		xml = xml.toLowerCase();
+		tagname = tagname.toLowerCase();
 		String startTag = "<"+tagname+">";
 		String endTag = "</"+tagname+">";
 		int start = xml.indexOf(startTag)+startTag.length();

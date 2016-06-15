@@ -195,7 +195,7 @@ public class OutgoingQueueRouter extends Thread {
 				}
 				
 				try {
-					Thread.sleep(mandatoryqueuewaittime);//TODO extenalize this sleep value
+					Thread.sleep(mandatoryqueuewaittime);
 				} catch (InterruptedException e) {
 					logger.error(e);
 				}
