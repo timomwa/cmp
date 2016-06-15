@@ -229,7 +229,7 @@ public class BulkSMSProducer extends Thread {
 					 MOProcessor moproc = opcosmsservice.getMoprocessor();
 					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
 					 outgoingsms.setMoprocessor(moproc);
-					 outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
+					 //outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
 					 outgoingsms.setParlayx_serviceid(  opcosmsservice.getServiceid()  );

@@ -5,9 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJB;
 import javax.naming.Context;
@@ -21,6 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.MessageStatus;
@@ -42,6 +52,9 @@ import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.dating.entities.Person;
 import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.entities.MOSms;
+import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
+import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
+import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 import com.pixelandtag.smssenders.Receiver;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.util.StopWatch;
@@ -70,6 +83,9 @@ public class SafParlayXReceiver extends HttpServlet {
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
+	
+	private StopWatch watch = new StopWatch();
+	private GenericHTTPClient httpclient;
 
 
 	private static final String SYNC_ORDER_RELATION_FLAG = "syncOrderRelation";
@@ -79,7 +95,21 @@ public class SafParlayXReceiver extends HttpServlet {
      */
     public SafParlayXReceiver() {
         super();
-        // TODO Auto-generated constructor stub
+        try {
+			httpclient = new GenericHTTPClient("http");
+		} catch (KeyManagementException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 	/**
@@ -161,6 +191,35 @@ public class SafParlayXReceiver extends HttpServlet {
 			
 			logger.info("\n\n\t\t:::::: IS SUBSCRIPTION!! MSISDN =>>> "+msisdn);
 			
+			try{
+			
+				GenericHTTPParam param = new GenericHTTPParam();
+				param.setUrl("http://139.162.223.21/mosms.php");
+				List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+				qparams.add(new BasicNameValuePair("cptxid", System.currentTimeMillis()+""));
+				qparams.add(new BasicNameValuePair("code","40420"));	
+				qparams.add(new BasicNameValuePair("msisdn",msisdn));
+				qparams.add(new BasicNameValuePair("text","alerts"));
+				
+				param.setHttpParams(qparams);
+				watch.start();
+				final GenericHttpResp resp = httpclient.call(param);
+				final int RESP_CODE = resp.getResp_code();
+				watch.stop();
+				logger.info(" SafParlayxReceiver PROXY_LATENCY_ON forwarding url ("+param.getUrl()+")::::::::::  "+(Double.parseDouble(watch.elapsedTime(TimeUnit.MILLISECONDS)+"")) + " mili-seconds");
+				watch.reset();
+				String message = resp.getBody();
+				if(message==null || message.trim().isEmpty())
+					message = "Request received. To unsubscribe, send STOP to 40420";
+				
+				logger.info("\n\n\t\t::::::_:::::::::PROXY_RESP_CODE: "+RESP_CODE);
+				logger.info("\n\n\t\t::::::_:::::::::PROXY_RESPONSE: "+message);
+			
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+			}
+			
+			
 		}else{
 		
 			incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
@@ -172,6 +231,7 @@ public class SafParlayXReceiver extends HttpServlet {
 			} catch (ConfigurationException e) {
 				logger.error(e.getMessage(),e);
 			}
+			
 			responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
 					   +"<soapenv:Header/>"
 					   +"<soapenv:Body>"
