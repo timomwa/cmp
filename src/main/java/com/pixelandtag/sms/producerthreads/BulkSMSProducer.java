@@ -1,6 +1,8 @@
 package com.pixelandtag.sms.producerthreads;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -60,6 +62,7 @@ public class BulkSMSProducer extends Thread {
 	private Properties mtsenderprop;
 	private Properties log4jProps;
 	private int bulk_sms_poll_wait_time = 1000;//1 sec in miliseconds by default
+	private Map<String,OpcoSenderReceiverProfile> profileSenderCache = new HashMap<String,OpcoSenderReceiverProfile>();
 
 	public void initEJB() throws NamingException{
 		
@@ -214,19 +217,31 @@ public class BulkSMSProducer extends Thread {
 			
 			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L); 
 			
-			logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size());
+			logger.info("\n\t>>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size()+"\n");
 			for(BulkSMSQueue bulktext : queue){
 				
 				try{
-					 String telcoid =  bulktext.getText().getPlan().getTelcoid();//could be the ISO opco code.
-					 OpcoSenderReceiverProfile opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco(telcoid);
+					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
+					 bulktext.setStatus(MessageStatus.IN_QUEUE);
+					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
+					 bulktext =  bulksmsBean.saveOrUpdate(bulktext);//Save state
 					 
-					 if(opcosenderprofile==null)
-					 try{
-						 opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco( Long.valueOf(telcoid)  );
-					 }catch(NumberFormatException nfe){
-						 logger.warn(nfe.getMessage()+" "+telcoid+" isn't a digit");
+					 String telcoid =  bulktext.getText().getPlan().getTelcoid();//could be the ISO opco code.
+					 OpcoSenderReceiverProfile opcosenderprofile = profileSenderCache.get(telcoid);
+							 
+					 
+					 
+					 if(opcosenderprofile==null){
+						 opcosenderprofile = opcosenderProfileEJB.getActiveProfileForOpco(telcoid);
+						 
+						 if(opcosenderprofile==null)
+							 try{
+								 opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco( Long.valueOf(telcoid)  );
+							 }catch(NumberFormatException nfe){
+								 logger.warn(nfe.getMessage()+" "+telcoid+" isn't a digit");
+							 }
 					 }
+					 
 					 BulkSMSText text = bulktext.getText();
 					 
 					// MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
@@ -236,10 +251,7 @@ public class BulkSMSProducer extends Thread {
 					 outgoingsms.setMoprocessor(moproc);
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
 					 outgoingsms.setParlayx_serviceid(  opcosmsservice.getServiceid()  );
-					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
-					 bulktext.setStatus(MessageStatus.IN_QUEUE);
-					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
-					 bulktext =  bulksmsBean.saveOrUpdate(bulktext);//Save state
+					 
 					
 					 BulkSMSPlan plan =  text.getPlan();
 					
