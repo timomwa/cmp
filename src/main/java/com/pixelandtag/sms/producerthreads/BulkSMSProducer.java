@@ -239,7 +239,7 @@ public class BulkSMSProducer extends Thread {
 					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
-					
+					 bulktext =  bulksmsBean.saveOrUpdate(bulktext);//Save state
 					
 					 BulkSMSPlan plan =  text.getPlan();
 					
