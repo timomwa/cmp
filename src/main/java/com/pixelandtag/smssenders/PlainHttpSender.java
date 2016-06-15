@@ -29,6 +29,8 @@ public class PlainHttpSender extends GenericSender {
 	
 	
 
+	private static final CharSequence EMPTY_LINKID_TAG = "<v2:linkid>${linkid}</v2:linkid>";
+
 	private Logger logger = Logger.getLogger(getClass());
 	
 	@Inject
@@ -284,6 +286,7 @@ public class PlainHttpSender extends GenericSender {
 				}
 			}
 			
+			payload_template = payload_template.replace(EMPTY_LINKID_TAG,"");
 			generic_http_parameters.setStringentity(payload_template);
 			
 		}else{

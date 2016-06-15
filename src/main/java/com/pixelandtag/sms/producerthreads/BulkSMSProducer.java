@@ -59,6 +59,7 @@ public class BulkSMSProducer extends Thread {
 	private  Context context = null;
 	private Properties mtsenderprop;
 	private Properties log4jProps;
+	private int bulk_sms_poll_wait_time = 1000;//1 sec in miliseconds by default
 
 	public void initEJB() throws NamingException{
 		
@@ -85,6 +86,10 @@ public class BulkSMSProducer extends Thread {
 			       		context.lookup("cmp/BulkSmsMTEJB!com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI");
 			 
 			 logger.info(getClass().getSimpleName()+": Successfully initialized EJB BulkSmsMTI !!");
+			 
+			 try{
+				 bulk_sms_poll_wait_time = Integer.valueOf(mtsenderprop.getProperty("bulk_sms_poll_wait_time"));
+			 }catch(Exception e){}
 	 }
 	
 	
@@ -185,7 +190,7 @@ public class BulkSMSProducer extends Thread {
 				populateQueue();
 				
 				try {
-					Thread.sleep(60000);//Wait a minute
+					Thread.sleep(bulk_sms_poll_wait_time);
 				} catch (InterruptedException e) {
 					log(e);
 				}
