@@ -70,6 +70,9 @@ public class SafParlayXReceiver extends HttpServlet {
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
+
+
+	private static final String SYNC_ORDER_RELATION_FLAG = "syncOrderRelation";
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -138,27 +141,49 @@ public class SafParlayXReceiver extends HttpServlet {
 		if(!body.isEmpty())
 			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
 		
-		incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
+		String responsexml = "";
 		
-		try {
-			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
-			logger.info("incomingsms = "+incomingsms);
-			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
-		} catch (ConfigurationException e) {
-			logger.error(e.getMessage(),e);
+		
+		if(!body.isEmpty() && body.contains(SYNC_ORDER_RELATION_FLAG)){
+			
+			String msisdn = getValue(body, "ID");
+			
+			responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\""
+							+"		xmlns:loc=\"http://www.csapi.org/schema/parlayx/data/sync/v1_0/local\">"
+							+"<soapenv:Header/>"
+							+"<soapenv:Body>"
+							+"<loc:syncOrderRelationResponse>"
+							+"<loc:result>0</loc:result>"
+							+"<loc:resultDescription>OK</loc:resultDescription>"
+							+"</loc:syncOrderRelationResponse>"
+							+"</soapenv:Body>"
+							+"</soapenv:Envelope>";
+			
+			logger.info("\n\n\t\t:::::: IS SUBSCRIPTION!! MSISDN =>>> "+msisdn);
+			
+		}else{
+		
+			incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
+			
+			try {
+				IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
+				logger.info("incomingsms = "+incomingsms);
+				logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
+			} catch (ConfigurationException e) {
+				logger.error(e.getMessage(),e);
+			}
+			responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
+					   +"<soapenv:Header/>"
+					   +"<soapenv:Body>"
+					   +"<loc:notifySmsReceptionResponse/>"
+					   +"</soapenv:Body>"
+					   +"</soapenv:Envelope>";
 		}
 		
 		PrintWriter pw = response.getWriter();
 		
 		try{
-		
-			String responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
-								   +"<soapenv:Header/>"
-								   +"<soapenv:Body>"
-								   +"<loc:notifySmsReceptionResponse/>"
-								   +"</soapenv:Body>"
-								   +"</soapenv:Envelope>";
-			pw.write(responsexml);//"Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
+			pw.write(responsexml);
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 		}finally{
@@ -166,6 +191,7 @@ public class SafParlayXReceiver extends HttpServlet {
 				pw.close();
 			}catch(Exception es){}
 		}
+		
 		
 		
 	}
@@ -213,5 +239,15 @@ public class SafParlayXReceiver extends HttpServlet {
 	    return body;
 	}
 
+	
+	private String getValue(String xml,String tagname) {
+		String startTag = "<"+tagname+">";
+		String endTag = "</"+tagname+">";
+		int start = xml.indexOf(startTag)+startTag.length();
+		int end  = xml.indexOf(endTag);
+		if(start<0 || end<0)
+			return "";
+		return xml.substring(start, end);
+	}
 
 }
