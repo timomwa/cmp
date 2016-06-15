@@ -117,7 +117,7 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 	public OutgoingSMS convertToOutgoing() {
 		OutgoingSMS outgoing = new OutgoingSMS();
 		outgoing.setBilling_status(getBilling_status());
-		outgoing.setCmp_tx_id( UUID.randomUUID().toString()  );
+		outgoing.setCmp_tx_id( getCmp_tx_id()  );
 		if(getEvent_type()!=null)
 			outgoing.setEvent_type(getEvent_type() );
 		outgoing.setIn_outgoing_queue(Boolean.FALSE);

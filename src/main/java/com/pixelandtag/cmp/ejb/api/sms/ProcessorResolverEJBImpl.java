@@ -185,7 +185,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 			msisdn =  incomingparams.get(msisdn_param_name_cfg.getValue());
 			shortcode =  incomingparams.get(shortcode_param_name_cfg.getValue());
-			if(shortcode==null || shortcode.isEmpty()){
+			if(shortcode==null || shortcode.isEmpty()){//TODO remove after PK fixes
 				for (Map.Entry<String, String> entry : incomingparams.entrySet()){
 					if(entry.getKey().toLowerCase().equalsIgnoreCase(shortcode_param_name_cfg.getValue())){
 						shortcode = entry.getValue();
@@ -195,6 +195,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			}
 				
 			sms  =  incomingparams.get(sms_param_name_cfg.getValue());
+			if(sms==null || sms.isEmpty())
+				sms = incomingparams.get("message");//TODO remove after PK fixes param names
 			if(txid_param_name_cfg!=null && txid_param_name_cfg.getValue()!=null || 
 					!txid_param_name_cfg.getValue().isEmpty()){
 				opcotxid = incomingparams.get(txid_param_name_cfg.getValue());
