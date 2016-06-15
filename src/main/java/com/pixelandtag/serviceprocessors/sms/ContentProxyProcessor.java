@@ -20,8 +20,10 @@ import org.apache.log4j.Logger;
 
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.GenericServiceProcessor;
+import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
@@ -36,6 +38,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	private GenericHTTPClient httpclient;
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	private OpcoSenderProfileEJBI opcosenderprofileEJB;
+	private QueueProcessorEJBI queueprocbean;
 	private Map<Long, OpcoSenderReceiverProfile> opco_sender_profile_cache = new HashMap<Long, OpcoSenderReceiverProfile>();
 	
 	public ContentProxyProcessor() throws NamingException, KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
@@ -47,7 +50,8 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 	public void initEJB() throws NamingException {
 		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
-		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
+		queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
+	 	logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
 	}
 
 	@Override
@@ -126,8 +130,10 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 				opcosmsserviceejb.saveOrUpdate(resp.getLatencyLog());
 			
 			if(incomingsms.getMoprocessor().getProtocol().equalsIgnoreCase("smpp")){
+				outgoingsms = queueprocbean.saveOrUpdate(outgoingsms);
 				baseEntityEJB.sendMTSMPP(outgoingsms,incomingsms.getMoprocessor().getSmppid());
 				outgoingsms.setIn_outgoing_queue(Boolean.TRUE);
+				queueprocbean.updateMessageLog(outgoingsms, MessageStatus.IN_QUEUE);
 			}
 			
 		} catch (Exception e) {
