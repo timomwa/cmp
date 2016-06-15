@@ -117,7 +117,12 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				logger.info("No such record with cmp_tx_id / opco_tx_id = "+sms.getCmp_tx_id()+"/"+sms.getOpco_tx_id()+"  in message_log table, so we create one");
 				
 				messagelog = new MessageLog();
-				messagelog.setCmp_tx_id(sms.getCmp_tx_id());
+				
+				if(sms.getCmp_tx_id()!=null && !sms.getCmp_tx_id().isEmpty())
+					messagelog.setCmp_tx_id(sms.getCmp_tx_id());
+				else
+					messagelog.setCmp_tx_id(UUID.randomUUID().toString());
+				
 				messagelog.setMo_processor_id_fk(sms.getMoprocessor().getId());
 				messagelog.setMsisdn(sms.getMsisdn());
 				messagelog.setMt_sms(sms.getSms());
