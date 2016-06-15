@@ -212,7 +212,7 @@ public class BulkSMSProducer extends Thread {
 		
 		try {
 			
-			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L);
+			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L); 
 			
 			logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size());
 			for(BulkSMSQueue bulktext : queue){
@@ -234,8 +234,6 @@ public class BulkSMSProducer extends Thread {
 					 MOProcessor moproc = opcosmsservice.getMoprocessor();
 					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
 					 outgoingsms.setMoprocessor(moproc);
-					 //outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
-					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
 					 outgoingsms.setParlayx_serviceid(  opcosmsservice.getServiceid()  );
 					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
@@ -250,14 +248,8 @@ public class BulkSMSProducer extends Thread {
 					 logger.info(">>::sms ::: "+text.getContent());
 					 logger.info(">>::msisdn ::: "+bulktext.getMsisdn());
 					 logger.info(">>::opcosmsservice.getServiceid()-> "+opcosmsservice.getServiceid());
-						
-					if(bulktext.getRetrycount().compareTo(0)>0){
-						MessageStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
-										 ? MessageStatus.FAILED_TEMPORARILY : MessageStatus.FAILED_PERMANENTLY;
-						bulktext.setStatus(status);
-					}
 					
-					outgoingsms = queueprocessor.saveOrUpdate(outgoingsms);
+					 outgoingsms = queueprocessor.saveOrUpdate(outgoingsms);
 								 
 				}catch(Exception exp){
 					
