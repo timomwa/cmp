@@ -112,7 +112,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESP_CODE: "+RESP_CODE);
 			logger.info("\n\n\t\t::::::_:::::::::PROXY_RESPONSE: "+message);
 			
-			if(RESP_CODE==HttpStatus.SC_OK){
+			if(RESP_CODE>=200 && RESP_CODE<=299){
 				outgoingsms.setSms(message);
 			}else if(RESP_CODE==HttpStatus.SC_CREATED || RESP_CODE==HttpStatus.SC_NO_CONTENT){
 				//mo.setMt_Sent("Request received.");
