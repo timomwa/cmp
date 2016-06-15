@@ -91,8 +91,10 @@ var TRIVIA = {
 								img = "images/received.png";
 							if(MT_STATUS=='FAILED_TEMPORARILY')
 								img = "images/temp_fail.png";
+							if(MT_STATUS=='IN_QUEUE')
+								img = "images/queue.png";
 							
-							var imgstr = "<img width='8' src='"+img+"' alt='Temp fail'/>";
+							var imgstr = "<img width='8' src='"+img+"' alt='x'/>";
 							table.append($("<TR>" +
 							"<TD>"+CMP_Txid+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
