@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 
@@ -184,6 +185,15 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 			msisdn =  incomingparams.get(msisdn_param_name_cfg.getValue());
 			shortcode =  incomingparams.get(shortcode_param_name_cfg.getValue());
+			if(shortcode==null || shortcode.isEmpty()){
+				for (Map.Entry<String, String> entry : incomingparams.entrySet()){
+					if(entry.getKey().toLowerCase().equalsIgnoreCase(shortcode_param_name_cfg.getValue())){
+						shortcode = entry.getValue();
+						break;
+					}
+				}
+			}
+				
 			sms  =  incomingparams.get(sms_param_name_cfg.getValue());
 			if(txid_param_name_cfg!=null && txid_param_name_cfg.getValue()!=null || 
 					!txid_param_name_cfg.getValue().isEmpty()){
