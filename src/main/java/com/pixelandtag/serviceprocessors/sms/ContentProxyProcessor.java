@@ -86,6 +86,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			qparams.add(new BasicNameValuePair("code",incomingsms.getShortcode()));	
 			qparams.add(new BasicNameValuePair("msisdn",incomingsms.getMsisdn()));
 			qparams.add(new BasicNameValuePair("text",incomingsms.getSms()));
+			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
 			//incomingsms.getMoprocessor()
 			
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMoprocessor().getForwarding_url() ::: "+incomingsms.getMoprocessor().getForwarding_url()
