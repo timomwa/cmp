@@ -127,6 +127,7 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			
 			if(incomingsms.getMoprocessor().getProtocol().equalsIgnoreCase("smpp")){
 				baseEntityEJB.sendMTSMPP(outgoingsms,incomingsms.getMoprocessor().getSmppid());
+				outgoingsms.setIn_outgoing_queue(Boolean.TRUE);
 			}
 			
 		} catch (Exception e) {
