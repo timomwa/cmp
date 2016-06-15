@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -121,7 +122,12 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				messagelog.setMsisdn(sms.getMsisdn());
 				messagelog.setMt_sms(sms.getSms());
 				messagelog.setMt_timestamp(mt_timestamp);
-				messagelog.setOpco_tx_id(sms.getOpco_tx_id());
+				
+				if(sms.getOpco_tx_id()!=null && !sms.getOpco_tx_id().isEmpty())
+					messagelog.setOpco_tx_id(sms.getOpco_tx_id());
+				else
+					messagelog.setOpco_tx_id(UUID.randomUUID().toString());
+				
 				messagelog.setShortcode(sms.getShortcode());
 				messagelog.setSource(sms.getMediumType().name());
 				messagelog.setStatus(status.name());
