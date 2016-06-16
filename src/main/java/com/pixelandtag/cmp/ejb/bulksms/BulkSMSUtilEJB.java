@@ -168,7 +168,7 @@ public class BulkSMSUtilEJB implements BulkSMSUtilBeanI {
 			Query query = em.createQuery("select coalesce((pln.numberOfSMS - count(*)), pln.numberOfSMS), pln from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
 					+ " WHERE q.text=txt and txt.plan=:plan group by pln");
 			query.setParameter("plan", plan);
-			List<Object[]> rest = (List<Object[]>) query.getSingleResult();
+			List<Object[]> rest = (List<Object[]>) query.getResultList();
 			
 			if(rest!=null && rest.size()>0)
 				planBalance = BigInteger.ZERO;
