@@ -2,6 +2,7 @@ package com.pixelandtag.sms.core;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -11,18 +12,23 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MessageStatus;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
+import com.pixelandtag.cmp.entities.BillingType;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
 import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
-import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.Sender;
+import com.pixelandtag.smssenders.SenderFactory;
 import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.util.FileUtils;
 /**
@@ -40,12 +46,17 @@ public class SenderThreadWorker implements Runnable{
 	private Sender sender;
 	private OpcoSenderReceiverProfile opcosenderprofile;
 	private ConfigsEJBI configsEJB;
+	private BillingGatewayEJBI billingGW;
 	private DNDListEJBI dndEJB;
 	private QueueProcessorEJBI queueprocbean;
 	private Context context;
 	private boolean run = true;
 	private boolean stopped  = false;
 	private Properties mtsenderprop;
+	public static final Map<String,OpcoSMSService> opco_sms_service_cache = new ConcurrentHashMap<String,OpcoSMSService>();
+
+	private static final String DEFAULT = "DEFAULT";
+	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
 	
 	
 	public SenderThreadWorker(Queue<OutgoingSMS> outqueue_, OpcoSenderReceiverProfile opcosenderprofile_) throws Exception{
@@ -68,6 +79,8 @@ public class SenderThreadWorker implements Runnable{
 	 	configsEJB =  (ConfigsEJBI) context.lookup("cmp/ConfigsEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI");
 	 	queueprocbean =  (QueueProcessorEJBI) context.lookup("cmp/QueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI");
 	 	dndEJB  =  (DNDListEJBI) context.lookup("cmp/DNDListEJBImpl!com.pixelandtag.cmp.ejb.subscription.DNDListEJBI");
+	 	billingGW =  (BillingGatewayEJBI) context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
+	 	opcoSMSServiceEJB =  (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 	 	logger.info(getClass().getSimpleName()+": Successfully initialized EJB QueueProcessorEJBImpl !!");
 	}
 
@@ -125,7 +138,9 @@ public class SenderThreadWorker implements Runnable{
 							mtstatus = MessageStatus.SENT_SUCCESSFULLY;
 							queueprocbean.deleteFromQueue(sms);
 							queueprocbean.deleteCorrespondingIncomingSMS(sms);
-						
+							
+							createSuccessBillingRec(sms);
+							
 						}else{
 							
 							sms.setSent(Boolean.FALSE);
@@ -172,6 +187,35 @@ public class SenderThreadWorker implements Runnable{
 		}
 		
 	}
+	
+
+	/**
+	 * for MT billing, we make sure if the sms was 
+	 * sent successfully, we create a success billing record.
+	 * @param sms
+	 */
+	public void createSuccessBillingRec(OutgoingSMS sms) {
+		
+		try{
+			
+			String key_ = DEFAULT+sms.getShortcode()+opcosenderprofile.getOpco().getId();
+			OpcoSMSService opcosmsservice = opco_sms_service_cache.get(key_);
+			if(opcosmsservice==null)
+				opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService(DEFAULT, sms.getShortcode(), opcosenderprofile.getOpco());
+			sms.setPrice(opcosmsservice.getPrice());
+			
+			if(opcosmsservice.getBillingType()==BillingType.MT_BILLING)
+				billingGW.createSuccessBillingRec(sms, BillingType.MT_BILLING);
+			
+		}catch(ServiceNotLinkedToOpcoException snle){
+			logger.warn(snle.getMessage());
+		}catch(Exception exp){
+			logger.warn(exp.getMessage(), exp);
+		}
+		
+	}
+	
+	
 
 	public boolean isRun() {
 		return run;
