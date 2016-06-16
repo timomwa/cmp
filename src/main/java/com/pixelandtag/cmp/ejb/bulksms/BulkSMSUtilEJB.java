@@ -164,11 +164,12 @@ public class BulkSMSUtilEJB implements BulkSMSUtilBeanI {
 	public BigInteger getPlanBalance(BulkSMSPlan plan) throws PlanBalanceException { 
 		BigInteger planBalance = null;
 		try{
-			Query query = em.createQuery("select coalesce((pln.numberOfSMS - count(*)), pln.numberOfSMS) from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
-					+ " WHERE q.text=txt and txt.plan=:plan");
+			Query query = em.createQuery("select coalesce((pln.numberOfSMS - count(*)), pln.numberOfSMS), pln.id from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
+					+ " WHERE q.text=txt and txt.plan=:plan group by pln.id");
 			query.setParameter("plan", plan);
-			planBalance = (BigInteger) query.getSingleResult();
+			Object[] rest = (Object[]) query.getSingleResult();
 			
+			planBalance = (BigInteger) rest[0];
 			if(planBalance==null)
 				planBalance = plan.getNumberOfSMS();
 			
