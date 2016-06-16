@@ -253,7 +253,7 @@ public class BulkSMSProducer extends Thread {
 					 outgoingsms.setMoprocessor(moproc);
 					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
 					 outgoingsms.setParlayx_serviceid(  opcosmsservice.getServiceid()  );
-					 
+					 outgoingsms.setPrice(opcosmsservice.getPrice());
 					
 					 BulkSMSPlan plan =  text.getPlan();
 					
