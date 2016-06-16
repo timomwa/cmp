@@ -2,6 +2,7 @@ package com.pixelandtag.api;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -18,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -28,6 +30,7 @@ import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.util.FileUtils;
 
 /**
@@ -43,6 +46,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	protected String dbName;
 	protected String username;
 	protected String password;
+	public static final String MO_BILLING = "MO_BILLING";
 	public static final String DB = "pixeland_content360";
 	public static final String SPACE = " ";
 	public static final String NUM_SEPERATOR = "."+SPACE;
@@ -109,10 +113,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	protected String unsubscriptionText;
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
-	//private Map<Long, ServiceProcessorDTO> serviceProcessorCache = new HashMap<Long,ServiceProcessorDTO>();
-	//private Map<Long, MOProcessor> serviceProcessorCache = new HashMap<Long,MOProcessor>();
-	//private Map<Long, OpcoSenderReceiverProfile> opcosenderProfileCache = new HashMap<Long,OpcoSenderReceiverProfile>();
-	
+	private BillingGatewayEJBI billingGW;
 	
 	public String getSubscriptionText() {
 		return subscriptionText;
@@ -221,7 +222,11 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			outgoingsms.setCharged(true);
 			BillingStatus status = opcosmsserv.getBillingType() == BillingType.MO_BILLING ? BillingStatus.SUCCESSFULLY_BILLED : BillingStatus.NO_BILLING_REQUIRED;
 			outgoingsms.setBilling_status(status);
-			logger.debug(" returning.... price is zero ");
+			logger.debug(" returning.... price is zero or is MO biling ");
+			
+			if(opcosmsserv.getBillingType() == BillingType.MO_BILLING)
+				billingGW.createSuccessBillingRec(outgoingsms, BillingType.MO_BILLING);
+			
 			return outgoingsms;
 		}
 		
@@ -285,6 +290,9 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		
 	}
+
+
+	
 
 
 	/**
@@ -386,6 +394,10 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		 context = new InitialContext(props);
 		 baseEntityEJB =  (CMPResourceBeanRemote) 
       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
+		  billingGW =  (BillingGatewayEJBI) 
+		      		context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
+		 
 		 
 		
 	}

@@ -13,7 +13,9 @@ import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -35,17 +37,23 @@ import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.MessageLog;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
+import com.pixelandtag.cmp.entities.SMSService;
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
@@ -96,6 +104,16 @@ public class SafaricomUSSD extends HttpServlet {
 	@EJB
 	private OpcoSMSServiceEJBI opcosmsserviceEJB;
 	
+	
+	@EJB
+	private BillingGatewayEJBI billingGW;
+	
+	@EJB
+	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
+	
+	
+	private static final String TELCO_ID =  "KEN-639-02";
+	
 	private Logger logger = Logger.getLogger(SafaricomUSSD.class);
     /**
 	 * 
@@ -106,6 +124,8 @@ public class SafaricomUSSD extends HttpServlet {
 	
 	private GenericHTTPClient httpclient;
 	private StopWatch watch;
+	public static final Map<String,OpcoSMSService> opco_sms_service_cache = new HashMap<String,OpcoSMSService>();
+	
 	
 
 	@Override
@@ -223,16 +243,29 @@ public class SafaricomUSSD extends HttpServlet {
 				incomingsms.setProcessed(Boolean.TRUE);
 				incomingsms.setMo_ack(Boolean.TRUE);
 				incomingsms.setMsisdn(MSISDN);
+				incomingsms.setOpco(opcoEJB.findOpcoByCode(TELCO_ID));
+				
 				MOProcessor processor = processorEJB.getMOProcessor( SERVICE_CODE );
+				String key_ = "DEFAULT"+SERVICE_CODE+incomingsms.getOpco().getId();
+				
+				OpcoSMSService opcosmsservice = opco_sms_service_cache.get(key_);
+				
+				if(opcosmsservice==null)
+					opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService("DEFAULT", SERVICE_CODE, incomingsms.getOpco());
+				
 				incomingsms.setMoprocessor(processor);
-				incomingsms.setOpco(opcoEJB.findOpcoByCode("KEN-639-02"));
-				incomingsms.setPrice(BigDecimal.ZERO);
+				incomingsms.setPrice( opcosmsservice.getPrice() );
+				
+				
 				
 				logger.info(" >> processor = "+processor);
 				
 				dndEJB.removeFromDNDList(incomingsms.getMsisdn());
-				datingBean.logMO(incomingsms).getId();
+				incomingsms = datingBean.logMO(incomingsms);
+				incomingsms.getId();
 				
+				if(opcosmsservice.getBillingType()==BillingType.MO_BILLING)
+					billingGW.createSuccessBillingRec(incomingsms, BillingType.MO_BILLING);
 				
 				MessageLog messagelog = new MessageLog();
 				messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());

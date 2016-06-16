@@ -1,5 +1,6 @@
 package com.pixelandtag.cmp.ejb.api.billing;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
@@ -17,9 +18,13 @@ import com.pixelandtag.billing.BillingConfigSet;
 import com.pixelandtag.billing.OpcoBillingProfile;
 import com.pixelandtag.billing.entities.BillerProfileTemplate;
 import com.pixelandtag.cmp.dao.core.SuccessfullyBillingRequestsDAOI;
+import com.pixelandtag.cmp.entities.BillingType;
+import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.Operation;
 import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.smssenders.SenderResp;
 
@@ -27,7 +32,6 @@ import com.pixelandtag.smssenders.SenderResp;
 @Remote
 public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 	
-	//private static Map<Long, Biller> biller_cache = new HashMap<Long, Biller>();
 	
 	@EJB
 	private BillerConfigsI billerConfigEJB;
@@ -109,6 +113,75 @@ public class BillingGatewayEJBImpl implements BillingGatewayEJBI {
 			logger.error(exp.getMessage(),exp);
 			throw new BillingGatewayException("Problem occurred instantiating sender. Error: "+exp.getMessage());
 		}
+	}
+	
+	
+	
+
+	public SuccessfullyBillingRequests createSuccessBillingRec(OutgoingSMS outgoingsms, BillingType billingType) {
+		
+		SuccessfullyBillingRequests success_billing = null;
+		
+		if(outgoingsms.getPrice()==null || outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0 )
+			return null;
+		
+		try{
+			
+			success_billing = new SuccessfullyBillingRequests();
+			success_billing.setCp_tx_id(outgoingsms.getCmp_tx_id());
+			success_billing.setKeyword(outgoingsms.getSms()!=null ? outgoingsms.getSms().split("\\s")[0].toUpperCase() : "recharge");
+			success_billing.setMsisdn(outgoingsms.getMsisdn());
+			success_billing.setOpco(outgoingsms.getOpcosenderprofile().getOpco());
+			success_billing.setOperation(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+			success_billing.setPrice(outgoingsms.getPrice());
+			success_billing.setResp_status_code("OK");
+			success_billing.setShortcode(outgoingsms.getShortcode());
+			success_billing.setSuccess(Boolean.TRUE);
+			success_billing.setTimeStamp(new Date());
+			success_billing.setTransactionId(outgoingsms.getCmp_tx_id());
+			success_billing.setTransferin(Boolean.FALSE);
+			success_billing.setBillingType(billingType);
+			success_billing = successfullbillingDAO.save(success_billing);
+		
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+		}
+		
+		return success_billing;
+		
+	}
+	
+	
+	public SuccessfullyBillingRequests createSuccessBillingRec(IncomingSMS incomingSms, BillingType billingType){
+
+		SuccessfullyBillingRequests success_billing = null;
+		
+		if(incomingSms.getPrice()==null || incomingSms.getPrice().compareTo(BigDecimal.ZERO)<=0 )
+			return null;
+		
+		try{
+			
+			success_billing = new SuccessfullyBillingRequests();
+			success_billing.setCp_tx_id(incomingSms.getCmp_tx_id());
+			success_billing.setKeyword(incomingSms.getSms()!=null ? incomingSms.getSms().split("\\s")[0].toUpperCase() : "recharge");
+			success_billing.setMsisdn(incomingSms.getMsisdn());
+			success_billing.setOpco(incomingSms.getOpco());
+			success_billing.setOperation(incomingSms.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+			success_billing.setPrice(incomingSms.getPrice());
+			success_billing.setResp_status_code("OK");
+			success_billing.setShortcode(incomingSms.getShortcode());
+			success_billing.setSuccess(Boolean.TRUE);
+			success_billing.setTimeStamp(new Date());
+			success_billing.setTransactionId(incomingSms.getCmp_tx_id());
+			success_billing.setTransferin(Boolean.FALSE);
+			success_billing.setBillingType(billingType);
+			success_billing = successfullbillingDAO.save(success_billing);
+		
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+		}
+		
+		return success_billing;
 	}
 
 }

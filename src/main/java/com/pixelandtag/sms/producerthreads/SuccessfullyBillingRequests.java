@@ -8,6 +8,8 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +23,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
@@ -88,6 +91,11 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	private Boolean transferin;
 	
 	
+	@Column(name = "billingType",nullable = true)
+	@Enumerated(EnumType.STRING)
+	private BillingType billingType;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
@@ -97,6 +105,8 @@ public class SuccessfullyBillingRequests  implements Serializable {
 			success = Boolean.FALSE;
 		if(transferin==null)
 			transferin = Boolean.FALSE;
+		if(billingType==null)
+			billingType = BillingType.MT_BILLING;
 	}
 
 
@@ -238,6 +248,18 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	public void setOpco(OperatorCountry opco) {
 		this.opco = opco;
 	}
+
+
+	public BillingType getBillingType() {
+		return billingType;
+	}
+
+
+	public void setBillingType(BillingType billingType) {
+		this.billingType = billingType;
+	}
+	
+	
 	
 
 }

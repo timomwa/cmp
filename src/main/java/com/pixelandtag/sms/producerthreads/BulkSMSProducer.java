@@ -240,6 +240,8 @@ public class BulkSMSProducer extends Thread {
 							 }catch(NumberFormatException nfe){
 								 logger.warn(nfe.getMessage()+" "+telcoid+" isn't a digit");
 							 }
+						 
+						 profileSenderCache.put(telcoid, opcosenderprofile);
 					 }
 					 
 					 BulkSMSText text = bulktext.getText();

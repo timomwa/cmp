@@ -24,6 +24,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 
@@ -92,6 +93,11 @@ public class Billable implements Serializable {
 	@Transient
 	private Boolean transferIn;
 	
+	
+	@Column(name = "billingType",nullable = true)
+	@Enumerated(EnumType.STRING)
+	private BillingType billingType;
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
@@ -105,6 +111,8 @@ public class Billable implements Serializable {
 			valid = Boolean.TRUE;
 		if(opco_tx_id==null && getCp_tx_id()!=null)
 			opco_tx_id = getCp_tx_id();
+		if(billingType==null)
+			billingType = BillingType.MT_BILLING;
 	}
 	
 	/**
@@ -451,6 +459,14 @@ public class Billable implements Serializable {
 
 	public void setOpco_tx_id(String opco_tx_id) {
 		this.opco_tx_id = opco_tx_id;
+	}
+
+	public BillingType getBillingType() {
+		return billingType;
+	}
+
+	public void setBillingType(BillingType billingType) {
+		this.billingType = billingType;
 	}
 	
 	
