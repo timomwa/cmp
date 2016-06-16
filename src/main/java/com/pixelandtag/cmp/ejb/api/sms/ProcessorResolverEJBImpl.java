@@ -288,7 +288,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 				
 		Query qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
-					+ "osms.smsservice.price, "//1
+					+ "osms.price, "//1
 					+ "osms.smsservice.id, "//2
 					+ "osms.smsservice.split_mt, "//3
 					+ "osms.smsservice.event_type, "//4
@@ -310,7 +310,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			
 			qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
-					+ "osms.smsservice.price, "//1
+					+ "osms.price, "//1
 					+ "osms.smsservice.id, "//2
 					+ "osms.smsservice.split_mt, "//3
 					+ "osms.smsservice.event_type, "//4
