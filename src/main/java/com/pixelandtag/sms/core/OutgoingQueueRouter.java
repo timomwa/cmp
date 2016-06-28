@@ -85,7 +85,7 @@ public class OutgoingQueueRouter extends Thread {
 		
 		try{
 			
-			queueSemaphore.acquire();
+			queueSemaphorebillable.acquire();
 			
 			Queue<OutgoingSMS> outqueue = opcoqueuemap.get(profileId);
 			
@@ -103,7 +103,7 @@ public class OutgoingQueueRouter extends Thread {
 			return null;
 		
 		}finally{
-			queueSemaphore.release(); 
+			queueSemaphorebillable.release(); 
 		}
 	}
 	

@@ -200,8 +200,10 @@ public class SenderThreadWorker implements Runnable{
 			
 			String key_ = DEFAULT+sms.getShortcode()+opcosenderprofile.getOpco().getId();
 			OpcoSMSService opcosmsservice = opco_sms_service_cache.get(key_);
-			if(opcosmsservice==null)
+			if(opcosmsservice==null){
 				opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService(DEFAULT, sms.getShortcode(), opcosenderprofile.getOpco());
+				opco_sms_service_cache.put(key_, opcosmsservice);
+			}
 			sms.setPrice(opcosmsservice.getPrice());
 			
 			if(opcosmsservice.getBillingType()==BillingType.MT_BILLING)
