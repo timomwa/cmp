@@ -1,3 +1,5 @@
+.tern-project
+.project
 /bin/
 .classpath
 .target/**
