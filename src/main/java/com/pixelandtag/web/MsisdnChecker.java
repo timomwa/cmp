@@ -298,7 +298,7 @@ public class MsisdnChecker extends HttpServlet {
 		+"}"
 		+"</style>"
 		+"</head>"
-		+"<body>"
+		+"<body><br/><br/><br/><br/><br/><br/>"
 		+"<div width=\"100%\" align=\"center\"><img src=\"images/crossgate_logo.png\" alt=\"\"  height=\"353\">"
 		+"<div class=\"content\">"
 		+"<form action=\"msisdncheck\" method=\"post\">"
