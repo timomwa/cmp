@@ -52,7 +52,7 @@ var TRIVIA = {
 							"</th><th scope='col'>Tx No.</th>" +
 							"</th><th scope='col'>Msisdn</th>" +
 							"<th scope='col'>First Name</th>" +
-							"<th scope='col' style='width:150px'>Middle Name</th>" +
+							"<th scope='col'>Middle Name</th>" +
 							"<th scope='col'>Last Name</th>" +
 							"<th scope='col'>Paid in</th>" +
 							"<th scope='col'>Agg. Balance</th>" +
