@@ -198,7 +198,7 @@ public class MsisdnController extends HttpServlet {
 						 ps.close();
 					 }catch(Exception exp){}
 					 
-					 ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in where date(timeStamp)=? order by mo_timestamp desc limit 50");
+					 ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in where date(timeStamp)=? order by timeStamp desc limit 50");
 					 ps.setString(1, date);
 				 }
 			 }
