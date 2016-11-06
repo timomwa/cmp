@@ -150,7 +150,9 @@ public class MsisdnChecker extends HttpServlet {
 			
 			stmt = conn.prepareStatement("SELECT counts FROM gen_counter");
 			rs = stmt.executeQuery();
-			String total_counts_so_far = rs.getString("counts");
+			String total_counts_so_far = "no count";
+			if(rs.next())
+			  total_counts_so_far = rs.getString("counts");
 			try{
 				if(stmt!=null)
 					stmt.close();
