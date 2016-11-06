@@ -268,7 +268,7 @@ public class MsisdnController extends HttpServlet {
 				i++;
 			 }
 			 
-			 responseJSON.append("totalMpesaCounts", total_counts_so_far);
+			 responseJSON.put("totalMpesaCounts", total_counts_so_far);
 			 
 			 if(i>0){
 				 responseJSON.put("success", "true");
