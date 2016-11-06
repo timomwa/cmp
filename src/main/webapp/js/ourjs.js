@@ -47,15 +47,16 @@ var TRIVIA = {
 					
 					$('#mytable').detach();
 					var table = $("<TABLE class='tiny_font' id='mytable' cellspacing='0'><TR id='header'>" +
-							"<th scope='col'>CMP_Txid</th>" +
-							"<th scope='col'>timeStamp" +
-							"</th><th scope='col'>SUB_Mobtel</th>" +
-							"<th scope='col'>MO_Received</th>" +
-							"<th scope='col' style='width:150px'>MT_Sent</th>" +
-							"<th scope='col'>MT_STATUS</th>" +
-							"<th scope='col'>dlrArrive</th>" +
-							"<th scope='col'>shortcode</th>" +
-							"<th scope='col'>source</th></TR></TABLE>");
+							"<th scope='col'>Id</th>" +
+							"<th scope='col'>Time" +
+							"</th><th scope='col'>Tx No.</th>" +
+							"<th scope='col'>First Name</th>" +
+							"<th scope='col' style='width:150px'>Middle Name</th>" +
+							"<th scope='col'>Last Name</th>" +
+							"<th scope='col'>Paid in</th>" +
+							"<th scope='col'>Agg. Balance</th>" +
+							"<th scope='col'>Bussiness Code</th>" +
+							"<th scope='col'>Trans. Type</th></TR></TABLE>");
 					
 					TRIVIA.statsdiv.html("");
 					TRIVIA.statsdiv.css('width','90%');
@@ -71,46 +72,35 @@ var TRIVIA = {
 						
 						for(var b = 0; b<y; b++){
 							
-							var CMP_Txid = unescape(data.CMP_Txid[b]);
-							var timeStamp =  unescape(data.timeStamp[b]);
-							var SUB_Mobtel =  unescape(data.SUB_Mobtel[b]);
-							var MO_Received =  unescape(data.MO_Received[b]);
-							var MT_Sent =  unescape(data.MT_Sent[b]);
-							var MT_STATUS =  unescape(data.MT_STATUS[b]);
-							var dlrArrive =  unescape(data.dlrArrive[b]);
-							var source = unescape(data.source[b]);
-							var shortcode = unescape(data.shortcode[b]);
+							var id = unescape(data.id[b]);
+							var billRefNumber = unescape(data.billRefNumber[b]);
+							var businessShortcode = unescape(data.businessShortcode[b]);
+							var first_name = unescape(data.first_name[b]);
+							var last_name = unescape(data.last_name[b]);
+							var middle_name = unescape(data.middle_name[b]);
+							var orgAccountBalance = unescape(data.orgAccountBalance[b]);
+							var raw_xml_id = unescape(data.raw_xml_id[b]);
+							var sourceip  = unescape(data.sourceip[b]);
+							var timeStamp  = unescape(data.timeStamp[b]);
+							var transAmount  = unescape(data.transAmount[b]);
+							var transId  = unescape(data.transId[b]);
+							var transType  = unescape(data.transType[b]);
+							var status  = unescape(data.status[b]);
 							
-							var spanC = (source == 'ussd') ? "red" : "green";
-							var img = "";
-							if(MT_STATUS=='SENT_SUCCESSFULLY')
-								img = "images/assign.png";
-							if(MT_STATUS=='FAILED_PERMANENTLY')
-								img = "images/error.png";
-							if(MT_STATUS=='RECEIVED')
-								img = "images/received.png";
-							if(MT_STATUS=='FAILED_TEMPORARILY')
-								img = "images/temp_fail.png";
-							if(MT_STATUS=='IN_QUEUE')
-								img = "images/queue.png";
+							var spanC = (transAmount <50) ? "red" : "green";
 							
-							var imgstr = "<img width='8' src='"+img+"' alt='x'/>";
 							table.append($("<TR>" +
-							"<TD>"+CMP_Txid+"</TD>" +
+							"<TD>"+id+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
-							"<TD>"+SUB_Mobtel+"</TD>" +
-							"<TD>"+MO_Received+"</TD>" +
-							"<TD>"+MT_Sent+"</TD>" +
-							"<TD>"+MT_STATUS+"&nbsp;&nbsp;"+imgstr+"</TD>" +
-							"<TD>"+dlrArrive+"</TD>" +
-							"<TD>"+shortcode+"</TD>" +
-							"<TD><span class='"+spanC+"'>"+source+"</span></TD></TR>"));
-							
-							//TRIVIA.statsdiv.append("<span class='lefters'>"+statusCode+" = "+count+" </span><br/>");
+							"<TD>"+transId+"</TD>" +
+							"<TD>"+first_name+"</TD>" +
+							"<TD>"+middle_name+"</TD>" +
+							"<TD>"+last_name+"</TD>" +
+							"<TD><span class='"+spanC+"'>"+transAmount+"</span></TD>" +
+							"<TD>"+businessShortcode+"</TD>" +
+							"<TD>"+transType+"</TD></TR>"));
 							
 						}
-						
-						//TRIVIA.statsdiv.append("<span class='clearer'></span>");
 						
 					}else{
 						

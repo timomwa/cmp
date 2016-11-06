@@ -300,7 +300,7 @@ public class MsisdnChecker extends HttpServlet {
 		+"</style>"
 		+"</head>"
 		+"<body>"
-		+"<div width=\"100%\" align=\"center\"><img src=\"images/axiata_logo.png\" alt=\"\" width=\"510\" height=\"353\">"
+		+"<div width=\"100%\" align=\"center\"><img src=\"images/crossgate_logo.png\" alt=\"\" width=\"510\" height=\"353\">"
 		+"<div class=\"content\">"
 		+"<form action=\"msisdncheck\" method=\"post\">"
 		+"<br>"
