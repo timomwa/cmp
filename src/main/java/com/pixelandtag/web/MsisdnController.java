@@ -244,7 +244,8 @@ public class MsisdnController extends HttpServlet {
 				responseJSON.append("transAmount", transAmount);
 				responseJSON.append("transId", transId);
 				responseJSON.append("transType", transType);
-				responseJSON.append("status", status);				 
+				responseJSON.append("status", status);	
+				responseJSON.append("msisdn", msisdn);	
 				 
 				i++;
 			 }

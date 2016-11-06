@@ -50,6 +50,7 @@ var TRIVIA = {
 							"<th scope='col'>Id</th>" +
 							"<th scope='col'>Time" +
 							"</th><th scope='col'>Tx No.</th>" +
+							"</th><th scope='col'>Msisdn</th>" +
 							"<th scope='col'>First Name</th>" +
 							"<th scope='col' style='width:150px'>Middle Name</th>" +
 							"<th scope='col'>Last Name</th>" +
@@ -86,6 +87,7 @@ var TRIVIA = {
 							var transId  = unescape(data.transId[b]);
 							var transType  = unescape(data.transType[b]);
 							var status  = unescape(data.status[b]);
+							var msisdn  = unescape(data.msisdn[b]);
 							
 							var spanC = (transAmount <50) ? "red" : "green";
 							
@@ -93,6 +95,7 @@ var TRIVIA = {
 							"<TD>"+id+"</TD>" +
 							"<TD>"+timeStamp+"</TD>" +
 							"<TD>"+transId+"</TD>" +
+							"<TD>"+msisdn+"</TD>" +
 							"<TD>"+first_name+"</TD>" +
 							"<TD>"+middle_name+"</TD>" +
 							"<TD>"+last_name+"</TD>" +
