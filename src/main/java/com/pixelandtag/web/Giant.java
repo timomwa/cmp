@@ -739,7 +739,7 @@ public class Giant extends HttpServlet {
 			
 			try{
 				
-				pstmt = con.prepareStatement("SELECT * FROM " + DB + ".users WHERE username = ? AND password = ?");
+				pstmt = con.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
 				
 				pstmt.setString(1, username);
 				pstmt.setString(2, password);
