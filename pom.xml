@@ -230,6 +230,13 @@
 			<version>3.3.0.Final</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.jboss.xnio/xnio-nio -->
+		<dependency>
+			<groupId>org.jboss.xnio</groupId>
+			<artifactId>xnio-nio</artifactId>
+			<version>3.2.0.Final</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>mysql</groupId>
@@ -549,14 +556,26 @@
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.opensmpp</groupId>
 			<artifactId>opensmpp-core</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		
 
+
+		<!-- https://mvnrepository.com/artifact/org.jboss.marshalling/jboss-marshalling-river -->
+		<dependency>
+			<groupId>org.jboss.marshalling</groupId>
+			<artifactId>jboss-marshalling-river</artifactId>
+			<version>1.4.11.Final</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jboss.marshalling</groupId>
+			<artifactId>jboss-marshalling</artifactId>
+			<version>1.4.11.Final</version>
+		</dependency>
 
 	</dependencies>
 

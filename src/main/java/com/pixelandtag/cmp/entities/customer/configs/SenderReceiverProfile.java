@@ -32,7 +32,7 @@ public class SenderReceiverProfile implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="name", unique=true, nullable=false)
+	@Column(name="name", unique=true, nullable=false, length=50)
 	@Index(name="profidx")
 	private String name;
 

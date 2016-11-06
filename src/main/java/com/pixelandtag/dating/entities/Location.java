@@ -45,7 +45,7 @@ public class Location implements Serializable {
 	@Index(name="cellIdx")
 	private Long cellid;
 	
-	@Column(name = "locationName")
+	@Column(name = "locationName", length=50)
 	@Index(name="locNameIdx")
 	private String locationName;
 	

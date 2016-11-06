@@ -64,7 +64,7 @@ public class BillerProfileConfig implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="name")
+	@Column(name="name", length=50)
 	@Index(name="bproflconfidx")
 	private String name;
 	

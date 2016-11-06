@@ -50,11 +50,11 @@ public class GenericMessage implements Serializable{
 	private Date timestamp;
 	
 	@Index(name="osmopco_tx_id")
-	@Column(name="opco_tx_id")
+	@Column(name="opco_tx_id",length=50)
 	private String opco_tx_id;
 		
 	@Index(name="osmcmp_tx_id")
-	@Column(name="cmp_tx_id", unique=true)
+	@Column(name="cmp_tx_id", unique=true,length=50)
 	private String cmp_tx_id;	
 
 	@Column(name="sms",length=1000)

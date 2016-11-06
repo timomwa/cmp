@@ -28,7 +28,7 @@ public class Operator implements Serializable{
 	private String name;
 	
 	
-	@Column(name="code", nullable=false, unique=true)
+	@Column(name="code", nullable=false, unique=true, length=50)
 	@Index(name="ortorcodidx")
 	private String code;
 

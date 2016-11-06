@@ -24,7 +24,7 @@ public class FreeLoader implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="msisdn")
+	@Column(name="msisdn", length=50)
 	@Index(name="freldermsisdn")
 	private String msisdn;
 

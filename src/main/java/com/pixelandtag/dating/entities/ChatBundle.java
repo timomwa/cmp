@@ -31,7 +31,7 @@ public class ChatBundle implements Serializable{
 	
 	
 	@Index(name="msisdccidx")
-	@Column(name="msisdn", nullable=false, unique=true)
+	@Column(name="msisdn", nullable=false, unique=true, length=20)
 	private String msisdn;
 	
 	@Column(name="sms")

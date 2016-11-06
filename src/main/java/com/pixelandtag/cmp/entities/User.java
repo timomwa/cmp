@@ -32,7 +32,7 @@ public class User implements Serializable{
 
 	
 	@Index(name = "u_name_idx")
-	@Column(name = "u_name")
+	@Column(name = "u_name", length=50)
 	private String username;
 	
 	@Column(name = "u_pwd")

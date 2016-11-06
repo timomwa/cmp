@@ -35,7 +35,7 @@ public class Person implements Serializable {
 	private Long id;
 	
 	@Index(name="msisdnidx")
-	@Column(name="msisdn")
+	@Column(name="msisdn", length=20)
 	private String msisdn;
 	
 	

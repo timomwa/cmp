@@ -65,7 +65,7 @@ public class ProfileConfigs implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="name")
+	@Column(name="name", length=50)
 	@Index(name="proflconfidx")
 	private String name;
 	

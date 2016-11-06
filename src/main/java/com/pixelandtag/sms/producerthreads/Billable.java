@@ -46,7 +46,7 @@ public class Billable implements Serializable {
 	/**
 	 * HTTP status code
 	 */
-	@Column(name = "resp_status_code")
+	@Column(name = "resp_status_code", length=20)
 	@Index(name="bilblidx")
 	private String resp_status_code;
 	
@@ -137,7 +137,7 @@ public class Billable implements Serializable {
 	@Column(name = "operation")
 	private String operation;
 	
-	@Column(name = "msisdn")
+	@Column(name = "msisdn", length=20)
 	@Index(name="msisdnIdx")
 	private String msisdn;
 	
@@ -146,7 +146,7 @@ public class Billable implements Serializable {
 	private String shortcode;
 	
 	
-	@Column(name = "keyword")
+	@Column(name = "keyword", length=20)
 	@Index(name="bilblmsisdidx")
 	private String keyword;
 	
@@ -161,18 +161,18 @@ public class Billable implements Serializable {
     @Enumerated(EnumType.STRING)
 	private EventType event_type;//very important
 	
-	@Column(name = "service_id")
+	@Column(name = "service_id", length=25)
 	@Index(name="msisdnIdx")
 	private String service_id;
 	
 	@Column(name = "discount_applied")
 	private String discount_applied;
 	
-	@Column(name = "cp_tx_id", unique=true)
+	@Column(name = "cp_tx_id", unique=true, length=50)
 	@Index(name="cp_idtxid_idx")
 	private String cp_tx_id;
 	
-	@Column(name = "opco_tx_id")
+	@Column(name = "opco_tx_id", length=50)
 	@Index(name="opcotxid_idx")
 	private String opco_tx_id;
 	
@@ -181,7 +181,7 @@ public class Billable implements Serializable {
 	private Long processed;
 	
 	
-	@Column(name = "transactionId")
+	@Column(name = "transactionId", length=50)
 	@Index(name="optxididx")
 	private String transactionId;
 	

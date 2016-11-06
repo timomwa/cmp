@@ -28,7 +28,7 @@ public class SubscriptionLog implements Serializable {
 	//@Column(name = "updated", nullable = false)
 //	private Date updated;
 	 
-	@Column(name = "msisdn")
+	@Column(name = "msisdn",length=20)
 	@Index(name="msisdn_idx")
 	private String msisdn;
 	

@@ -36,7 +36,7 @@ public class PersonDatingProfile  implements Serializable  {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "username", unique=true, nullable=false)
+	@Column(name = "username", unique=true, nullable=false, length=50)
 	@Index(name="usrnameIdx")
 	private String username;
 	
