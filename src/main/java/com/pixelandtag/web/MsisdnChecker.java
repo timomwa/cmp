@@ -205,7 +205,7 @@ public class MsisdnChecker extends HttpServlet {
 				out.println("<br/><a href=\""+reqUrl+"logout?url=msisdncheck%3Flogout%31\" style=\"color:#0FFF\">Logout</a><br/><br/><br/>");
 		
 				out.println("<TABLE>");
-				out.println("<TR><TD>Total Transactions</TD><TD>"+total_counts_so_far+"</TD></TR>");
+				out.println("<TR><TD>Total Transactions</TD><TD id='totalTx'>"+total_counts_so_far+"</TD></TR>");
 				out.println("<TR><TD>MSISDN</TD><TD><input name='msisdn' id='msisdn' type='text'/></TD></TR>");
 				
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

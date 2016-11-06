@@ -46,6 +46,7 @@ var TRIVIA = {
 				success: function(data){
 					
 					$('#mytable').detach();
+					var totalTx = $('#totalTx');
 					var table = $("<TABLE class='tiny_font' id='mytable' cellspacing='0'><TR id='header'>" +
 							"<th scope='col'>Id</th>" +
 							"<th scope='col'>Time" +
@@ -65,6 +66,8 @@ var TRIVIA = {
 					
 					//TRIVIA.statsdiv.html("");
 					
+					var totalMpesaCounts = data.totalMpesaCounts;
+					totalTx.html( totalMpesaCounts );
 					
 					if(data.success=='true'){
 						
@@ -88,6 +91,7 @@ var TRIVIA = {
 							var transType  = unescape(data.transType[b]);
 							var status  = unescape(data.status[b]);
 							var msisdn  = unescape(data.msisdn[b]);
+							vat totalMpesaCounts = unescape(data.totalMpesaCounts[b]);
 							
 							var spanC = (transAmount <50) ? "red" : "green";
 							

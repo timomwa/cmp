@@ -182,8 +182,25 @@ public class MsisdnController extends HttpServlet {
 			 
 			 date = requestJSON.getString("date").trim();
 			 
+			ps = conn.prepareStatement("SELECT counts FROM gen_counter");
+			rs = ps.executeQuery();
+			
+			String total_counts_so_far = "no count";
+			
+			if(rs.next())
+				 total_counts_so_far = rs.getString("counts");
+			try{
+				if(ps!=null)
+					ps.close();
+			}catch(Exception e){}
+			
+			try{
+				if(rs!=null)
+					rs.close();
+			}catch(Exception e){}
+				
 			 if(msisdn!=null && !msisdn.isEmpty()){
-				     ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in WHERE (msisdn = ? OR transId=?) AND date(timeStamp)=? order by timeStamp desc");
+				 ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in WHERE (msisdn = ? OR transId=?) AND date(timeStamp)=? order by timeStamp desc");
 				 ps.setString(1, msisdn);
 				 ps.setString(2, msisdn);
 				 ps.setString(3, date);
@@ -244,10 +261,14 @@ public class MsisdnController extends HttpServlet {
 				responseJSON.append("transId", transId);
 				responseJSON.append("transType", transType);
 				responseJSON.append("status", status);	
-				responseJSON.append("msisdn", msisdn);	
+				responseJSON.append("msisdn", msisdn);
+					
+				
 				 
 				i++;
 			 }
+			 
+			 responseJSON.append("totalMpesaCounts", total_counts_so_far);
 			 
 			 if(i>0){
 				 responseJSON.put("success", "true");
