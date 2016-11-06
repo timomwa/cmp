@@ -192,7 +192,7 @@ public class MsisdnChecker extends HttpServlet {
 				Calendar cal = Calendar.getInstance();
 				//cal.add(Calendar.DATE, -1);
 				out.println("<TR><TD>DATE</TD><TD><input name='msisdn' id='date' type='text' value='"+sdf.format(cal.getTime())+"' /></TD></TR>");
-				out.println("<TR><TD colspan='4'> <img class='pntz' src='images/msg_log.png' alt='SMS LOG' title='SMS LOG' onclick='TRIVIA.getLogsFor()'/> <a href='javascript:void(0)' onclick='TRIVIA.getLogsFor()'>M-PESA Log</a></TD></TR>");
+				out.println("<TR><TD  align='center' colspan='2'> <img class='pntz' src='images/msg_log.png' alt='SMS LOG' title='SMS LOG' onclick='TRIVIA.getLogsFor()'/> <a href='javascript:void(0)' onclick='TRIVIA.getLogsFor()'>M-PESA Log</a></TD></TR>");
 				
 				
 				//<input type=\"submit\">
