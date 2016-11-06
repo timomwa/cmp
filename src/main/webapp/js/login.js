@@ -51,7 +51,7 @@ Ext.onReady(function(){
 			// you define as redirect. 
  
                         success:function(form, action){ 
-                        	
+                        	console.log(' INIT_PARAMS.mainAPP --> '+INIT_PARAMS.mainAPP)
                         	 var resp = Ext.util.JSON.decode(action.response.responseText);
                         	 
                         	 if(resp.success==true){
