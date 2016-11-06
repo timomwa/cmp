@@ -97,8 +97,8 @@ var TRIVIA = {
 							"<TD>"+middle_name+"</TD>" +
 							"<TD>"+last_name+"</TD>" +
 							"<TD><span class='"+spanC+"'>"+transAmount+"</span></TD>" +
-							"<TD>"+businessShortcode+"</TD>" +
 							"<TD>"+orgAccountBalance+"</TD>" +
+							"<TD>"+businessShortcode+"</TD>" +
 							"<TD>"+transType+"</TD></TR>"));
 							
 						}

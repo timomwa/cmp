@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -36,6 +37,7 @@ public class MsisdnChecker extends HttpServlet {
 	private Logger logger = Logger.getLogger(MsisdnChecker.class);
 	private DataSource ds;
 	private Context initContext;
+	
 	
 	private final byte[] OK_200 =  "200 OK".getBytes();
 	//private String DB = "cmp";

@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,7 +57,8 @@ public class MsisdnController extends HttpServlet {
 	private static final long serialVersionUID = 43332451L;
 	private static final String KE_COUNTRY_CODE = "254";
 	private static final String ZERO = "0";
-
+	private NumberFormat nf = NumberFormat.getInstance();//Be careful only available in Java 8
+	
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		doPost(req, resp);
@@ -218,12 +220,12 @@ public class MsisdnController extends HttpServlet {
 				 first_name = StringEscapeUtils.escapeHtml(rs.getString("first_name"));
 				 last_name = StringEscapeUtils.escapeHtml(rs.getString("last_name"));
 				 middle_name = StringEscapeUtils.escapeHtml(rs.getString("middle_name"));
-				 orgAccountBalance = StringEscapeUtils.escapeHtml(rs.getString("orgAccountBalance"));
+				 orgAccountBalance = "Kes. "+ nf.format(  Double.valueOf( StringEscapeUtils.escapeHtml(rs.getString("orgAccountBalance")) ) );
 				 raw_xml_id = StringEscapeUtils.escapeHtml(rs.getString("raw_xml_id"));
 				 sourceip  = StringEscapeUtils.escapeHtml(rs.getString("sourceip"));
 				 timeStamp  = StringEscapeUtils.escapeHtml(rs.getString("timeStamp"));
 				 timeStamp = convertToPrettyFormat(timeStamp);
-				 transAmount  = StringEscapeUtils.escapeHtml(rs.getString("transAmount"));
+				 transAmount  = "Kes. "+ nf.format( Double.valueOf( nf.format( StringEscapeUtils.escapeHtml(rs.getString("transAmount")) ) ) );
 				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId")).toUpperCase();
 				 transType  = StringEscapeUtils.escapeHtml(rs.getString("transType"));
 				 status  = StringEscapeUtils.escapeHtml(rs.getString("status"));
