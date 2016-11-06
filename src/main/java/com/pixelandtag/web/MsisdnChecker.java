@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -120,6 +121,7 @@ public class MsisdnChecker extends HttpServlet {
 			
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
+			
 			try{
 				conn = ds.getConnection();
 				stmt = conn.prepareStatement("SELECT 'test'");
@@ -145,6 +147,19 @@ public class MsisdnChecker extends HttpServlet {
 				}catch(Exception e){}
 				
 			}
+			
+			stmt = conn.prepareStatement("SELECT counts FROM gen_counter");
+			rs = stmt.executeQuery();
+			String total_counts_so_far = rs.getString("counts");
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(Exception e){}
+			
+			try{
+				if(rs!=null)
+					rs.close();
+			}catch(Exception e){}
 			
 			
 			
@@ -188,6 +203,7 @@ public class MsisdnChecker extends HttpServlet {
 				out.println("<br/><a href=\""+reqUrl+"logout?url=msisdncheck%3Flogout%31\" style=\"color:#0FFF\">Logout</a><br/><br/><br/>");
 		
 				out.println("<TABLE>");
+				out.println("<TR><TD>Total Transactions</TD><TD>"+total_counts_so_far+"</TD></TR>");
 				out.println("<TR><TD>MSISDN</TD><TD><input name='msisdn' id='msisdn' type='text'/></TD></TR>");
 				
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

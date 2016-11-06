@@ -114,8 +114,6 @@ public class MsisdnController extends HttpServlet {
 				i++;
 			}
 			
-			
-			
 			StringBuffer jb = new StringBuffer();
 			BufferedReader reader = req.getReader();
 			   
