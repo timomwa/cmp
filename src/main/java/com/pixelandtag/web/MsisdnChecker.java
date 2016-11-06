@@ -38,7 +38,7 @@ public class MsisdnChecker extends HttpServlet {
 	private Context initContext;
 	
 	private final byte[] OK_200 =  "200 OK".getBytes();
-	private String DB = "pixeland_content360";
+	//private String DB = "cmp";
 
 	/**
 	 * 
@@ -249,7 +249,7 @@ public class MsisdnChecker extends HttpServlet {
 		if(kEY.equals("KEY")){
 			
 			try {
-				ps = conn.prepareStatement("select `key`, `description`  FROM `"+DB+"`.`message` group by `key`");
+				ps = conn.prepareStatement("select `key`, `description`  FROM `.`message` group by `key`");
 				rs = ps.executeQuery();
 				
 				String key,description;
@@ -336,7 +336,7 @@ public class MsisdnChecker extends HttpServlet {
 		password = req.getParameter("password") != null ? req.getParameter("password") : password;
 		
 		boolean isUserLoggedIn = false;
-		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM "+DB+".user WHERE u_name = ? AND u_pwd = ?");
+		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM user WHERE u_name = ? AND u_pwd = ?");
 		pstmt.setString(1,username);
 		pstmt.setString(2,password);
 		ResultSet rs = pstmt.executeQuery();
@@ -351,7 +351,7 @@ public class MsisdnChecker extends HttpServlet {
 	private String tabilizeAllResponseTexts(Connection conn, String keyM, int languageID) {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT * FROM `"+DB+"`.`message` WHERE `key`= ? and `language_id` = ?";
+		String sql = "SELECT * FROM `message` WHERE `key`= ? and `language_id` = ?";
 		String table = "<TABLE id=\"mytable\" cellspacing=\"0\"> ";
 		table += "<TR id='header' > <th scope=\"col\" class=\"nobg\"> MESSAGE </th> <th scope=\"col\"> SIZE </th> <th scope=\"col\"> LANG </th> <th scope=\"col\"> DESCRIPTION </th> <th scope=\"col\"> KEY </th  </TR>";
 		
