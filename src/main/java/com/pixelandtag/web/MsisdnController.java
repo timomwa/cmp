@@ -225,7 +225,7 @@ public class MsisdnController extends HttpServlet {
 				 sourceip  = StringEscapeUtils.escapeHtml(rs.getString("sourceip"));
 				 timeStamp  = StringEscapeUtils.escapeHtml(rs.getString("timeStamp"));
 				 timeStamp = convertToPrettyFormat(timeStamp);
-				 transAmount  = "Kes. "+ nf.format( Double.valueOf( nf.format( StringEscapeUtils.escapeHtml(rs.getString("transAmount")) ) ) );
+				 transAmount  = "Kes. "+  nf.format( Double.valueOf( StringEscapeUtils.escapeHtml(rs.getString("transAmount")) ) );
 				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId")).toUpperCase();
 				 transType  = StringEscapeUtils.escapeHtml(rs.getString("transType"));
 				 status  = StringEscapeUtils.escapeHtml(rs.getString("status"));
