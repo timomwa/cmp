@@ -16,8 +16,10 @@ public class Desktop extends BaseActionBean {
 	public Resolution showDesktop(){
 		
 		Subject currentUser = SecurityUtils.getSubject();
+		
 		logger.info(" \n\n  currentUser -> "+currentUser+"\n\n");
 		logger.info(" \n\n  currentUser.isAuthenticated() -> "+currentUser.isAuthenticated()+"\n\n");
+		
 		if(currentUser.isAuthenticated()){
 			return desktop;
 		}else{
