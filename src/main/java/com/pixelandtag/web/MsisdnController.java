@@ -224,7 +224,7 @@ public class MsisdnController extends HttpServlet {
 				 timeStamp  = StringEscapeUtils.escapeHtml(rs.getString("timeStamp"));
 				 timeStamp = convertToPrettyFormat(timeStamp);
 				 transAmount  = StringEscapeUtils.escapeHtml(rs.getString("transAmount"));
-				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId"));
+				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId")).toUpperCase();
 				 transType  = StringEscapeUtils.escapeHtml(rs.getString("transType"));
 				 status  = StringEscapeUtils.escapeHtml(rs.getString("status"));
 				 
@@ -296,7 +296,6 @@ public class MsisdnController extends HttpServlet {
 			msisdn = msisdn.substring(1);
 			msisdn = KE_COUNTRY_CODE.concat(msisdn);
 		}else if((msisdn.trim().length()<10) && !msisdn.trim().startsWith(ZERO)){
-			msisdn = msisdn.substring(1);
 			msisdn = KE_COUNTRY_CODE.concat(msisdn);
 		}
 		return msisdn;

@@ -98,6 +98,7 @@ var TRIVIA = {
 							"<TD>"+last_name+"</TD>" +
 							"<TD><span class='"+spanC+"'>"+transAmount+"</span></TD>" +
 							"<TD>"+businessShortcode+"</TD>" +
+							"<TD>"+orgAccountBalance+"</TD>" +
 							"<TD>"+transType+"</TD></TR>"));
 							
 						}
