@@ -229,7 +229,7 @@ public class MsisdnController extends HttpServlet {
 				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId")).toUpperCase();
 				 transType  = StringEscapeUtils.escapeHtml(rs.getString("transType"));
 				 status  = StringEscapeUtils.escapeHtml(rs.getString("status"));
-				 
+				 msisdn  = StringEscapeUtils.escapeHtml(rs.getString("msisdn"));
 				 
 				responseJSON.append("id", id );
 				responseJSON.append("billRefNumber", billRefNumber);
