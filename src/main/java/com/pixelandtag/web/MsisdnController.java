@@ -288,6 +288,8 @@ public class MsisdnController extends HttpServlet {
 	}
 
 	private String convertToMsisdnFormat(String msisdn) {
+		if(msisdn==null || msisdn.isEmpty() || msisdn.trim().length()<1)
+			return msisdn;
 		if(msisdn.trim().startsWith(KE_COUNTRY_CODE))
 			return msisdn;
 		if(msisdn.trim().startsWith(ZERO)){

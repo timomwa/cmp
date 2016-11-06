@@ -67,7 +67,7 @@ var TRIVIA = {
 					
 					if(data.success=='true'){
 						
-						var y = data.CMP_Txid.length;
+						var y = data.id.length;
 						
 						
 						for(var b = 0; b<y; b++){
