@@ -91,7 +91,7 @@ var TRIVIA = {
 							var transType  = unescape(data.transType[b]);
 							var status  = unescape(data.status[b]);
 							var msisdn  = unescape(data.msisdn[b]);
-							vat totalMpesaCounts = unescape(data.totalMpesaCounts[b]);
+							
 							
 							var spanC = (transAmount <50) ? "red" : "green";
 							
