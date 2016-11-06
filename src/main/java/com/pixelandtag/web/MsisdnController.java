@@ -9,6 +9,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 
 import javax.naming.Context;
@@ -42,6 +46,7 @@ public class MsisdnController extends HttpServlet {
 
 	private final String SERVER_TIMEZONE = "+03:00";
 	private final String CLIENT_TIMEZONE = "+03:00";
+	private final SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
 	
 	//private String DB = "pixeland_content360";
 
@@ -206,6 +211,7 @@ public class MsisdnController extends HttpServlet {
 			 int i = 0;
 			 
 			 while(rs.next()){
+				 
 				 id = StringEscapeUtils.escapeHtml(rs.getString("id"));
 				 billRefNumber = StringEscapeUtils.escapeHtml(rs.getString("billRefNumber"));
 				 businessShortcode = StringEscapeUtils.escapeHtml(rs.getString("businessShortcode"));
@@ -216,6 +222,7 @@ public class MsisdnController extends HttpServlet {
 				 raw_xml_id = StringEscapeUtils.escapeHtml(rs.getString("raw_xml_id"));
 				 sourceip  = StringEscapeUtils.escapeHtml(rs.getString("sourceip"));
 				 timeStamp  = StringEscapeUtils.escapeHtml(rs.getString("timeStamp"));
+				 timeStamp = convertToPrettyFormat(timeStamp);
 				 transAmount  = StringEscapeUtils.escapeHtml(rs.getString("transAmount"));
 				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId"));
 				 transType  = StringEscapeUtils.escapeHtml(rs.getString("transType"));
@@ -463,6 +470,44 @@ public class MsisdnController extends HttpServlet {
 		
 		}
 		
+	}
+	
+	private String convertToPrettyFormat(String date_str) throws ParseException{
+		Date date = stringToDate(date_str);
+		return convertToPrettyFormat(date);
+	}
+	
+	
+	public String convertToPrettyFormat(Date date){
+		int day = Integer.parseInt(formatDayOfMonth.format(date));
+		String suff  = getDayNumberSuffix(day);
+		DateFormat prettier_df = new SimpleDateFormat("d'"+suff+"' E MMM YYYY h:mm a ");
+	    return prettier_df.format(date);
+	}
+	
+	public Date stringToDate(String dateStr, String dateformat) throws ParseException{
+		DateFormat format = new SimpleDateFormat(dateformat);
+		return format.parse(dateStr);
+	}
+	
+	public Date stringToDate(String dateStr) throws ParseException{
+		return stringToDate(dateStr,"yyyy-MM-dd HH:m:ss");
+	}
+	
+	public static String getDayNumberSuffix(int day) {
+	    if (day >= 11 && day <= 13) {
+	        return "th";
+	    }
+	    switch (day % 10) {
+	    case 1:
+	        return "st";
+	    case 2:
+	        return "nd";
+	    case 3:
+	        return "rd";
+	    default:
+	        return "th";
+	    }
 	}
 
 }
