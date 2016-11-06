@@ -192,7 +192,7 @@ public class MsisdnChecker extends HttpServlet {
 				Calendar cal = Calendar.getInstance();
 				//cal.add(Calendar.DATE, -1);
 				out.println("<TR><TD>DATE</TD><TD><input name='msisdn' id='date' type='text' value='"+sdf.format(cal.getTime())+"' /></TD></TR>");
-				out.println("<TR><TD colspan='2'> <img class='pntz' src='images/msg_log.png' alt='SMS LOG' title='SMS LOG' onclick='TRIVIA.getLogsFor()'/> <a href='javascript:void(0)' onclick='TRIVIA.getLogsFor()'>SMS LOG</a></TD></TR>");
+				out.println("<TR><TD colspan='4'> <img class='pntz' src='images/msg_log.png' alt='SMS LOG' title='SMS LOG' onclick='TRIVIA.getLogsFor()'/> <a href='javascript:void(0)' onclick='TRIVIA.getLogsFor()'>M-PESA Log</a></TD></TR>");
 				
 				
 				//<input type=\"submit\">
@@ -299,7 +299,7 @@ public class MsisdnChecker extends HttpServlet {
 		+"</style>"
 		+"</head>"
 		+"<body>"
-		+"<div width=\"100%\" align=\"center\"><img src=\"images/crossgate_logo.png\" alt=\"\" width=\"510\" height=\"353\">"
+		+"<div width=\"100%\" align=\"center\"><img src=\"images/crossgate_logo.png\" alt=\"\" >"
 		+"<div class=\"content\">"
 		+"<form action=\"msisdncheck\" method=\"post\">"
 		+"<br>"
