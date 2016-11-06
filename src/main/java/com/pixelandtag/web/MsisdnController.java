@@ -185,9 +185,10 @@ public class MsisdnController extends HttpServlet {
 			 date = requestJSON.getString("date").trim();
 			 
 			 if(msisdn!=null && !msisdn.isEmpty()){
-				     ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in WHERE msisdn = ? AND date(timeStamp)=? order by timeStamp desc");
+				     ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in WHERE (msisdn = ? OR transId=?) AND date(timeStamp)=? order by timeStamp desc");
 				 ps.setString(1, msisdn);
-				 ps.setString(2, date);
+				 ps.setString(2, msisdn);
+				 ps.setString(3, date);
 			 }else{
 				 try{
 					 
