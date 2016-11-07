@@ -15,9 +15,9 @@
 
 
 	<repositories>
-		<repository>
+		<!--repository>
 			<url>http://dist.wso2.org/maven2/</url>
-		</repository>
+		</repository-->
 
 	</repositories>
 
