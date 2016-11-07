@@ -191,7 +191,7 @@ select msisdn,convert_tz(mo_timestamp,'-04:00','+03:00') mo_time, convert_tz(mt_
 -- 79497102 Airtel --
 -- 79497164 Orange --
 select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1 and opco_id_fk = 79497102  
-and timeStamp between  convert_tz('2016-05-29 00:00:00','-04:00','+03:00') AND convert_tz('2016-07-02 23:59:59','-04:00','+03:00')
+and timeStamp between  convert_tz('2016-09-29 00:00:00','-04:00','+03:00') AND convert_tz('2016-11-02 23:59:59','-04:00','+03:00')
 group by dt order by dt desc limit 35;
 
 

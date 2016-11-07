@@ -304,7 +304,7 @@ public class MsisdnController extends HttpServlet {
 					logger.error(e.getMessage(),e);
 				}
 				
-				logger.info("change resp text result :::::::"+responseJSON.toString());
+				//logger.info("change resp text result :::::::"+responseJSON.toString());
 				writer.write(responseJSON.toString());
 		}
 		
@@ -431,7 +431,7 @@ public class MsisdnController extends HttpServlet {
 					logger.error(e.getMessage(),e);
 				}
 				
-				logger.info("change resp text result :::::::"+responseJSON.toString());
+				//logger.info("change resp text result :::::::"+responseJSON.toString());
 				writer.write(responseJSON.toString());
 		}
 		
