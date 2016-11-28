@@ -11,7 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-@Path("/rest/mt")
+@Path("/mt")//rest
 public interface BulkSMSMTReceiverI extends BaseRestI {
 	
 	@POST
