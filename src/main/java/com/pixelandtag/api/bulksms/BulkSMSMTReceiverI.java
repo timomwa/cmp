@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 public interface BulkSMSMTReceiverI extends BaseRestI {
 	
 	@POST
-	@Consumes("application/json")
+	//@Consumes("application/json")
 	@Produces("application/json")
 	@Path("post")
 	public Response post(@Context HttpHeaders headers,InputStream incomingData, @Context HttpServletRequest req) throws QueueException;
