@@ -64,11 +64,12 @@
 			<classifier>jdk15</classifier>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>2.3.1.GA</version>
-		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs -->
+<dependency>
+    <groupId>org.jboss.resteasy</groupId>
+    <artifactId>resteasy-jaxrs</artifactId>
+    <version>3.0.19.Final</version>
+</dependency>
 
 		<!-- To work in Wildfly 10 ? -->
 		<dependency>
