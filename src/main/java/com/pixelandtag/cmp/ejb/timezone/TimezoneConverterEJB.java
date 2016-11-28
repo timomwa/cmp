@@ -168,12 +168,12 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	 */
 	@Override
 	public Date convertToHostTimezone(String time, String sourcetimeZone) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(sourcetimeZone));
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:mm:ss",TimeZone.getTimeZone(sourcetimeZone));
 	}
 	
 	@Override
 	public Date convertToHostTimezone(Date time, String sourcetimeZone) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(sourcetimeZone));
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:mm:ss",TimeZone.getTimeZone(sourcetimeZone));
 	}
 	
 	/* (non-Javadoc)
@@ -181,7 +181,7 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	 */
 	@Override
 	public Date convertToThisTimezone(String time) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getDefault());
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:mm:ss",TimeZone.getDefault());
 	}
 	
 	public boolean isDateInThePast(Date date){
