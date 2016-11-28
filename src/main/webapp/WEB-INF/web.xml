@@ -10,11 +10,11 @@
   
   <context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>
-		<param-value>/rest</param-value>
+		<param-value>/</param-value>
   </context-param>
   
 	<servlet>
-		<servlet-name>resteasy-servlet</servlet-name>
+		<servlet-name>resteasy-servlet</servlfet-name>
 		<servlet-class>
 			org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
 		</servlet-class>
