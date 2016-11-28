@@ -14,7 +14,7 @@
   </context-param>
   
 	<servlet>
-		<servlet-name>resteasy-servlet</servlfet-name>
+		<servlet-name>resteasy-servlet</servlet-name>
 		<servlet-class>
 			org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
 		</servlet-class>
