@@ -76,6 +76,7 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-servlet-initializer</artifactId>
 			<version>3.0.17.Final</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
