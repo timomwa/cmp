@@ -102,7 +102,7 @@ public class SenderThreadWorker implements Runnable{
 			
 			try{
 			
-				OutgoingSMS sms = /*outqueue!=null ? (outqueue.size()>1000 ? outqueue.poll() :*/ OutgoingQueueRouter.poll(opcosenderprofile.getId()) /*) : null*/; 
+				OutgoingSMS sms = outqueue.poll();/*outqueue!=null ? (outqueue.size()>1000 ? outqueue.poll() :*/ /*OutgoingQueueRouter.poll(opcosenderprofile.getId())*/ /*) : null*/; 
 				
 				if(sms!=null && sms.getId().compareTo(-1L)>0){
 					
