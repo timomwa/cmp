@@ -257,6 +257,13 @@ public class OutgoingQueueRouter extends Thread {
 				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profilemap.get(profileid));  
 				
 				for(OutgoingSMS outgoingsms : outqueuelist_){
+					
+					try {
+						outgoingsms.setIn_outgoing_queue(Boolean.TRUE);
+						queueprocEJB.saveOrUpdate(outgoingsms);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
 					//if(outqueue.size()<1){
 						outqueue.offer(outgoingsms);
 						opcoqueuemap.put(profileid, outqueue);
@@ -272,8 +279,25 @@ public class OutgoingQueueRouter extends Thread {
 		
 		System.out.println("Shutting down...");
 		
-		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet())
+		//Update on the db and say none of the sms are in queue
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet()){
+			
+			for( OutgoingSMS sms : entryset.getValue() ){
+				try {
+					
+					sms.setIn_outgoing_queue(Boolean.FALSE);
+					queueprocEJB.saveOrUpdate(sms);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet()){
 			entryset.getValue().clear();//clear queue
+		}
 		
 		for(SenderThreadWorker worker : senderworkers)
 			worker.stop();

@@ -182,6 +182,7 @@ public class SenderThreadWorker implements Runnable{
 				
 			}catch(Exception exp){
 				logger.error(exp.getMessage());
+			}finally{
 			}
 			
 		}
