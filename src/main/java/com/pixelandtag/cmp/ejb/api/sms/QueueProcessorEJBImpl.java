@@ -52,6 +52,8 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 		billingstatuses.add(BillingStatus.NO_BILLING_REQUIRED);
 		billingstatuses.add(BillingStatus.INSUFFICIENT_FUNDS);
 		billingstatuses.add(BillingStatus.SUCCESSFULLY_BILLED);
+		billingstatuses.add(BillingStatus.OPERATOR_ALREADY_BILLED_ON_MO);
+		billingstatuses.add(BillingStatus.OPERATOR_TO_BILL_ON_MT);
 	}
 	
 	@Inject

@@ -218,14 +218,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			outgoingsms.setPrice(opcosmsserv.getPrice());
 		outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid()); 
 		
-		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0 || (opcosmsserv.getBillingType()!=null && opcosmsserv.getBillingType() == BillingType.MO_BILLING )){//if price is zero, or if it's MO billing
+		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0 || (opcosmsserv.getBillingType()!=null && opcosmsserv.getBillingType() == BillingType.OPERATOR_SIDE_MO_BILLING )){//if price is zero, or if it's MO billing
 			outgoingsms.setCharged(true);
-			BillingStatus status = opcosmsserv.getBillingType() == BillingType.MO_BILLING ? BillingStatus.SUCCESSFULLY_BILLED : BillingStatus.NO_BILLING_REQUIRED;
+			BillingStatus status = opcosmsserv.getBillingType() == BillingType.OPERATOR_SIDE_MO_BILLING ? BillingStatus.SUCCESSFULLY_BILLED : BillingStatus.NO_BILLING_REQUIRED;
 			outgoingsms.setBilling_status(status);
 			logger.debug(" returning.... price is zero or is MO biling ");
 			
-			if(opcosmsserv.getBillingType() == BillingType.MO_BILLING)
-				billingGW.createSuccessBillingRec(outgoingsms, BillingType.MO_BILLING);
+			if(opcosmsserv.getBillingType() == BillingType.OPERATOR_SIDE_MO_BILLING)
+				billingGW.createSuccessBillingRec(outgoingsms, BillingType.OPERATOR_SIDE_MO_BILLING);
 			
 			return outgoingsms;
 		}
