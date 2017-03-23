@@ -91,13 +91,15 @@ public class ContentProxyProcessor extends GenericServiceProcessor {
 			qparams.add(new BasicNameValuePair("msisdn",incomingsms.getMsisdn()));
 			qparams.add(new BasicNameValuePair("text",incomingsms.getSms()));
 			qparams.add(new BasicNameValuePair("sms",incomingsms.getSms()));
+			qparams.add(new BasicNameValuePair("opcotxid",incomingsms.getOpco_tx_id()));
 			//incomingsms.getMoprocessor()
 			
 			logger.info("\n\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMoprocessor().getForwarding_url() ::: "+incomingsms.getMoprocessor().getForwarding_url()
 					+"\n\t\t:::::::::::::::PROXY_MO: mo.getSMS_Message_String() ::: "+incomingsms.getSms()
 					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getCmp_tx_id() ::: "+incomingsms.getCmp_tx_id()
 					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getShortcode() ::: "+incomingsms.getShortcode()
-					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMsisdn() ::: "+incomingsms.getMsisdn());
+					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getMsisdn() ::: "+incomingsms.getMsisdn()
+					+"\n\t\t:::::::::::::::PROXY_MO: incomingsms.getOpco_tx_id() ::: "+incomingsms.getOpco_tx_id());
 			
 			//qparams.add(new BasicNameValuePair("text",mo.getSMS_Message_String()));
 			
