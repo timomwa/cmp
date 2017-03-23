@@ -283,7 +283,17 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		}
 		
 		logger.debug(" after save "+billable.getId());
-		outgoingsms.setBilling_status(BillingStatus.WAITING_BILLING);
+		BillingStatus status = BillingStatus.NO_BILLING_REQUIRED;
+		if(opcosmsserv.getBillingType()==BillingType.OPERATOR_SIDE_MO_BILLING)
+			status = BillingStatus.OPERATOR_ALREADY_BILLED_ON_MO;
+		if(opcosmsserv.getBillingType()==BillingType.OPERATOR_SIDE_MT_BILLING)
+			status = BillingStatus.OPERATOR_TO_BILL_ON_MT;
+		if(opcosmsserv.getBillingType()==BillingType.CMP_SIDE_MO_BILLING)
+			status = BillingStatus.WAITING_BILLING;
+		if(opcosmsserv.getBillingType()==BillingType.CMP_SIDE_MT_BILLING)
+			status = BillingStatus.WAITING_BILLING;
+		
+		outgoingsms.setBilling_status(status);
 		outgoingsms.setPriority(0);
 		logger.debug(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		return outgoingsms;
