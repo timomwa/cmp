@@ -112,7 +112,7 @@ public class Billable implements Serializable {
 		if(opco_tx_id==null && getCp_tx_id()!=null)
 			opco_tx_id = getCp_tx_id();
 		if(billingType==null)
-			billingType = BillingType.MT_BILLING;
+			billingType = BillingType.OPERATOR_SIDE_MT_BILLING;
 	}
 	
 	/**
