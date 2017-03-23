@@ -106,7 +106,7 @@ public class SuccessfullyBillingRequests  implements Serializable {
 		if(transferin==null)
 			transferin = Boolean.FALSE;
 		if(billingType==null)
-			billingType = BillingType.MT_BILLING;
+			billingType = BillingType.OPERATOR_SIDE_MT_BILLING;
 	}
 
 

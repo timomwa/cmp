@@ -207,8 +207,7 @@ public class SenderThreadWorker implements Runnable{
 			}
 			sms.setPrice(opcosmsservice.getPrice());
 			
-			if(opcosmsservice.getBillingType()==BillingType.MT_BILLING)
-				billingGW.createSuccessBillingRec(sms, BillingType.MT_BILLING);
+			billingGW.createSuccessBillingRec(sms, opcosmsservice.getBillingType());
 			
 		}catch(ServiceNotLinkedToOpcoException snle){
 			logger.warn(snle.getMessage());

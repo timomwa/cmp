@@ -264,8 +264,8 @@ public class SafaricomUSSD extends HttpServlet {
 				incomingsms = datingBean.logMO(incomingsms);
 				incomingsms.getId();
 				
-				if(opcosmsservice.getBillingType()==BillingType.MO_BILLING)
-					billingGW.createSuccessBillingRec(incomingsms, BillingType.MO_BILLING);
+				if(opcosmsservice.getBillingType()==BillingType.OPERATOR_SIDE_MO_BILLING)
+					billingGW.createSuccessBillingRec(incomingsms, BillingType.OPERATOR_SIDE_MO_BILLING);
 				
 				MessageLog messagelog = new MessageLog();
 				messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
