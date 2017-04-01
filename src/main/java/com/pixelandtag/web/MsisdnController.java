@@ -9,11 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Enumeration;
 
 import javax.naming.Context;
@@ -45,20 +40,16 @@ public class MsisdnController extends HttpServlet {
 	private JSONObject responseJSON = null;
 	private PrintWriter writer;
 
-	private final String SERVER_TIMEZONE = "+03:00";
+	private final String SERVER_TIMEZONE = "-05:00";
 	private final String CLIENT_TIMEZONE = "+03:00";
-	private final SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
 	
-	//private String DB = "pixeland_content360";
+	private String DB = "pixeland_content360";
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 43332451L;
-	private static final String KE_COUNTRY_CODE = "254";
-	private static final String ZERO = "0";
-	private NumberFormat nf = NumberFormat.getInstance();//Be careful only available in Java 8
-	
+	private static final long serialVersionUID = 4332451L;
+
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		doPost(req, resp);
@@ -113,6 +104,8 @@ public class MsisdnController extends HttpServlet {
 				logger.info(i+". Parameter names :: "+elem );
 				i++;
 			}
+			
+			
 			
 			StringBuffer jb = new StringBuffer();
 			BufferedReader reader = req.getReader();
@@ -178,37 +171,19 @@ public class MsisdnController extends HttpServlet {
 			 String query = "";
 			 String date = "";
 			 
-			 String msisdn = convertToMsisdnFormat( requestJSON.getString("msisdn") );
+			 String msisdn = requestJSON.getString("msisdn");
 			 
 			 date = requestJSON.getString("date").trim();
 			 
-			ps = conn.prepareStatement("SELECT counts FROM gen_counter");
-			rs = ps.executeQuery();
-			
-			String total_counts_so_far = "no count";
-			
-			if(rs.next())
-				 total_counts_so_far = rs.getString("counts");
-			try{
-				if(ps!=null)
-					ps.close();
-			}catch(Exception e){}
-			
-			try{
-				if(rs!=null)
-					rs.close();
-			}catch(Exception e){}
-				
 			 if(msisdn!=null && !msisdn.isEmpty()){
-				 ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in WHERE (msisdn = ? OR transId=?) AND date(timeStamp)=? order by timeStamp desc");
+				     ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received',mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source', shortcode from "+DB+".message_log where msisdn=? and date(convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"'))=? order by mo_timestamp desc");
 				 ps.setString(1, msisdn);
-				 ps.setString(2, msisdn);
-				 ps.setString(3, date);
+				 ps.setString(2, date);
 			 }else{
 				 try{
 					 
 					 int limit = Integer.valueOf(date);
-					 ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in order by timeStamp desc limit "+limit);
+					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel',cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source', shortcode from "+DB+".message_log order by mo_timestamp desc limit "+limit);
 					 
 				 }catch(NumberFormatException ex){
 					 
@@ -216,59 +191,39 @@ public class MsisdnController extends HttpServlet {
 						 ps.close();
 					 }catch(Exception exp){}
 					 
-					 ps = conn.prepareStatement("select id,billRefNumber,businessShortcode, first_name, last_name,  middle_name, msisdn, orgAccountBalance, raw_xml_id, sourceip, timeStamp, transAmount, transId, transType, status from mpesa_in where date(timeStamp)=? order by timeStamp desc limit 50");
+					 ps = conn.prepareStatement("select status as 'MT_STATUS',convert_tz(mo_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as 'timeStamp',msisdn as 'SUB_Mobtel', cmp_tx_id as 'CMP_Txid', mo_sms as 'MO_Received', mt_sms as 'MT_Sent', status as 'CMPResponse', convert_tz(mt_timestamp,'"+SERVER_TIMEZONE+"','"+CLIENT_TIMEZONE+"') as dlrArrive,`source` as 'source', shortcode from "+DB+".message_log where date(mo_timestamp)=? order by mo_timestamp desc limit 50");
 					 ps.setString(1, date);
 				 }
 			 }
 			 rs = ps.executeQuery();
 			 
 			 
-			 String id,billRefNumber="",businessShortcode="", first_name="", last_name="", middle_name="", orgAccountBalance="", 
-			 raw_xml_id="", sourceip="", timeStamp="", transAmount="", transId="", transType="", status="";
+			 String timeStamp="",SUB_Mobtel="",CMP_Txid="",MO_Received="",MT_Sent="",MT_STATUS="", dlrArrive="", source="", shortcode="";
 			 
 			 int i = 0;
 			 
 			 while(rs.next()){
-				 
-				 id = StringEscapeUtils.escapeHtml(rs.getString("id"));
-				 billRefNumber = StringEscapeUtils.escapeHtml(rs.getString("billRefNumber"));
-				 businessShortcode = StringEscapeUtils.escapeHtml(rs.getString("businessShortcode"));
-				 first_name = StringEscapeUtils.escapeHtml(rs.getString("first_name"));
-				 last_name = StringEscapeUtils.escapeHtml(rs.getString("last_name"));
-				 middle_name = StringEscapeUtils.escapeHtml(rs.getString("middle_name"));
-				 orgAccountBalance = "Kes. "+ nf.format(  Double.valueOf( StringEscapeUtils.escapeHtml(rs.getString("orgAccountBalance")) ) );
-				 raw_xml_id = StringEscapeUtils.escapeHtml(rs.getString("raw_xml_id"));
-				 sourceip  = StringEscapeUtils.escapeHtml(rs.getString("sourceip"));
-				 timeStamp  = StringEscapeUtils.escapeHtml(rs.getString("timeStamp"));
-				 timeStamp = convertToPrettyFormat(timeStamp);
-				 transAmount  = "Kes. "+  nf.format( Double.valueOf( StringEscapeUtils.escapeHtml(rs.getString("transAmount")) ) );
-				 transId  = StringEscapeUtils.escapeHtml(rs.getString("transId")).toUpperCase();
-				 transType  = StringEscapeUtils.escapeHtml(rs.getString("transType"));
-				 status  = StringEscapeUtils.escapeHtml(rs.getString("status"));
-				 msisdn  = StringEscapeUtils.escapeHtml(rs.getString("msisdn"));
-				 
-				responseJSON.append("id", id );
-				responseJSON.append("billRefNumber", billRefNumber);
-				responseJSON.append("businessShortcode", businessShortcode);
-				responseJSON.append("first_name", first_name);
-				responseJSON.append("last_name", last_name);
-				responseJSON.append("middle_name", middle_name);
-				responseJSON.append("orgAccountBalance", orgAccountBalance);
-				responseJSON.append("raw_xml_id", raw_xml_id);
-				responseJSON.append("sourceip", sourceip);
-				responseJSON.append("timeStamp", timeStamp);
-				responseJSON.append("transAmount", transAmount);
-				responseJSON.append("transId", transId);
-				responseJSON.append("transType", transType);
-				responseJSON.append("status", status);	
-				responseJSON.append("msisdn", msisdn);
-					
-				
-				 
-				i++;
+				 timeStamp = StringEscapeUtils.escapeHtml(rs.getString("timeStamp"));
+				 SUB_Mobtel = StringEscapeUtils.escapeHtml(rs.getString("SUB_Mobtel"));
+				 CMP_Txid = StringEscapeUtils.escapeHtml(rs.getString("CMP_Txid"));
+				 MO_Received = StringEscapeUtils.escapeHtml(rs.getString("MO_Received"));
+				 MT_Sent = StringEscapeUtils.escapeHtml(rs.getString("MT_Sent"));
+				 MT_STATUS = StringEscapeUtils.escapeHtml(rs.getString("MT_STATUS"));
+				 dlrArrive = StringEscapeUtils.escapeHtml(rs.getString("dlrArrive"));
+				 source = StringEscapeUtils.escapeHtml(rs.getString("source"));
+				 shortcode  = StringEscapeUtils.escapeHtml(rs.getString("shortcode"));
+				 //System.out.println("count:::::::"+count);
+				 responseJSON.append("timeStamp", timeStamp);
+				 responseJSON.append("SUB_Mobtel", SUB_Mobtel);
+				 responseJSON.append("CMP_Txid", CMP_Txid);
+				 responseJSON.append("MO_Received", MO_Received);
+				 responseJSON.append("MT_Sent", MT_Sent);
+				 responseJSON.append("MT_STATUS", MT_STATUS);
+				 responseJSON.append("dlrArrive", dlrArrive);
+				 responseJSON.append("source", source);
+				 responseJSON.append("shortcode", shortcode);
+				 i++;
 			 }
-			 
-			 responseJSON.put("totalMpesaCounts", total_counts_so_far);
 			 
 			 if(i>0){
 				 responseJSON.put("success", "true");
@@ -304,24 +259,10 @@ public class MsisdnController extends HttpServlet {
 					logger.error(e.getMessage(),e);
 				}
 				
-				//logger.info("change resp text result :::::::"+responseJSON.toString());
+				logger.info("change resp text result :::::::"+responseJSON.toString());
 				writer.write(responseJSON.toString());
 		}
 		
-	}
-
-	private String convertToMsisdnFormat(String msisdn) {
-		if(msisdn==null || msisdn.isEmpty() || msisdn.trim().length()<1)
-			return msisdn;
-		if(msisdn.trim().startsWith(KE_COUNTRY_CODE))
-			return msisdn;
-		if(msisdn.trim().startsWith(ZERO)){
-			msisdn = msisdn.substring(1);
-			msisdn = KE_COUNTRY_CODE.concat(msisdn);
-		}else if((msisdn.trim().length()<10) && !msisdn.trim().startsWith(ZERO)){
-			msisdn = KE_COUNTRY_CODE.concat(msisdn);
-		}
-		return msisdn;
 	}
 
 	/**
@@ -371,7 +312,7 @@ public class MsisdnController extends HttpServlet {
 			 
 			 date = requestJSON.getString("date").trim();
 			 
-			 ps = conn.prepareStatement("select count(*) as 'count', statusCode, price from SMSStatLog where date(timeStamp)=? and msisdn=? group by statusCode, price");
+			 ps = conn.prepareStatement("select count(*) as 'count', statusCode, price from "+DB+".SMSStatLog where date(timeStamp)=? and msisdn=? group by statusCode, price");
 				
 			 ps.setString(1, date);
 			 
@@ -431,7 +372,7 @@ public class MsisdnController extends HttpServlet {
 					logger.error(e.getMessage(),e);
 				}
 				
-				//logger.info("change resp text result :::::::"+responseJSON.toString());
+				logger.info("change resp text result :::::::"+responseJSON.toString());
 				writer.write(responseJSON.toString());
 		}
 		
@@ -494,44 +435,6 @@ public class MsisdnController extends HttpServlet {
 		
 		}
 		
-	}
-	
-	private String convertToPrettyFormat(String date_str) throws ParseException{
-		Date date = stringToDate(date_str);
-		return convertToPrettyFormat(date);
-	}
-	
-	
-	public String convertToPrettyFormat(Date date){
-		int day = Integer.parseInt(formatDayOfMonth.format(date));
-		String suff  = getDayNumberSuffix(day);
-		DateFormat prettier_df = new SimpleDateFormat("d'"+suff+"' E MMM YYYY h:mm a ");
-	    return prettier_df.format(date);
-	}
-	
-	public Date stringToDate(String dateStr, String dateformat) throws ParseException{
-		DateFormat format = new SimpleDateFormat(dateformat);
-		return format.parse(dateStr);
-	}
-	
-	public Date stringToDate(String dateStr) throws ParseException{
-		return stringToDate(dateStr,"yyyy-MM-dd HH:m:ss");
-	}
-	
-	public static String getDayNumberSuffix(int day) {
-	    if (day >= 11 && day <= 13) {
-	        return "th";
-	    }
-	    switch (day % 10) {
-	    case 1:
-	        return "st";
-	    case 2:
-	        return "nd";
-	    case 3:
-	        return "rd";
-	    default:
-	        return "th";
-	    }
 	}
 
 }

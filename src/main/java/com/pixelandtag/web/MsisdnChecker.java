@@ -4,12 +4,10 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -39,9 +37,8 @@ public class MsisdnChecker extends HttpServlet {
 	private DataSource ds;
 	private Context initContext;
 	
-	
 	private final byte[] OK_200 =  "200 OK".getBytes();
-	//private String DB = "cmp";
+	private String DB = "pixeland_content360";
 
 	/**
 	 * 
@@ -121,7 +118,6 @@ public class MsisdnChecker extends HttpServlet {
 			
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
-			
 			try{
 				conn = ds.getConnection();
 				stmt = conn.prepareStatement("SELECT 'test'");
@@ -147,21 +143,6 @@ public class MsisdnChecker extends HttpServlet {
 				}catch(Exception e){}
 				
 			}
-			
-			stmt = conn.prepareStatement("SELECT counts FROM gen_counter");
-			rs = stmt.executeQuery();
-			String total_counts_so_far = "no count";
-			if(rs.next())
-			  total_counts_so_far = rs.getString("counts");
-			try{
-				if(stmt!=null)
-					stmt.close();
-			}catch(Exception e){}
-			
-			try{
-				if(rs!=null)
-					rs.close();
-			}catch(Exception e){}
 			
 			
 			
@@ -205,14 +186,14 @@ public class MsisdnChecker extends HttpServlet {
 				out.println("<br/><a href=\""+reqUrl+"logout?url=msisdncheck%3Flogout%31\" style=\"color:#0FFF\">Logout</a><br/><br/><br/>");
 		
 				out.println("<TABLE>");
-				out.println("<TR><TD>Total Transactions</TD><TD id='totalTx'>"+total_counts_so_far+"</TD></TR>");
 				out.println("<TR><TD>MSISDN</TD><TD><input name='msisdn' id='msisdn' type='text'/></TD></TR>");
 				
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				Calendar cal = Calendar.getInstance();
 				//cal.add(Calendar.DATE, -1);
 				out.println("<TR><TD>DATE</TD><TD><input name='msisdn' id='date' type='text' value='"+sdf.format(cal.getTime())+"' /></TD></TR>");
-				out.println("<TR><TD  align='center' colspan='2'> <img class='pntz' src='images/msg_log.png' alt='SMS LOG' title='SMS LOG' onclick='TRIVIA.getLogsFor()'/> <a href='javascript:void(0)' onclick='TRIVIA.getLogsFor()'>M-PESA Log</a></TD></TR>");
+				out.println("<TR><TD colspan='2'><img class='pntz' src='images/sms_stat.png' alt='Transaction stats' title='Transaction stats' onclick='TRIVIA.getTxProfile()' />  <a href='javascript:void(0)' onclick='TRIVIA.getTxProfile()'>TX Status</a> | " +
+						"<img class='pntz' src='images/msg_log.png' alt='SMS LOG' title='SMS LOG' onclick='TRIVIA.getLogsFor()'/> <a href='javascript:void(0)' onclick='TRIVIA.getLogsFor()'>SMS LOG</a></TD></TR>");
 				
 				
 				//<input type=\"submit\">
@@ -268,7 +249,7 @@ public class MsisdnChecker extends HttpServlet {
 		if(kEY.equals("KEY")){
 			
 			try {
-				ps = conn.prepareStatement("select `key`, `description`  FROM `.`message` group by `key`");
+				ps = conn.prepareStatement("select `key`, `description`  FROM `"+DB+"`.`message` group by `key`");
 				rs = ps.executeQuery();
 				
 				String key,description;
@@ -306,7 +287,7 @@ public class MsisdnChecker extends HttpServlet {
 		+"<style>"
 		+"body"
 		+"{"
-		+"font-family:Arial, Helvetica, sans-serif; padding:0; margin:0; background-color:#eff2f6;"
+		+"font-family:Arial, Helvetica, sans-serif; padding:0; margin:0; background-color:#6689AB;"
 		+"}"
 		+".content"
 		+"{"
@@ -318,8 +299,8 @@ public class MsisdnChecker extends HttpServlet {
 		+"}"
 		+"</style>"
 		+"</head>"
-		+"<body><br/><br/><br/><br/><br/><br/>"
-		+"<div width=\"100%\" align=\"center\"> <img src=\"images/crossgate_logo.png\" alt=\"\"  height=\"53\"/> <br/><br/><br/>"
+		+"<body>"
+		+"<div width=\"100%\" align=\"center\"><img src=\"images/axiata_logo.png\" alt=\"\" width=\"510\" height=\"353\">"
 		+"<div class=\"content\">"
 		+"<form action=\"msisdncheck\" method=\"post\">"
 		+"<br>"
@@ -355,7 +336,7 @@ public class MsisdnChecker extends HttpServlet {
 		password = req.getParameter("password") != null ? req.getParameter("password") : password;
 		
 		boolean isUserLoggedIn = false;
-		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM user WHERE u_name = ? AND u_pwd = ?");
+		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM "+DB+".user WHERE username = ? AND password = ?");
 		pstmt.setString(1,username);
 		pstmt.setString(2,password);
 		ResultSet rs = pstmt.executeQuery();
@@ -370,7 +351,7 @@ public class MsisdnChecker extends HttpServlet {
 	private String tabilizeAllResponseTexts(Connection conn, String keyM, int languageID) {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql = "SELECT * FROM `message` WHERE `key`= ? and `language_id` = ?";
+		String sql = "SELECT * FROM `"+DB+"`.`message` WHERE `key`= ? and `language_id` = ?";
 		String table = "<TABLE id=\"mytable\" cellspacing=\"0\"> ";
 		table += "<TR id='header' > <th scope=\"col\" class=\"nobg\"> MESSAGE </th> <th scope=\"col\"> SIZE </th> <th scope=\"col\"> LANG </th> <th scope=\"col\"> DESCRIPTION </th> <th scope=\"col\"> KEY </th  </TR>";
 		
