@@ -51,7 +51,6 @@ Ext.onReady(function(){
 			// you define as redirect. 
  
                         success:function(form, action){ 
-                        	
                         	 var resp = Ext.util.JSON.decode(action.response.responseText);
                         	 
                         	 if(resp.success==true){

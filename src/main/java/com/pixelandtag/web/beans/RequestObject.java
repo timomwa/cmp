@@ -154,7 +154,7 @@ public class RequestObject implements Serializable{
 	
 	public static String replaceAllIllegalCharacters(String text){
 		
-		if(text==null)
+		if(text==null || text.isEmpty())
 			return null;
 		
 		text = text.replaceAll("[\\s]", "");

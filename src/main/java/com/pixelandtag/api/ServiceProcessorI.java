@@ -45,30 +45,6 @@ public interface ServiceProcessorI extends Runnable{
 	 */
 	public boolean submit(IncomingSMS mo);
 	
-	/**
-	 * Cache a connection object.
-	 * Each time this method is called,
-	 * it MUST check first if the cached
-	 * connection object is healthy, else
-	 * it must create a new connection object.
-	 * This can be achieved using a pooled connection
-	 * or simply create a connection object.
-	 * Just make sure that you don't create connections
-	 * that won't be closed.
-	 * @return
-	 */
-	public Connection getCon();
-	
-	
-	
-	/**
-	 * Since we are trying to move to 
-	 * EJB, all implementers must 
-	 * define their own EJBs..
-	 * @return
-	 */
-	public BaseEntityI getEJB();
-	
 	
 	/**
 	 * Insert into http to send/or any other way

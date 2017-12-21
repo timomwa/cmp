@@ -55,7 +55,7 @@ public class SMSMenuLevels implements Serializable{
 	@Column(name="visible")
 	private Boolean visible;
 	
-	@Column(name="ussdTag")
+	@Column(name="ussdTag",length=30)
 	@Index(name="ussdtgidx")
 	private String ussdTag = "";
 

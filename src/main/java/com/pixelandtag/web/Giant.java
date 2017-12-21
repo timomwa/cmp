@@ -43,7 +43,7 @@ public class Giant extends HttpServlet {
 
 	private Logger logger = Logger.getLogger(Giant.class);
 
-	private String DB = "pixeland_content360";
+	//private String DB = "pixeland_content360";
 	private int LOG_IN = 0;
 	private int LOG_OUT = 1;
 	private int SEARCH = 2;
@@ -426,7 +426,7 @@ public class Giant extends HttpServlet {
 			}catch(Exception e){
 				logger.error(e.getMessage(), e);
 			}
-			String sql = "UPDATE `"+DB+"`.`voucher` SET USED = 1, store_id_fk = ?, timeStamp_used = now() "
+			String sql = "UPDATE `voucher` SET USED = 1, store_id_fk = ?, timeStamp_used = now() "
 				+" WHERE id=? AND voucherNumber = ? AND msisdn = ? ";
 			
 			
@@ -484,9 +484,9 @@ public class Giant extends HttpServlet {
 			String sql = "SELECT v.id as 'voucher_id', pz.name as 'prize_name',pz.description as 'prize_description',"
 				+" pz.id as 'prize_id', p.name as 'promo_name', p.description as 'promo_description',"
 				+" p.id as 'promo_id', v.voucherNumber, v.msisdn, v.winning, v.used, v.timeStamp_awarded, v.timeStamp_used"
-				+" FROM `"+DB+"`.`voucher` v"
-				+" LEFT JOIN `"+DB+"`.`promotion` p ON p.id = v.promotion_id_fk"
-				+" LEFT JOIN `"+DB+"`.`prize` pz ON pz.promotion_id_fk = v.promotion_id_fk"
+				+" FROM `voucher` v"
+				+" LEFT JOIN `promotion` p ON p.id = v.promotion_id_fk"
+				+" LEFT JOIN `prize` pz ON pz.promotion_id_fk = v.promotion_id_fk"
 				+" WHERE v.winning=1 AND (v.voucherNumber = ?) OR (v.msisdn = ?)";
 			
 			boolean dateRange = false;
@@ -739,7 +739,7 @@ public class Giant extends HttpServlet {
 			
 			try{
 				
-				pstmt = con.prepareStatement("SELECT * FROM " + DB + ".users WHERE username = ? AND password = ?");
+				pstmt = con.prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?");
 				
 				pstmt.setString(1, username);
 				pstmt.setString(2, password);

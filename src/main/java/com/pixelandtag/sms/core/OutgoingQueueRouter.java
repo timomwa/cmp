@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import javax.naming.Context;
@@ -22,6 +23,7 @@ import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.util.FileUtils;
 
 /**
@@ -42,11 +44,14 @@ public class OutgoingQueueRouter extends Thread {
 	private OpcoSenderProfileEJBI opcosenderprofEJB;
 	private static List<SenderThreadWorker> senderworkers = new ArrayList<SenderThreadWorker>();
 	private static ConcurrentMap<Long,Queue<OutgoingSMS>> opcoqueuemap = new ConcurrentHashMap<Long,Queue<OutgoingSMS>>();
+	private static Queue<Billable> billablequeue = new LinkedBlockingQueue<Billable>();
 	private static Map<Long,OpcoSenderReceiverProfile> profilemap = new HashMap<Long,OpcoSenderReceiverProfile>();
 	private static Semaphore queueSemaphore;
+	private static Semaphore queueSemaphorebillable;
 	private int mandatoryqueuewaittime = 0;
 	static{
 		queueSemaphore = new Semaphore(1, true);
+		queueSemaphorebillable = new Semaphore(1, true);
 	}
 	
 	public static OutgoingSMS poll(Long profileId) throws InterruptedException{
@@ -74,6 +79,34 @@ public class OutgoingQueueRouter extends Thread {
 		}
 	}
 	
+	
+
+	public static Billable pollBillable(Long profileId) throws InterruptedException{
+		
+		try{
+			
+			queueSemaphorebillable.acquire();
+			
+			Queue<OutgoingSMS> outqueue = opcoqueuemap.get(profileId);
+			
+			if(outqueue!=null){
+				
+				final Billable billable = billablequeue.poll();
+				
+				if(billable!=null && billable.getId()>-1){
+					//queueprocEJB.updateQueueStatus(myMt.getId(), Boolean.TRUE); update the billable, we tell system it's in queue
+				}
+				
+				return billable;
+			}
+			
+			return null;
+		
+		}finally{
+			queueSemaphorebillable.release(); 
+		}
+	}
+	
 	public OutgoingQueueRouter() throws Exception{
 		initialize();
 	}
@@ -93,9 +126,9 @@ public class OutgoingQueueRouter extends Thread {
 		setDaemon(true);//I don't know what I am doing here 
 	}
 	
-	private void startWorkers() {
+	private void startWorkers() throws Exception {
 		
-		List<OpcoSenderReceiverProfile> profiles = opcosenderprofEJB.getAllActiveProfiles();
+		List<OpcoSenderReceiverProfile> profiles = opcosenderprofEJB.getAllActiveSenderOrTranceiverProfiles();
 		
 		for(OpcoSenderReceiverProfile opcoprofile : profiles){
 			
@@ -162,7 +195,7 @@ public class OutgoingQueueRouter extends Thread {
 				}
 				
 				try {
-					Thread.sleep(mandatoryqueuewaittime);//TODO extenalize this sleep value
+					Thread.sleep(mandatoryqueuewaittime);
 				} catch (InterruptedException e) {
 					logger.error(e);
 				}
@@ -192,7 +225,7 @@ public class OutgoingQueueRouter extends Thread {
 		int lowestsize = 10;
 		
 		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet())
-			if(lowestsize>entryset.getValue().size())
+			if(lowestsize>=entryset.getValue().size())
 				lowestsize = entryset.getValue().size();
 		
 		return lowestsize;
@@ -219,15 +252,22 @@ public class OutgoingQueueRouter extends Thread {
 			Long profileid = entryset.getKey();
 			Queue<OutgoingSMS> outqueue = entryset.getValue();
 			
-			if(outqueue.size()<1){
+			if(outqueue.size()==0){
 				
 				List<OutgoingSMS> outqueuelist_ = queueprocEJB.getUnsent(maxsizeofqueue, profilemap.get(profileid));  
 				
 				for(OutgoingSMS outgoingsms : outqueuelist_){
-					if(outqueue.size()<1){
+					
+					try {
+						outgoingsms.setIn_outgoing_queue(Boolean.TRUE);
+						queueprocEJB.saveOrUpdate(outgoingsms);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
+					//if(outqueue.size()<1){
 						outqueue.offer(outgoingsms);
 						opcoqueuemap.put(profileid, outqueue);
-					}
+					//}
 				}
 			}
 		}
@@ -239,8 +279,25 @@ public class OutgoingQueueRouter extends Thread {
 		
 		System.out.println("Shutting down...");
 		
-		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet())
+		//Update on the db and say none of the sms are in queue
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet()){
+			
+			for( OutgoingSMS sms : entryset.getValue() ){
+				try {
+					
+					sms.setIn_outgoing_queue(Boolean.FALSE);
+					queueprocEJB.saveOrUpdate(sms);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		
+		for(Entry<Long, Queue<OutgoingSMS>> entryset  : opcoqueuemap.entrySet()){
 			entryset.getValue().clear();//clear queue
+		}
 		
 		for(SenderThreadWorker worker : senderworkers)
 			worker.stop();

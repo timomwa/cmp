@@ -1,24 +1,19 @@
-<soapenv:Envelope xmlns:soapenv=‘http://schemas.xmlsoap.org/soap/envelope/’
-	xmlns:v3=‘http://www.csapi.org/schema/parlayx/common/v3_1’ xmlns:loc=‘http://www.csapi.org/schema/parlayx/sms/send/v3_1/local’>
-	<soapenv:Header>
-		<v3:RequestSOAPHeader>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:comm3="http://www.csapi.org/schema/parlayx/common/v3_1"
+	xmlns:sms7="http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local">
+	<SOAP-ENV:Header>
+		<comm3:NotifySOAPHeader>
 			<spId>36</spId>
-			<spPassword>D537064C75510543DE7B6F6392AADF33</spPassword>
-			<timeStamp>1212101030</timeStamp>
-			<serviceID>34</serviceID>
-		</v3:RequestSOAPHeader>
-	</soapenv:Header>
-	<soapenv:Body>
-		<loc:sendSms>
-			<loc:addresses>tel:+254</loc:addresses>
-			<loc:senderName>32329</loc:senderName>
-		</loc:charging>
-			<loc:message>sms test</loc:message>
-			<loc:receiptRequest>
-				<endpoint></endpoint>
-				<interfaceName>sendSms</interfaceName>
-				<correlator>123</correlator>
-			</loc:receiptRequest>
-		</loc:sendSms>
-	</soapenv:Body>
-</soapenv:Envelope>
+		</comm3:NotifySOAPHeader>
+	</SOAP-ENV:Header>
+	<SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+		<sms7:notifySmsDeliveryReceipt>
+			<sms7:correlator></sms7:correlator>
+			<sms7:deliveryStatus>
+				<address>tel:254776165270</address>
+				<deliveryStatus>DeliveredToTerminal</deliveryStatus>
+			</sms7:deliveryStatus>
+		</sms7:notifySmsDeliveryReceipt>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

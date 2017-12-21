@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -116,7 +117,7 @@ public class IncomingSMS extends GenericMessage implements Serializable{
 	public OutgoingSMS convertToOutgoing() {
 		OutgoingSMS outgoing = new OutgoingSMS();
 		outgoing.setBilling_status(getBilling_status());
-		outgoing.setCmp_tx_id(getCmp_tx_id());
+		outgoing.setCmp_tx_id( getCmp_tx_id()  );
 		if(getEvent_type()!=null)
 			outgoing.setEvent_type(getEvent_type() );
 		outgoing.setIn_outgoing_queue(Boolean.FALSE);

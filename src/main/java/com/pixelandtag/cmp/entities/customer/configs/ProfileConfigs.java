@@ -65,7 +65,7 @@ public class ProfileConfigs implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="name")
+	@Column(name="name", length=50)
 	@Index(name="proflconfidx")
 	private String name;
 	
@@ -144,7 +144,12 @@ public class ProfileConfigs implements Serializable{
 		this.profile = profile;
 	}
 	
-	
+	public static ProfileConfigs createBasic(String name, String value){
+		ProfileConfigs config_ = new ProfileConfigs();
+		config_.setName(name);
+		config_.setValue(value);
+		return config_;
+	}
 	
 	
 

@@ -2,21 +2,35 @@ package com.pixelandtag.api;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.BaseEntityI;
+import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
 import com.pixelandtag.sms.producerthreads.Operation;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.util.FileUtils;
 
 /**
@@ -25,11 +39,14 @@ import com.pixelandtag.util.FileUtils;
  */
 public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	
+	protected InitialContext context;
+	protected CMPResourceBeanRemote baseEntityEJB;
 	protected Properties mtsenderprop;
 	protected String host;
 	protected String dbName;
 	protected String username;
 	protected String password;
+	public static final String MO_BILLING = "MO_BILLING";
 	public static final String DB = "pixeland_content360";
 	public static final String SPACE = " ";
 	public static final String NUM_SEPERATOR = "."+SPACE;
@@ -46,14 +63,22 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	public static final String DEST_USERNAME_TAG = "<DEST_USERNAME>";
 	public static final String SOURCE_USERNAME_TAG = "<SOURCE_USERNAME>";
 	public static final String PRONOUN_TAG = "<PRONOUN>";
+	public static final String RESPONSE_ODDS = "<RESPONSE_ODDS>";
 	public static final String MSG_PRICE_TAG = "<PRICE>";
 	public static final String CHAT_MESSAGE_TAG = "<CHAT_MESSAGE>";
 	public static final String PROFILE_TAG = "<PROFILE>";
 	public static final String GENDER_PRONOUN_M = "GENDER_PRONOUN_M";
 	public static final String GENDER_PRONOUN_F = "GENDER_PRONOUN_F";
+	
+	public static final String GENDER_PRONOUN_HE = "GENDER_PRONOUN_HE";
+	public static final String GENDER_PRONOUN_SHE = "GENDER_PRONOUN_SHE";
+	
+	
 	public static final String GENDER_PRONOUN_INCHAT_F = "GENDER_PRONOUN_INCHAT_F";
 	public static final String OFFLINE_NOTIFIER = "OFFLINE_NOTIFIER";
 	public static final String MESSAGE_SENT_NOTIFICATION = "MESSAGE_SENT_NOTIFICATION";
+	public static final String MESSAGE_SENT_NOTIFICATION_OFFBUNDLE = "MESSAGE_SENT_NOTIFICATION_OFFBUNDLE";
+	public static final String MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION = "MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION";
 	public static final String CHAT_MESSAGE_TEMPLATE = "CHAT_MESSAGE_TEMPLATE";
 	public static final String GENDER_PRONOUN_INCHAT_M = "GENDER_PRONOUN_INCHAT_M";
 	public static final String CHAT_USERNAME_SEPERATOR = " Says: ";
@@ -76,20 +101,19 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	//private static final String COLON = ":";
 	public static final String SUBSCRIPTION_CONFIRMATION = "ON";
 	public static final String SUBSCRIPTION_ADVICE = "SUBSCRIPTION_ADVICE";
+	private Map<Long, OpcoSMSService> opco_service_cache = new HashMap<Long, OpcoSMSService>();
 
 	
 	private static final String TO_STATS_LOG = "INSERT INTO `"+CelcomImpl.database+"`.`SMSStatLog`(SMSServiceID,msisdn,transactionID, price, subscription) " +
 						"VALUES(?,?,?,?,?)";
+	public static final String RETURN_CARRIAGE = "\n";
 	
 
 	protected String subscriptionText;
 	protected String unsubscriptionText;
 	protected String tailTextSubscribed;
 	protected String tailTextNotSubecribed;
-	//private Map<Long, ServiceProcessorDTO> serviceProcessorCache = new HashMap<Long,ServiceProcessorDTO>();
-	//private Map<Long, MOProcessor> serviceProcessorCache = new HashMap<Long,MOProcessor>();
-	//private Map<Long, OpcoSenderReceiverProfile> opcosenderProfileCache = new HashMap<Long,OpcoSenderReceiverProfile>();
-	
+	private BillingGatewayEJBI billingGW;
 	
 	public String getSubscriptionText() {
 		return subscriptionText;
@@ -177,18 +201,41 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.debug(" in com.pixelandtag.api.GenericServiceProcessor.bill(OutgoingSMS) ");
 		logger.debug("mo_.getPrice().doubleValue() "+outgoingsms.getPrice().doubleValue());
 		logger.debug(" mo_.getPrice().compareTo(BigDecimal.ZERO) "+outgoingsms.getPrice().compareTo(BigDecimal.ZERO));
-		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0){//if price is zero
+		
+		Long key_ = ( outgoingsms.getServiceid().longValue() +  outgoingsms.getOpcosenderprofile().getOpco().getId().longValue() );
+		OpcoSMSService opcosmsserv = opco_service_cache.get( key_ ) ;
+		
+		if(opcosmsserv==null){
+			try {
+				opcosmsserv = baseEntityEJB.getOpcoSMSService(outgoingsms.getServiceid(), outgoingsms.getOpcosenderprofile().getOpco());
+			} catch (ServiceNotLinkedToOpcoException e) {
+				logger.error(e.getMessage(), e);
+			} 
+			opco_service_cache.put(key_  , opcosmsserv);
+		}
+		
+		if(outgoingsms.getPrice()==null && outgoingsms.getBilling_status()!=null && outgoingsms.getBilling_status()!=BillingStatus.WAITING_BILLING)
+			outgoingsms.setPrice(opcosmsserv.getPrice());
+		outgoingsms.setParlayx_serviceid(opcosmsserv.getServiceid()); 
+		
+		if(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)<=0 || (opcosmsserv.getBillingType()!=null && opcosmsserv.getBillingType() == BillingType.OPERATOR_SIDE_MO_BILLING )){//if price is zero, or if it's MO billing
 			outgoingsms.setCharged(true);
-			outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
-			logger.debug(" returning.... price is zero ");
+			BillingStatus status = opcosmsserv.getBillingType() == BillingType.OPERATOR_SIDE_MO_BILLING ? BillingStatus.SUCCESSFULLY_BILLED : BillingStatus.NO_BILLING_REQUIRED;
+			outgoingsms.setBilling_status(status);
+			logger.debug(" returning.... price is zero or is MO biling ");
+			
+			if(opcosmsserv.getBillingType() == BillingType.OPERATOR_SIDE_MO_BILLING)
+				billingGW.createSuccessBillingRec(outgoingsms, BillingType.OPERATOR_SIDE_MO_BILLING);
+			
 			return outgoingsms;
 		}
 		
 		Billable billable = null;
 		
+		
 		try{
 			
-			billable = getEJB().find(Billable.class, "cp_tx_id",outgoingsms.getCmp_tx_id());
+			billable = baseEntityEJB.find(Billable.class, "cp_tx_id",outgoingsms.getCmp_tx_id());
 			
 			
 		}catch(Exception e){
@@ -227,7 +274,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		logger.debug(" before save "+billable.getId());
 		
 		try{
-			billable = getEJB().saveOrUpdate(billable);
+			billable = baseEntityEJB.saveUpdate(billable);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.debug(" something went terribly wrong! ");
@@ -236,13 +283,26 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		}
 		
 		logger.debug(" after save "+billable.getId());
-		outgoingsms.setBilling_status(BillingStatus.WAITING_BILLING);
+		BillingStatus status = BillingStatus.NO_BILLING_REQUIRED;
+		if(opcosmsserv.getBillingType()==BillingType.OPERATOR_SIDE_MO_BILLING)
+			status = BillingStatus.OPERATOR_ALREADY_BILLED_ON_MO;
+		if(opcosmsserv.getBillingType()==BillingType.OPERATOR_SIDE_MT_BILLING)
+			status = BillingStatus.OPERATOR_TO_BILL_ON_MT;
+		if(opcosmsserv.getBillingType()==BillingType.CMP_SIDE_MO_BILLING)
+			status = BillingStatus.WAITING_BILLING;
+		if(opcosmsserv.getBillingType()==BillingType.CMP_SIDE_MT_BILLING)
+			status = BillingStatus.WAITING_BILLING;
+		
+		outgoingsms.setBilling_status(status);
 		outgoingsms.setPriority(0);
 		logger.debug(" leaving  com.pixelandtag.api.GenericServiceProcessor.bill(MOSms) ");
 		return outgoingsms;
 		
 		
 	}
+
+
+	
 
 
 	/**
@@ -325,17 +385,34 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 			return false;
 	}
 	
-	public GenericServiceProcessor(){
+	public GenericServiceProcessor() throws NamingException{
 		
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
 		
-		host = mtsenderprop.getProperty("db_host");
-		dbName = mtsenderprop.getProperty("DATABASE");
-		username = mtsenderprop.getProperty("db_username");
-		password = mtsenderprop.getProperty("db_password");
+		initEjb();
 		
 	}
 	
+	private void initEjb() throws NamingException {
+		String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
+		 Properties props = new Properties();
+		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
+		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
+		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
+		 props.put("jboss.naming.client.ejb.context", true);
+		 context = new InitialContext(props);
+		 baseEntityEJB =  (CMPResourceBeanRemote) 
+      		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		 
+		  billingGW =  (BillingGatewayEJBI) 
+		      		context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
+		 
+		 
+		
+	}
+
+
 	public static Vector<String> splitText(String input){
   		int maxSize = 156;
 		Vector<String> ret=new Vector<String>();
@@ -368,7 +445,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		try {
 			
-			getEJB().toStatsLog(incomingsms,TO_STATS_LOG);	
+			baseEntityEJB.toStatsLog(incomingsms,TO_STATS_LOG);	
 			
 		} catch (Exception e) {
 			log(e);
@@ -382,12 +459,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	}
 
 	public String generateNextTxId(){
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			logger.warn(e.getMessage());
-		}
-		return String.valueOf(System.currentTimeMillis());
+		return UUID.randomUUID().toString() ;
 	}
 	
 	
@@ -408,7 +480,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 					IncomingSMS mo = this.moMsgs.takeFirst();//will block here while the queue is empty
 					
 					mo.setMo_ack(Boolean.TRUE);
-					mo = getEJB().saveOrUpdate(mo);
+					mo = baseEntityEJB.saveUpdate(mo);
 					
 					if(!(mo.getCmp_tx_id().isEmpty())){
 						
@@ -420,7 +492,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 						
 						if(outgoingsms.getOpcosenderprofile()==null){//In case no sender profile, use the incoming one's
 							OperatorCountry opco = mo.getOpco();
-							OpcoSenderReceiverProfile opcosenderprofile = getEJB().getopcosenderProfileFromOpcoId(opco.getId());
+							OpcoSenderReceiverProfile opcosenderprofile = baseEntityEJB.getopcosenderProfileFromOpcoId(opco.getId());
 							outgoingsms.setOpcosenderprofile(opcosenderprofile);
 						}
 						
@@ -488,7 +560,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		try {
 			
 			incomingsms.setMo_ack(Boolean.TRUE);
-			success = getEJB().saveOrUpdate(incomingsms).getId().compareTo(0L)>0;
+			success = baseEntityEJB.saveUpdate(incomingsms).getId().compareTo(0L)>0;
 			
 		} catch (Exception e) {
 			
@@ -514,16 +586,14 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 		
 		outgoingSMS  = bill(outgoingSMS);
 		
-		BaseEntityI cmpBean = getEJB();
-		
 		try {
 			
 			//int max_retry = 5;
 			//int count = 0;
 			
-			boolean success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
+			boolean success = baseEntityEJB.saveUpdate(outgoingSMS).getId().compareTo(0L)>0;
 			//while(!success && count<=max_retry){
-			//	success = cmpBean.saveOrUpdate(outgoingSMS).getId().compareTo(0L)>0;
+			//	success = cmpBean.saveUpdate(outgoingSMS).getId().compareTo(0L)>0;
 			//}
 			
 			

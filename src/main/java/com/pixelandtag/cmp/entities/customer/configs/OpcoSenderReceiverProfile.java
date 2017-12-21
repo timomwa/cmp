@@ -32,6 +32,10 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 			query = "select osp from OpcoSenderReceiverProfile osp where osp.opco=:opco AND osp.active=:active  order by osp.pickorder desc"
 	),
 	@NamedQuery(
+			name = OpcoSenderReceiverProfile.NQ_FIND_BY_OPCO_AND_TYPE,
+			query = "select osp from OpcoSenderReceiverProfile osp where osp.opco=:opco AND osp.active=:active AND osp.profile.profiletype=:profiletype  order by osp.pickorder desc"
+	),
+	@NamedQuery(
 			name = OpcoSenderReceiverProfile.NQ_LIST_ACTIVE,
 			query = "select osp from OpcoSenderReceiverProfile osp where osp.active=:active  order by osp.pickorder desc"
 	)
@@ -46,6 +50,10 @@ public class OpcoSenderReceiverProfile implements Serializable{
 	
 	@Transient
 	public static final String NQ_FIND_BY_OPCO = "opcosenderprofile.byopco";
+	
+	@Transient
+	public static final String NQ_FIND_BY_OPCO_AND_TYPE = "opcosenderprofile.byopcoandtype";
+	
 	@Transient
 	public static final String NQ_LIST_ACTIVE = "opcosenderprofile.listactive";
 	

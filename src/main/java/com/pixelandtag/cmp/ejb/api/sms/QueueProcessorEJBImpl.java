@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -51,6 +52,8 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 		billingstatuses.add(BillingStatus.NO_BILLING_REQUIRED);
 		billingstatuses.add(BillingStatus.INSUFFICIENT_FUNDS);
 		billingstatuses.add(BillingStatus.SUCCESSFULLY_BILLED);
+		billingstatuses.add(BillingStatus.OPERATOR_ALREADY_BILLED_ON_MO);
+		billingstatuses.add(BillingStatus.OPERATOR_TO_BILL_ON_MT);
 	}
 	
 	@Inject
@@ -116,12 +119,22 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 				logger.info("No such record with cmp_tx_id / opco_tx_id = "+sms.getCmp_tx_id()+"/"+sms.getOpco_tx_id()+"  in message_log table, so we create one");
 				
 				messagelog = new MessageLog();
-				messagelog.setCmp_tx_id(sms.getCmp_tx_id());
+				
+				if(sms.getCmp_tx_id()!=null && !sms.getCmp_tx_id().isEmpty())
+					messagelog.setCmp_tx_id(sms.getCmp_tx_id());
+				else
+					messagelog.setCmp_tx_id(UUID.randomUUID().toString());
+				
 				messagelog.setMo_processor_id_fk(sms.getMoprocessor().getId());
 				messagelog.setMsisdn(sms.getMsisdn());
 				messagelog.setMt_sms(sms.getSms());
 				messagelog.setMt_timestamp(mt_timestamp);
-				messagelog.setOpco_tx_id(sms.getOpco_tx_id());
+				
+				if(sms.getOpco_tx_id()!=null && !sms.getOpco_tx_id().isEmpty())
+					messagelog.setOpco_tx_id(sms.getOpco_tx_id());
+				else
+					messagelog.setOpco_tx_id(UUID.randomUUID().toString());
+				
 				messagelog.setShortcode(sms.getShortcode());
 				messagelog.setSource(sms.getMediumType().name());
 				messagelog.setStatus(status.name());
@@ -140,9 +153,15 @@ public class QueueProcessorEJBImpl implements QueueProcessorEJBI {
 	
 	
 	@Override
-	public boolean deleteFromQueue(OutgoingSMS sms)  throws Exception{
-		sms = em.merge(sms);
-		smsoutDAO.delete(sms);
+	public boolean deleteFromQueue(OutgoingSMS sms){
+		
+		try{
+			Query qry = em.createQuery("delete from OutgoingSMS WHERE id=:id");
+			qry.setParameter("id", sms.getId());
+			qry.executeUpdate();
+		}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+		}
 		return true;
 	}
 	

@@ -36,7 +36,7 @@ public class SubscriptionHistory implements Serializable {
 	@Index(name = "subhistidx")
 	private Long service_id;
 
-	@Column(name = "msisdn", nullable = false)
+	@Column(name = "msisdn", nullable = false, length=50)
 	@Index(name = "subhistidx")
 	private String msisdn;
 

@@ -50,11 +50,11 @@ public class GenericMessage implements Serializable{
 	private Date timestamp;
 	
 	@Index(name="osmopco_tx_id")
-	@Column(name="opco_tx_id")
+	@Column(name="opco_tx_id",length=50)
 	private String opco_tx_id;
 		
 	@Index(name="osmcmp_tx_id")
-	@Column(name="cmp_tx_id", unique=true)
+	@Column(name="cmp_tx_id", unique=true,length=50)
 	private String cmp_tx_id;	
 
 	@Column(name="sms",length=1000)
@@ -89,6 +89,9 @@ public class GenericMessage implements Serializable{
 	
 	@Column(name="isSubscription", nullable=false)
 	private Boolean isSubscription;
+	
+	@Column(name="parlayx_serviceid")
+	private String parlayx_serviceid;
 	
 	@PreUpdate
 	@PrePersist
@@ -163,7 +166,7 @@ public class GenericMessage implements Serializable{
 
 
 	public BigDecimal getPrice() {
-		return price;
+		return price==null ? BigDecimal.ZERO : price;
 	}
 
 
@@ -257,6 +260,16 @@ public class GenericMessage implements Serializable{
 	}
 
 
+	public String getParlayx_serviceid() {
+		return parlayx_serviceid;
+	}
+
+
+	public void setParlayx_serviceid(String parlayx_serviceid) {
+		this.parlayx_serviceid = parlayx_serviceid;
+	}
+
+
 	@Override
 	public String toString() {
 		return "GenericMessage [id=" + id + ", shortcode=" + shortcode
@@ -267,8 +280,9 @@ public class GenericMessage implements Serializable{
 				+ ", serviceid=" + serviceid + ", split=" + split
 				+ ", event_type=" + event_type + ", price_point_keyword="
 				+ price_point_keyword + ", moprocessor=" + moprocessor
-				+ ", isSubscription=" + isSubscription + "]";
+				+ ", isSubscription=" + isSubscription + ", parlayx_serviceid="
+				+ parlayx_serviceid + "]";
 	}
-	
+
 	
 }

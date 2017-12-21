@@ -1,12 +1,10 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.Map.Entry;
-import java.util.Properties;
 
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -20,7 +18,6 @@ import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
@@ -46,38 +43,26 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 	private static final int MAL = 2;//Language Malay
 
 	private final Logger mo_processor_logger = Logger.getLogger(GenericMenuProcessor.class);
-	//private final String RESET_SESSION_ENG = "\nREPLY with \"Number\" to get the list of services.";
-	//private final String RESET_SESSION_MAL = "\nBALAS dengan \"Nombor\" untuk dapatkan senarai servis.";
-	//private ContentRetriever cr = null;
 	private DBPoolDataSource ds;
 	private MenuController menu_controller = null;
 	private SubscriptionOld subscription = null;
 	private CelcomHTTPAPI celcomAPI = null;
 	
 	private InitialContext context;
-	private CMPResourceBeanRemote cmpbean;
 	
 	private SubscriptionBeanI subscriptionBean;
     
     public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		 Properties props = new Properties();
-		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		 props.put("jboss.naming.client.ejb.context", true);
-		 context = new InitialContext(props);
-		 cmpbean =  (CMPResourceBeanRemote) 
-       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+    	
 		 subscriptionBean = (SubscriptionBeanI) 
     		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		 
 		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
-	public GenericMenuProcessor(){
+    
+	public GenericMenuProcessor() throws NamingException{
 		init_datasource();
-		menu_controller = new MenuController(getEJB());
+		menu_controller = new MenuController(baseEntityEJB);
 		subscription = new SubscriptionOld();
 	}
 	
@@ -195,7 +180,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				smsmenu_level_id_fk = sess.getSmsmenu_level_id_fk();
 				language_id = sess.getLanguage_id();
 			}else{
-				language_id = getEJB().getSubscriberLanguage(incomingsms.getMsisdn());//get from db
+				language_id = baseEntityEJB.getSubscriberLanguage(incomingsms.getMsisdn());//get from db
 			}
 			
 			
@@ -215,7 +200,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				menu_controller.updateSession(language_id,MSISDN, current_menu.getParent_level_id());//update session to upper menu.
 				MenuItem item = menu_controller.getMenuByParentLevelId(language_id,current_menu.getParent_level_id(),menuid);
-				outgoingsms.setSms(item.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId()));//get all the sub menus there.
+				outgoingsms.setSms(item.enumerate()+baseEntityEJB.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId()));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("0")){
 				
@@ -230,12 +215,12 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				language_id = KEYWORD.equalsIgnoreCase("GIFT") ?  ENG : MAL;
 				int menu_id = 1;
 				
-				cmpbean.updateProfile(incomingsms.getMsisdn(),language_id);
+				baseEntityEJB.updateProfile(incomingsms.getMsisdn(),language_id);
 				
 				menu_controller.updateSession(language_id,MSISDN, -1);//update session to upper menu.
 				current_menu = menu_controller.getTopMenu(menu_id, language_id );
 				
-				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));
+				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate()+baseEntityEJB.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));
 				
 			}else if(KEYWORD.equalsIgnoreCase("AFCON")){
 				
@@ -245,7 +230,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				menu_controller.updateSession(language_id,MSISDN, -1);//update session to upper menu.
 				current_menu = menu_controller.getTopMenu(menu_id, language_id );
 				
-				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate()+SPACE+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));
+				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate()+SPACE+baseEntityEJB.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));
 				
 			}else if(kw_is_digit){
 				
@@ -293,7 +278,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 					outgoingsms =  getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
 						
 					if(outgoingsms!=null){
-						String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ) ;
+						String response = baseEntityEJB.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ) ;
 						if(response.indexOf(SERVICENAME_TAG)>=0)
 							response = response.replaceAll(SERVICENAME_TAG, chosenMenu.getName());
 						if(response.indexOf(PRICE_TAG)>=0)
@@ -424,7 +409,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				
 				//TODO - if a subscriber just sends "ON" or "BUY" Without the number, then, we give them the main menu, or the sub menu that they previously were in
-				SubscriptionDTO sub = cmpbean.checkAnyPending(MSISDN);
+				SubscriptionDTO sub = baseEntityEJB.checkAnyPending(MSISDN);
 				
 				if(sub!=null){
 					
@@ -437,7 +422,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 					mo_processor_logger.info("::::::::::::::::::::::::: serviceid:: "+menu.getService_id() + "\n\nmenu.toString():\n "+menu.toString()+"\n");
 					outgoingsms =  getContentFromServiceId(menu.getService_id(),MSISDN,true);
 					
-					String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE,language_id, incomingsms.getOpco().getId()) ;
+					String response = baseEntityEJB.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE,language_id, incomingsms.getOpco().getId()) ;
 					if(response.indexOf(SERVICENAME_TAG)>=0)
 						response = response.replaceAll(SERVICENAME_TAG, menu.getName());
 					if(response.indexOf(PRICE_TAG)>=0)
@@ -455,12 +440,12 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 					
 					
 				}else{
-					outgoingsms.setSms(cmpbean.getMessage(NO_PENDING_SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ));
+					outgoingsms.setSms(baseEntityEJB.getMessage(NO_PENDING_SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ));
 				}
 				
 			}else if(KEYWORD.equals("STOP") || KEYWORD.equals("ST0P") || KEYWORD.equals("BATAL")){
 				
-				String msg = cmpbean.getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId() );
+				String msg = baseEntityEJB.getMessage(MessageType.UNSUBSCRIBED_SINGLE_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId() );
 				
 				int stop_number = -1;
 				
@@ -469,14 +454,14 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				}catch(Exception e){}
 				
 				
-				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = cmpbean.getAllSubscribedServices(incomingsms.getMsisdn());
+				LinkedHashMap<Integer,SMSServiceDTO> allsubscribed = baseEntityEJB.getAllSubscribedServices(incomingsms.getMsisdn());
 				
 				if(allsubscribed!=null){
 				
 					if(second_keyword!=null && (second_keyword.equalsIgnoreCase("all") || second_keyword.equalsIgnoreCase("semua"))){
-						cmpbean.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_sms);
-						msg = cmpbean.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id, incomingsms.getOpco().getId() );
-						msg = msg.replaceAll(SERVICENAME_TAG, cmpbean.getMessage(MessageType.ALL_SERVICES, language_id, incomingsms.getOpco().getId() ));
+						baseEntityEJB.unsubscribeAll(MSISDN,SubscriptionStatus.unsubscribed,AlterationMethod.self_via_sms);
+						msg = baseEntityEJB.getMessage(UNSUBSCRIBED_ALL_ADVICE, language_id, incomingsms.getOpco().getId() );
+						msg = msg.replaceAll(SERVICENAME_TAG, baseEntityEJB.getMessage(MessageType.ALL_SERVICES, language_id, incomingsms.getOpco().getId() ));
 						outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+SPACE+msg);
 					}else if(second_keyword!=null || stop_number>-1){
 						
@@ -493,7 +478,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 										 
 						}else if(second_keyword!=null){
 										
-							SMSServiceDTO smsservice = cmpbean.getSMSservice(second_keyword);
+							SMSServiceDTO smsservice = baseEntityEJB.getSMSservice(second_keyword);
 							
 							//if(subscription.updateSubscription(conn, smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed)){
 							subscriptionBean.updateSubscription(smsservice.getId(), MSISDN,SubscriptionStatus.unsubscribed, AlterationMethod.self_via_sms);
@@ -505,11 +490,11 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 						}
 								
 					}else {
-						msg = subscription.stringFyServiceList(allsubscribed)+cmpbean.getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, language_id, incomingsms.getOpco().getId() );
+						msg = subscription.stringFyServiceList(allsubscribed)+baseEntityEJB.getMessage(MessageType.INDIVIDUAL_UNSUBSCRIBE_ADVICE, language_id, incomingsms.getOpco().getId() );
 					}
 							
 				}else{
-					msg = cmpbean.getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId() );
+					msg = baseEntityEJB.getMessage(MessageType.NOT_SUBSCRIBED_TO_ANY_SERVICE_ADVICE, language_id, incomingsms.getOpco().getId() );
 				}
 					
 				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+msg);
@@ -517,17 +502,17 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 
 			}else if(KEYWORD.equals("HELP")){
 				
-				String msg =  cmpbean.getMessage(MessageType.HELP,language_id, incomingsms.getOpco().getId());
+				String msg =  baseEntityEJB.getMessage(MessageType.HELP,language_id, incomingsms.getOpco().getId());
 				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+msg);
 				
 			}else if(KEYWORD.equals("INFO")){
 				
-				String msg =  cmpbean.getMessage(MessageType.INFO, language_id, incomingsms.getOpco().getId() );
+				String msg =  baseEntityEJB.getMessage(MessageType.INFO, language_id, incomingsms.getOpco().getId() );
 				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+msg);
 			
 			}else{
 				//Unknown keyword
-				outgoingsms.setSms(cmpbean.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id, incomingsms.getOpco().getId() ));
+				outgoingsms.setSms(baseEntityEJB.getMessage(MessageType.UNKNOWN_KEYWORD_ADVICE, language_id, incomingsms.getOpco().getId() ));
 			}
 			
 			mo_processor_logger.info(incomingsms.toString());
@@ -568,7 +553,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 			chosenMenu = current_menu.getMenuByPosition(chosen);
 			outgoingsms = getContentFromServiceId(chosenMenu.getService_id(),MSISDN,true);
 			//final MOSms mosm_ =  cr.getContentFromServiceId(chosenMenu.getService_id(),MSISDN,conn);
-			final SubscriptionDTO subdto = cmpbean.getSubscriptionDTO( MSISDN, chosenMenu.getService_id());
+			final SubscriptionDTO subdto = baseEntityEJB.getSubscriptionDTO( MSISDN, chosenMenu.getService_id());
 			
 			if(chosenMenu.getService_id()<1){//if this still looks like a sub-menu, we send to subscriber the sub menu and tell them how to subscribe
 
@@ -593,9 +578,9 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				
 				if(submenus_have_sub_menus)
-					outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+chosenMenu.enumerate()+cmpbean.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
+					outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+chosenMenu.enumerate()+baseEntityEJB.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
 				else
-					outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+chosenMenu.enumerate()+cmpbean.getMessage(SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
+					outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+chosenMenu.enumerate()+baseEntityEJB.getMessage(SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
 				
 			}else{
 				
@@ -606,11 +591,11 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				
 				if(subdto==null || (subdto!=null && !subdto.getSubscription_status().equals(SubscriptionStatus.confirmed.toString()))){
 				
-					SMSService smsService = cmpbean.find(SMSService.class, new Long(chosenMenu.getService_id()));
-					cmpbean.subscribe(MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS,AlterationMethod.self_via_sms);//subscribe but marks as "confirmed"
+					SMSService smsService = baseEntityEJB.find(SMSService.class, new Long(chosenMenu.getService_id()));
+					baseEntityEJB.subscribe(MSISDN, smsService, chosenMenu.getId(),SubscriptionStatus.confirmed, SubscriptionSource.SMS,AlterationMethod.self_via_sms);//subscribe but marks as "confirmed"
 					
 					
-					String response = cmpbean.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ) ;
+					String response = baseEntityEJB.getMessage(CONFIRMED_SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ) ;
 					if(response.indexOf(SERVICENAME_TAG)>=0)
 						response = response.replaceAll(SERVICENAME_TAG, chosenMenu.getName());
 					if(response.indexOf(PRICE_TAG)>=0)
@@ -637,7 +622,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 					//that you don't charge a subscriber without warning. They must confim their subscription.
 					
 					//Already subscribed text
-					String response = cmpbean.getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id, incomingsms.getOpco().getId() ) ;
+					String response = baseEntityEJB.getMessage(MessageType.ALREADY_SUBSCRIBED_ADVICE, language_id, incomingsms.getOpco().getId() ) ;
 					if(response.indexOf(SERVICENAME_TAG)>=0)
 						response = response.replaceAll(SERVICENAME_TAG, chosenMenu.getName());
 					if(response.indexOf(PRICE_TAG)>=0)
@@ -657,9 +642,9 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 		}else{
 			//Here check if subscriber sent valid keyword, fetch service, and subscribe then to that service.
 			if(submenus_have_sub_menus)
-				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate() + cmpbean.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
+				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate() + baseEntityEJB.getMessage(MAIN_MENU_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
 			else
-				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate() + cmpbean.getMessage(SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
+				outgoingsms.setSms(RM.replaceAll(PRICE_TG, String.valueOf(incomingsms.getPrice()))+current_menu.enumerate() + baseEntityEJB.getMessage(SUBSCRIPTION_ADVICE, language_id, incomingsms.getOpco().getId() ));//get all the sub menus there.
 		
 		}
 		
@@ -703,21 +688,21 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 		
 		String s  = "::::::::::::::::::::::::::::::::::::::::::::::::::::";
 		logger.info(s+" service_id["+service_id+"] msisdn["+msisdn+"]");
-		SMSServiceDTO sm = cmpbean.getSMSservice(service_id);
+		SMSServiceDTO sm = baseEntityEJB.getSMSservice(service_id);
 		logger.info(s+sm);
 		IncomingSMS incomingsms = null;
 		OutgoingSMS outgoingsms = null;
 		
 		if(sm!=null){
 			
-			ServiceProcessorDTO procDTO = cmpbean.getServiceProcessor(sm.getMo_processor_FK());
+			ServiceProcessorDTO procDTO = baseEntityEJB.getServiceProcessor(sm.getMo_processor_FK());
 			
 			try {
 				
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				incomingsms = new IncomingSMS();
-				incomingsms.setCmp_tx_id(cmpbean.generateNextTxId()); 
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  ); 
 				incomingsms.setMsisdn(msisdn);
 				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
@@ -728,7 +713,7 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 				incomingsms.setPrice_point_keyword(sm.getPricePointKeyword());
 				
 				//added on 10th June 2013 but not tested
-				incomingsms.setMoprocessor(cmpbean.find(MOProcessor.class, sm.getMo_processor_FK()));
+				incomingsms.setMoprocessor(baseEntityEJB.find(MOProcessor.class, sm.getMo_processor_FK()));
 				
 				
 				
@@ -757,32 +742,5 @@ public class GenericMenuProcessor extends GenericServiceProcessor  {
 		return outgoingsms;
 	}
 
-	@Override
-	public Connection getCon() {
-		
-		try {
-			
-			return ds.getConnection();
-		
-		} catch (Exception e) {
-			
-			mo_processor_logger.error(e.getMessage(),e);
-			
-			return null;
-		
-		}finally{
-		
-		}
-	}
-	
-	
-
-	
-	@Override
-	public CMPResourceBeanRemote getEJB() {
-		return this.cmpbean;
-	}
-	
-	
 	
 }

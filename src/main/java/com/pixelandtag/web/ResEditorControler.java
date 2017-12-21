@@ -41,8 +41,6 @@ public class ResEditorControler extends HttpServlet {
 	private JSONObject requestJSON = null;
 	private JSONObject responseJSON = null;
 	private PrintWriter writer;
-	
-	private String DB = "pixeland_content360";
 
 	/**
 	 * 

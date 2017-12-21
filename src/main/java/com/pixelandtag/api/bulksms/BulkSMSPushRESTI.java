@@ -13,7 +13,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 
-@Path("/rest/bulk")
+@Path("/bulk")
 public interface BulkSMSPushRESTI {
 	
 	@POST

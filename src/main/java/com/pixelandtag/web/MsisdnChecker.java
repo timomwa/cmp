@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -173,7 +174,7 @@ public class MsisdnChecker extends HttpServlet {
 				out.println("	<script type=\"text/javascript\" src=\"js/utils.js\"></script>");
 				out.println("	<script type=\"text/javascript\" src=\"js/jquery-1.7.2.min.js\"></script>");
 				out.println("	<script type=\"text/javascript\" src=\"js/jquery.json-2.2.min.js\"></script>");
-				out.println("	<script type=\"text/javascript\" src=\"js/ourjs.js?v=2\"></script>");
+				out.println("	<script type=\"text/javascript\" src=\"js/ourjs.js?v="+(new Date()).getTime()+"\"></script>");
 				out.println("</head>");
 				
 				out.println("<BODY>");
@@ -336,7 +337,7 @@ public class MsisdnChecker extends HttpServlet {
 		password = req.getParameter("password") != null ? req.getParameter("password") : password;
 		
 		boolean isUserLoggedIn = false;
-		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM "+DB+".user WHERE username = ? AND password = ?");
+		PreparedStatement pstmt = con.prepareStatement("SELECT * FROM "+DB+".user WHERE u_name = ? AND u_pwd = ?");
 		pstmt.setString(1,username);
 		pstmt.setString(2,password);
 		ResultSet rs = pstmt.executeQuery();

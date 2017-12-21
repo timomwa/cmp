@@ -186,25 +186,61 @@ END;
 $
 DELIMITER ;
 
+select msisdn,convert_tz(mo_timestamp,'-04:00','+03:00') mo_time, convert_tz(mt_timestamp,'-04:00','+03:00') mt_time,shortcode,source,replace(mo_sms,'\n',' ') mo_sms, replace(mt_sms,'\n',' '), status from message_log where msisdn='254756121523' order by mo_timestamp desc;
 
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-06-30 00:00:00','-04:00','+03:00') AND convert_tz('2015-07-31 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-08-30 00:00:00','-04:00','+03:00') AND convert_tz('2015-10-01 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-11-30 00:00:00','-04:00','+03:00') AND convert_tz('2016-01-01 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
-
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-10-31 00:00:00','-04:00','+03:00') AND convert_tz('2015-12-01 23:59:59','-04:00','+03:00')
+-- 79497102 Airtel --
+-- 79497164 Orange --
+select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1 and opco_id_fk = 79497102  
+and timeStamp between  convert_tz('2016-09-29 00:00:00','-04:00','+03:00') AND convert_tz('2016-11-02 23:59:59','-04:00','+03:00')
 group by dt order by dt desc limit 35;
 
 
-select date(convert_tz(timeStamp,'-04:00','+03:00')) dt, count(*) count, sum(price) total_kshs from  success_billing where success=1  
-and timeStamp between  convert_tz('2015-12-31 00:00:00','-04:00','+03:00') AND convert_tz('2016-02-02 23:59:59','-04:00','+03:00')
-group by dt order by dt desc limit 35;
+
+
+
+
+DELIMITER $
+CREATE PROCEDURE analyzeChatTrends()
+BEGIN
+DECLARE cursor_ID INT;
+DECLARE totaltraffic INT default 0;
+DECLARE cursor_received INT;
+DECLARE cursor_sent INT;
+DECLARE cursor_replyProbab double;
+DECLARE done boolean DEFAULT FALSE;
+DECLARE cursor_i CURSOR FOR select dp.id from dating_person dp left join dating_profile prof on prof.person_id_fk = dp.id WHERE dp.active=1 AND prof.profileComplete=1;
+DECLARE cursor_k CURSOR FOR  select sum(k.received) received, sum(k.sent) sent from (select count(*) received, 0 as sent from dating_chatlog where TIMESTAMPDIFF(DAY,timeStamp, now())<=7 AND dest_person_id = cursor_ID union select 0 as received, count(*) sent  from dating_chatlog where TIMESTAMPDIFF(DAY,timeStamp, now())<=7 AND source_person_id = cursor_ID) k;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+OPEN cursor_i;
+LOOP1: LOOP
+FETCH cursor_i INTO cursor_ID;
+IF done THEN
+close cursor_i;
+LEAVE LOOP1;
+END IF;
+OPEN cursor_k;
+LOOP2: LOOP
+FETCH cursor_k INTO cursor_received, cursor_sent;
+IF done THEN
+set done = FALSE;
+close cursor_k;
+LEAVE LOOP2;
+END IF;
+set totaltraffic = (cursor_sent+cursor_received);
+IF totaltraffic>0  THEN
+set cursor_replyProbab = (cursor_sent) / (cursor_sent+cursor_received) ;
+END IF;
+select cursor_replyProbab,totaltraffic,cursor_ID;
+update dating_profile set replyProbability=cursor_replyProbab where person_id_fk = cursor_ID;
+end loop LOOP2;
+end loop LOOP1;
+END;
+$
+DELIMITER ;
+call analyzeChatTrends;
+select person_id_fk,gender,lastActive,replyProbability, username from dating_profile order by lastActive desc, replyProbability desc limit 20;
+
+--- SEARCHN CLEANUP SCRIPTS ---
+delete from dating_systemmatchlog where person_a_id not in (select id from dating_person);
+delete from dating_systemmatchlog where person_b_id not in (select id from dating_person);
+----- END -----

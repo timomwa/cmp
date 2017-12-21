@@ -6,6 +6,7 @@ public interface Receiver {
 	
 	public static String IP_ADDRESS = "ip.address";
 	public static String MO_MEDIUM_SOURCE = "mo_medium_source";
+	public static String STRIPPABLE_STRING = "strippable_string";
 	public static String HTTP_HEADER_PREFIX = "http_header_";
 	public static String HTTP_RECEIVER_MSISDN_PARAM_NAME = "receiver_msisdn_param_name";
 	public static String HTTP_RECEIVER_SHORTCODE_PARAM_NAME = "receiver_shortcode_param_name";

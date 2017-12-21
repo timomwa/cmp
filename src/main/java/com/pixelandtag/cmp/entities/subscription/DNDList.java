@@ -24,7 +24,7 @@ public class DNDList implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="msisdn")
+	@Column(name="msisdn", length=20)
 	@Index(name="dmdlstmsisdn")
 	private String msisdn;
 

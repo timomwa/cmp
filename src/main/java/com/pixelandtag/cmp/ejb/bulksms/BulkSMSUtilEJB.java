@@ -161,16 +161,22 @@ public class BulkSMSUtilEJB implements BulkSMSUtilBeanI {
 	 * @see com.pixelandtag.cmp.ejb.BulkSMSUtilBeanI#getPlanBalance(com.pixelandtag.bulksms.BulkSMSPlan)
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public BigInteger getPlanBalance(BulkSMSPlan plan) throws PlanBalanceException { 
-		BigInteger planBalance = null;
+		BigInteger planBalance = plan.getNumberOfSMS();
 		try{
-			Query query = em.createQuery("select coalesce((pln.numberOfSMS - count(*)), pln.numberOfSMS) from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
-					+ " WHERE q.text=txt and txt.plan=:plan");
+			Query query = em.createQuery("select coalesce((pln.numberOfSMS - count(*)), pln.numberOfSMS), pln from BulkSMSQueue q, BulkSMSText txt, BulkSMSPlan pln"
+					+ " WHERE q.text=txt and txt.plan=:plan group by pln");
 			query.setParameter("plan", plan);
-			planBalance = (BigInteger) query.getSingleResult();
+			List<Object[]> rest = (List<Object[]>) query.getResultList();
 			
-			if(planBalance==null)
-				planBalance = plan.getNumberOfSMS();
+			if(rest!=null && rest.size()>0)
+				planBalance = BigInteger.ZERO;
+			
+			for(Object[] o : rest){
+				BigInteger bal = (BigInteger) o[0];
+				planBalance = planBalance.add(bal);
+			}
 			
 		}catch(javax.persistence.NoResultException nre){
 			logger.warn(nre.getMessage()+"This plan has no sms");

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
@@ -26,7 +27,7 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
@@ -39,6 +40,7 @@ import com.pixelandtag.cmp.entities.TimeUnit;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.dating.entities.ChatBundle;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
 import com.pixelandtag.dating.entities.Location;
@@ -49,6 +51,7 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
+import com.pixelandtag.mo.sms.USSDReceiver;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.EventType;
@@ -65,7 +68,7 @@ import com.pixelandtag.web.beans.RequestObject;
 public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI {
 	
 
-	public Logger logger = Logger.getLogger(getClass());
+	public Logger logger = Logger.getLogger(DatingServiceBean.class);
 	
 	@PersistenceContext(unitName = "EjbComponentPU4")
 	private EntityManager em;
@@ -90,13 +93,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	@EJB
 	TimezoneConverterI timezoneEJB;
 	
-	@EJB
-	private TimeStampSequenceEJBI timeStampEJB;
 	
 	@EJB
 	private FreeLoaderEJBI freeloaderEJB;
 	
 	
+	@EJB
+	private ChatCounterEJBI chatcounterEJB;
 	
 	private StopWatch watch = new StopWatch();
 	
@@ -142,7 +145,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					outgoingsms.setMoprocessor(proc);
 					outgoingsms.setShortcode(proc.getShortcode());
 					
-					outgoingsms.setCmp_tx_id(generateNextTxId());
+					outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					
 					outgoingsms.setSplit(false);
 					outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
@@ -212,7 +215,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					if(pl!=null && pl.getLocation()!=null){
 						locationName = pl.getLocation().getLocationName();
 						if(locationName==null || locationName.trim().isEmpty()){
-							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 							if(loc!=null)
 								locationName = loc.getLocationName();
 						}
@@ -266,14 +269,14 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						keywordIsNumber = true;
 					}catch(Exception exp){}
 					
-					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
+					if( (keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES"))) ){
 						person.setAgreed_to_tnc(true);
 						person = saveOrUpdate(person);
-					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
+					}else if((keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
 						resp = "Ok. Bye";
 						return resp;
 					}else{
-						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.SPACE +"Proceed?\n1. No\n2. Yes" ;
+						resp = getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId()) + GenericServiceProcessor.RETURN_CARRIAGE + messageEJB.getMessage(DatingMessages.YES_NO_PROMPT.toString(), Long.valueOf(language_id), person.getOpco().getId()).getMessage();//"Proceed?\n1. Yes\n2. No" ;
 						return resp;
 					}
 						
@@ -287,7 +290,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						if(isunique)
 							isunique = !(("0"+person.getMsisdn().substring(3)).equals(Integer.valueOf(KEYWORD).toString()));
 					}catch(Exception exp){
-						logger.error(exp.getMessage(),exp);
+						//logger.warn(exp.getMessage(),exp);
 					}
 					
 					if(isunique){
@@ -368,7 +371,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					profile.setLocation(MESSAGE);
 					if((req.getCellid()!=null && !req.getCellid().isEmpty()) && (req.getLac()!=null && !req.getLac().isEmpty())){
 						try{
-							location_ejb.findOrCreateLocation(Long.valueOf(req.getCellid()), Long.valueOf(req.getLac()), MESSAGE, profile);
+							location_ejb.findOrCreateLocation(Long.valueOf(req.getCellid()), Long.valueOf(req.getLac()), MESSAGE, profile, true);
 						}catch(Exception exp){
 							logger.error(exp.getMessage(), exp);
 						}
@@ -488,7 +491,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 							outgoingsms.setServiceid(smsserv.getId());
 							outgoingsms.setMoprocessor(proc);
 							outgoingsms.setShortcode(proc.getShortcode());
-							outgoingsms.setCmp_tx_id(generateNextTxId());
+							outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 							
 							outgoingsms.setSplit(false);
 							outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
@@ -520,7 +523,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 								resp = "Select your chat bundles.\n"+ resp+getMessage(GenericServiceProcessor.MAIN_MENU_ADVICE,language_id, person.getOpco().getId());
 							}
 						}else{
-							resp = "Request received but we couldn't process your request. Do try again later.";
+							resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request received but we couldn't process your request. Do try again later.";
 						}
 						
 										
@@ -529,7 +532,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
 			//throw new DatingServiceException("Something went Wrong. Kindly try again.",exp);
-			resp = "Could not process request. Kindly try again later";
+			resp = USSDReceiver.SESSION_TERMINATION_TAG+"Could not process request. Kindly try again later";
 			
 		}
 		
@@ -567,8 +570,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				profile = saveOrUpdate(profile);
 				
 				ProfileQuestion question = getNextProfileQuestion(profile.getId());
-				logger.debug("QUESTION::: "+question.getQuestion());
-				resp =  GenericServiceProcessor.SPACE +question.getQuestion();
+				resp =  question.getQuestion()+GenericServiceProcessor.RETURN_CARRIAGE+getMessage(DatingMessages.YES_NO_PROMPT, language_id, person.getOpco().getId());
 				
 				QuestionLog ql = new QuestionLog();
 				
@@ -625,6 +627,9 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	@SuppressWarnings("unchecked")
 	public PersonDatingProfile getProfile(Person person) throws DatingServiceException{
 		
+		if(person==null)
+			return null;
+		
 		PersonDatingProfile profile = null;
 		
 		try{
@@ -658,11 +663,16 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	@Override
 	public Person register(String msisdn, OperatorCountry opco) throws Exception {
-		Person person = new Person();
-		person.setMsisdn(msisdn);
-		person.setActive(false);
-		person.setOpco(opco);
-		return saveOrUpdate(person);
+		try{
+			Person person = new Person();
+			person.setMsisdn(msisdn);
+			person.setActive(false);
+			person.setOpco(opco);
+			return saveOrUpdate(person);
+		}catch(Exception ex){
+			logger.error(ex.getMessage());
+			throw ex;
+		}
 	}
 
 	
@@ -673,8 +683,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
-			qry.setParameter("active", new Boolean(true));
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.profileComplete=:active AND p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("person_a_id", curPersonId);
 			//qry.setParameter("alreadyMatched", alreadyMatched);
@@ -693,11 +703,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.person.opco=:opco AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
-			qry.setParameter("active", new Boolean(true));
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.profileComplete=:active AND p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN  (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
 			qry.setParameter("person_a_id", curPersonId);
-			qry.setParameter("opco", opco);
+			//qry.setParameter("opco", opco);
 			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
@@ -716,12 +726,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
 			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.opco=:opco AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.profileComplete=:active AND p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");// + "    pl.profile.lastActive desc"); :alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
-			qry.setParameter("active", new Boolean(true));
-			qry.setParameter("dob", dob);
+			qry.setParameter("active", Boolean.TRUE);
+			//qry.setParameter("dob", dob);
 			qry.setParameter("person_a_id", curPersonId);
-			qry.setParameter("opco", opco);
+			//qry.setParameter("opco", opco);
 			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
 			if(ps.size()>0)
@@ -739,11 +749,11 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		try{
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
-			Date dob = calculateDobFromAge(pref_age);
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND p.person.active=:active AND p.gender=:gender AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched) ");//AND p.dob>=:dob
+			//Date dob = calculateDobFromAge(pref_age);
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.profileComplete=:active AND p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched) ");//AND p.dob>=:dob
 			qry.setParameter("gender", pref_gender);
-			qry.setParameter("active", new Boolean(true));
-			qry.setParameter("dob", dob);
+			qry.setParameter("active", Boolean.TRUE);
+			//qry.setParameter("dob", dob);
 			qry.setParameter("person_a_id", curPersonId);
 			//qry.setParameter("alreadyMatched", alreadyMatched);
 			List<PersonDatingProfile> ps = qry.getResultList();
@@ -783,24 +793,26 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											+ "	   AND  "
 											+ "      pl.profile.person.active=:active "
 											+ "    AND "
-											//+ "      pl.profile.dob<=:dob "
-											//+ "    AND "
+											+ "      pl.profile.profileComplete=:active "
+											+ "    AND "
 											+ "      pl.profile.gender=:prefGender "
 											+ "    AND "
-											+ "        (  pl.location.location_id=:location_id "
+											+ "        (  "
+										//	+ "             pl.location.location_id=:location_id "
 										//	+ "				OR "
 										//	+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
-											+ "				OR  "
-											+ "					pl.location.cellid=:cellid"
-											+(max_cell_id.longValue()>0 ? (  
+										//	+ "				OR  "
+											//+ "					pl.location.cellid=:cellid"
+											/*+(max_cell_id.longValue()>0 ? (  
 											 "				OR  "
 											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
-													) : "")
-											+ "				OR "
-											+ "				   lower(pl.location.locationName) like lower(:locationName)  "
+													) : "")*/
+									//		+ "				OR "
+											+ "				   lower(pl.location.locationName) = lower(:locationName)  "
 											+ "		   ) "
-											+ "   )  AND "
-											+ "    (   pl.profile.person.id "
+											+ "   )  "
+											+ "   AND "
+											+ "   (   pl.profile.person.id "
 											+ "				NOT IN "
 											+ "					(SELECT "
 											+ "						DISTINCT person_b_id "
@@ -810,24 +822,28 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											+ "                     sml.person_a_id = :person_a_id"
 											+ "                 )"
 											+ "   )"
+											+ "   AND"
+											+ "    pl.profile.person.loggedin=:active"
 											+ " order by "
-											+ "    pl.timeStamp desc, pl.profile.dob desc");
+											+ "    pl.profile.lastActive desc, pl.profile.replyProbability desc");
+											//lastActive+ "    pl.timeStamp desc, pl.profile.dob desc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
 				
-				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
-				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				//qry.setParameter("cellid", profileLocation.getLocation().getCellid());
+				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
 				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
-				if(max_cell_id.longValue()>0){
+				/*if(max_cell_id.longValue()>0){
 					qry.setParameter("min_cell_id", min_cell_id);
 					qry.setParameter("max_cell_id", max_cell_id);
-				} 
-				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
+				} */
+				//qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
+				qry.setParameter("locationName", profileLocation.getLocation().getLocationName());
 				qry.setParameter("prefGender", profile.getPreferred_gender());
 				qry.setParameter("person_a_id",profile.getPerson().getId());
 				//qry.setParameter("dob", dob);
-				qry.setParameter("active", new Boolean(true));
+				qry.setParameter("active", Boolean.TRUE);
 				ProfileLocation pl = (ProfileLocation) qry.getSingleResult();
 				
 				persondatingProfile = pl.getProfile();
@@ -870,25 +886,27 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											+ "	   AND  "
 											+ "      pl.profile.person.active=:active "
 											+ "    AND "
-											+ "      pl.profile.person.opco=:opco"
+											+ "      pl.profile.profileComplete=:active "
 											+ "    AND "
 											//+ "      pl.profile.dob<=:dob "
 											//+ "    AND "
 											+ "      pl.profile.gender=:prefGender "
 											+ "    AND "
-											+ "        (  pl.location.location_id=:location_id "
+											+ "        (  "
+										//	+ "pl.location.location_id=:location_id "
 										//	+ "				OR "
 										//	+ "				   pl.location.location_id between :location_id_lower and :location_id_upper  "
-											+ "				OR  "
-											+ "					pl.location.cellid=:cellid"
-											+(max_cell_id.longValue()>0 ? (  
+										//	+ "				OR  "
+										//	+ "					pl.location.cellid=:cellid"
+											/*+(max_cell_id.longValue()>0 ? (  
 											 "				OR  "
 											+ "					pl.location.cellid between :min_cell_id and :max_cell_id "
-													) : "")
-											+ "				OR "
-											+ "				   lower(pl.location.locationName) like lower(:locationName)  "
+													) : "")*/
+											//+ "				OR "
+											+ "				   lower(pl.location.locationName) = lower(:locationName)  "
 											+ "		   ) "
-											+ "   )  AND "
+											+ "   )  "
+											+ "   AND "
 											+ "    (   pl.profile.person.id "
 											+ "				NOT IN "
 											+ "					(SELECT "
@@ -899,20 +917,23 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 											+ "                     sml.person_a_id = :person_a_id"
 											+ "                 )"
 											+ "   )"
+											+ "   AND"
+											+ "    pl.profile.person.loggedin=:active"
 											+ " order by "
-											+ "    pl.timeStamp desc, pl.profile.dob desc");
+											+ "    pl.profile.lastActive desc, pl.profile.replyProbability desc ");
+											//+ "    pl.timeStamp desc, pl.profile.dob desc");
 				qry.setFirstResult(0);
 				qry.setMaxResults(1);
-				qry.setParameter("opco", opco);
-				qry.setParameter("cellid", profileLocation.getLocation().getCellid());
-				qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
+				//qry.setParameter("opco", opco);
+				//qry.setParameter("cellid", profileLocation.getLocation().getCellid());
+				//qry.setParameter("location_id", profileLocation.getLocation().getLocation_id());
 				//qry.setParameter("location_id_lower", (profileLocation.getLocation().getLocation_id()-1));
 				//qry.setParameter("location_id_upper", (profileLocation.getLocation().getLocation_id()+1));
-				if(max_cell_id.longValue()>0){
+				/*if(max_cell_id.longValue()>0){
 					qry.setParameter("min_cell_id", min_cell_id);
 					qry.setParameter("max_cell_id", max_cell_id);
-				} 
-				qry.setParameter("locationName", "%"+profileLocation.getLocation().getLocationName()+"%");
+				} */
+				qry.setParameter("locationName", profileLocation.getLocation().getLocationName());
 				qry.setParameter("prefGender", profile.getPreferred_gender());
 				qry.setParameter("person_a_id",profile.getPerson().getId());
 				//qry.setParameter("dob", dob);
@@ -945,12 +966,12 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			
 			Date dob = calculateDobFromAge(pref_age);
 			
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.opco=:opco AND p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched)");//AND p.dob>=:dob
-			qry.setParameter("active", new Boolean(true));
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.profileComplete=:active AND p.username <> p.person.msisdn AND p.person.loggedin=:active AND p.person.active=:active AND p.gender=:gender AND p.location = :location  AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched)");//AND p.dob>=:dob
+			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
-			qry.setParameter("location", "%"+location+"%");
-			qry.setParameter("dob", dob);
-			qry.setParameter("opco", opco);
+			qry.setParameter("location", location);
+			//qry.setParameter("dob", dob);
+			//qry.setParameter("opco", opco);
 			qry.setParameter("person_a_id", curPersonId);
 			
 			try{
@@ -984,13 +1005,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			List<Long> alreadyMatched = getAlreadyMatched(curPersonId);
 			alreadyMatched.add(curPersonId);
 			
-			Date dob = calculateDobFromAge(pref_age);
+			//Date dob = calculateDobFromAge(pref_age);
 			
-			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.username <> p.person.msisdn AND  p.person.active=:active AND p.gender=:gender AND p.location like :location AND p.dob<=:dob AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.creationDate desc");//:alreadyMatched)");//AND p.dob>=:dob
-			qry.setParameter("active", new Boolean(true));
+			Query qry = em.createQuery("from PersonDatingProfile p WHERE p.profileComplete=:active AND p.username <> p.person.msisdn AND p.person.loggedin=:active AND  p.person.active=:active AND p.gender=:gender AND p.location = :location  AND p.person.id NOT IN (SELECT DISTINCT person_b_id from SystemMatchLog sml WHERE sml.person_a_id = :person_a_id) order by p.lastActive desc, p.replyProbability desc");//:alreadyMatched)");//AND p.dob>=:dob
+			qry.setParameter("active", Boolean.TRUE);
 			qry.setParameter("gender", pref_gender);
-			qry.setParameter("location", "%"+location+"%");
-			qry.setParameter("dob", dob);
+			qry.setParameter("location", location);
+			//qry.setParameter("dob", dob);
 			qry.setParameter("person_a_id", curPersonId);
 			
 			try{
@@ -1110,7 +1131,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	 * To statslog
 	 */
 	
-	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
+	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception { 
 		boolean success = false;
 		try{
 		 
@@ -1198,7 +1219,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(username.contains("*"))
 				return false;
 			try{
-				BigDecimal bd = new BigDecimal(username);
+				new BigDecimal(username);
 				if(username.length()<4)
 					return false;
 			}catch(Exception exp){}
@@ -1258,13 +1279,15 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	}
 	
 	public BigInteger calculateAgeFromDob(Date dob) throws DatingServiceException{
+		if(dob==null)
+			return null;
 		BigInteger age = null;
 		try{
 			Query qry = em.createNativeQuery("SELECT TIMESTAMPDIFF(YEAR, :dob, CURDATE()) as 'age'");
 			qry.setParameter("dob", dob);
 			Object o = qry.getSingleResult();
 			age = (BigInteger) o;
-			age = age.compareTo(BigInteger.valueOf(18L))<0 ? BigInteger.valueOf(18L) : age;
+			age = age!=null ? (age.compareTo(BigInteger.valueOf(18L))<0 ? BigInteger.valueOf(18L) : age) : null;
 		}catch(Exception exp){
 			logger.error(exp.getMessage(), exp);
 			throw new DatingServiceException(exp.getMessage(), exp);
@@ -1272,6 +1295,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		return age;
 	}
 	public Date calculateDobFromAge(BigDecimal age) throws DatingServiceException{
+		if(age==null)
+			return null;
 		Date date = null;
 		try{
 			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
@@ -1295,7 +1320,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
 		
 		if(outgoingsms.getCmp_tx_id()==null || outgoingsms.getCmp_tx_id().trim().isEmpty()){
-			outgoingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+			outgoingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 		}
 		try{
 			
@@ -1337,14 +1362,16 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 						|| "OL405".equals(billable.getResp_status_code())  
 						|| "OL406".equals(billable.getResp_status_code())){
 				
-					 message_key =  billable.getResp_status_code();
+					 message_key =  BillingStatus.INSUFFICIENT_FUNDS.toString();
 				}
 				
-				String message = message_key!=BILLING_FAILED ? getMessage(message_key, language_id, person.getOpco().getId()) : null;
+				logger.info("\n\t\t message_key>>>>> from billing when not success=== "+message_key);
+				String message =  getMessage(message_key, language_id, person.getOpco().getId());//message_key!=BILLING_FAILED ? : null;
 				
 				outgoingsms.setSms(message);
 				outgoingsms.setPrice(BigDecimal.ZERO);//set price to subscription price
 				outgoingsms.setPriority(1);
+				outgoingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
 				//outgoingsms.setTimestamp(new Date());
 				
 				try{
@@ -1362,6 +1389,8 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				
 				Subscription sub = subscriptionBean.renewSubscription(incomingsms.getOpco(), MSISDN, smsserv,SubscriptionStatus.confirmed,method);
 				
+				ChatBundle chatbundle  = chatcounterEJB.createChatBundle(sub);
+				logger.info(" >>>>> chatbundle >> "+chatbundle);
 				logger.info(" ::::????****  sub.getExpiryDate()  : "+(sub!=null ? sub.getExpiryDate() : null));
 				DatingMessages message_key = sub.getRenewal_count().compareTo(1L)==0 ? DatingMessages.FIRST_SUBSCRIPTION_WELCOME  : DatingMessages.SUBSCRIPTION_RENEWED;
 				
@@ -1390,10 +1419,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 	
 	
 
-	private Billable createBillable(IncomingSMS incomingsms) {
+	public Billable createBillable(IncomingSMS incomingsms) {
 		Billable billable =  new Billable();
 			
-		System.out.println("\n\n\t\t    incomingsms.getOpco(): "+incomingsms.getOpco());
+		logger.info("\n\n\t\t    incomingsms.getOpco(): "+incomingsms.getOpco());
 		billable.setOpco(incomingsms.getOpco());
 		billable.setCp_id("CONTENT360_KE");
 		billable.setCp_tx_id(incomingsms.getCmp_tx_id());
@@ -1416,6 +1445,40 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		billable.setShortcode(incomingsms.getShortcode());		
 		billable.setEvent_type((incomingsms.getEvent_type()!=null ?  EventType.get(incomingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
 		billable.setPricePointKeyword(incomingsms.getPrice_point_keyword());
+		
+		return billable;
+	}
+	
+	
+	public Billable createBillable(OutgoingSMS outgoingsms) {
+		Billable billable =  new Billable();
+			
+		logger.info("\n\n\t\t    incomingsms.getOpco(): "+outgoingsms.getOpcosenderprofile().getOpco());
+		billable.setOpco(outgoingsms.getOpcosenderprofile().getOpco());
+		billable.setCp_id("CONTENT360_KE");
+		billable.setCp_tx_id(outgoingsms.getCmp_tx_id());
+		billable.setOpco_tx_id(outgoingsms.getOpco_tx_id());
+		billable.setDiscount_applied("0");
+		billable.setIn_outgoing_queue(0l);
+		if(outgoingsms.getSms()!=null)
+			billable.setKeyword(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		billable.setMaxRetriesAllowed(1L);
+		billable.setMessage_id(outgoingsms.getId());
+		billable.setMsisdn(outgoingsms.getMsisdn());
+		billable.setOperation(outgoingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ? Operation.debit.toString() : Operation.credit.toString());
+		billable.setPrice(outgoingsms.getPrice());
+		billable.setPriority(0l);
+		billable.setProcessed(0L);
+		billable.setRetry_count(0L);
+		if(outgoingsms.getServiceid()>0){
+			billable.setService_id(outgoingsms.getServiceid()+"");
+		}else{
+			if(outgoingsms.getSms()!=null)
+			billable.setService_id(outgoingsms.getSms().split("\\s")[0].toUpperCase());
+		}
+		billable.setShortcode(outgoingsms.getShortcode());		
+		billable.setEvent_type((outgoingsms.getEvent_type()!=null ?  EventType.get(outgoingsms.getEvent_type()) :  EventType.SUBSCRIPTION_PURCHASE));
+		billable.setPricePointKeyword(outgoingsms.getPrice_point_keyword());
 		
 		return billable;
 	}
@@ -1644,6 +1707,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ " AND "
 					+ " day(pcl.timeStamp)=day(:todaysdate)"
 					+ ")"
+					+ ")"
+					+ "AND"
+					+ "("
+					+ "  dp.person.msisdn not in (select msisdn from DNDList)"
 					+ ")");
 			query.setParameter("profilecomplete", Boolean.FALSE);
 			query.setParameter("loggedin", Boolean.TRUE);
@@ -1674,6 +1741,10 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					+ " AND "
 					+ " day(pcl.timeStamp)=day(:todaysdate)"
 					+ ")"
+					+ ")"
+					+ "AND"
+					+ "( "
+					+ "  dp.person.msisdn not in (select msisdn from DNDList)"
 					+ ")");
 			query.setParameter("profilecomplete", Boolean.TRUE);
 			query.setParameter("actived", Boolean.TRUE);
@@ -1712,6 +1783,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			if(language_id<1)
 				language_id = 1;
 			if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
+				//TODO cache message here
 				msg = getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, person.getOpco().getId());
 				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 			}else{
@@ -1724,6 +1796,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				}catch(Exception exp){
 					logger.warn("\n\n\n\t\t"+exp.getMessage()+"\n\n",exp);
 				}
+				//TODO - cache the pronouns.
 				String gender_pronoun = profile.getPreferred_gender().equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_M, language_id, person.getOpco().getId());
 				String gender_pronoun2 = profile.getPreferred_gender().equals(Gender.FEMALE)? getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_F, language_id, person.getOpco().getId()) : getMessage(GenericServiceProcessor.GENDER_PRONOUN_INCHAT_M, language_id, person.getOpco().getId());
 				StringBuffer sb = new StringBuffer();
@@ -1735,7 +1808,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 					if(pl!=null && pl.getLocation()!=null){
 						locationName = pl.getLocation().getLocationName();
 						if(locationName==null || locationName.trim().isEmpty()){
-							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+							Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 							if(loc!=null)
 								locationName = loc.getLocationName();
 						}
@@ -1743,6 +1816,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 				}
 				sb.append("Location : ").append(locationName).append("\n");
 				sb.append("Gender : ").append(match.getGender()).append("\n");
+				//TODO cache the match found message
 				msg = getMessage(DatingMessages.MATCH_FOUND, language_id, person.getOpco().getId());
 				msg = msg.replaceAll(GenericServiceProcessor.USERNAME_TAG, profile.getUsername());
 				msg = msg.replaceAll(GenericServiceProcessor.GENDER_PRONOUN_TAG, gender_pronoun);
@@ -1769,6 +1843,7 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 		//location_ejb
 		PersonDatingProfile match =  findMatch(profile);
 		
+		if(match==null)
 		try{
 			match = findMatch(profile, profile.getPerson().getOpco());//try find by their location
 		}catch(DatingServiceException exp){
@@ -1789,5 +1864,13 @@ public class DatingServiceBean  extends BaseEntityBean implements DatingServiceI
 			 match = findMatch(pref_gender,person.getId());
 		
 		return match;
+	}
+	
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
 	}
 }

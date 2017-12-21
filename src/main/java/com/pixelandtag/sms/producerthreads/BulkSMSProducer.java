@@ -1,7 +1,10 @@
 package com.pixelandtag.sms.producerthreads;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -15,11 +18,13 @@ import com.pixelandtag.bulksms.BulkSMSPlan;
 import com.pixelandtag.bulksms.BulkSMSQueue;
 import com.pixelandtag.bulksms.BulkSMSText;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
 import com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI;
 import com.pixelandtag.cmp.ejb.sequences.SequenceGenI;
 import com.pixelandtag.cmp.entities.MOProcessor;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.entities.URLParams;
@@ -52,9 +57,12 @@ public class BulkSMSProducer extends Thread {
 	private QueueProcessorEJBI queueprocessor;
 	private BulkSmsMTI bulksmsBean;
 	private OpcoSenderProfileEJBI opcosenderProfileEJB;
+	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
 	private  Context context = null;
 	private Properties mtsenderprop;
 	private Properties log4jProps;
+	private int bulk_sms_poll_wait_time = 1000;//1 sec in miliseconds by default
+	private Map<String,OpcoSenderReceiverProfile> profileSenderCache = new HashMap<String,OpcoSenderReceiverProfile>();
 
 	public void initEJB() throws NamingException{
 		
@@ -67,7 +75,8 @@ public class BulkSMSProducer extends Thread {
 			 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 			 props.put("jboss.naming.client.ejb.context", true);
 			 context = new InitialContext(props);
-			
+			 opcoSMSServiceEJB = (OpcoSMSServiceEJBI) 
+			       		context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 			 opcosenderProfileEJB = (OpcoSenderProfileEJBI) 
 			       		context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 			 sequenceGen  = (SequenceGenI) 
@@ -80,6 +89,10 @@ public class BulkSMSProducer extends Thread {
 			       		context.lookup("cmp/BulkSmsMTEJB!com.pixelandtag.cmp.ejb.bulksms.BulkSmsMTI");
 			 
 			 logger.info(getClass().getSimpleName()+": Successfully initialized EJB BulkSmsMTI !!");
+			 
+			 try{
+				 bulk_sms_poll_wait_time = Integer.valueOf(mtsenderprop.getProperty("bulk_sms_poll_wait_time"));
+			 }catch(Exception e){}
 	 }
 	
 	
@@ -180,7 +193,7 @@ public class BulkSMSProducer extends Thread {
 				populateQueue();
 				
 				try {
-					Thread.sleep(60000);//Wait a minute
+					Thread.sleep(bulk_sms_poll_wait_time);
 				} catch (InterruptedException e) {
 					log(e);
 				}
@@ -202,35 +215,46 @@ public class BulkSMSProducer extends Thread {
 		
 		try {
 			
-			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L);
+			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L); 
 			
-			logger.info(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size());
+			logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size()+"\n");
 			for(BulkSMSQueue bulktext : queue){
 				
 				try{
-					 String cpTxId = sequenceGen.getOrCreateNextSequence("BLK").getSeqNumber();
-					 String telcoid =  bulktext.getText().getPlan().getTelcoid();//could be the ISO opco code.
-					 OpcoSenderReceiverProfile opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco(telcoid);
-					 
-					 if(opcosenderprofile==null)
-					 try{
-						 opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco( Long.valueOf(telcoid)  );
-					 }catch(NumberFormatException nfe){
-						 logger.warn(nfe.getMessage()+" "+telcoid+" isn't a digit");
-					 }
-					 BulkSMSText text = bulktext.getText();
-					 
-					 MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
-					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
-					 outgoingsms.setMoprocessor(moproc);
-					 outgoingsms.setCmp_tx_id(cpTxId);
-					 outgoingsms.setTtl( (bulktext.getRetrycount() + 1L) );
-					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
-					 
-					 bulktext.setBulktxId(cpTxId);//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
+					 bulktext.setBulktxId( UUID.randomUUID().toString()  );//We link the cmp tx id to the bulk text, so that later we can update the status as sent or something like that
 					 bulktext.setStatus(MessageStatus.IN_QUEUE);
 					 bulktext.setRetrycount( (bulktext.getRetrycount().intValue() + 1) );
-					
+					 bulktext =  bulksmsBean.saveOrUpdate(bulktext);//Save state
+					 
+					 String telcoid =  bulktext.getText().getPlan().getTelcoid();//could be the ISO opco code.
+					 OpcoSenderReceiverProfile opcosenderprofile = profileSenderCache.get(telcoid);
+							 
+					 
+					 
+					 if(opcosenderprofile==null){
+						 opcosenderprofile = opcosenderProfileEJB.getActiveProfileForOpco(telcoid);
+						 
+						 if(opcosenderprofile==null)
+							 try{
+								 opcosenderprofile =  opcosenderProfileEJB.getActiveProfileForOpco( Long.valueOf(telcoid)  );
+							 }catch(NumberFormatException nfe){
+								 logger.warn(nfe.getMessage()+" "+telcoid+" isn't a digit");
+							 }
+						 
+						 profileSenderCache.put(telcoid, opcosenderprofile);
+					 }
+					 
+					 BulkSMSText text = bulktext.getText();
+					 
+					// MOProcessor moproc = opcosenderProfileEJB.getMOProcessorByTelcoShortcodeAndKeyword("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
+					 OpcoSMSService opcosmsservice = opcoSMSServiceEJB.getOpcoSMSService("DEFAULT", text.getSenderid(), opcosenderprofile.getOpco());
+					 MOProcessor moproc = opcosmsservice.getMoprocessor();
+					 OutgoingSMS outgoingsms = bulktext.convertToOutGoingSMS();
+					 outgoingsms.setMoprocessor(moproc);
+					 outgoingsms.setOpcosenderprofile(opcosenderprofile);
+					 outgoingsms.setParlayx_serviceid(  opcosmsservice.getServiceid()  );
+					 outgoingsms.setPrice(opcosmsservice.getPrice());
+					 text.setPrice(opcosmsservice.getPrice());
 					
 					 BulkSMSPlan plan =  text.getPlan();
 					
@@ -238,14 +262,9 @@ public class BulkSMSProducer extends Thread {
 					 logger.info(">>::processorId:"+plan.getProcessor_id());
 					 logger.info(">>::sms ::: "+text.getContent());
 					 logger.info(">>::msisdn ::: "+bulktext.getMsisdn());
-						
-					if(bulktext.getRetrycount().compareTo(0)>0){
-						MessageStatus status = (bulktext.getRetrycount().compareTo(bulktext.getMax_retries())<0)
-										 ? MessageStatus.FAILED_TEMPORARILY : MessageStatus.FAILED_PERMANENTLY;
-						bulktext.setStatus(status);
-					}
+					 logger.info(">>::opcosmsservice.getServiceid()-> "+opcosmsservice.getServiceid());
 					
-					outgoingsms = queueprocessor.saveOrUpdate(outgoingsms);
+					 outgoingsms = queueprocessor.saveOrUpdate(outgoingsms);
 								 
 				}catch(Exception exp){
 					
@@ -258,7 +277,7 @@ public class BulkSMSProducer extends Thread {
 				}finally{
 					
 					try{
-						bulktext =  cmpbean.saveOrUpdate(bulktext);
+						bulktext =  bulksmsBean.saveOrUpdate(bulktext);
 					}catch(Exception exp){
 						log(exp);
 					}

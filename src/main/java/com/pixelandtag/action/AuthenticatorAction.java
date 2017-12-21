@@ -16,8 +16,6 @@ public class AuthenticatorAction extends BaseActionBean {
 	
 	@DefaultHandler
 	public Resolution authentication() {
-		logger.info("loginUsername : "+loginUsername);
-		logger.info("loginPassword : "+loginPassword);
 		return new ForwardResolution(VIEW);
 	}
 	

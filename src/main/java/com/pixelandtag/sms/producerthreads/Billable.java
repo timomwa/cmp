@@ -24,6 +24,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 
@@ -33,19 +34,21 @@ public class Billable implements Serializable {
 
 	
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1456362142345245L;
+
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4690931003011822080L;
 	
 	/**
 	 * HTTP status code
 	 */
-	@Column(name = "resp_status_code")
+	@Column(name = "resp_status_code", length=20)
 	@Index(name="bilblidx")
 	private String resp_status_code;
 	
@@ -92,6 +95,11 @@ public class Billable implements Serializable {
 	@Transient
 	private Boolean transferIn;
 	
+	
+	@Column(name = "billingType",nullable = true)
+	@Enumerated(EnumType.STRING)
+	private BillingType billingType;
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
@@ -105,6 +113,8 @@ public class Billable implements Serializable {
 			valid = Boolean.TRUE;
 		if(opco_tx_id==null && getCp_tx_id()!=null)
 			opco_tx_id = getCp_tx_id();
+		if(billingType==null)
+			billingType = BillingType.OPERATOR_SIDE_MT_BILLING;
 	}
 	
 	/**
@@ -120,7 +130,7 @@ public class Billable implements Serializable {
 	private Date timeStamp;
 	
 	@Column(name = "maxRetriesAllowed")
-		private Long maxRetriesAllowed;
+	private Long maxRetriesAllowed;
 	
 	@Column(name = "retry_count")
 	@Index(name="bilblidx")
@@ -129,7 +139,7 @@ public class Billable implements Serializable {
 	@Column(name = "operation")
 	private String operation;
 	
-	@Column(name = "msisdn")
+	@Column(name = "msisdn", length=20)
 	@Index(name="msisdnIdx")
 	private String msisdn;
 	
@@ -138,7 +148,7 @@ public class Billable implements Serializable {
 	private String shortcode;
 	
 	
-	@Column(name = "keyword")
+	@Column(name = "keyword", length=20)
 	@Index(name="bilblmsisdidx")
 	private String keyword;
 	
@@ -153,18 +163,18 @@ public class Billable implements Serializable {
     @Enumerated(EnumType.STRING)
 	private EventType event_type;//very important
 	
-	@Column(name = "service_id")
+	@Column(name = "service_id", length=25)
 	@Index(name="msisdnIdx")
 	private String service_id;
 	
 	@Column(name = "discount_applied")
 	private String discount_applied;
 	
-	@Column(name = "cp_tx_id", unique=true)
+	@Column(name = "cp_tx_id", unique=true, length=50)
 	@Index(name="cp_idtxid_idx")
 	private String cp_tx_id;
 	
-	@Column(name = "opco_tx_id")
+	@Column(name = "opco_tx_id", length=50)
 	@Index(name="opcotxid_idx")
 	private String opco_tx_id;
 	
@@ -173,7 +183,7 @@ public class Billable implements Serializable {
 	private Long processed;
 	
 	
-	@Column(name = "transactionId")
+	@Column(name = "transactionId", length=50)
 	@Index(name="optxididx")
 	private String transactionId;
 	
@@ -237,14 +247,8 @@ public class Billable implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-
 	
-	
-
 	public Date getTimeStamp() {
-		if(timeStamp==null)
-			timeStamp = new Date();
 		return timeStamp;
 	}
 
@@ -457,6 +461,14 @@ public class Billable implements Serializable {
 
 	public void setOpco_tx_id(String opco_tx_id) {
 		this.opco_tx_id = opco_tx_id;
+	}
+
+	public BillingType getBillingType() {
+		return billingType;
+	}
+
+	public void setBillingType(BillingType billingType) {
+		this.billingType = billingType;
 	}
 	
 	

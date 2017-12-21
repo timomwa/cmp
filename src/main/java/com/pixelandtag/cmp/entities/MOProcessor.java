@@ -71,11 +71,6 @@ public class MOProcessor implements Serializable {
 	@Column(name="smppid")
 	private Long smppid;
 	
-	/*@ManyToOne(cascade=CascadeType.MERGE)
-	@JoinColumn(name = "opco_id_fk", nullable=false)
-	@Index(name="mopropidx")
-	private OperatorCountry opco;*/
-	
 	
 
 	public Long getId() {

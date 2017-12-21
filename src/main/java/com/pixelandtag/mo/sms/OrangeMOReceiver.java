@@ -34,6 +34,16 @@ public class OrangeMOReceiver extends HttpServlet {
 	private Logger logger = Logger.getLogger(OrangeMOReceiver.class);
 	
 	private static final long serialVersionUID = 1L;
+	private static final String responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
+			   +"<soapenv:Header/>"
+			   +"<soapenv:Body>"
+			   +"<loc:notifySmsReceptionResponse/>"
+			   +"</soapenv:Body>"
+			   +"</soapenv:Envelope>";
+
+	private static final String FAKE_IP = "123.123.123";
+
+	private static final CharSequence DLR_FLAG = "<sms7:notifySmsDeliveryReceipt>";
 	
 	@EJB
 	private ProcessorResolverEJBI processorEJB;
@@ -68,21 +78,21 @@ public class OrangeMOReceiver extends HttpServlet {
 		String ip_addr = request.getRemoteAddr();
 		
 		Enumeration<String> headernames = request.getHeaderNames();
-		String headerstr = "\n";
+		//String headerstr = "\n";
 		 while (headernames.hasMoreElements()) { 
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = request.getHeader(headerName);  
-		     headerstr += "\n\t\tMO_ORANGE:HEADER >> "+headerName+ " : "+headerValue;
+		     //headerstr += "\n\t\tMO_ORANGE:HEADER >> "+headerName+ " : "+headerValue;
 		     //incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
 		 }
 		
 		 
-		 logger.info("MO_ORANGE:"+headerstr+"\n\n");
+		 //logger.info("MO_ORANGE:"+headerstr+"\n\n");
 		
 		
-		incomingparams.put(Receiver.IP_ADDRESS, "123.123.123");
+		incomingparams.put(Receiver.IP_ADDRESS, FAKE_IP);
 		
-		String params = "\n\n\tMO_ORANGE::: real ip_addr "+ip_addr+" fake ip address 123.123.123";
+		//String params = "\n\n\tMO_ORANGE::: real ip_addr "+ip_addr+" fake ip address 123.123.123";
 		
 		while(enums.hasMoreElements()){
 			
@@ -92,49 +102,43 @@ public class OrangeMOReceiver extends HttpServlet {
 			
 			incomingparams.put(paramName, value);
 						
-			params += "\n\tMO_ORANGE::: "+   paramName +" : "+value;
+			//params += "\n\tMO_ORANGE::: "+   paramName +" : "+value;
 			
 		}
 		
-		logger.info("MO_ORANGE:"+params+"\n\n");
+		//logger.info("MO_ORANGE:"+params+"\n\n");
 		
 		final String body = getBody(request);
 		
-		logger.info("MO_ORANGE:"+body+"\n\n");
-		
-		if(!body.isEmpty())
+		//logger.info("MO_ORANGE:"+body+"\n\n");
+		//sms7:notifySmsReception
+		if(body!=null && body.contains(DLR_FLAG) ){
+			//logger.info(" ********* We received SMS delivery notification from Orange *********************");
+		}else if(!body.isEmpty()){
+			
 			incomingparams.put(Receiver.HTTP_RECEIVER_PAYLOAD, body);
 		
-		incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
-		
-		try {
-			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
-			logger.info("incomingsms = "+incomingsms);
-			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
-		} catch (ConfigurationException e) {
-			logger.error(e.getMessage(),e);
-		}
-		
-		PrintWriter pw = response.getWriter();
-		
-		try{
-		
-			String responsexml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:loc=\"http://www.csapi.org/schema/parlayx/sms/notification/v3_1/local\">"
-								   +"<soapenv:Header/>"
-								   +"<soapenv:Body>"
-								   +"<loc:notifySmsReceptionResponse/>"
-								   +"</soapenv:Body>"
-								   +"</soapenv:Envelope>";
-			pw.write(responsexml);//"Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
-		}catch(Exception exp){
-			logger.error(exp.getMessage(),exp);
-		}finally{
+			incomingparams.put(Receiver.HTTP_RECEIVER_TYPE, MediumType.sms.name()); 
+			
+			try {
+				IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
+				//logger.info("incomingsms = "+incomingsms);
+			} catch (ConfigurationException e) {
+				logger.error(e.getMessage(),e);
+			}
+			
+			PrintWriter pw = response.getWriter();
+			
 			try{
-				pw.close();
-			}catch(Exception es){}
+				pw.write(responsexml);//"Welcome to the dating chat and friend finder service. You will meet real people, so be kind.");
+			}catch(Exception exp){
+				logger.error(exp.getMessage(),exp);
+			}finally{
+				try{
+					pw.close();
+				}catch(Exception es){}
+			}
 		}
-		
-		
 	}
 	
 	

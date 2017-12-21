@@ -7,13 +7,16 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import com.pixelandtag.cmp.ejb.api.sms.ServiceNotLinkedToOpcoException;
 import com.pixelandtag.cmp.entities.IncomingSMS;
+import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public interface BaseEntityI {
@@ -27,7 +30,6 @@ public interface BaseEntityI {
 	public <T> Collection<T> listAll(Class<T> entityClass) throws Exception;
 	public <T> T find(Class<T> entityClass, Long id) throws Exception;
 	public <T> Collection<T> find(Class<T> entityClass,	Map<String, Object> criteria, int start, int end)   throws Exception;
-	public <T> T saveOrUpdate(T t) throws Exception ;
 	public <T> T find(Class<T> entityClass, String param_name, Object value) throws Exception;
 	public boolean toStatsLog(IncomingSMS incomingsms, String toStatsLog)  throws Exception ;
 	public boolean  acknowledge(long message_log_id) throws Exception;
@@ -41,10 +43,11 @@ public interface BaseEntityI {
 	public OutgoingSMS sendMT(OutgoingSMS mo) throws Exception;
 	public String generateNextTxId();
 	public boolean sendMTSMPP(Long sppid,String msisdn,String shortcode,String sms,String mo_text, Integer priority) throws Exception;
-	public void createSuccesBillRec(Billable billable);
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception;
 	public boolean changeStatusIfSubscribed(String msisdn, List<String> services, SubscriptionStatus status);
 	public ServiceProcessorDTO getServiceProcessor(Long processor_id_fk) throws Exception;
-	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid);
+	public OpcoSenderReceiverProfile getopcosenderProfileFromOpcoId(Long opcoid) ;
+	public OpcoSMSService getOpcoSMSService(Long serviceid, OperatorCountry opco) throws ServiceNotLinkedToOpcoException;
 	
 	
 

@@ -57,20 +57,20 @@ public class SEInboundAirtel extends HttpServlet {
 		String ip_addr = request.getRemoteAddr();
 		
 		Enumeration<String> headernames = request.getHeaderNames();
-		String headerstr = "\n";
-		 while (headernames.hasMoreElements()) { 
+		//String headerstr = "\n";
+		 /*while (headernames.hasMoreElements()) { 
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = request.getHeader(headerName);  
-		     headerstr += "\n\t\tSEIN_AIRTEL:HEADER >> "+headerName+ " : "+headerValue;
-		 }
+		     //headerstr += "\n\t\tSEIN_AIRTEL:HEADER >> "+headerName+ " : "+headerValue;
+		 }*/
 		
 		 
-		 logger.info("SEIN_AIRTEL:"+headerstr+"\n\n");
+		// logger.info("SEIN_AIRTEL:"+headerstr+"\n\n");
 		
 		
 		incomingparams.put(Receiver.IP_ADDRESS, "125.125.125");
 		
-		String params = "\n\n\tSEIN_AIRTEL::: real ip_addr "+ip_addr+" fake ip address 125.125.125";
+		//String params = "\n\n\tSEIN_AIRTEL::: real ip_addr "+ip_addr+" fake ip address 125.125.125";
 		
 		while(enums.hasMoreElements()){
 			
@@ -80,15 +80,15 @@ public class SEInboundAirtel extends HttpServlet {
 			
 			incomingparams.put(paramName, value);
 						
-			params += "\n\tSEIN_AIRTEL::: "+   paramName +" : "+value;
+			//params += "\n\tSEIN_AIRTEL::: "+   paramName +" : "+value;
 			
 		}
 		
-		logger.info("SEIN_AIRTEL:"+params+"\n\n");
+		//logger.info("SEIN_AIRTEL:"+params+"\n\n");
 		
-		final String body = getBody(request);
+		//final String body = getBody(request);
 		
-		logger.info("SEIN_AIRTEL:"+body+"\n\n");
+		//logger.info("SEIN_AIRTEL:"+body+"\n\n");
 		
 	}
 	

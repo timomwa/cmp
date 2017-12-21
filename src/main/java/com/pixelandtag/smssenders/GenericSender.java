@@ -1,5 +1,9 @@
 package com.pixelandtag.smssenders;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +14,8 @@ import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
 public abstract class GenericSender implements Sender{
 	
 	
+	private DateFormat format = null;
+	private Map<String,DateFormat> date_format_cache = new HashMap<String,DateFormat>();
 	private Map<String,ProfileConfigs> configuration;
 	private Map<String,ProfileTemplate> templates = new HashMap<String,ProfileTemplate>();
 	
@@ -38,6 +44,22 @@ public abstract class GenericSender implements Sender{
 		this.templates = templates;
 	}
 	
+	/**
+	 * Converts a date to the desired format.
+	 * Uses cacheing.
+	 * 
+	 * @param datestr
+	 * @param dateformat - "yyyy-MM-dd HH:mm:ss"
+	 * @return string - formatted date
+	 * @throws ParseException
+	 */
+	public String dateToString(Date datestr, String dateformat) throws ParseException{
+		if(date_format_cache.get(dateformat)==null){
+			format = new SimpleDateFormat(dateformat);
+			date_format_cache.put(dateformat, format);
+		}
+		return date_format_cache.get(dateformat).format(datestr);
+	}
 	
 
 }

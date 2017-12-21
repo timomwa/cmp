@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import javax.ejb.EJB;
@@ -37,12 +38,14 @@ import com.pixelandtag.api.ERROR;
 import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MOProcessorFactory;
 import com.pixelandtag.api.ServiceProcessorI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DoubleConfirmationQueueEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SMSServiceBundleEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.ClassStatus;
 import com.pixelandtag.cmp.entities.HttpToSend;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -54,6 +57,7 @@ import com.pixelandtag.cmp.entities.ProcessorType;
 import com.pixelandtag.cmp.entities.SMSMenuLevels;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.SMSServiceMetaData;
+import com.pixelandtag.cmp.entities.TimeZoneConfig;
 import com.pixelandtag.cmp.entities.subscription.DoubleConfirmationQueue;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
@@ -62,6 +66,7 @@ import com.pixelandtag.dating.entities.SubscriptionHistory;
 import com.pixelandtag.dynamic.dto.NoContentTypeException;
 import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.exceptions.NoSettingException;
+import com.pixelandtag.mo.sms.USSDReceiver;
 import com.pixelandtag.serviceprocessors.dto.ServiceProcessorDTO;
 import com.pixelandtag.serviceprocessors.dto.ServiceSubscription;
 import com.pixelandtag.serviceprocessors.dto.SubscriptionDTO;
@@ -94,6 +99,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	
 	@EJB
 	private DNDListEJBI dndEJB;
+	
+	@EJB
+	private ChatCounterEJBI chatcounterEJB;
+	
+	@EJB
+	private TimezoneConverterI timezoneConverterEJB;
 	
 	private Random rand = new Random();
 	
@@ -306,6 +317,12 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			
 			try{
 				datingserviceEJB.deactivate(msisdn);
+			}catch(Exception exp){
+				logger.error(exp.getMessage(), exp);
+			}
+			
+			try{
+				chatcounterEJB.removeAllBundles(msisdn);
 			}catch(Exception exp){
 				logger.error(exp.getMessage(), exp);
 			}
@@ -760,6 +777,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		
 		return items;
 	}
+	
 	@SuppressWarnings("unchecked")
 	public MenuItem getTopMenu(int menu_id, int language_id)  throws Exception{
 
@@ -1767,8 +1785,32 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return getMessage(messageType.toString(), language, opcoid);
 	}
 	
+	@Override
+	public boolean updateMessageInQueueNew(String cp_tx_id, BillingStatus billstatus){
+		boolean success = false;
+		try{
+			 
+			 Query qry = em.createQuery("UPDATE OutgoingSMS set priority=:priority, "
+			 		+ "charged=:charged, billing_status=:billing_status WHERE cmp_tx_id=:CMP_TxID ")
+			.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
+			.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) )
+			.setParameter("billing_status", billstatus)
+			.setParameter("CMP_TxID", cp_tx_id);
+			int num =  qry.executeUpdate();
+			 
+			 success = num>0;
+		}catch(Exception e){
+			try {
+				
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(),e1);
+			} 
+			logger.error(e.getMessage(),e);
+		}
+		return success;
+	}
 	
-	
+	@Override
 	public boolean updateMessageInQueue(String cp_tx_id, BillingStatus billstatus) throws Exception{
 		boolean success = false;
 		try{
@@ -1825,7 +1867,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	 * To statslog
 	 */
 	
-	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception {
+	public boolean toStatsLog(IncomingSMS mo, String presql)  throws Exception { 
 		boolean success = false;
 		try{
 		 
@@ -1947,7 +1989,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 			qry.setParameter("valid", Boolean.FALSE);
 			qry.setParameter("msisdn", bill.getMsisdn());
 			qry.setParameter("service_id", bill.getService_id());
-			qry.setParameter("timestampC", bill.getTimeStamp());
+			qry.setParameter("timestampC", (null!=bill.getTimeStamp() ? bill.getTimeStamp() : new Date()) );
 			qry.setParameter("id", bill.getId());
 			res = qry.executeUpdate();
 			
@@ -2198,7 +2240,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 					}
 					
 					//conn = getCon();
-					
+					logger.info("\t\t MSISDN ::::::::::::::::::::::::: ["+MSISDN+"]");
 					logger.info("\t\t KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
 					logger.info("\t\t MSG ::::::::::::::::::::::::: ["+msg+"]");
 					logger.info("\t\t THE WORD AFTER KEYWORD ::::::::::::::::::::::::: ["+second_keyword+"]");
@@ -2331,7 +2373,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 									incomingsms.setSms(smsserv.getCmd());
 									incomingsms.setShortcode(proc.getShortcode());
 									incomingsms.setPrice(smsserv.getPrice());
-									incomingsms.setCmp_tx_id(generateNextTxId());
+									incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 									incomingsms.setEvent_type(EventType.get(smsserv.getEvent_type()).getName());
 									incomingsms.setServiceid( Long.valueOf(smsserv.getId().intValue()));
 									incomingsms.setPrice_point_keyword(smsserv.getPrice_point_keyword());
@@ -2354,13 +2396,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 											||
 											smsserv.getCmd().equals("DATE")){
 										
-										resp = "Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
+										resp = USSDReceiver.SESSION_TERMINATION_TAG+"Your request to puchase chat bundles for one "+smsserv.getSubscription_length_time_unit().toString().toLowerCase()+" was received and will be processed shortly.";
 										
 										
 									}else if(smsserv.getCmd().equals("FIND")){
-										resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+										resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request to find friend near your area received. You shall receive an sms shortly.";
 									}else{
-										resp = "Request received and is being processed.";
+										resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request received and is being processed.";
 									}
 									sess.setSessionId(req.getSessionid());
 									clearUssdSesion(sess);
@@ -2501,9 +2543,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 										logMO(incomingsms);
 										
 										if(smsserv.getCmd().equals("FIND")){
-											resp = "Request to find friend near your area received. You shall receive an sms shortly.";
+											resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request to find friend near your area received. You shall receive an sms shortly.";
 										}else{
-											resp = "Request received and is being processed.";
+											resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request received and is being processed.";
 										}
 										
 									}else{
@@ -2578,14 +2620,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 													
 													subscriptionEJB.updateSubscription(subscription.getId().intValue(), SubscriptionStatus.confirmed, AlterationMethod.self_via_ussd);
 													
-													resp = "Request to subscribe to "
+													resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request to subscribe to "
 															+smsserv.getService_name()+" Received.";
 													
 													doubleconfirmationEJB.dequeue(doubleConfirmationQueue);
 													
 												}else if(KEYWORD.equals("2") || KEYWORD.equalsIgnoreCase("decline")){
 													
-													resp = "Request cancelled.";
+													resp = USSDReceiver.SESSION_TERMINATION_TAG+"Request cancelled.";
 													
 													doubleconfirmationEJB.dequeue(doubleConfirmationQueue);
 												
@@ -2978,9 +3020,9 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		sess.setMsisdn(msisdn);
 		sess.setTimeStamp(new Date());
 		try {
-			sess = saveOrUpdate(sess);
+			sess = em.merge(sess);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 	public String stringFyServiceList(LinkedHashMap<Integer,SMSServiceDTO> allsubscribed) {
@@ -3287,7 +3329,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				
 				ServiceProcessorI processor =  MOProcessorFactory.getProcessorClass(procDTO.getProcessorClassName(), GenericServiceProcessor.class);
 				incomingsms = new IncomingSMS();
-				incomingsms.setCmp_tx_id(generateNextTxId());
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 				incomingsms.setMsisdn(msisdn);
 				incomingsms.setPrice(sm.getPrice());
 				incomingsms.setBilling_status(incomingsms.getPrice().compareTo(BigDecimal.ZERO)>0 ?  BillingStatus.WAITING_BILLING :   BillingStatus.NO_BILLING_REQUIRED);
@@ -3516,7 +3558,13 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 
 	@Override
-	public String getBillingStats(String fromTz, String toTz) throws JSONException {
+	@SuppressWarnings("unchecked")
+		public String getBillingStats(String fromTz, String toTz) throws JSONException {
+		
+		TimeZoneConfig timezoneConfig = timezoneConverterEJB.getLatestTimeZoneConfig(); 
+		if(timezoneConfig!=null){
+			fromTz = timezoneConfig.getUtcOffset();
+		}
 
 		Query qry = em.createNativeQuery("select date(convert_tz(timeStamp,'"+fromTz+"','"+toTz+"')) dt, count(*) count, price, sum(price) total_kshs from  success_billing where success=1  group by dt order by dt desc limit 31");
 		
@@ -3606,6 +3654,14 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	        color += letters[(rand.nextInt((15 - 0) + 1) + 0)];
 	    }
 	    return color;
+	}
+	
+	public <T> T saveUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
 	}
 
 }

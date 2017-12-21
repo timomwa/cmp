@@ -1,31 +1,20 @@
 package com.pixelandtag.action;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
-import javax.persistence.Query;
-
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.pixelandtag.cmp.ejb.stats.LinkLatencyStatEJBI;
-import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
 
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.Resolution;
+
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+
+import com.pixelandtag.cmp.ejb.stats.LinkLatencyStatEJBI;
+import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterEJB;
 
 public class StatsAction extends BaseActionBean {
 	
