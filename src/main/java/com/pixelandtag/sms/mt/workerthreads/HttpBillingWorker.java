@@ -326,7 +326,7 @@ public class HttpBillingWorker implements Runnable {
 								
 			}else if(RESP_CODE == 400){
 				
-				
+				logger.error("\nResp 400");
 			}else if(RESP_CODE == 401){
 				
 				logger.error("\nUnauthorized!");
@@ -343,11 +343,11 @@ public class HttpBillingWorker implements Runnable {
 			
 		} catch (Exception ioe) {
 				
+			logger.error(message, ioe);
 			message = ioe.getMessage();
-		
 			httsppost.abort();
 			
-			logger.error(message, ioe);
+			
 				
 			
 		} finally{

@@ -7,7 +7,7 @@ insert into opco_senderprofiles(id,active,effectiveDate,pickorder,opco_id_fk,pro
 insert into opco_senderprofiles(id,active,effectiveDate,pickorder,opco_id_fk,profile_id_fk,workers)  values('89028424', '1', '2016-03-16 20:54:52', '1', '79497164', '89016857', '1');
 
 insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080241,'string', now(),'senderimpl','com.pixelandtag.smssenders.PlainHttpSender',89016857);
-insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080242,'string', now(),'http_protocol','http',890168570);
+insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080242,'string', now(),'http_protocol','http',89016857);
 insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080243,'string', now(),'http_base_url','http://196.202.219.252:7062/SendSmsService',89016857);
 insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080244,'string', now(),'http_shortcode_param_name','shortcode',89016857);
 insert into `pixeland_content360`.`profile_configs`(id,data_type,`effectiveDate`,`name`,`value`,`profile_id_fk`) values(128080245,'string', now(),'http_msisdn_param_name','msisdn',89016857);
