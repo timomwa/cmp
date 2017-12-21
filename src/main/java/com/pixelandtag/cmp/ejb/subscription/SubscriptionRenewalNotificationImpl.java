@@ -57,7 +57,6 @@ public class SubscriptionRenewalNotificationImpl implements
 	@EJB
 	private OperatorCountryRulesEJBI opcoRulesEJBI;
 	
-	
 	@EJB
 	private OpcoSMSServiceEJBI opcoSMSServiceEJB;
 	

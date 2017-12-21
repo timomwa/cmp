@@ -207,6 +207,7 @@ public class SubscriptionBillingWorker implements Runnable {
 						if(sub.getSubscription_status()==SubscriptionStatus.confirmed){
 							sub.setQueue_status(1L);
 							subscriptionejb.updateQueueStatus(1L, sub.getId(), AlterationMethod.backend);
+							sub.setQueue_status(1L);
 							billable = createBillableFromSubscription(sub);
 						}
 					}

@@ -259,7 +259,7 @@ public class SubscriptionRenewal extends  Thread {
 					logger.error(e.getMessage(), e);
 				}
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(20000);//20 seconds
 				} catch (InterruptedException e) {
 					logger.error(e.getMessage(), e);
 				} finally {

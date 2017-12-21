@@ -175,7 +175,8 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	public List<Subscription> getExpiredSubscriptions(Long size) {
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
-			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "Africa/Nairobi", "Africa/Nairobi");
+			logger.info("\n\n\t***************timeInNairobi --> "+timeInNairobi+"************\n\n");
 			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate AND s.queue_status = 0 ORDER BY s.credibility_index desc");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
 			qry.setParameter("todaydate", timeInNairobi);
@@ -263,7 +264,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 				
 				operatorCountry = em.merge(operatorCountry);
 				Date todaysdate = new Date();
-				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(todaysdate, "America/New_York", operatorCountry.getCountry().getTimeZone());//"Africa/Nairobi");
+				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(todaysdate, "Africa/Nairobi", operatorCountry.getCountry().getTimeZone());//"Africa/Nairobi");
 				
 				if(sub==null){
 				
