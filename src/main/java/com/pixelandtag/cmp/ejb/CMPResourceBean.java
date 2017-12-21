@@ -1785,8 +1785,32 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 		return getMessage(messageType.toString(), language, opcoid);
 	}
 	
+	@Override
+	public boolean updateMessageInQueueNew(String cp_tx_id, BillingStatus billstatus){
+		boolean success = false;
+		try{
+			 
+			 Query qry = em.createQuery("UPDATE OutgoingSMS set priority=:priority, "
+			 		+ "charged=:charged, billing_status=:billing_status WHERE cmp_tx_id=:CMP_TxID ")
+			.setParameter("priority", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) ? 0 :  3)
+			.setParameter("charged", billstatus.equals(BillingStatus.SUCCESSFULLY_BILLED) )
+			.setParameter("billing_status", billstatus)
+			.setParameter("CMP_TxID", cp_tx_id);
+			int num =  qry.executeUpdate();
+			 
+			 success = num>0;
+		}catch(Exception e){
+			try {
+				
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(),e1);
+			} 
+			logger.error(e.getMessage(),e);
+		}
+		return success;
+	}
 	
-	
+	@Override
 	public boolean updateMessageInQueue(String cp_tx_id, BillingStatus billstatus) throws Exception{
 		boolean success = false;
 		try{

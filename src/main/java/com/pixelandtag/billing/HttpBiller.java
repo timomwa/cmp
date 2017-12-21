@@ -44,7 +44,7 @@ public class HttpBiller extends GenericBiller {
 	
 	//private static JsonUtilI jsonutil = new JsonUtilImpl();
 	
-	private static final String TEST_MSIDN = "254776165280";
+	private static final String TEST_MSIDN = "254775252504";
 	private Map<String,BillerProfileConfig> configuration;
 	
 	public HttpBiller(BillingConfigSet billingconfig) throws Exception {
@@ -395,6 +395,7 @@ public class HttpBiller extends GenericBiller {
 					sb.setLength(0);
 				}
 				String respmsg = (String)jsonutil.getValue(respmsgcnf_failure.getValue());
+				logger.info( " A. respmsg ----> "+respmsg );
 				sb.append("\t\t").append("C.  1. respmsg  > ").append( respmsg );//.append("\n");	
 				if(testing){
 					logger.info(sb.toString());
@@ -402,12 +403,21 @@ public class HttpBiller extends GenericBiller {
 				}
 				if(respmsg==null || respmsg.trim().isEmpty())
 					respmsg =   (String)jsonutil.getValue(respmsgcnf_success.getValue());
+				logger.info( " B. respmsg ----> "+respmsg );
+				logger.info( " B. respmsgcnf_success.getValue() ----> "+respmsgcnf_success.getValue() );
 				sb.append("\t\t").append("D.  2. respmsg  > ").append( respmsg );//.append("\n");	
 				if(testing){
 					logger.info(sb.toString());
 					sb.setLength(0);
 				}
+				if(respmsg==null || respmsg.trim().isEmpty()){
+					respmsg = resp.getBody();
+				}
 				response.setResponseMsg(respmsg);
+				logger.info( " response ----> "+response );
+				logger.info( " respmsg ----> "+respmsg );
+				logger.info( " success_string ----> "+success_string );
+				logger.info( " success_string.getValue() ----> "+(success_string!=null ? success_string.getValue() : "Bloody null!!!!") );
 				response.setSuccess(  respmsg.contains(  success_string.getValue().trim()  )    );
 				sb.append("\t\t").append("E.  success_string > ").append( success_string.getValue() );//.append("\n");
 				if(testing){

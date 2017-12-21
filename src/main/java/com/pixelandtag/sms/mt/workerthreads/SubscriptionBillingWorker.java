@@ -517,6 +517,7 @@ public class SubscriptionBillingWorker implements Runnable {
 			billable.setPricePointKeyword(service.getSmsservice().getPrice_point_keyword());
 			billable.setSuccess(Boolean.FALSE);
 			billable.setOpco(sub.getOpco());
+			billable.setBillingType( service.getBillingType() );
 			logger.debug(" before queue transaction_id" + billable.getCp_tx_id());
 
 			

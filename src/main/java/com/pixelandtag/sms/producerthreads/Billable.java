@@ -34,14 +34,16 @@ public class Billable implements Serializable {
 
 	
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1456362142345245L;
+
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4690931003011822080L;
 	
 	/**
 	 * HTTP status code
