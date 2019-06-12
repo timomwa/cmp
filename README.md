@@ -116,6 +116,8 @@ are accessible by the standalone (SE) threads.
 
 If you deployed to wildfly successfully, this sould be it.
 
+`./run.sh`
+
 
 
 
