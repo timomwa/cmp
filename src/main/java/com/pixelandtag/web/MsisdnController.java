@@ -43,7 +43,7 @@ public class MsisdnController extends HttpServlet {
 	private final String SERVER_TIMEZONE = "-05:00";
 	private final String CLIENT_TIMEZONE = "+03:00";
 	
-	private String DB = "pixeland_content360";
+	private String DB = "cmp";
 
 	/**
 	 * 

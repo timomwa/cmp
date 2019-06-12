@@ -39,7 +39,7 @@ public class MsisdnChecker extends HttpServlet {
 	private Context initContext;
 	
 	private final byte[] OK_200 =  "200 OK".getBytes();
-	private String DB = "pixeland_content360";
+	private String DB = "cmp";
 
 	/**
 	 * 

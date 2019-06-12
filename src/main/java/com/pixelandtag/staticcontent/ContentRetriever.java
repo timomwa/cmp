@@ -25,7 +25,7 @@ import com.pixelandtag.subscription.dto.SMSServiceDTO;
 
 public class ContentRetriever {
 	
-	private static final String DB_NAME = "pixeland_content360";
+	private static final String DB_NAME = "cmp";
 	private Logger log = Logger.getLogger(ContentRetriever.class);
 	private SubscriptionOld sub = new SubscriptionOld();
 	private CMPResourceBeanRemote cmpresource;

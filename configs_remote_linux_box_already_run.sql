@@ -5,7 +5,7 @@ insert into operator_country select next_val+1,79484794,79493566 from hibernate_
 insert into operator_country select next_val+1,79484794,79494610 from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 
 
-ALTER TABLE `pixeland_content360`.`operator_country` ADD COLUMN `code` VARCHAR(255) AFTER `operator_id_fk`, ADD UNIQUE INDEX `coded_UNIQUE` (`code` ASC) ;
+ALTER TABLE `cmp`.`operator_country` ADD COLUMN `code` VARCHAR(255) AFTER `operator_id_fk`, ADD UNIQUE INDEX `coded_UNIQUE` (`code` ASC) ;
 
 
 delimiter $$
@@ -49,7 +49,7 @@ insert into opco_templates  select next_val+1,'2017-12-20 00:00:00', 'oneapi_jso
 insert into opco_configs  select next_val+1, 'string', '2017-12-20 00:00:00', 'spId', '36', 79497164 from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 insert into opco_configs  select next_val+1, 'string', '2017-12-20 00:00:00', 'spPassword', '111111', 79497164 from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 insert into opco_configs  select next_val+1, 'string', '2017-12-20 00:00:00', 'http_payload_param_', '111111', 79497164 from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
-UPDATE `pixeland_content360`.`opco_templates` SET `value`='{\"validity_period\":\"991201230029000+\",\"address\":[\"tel:${msisdn}\"],\"senderAddress\":\"${senderaddress}\",\"message\":\"${message}\",\"notifyURL\":\"http://test/test\",\"senderName\":\"${senderaddress}\"}' WHERE `id`='79655901';
+UPDATE `cmp`.`opco_templates` SET `value`='{\"validity_period\":\"991201230029000+\",\"address\":[\"tel:${msisdn}\"],\"senderAddress\":\"${senderaddress}\",\"message\":\"${message}\",\"notifyURL\":\"http://test/test\",\"senderName\":\"${senderaddress}\"}' WHERE `id`='79655901';
 
 insert into opco_configs  select next_val+1, 'string', '2017-12-20 00:00:00', 'http_rest_path_param_msisdn', 'msisdn', 79497164 from hibernate_sequence;update hibernate_sequence set next_val=next_val+1;
 

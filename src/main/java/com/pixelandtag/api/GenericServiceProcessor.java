@@ -47,7 +47,7 @@ public abstract class GenericServiceProcessor implements ServiceProcessorI {
 	protected String username;
 	protected String password;
 	public static final String MO_BILLING = "MO_BILLING";
-	public static final String DB = "pixeland_content360";
+	public static final String DB = "cmp";
 	public static final String SPACE = " ";
 	public static final String NUM_SEPERATOR = "."+SPACE;
 	public static final String NEW_LINE = "\n";

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.8, for Win64 (x86)
 --
--- Host: pixelandtag.com    Database: pixeland_content360
+-- Host: pixelandtag.com    Database: cmp
 -- ------------------------------------------------------
 -- Server version	5.5.40-cll
 

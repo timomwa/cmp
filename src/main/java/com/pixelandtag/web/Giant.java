@@ -43,7 +43,6 @@ public class Giant extends HttpServlet {
 
 	private Logger logger = Logger.getLogger(Giant.class);
 
-	//private String DB = "pixeland_content360";
 	private int LOG_IN = 0;
 	private int LOG_OUT = 1;
 	private int SEARCH = 2;

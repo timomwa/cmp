@@ -101,6 +101,10 @@ The genrated jar file will be located at
 
 `./target/cmp-jar-with-dependencies.jar`
 
+Or... combine all;
+
+`mvn clean compile package assembly:single`
+
 
 
 

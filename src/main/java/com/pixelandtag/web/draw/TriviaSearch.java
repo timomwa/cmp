@@ -38,7 +38,7 @@ import com.pixelandtag.util.POI;
  *                           value="A value"
  */
 public class TriviaSearch extends HttpServlet {
-	final String DB = "pixeland_content360";
+	final String DB = "cmp";
 	static final long serialVersionUID = 0;
 	Logger log = Logger.getLogger(TriviaSearch.class);
 	public TriviaSearch() {

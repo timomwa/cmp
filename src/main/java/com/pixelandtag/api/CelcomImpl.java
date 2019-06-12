@@ -97,7 +97,7 @@ public class CelcomImpl implements CelcomHTTPAPI, Serializable{
 		int vendor = DriverUtilities.MYSQL;
 	    String driver = DriverUtilities.getDriver(vendor);
 	   
-	    String dbName = "pixeland_content360";// HTTPMTSenderApp.props.getProperty("DATABASE");
+	    String dbName = "cmp";// HTTPMTSenderApp.props.getProperty("DATABASE");
 	   
 	    String host =  "db";//HTTPMTSenderApp.props.getProperty("db_host");
 	    String url = DriverUtilities.makeURL(host, dbName, vendor);

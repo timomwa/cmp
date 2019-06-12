@@ -1761,7 +1761,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 	}
 
 	private Logger logger = Logger.getLogger(CMPResourceBean.class);
-	private String database = "pixeland_content360";
+	private String database = "cmp";
 	
 	
 	@SuppressWarnings("unchecked")
@@ -3453,7 +3453,7 @@ public class CMPResourceBean extends BaseEntityBean implements CMPResourceBeanRe
 				+ "FROM OpcoSMSService osms "
 				+ "WHERE osms.moprocessor.enable=1 "
 				+ "AND osms.moprocessor.processor_type <> :phantom_processor "
-				+ "group by osms.moprocessor.id");
+				+ "group by osms.moprocessor, osms.smsservice");
 			
 			qry.setParameter("phantom_processor", ProcessorType.PHANTOM);
 			

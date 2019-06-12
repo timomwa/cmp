@@ -23,7 +23,7 @@ import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
 public class SubscriptionOld {
 	
-	private static final String DB_NAME = "pixeland_content360";
+	private static final String DB_NAME = "cmp";
 	private Logger logger  = Logger.getLogger(SubscriptionOld.class);
 	private static final String SPACE = " ";
 	private static final String NUM_SEPERATOR = "."+SPACE;

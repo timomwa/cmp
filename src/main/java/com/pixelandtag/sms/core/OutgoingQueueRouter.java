@@ -117,7 +117,7 @@ public class OutgoingQueueRouter extends Thread {
 		try{
 			mandatoryqueuewaittime = Integer.valueOf( mtsenderprop.getProperty("mandatoryqueuewaittime") );
 		}catch(NumberFormatException  nfe){
-			logger.error(nfe.getMessage(), nfe);
+			logger.warn(nfe.getMessage(), nfe);
 		}catch(Exception  nfe){
 			logger.error(nfe.getMessage(), nfe);
 		}
@@ -168,9 +168,11 @@ public class OutgoingQueueRouter extends Thread {
     	 String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 		 Properties props = new Properties();
 		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+		 props.put(Context.PROVIDER_URL, mtsenderprop.getProperty("ejbprotocol")+"://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
 		props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
 		props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
+		props.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
+        
 		props.put("jboss.naming.client.ejb.context", true);
 		 context = new InitialContext(props);
 		 queueprocEJB =  (QueueProcessorEJBI) 

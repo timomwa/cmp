@@ -27,8 +27,8 @@ insert into opco_configs  select 79807029, 'string', '2015-08-16 00:00:00', 'htt
 insert into sender_profiles  select 80452253, 1, '2015-08-16 00:00:00', 'parlay x' from hibernate_sequence;
 insert into opco_senderprofiles select 80457410, 1, '2015-08-16 00:00:00', 0, 79497164, 80452253 from hibernate_sequence;
 
-insert into `pixeland_content360`.`profile_configs` select id, data_type, effectiveDate, name, `value`, 80452253 as 'opco_id_fk' FROM `pixeland_content360`.`opco_configs`;
-insert into `pixeland_content360`.`profile_templates` select id,effectiveDate,`name`,`type`,`value`,80452253 FROM `pixeland_content360`.`opco_templates`;
+insert into `cmp`.`profile_configs` select id, data_type, effectiveDate, name, `value`, 80452253 as 'opco_id_fk' FROM `cmp`.`opco_configs`;
+insert into `cmp`.`profile_templates` select id,effectiveDate,`name`,`type`,`value`,80452253 FROM `cmp`.`opco_templates`;
 
 
 orange - 79497164

@@ -29,7 +29,7 @@ public class SubscriptionWorker extends Thread{
 	
 	private int serviceid;
 	private String name;
-	private String connstr;// = "jdbc:mysql://db/pixeland_content360?user=root&password=";
+	private String connstr;
 	private int subs = 0;
 	private boolean busy;
 	public static final int PROCESSING = 1;

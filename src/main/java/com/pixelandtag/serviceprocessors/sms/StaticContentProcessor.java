@@ -87,7 +87,7 @@ public class StaticContentProcessor extends GenericServiceProcessor{
 				}else{
 					tailMsg = additionalInfo.get("tailText_subscribed");
 				}
-				final String content = baseEntityEJB.getUniqueFromCategory("pixeland_content360", table, "Text", "id", "Category", static_categoryvalue, MSISDN, serviceid.intValue(), 1, incomingsms.getMoprocessor().getId());
+				final String content = baseEntityEJB.getUniqueFromCategory("cmp", table, "Text", "id", "Category", static_categoryvalue, MSISDN, serviceid.intValue(), 1, incomingsms.getMoprocessor().getId());
 				
 				if(content!=null)
 					outgoingsms.setSms(content+SPACE+tailMsg);

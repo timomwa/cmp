@@ -37,7 +37,7 @@ public class SubscriptionMainTread extends Thread{
 		uniq = new Semaphore(1, true);
 	}
 	
-	public static String DB = "pixeland_content360";
+	public static String DB = "cmp";
 	private static SubscriptionMainTread instance;
 
 	

@@ -70,7 +70,7 @@ public class BulkSMSProducer extends Thread {
 	    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
 			 Properties props = new Properties();
 			 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-			 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
+			 props.put(Context.PROVIDER_URL, mtsenderprop.getProperty("ejbprotocol")+"://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
 			 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
 			 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
 			 props.put("jboss.naming.client.ejb.context", true);
@@ -217,7 +217,7 @@ public class BulkSMSProducer extends Thread {
 			
 			List<BulkSMSQueue> queue = bulksmsBean.getUnprocessed(1000L); 
 			
-			logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size()+"\n");
+			//logger.debug(">>> BULK_SMS #%#%#%#%#%#%#%#%#%#% queue.size():: "+queue.size()+"\n");
 			for(BulkSMSQueue bulktext : queue){
 				
 				try{
