@@ -1,9 +1,66 @@
-<mxfile host="app.diagrams.net" modified="2023-10-26T08:12:33.498Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" version="22.0.8" etag="i2hdK0m1pCqJlIUYo6Fx" type="github">
+<mxfile host="app.diagrams.net" modified="2023-10-26T08:27:21.321Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" etag="3C69hFTKxHs_4jIC-bW6" version="22.0.8" type="github">
   <diagram name="Page-1" id="pVd1hs-IhMFepFoSFWVQ">
-    <mxGraphModel>
+    <mxGraphModel dx="954" dy="530" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-2" value="Director of commerce" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="120" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-3" value="Digital Marketing Manager" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="150" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-4" value="Project Manager" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="180" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-5" value="Supply Chain Manager" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="210" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-6" value="Customer Service Manager" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="270" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-7" value="Financial Manager" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="240" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-10" value="Content/Merchandising Manger" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="300" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-11" value="Business Analyst" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="340" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-12" value="I.T Specialists" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="370" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-13" value="Web/Portal Developers" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="400" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-14" value="Quality Assurance Analysts" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="430" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-15" value="Graphic Designers" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="460" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-16" value="UI/UX Designers" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="490" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-17" value="Customer Service Representatives" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="520" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-18" value="SEO Content Writer" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="560" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-19" value="Warehouse Manger" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="160" y="590" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-20" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;" vertex="1" parent="1">
+          <mxGeometry x="300" y="120" width="300" height="490" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-21" value="Financial Data" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cSFD1IT2daWeMbKAuxl0-22" value="Financial Data" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="370" y="80" width="60" height="30" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
