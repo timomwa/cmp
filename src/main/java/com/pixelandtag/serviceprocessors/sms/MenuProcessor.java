@@ -1,19 +1,12 @@
 package com.pixelandtag.serviceprocessors.sms;
 
 import java.sql.Connection;
-import java.util.Properties;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.util.UtilCelcom;
@@ -26,31 +19,9 @@ public class MenuProcessor extends GenericServiceProcessor{
 	
 	
 	public MenuProcessor() throws Exception{
-		init_datasource();
-		initEJB();
-	}
-	private InitialContext context;
-	private CMPResourceBeanRemote cmpbean;
-    
-    public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		 Properties props = new Properties();
-		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		 props.put("jboss.naming.client.ejb.context", true);
-		 context = new InitialContext(props);
-		 cmpbean =  (CMPResourceBeanRemote) 
-       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		 
-		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
-    }
-    
-    
-	private void init_datasource(){
 		
 	}
+    
 
 	@Override
 	public OutgoingSMS process(IncomingSMS incomingsms) {
@@ -67,7 +38,7 @@ public class MenuProcessor extends GenericServiceProcessor{
 			final String KEYWORD = req.getKeyword().trim();
 			final Long serviceid = 	incomingsms.getServiceid();
 			
-			conn = getCon();
+			conn = null;//getCon();
 			
 			
 			logger.info(" KEYWORD ::::::::::::::::::::::::: ["+KEYWORD+"]");
@@ -120,7 +91,8 @@ public class MenuProcessor extends GenericServiceProcessor{
 
 		try{
 			
-			context.close();
+			if(context!=null)
+				context.close();
 		
 		}catch(Exception e){
 			
@@ -140,28 +112,4 @@ public class MenuProcessor extends GenericServiceProcessor{
 		
 	}
 
-	@Override
-	public Connection getCon() {
-		
-		try {
-			
-			return ds.getConnection();
-		
-		} catch (Exception e) {
-			
-			logger.error(e.getMessage(),e);
-			
-			return null;
-		
-		}finally{
-		
-		}
-	}
-	
-
-	
-	@Override
-	public BaseEntityI getEJB() {
-		return this.cmpbean;
-	}
 }

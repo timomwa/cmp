@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -44,11 +45,15 @@ import org.apache.log4j.Logger;
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.ERROR;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.sms.producerthreads.BillableI;
 import com.pixelandtag.sms.producerthreads.BillingService;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
+import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.util.StopWatch;
 
@@ -69,6 +74,7 @@ public class HttpBillingWorker implements Runnable {
 	private SSLContextBuilder builder = new SSLContextBuilder();
 	private PoolingHttpClientConnectionManager cm;
 	private SubscriptionBeanI subscriptionejb;
+	private BillingGatewayEJBI billingGatewyEJB;
 	private Properties mtsenderprop;
 	private TrustSelfSignedStrategy trustSelfSignedStrategy = new TrustSelfSignedStrategy(){
 		@Override
@@ -117,7 +123,6 @@ public class HttpBillingWorker implements Runnable {
 		this.finished = finished;
 	}
 
-	private String mtUrl = "https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
 	private CMPResourceBeanRemote cmp_ejb;
 	
 	
@@ -168,6 +173,10 @@ public class HttpBillingWorker implements Runnable {
 		 
 		 this.subscriptionejb =  (SubscriptionBeanI) 
 		      		context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
+		 
+		 
+		 this.billingGatewyEJB  = (BillingGatewayEJBI) 
+		      		context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
 		
 		 this.watch = new StopWatch();
 		
@@ -269,69 +278,35 @@ public class HttpBillingWorker implements Runnable {
 	private void charge(Billable  billable){
 		
 		setBusy(true);
-		
-		httsppost = new HttpPost(this.mtUrl);
-
-		HttpEntity resEntity = null;
-		CloseableHttpResponse response = null;
-		
-		
+		SenderResp response = null;
 		try {
 			
-			String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
-			String encoding = null;
-			sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
-			encoding = encoder.encode( usernamePassword.getBytes() ); 
-			httsppost.setHeader("Authorization", "Basic " + encoding);
-			httsppost.setHeader("SOAPAction","");
-			httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
-			
-			String xml = billable.getChargeXML(BillableI.plainchargeXML);
-			logger.debug("BILLABLE: "+billable.toString());
-			logger.info("XML SENT \n : "+xml + "\n");
-			StringEntity se = new StringEntity(xml);
-			httsppost.setEntity(se);
-			
-			
 			watch.start();
-			response = httpsclient.execute(httsppost);
+			response = billingGatewyEJB.bill(billable);
 			watch.stop();
 			logger.debug("billable.getMsisdn()="+billable.getMsisdn()+" :::: Shortcode="+billable.getShortcode()+" :::< . >< . >< . >< . >< . it took "+(Double.valueOf(watch.elapsedTime(TimeUnit.MILLISECONDS)/1000d)) + " seconds to bill via HTTP");
 				
 			 
-			 final int RESP_CODE = response.getStatusLine().getStatusCode();
+			 final int RESP_CODE = Integer.valueOf(response.getRespcode());
 			 
-			 resEntity = response.getEntity();
-			 
-			 String resp = convertStreamToString(resEntity.getContent());
-			
-			 logger.debug("RESP CODE : "+RESP_CODE);
-			 logger.debug("RESP XML : "+resp);
-			 
-			 billable.setResp_status_code(String.valueOf(RESP_CODE));
+			 billable.setResp_status_code(response.getRespcode());
 			
 			
 			billable.setProcessed(1L);
-			if (RESP_CODE == HttpStatus.SC_OK) {
+			if (RESP_CODE == HttpStatus.SC_OK || RESP_CODE == HttpStatus.SC_CREATED) {
 				
 				billable.setRetry_count(billable.getRetry_count()+1);
-				Boolean success = resp.toUpperCase().split("<STATUS>")[1].startsWith("SUCCESS");
-				billable.setSuccess(success );
+				billable.setSuccess( response.getSuccess() );
 				
-				if(!success.booleanValue()){
+				if(!response.getSuccess()){
 					
-					String err = getErrorCode(resp);
-					String errMsg = getErrorMessage(resp);
-					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_CODE["+err+"]:::::::::::::::::::::: resp:");
-					logger.debug("resp: :::::::::::::::::::::::::::::ERROR_MESSAGE["+errMsg+"]:::::::::::::::::::::: resp:");
-					logger.info("FAILED TO BILL ERROR="+err+", ERROR_MESSAGE="+errMsg+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
+					logger.info("FAILED TO BILL, ERROR_MESSAGE="+response.getResponseMsg()+" msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					try{
-						String transactionId = getTransactionId(resp);
-						billable.setTransactionId(transactionId);
+						billable.setTransactionId(response.getRefvalue());
 					}catch(Exception exp){
 						logger.warn("No transaction id found");
 					}
-					if(resp.toUpperCase().contains("Insufficient".toUpperCase())){
+					if(response.getResponseMsg().toUpperCase().contains("Insufficient".toUpperCase())){
 						try{
 							subscriptionejb.updateCredibilityIndex(billable.getMsisdn(),Long.valueOf(billable.getService_id()),-1, billable.getOpco());
 						}catch(NumberFormatException nfe){
@@ -339,10 +314,20 @@ public class HttpBillingWorker implements Runnable {
 						}
 					}
 				}else{
-					String transactionId = getTransactionId(resp);
-					billable.setTransactionId(transactionId);
+					billable.setTransactionId(response.getRefvalue());
 					billable.setResp_status_code("Success");
-					cmp_ejb.createSuccesBillRec(billable);
+					
+					try{
+						SuccessfullyBillingRequests successbilling = createSuccesBillRec(billable);
+						
+						//OperatorCountry opco = cmp_ejb.find(OperatorCountry.class, billable.getOpco().getId());
+						//successbilling.setOpco(opco);
+						
+						successbilling = cmp_ejb.saveUpdate(successbilling);
+					}catch(Exception e){
+						logger.warn(e.getMessage(), e);
+					}
+					
 					logger.debug("resp: :::::::::::::::::::::::::::::SUCCESS["+billable.isSuccess()+"]:::::::::::::::::::::: resp:");
 					logger.info("SUCCESS BILLING msisdn="+billable.getMsisdn()+" price="+billable.getPrice()+" pricepoint keyword="+billable.getPricePointKeyword()+" operation="+billable.getOperation());
 					
@@ -355,7 +340,7 @@ public class HttpBillingWorker implements Runnable {
 								
 			}else if(RESP_CODE == 400){
 				
-				
+				logger.error("\nResp 400");
 			}else if(RESP_CODE == 401){
 				
 				logger.error("\nUnauthorized!");
@@ -370,43 +355,14 @@ public class HttpBillingWorker implements Runnable {
 			
 					
 			
-		}catch(ConnectException ce){
-				
-				//this.success  = false;
-				
-				message = ce.getMessage();
-				
-				logger.error(message, ce);
-				
-				httsppost.abort();
-				
-			
-		}catch(SocketTimeoutException se){
-				
-			message = se.getMessage();
-			
-			httsppost.abort();
-			
-			logger.error(message, se);
-				
-			
-		} catch (IOException ioe) {
-				
-				
-			message = ioe.getMessage();
-			
-			httsppost.abort();
-			
-			logger.error("\n\n==============================================================\n\n"+message+" CONNECTION TO OPERATOR FAILED. WE SHALL TRY AGAIN. Re-tries so far "+recursiveCounter+"\n\n==============================================================\n\n");
-				
-			
 		} catch (Exception ioe) {
 				
-			message = ioe.getMessage();
-		
-			httsppost.abort();
-			
 			logger.error(message, ioe);
+			message = ioe.getMessage();
+			if(httsppost!=null)
+				httsppost.abort();
+			
+			
 				
 			
 		} finally{
@@ -420,18 +376,6 @@ public class HttpBillingWorker implements Runnable {
 			// When HttpClient instance is no longer needed,
 	        // shut down the connection manager to ensure
 	        // immediate deallocation of all system resources
-			
-			try {
-			
-				if(resEntity!=null)
-					EntityUtils.consume(resEntity);
-				
-			} catch (Exception e) {
-				
-				log(e);
-				
-			}
-				
 				
 			try{
 					
@@ -439,6 +383,7 @@ public class HttpBillingWorker implements Runnable {
 				billable.setIn_outgoing_queue(0L);
 					
 				if(billable.isSuccess() ||  "Success".equals(billable.getResp_status_code()) ){
+					cmp_ejb.updateMessageInQueueNew(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
 					cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.SUCCESSFULLY_BILLED);
 					cmp_ejb.updateSMSStatLog(billable.getCp_tx_id(),ERROR.Success);
 					billable.setResp_status_code(BillingStatus.SUCCESSFULLY_BILLED.toString());
@@ -463,14 +408,15 @@ public class HttpBillingWorker implements Runnable {
 					billable.setResp_status_code(BillingStatus.BILLING_FAILED.toString());
 				}
 					
-				cmp_ejb.saveOrUpdate(billable);
+				subscriptionejb.saveOrUpdate(billable);
 					
 				if(billable.isSuccess()){//return back to queue if we did not succeed
 					//We only try 3 times recursively if we've not been poisoned and its one part of a multi-part message, we try to re-send, but no requeuing
 					//cmp_ejb.updateMessageInQueue(billable.getCp_tx_id(),BillingStatus.BILLING_FAILED_PERMANENTLY);
 						
 					//on third try, we abort
-					httsppost.abort();
+					if(httsppost!=null)
+						httsppost.abort();
 						
 						
 				}else{
@@ -479,16 +425,10 @@ public class HttpBillingWorker implements Runnable {
 				}
 				
 			}catch(Exception e){
-					logger.error(e.getMessage(),e);
+				logger.error(e.getMessage(),e);
 			}
 				
 			watch.reset();
-			
-			try {
-				response.close();
-			} catch (Exception e) {
-				logger.error(e.getMessage(),e);
-			}
 			
 			logger.debug("DONE! ");
 				
@@ -566,6 +506,32 @@ public class HttpBillingWorker implements Runnable {
 		logger.debug(">>>>>>>>>>>>>>>>> ||||||||||||| MEM_USAGE: " + OutgoingQueueRouter.getMemoryUsage()+" |||||||||||||||| <<<<<<<<<<<<<<<<<<<<<<<< ");
 	}
 	
+	
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception {
+		
+    	try{
+    		
+    		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
+    		successfulBill.setCp_tx_id(billable.getCp_tx_id());
+    		successfulBill.setKeyword(billable.getKeyword());
+    		successfulBill.setMsisdn(billable.getMsisdn());
+    		successfulBill.setOperation(billable.getOperation());
+    		successfulBill.setPrice(billable.getPrice());
+    		successfulBill.setPricePointKeyword(billable.getPricePointKeyword());
+    		successfulBill.setResp_status_code(billable.getResp_status_code());
+    		successfulBill.setShortcode(billable.getShortcode());
+    		successfulBill.setSuccess(billable.getSuccess());
+    		successfulBill.setTimeStamp( (null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) );
+    		successfulBill.setTransactionId(billable.getTransactionId());
+    		successfulBill.setTransferin(billable.getTransferIn());
+    		successfulBill.setOpco(billable.getOpco());
+    		return successfulBill ;
+    		
+    	}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+			throw exp;
+		}
+    }
 	
 	
 	

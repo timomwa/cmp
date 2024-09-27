@@ -106,6 +106,7 @@ public class HttpToSend implements Serializable{
 	private String sub_c_mobtel;
 	
 	@Index(name="CMP_TxID")
+	@Column(name="CMP_TxID", length=50)
 	private String CMP_TxID;
 
 	@Column(name="newCMP_Txid")

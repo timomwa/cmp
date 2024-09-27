@@ -10,18 +10,45 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileType;
 
 @Entity
 @Table(name = "biller_profile")
+@NamedQueries({
+	/*@NamedQuery(
+			name = BillerProfile.NQ_FIND_BY_OPCO,
+			query = "select osp from BillerProfile osp where osp.opco=:opco AND osp.active=:active  order by osp.pickorder desc"
+	),
+	@NamedQuery(
+			name = BillerProfile.NQ_FIND_BY_OPCO_AND_TYPE,
+			query = "select osp from BillerProfile osp where osp.opco=:opco AND osp.active=:active AND osp.profile.profiletype=:profiletype  order by osp.pickorder desc"
+	),
+	*/@NamedQuery(
+			name = BillerProfile.NQ_LIST_ACTIVE,
+			query = "select osp from BillerProfile osp where osp.active=:active"
+	)
+})
 public class BillerProfile implements Serializable{
+	
+	/*@Transient
+	public static final String NQ_FIND_BY_OPCO = "billerprofile.findbyopco";
+	
+	@Transient
+	public static final String NQ_FIND_BY_OPCO_AND_TYPE = "billerprofile.findbyopcoAndtype";*/
+	
+	@Transient
+	public static final String NQ_LIST_ACTIVE = "billerprofile.listactive";
 	
 	/**
 	 * 
@@ -32,7 +59,7 @@ public class BillerProfile implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="name", unique=true, nullable=false)
+	@Column(name="name", unique=true, nullable=false, length=50)
 	@Index(name="bprofidx")
 	private String name;
 

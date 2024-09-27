@@ -52,7 +52,7 @@ public class Subscription implements Serializable {
 	@Index(name= "sms_service_idx")
 	private Long sms_service_id_fk;
 	
-	@Column(name="msisdn")
+	@Column(name="msisdn", length=20)
 	@Index(name="msisdnIdx")
 	private String msisdn;
 	

@@ -68,12 +68,12 @@ public class BulkSMSPlan implements Serializable {
 	@Column(name = "active")
 	private Boolean active;
 	
-	@Column(name = "planid")
+	@Column(name = "planid", length=50)
 	@Index(name="plnaccidx")
 	private String planid;
 	
 	
-	@Column(name = "telcoid")
+	@Column(name = "telcoid", length=50)
 	@Index(name="plnaccidx")
 	private String telcoid;
 	

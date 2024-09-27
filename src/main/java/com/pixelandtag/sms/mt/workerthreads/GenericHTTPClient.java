@@ -185,7 +185,7 @@ public class GenericHTTPClient implements Serializable{
 				Long latency = watch.elapsedTime(TimeUnit.MILLISECONDS);
 				LatencyLog latencyLog = LatencyLogBuilder.create().latency(latency).link(link).build();
 				respBuilder.latencyLog(latencyLog);
-				logger.info(getName()+" :::: LINK_LATENCY : ("+link+")::::::::::  "+ latency.longValue() + " mili-seconds");
+				logger.debug(getName()+" :::: LINK_LATENCY : ("+link+")::::::::::  "+ latency.longValue() + " mili-seconds");
 				
 				Header[] headers = response.getAllHeaders();
 				if(headers!=null)
@@ -207,7 +207,7 @@ public class GenericHTTPClient implements Serializable{
 			
 			String respose_msg  = convertStreamToString(response.getEntity().getContent());
 			respBuilder.body(respose_msg);
-			logger.info(getName()+" PROXY ::::::: finished attempt to deliver SMS via HTTP :::: RESP::: "+respose_msg);
+			logger.debug(getName()+" PROXY ::::::: finished attempt to deliver SMS via HTTP :::: RESP::: "+respose_msg);
 			try {
 				
 				EntityUtils.consume(response.getEntity());
@@ -236,6 +236,10 @@ public class GenericHTTPClient implements Serializable{
 			httpmethod.abort();
 			this.success = false;
 		} catch (IOException e) {
+			logger.error(e.getMessage(),e);
+			httpmethod.abort();
+			this.success = false;
+		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			httpmethod.abort();
 			this.success = false;
@@ -400,17 +404,16 @@ public class GenericHTTPClient implements Serializable{
 			if(httpclient!=null)
 				httpclient.close();
 			httpclient = null;
-		}catch(Exception e){}
+		}catch(Exception e){logger.error(e.getMessage(), e);}
 		try{
-			cm.close();
 			if(cm!=null)
 				cm.close();
-		}catch(Exception e){}
+		}catch(Exception e){logger.error(e.getMessage(), e);}
 		try{
 			if(cm!=null)
 				cm.shutdown();
 			cm = null;
-		}catch(Exception e){}
+		}catch(Exception e){logger.error(e.getMessage(), e);}
 	}
 	
 }

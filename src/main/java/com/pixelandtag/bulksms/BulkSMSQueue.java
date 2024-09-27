@@ -40,8 +40,8 @@ import com.pixelandtag.subscription.dto.MediumType;
 			+ " year(bs.text.sheduledate)=year(:sheduledate) AND "
 			+ " month(bs.text.sheduledate)=month(:sheduledate) AND "
 			+ " day(bs.text.sheduledate)=day(:sheduledate) AND "
-			+ " hour(bs.text.sheduledate)>=hour(:sheduledate) AND "
-			+ " minute(bs.text.sheduledate)>=minute(:sheduledate) "
+			+ " hour(bs.text.sheduledate)<=hour(:sheduledate) AND "
+			+ " minute(bs.text.sheduledate)<=minute(:sheduledate) "
 			+ " ORDER BY bs.timelogged asc, bs.priority asc"
 	)
 })
@@ -61,15 +61,15 @@ public class BulkSMSQueue implements Serializable{
 	@JoinColumn(name = "txt_id_fk")
 	private BulkSMSText text;
 	
-	@Column(name = "msisdn")
+	@Column(name = "msisdn", length=50)
 	@Index(name="logmsidnidx")
 	private String msisdn;
 	
-	@Column(name = "bulktxId")
+	@Column(name = "bulktxId", length=50)
 	@Index(name="logblkidx")
 	private String bulktxId;
 	
-	@Column(name = "cptxId")
+	@Column(name = "cptxId", length=50)
 	@Index(name="logcpidx")
 	private String cptxId;
 	
@@ -84,7 +84,7 @@ public class BulkSMSQueue implements Serializable{
 	@Column(name = "max_retries")
 	private Integer max_retries;
 	
-	@Column(name = "status")
+	@Column(name = "status", length=50)
 	@Enumerated(EnumType.STRING)
 	@Index(name="logstsidx")
 	private MessageStatus status;

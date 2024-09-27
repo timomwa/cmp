@@ -58,12 +58,18 @@ public class ContentManagementAction extends BaseActionBean {
 	
 	
 	public Resolution saveOrUpdateService() throws Exception{
-		smsservice = cmp_dao.saveOrUpdate(smsservice);
-		JSONObject jsonob = new JSONObject();
-		jsonob.put("success", true);
-		jsonob.put("msg", "Successfully saved keyword");
-		jsonob.put("id", smsservice.getId());
-		return  sendResponse(jsonob.toString());
+		
+		try{
+			smsservice = cmp_dao.saveOrUpdate(smsservice);
+			JSONObject jsonob = new JSONObject();
+			jsonob.put("success", true);
+			jsonob.put("msg", "Successfully saved keyword");
+			jsonob.put("id", smsservice.getId());
+			return  sendResponse(jsonob.toString());
+		}catch(Exception e){
+			log.error(e.getMessage(),e);
+			throw e;
+		}
 	}
 
 

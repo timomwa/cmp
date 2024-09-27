@@ -31,6 +31,7 @@ import org.apache.log4j.PropertyConfigurator;
 import com.inmobia.util.StopWatch;
 import com.pixelandtag.api.CelcomHTTPAPI;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.api.billing.BillableQueueProcessorEJBI;
 import com.pixelandtag.sms.core.OutgoingQueueRouter;
 import com.pixelandtag.sms.mt.workerthreads.HttpBillingWorker;
 import com.pixelandtag.util.FileUtils;
@@ -73,6 +74,7 @@ public class BillingService extends Thread{
 	}
 	
 	private CMPResourceBeanRemote cmpbean;
+	private BillableQueueProcessorEJBI billableQueueProc;
 	private  Context context = null;
 	public void initEJB() throws NamingException{
 			
@@ -89,6 +91,8 @@ public class BillingService extends Thread{
 		context = new InitialContext(props);
 		cmpbean =  (CMPResourceBeanRemote) 
 	   		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+		billableQueueProc =  (BillableQueueProcessorEJBI) 
+		   		context.lookup("cmp/BillableQueueProcessorEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillableQueueProcessorEJBI");
 		logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
 	 
 	}
@@ -313,7 +317,7 @@ public class BillingService extends Thread{
 						billableQ.offer(billable);
 						
 						billable.setIn_outgoing_queue(1L);
-						cmpbean.saveOrUpdate(billable);
+						billableQueueProc.saveOrUpdate(billable);
 						//celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I later realzed we still sending SMS twice!!!!!!
 						
 					}catch(Exception e){
@@ -331,7 +335,7 @@ public class BillingService extends Thread{
 						billableQ.offer(billable);//if we've got a limit to the queue
 						
 						billable.setIn_outgoing_queue(1L);
-						cmpbean.saveOrUpdate(billable);
+						billableQueueProc.saveOrUpdate(billable);
 						//celcomAPI.markInQueue(mtsms.getId());//change at 11th March 2012 - I fucking later realzed we still sending SMS twice!!!!!!
 						
 						//addedToqueue = true;
@@ -519,12 +523,12 @@ public class BillingService extends Thread{
 		
 		logger.info("We're shutting down, we put back any unprocessed message to the db queue so that they're picked next time we run..");
 		//Now, if we have a big queue of unprocessed messages, we return them back to the db (or rather set the necessary flags
-		for(Billable sms : billableQ){
-			sms.setIn_outgoing_queue(0L);//and its now not in the queue
-			sms.setProcessed(0L);//nope, we're not processing it
-			logger.info("Returned to db: "+ sms.toString());
+		for(Billable billable : billableQ){
+			billable.setIn_outgoing_queue(0L);//and its now not in the queue
+			billable.setProcessed(0L);//nope, we're not processing it
+			logger.info("Returned to db: "+ billable.toString());
 			try {
-				sms = cmpbean.saveOrUpdate(sms);
+				billable = billableQueueProc.saveOrUpdate(billable);
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}

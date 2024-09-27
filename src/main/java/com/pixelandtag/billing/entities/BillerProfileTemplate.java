@@ -76,7 +76,7 @@ public class BillerProfileTemplate implements Serializable{
 	@Enumerated(EnumType.STRING)
 	private TemplateType type;
 	
-	@Column(name="name")
+	@Column(name="name", length=50)
 	@Index(name="bpopctpltfidx")
 	private String name;
 	

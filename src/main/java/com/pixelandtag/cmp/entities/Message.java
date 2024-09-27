@@ -20,11 +20,11 @@ import javax.persistence.UniqueConstraint;
 @NamedQueries({
 	@NamedQuery(
 			name = Message.NQ_FIND_BY_LANG_AND_KEY,
-			query = "from Message msg WHERE msg.language_id=:language_id AND msg.key=:key"
+			query = "SELECT msg from Message msg WHERE msg.language_id=:language_id AND msg.key=:key"
 	),
 	@NamedQuery(
 			name = Message.NQ_FIND_BY_LANG_AND_KEY_AND_OPCOID,
-			query = "from Message msg WHERE msg.language_id=:language_id AND msg.key=:key AND msg.opcoid=:opcoid"
+			query = "SELECT msg from Message msg WHERE msg.language_id=:language_id AND msg.key=:key AND msg.opcoid=:opcoid"
 	)
 })
 public class Message implements Serializable {

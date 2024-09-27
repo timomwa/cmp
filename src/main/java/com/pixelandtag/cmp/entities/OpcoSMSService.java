@@ -35,6 +35,10 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 	@NamedQuery(
 			name = OpcoSMSService.NQ_FIND_BY_KEYWORD_AND_OPCO,
 			query = "from OpcoSMSService osms WHERE osms.smsservice.cmd=:keyword AND osms.opco=:opco"
+	),
+	@NamedQuery(
+			name = OpcoSMSService.NQ_FIND_BY_KEYWORD_SHORTCODE_AND_OPCO,
+			query = "from OpcoSMSService osms WHERE osms.smsservice.cmd=:keyword AND osms.moprocessor.shortcode=:shortcode AND osms.opco=:opco"
 	)
 })
 public class OpcoSMSService implements Serializable {
@@ -49,6 +53,9 @@ public class OpcoSMSService implements Serializable {
 	
 	@Transient
 	public static final String NQ_FIND_BY_KEYWORD_AND_OPCO = "findbykeywordandopco";
+	
+	@Transient
+	public static final String NQ_FIND_BY_KEYWORD_SHORTCODE_AND_OPCO = "findbykeywordshortcodeandopco";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -80,6 +87,13 @@ public class OpcoSMSService implements Serializable {
 	@Column(name="doubleconfirm")
 	private Boolean doubleconfirm;
 	
+	@Column(name="serviceid")
+	private String serviceid;//for parlay x.
+	
+	
+	@Column(name="bundlesize")
+	private Long bundlesize;
+	
 	@PreUpdate
 	@PrePersist
 	public void update(){
@@ -89,6 +103,8 @@ public class OpcoSMSService implements Serializable {
 			billingType = BillingType.NONE;
 		if(doubleconfirm==null)
 			doubleconfirm = Boolean.FALSE;
+		if(bundlesize==null)
+			bundlesize = 0L;
 	}
 
 	public Long getId() {
@@ -147,13 +163,47 @@ public class OpcoSMSService implements Serializable {
 		this.doubleconfirm = doubleconfirm;
 	}
 
+	public String getServiceid() {
+		return serviceid;
+	}
+
+	public void setServiceid(String serviceid) {
+		this.serviceid = serviceid;
+	}
+
+	public Long getBundlesize() {
+		return bundlesize;
+	}
+
+	public void setBundlesize(Long bundlesize) {
+		this.bundlesize = bundlesize;
+	}
+
 	@Override
 	public String toString() {
-		return "OpcoSMSService [id=" + id + ",\n smsservice=" + smsservice
-				+ ",\n opco=" + opco + ",\n moprocessor=" + moprocessor
-				+ ",\n price=" + price + ",\n billingType=" + billingType
-				+ ",\n doubleconfirm=" + doubleconfirm + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("OpcoSMSService [id=");
+		builder.append(id);
+		builder.append(", \nsmsservice=");
+		builder.append(smsservice);
+		builder.append(", \nopco=");
+		builder.append(opco);
+		builder.append(", \nmoprocessor=");
+		builder.append(moprocessor);
+		builder.append(", \nprice=");
+		builder.append(price);
+		builder.append(", \nbillingType=");
+		builder.append(billingType);
+		builder.append(", \ndoubleconfirm=");
+		builder.append(doubleconfirm);
+		builder.append(", \nserviceid=");
+		builder.append(serviceid);
+		builder.append(", \nbundlesize=");
+		builder.append(bundlesize);
+		builder.append("]");
+		return builder.toString();
 	}
+
 	
 	
 }

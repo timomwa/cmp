@@ -121,8 +121,8 @@ public class BillingClass {
 		      "<contentMediaType>32329LOVECHAT</contentMediaType>\r\n" + 
 		     "<serviceId>439</serviceId>\r\n" + 
 		    "<parentId></parentId>\r\n" +
-		      "<actualPrice>5.0</actualPrice>\r\n" + 
-		      "<basePrice>5.0</basePrice>\r\n" +
+		      "<actualPrice>5</actualPrice>\r\n" + 
+		      "<basePrice>5</basePrice>\r\n" +
 		      "<discountApplied>0</discountApplied>\r\n" +
 		     "<paymentMethod></paymentMethod>\r\n" +
 		    "<revenuePercent></revenuePercent>\r\n" +
@@ -131,7 +131,7 @@ public class BillingClass {
 		     "<customerClass></customerClass>\r\n" +
 		      "<eventType>Subscription Purchase</eventType>\r\n" +//very important
 		     "<localTimeStamp></localTimeStamp>\r\n" +
-		    "<transactionId>32329</transactionId>\r\n" +
+		    "<transactionId>${TX_ID}</transactionId>\r\n" +
 		   "<subscriptionTypeCode>abcd</subscriptionTypeCode>\r\n" +
 		  "<subscriptionName>0</subscriptionName>\r\n" +
 		 "<parentType></parentType>\r\n" +
@@ -155,6 +155,8 @@ public class BillingClass {
 	public static void main(String[] args) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, InstantiationException, IllegalAccessException, ClassNotFoundException, ClientProtocolException, IOException, SOAPException {
 		
 		String xml_ = xml;
+		
+		System.out.println(xml_);
 		
 		if(args!=null && args.length>0){
 			System.out.println("FILE TO READ?? >> "+args[0]);
@@ -184,7 +186,6 @@ public class BillingClass {
 		
 		
 		String chargingServiceURL="https://41.223.58.133:8443/ChargingServiceFlowWeb/sca/ChargingExport1";
-	  	
 		HttpPost httsppost = new HttpPost(chargingServiceURL);
 		
 		String usernamePassword = "CONTENT360_KE" + ":" + "4ecf#hjsan7"; // Username and password will be provided by TWSS Admin
@@ -192,10 +193,11 @@ public class BillingClass {
 		sun.misc.BASE64Encoder encoder = (sun.misc.BASE64Encoder) Class.forName( "sun.misc.BASE64Encoder" ).newInstance(); 
 		encoding = encoder.encode( usernamePassword.getBytes() ); 
 		httsppost.setHeader("Authorization", "Basic " + encoding);
+		System.out.println("[ "+encoding+" ]");
 		httsppost.setHeader("SOAPAction","");
-		httsppost.setHeader("Content-Type","text/xml; charset=utf-8");
-		List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-		qparams.add(new BasicNameValuePair("login", ""));
+		httsppost.setHeader("Content-Type","text/xml; charset=utf-8");//optional
+		/*List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+		qparams.add(new BasicNameValuePair("login", ""));*/
 		 StringEntity se = new StringEntity(xml_);
 		 httsppost.setEntity(se);
 		

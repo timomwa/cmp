@@ -32,7 +32,7 @@ public class SenderReceiverProfile implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="name", unique=true, nullable=false)
+	@Column(name="name", unique=true, nullable=false, length=50)
 	@Index(name="profidx")
 	private String name;
 
@@ -99,11 +99,16 @@ public class SenderReceiverProfile implements Serializable{
 	}
 
 
-	@Override
-	public String toString() {
-		return "SenderReceiverProfile [id=" + id + ", name=" + name
-				+ ", effectiveDate=" + effectiveDate + ", profiletype="
-				+ profiletype + ", active=" + active + "]";
+	public ProfileType getProfiletype() {
+		return profiletype;
 	}
+
+
+	public void setProfiletype(ProfileType profiletype) {
+		this.profiletype = profiletype;
+	}
+
+
+	
 	
 }

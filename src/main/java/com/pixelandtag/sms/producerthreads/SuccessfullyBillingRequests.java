@@ -8,6 +8,8 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +23,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.BillingType;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
@@ -33,7 +36,7 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	private static final long serialVersionUID = -5539052893235380900L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+	private Long id;
 	
 	/**
 	 * HTTP status code
@@ -88,6 +91,11 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	private Boolean transferin;
 	
 	
+	@Column(name = "billingType",nullable = true)
+	@Enumerated(EnumType.STRING)
+	private BillingType billingType;
+	
+	
 	@PrePersist
 	@PreUpdate
 	public void onCreate(){
@@ -97,15 +105,17 @@ public class SuccessfullyBillingRequests  implements Serializable {
 			success = Boolean.FALSE;
 		if(transferin==null)
 			transferin = Boolean.FALSE;
+		if(billingType==null)
+			billingType = BillingType.OPERATOR_SIDE_MT_BILLING;
 	}
 
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -238,6 +248,18 @@ public class SuccessfullyBillingRequests  implements Serializable {
 	public void setOpco(OperatorCountry opco) {
 		this.opco = opco;
 	}
+
+
+	public BillingType getBillingType() {
+		return billingType;
+	}
+
+
+	public void setBillingType(BillingType billingType) {
+		this.billingType = billingType;
+	}
+	
+	
 	
 
 }

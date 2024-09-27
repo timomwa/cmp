@@ -2,6 +2,7 @@ package com.pixelandtag.mo.sms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.TimeZone;
@@ -19,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 
+import com.pixelandtag.api.GenericServiceProcessor;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
@@ -96,6 +98,21 @@ public class USSDReceiver extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 14512222156L;
+	public static final String SESSION_TERMINATION_TAG = "####ST";
+	private static final String HEADER_FREEFLOW_BREAK = "FB";
+	private static final String HEADER_FREEFLOW_CONTINUE = "FC";
+	private static final String HEADER_FREEFLOW = "Freeflow";
+	private static final String HEADER_CHARGE = "charge";
+	private static final String HEADER_AMOUNT = "amount";
+	private static final String HEADER_EXPIRES = "Expires";
+	private static final String HEADER_PRAGMA = "Pragma";
+	private static final String NO = "N";
+	private static final String NO_CACHE = "no-cache";
+	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	private static final String MAX_AGE = "max-age=0";
+	private static final String HEADER_CONTENT_TYPE = "Content-Type";
+	private static final String UTF_8 = "UTF-8";
+	
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -109,15 +126,15 @@ public class USSDReceiver extends HttpServlet {
 		
 		
 		Enumeration<String> headernames = req.getHeaderNames();
-		String headerstr = "\n";
+		/*String headerstr = "\n";
 		 while (headernames.hasMoreElements()) { 
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = req.getHeader(headerName);  
 		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
-		 }
+		 }*/
 		
 		 
-		 logger.info(headerstr+"\n\n");
+		// logger.info(headerstr+"\n\n");
 		 
 		ServletOutputStream sOutStream = null;
 		
@@ -136,16 +153,16 @@ public class USSDReceiver extends HttpServlet {
 			
 			String ip_addr = req.getRemoteAddr();
 			
-			System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
+			//System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
 			
 		}
 		
-		System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"  : paramName: "+paramName+ " value: "+value);
+		//System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"  : paramName: "+paramName+ " value: "+value);
 		
 		
 		watch.start();
 		
-		PrintWriter pw = resp.getWriter();
+		PrintWriter pw = null;
 		String response =""; 
 		
 		try{
@@ -158,10 +175,10 @@ public class USSDReceiver extends HttpServlet {
 			if(sess!=null){
 				menuid_ = sess.getMenuid()!=null ? sess.getMenuid().intValue() : -1;
 			}
-			logger.debug("\n\n\n\t\t    sess = "+sess
+			/*logger.debug("\n\n\n\t\t    sess = "+sess
 					+ "\n\n\n\t\t    menuid_ = "+menuid_
 					+ "\n\n\n\t\t    msg = "+msg
-					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());
+					+ "\n\n\n\t\t    msisdn = "+ro.getMsisdn());*/
 			if(msg.contains("*")  || (menuid_!=2 && menuid_>-1) ){
 				
 				if(msg.contains("*") ){
@@ -171,7 +188,7 @@ public class USSDReceiver extends HttpServlet {
 					ro.setMenuid(menuid_);
 				}
 				
-				System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
+				//System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"   menuid  : "+ro.getMenuid());
 				
 				ro.setMediumType(MediumType.ussd);
 				ro.setOpco(opco);
@@ -180,13 +197,28 @@ public class USSDReceiver extends HttpServlet {
 				response = handleGeneralQuery(req);
 			}
 			
+			if(response.trim().startsWith(SESSION_TERMINATION_TAG)){
+				
+				response = response.replace(SESSION_TERMINATION_TAG, "");
+				resp.setHeader(HEADER_FREEFLOW, HEADER_FREEFLOW_BREAK);
+				resp.setHeader(HEADER_CHARGE, NO);
+				resp.setHeader(HEADER_AMOUNT, BigDecimal.ZERO.toString());
+				resp.setHeader(HEADER_EXPIRES, BigDecimal.ONE.negate().toString());
+				resp.setHeader(HEADER_PRAGMA, NO_CACHE);
+				resp.setHeader(HEADER_CACHE_CONTROL, MAX_AGE);
+				resp.setHeader(HEADER_CONTENT_TYPE, UTF_8);
+			}else{
+				resp.setHeader(HEADER_FREEFLOW, HEADER_FREEFLOW_CONTINUE);
+			}
+			pw =  resp.getWriter();
 			pw.write(response);
 			
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			response = "Problem occurred. Please try again later";
 			try{
-				pw.close();
+				if(pw!=null)
+					pw.close();
 			}catch(Exception ex){
 				logger.error(e.getMessage(),e);
 				response = "Problem occurred. Please try again later";
@@ -195,7 +227,8 @@ public class USSDReceiver extends HttpServlet {
 		}finally{
 			
 			try{
-				pw.close();
+				if(pw!=null)
+					pw.close();
 			}catch(Exception e){
 				logger.error(e.getMessage(),e);
 				response = "Problem occurred. Please try again later";
@@ -239,9 +272,9 @@ public class USSDReceiver extends HttpServlet {
 			incomingsms.setMo_ack(Boolean.TRUE);
 			incomingsms.setMsisdn(moMessage.getMsisdn());
 			MOProcessor processor = processorEJB.getMOProcessor(moMessage.getSMS_SourceAddr() );
-			incomingsms.setOpco(opco);
-			logger.info(" >> processor = "+processor);
 			incomingsms.setMoprocessor(processor);
+			incomingsms.setOpco(opco);
+			//logger.info(" >> processor = "+processor);
 			
 			dndEJB.removeFromDNDList(incomingsms.getMsisdn());
 			

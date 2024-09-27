@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.40, for Win64 (x86)
 --
--- Host: localhost    Database: pixeland_content360
+-- Host: localhost    Database: cmp
 -- ------------------------------------------------------
 -- Server version	5.5.40
 
@@ -1012,7 +1012,7 @@ CREATE TABLE `sms_service_metadata` (
 
 LOCK TABLES `sms_service_metadata` WRITE;
 /*!40000 ALTER TABLE `sms_service_metadata` DISABLE KEYS */;
-INSERT INTO `sms_service_metadata` VALUES (1,364,'db_name','pixeland_content360'),(2,364,'table','jokes'),(3,364,'static_categoryvalue','bar'),(4,366,'table','jobs'),(5,366,'static_categoryvalue','business_support');
+INSERT INTO `sms_service_metadata` VALUES (1,364,'db_name','cmp'),(2,364,'table','jokes'),(3,364,'static_categoryvalue','bar'),(4,366,'table','jobs'),(5,366,'static_categoryvalue','business_support');
 /*!40000 ALTER TABLE `sms_service_metadata` ENABLE KEYS */;
 UNLOCK TABLES;
 

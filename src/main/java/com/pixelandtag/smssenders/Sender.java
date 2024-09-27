@@ -1,5 +1,8 @@
 package com.pixelandtag.smssenders;
 
+import java.text.ParseException;
+import java.util.Date;
+
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.entities.MTsms;
 
@@ -12,6 +15,8 @@ public interface Sender{
 	public final String HTTP_SHORTCODE_PARAM_NAME = "http_shortcode_param_name";
 	public final String HTTP_MSISDN_PARAM_NAME = "http_msisdn_param_name";
 	public final String HTTP_SMS_MSG_PARAM_NAME = "http_sms_msg_param_name";
+	public final String HTTP_TIMESTAMP_PARAM_NAME = "http_timestamp_param_name";
+	public final String HTTP_PARLAYX_SERVICEID_PARAM_NAME = "http_parlayx_serviceid_param_name";
 	public final String HTTP_USE_HTTP_HEADER = "http_useheader";
 	
 	public final String HTTP_HAS_PAYLOAD = "http_haspayload";
@@ -32,6 +37,10 @@ public interface Sender{
 	public final String HTTP_HEADER_AUTH_PARAM_PREFIX = "http_header_auth_param_";
 	public final String HTTP_HEADER_PREFIX = "http_header_param_";
 	public final String HTTP_PAYLOAD_PARAM_PREFIX = "http_payload_param_";
+	public final String HTTP_PAYLOAD_PLAIN_PASSWORD = "http_payload_plain_password";
+	public final String HTTP_PAYLOAD_ENCRYPTION_MODE = "http_payload_encryption_mode";
+	public final String HTTP_PAYLOAD_TIMESTAMP_FORMAT = "yyyyMMddHHmmss";//TODO externalize this
+	public final String HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME = "http_payload_sppassword_param_name";//TODO externalize this
 	public final String HTTP_REST_PATH_PARAM_PREFIX = "http_rest_path_param_";
 	
 	public final String HTTP_RESP_JSON_REF_VALUE_KEY = "http_resp_json_ref_value_key";
@@ -42,8 +51,10 @@ public interface Sender{
 	public final String HTTP_RESP_XML_RESP_MSG_KEY = "http_resp_xml_resp_msg_key";
 	public final String HTTP_RESP_XML_RESPCODE_KEY = "http_resp_xml_respcode_key";
 	public final String HTTP_ALLOW_SENDING_BLANK_TEXT = "http_allow_send_blank_text";
+	public final String HTTP_REQUEST_PAYLOAD_CONTENTTYPE = "http_payload_contenttype";
 	
-	
+	public final String SMPP_ID = "smpp_id";
+	public final String ALT_SMPP_ID = "alt_smpp_id";
 	public final String SMPP_IP = "smpp_ip";
 	public final String SMPP_PORT = "smpp_port";
 	public final String SMPP_TYPE = "smpp_type";
@@ -58,5 +69,6 @@ public interface Sender{
 	
 	public SenderResp sendSMS(OutgoingSMS outgoingsms) throws MessageSenderException;
 	public void validateMandatory()  throws MessageSenderException;
+	//public String dateToString(Date datestr, String dateformat) throws ParseException
 
 }

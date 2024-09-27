@@ -33,7 +33,7 @@ public class CMPSequence implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "name",nullable=false,unique=true)
+	@Column(name = "name",nullable=false,unique=true,length=50)
 	@Index(name="cmpsqnmidx")
 	private String name;
 	

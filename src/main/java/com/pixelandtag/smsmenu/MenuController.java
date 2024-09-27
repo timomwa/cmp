@@ -17,7 +17,7 @@ public class MenuController {
 	private Logger logger = Logger.getLogger(MenuController.class);
 	
 	
-	private final String DB_NAME = "pixeland_content360";
+	private final String DB_NAME = "cmp";
 	public static final String NUM_SPACER = ". ";
 	private CMPResourceBeanRemote cmpbean;
 	

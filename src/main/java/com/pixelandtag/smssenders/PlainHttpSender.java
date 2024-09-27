@@ -2,6 +2,7 @@ package com.pixelandtag.smssenders;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,6 @@ import org.json.JSONObject;
 import com.pixelandtag.cmp.ejb.api.sms.SenderConfiguration;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
-import com.pixelandtag.entities.MTsms;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
@@ -28,6 +28,8 @@ import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 public class PlainHttpSender extends GenericSender {
 	
 	
+
+	private static final CharSequence EMPTY_LINKID_TAG = "<v2:linkid>${linkid}</v2:linkid>";
 
 	private Logger logger = Logger.getLogger(getClass());
 	
@@ -92,7 +94,22 @@ public class PlainHttpSender extends GenericSender {
 		
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SHORTCODE_PARAM_NAME).getValue(),outgoingsms.getShortcode()));//"sourceaddress"	
 		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_MSISDN_PARAM_NAME).getValue(),outgoingsms.getMsisdn()));//"msisdn"
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
+		if(this.configuration.get(HTTP_REQUEST_PAYLOAD_CONTENTTYPE)!=null && this.configuration.get(HTTP_REQUEST_PAYLOAD_CONTENTTYPE).getValue().equalsIgnoreCase("json")){
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms().replaceAll(Matcher.quoteReplacement("\""), Matcher.quoteReplacement("'"))));//"sms"
+		}else{
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_SMS_MSG_PARAM_NAME).getValue(),outgoingsms.getSms()));//"sms"
+		}
+		if(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_PARLAYX_SERVICEID_PARAM_NAME).getValue(),outgoingsms.getParlayx_serviceid()));//"parlayxserviceid"
+		try {
+			if(this.configuration.get(HTTP_TIMESTAMP_PARAM_NAME)!=null)
+				qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_TIMESTAMP_PARAM_NAME).getValue(),dateToString(outgoingsms.getTimestamp(),HTTP_PAYLOAD_TIMESTAMP_FORMAT)));
+		} catch (ParseException e1) {
+			logger.error(e1.getMessage(), e1);
+			throw new MessageSenderException(" Could not convert the timestamp "+outgoingsms.getTimestamp()
+					+" to the format "+HTTP_PAYLOAD_TIMESTAMP_FORMAT);
+		}
+		
 		
 		if(this.configuration.get(HTTP_USE_HTTP_HEADER).getValue().equalsIgnoreCase("yes")){
 			
@@ -137,7 +154,7 @@ public class PlainHttpSender extends GenericSender {
 				
 				String digest = "";
 				try {
-					digest = encryptor.encrypt(username,password, encryptionmethod);
+					digest = encryptor.encode(username,password, encryptionmethod);
 				} catch (Exception e) {
 					logger.error(e.getMessage(),e);
 					throw new MessageSenderException("Could not encrypt header params",e);
@@ -211,6 +228,48 @@ public class PlainHttpSender extends GenericSender {
 						+ "hasn't been found. First check if the name is "
 						+ "correct in the opco_configs table and matches in the opco_templates table");
 			
+			
+			ProfileConfigs encryptionmode = this.configuration.get(HTTP_PAYLOAD_ENCRYPTION_MODE);
+			
+			String digest = "";
+			
+			if(encryptionmode!=null){//WE assume parlay x
+				if(this.configuration.get(HTTP_PAYLOAD_PARAM_PREFIX+"spId")==null){
+					throw new MessageSenderException("could not find the configuration "+(HTTP_PAYLOAD_PARAM_PREFIX+"spId")
+							+". If this is a parlay x config, this value must be provided");
+				}
+				
+				if(this.configuration.get(HTTP_PAYLOAD_PLAIN_PASSWORD)==null){
+					throw new MessageSenderException("Could not find the configuration "+HTTP_PAYLOAD_PLAIN_PASSWORD
+							+". If this is a parlayx config, this value must be provided!");
+				}
+				
+				if(this.configuration.get(HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME)==null){
+					throw new MessageSenderException("Could not find the configuration "+HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME
+							+". If this is a parlayx config, this value must be provided!");
+				}
+					
+				String spid_param_name = this.configuration.get(HTTP_PAYLOAD_PARAM_PREFIX+"spId").getValue();
+				String parlayx_password_plain = this.configuration.get(HTTP_PAYLOAD_PLAIN_PASSWORD).getValue();
+				String sppassword_param_name = this.configuration.get(HTTP_PAYLOAD_SPPASSWORD_PARAM_NAME).getValue();
+				
+				if(this.configuration.get(sppassword_param_name)==null){
+					throw new MessageSenderException("Could not find the configuration "+sppassword_param_name
+							+". If this is a parlayx config, this value must be provided!");
+				}
+				
+				String parlayx_pass_param = this.configuration.get(sppassword_param_name).getValue();
+				String encryptionmethod = encryptionmode.getValue();
+				try {
+					digest = encryptor.encode(spid_param_name+parlayx_password_plain+dateToString(outgoingsms.getTimestamp(),HTTP_PAYLOAD_TIMESTAMP_FORMAT), encryptionmethod);
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+					throw new MessageSenderException("Could not encrypt header params or format timestamp",e);
+				}
+				payload_template = payload_template.replaceAll("\\$\\{"+sppassword_param_name+"\\}", Matcher.quoteReplacement(digest) );
+			}
+			
+			
 			for(Map.Entry<String,ProfileConfigs> config : this.configuration.entrySet()){//Any other header param
 				
 				String key = config.getKey();
@@ -220,12 +279,14 @@ public class PlainHttpSender extends GenericSender {
 				}
 			}
 			for(NameValuePair valuep : qparams){
-				if(valuep.getValue()!=null)
+				if(valuep.getValue()!=null){
 					payload_template = payload_template.replaceAll("\\$\\{"+valuep.getName()+"\\}", Matcher.quoteReplacement( valuep.getValue()) );
-				else
+				}else{
 					logger.warn("Value for valuep.getName()-> '"+valuep.getName()+"' is valuep.getValue()-> '"+valuep.getValue()+"'");
+				}
 			}
 			
+			payload_template = payload_template.replace(EMPTY_LINKID_TAG,"");
 			generic_http_parameters.setStringentity(payload_template);
 			
 		}else{
@@ -274,7 +335,7 @@ public class PlainHttpSender extends GenericSender {
 		ProfileConfigs httpmethod = this.configuration.get(HTTP_REQUEST_METHOD);
 		
 		if(httpmethod!=null){
-			generic_http_parameters.setHttpmethod(httpmethod.getValue());
+			generic_http_parameters.setHttpmethod(httpmethod.getValue().trim().toUpperCase());
 		}else{
 			generic_http_parameters.setHttpmethod(HttpMethod.POST);
 			logger.warn("No configuration for \""+HTTP_REQUEST_METHOD
@@ -295,7 +356,9 @@ public class PlainHttpSender extends GenericSender {
 		logger.info("\n\n\t\t>>>url>>> : ["+url
 				+"]\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
-				"\n\t\t>>>response>>> : "+resp.getBody()+"\n\n");
+				"\n\n\t\t<<<response<<< : "+resp.getBody()+"\n\n");
+		
+		logger.info("\n\t\t<<< http resp cpde <<< : "+resp.getResp_code());
 		
 		response.setRespcode(String.valueOf(resp.getResp_code()));
 		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success
@@ -381,6 +444,8 @@ public class PlainHttpSender extends GenericSender {
 		String endTag = "</"+tagname+">";
 		int start = xml.indexOf(startTag)+startTag.length();
 		int end  = xml.indexOf(endTag);
+		if(start<0 || end<0)
+			return "";
 		return xml.substring(start, end);
 	}
 	

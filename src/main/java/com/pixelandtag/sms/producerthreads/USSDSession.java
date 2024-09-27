@@ -33,7 +33,7 @@ public class USSDSession  implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "msisdn")
+	@Column(name = "msisdn",length=20)
 	@Index(name="smsidnidx")
 	private String msisdn;
 	

@@ -45,9 +45,15 @@ public class Location implements Serializable {
 	@Index(name="cellIdx")
 	private Long cellid;
 	
-	@Column(name = "locationName")
+	@Column(name = "locationName", length=50)
 	@Index(name="locNameIdx")
 	private String locationName;
+	
+	
+	
+	@Column(name = "authoritative")
+	@Index(name="authoritIdx")
+	private Boolean authoritative;
 	
 	/**
 	 * Date of recording
@@ -59,6 +65,8 @@ public class Location implements Serializable {
 	public void onCreate(){
 		if(timeStamp==null)
 			timeStamp = new Date();
+		if(authoritative==null)
+			authoritative = Boolean.FALSE;
 	}
 
 	public Long getId() {
@@ -99,6 +107,14 @@ public class Location implements Serializable {
 
 	public void setTimeStamp(Date timeStamp) {
 		this.timeStamp = timeStamp;
+	}
+
+	public Boolean getAuthoritative() {
+		return authoritative;
+	}
+
+	public void setAuthoritative(Boolean authoritative) {
+		this.authoritative = authoritative;
 	}
 	
 

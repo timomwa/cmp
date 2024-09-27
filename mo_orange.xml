@@ -6,18 +6,15 @@
 	<SOAP-ENV:Header>
 		<comm3:NotifySOAPHeader>
 			<spId>36</spId>
-			<SAN>32329</SAN>
 		</comm3:NotifySOAPHeader>
 	</SOAP-ENV:Header>
 	<SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-		<sms7:notifySmsReception>
+		<sms7:notifySmsDeliveryReceipt>
 			<sms7:correlator></sms7:correlator>
-			<sms7:message>
-				<message>T</message>
-				<senderAddress>254202407004</senderAddress>
-				<smsServiceActivationNumber>32329</smsServiceActivationNumber>
-				<dateTime>2015-10-14T21:04:07+03:00</dateTime>
-			</sms7:message>
-		</sms7:notifySmsReception>
+			<sms7:deliveryStatus>
+				<address>tel:254776165280</address>
+				<deliveryStatus>DeliveredToTerminal</deliveryStatus>
+			</sms7:deliveryStatus>
+		</sms7:notifySmsDeliveryReceipt>
 	</SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

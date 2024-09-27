@@ -80,7 +80,7 @@ public class MOReceiver extends HttpServlet {
 			 String headerName = (String) headernames.nextElement();  
 		     String headerValue = request.getHeader(headerName);  
 		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
-		     //incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
+		     incomingparams.put(Receiver.HTTP_HEADER_PREFIX+headerName, headerValue);
 		 }
 		
 		 
@@ -105,6 +105,10 @@ public class MOReceiver extends HttpServlet {
 		
 		logger.info(params+"\n\n");
 		
+		String contextpath = request.getRequestURI();
+		
+		logger.info("\n\n\t\t::::: >>>> RequestURI -> "+contextpath+"\n\n\n\n");
+		
 		final String body = getBody(request);
 		
 		
@@ -116,8 +120,8 @@ public class MOReceiver extends HttpServlet {
 		
 		try {
 			IncomingSMS incomingsms = processorEJB.processMo(incomingparams);
-			logger.info("incomingsms = "+incomingsms);
-			logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
+			//logger.info("incomingsms = "+incomingsms);
+			//logger.info("success = "+(incomingsms.getId().compareTo(0L)>0));
 		} catch (ConfigurationException e) {
 			logger.error(e.getMessage(),e);
 		}

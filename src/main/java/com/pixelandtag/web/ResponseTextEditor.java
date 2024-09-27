@@ -195,7 +195,7 @@ public class ResponseTextEditor extends HttpServlet {
 		if(kEY.equals("KEY")){
 			
 			try {
-				ps = conn.prepareStatement("select `key`, `description`  FROM `pixeland_content360`.`message` group by `key`");
+				ps = conn.prepareStatement("select `key`, `description`  FROM `cmp`.`message` group by `key`");
 				rs = ps.executeQuery();
 				
 				String key,description;

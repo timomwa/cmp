@@ -52,11 +52,11 @@ public class MessageLog implements Serializable {
 	
 	
 	@Index(name="mlopco_tx_id")
-	@Column(name="opco_tx_id")
+	@Column(name="opco_tx_id", length=50)
 	private String opco_tx_id;
 		
 	@Index(name="mlcmp_tx_id")
-	@Column(name="cmp_tx_id", unique=true, nullable=false)
+	@Column(name="cmp_tx_id", unique=true, nullable=false, length=50)
 	private String cmp_tx_id;
 	
 	@Column(name="mo_sms",length=2000)
@@ -81,18 +81,18 @@ public class MessageLog implements Serializable {
 	private String shortcode;
 	
 	
-	@Column(name="msisdn")
+	@Column(name="msisdn", length=20)
 	@Index(name="msisdnidx")
 	private String msisdn;
 	
-	@Column(name="status")
+	@Column(name="status", length=30)
 	@Index(name="statusidx")
 	private String status;
 	
 	@Column(name="retry_count")
 	private Long retryCount;
 	
-	@Column(name="source")
+	@Column(name="source", length=50)
 	@Index(name="sourceidx")
 	private String source;
 	

@@ -57,7 +57,7 @@ public class AuditTrail implements Serializable{
 	@Index(name="uactidx")
 	private User user;
 	
-	@Column(name = "username")
+	@Column(name = "username", length=25)
 	@Index(name="uactidx")
 	private String username;
 	

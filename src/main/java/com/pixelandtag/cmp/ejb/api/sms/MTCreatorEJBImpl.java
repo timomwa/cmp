@@ -2,6 +2,7 @@ package com.pixelandtag.cmp.ejb.api.sms;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
@@ -12,7 +13,6 @@ import javax.persistence.PersistenceContext;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
@@ -42,8 +42,6 @@ public class MTCreatorEJBImpl implements MTCreatorEJBI {
 	@EJB
 	private OperatorCountryRulesEJBI opcorulesEJB;
 	
-	@EJB
-	private TimeStampSequenceEJBI timeStampEJB;
 	
 	@EJB
 	private QueueProcessorEJBI queueProcessorEJB;
@@ -73,7 +71,7 @@ public class MTCreatorEJBImpl implements MTCreatorEJBI {
 			outgoingsms.setShortcode(opcosmsservice.getMoprocessor().getShortcode());
 			outgoingsms.setIn_outgoing_queue(Boolean.FALSE);
 			outgoingsms.setIsSubscription(Boolean.TRUE);
-			outgoingsms.setCmp_tx_id(String.valueOf( System.nanoTime() ));
+			outgoingsms.setCmp_tx_id( UUID.randomUUID().toString() );
 			outgoingsms.setMsisdn(msisdn);
 			outgoingsms.setOpcosenderprofile(opcosenderprofile);
 			outgoingsms.setTimestamp(ealiestSendTime);

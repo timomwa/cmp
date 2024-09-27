@@ -40,7 +40,7 @@ public class LatencyLog implements Serializable {
 	@Index(name="llocpidx")
 	private OperatorCountry opco;
 	
-	@Column(name="link", nullable=false)
+	@Column(name="link", nullable=false, length=90)
 	@Index(name="lnkidx")
 	private String link;
 	

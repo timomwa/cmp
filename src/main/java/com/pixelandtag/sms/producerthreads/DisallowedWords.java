@@ -25,7 +25,7 @@ public class DisallowedWords implements Serializable {
 	private int id;
 	
 	
-	@Column(name = "word")
+	@Column(name = "word", length=50)
 	@Index(name="dsalwedidx")
 	private String word;
 

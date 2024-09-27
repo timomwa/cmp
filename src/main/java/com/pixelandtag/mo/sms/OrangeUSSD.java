@@ -1,8 +1,15 @@
 package com.pixelandtag.mo.sms;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.naming.Context;
@@ -16,7 +23,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
+import org.jdom.DocType;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
+import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.MessageStatus;
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
@@ -25,6 +38,8 @@ import com.pixelandtag.cmp.ejb.api.sms.ConfigsEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.ProcessorResolverEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.QueueProcessorEJBI;
+import com.pixelandtag.cmp.ejb.api.ussd.USSDMenuEJBI;
+import com.pixelandtag.cmp.ejb.api.ussd.USSDResponseWrapper;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -53,6 +68,12 @@ public class OrangeUSSD extends HttpServlet {
 	private final String SERVER_TIMEZONE = "-05:00";
 	private final String CLIENT_TIMEZONE = "+04:00";
 
+	private XMLOutputter xmlOutput = new XMLOutputter(Format.getPrettyFormat().setEncoding("ISO-8859-1")) {
+        @Override
+        public String escapeElementEntities(String str) {
+        	return str;
+        }
+    };
 	
 	@EJB
 	private CMPResourceBeanRemote cmpBean;
@@ -68,7 +89,7 @@ public class OrangeUSSD extends HttpServlet {
 	
 	@EJB
 	private OpcoEJBI opcoEJB;
-	
+
 	@EJB
 	private ConfigsEJBI configsEJB;
 	
@@ -80,12 +101,18 @@ public class OrangeUSSD extends HttpServlet {
 	
 	@EJB
 	private DNDListEJBI dndEJB;
+	
+	@EJB
+	private USSDMenuEJBI ussdmenuEJB;
 
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 14512222156L;
+	private static final String SHORTCODE = "329";
+	private static final String MSG_TAG = "msg";
+	private static final String PROBLEM_OCCURRED = "There was a problem processing this request. Kindly try again later.";
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -98,70 +125,147 @@ public class OrangeUSSD extends HttpServlet {
 			throws ServletException, IOException {
 		
 		
-		Enumeration<String> headernames = req.getHeaderNames();
-		String headerstr = "\n";
-		 while (headernames.hasMoreElements()) { 
-			 String headerName = (String) headernames.nextElement();  
-		     String headerValue = req.getHeader(headerName);  
-		     headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
-		 }
-		
-		 
-		 logger.info(headerstr+"\n\n");
-		 
-		ServletOutputStream sOutStream = null;
-		
-		
-		Enumeration enums = req.getParameterNames();
-		
-		String paramName = "";
-		String value  = "";
-		String msg =  req.getParameter("msg");
-		
-		while(enums.hasMoreElements()){
-			
-			paramName = (String) enums.nextElement();
-			
-			value = req.getParameter(paramName);
-			
-			String ip_addr = req.getRemoteAddr();
-			
-			System.out.println("\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value);
-			
-		}
-		
-		System.out.println("\t:::::: REQ from "+req.getRemoteAddr()+"  : paramName: "+paramName+ " value: "+value);
-		
-		
-		watch.start();
-		
+		//final StringBuffer sb = new StringBuffer();
+		String response = "";
 		PrintWriter pw = resp.getWriter();
-		String response ="<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
-					+" <!DOCTYPE pages SYSTEM \"cellflash-1.3.dtd\">"
-					+" <pages descr=\"News\">"
-					+" <page>"
-					+" Headlines<br/>"
-					+" <a href=\"#item1\">Interest rates cut</a><br/>"
-					+" <a href=\"#item2\">Concorde resumes service</a><br/>"
-					+" </page>"
-					+" <page tag=\"item1\">"
-					+" WASHINGTON-In a much anticipated move, the Federal Reserve"
-					+" announced new rate cuts amid growing economic concerns.<br/>"
-					+" <a href=\"#item2\">Next article</a>"
-					+" </page>"
-					+" <page tag=\"item2\">"
-					+" PARIS-Air France resumed its Concorde service Monday."
-					+" The plane had been grounded following a tragic accident."
-					+" </page>"
-					+" </pages>"; 
+		
 		
 		try{
 			
+			//final String body = getBody(req);
+			
+			//logger.info("MO_ORANGE_USSD:"+body+"\n\n");
+			
+			String contextpath = req.getRequestURI();
+			
+			//logger.info("MO_ORANGE_USSD_CONTEXT_PATH:"+contextpath+"\n\n");
+			
+			//Enumeration<String> headernames = req.getHeaderNames();
+			//String headerstr = "\n";
+			// while (headernames.hasMoreElements()) { 
+				 //String headerName = (String) headernames.nextElement();  
+			    // String headerValue = req.getHeader(headerName);  
+			    // headerstr += "\n\t\tHEADER >> "+headerName+ " : "+headerValue;
+			 //}
+			 
+			 
+			// logger.info(headerstr+"\n\n");
+			 
+			
+			 ServletOutputStream sOutStream = null;
+			
+			 
+			Enumeration enums = req.getParameterNames();
+			
+			Long messageID = -1L;
+			String paramName = "";
+			String value  = "";
+			String msg =  req.getParameter(MSG_TAG);
+			
+			
+			//sb.append("\n");
+			Map<String, String> attribz = new HashMap<String, String>();
+			while(enums.hasMoreElements()){
+				
+				paramName = (String) enums.nextElement();
+				
+				value = req.getParameter(paramName);
+				
+				attribz.put(paramName, value);
+				
+				String ip_addr = req.getRemoteAddr();
+				
+				//sb.append("\t\t:::::: REQ from "+ip_addr+"  : paramName: "+paramName+ " value: "+value).append("\n");
+				
+			}
+			
+			//logger.info(sb.toString());
+			//sb.setLength(0);
+			
+			watch.start();
+			
+			
+			String answers = req.getParameter("answers") ;
+			answers = RequestObject.replaceAllIllegalCharacters(answers);
+			//String attrib = req.getParameter("attrib") ;
+			String action = req.getParameter("action") ;
+			
+			String msisdn = req.getHeader("user-msisdn");
+			//String imsi = req.getHeader("user-imsi");
+			//String sessionid = req.getHeader("http_gateway-session_id");
+			
+			
+			//String respxml = ussdmenuEJB.getMenu(1, -1, 1);
+			
+			
+			
+			IncomingSMS incomingsms = new IncomingSMS();
+			incomingsms.setBilling_status(BillingStatus.NO_BILLING_REQUIRED);
+			incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
+			incomingsms.setIsSubscription(Boolean.FALSE);
+			incomingsms.setMediumType(MediumType.ussd);
+			incomingsms.setSms(  (answers!=null ? answers  : action) );
+			incomingsms.setShortcode(SHORTCODE);
+			incomingsms.setProcessed(Boolean.TRUE);
+			incomingsms.setMo_ack(Boolean.TRUE);
+			incomingsms.setMsisdn(msisdn);
+			MOProcessor processor = processorEJB.getMOProcessor( SHORTCODE );
+			incomingsms.setMoprocessor(processor);
+			incomingsms.setOpco(opcoEJB.findOpcoByCode("KEN-639-7"));
+			incomingsms.setPrice(BigDecimal.ZERO);
+			
+			//logger.info(" >> processor = "+processor);
+			
+			dndEJB.removeFromDNDList(incomingsms.getMsisdn());
+			
+			messageID = datingBean.logMO(incomingsms).getId();
+			
+			attribz.put("contextpath", contextpath);
+			attribz.put("messageID", String.valueOf( messageID ) );
+			
+			MessageLog messagelog = new MessageLog();
+			messagelog.setCmp_tx_id(incomingsms.getCmp_tx_id());
+			messagelog.setMo_processor_id_fk(incomingsms.getMoprocessor().getId());
+			messagelog.setMsisdn(incomingsms.getMsisdn());
+			messagelog.setOpco_tx_id(incomingsms.getOpco_tx_id());
+			messagelog.setShortcode(incomingsms.getShortcode());
+			messagelog.setSource(incomingsms.getMediumType().name());
+			messagelog.setStatus(MessageStatus.RECEIVED.name());
+			messagelog.setMo_sms( (answers!=null ? answers  : action) );
+			messagelog = processorEJB.saveMessageLog(messagelog);
+			
+			
+			 USSDResponseWrapper wrapper =  ussdmenuEJB.getNextQuestionOrange(attribz,incomingsms);//ussdmenuEJB.getMenu(contextpath, msisdn, languageid, parent_level_id, menuid, menuitemid, opcoEJB.findOpcoByCode("KEN-639-7"));
+			 response = wrapper.getResponseMessage();
+			
+			 messagelog.setMt_sms(wrapper.getLoggableMessage());
+			 messagelog = processorEJB.saveMessageLog(messagelog);
+				
+			//logger.info("\n>>> xml "+response);
+			//logger.info("\n>>> loggable  "+wrapper.getLoggableMessage());
 			pw.write(response);
 			
 		}catch(Exception e){
-			logger.error(e.getMessage(),e);
-			response = "Problem occurred. Please try again later";
+			
+			
+			
+			Element rootelement = new Element("pages");
+	    	Document doc = new Document(rootelement); 
+			DocType doctype = new DocType("pages");
+			doctype.setSystemID("cellflash-1.3.dtd");
+			doc.setDocType(doctype);
+			
+			Element page = new Element("page");
+			page.setAttribute( "nav", "end");
+    		page.setText(PROBLEM_OCCURRED);
+			rootelement.addContent(page);
+			response = xmlOutput.outputString(doc);
+			//logger.info("\n\nXML_RESPONSE >>>>>> "+response+"\n\n");
+			
+			logger.error(e.getMessage(), e);
+			
+			
+			pw.write(response);
 			try{
 				pw.close();
 			}catch(Exception ex){
@@ -183,10 +287,21 @@ public class OrangeUSSD extends HttpServlet {
 		
 	}
 
+	public static int setdefaultifnull(String string) {
+		if(string==null || string.isEmpty())
+			return 1;
+		int i = -1;
+		try{
+			i = Integer.valueOf(string);
+		}catch(NumberFormatException nfe){
+		}
+		return i;
+	}
+
 	private String handleGeneralQuery(HttpServletRequest req) throws Exception {
 		String response = "";
 		String ip_addr = req.getRemoteAddr();
-		String tx_id = cmpBean.generateNextTxId();
+		String tx_id = UUID.randomUUID().toString() ;
 		final RequestObject ro = new RequestObject(req,tx_id,false);
 		
 		ro.setMediumType(MediumType.ussd);
@@ -205,7 +320,7 @@ public class OrangeUSSD extends HttpServlet {
 			
 			
 			incomingsms.setBilling_status(moMessage.getBillingStatus());
-			incomingsms.setCmp_tx_id(moMessage.getCmp_tx_id());
+			incomingsms.setCmp_tx_id( moMessage.getCmp_tx_id());
 			incomingsms.setOpco_tx_id(moMessage.getOpco_tx_id());
 			incomingsms.setEvent_type(moMessage.getEventType()!=null ? moMessage.getEventType().toString() : "" );
 			incomingsms.setIsSubscription(Boolean.FALSE);
@@ -324,6 +439,49 @@ public class OrangeUSSD extends HttpServlet {
 		}
 
 	    
+	}
+	
+	
+	
+	public String getBody(HttpServletRequest request) throws IOException {
+
+	    String body = null;
+	    StringBuilder stringBuilder = new StringBuilder();
+	    BufferedReader bufferedReader = null;
+	    InputStream inputStream = null;
+	    
+	    try {
+	        inputStream = request.getInputStream();
+	        if (inputStream != null) {
+	            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+	            char[] charBuffer = new char[128];
+	            int bytesRead = -1;
+	            while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+	                stringBuilder.append(charBuffer, 0, bytesRead);
+	            }
+	        } else {
+	            stringBuilder.append("");
+	        }
+	    } catch (IOException ex) {
+	        logger.error(ex.getMessage(),ex);
+	    } finally {
+	    	
+	        if (bufferedReader != null) {
+	            try {
+	                bufferedReader.close();
+	            } catch (IOException ex) {
+	            	 logger.error(ex.getMessage(),ex);
+	            }
+	        }
+	        
+	        try {
+	        	inputStream.close();
+            } catch (IOException ex) {
+            }
+	    }
+
+	    body = stringBuilder.toString();
+	    return body;
 	}
 
 }

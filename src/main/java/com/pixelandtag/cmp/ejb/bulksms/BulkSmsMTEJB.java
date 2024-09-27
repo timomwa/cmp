@@ -279,5 +279,13 @@ public class BulkSmsMTEJB implements BulkSmsMTI {
 		return cptxid;
 
 	}
+	
+	public BulkSMSQueue saveOrUpdate(BulkSMSQueue bulktext)  throws Exception{
+		try{
+			return em.merge(bulktext);
+		}catch(Exception e){
+			throw e;
+		}
+	}
 
 }

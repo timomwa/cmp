@@ -13,6 +13,7 @@ import net.sourceforge.stripes.action.Resolution;
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
+import com.pixelandtag.cmp.ejb.subscription.SMSServiceBundleEJBI;
 import com.pixelandtag.cmp.entities.Keyword;
 import com.pixelandtag.sms.producerthreads.Billable;
 
@@ -22,6 +23,7 @@ public class CMPDao  extends BaseDao {
 	
 	public static String FAIL_JSON = "{ \"response\" : \"{\"type\" : \"1\", \"message\" : \"Something went wrong :(\"}, \"}";
 	public  CMPResourceBeanRemote resource_bean = null;
+	public SMSServiceBundleEJBI smsserviceEJB;
 	private static CMPDao this_dao = null;
 	private DecimalFormat df = null;
 	private Logger logger = Logger.getLogger(CMPDao.class);
@@ -39,6 +41,8 @@ public class CMPDao  extends BaseDao {
 		try {
 			resource_bean = (CMPResourceBeanRemote) ctx
 					.lookup("ejb:/cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
+			smsserviceEJB = (SMSServiceBundleEJBI) ctx
+					.lookup("ejb:/cmp/SMSServiceBundleEJBImpl!com.pixelandtag.cmp.ejb.subscription.SMSServiceBundleEJBI");
 			DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
 			symbols.setGroupingSeparator(',');
 			df = new DecimalFormat("###,###.##",symbols);
@@ -50,9 +54,13 @@ public class CMPDao  extends BaseDao {
 	}
 	
 	public <T> T saveOrUpdate(T t) throws Exception {
-		t = resource_bean.saveOrUpdate(t);
-        return t;
-	} 
+		try{
+			return smsserviceEJB.saveOrUpdate(t);
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+	}
 
 	public <T> T find(Class<T> entityClass, Long primaryKey) throws Exception {
 		return resource_bean.find(entityClass, primaryKey);

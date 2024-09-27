@@ -16,6 +16,7 @@ import com.pixelandtag.dating.entities.PersonDatingProfile;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.serviceprocessors.sms.DatingMessages;
+import com.pixelandtag.sms.producerthreads.Billable;
 import com.pixelandtag.web.beans.RequestObject;
 
 
@@ -80,11 +81,11 @@ public interface DatingServiceI extends BaseEntityI {
 	public String findMatchString(PersonDatingProfile profile);
 
 	public PersonDatingProfile searchMatch(PersonDatingProfile profile) throws DatingServiceException;
-
 	
-
+	public Billable createBillable(IncomingSMS incomingsms);
 	
+	public Billable createBillable(OutgoingSMS outgoingsms);
 
-	
+	public <T> T saveOrUpdate(T t) throws Exception;
 
 }

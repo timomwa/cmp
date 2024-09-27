@@ -11,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -19,16 +21,26 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Index;
 
+import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
 @Table(name = "opco_rules")
+@NamedQueries({
+	@NamedQuery(
+			name = OperatorCountryRules.NQ_FIND_BY_NAME_AND_OPCO,
+			query = "from OperatorCountryRules ocrl WHERE ocrl.opco=:opco AND ocrl.rule_name=:rule_name"
+	)}
+)
 public class OperatorCountryRules implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1001805634163403994L;
+
+
+	public static final String NQ_FIND_BY_NAME_AND_OPCO = "opco_rules.nq_findbynameandopco";
 	
 	
 	@Id
@@ -145,10 +157,25 @@ public class OperatorCountryRules implements Serializable {
 
 	@Override
 	public String toString() {
-		return "OperatorCountryRules [id=" + id + ", opco=" + opco
-				+ ", rule_name=" + rule_name + ", rule_value=" + rule_value
-				+ ", data_type=" + data_type + ", effectiveDate="
-				+ effectiveDate + ", active=" + active + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("OperatorCountryRules [id=");
+		builder.append(id);
+		builder.append(", \nopco=");
+		builder.append(opco);
+		builder.append(", \nrule_name=");
+		builder.append(rule_name);
+		builder.append(", \nrule_value=");
+		builder.append(rule_value);
+		builder.append(", \ndata_type=");
+		builder.append(data_type);
+		builder.append(", \neffectiveDate=");
+		builder.append(effectiveDate);
+		builder.append(", \nactive=");
+		builder.append(active);
+		builder.append("]");
+		return builder.toString();
 	}
+
+	
 	
 }

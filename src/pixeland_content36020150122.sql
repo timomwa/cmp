@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.6.19, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: pixeland_content360
+-- Host: localhost    Database: cmp
 -- ------------------------------------------------------
 -- Server version	5.6.19-0ubuntu0.14.04.1
 
@@ -18,7 +18,7 @@
 --
 -- Table structure for table `BaseEntity`
 --
-use `pixeland_content360`;
+use `cmp`;
 DROP TABLE IF EXISTS `BaseEntity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -1139,7 +1139,7 @@ CREATE TABLE `sms_service_metadata` (
 
 LOCK TABLES `sms_service_metadata` WRITE;
 /*!40000 ALTER TABLE `sms_service_metadata` DISABLE KEYS */;
-INSERT INTO `sms_service_metadata` VALUES (1,364,'db_name','pixeland_content360'),(2,364,'table','jokes'),(3,364,'static_categoryvalue','bar'),(4,366,'table','jobs'),(5,366,'static_categoryvalue','business_support'),(6,393,'static_categoryvalue','ROMANCE'),(7,394,'static_categoryvalue','MCHONG'),(8,395,'static_categoryvalue','ISLAMQ'),(9,396,'static_categoryvalue','BIBLEQ'),(10,397,'static_categoryvalue','CHRISTMASQ'),(11,398,'static_categoryvalue','VALENTINE'),(12,399,'static_categoryvalue','FUNFACTS'),(13,400,'static_categoryvalue','VITENDA'),(14,393,'table','static_content'),(15,394,'table','static_content'),(16,395,'table','static_content'),(17,396,'table','static_content'),(18,397,'table','static_content'),(19,398,'table','static_content'),(20,399,'table','static_content'),(21,400,'table','static_content'),(22,401,'table','jobs'),(23,402,'table','jobs'),(24,403,'table','jobs'),(25,404,'table','jobs'),(26,405,'table','jobs'),(27,401,'static_categoryvalue','JOB_ACCOUNTS'),(28,402,'static_categoryvalue','JOB_ADMIN'),(29,403,'static_categoryvalue','JOB_BIZ_SUPP'),(30,404,'static_categoryvalue','JOB_FINANCE'),(31,405,'static_categoryvalue','JOB_SALEMARKET'),(32,401,'db_name','pixeland_content360'),(33,402,'db_name','pixeland_content360'),(34,403,'db_name','pixeland_content360'),(35,404,'db_name','pixeland_content360'),(36,405,'db_name','pixeland_content360'),(37,406,'static_categoryvalue','PROPERTY_RENTAL'),(38,407,'static_categoryvalue','PROPERTY_SALE'),(39,406,'table','property'),(40,407,'table','property'),(41,406,'db_name','pixeland_content360'),(42,407,'db_name','pixeland_content360'),(43,408,'static_categoryvalue','AUTO'),(44,408,'table','auto'),(45,408,'db_name','pixeland_content360');
+INSERT INTO `sms_service_metadata` VALUES (1,364,'db_name','cmp'),(2,364,'table','jokes'),(3,364,'static_categoryvalue','bar'),(4,366,'table','jobs'),(5,366,'static_categoryvalue','business_support'),(6,393,'static_categoryvalue','ROMANCE'),(7,394,'static_categoryvalue','MCHONG'),(8,395,'static_categoryvalue','ISLAMQ'),(9,396,'static_categoryvalue','BIBLEQ'),(10,397,'static_categoryvalue','CHRISTMASQ'),(11,398,'static_categoryvalue','VALENTINE'),(12,399,'static_categoryvalue','FUNFACTS'),(13,400,'static_categoryvalue','VITENDA'),(14,393,'table','static_content'),(15,394,'table','static_content'),(16,395,'table','static_content'),(17,396,'table','static_content'),(18,397,'table','static_content'),(19,398,'table','static_content'),(20,399,'table','static_content'),(21,400,'table','static_content'),(22,401,'table','jobs'),(23,402,'table','jobs'),(24,403,'table','jobs'),(25,404,'table','jobs'),(26,405,'table','jobs'),(27,401,'static_categoryvalue','JOB_ACCOUNTS'),(28,402,'static_categoryvalue','JOB_ADMIN'),(29,403,'static_categoryvalue','JOB_BIZ_SUPP'),(30,404,'static_categoryvalue','JOB_FINANCE'),(31,405,'static_categoryvalue','JOB_SALEMARKET'),(32,401,'db_name','cmp'),(33,402,'db_name','cmp'),(34,403,'db_name','cmp'),(35,404,'db_name','cmp'),(36,405,'db_name','cmp'),(37,406,'static_categoryvalue','PROPERTY_RENTAL'),(38,407,'static_categoryvalue','PROPERTY_SALE'),(39,406,'table','property'),(40,407,'table','property'),(41,406,'db_name','cmp'),(42,407,'db_name','cmp'),(43,408,'static_categoryvalue','AUTO'),(44,408,'table','auto'),(45,408,'db_name','cmp');
 /*!40000 ALTER TABLE `sms_service_metadata` ENABLE KEYS */;
 UNLOCK TABLES;
 

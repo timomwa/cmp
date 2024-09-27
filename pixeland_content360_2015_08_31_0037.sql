@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.8, for Win64 (x86)
 --
--- Host: localhost    Database: pixeland_content360
+-- Host: localhost    Database: cmp
 -- ------------------------------------------------------
 -- Server version	5.5.8
 

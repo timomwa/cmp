@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileTemplate;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileType;
 import com.pixelandtag.cmp.entities.customer.configs.SenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.TemplateType;
 
@@ -77,6 +79,17 @@ public interface ConfigsEJBI {
 	 * @return
 	 */
 	public OperatorCountry getOperatorByIpAddress(String ip_address);
+	
+	/**
+	 * 
+	 * @param opco
+	 * @param type
+	 * @return
+	 */
+	public OpcoSenderReceiverProfile findActiveProfileByTypeOrTranceiver(OperatorCountry opco, ProfileType type) throws ConfigurationException;
+	
+	
+	
 	
 
 }

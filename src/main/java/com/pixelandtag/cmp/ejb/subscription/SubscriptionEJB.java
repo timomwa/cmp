@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.EJB;
 import javax.ejb.Remote;
@@ -22,6 +23,7 @@ import org.joda.time.DateTime;
 import com.pixelandtag.api.CelcomImpl;
 import com.pixelandtag.cmp.dao.subscription.SubscriptionDAOI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.timezone.TimezoneConverterI;
 import com.pixelandtag.cmp.entities.OpcoSMSService;
@@ -29,8 +31,11 @@ import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.subscription.Subscription;
 import com.pixelandtag.dating.entities.AlterationMethod;
+import com.pixelandtag.dating.entities.ChatBundle;
 import com.pixelandtag.dating.entities.SubscriptionEvent;
 import com.pixelandtag.dating.entities.SubscriptionHistory;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.SuccessfullyBillingRequests;
 import com.pixelandtag.subscription.dto.MediumType;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 
@@ -58,6 +63,9 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@EJB
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
+	
+	@EJB
+	private ChatCounterEJBI chatcounterEJB;
 	
 	/* (non-Javadoc)
 	 * @see com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI#updateCredibilityIndex(java.lang.String, java.lang.Long, int)
@@ -167,7 +175,8 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	public List<Subscription> getExpiredSubscriptions(Long size) {
 		List<Subscription> expired = new ArrayList<Subscription>();
 		try{
-			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "Africa/Nairobi", "Africa/Nairobi");
+			logger.info("\n\n\t***************timeInNairobi --> "+timeInNairobi+"************\n\n");
 			Query qry   = em.createQuery("from Subscription s WHERE s.subscription_status=:status  AND s.expiryDate<=:todaydate AND s.queue_status = 0 ORDER BY s.credibility_index desc");
 			qry.setParameter("status", SubscriptionStatus.confirmed);
 			qry.setParameter("todaydate", timeInNairobi);
@@ -195,10 +204,13 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 			sub = renewSubscription(operatorCountry,msisdn, service, SubscriptionStatus.confirmed, method);
 			updateQueueStatus(0L,sub.getId(),method);
 			subrenewalnotificationEJB.sendSubscriptionRenewalMessage(operatorCountry,service,msisdn, sub); 
+			ChatBundle chatbundle  = chatcounterEJB.createChatBundle(sub);
+			logger.info(" >>>>> chatbundle >> "+chatbundle);
+			return sub;
 		}catch(Exception exp){
 			logger.error(exp.getMessage(),exp);
+			throw exp;
 		}
-		return sub;
 	}
 	
 	
@@ -219,7 +231,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	
 	@Override
-	
 	public void updateQueueStatus(Long status, Long id, AlterationMethod method) throws Exception{
 		try{
 			Query qry = em.createQuery("UPDATE Subscription s SET s.queue_status=:queue_status WHERE s.id=:id");
@@ -253,7 +264,7 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 				
 				operatorCountry = em.merge(operatorCountry);
 				Date todaysdate = new Date();
-				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(todaysdate, "America/New_York", operatorCountry.getCountry().getTimeZone());//"Africa/Nairobi");
+				Date nowInNairobiTz = timezoneEJB.convertFromOneTimeZoneToAnother(todaysdate, "Africa/Nairobi", operatorCountry.getCountry().getTimeZone());//"Africa/Nairobi");
 				
 				if(sub==null){
 				
@@ -647,10 +658,10 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean subscriptionValid(String msisdn, Long serviceid) throws Exception{
+	public boolean subscriptionValid(String msisdn, Long serviceid, OperatorCountry opco) throws Exception{
 		boolean subValid = false;
 		try{
-			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), "America/New_York", "Africa/Nairobi");
+			Date timeInNairobi = timezoneEJB.convertFromOneTimeZoneToAnother(new Date(), TimeZone.getDefault().getID(), opco.getCountry().getTimeZone());
 			Query qry = em.createQuery("from Subscription sub WHERE sub.subscription_status=:subscription_status AND sub.msisdn=:msisdn AND sms_service_id_fk=:serviceid AND expiryDate > :timeInNairobi ");
 			qry.setParameter("msisdn", msisdn);
 			qry.setParameter("serviceid", serviceid);
@@ -667,7 +678,6 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			throw e;
-			
 		}
 		return subValid;
 	}
@@ -721,4 +731,40 @@ public class SubscriptionEJB implements SubscriptionBeanI {
 		}
 		return isAtive;
 	}
+	
+	public <T> T saveOrUpdate(T t) throws Exception{
+		try{
+			return em.merge(t);
+		}catch(Exception e){
+			throw e;
+		}
+	}
+
+
+	@Override
+	public SuccessfullyBillingRequests createSuccesBillRec(Billable billable) throws Exception {
+		
+    	try{
+    		
+    		SuccessfullyBillingRequests successfulBill = new SuccessfullyBillingRequests();
+    		successfulBill.setCp_tx_id(billable.getCp_tx_id());
+    		successfulBill.setKeyword(billable.getKeyword());
+    		successfulBill.setMsisdn(billable.getMsisdn());
+    		successfulBill.setOperation(billable.getOperation());
+    		successfulBill.setPrice(billable.getPrice());
+    		successfulBill.setPricePointKeyword(billable.getPricePointKeyword());
+    		successfulBill.setResp_status_code(billable.getResp_status_code());
+    		successfulBill.setShortcode(billable.getShortcode());
+    		successfulBill.setSuccess(billable.getSuccess());
+    		successfulBill.setTimeStamp( (null!=billable.getTimeStamp() ? billable.getTimeStamp() : new Date()) );
+    		successfulBill.setTransactionId(billable.getTransactionId());
+    		successfulBill.setTransferin(billable.getTransferIn());
+    		successfulBill.setOpco(em.merge(billable.getOpco()));
+    		return em.merge(successfulBill);
+    		
+    	}catch(Exception exp){
+			logger.error(exp.getMessage(),exp);
+			throw exp;
+		}
+    }
 }

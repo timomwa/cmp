@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.44, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: pixeland_content360
+-- Host: localhost    Database: cmp
 -- ------------------------------------------------------
 -- Server version	5.5.44-0ubuntu0.12.04.1
 

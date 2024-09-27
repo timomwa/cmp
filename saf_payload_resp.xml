@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Header>
+		<ns1:NotifySOAPHeader xmlns:ns1="http://www.huawei.com.cn/schema/common/v2_1">
+			<ns1:spId>601727</ns1:spId>
+			<ns1:serviceId>6017272000123062</ns1:serviceId>
+			<ns1:linkid>23203806075700239227</ns1:linkid>
+			<ns1:traceUniqueID>504021504471703232038069461003</ns1:traceUniqueID>
+		</ns1:NotifySOAPHeader>
+	</soapenv:Header>
+	<soapenv:Body>
+		<ns2:notifySmsReception
+			xmlns:ns2="http://www.csapi.org/schema/parlayx/sms/notification/v2_2/local">
+			<ns2:correlator>9232579</ns2:correlator>
+			<ns2:message>
+				<message>B100</message>
+				<senderAddress>tel:720988636</senderAddress>
+				<smsServiceActivationNumber>tel:40420</smsServiceActivationNumber>
+				<dateTime>2017-03-23T17:38:06Z</dateTime>
+			</ns2:message>
+		</ns2:notifySmsReception>
+	</soapenv:Body>
+</soapenv:Envelope>

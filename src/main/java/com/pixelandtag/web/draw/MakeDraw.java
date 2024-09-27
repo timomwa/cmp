@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  *                           value="A value"
  */
 public class MakeDraw extends HttpServlet {
-	final String DB = "pixeland_content360";
+	final String DB = "cmp";
 	static final long serialVersionUID = 3425345L;
 	Logger log = Logger.getLogger(MakeDraw.class);
 	public MakeDraw() {

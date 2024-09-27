@@ -25,15 +25,15 @@ import org.hibernate.annotations.Index;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 
 @Entity
-@Table(name = "opco_billerfiles")
+@Table(name = "opco_biller_profile")
 @NamedQueries({
 	@NamedQuery(
 			name = OpcoBillingProfile.NQ_FIND_BY_OPCO,
-			query = "select osp from OpcoSenderReceiverProfile osp where osp.opco=:opco AND osp.active=:active  order by osp.pickorder desc"
+			query = "select obp from OpcoBillingProfile obp where obp.opco=:opco AND obp.active=:active  order by obp.pickorder desc"
 	),
 	@NamedQuery(
 			name = OpcoBillingProfile.NQ_LIST_ACTIVE,
-			query = "select osp from OpcoSenderReceiverProfile osp where osp.active=:active  order by osp.pickorder desc"
+			query = "select obp from OpcoBillingProfile obp where obp.active=:active  order by obp.pickorder desc"
 	)
 })
 public class OpcoBillingProfile implements Serializable {
@@ -78,7 +78,6 @@ public class OpcoBillingProfile implements Serializable {
 	
 	@Column(name="workers", nullable=false)
 	private Integer workers;
-	
 	
 	
 	@PrePersist

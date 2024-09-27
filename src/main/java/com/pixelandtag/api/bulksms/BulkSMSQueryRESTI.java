@@ -11,7 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-@Path("/rest/bulk")
+@Path("/bulk")
 public interface BulkSMSQueryRESTI extends BaseRestI {
 	
 	@POST

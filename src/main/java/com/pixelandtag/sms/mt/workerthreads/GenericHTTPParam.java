@@ -82,5 +82,17 @@ public class GenericHTTPParam implements Serializable{
 	public void setHttpmethod(String httpmethod) {
 		this.httpmethod = httpmethod;
 	}
+	@Override
+	public String toString() {
+		return "GenericHTTPParam [url=" + url + ",\n id=" + id + ",\n mtsms="
+				+ mtsms + ",\n bulktext=" + bulktext + ",\n httpParams="
+				+ httpParams + ",\n headerParams=" + headerParams
+				+ ",\n stringentity=" + stringentity + ",\n httpmethod="
+				+ httpmethod + "]";
+	}
+	
+	
+	
+	
 	
 }

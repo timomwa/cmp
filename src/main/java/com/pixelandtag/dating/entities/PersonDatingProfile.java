@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,7 +36,7 @@ public class PersonDatingProfile  implements Serializable  {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "username", unique=true, nullable=false)
+	@Column(name = "username", unique=true, nullable=false, length=50)
 	@Index(name="usrnameIdx")
 	private String username;
 	
@@ -76,12 +77,35 @@ public class PersonDatingProfile  implements Serializable  {
 	@Column(name = "creationDate", nullable = false)
 	private Date creationDate;
 	
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "lastActive")
+	@Index(name="lastactvidx")
+	private Date lastActive;
+	
+	@Column(name = "replyProbability", precision=12, scale=7)
+	@Index(name="respProIdx")
+	private BigDecimal replyProbability;
+	
+	@PreUpdate
+	public void onUpdate(){
+		if(lastActive==null)
+			lastActive = new Date();
+		if(replyProbability==null)
+			replyProbability = BigDecimal.ZERO;
+	}
+	
+	
 	@PrePersist
 	public void onCreate(){
 		if(profileComplete==null)
 			profileComplete = new Boolean(false);
 		if(creationDate==null)
 			creationDate = new Date();
+		if(lastActive==null)
+			lastActive = new Date();
+		if(replyProbability==null)
+			replyProbability = BigDecimal.ZERO;
 	}
 	
 	public Date getCreationDate() {
@@ -172,15 +196,60 @@ public class PersonDatingProfile  implements Serializable  {
 		this.language_id = language_id;
 	}
 
+
+	public Date getLastActive() {
+		return lastActive;
+	}
+
+
+	public void setLastActive(Date lastActive) {
+		this.lastActive = lastActive;
+	}
+
+	public BigDecimal getReplyProbability() {
+		return replyProbability;
+	}
+
+
+	public void setReplyProbability(BigDecimal replyProbability) {
+		this.replyProbability = replyProbability;
+	}
+
+
 	@Override
 	public String toString() {
-		return "PersonDatingProfile [id=" + id + ", username=" + username
-				+ ", person=" + person + ", preferred_gender="
-				+ preferred_gender + ", preferred_age=" + preferred_age
-				+ ", location=" + location + ", dob=" + dob + ", language_id="
-				+ language_id + ", gender=" + gender + ", profileComplete="
-				+ profileComplete + ", creationDate=" + creationDate + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("PersonDatingProfile [id=");
+		builder.append(id);
+		builder.append(", \nusername=");
+		builder.append(username);
+		builder.append(", \nperson=");
+		builder.append(person);
+		builder.append(", \npreferred_gender=");
+		builder.append(preferred_gender);
+		builder.append(", \npreferred_age=");
+		builder.append(preferred_age);
+		builder.append(", \nlocation=");
+		builder.append(location);
+		builder.append(", \ndob=");
+		builder.append(dob);
+		builder.append(", \nlanguage_id=");
+		builder.append(language_id);
+		builder.append(", \ngender=");
+		builder.append(gender);
+		builder.append(", \nprofileComplete=");
+		builder.append(profileComplete);
+		builder.append(", \ncreationDate=");
+		builder.append(creationDate);
+		builder.append(", \nlastActive=");
+		builder.append(lastActive);
+		builder.append(", \nreplyProbability=");
+		builder.append(replyProbability);
+		builder.append("]");
+		return builder.toString();
 	}
+
+	
 	
 	
 	

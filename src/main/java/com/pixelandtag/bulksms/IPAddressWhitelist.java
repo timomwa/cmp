@@ -36,7 +36,7 @@ public class IPAddressWhitelist implements Serializable{
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name = "ipaddress")
+	@Column(name = "ipaddress", length=50)
 	@Index(name="ipadwidx")
 	private String ipaddress;
 	

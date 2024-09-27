@@ -28,11 +28,10 @@ public class SubscriptionLog implements Serializable {
 	//@Column(name = "updated", nullable = false)
 //	private Date updated;
 	 
-	@Column(name = "msisdn")
+	@Column(name = "msisdn",length=20)
 	@Index(name="msisdn_idx")
 	private String msisdn;
 	
-	//`pixeland_content360`.`servicesubscription`
 	@Column(name = "service_subscription_id")
 	@Index(name="servsub_idx")
 	private int service_subscription_id;
@@ -43,7 +42,6 @@ public class SubscriptionLog implements Serializable {
 	@Index(name="sblogtmstp_idx")
 	private Date timeStamp;
 	
-	//`pixeland_content360`.`subscription`
 	@Column(name = "subscription_id")
 	@Index(name="subLog_idx")
 	private Long subscription_id;

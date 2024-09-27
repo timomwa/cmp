@@ -2,29 +2,29 @@ package com.pixelandtag.serviceprocessors.sms;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
 import com.pixelandtag.api.BillingStatus;
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.ejb.DatingServiceException;
 import com.pixelandtag.cmp.ejb.DatingServiceI;
 import com.pixelandtag.cmp.ejb.LocationBeanI;
 import com.pixelandtag.cmp.ejb.MessageEJBI;
+import com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI;
 import com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI;
+import com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI;
 import com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI;
 import com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
@@ -33,7 +33,9 @@ import com.pixelandtag.cmp.entities.OpcoSMSService;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
 import com.pixelandtag.cmp.entities.SMSService;
 import com.pixelandtag.cmp.entities.TimeUnit;
+import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
+import com.pixelandtag.cmp.entities.customer.configs.OperatorCountryRules;
 import com.pixelandtag.dating.entities.AlterationMethod;
 import com.pixelandtag.dating.entities.ChatLog;
 import com.pixelandtag.dating.entities.Gender;
@@ -45,6 +47,8 @@ import com.pixelandtag.dating.entities.ProfileLocation;
 import com.pixelandtag.dating.entities.ProfileQuestion;
 import com.pixelandtag.dating.entities.QuestionLog;
 import com.pixelandtag.dating.entities.SystemMatchLog;
+import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.smssenders.SenderResp;
 import com.pixelandtag.subscription.dto.SubscriptionStatus;
 import com.pixelandtag.util.FileUtils;
 import com.pixelandtag.web.beans.RequestObject;
@@ -54,16 +58,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	final Logger logger = Logger.getLogger(DatingServiceProcessor.class);
 	private DatingServiceI datingBean;
 	private LocationBeanI location_ejb; 
-	private CMPResourceBeanRemote cmp_bean;
 	private OpcoSMSServiceEJBI opcosmsserviceejb;
 	private SubscriptionBeanI subscriptionBean;
 	private OpcoSenderProfileEJBI opcosenderprofileEJB;
 	private FreeLoaderEJBI freeloaderEJB;
 	private MessageEJBI messageEJB;
-	private InitialContext context;
-	//private Properties mtsenderprop;
+	private OperatorCountryRulesEJBI opcorulesEJB;
+	private ChatCounterEJBI chatcounterEJB;
+	private BillingGatewayEJBI billinggateway;
+	private Map<String,OperatorCountryRules> rulescache = new HashMap<String,OperatorCountryRules>();
+	
 	private boolean allow_number_sharing  = true;
-	private boolean allow_multiple_plans = false;
+	private boolean allow_multiple_plans = true;
 	
 	public DatingServiceProcessor() throws NamingException{
 		mtsenderprop = FileUtils.getPropertyFile("mtsender.properties");
@@ -72,23 +78,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 	
 	
 	public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		 Properties props = new Properties();
-		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		 props.put("jboss.naming.client.ejb.context", true);
-		 context = new InitialContext(props);
-		 datingBean =  (DatingServiceI) 
+    	
+		datingBean =  (DatingServiceI) 
        		context.lookup("cmp/DatingServiceBean!com.pixelandtag.cmp.ejb.DatingServiceI");
 		location_ejb = (LocationBeanI) context.lookup("cmp/LocationEJB!com.pixelandtag.cmp.ejb.LocationBeanI");
-		cmp_bean = (CMPResourceBeanRemote) context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
 		subscriptionBean = (SubscriptionBeanI) context.lookup("cmp/SubscriptionEJB!com.pixelandtag.cmp.ejb.subscription.SubscriptionBeanI");
 		opcosenderprofileEJB = (OpcoSenderProfileEJBI) context.lookup("cmp/OpcoSenderProfileEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSenderProfileEJBI");
 		opcosmsserviceejb = (OpcoSMSServiceEJBI) context.lookup("cmp/OpcoSMSServiceEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OpcoSMSServiceEJBI");
 		freeloaderEJB =  (FreeLoaderEJBI) context.lookup("cmp/FreeLoaderEJBImpl!com.pixelandtag.cmp.ejb.subscription.FreeLoaderEJBI");
 		messageEJB =  (MessageEJBI) context.lookup("cmp/MessageEJBImpl!com.pixelandtag.cmp.ejb.MessageEJBI");
+		opcorulesEJB =  (OperatorCountryRulesEJBI) context.lookup("cmp/OperatorCountryRulesEJBImpl!com.pixelandtag.cmp.ejb.api.sms.OperatorCountryRulesEJBI");
+		chatcounterEJB =  (ChatCounterEJBI) context.lookup("cmp/ChatCounterEJBImpl!com.pixelandtag.cmp.ejb.api.sms.ChatCounterEJBI");
+		billinggateway =  (BillingGatewayEJBI) context.lookup("cmp/BillingGatewayEJBImpl!com.pixelandtag.cmp.ejb.api.billing.BillingGatewayEJBI");
 		logger.debug("Successfully initialized EJB CMPResourceBeanRemote !!");
     }
 	
@@ -129,8 +130,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 			PersonDatingProfile profile = datingBean.getProfile(person);
 			
 			if(KEYWORD.equalsIgnoreCase("BUNDLES")){
-				String submenustring = cmp_bean.getSubMenuString(KEYWORD,language_id);
-				outgoingsms.setSms(submenustring+cmp_bean.getMessage(MAIN_MENU_ADVICE,language_id, person.getOpco().getId()));//get all the sub menus there.
+				String submenustring = baseEntityEJB.getSubMenuString(KEYWORD,language_id);
+				outgoingsms.setSms(submenustring+baseEntityEJB.getMessage(MAIN_MENU_ADVICE,language_id, person.getOpco().getId()));//get all the sub menus there.
 				
 			}else if(KEYWORD.equalsIgnoreCase("LOGIN")){
 				
@@ -193,7 +194,6 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				
 				PersonDatingProfile match =  datingBean.searchMatch(profile);
 				
-				
 				if(match==null || match.getUsername()==null || match.getUsername().trim().isEmpty()){
 					String msg = datingBean.getMessage(DatingMessages.COULD_NOT_FIND_MATCH_AT_THE_MOMENT, language_id, incomingsms.getOpco().getId());
 					outgoingsms.setSms(msg.replaceAll(USERNAME_TAG, profile.getUsername()));
@@ -218,7 +218,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						if(pl!=null && pl.getLocation()!=null){
 							locationName = pl.getLocation().getLocationName();
 							if(locationName==null || locationName.trim().isEmpty()){
-								Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+								Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 								if(loc!=null)
 									locationName = loc.getLocationName();
 							}
@@ -251,12 +251,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, incomingsms.getOpco());
 				
 				
-				if(!subvalid ||  allow_multiple_plans ){
+				if((!subvalid ||  allow_multiple_plans) ||  ( (!subvalid && chatcounterEJB.isoffBundle(MSISDN, incomingsms.getOpco()) ) 
+						||  allow_multiple_plans  ) ){
 					
 					try{
 						
 						try{
 							subscriptionBean.unsubscribe(MSISDN, services, incomingsms.getOpco());
+							
 						}catch(Exception exp){
 							logger.error(exp.getMessage(), exp);
 						}
@@ -267,8 +269,8 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						
 					}catch(DatingServiceException dse){
 						logger.error(dse.getMessage(),dse);
-						outgoingsms.setSms(null);//set nul so that we don't send it out..
-						outgoingsms.setPrice(BigDecimal.ZERO);
+						//outgoingsms.setSms(outgoingsms.getSms());//set nul so that we don't send it out..
+						//outgoingsms.setPrice(BigDecimal.ZERO);
 					}
 					
 				}else{
@@ -296,11 +298,14 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				boolean subvalid = datingBean.hasAnyActiveSubscription(MSISDN, services, person.getOpco());
 				
 				//if(!subvalid) //TODO - have a config per opco to decide whether to auto renew or not.
-				//	cmp_bean.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
+				//	baseEntityEJB.mimicMO("BILLING_SERV5",MSISDN,incomingsms.getOpco());
+				OperatorCountryRules chatbundlerule = getChatBundleRules( incomingsms.getOpco() );
 				
-				if(subvalid && profile!=null && profile.getProfileComplete()){//if subscription is valid && their profile is complete
+				boolean allowOffBundle = (profile!=null && profile.getProfileComplete() && chatbundlerule.getRule_value().equalsIgnoreCase("true"));
+				if((subvalid && profile!=null && profile.getProfileComplete())
+						|| ((!subvalid && profile!=null && profile.getProfileComplete()) && allowOffBundle)){//if subscription is valid && their profile is complete
 					
-					outgoingsms = processDating(incomingsms,person);
+					outgoingsms = processDating(incomingsms,person, allowOffBundle);
 						
 				}else if((profile==null || !profile.getProfileComplete() || !subvalid) ){//No profile or incomplete profile
 					
@@ -328,7 +333,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						outgoingsms.setPriority(3);
 						
 					}else{
-						outgoingsms = processDating(incomingsms,person);
+						outgoingsms = processDating(incomingsms,person,allowOffBundle);
 					}
 				}
 			}else{
@@ -344,33 +349,41 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 
 
 
-	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person) throws Exception { 
+	private OutgoingSMS processDating(IncomingSMS incomingsms, Person person, boolean allowOffBundle) throws Exception { 
 					  
-		OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
-		if(person==null)
-			person = datingBean.register(incomingsms.getMsisdn(),incomingsms.getOpco());
-		
-		
-		PersonDatingProfile profile = datingBean.getProfile(person);
-		
-		if(profile!=null && profile.getProfileComplete()){
-			outgoingsms = chat(incomingsms,profile,person);
-		}
+		try{
+			OutgoingSMS outgoingsms = incomingsms.convertToOutgoing();
+			if(person==null)
+				person = datingBean.register(incomingsms.getMsisdn(),incomingsms.getOpco());
+			
+			
+			PersonDatingProfile profile = datingBean.getProfile(person);
+			
+			if(profile!=null && profile.getProfileComplete()){
 				
-		if(person.getId()>0 && profile==null){//Success registering/registered but no profile
-			
-			outgoingsms = startProfileQuestions(incomingsms,person);
-		
-		}else{
-			
-			if(!profile.getProfileComplete()){
-				
-				outgoingsms = completeProfile(incomingsms,person,profile);
-			
+				outgoingsms = chat(incomingsms,profile,person,allowOffBundle);
+				profile.setLastActive(new Date());
+				profile = datingBean.saveOrUpdate(profile);
 			}
+					
+			if(person.getId()>0 && profile==null){//Success registering/registered but no profile
+				
+				outgoingsms = startProfileQuestions(incomingsms,person);
+			
+			}else{
+				
+				if(!profile.getProfileComplete()){
+					
+					outgoingsms = completeProfile(incomingsms,person,profile);
+				
+				}
+			}
+			
+			return outgoingsms;
+		}catch(Exception e){
+			logger.error(e.getMessage(), e);
+			throw e;
 		}
-		
-		return outgoingsms;
 	}
 
 	private OutgoingSMS startProfileQuestions(IncomingSMS incomingsms, Person person) throws DatingServiceException {
@@ -400,8 +413,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				profile = datingBean.saveOrUpdate(profile);
 				
 				ProfileQuestion question = datingBean.getNextProfileQuestion(profile.getId());
-				logger.debug("QUESTION::: "+question.getQuestion());
-				outgoingsms.setSms(msg+ SPACE +question.getQuestion());
+				outgoingsms.setSms(msg+ SPACE +question.getQuestion()+GenericServiceProcessor.RETURN_CARRIAGE+datingBean.getMessage(DatingMessages.YES_NO_PROMPT, language_id, person.getOpco().getId()));
 				
 				QuestionLog ql = new QuestionLog();
 				
@@ -445,16 +457,16 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						keywordIsNumber = true;
 					}catch(Exception exp){}
 					
-					if( (keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES") || KEYWORD.trim().equalsIgnoreCase("YEP")
+					if( (keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("Y") || KEYWORD.trim().equalsIgnoreCase("YES") || KEYWORD.trim().equalsIgnoreCase("YEP")
 							|| KEYWORD.trim().equalsIgnoreCase("NDIO") || KEYWORD.trim().equalsIgnoreCase("NDIYO")  || KEYWORD.trim().equalsIgnoreCase("SAWA") || KEYWORD.trim().equalsIgnoreCase("OK") )) ){
 						person.setAgreed_to_tnc(Boolean.TRUE);
 						person = datingBean.saveOrUpdate(person);
-					}else if((keywordIsNumber && agreed==1 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("A") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
+					}else if((keywordIsNumber && agreed==2 ) || (KEYWORD!=null && (KEYWORD.trim().equalsIgnoreCase("B") || KEYWORD.trim().equalsIgnoreCase("N") || KEYWORD.trim().equalsIgnoreCase("NO")))){
 						outgoingsms.setSms("Ok. Bye");
 						return outgoingsms;
 					}else{
 						String msg = datingBean.getMessage(DatingMessages.MUST_AGREE_TO_TNC, language_id, person.getOpco().getId());
-						outgoingsms.setSms(msg+SPACE+previousQuestion.getQuestion());
+						outgoingsms.setSms(msg+SPACE+previousQuestion.getQuestion()+GenericServiceProcessor.RETURN_CARRIAGE+datingBean.getMessage(DatingMessages.YES_NO_PROMPT, language_id, person.getOpco().getId()));
 						return outgoingsms;
 					}
 						
@@ -512,7 +524,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					}catch(java.lang.NumberFormatException nfe){
 						String msg = datingBean.getMessage(DatingMessages.AGE_NUMBER_INCORRECT, language_id,person.getOpco().getId());
 						msg = msg.replaceAll(USERNAME_TAG, profile.getUsername());
-						msg = msg.replaceAll(AGE_TAG, age.intValue()+"");
+						msg = msg.replaceAll(AGE_TAG, (age!=null ? age.intValue(): 0)+"");
 						outgoingsms.setSms(msg);
 						return outgoingsms;
 					}
@@ -660,7 +672,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 							if(pl!=null && pl.getLocation()!=null){
 								locationName = pl.getLocation().getLocationName();
 								if(locationName==null || locationName.trim().isEmpty()){
-									Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id());
+									Location loc = location_ejb.getLastKnownLocationWithNameUsingLac(pl.getLocation().getLocation_id(), pl.getLocation().getCellid());
 									if(loc!=null)
 										locationName = loc.getLocationName();
 								}
@@ -687,7 +699,7 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		return outgoingsms;
 	}
 
-	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person) throws DatingServiceException {
+	private OutgoingSMS chat(IncomingSMS incomingSMS, PersonDatingProfile profile, Person person, Boolean allowOffBundle) throws DatingServiceException { 
 			
 		OutgoingSMS outgoingsms = incomingSMS.convertToOutgoing();
 		
@@ -745,9 +757,18 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 				        msg = source_user+CHAT_USERNAME_SEPERATOR_DIRECT+(allow_number_sharing ? MESSAGE.replaceAll(KEYWORD, "") : MESSAGE.replaceAll(KEYWORD, "").trim().replaceAll("\\d{5,10}", "*")) ;
 					}
 					
+					OperatorCountryRules chatbundlerule = getChatBundleRules(person.getOpco());
+					
+					
+					boolean isoffbundle = false;
+					if(allowOffBundle)//try double check whether they're off bundle
+					if(chatbundlerule!=null && chatbundlerule.getActive() && chatbundlerule.getRule_value().equalsIgnoreCase("true")){
+						logger.info("*************This opco has bundle capping... so we check for msisdn ="+person.getMsisdn()+"**************");
+						isoffbundle = chatcounterEJB.isoffBundle(person);
+					}
 					
 					outgoingchatsms.setSms(msg);
-					outgoingchatsms.setCmp_tx_id(generateNextTxId());//Is a totally new message
+					outgoingchatsms.setCmp_tx_id( UUID.randomUUID().toString() );//Is a totally new message
 					outgoingchatsms.setOpco_tx_id(generateNextTxId());//Is a totally new message
 					outgoingchatsms.setPriority(0);//highest priority possible
 					outgoingchatsms.setPrice(BigDecimal.ZERO);
@@ -757,7 +778,11 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 					outgoingchatsms.setShortcode(shortcode);
 					outgoingchatsms.setTimestamp(new Date());
 					
-					sendMT(outgoingchatsms);
+					
+					
+					if(!isoffbundle)
+						chatcounterEJB.updateBundles(person, -1L);
+					
 					String tailmsg = "";
 					if(!person.getLoggedin()){
 						String offlineNotifier = datingBean.getMessage(OFFLINE_NOTIFIER, language_id,person.getOpco().getId());
@@ -765,15 +790,55 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 						tailmsg = ". "+offlineNotifier;
 					}
 					
-					String msgsentto = datingBean.getMessage(MESSAGE_SENT_NOTIFICATION, language_id,person.getOpco().getId());
+					
+					String msg_key = MESSAGE_SENT_NOTIFICATION;
+					
+					boolean chargeSucess = true;
+					//Risk here is if billing gateway is slow, the whole chat becomes slow
+					if(isoffbundle){//TODO find a way to make this fault tollerant. If we don't succeed here, try again somewhere in a different process.
+						OpcoSenderReceiverProfile opcosenderreceiverprofile = opcosenderprofileEJB.getActiveProfileForOpco(person.getOpco().getId());
+						outgoingsms.setOpcosenderprofile(opcosenderreceiverprofile);
+						Billable billable = datingBean.createBillable(outgoingsms);
+						billable.setPrice(BigDecimal.ONE);
+						SenderResp response = billinggateway.bill(billable);
+						chargeSucess = response.getSuccess();
+						if(chargeSucess){
+							billable.setSuccess(response.getSuccess());
+							billable.setResp_status_code(response.getResponseMsg());
+							billable.setOpco_tx_id(response.getRefvalue());
+							billable.setTransactionId(response.getRefvalue());
+							billinggateway.createSuccesBillRec(billable);
+						}
+					}
+					
+					if(isoffbundle && chargeSucess){
+						msg_key = MESSAGE_SENT_NOTIFICATION_OFFBUNDLE;
+					}else if(!chargeSucess){
+						msg_key = MESSAGE_NOT_SENT_INSUFFICIENT_BAL_NOTIFICATION;
+					}
+				
+					if(chargeSucess)
+						sendMT(outgoingchatsms);
+					
+					
+					String dest_plain_pronoun = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
+					
+					String msgsentto = datingBean.getMessage(msg_key, language_id,person.getOpco().getId());
 					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
+					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(DEST_USERNAME_TAG), Matcher.quoteReplacement(destination_person.getUsername()));
+					msgsentto = msgsentto.replaceAll(PRONOUN_TAG, dest_plain_pronoun);
+					String probabilitytheyGetResponse = getProbabilityStr(destination_person);
+					msgsentto = msgsentto.replaceAll(Matcher.quoteReplacement(RESPONSE_ODDS), Matcher.quoteReplacement(probabilitytheyGetResponse));
+					
 					outgoingsms.setSms(msgsentto+tailmsg);
 					outgoingsms.setTimestamp(new Date());
+					
 					
 				}else{
 					log.setOffline_msg(Boolean.TRUE);
 					incomingSMS.setPrice(BigDecimal.ZERO);
-					String pronoun2 = dest_pronoun.equalsIgnoreCase("her") ? "she" : "he";
+					String pronoun2 = (dest_gender == Gender.FEMALE) ? datingBean.getMessage(GENDER_PRONOUN_SHE, language_id,person.getOpco().getId()) : datingBean.getMessage(GENDER_PRONOUN_HE, language_id,person.getOpco().getId());
+					//String pronoun2 = dest_pronoun.equalsIgnoreCase("her") ? "she" : "he";
 					outgoingsms.setSms("Sorry "+profile.getUsername()+", '"+destination_person.getUsername()+"' is currently offline. You can chat with "+dest_pronoun+" when "+pronoun2+" gets back online.");
 				}
 				
@@ -809,24 +874,40 @@ public class DatingServiceProcessor extends GenericServiceProcessor {
 		}
 	}
 
+	private OperatorCountryRules getChatBundleRules(OperatorCountry opco) {
+		OperatorCountryRules chatbundlerule = rulescache.get("chatbundles_enabled"+opco.getId());
+		
+		if(chatbundlerule==null){
+			chatbundlerule = opcorulesEJB.getConfig("chatbundles_enabled", opco); 
+			if(chatbundlerule==null){
+				chatbundlerule = new OperatorCountryRules();
+				chatbundlerule.setActive(false);
+				chatbundlerule.setRule_value("false");
+				logger.info("faked a rule!! ");
+			}
+			rulescache.put("chatbundles_enabled"+opco.getId(), chatbundlerule);
+		}
+		return chatbundlerule;
+	}
+
+
+	private String getProbabilityStr(PersonDatingProfile destination_person) {
+		BigDecimal reply_probability = destination_person.getReplyProbability();
+		if(reply_probability==null || reply_probability.compareTo(BigDecimal.ZERO)<=0)
+			return " < 3.5%";
+		else
+			return reply_probability.multiply(BigDecimal.valueOf(100L)).setScale(2, BigDecimal.ROUND_UP).toString()+"%";
+	}
+
+
 	@Override
 	public void finalizeMe() {
 		try {
-			context.close();
-		} catch (NamingException e) {
+			if(context!=null)
+				context.close();
+		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
-	}
-
-	@Override
-	public Connection getCon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BaseEntityI getEJB() {
-		return this.datingBean;
 	}
 
 }

@@ -1,10 +1,12 @@
 package com.pixelandtag.cmp.ejb.api.sms;
 
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Matcher;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -16,10 +18,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import org.apache.log4j.Logger;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.input.SAXBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,7 +26,6 @@ import com.pixelandtag.cmp.dao.core.IncomingSMSDAOI;
 import com.pixelandtag.cmp.dao.core.MessageExtraParamsDAOI;
 import com.pixelandtag.cmp.dao.core.MessageLogDAOI;
 import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
-import com.pixelandtag.cmp.ejb.sequences.TimeStampSequenceEJBI;
 import com.pixelandtag.cmp.ejb.subscription.DNDListEJBI;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.MOProcessor;
@@ -38,7 +35,7 @@ import com.pixelandtag.cmp.entities.customer.OperatorCountry;
 import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 import com.pixelandtag.cmp.entities.customer.configs.ProfileConfigs;
-import com.pixelandtag.cmp.entities.subscription.DNDList;
+import com.pixelandtag.cmp.entities.customer.configs.ProfileType;
 import com.pixelandtag.smssenders.JsonUtilI;
 import com.pixelandtag.smssenders.Receiver;
 import com.pixelandtag.subscription.dto.MediumType;
@@ -80,9 +77,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		mandatory.add(Receiver.MO_MEDIUM_SOURCE);
 	}
 	
-	@EJB
-	private TimeStampSequenceEJBI timeStampEJB;
-	
 	@Inject
 	private static JsonUtilI jsonutil;
 	
@@ -109,7 +103,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			throw new ConfigurationException("No operator identified by the IP address => "+ip_address);
 		
 	
-		OpcoSenderReceiverProfile profile = configsEJB.getActiveOpcoSenderReceiverProfile(opco);
+		OpcoSenderReceiverProfile profile = configsEJB.findActiveProfileByTypeOrTranceiver(opco, ProfileType.RECEIVER);
 		
 		if(profile==null)
 			throw new ConfigurationException(" The operator \""+opco.toString()
@@ -127,7 +121,8 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		ProfileConfigs txid_param_name_cfg = profileconfigs.get(Receiver.HTTP_RECEIVER_OPCO_TX_ID_PARAM_NAME);
 		ProfileConfigs receiver_has_payload = profileconfigs.get(Receiver.HTTP_RECEIVER_HAS_PAYLOAD);
 		ProfileConfigs expectedcontenttype = profileconfigs.get(Receiver.HTTP_RECEIVER_EXPECTED_CONTENTTYPE);
-		ProfileConfigs mo_medium_source = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
+	    ProfileConfigs mo_medium_source = profileconfigs.get(Receiver.MO_MEDIUM_SOURCE);
+	    ProfileConfigs strippable_string = profileconfigs.get(Receiver.STRIPPABLE_STRING);
 		
 		
 		for(String param : mandatory)
@@ -143,7 +138,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		String type_ = incomingparams.get(Receiver.HTTP_RECEIVER_TYPE);
 		MediumType type = ( type_!=null && !type_.isEmpty() ) ? MediumType.get(type_) : MediumType.sms;
 		
-		
 		if(receiver_has_payload.getValue().equalsIgnoreCase("yes")){
 		
 			if(expectedcontenttype==null || 
@@ -155,11 +149,12 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			String payload = incomingparams.get(Receiver.HTTP_RECEIVER_PAYLOAD);
 			
 			String contenttype = expectedcontenttype.getValue();
-			
 			if(contenttype.equalsIgnoreCase("xml")){
 				msisdn = getValue(payload, msisdn_param_name_cfg.getValue());
 				shortcode = getValue(payload, shortcode_param_name_cfg.getValue());
 				sms = getValue(payload, sms_param_name_cfg.getValue());
+				if(sms!=null)
+					sms = sms.trim();
 				if(txid_param_name_cfg!=null && (txid_param_name_cfg.getValue()!=null || 
 						!txid_param_name_cfg.getValue().isEmpty())){
 					opcotxid = getValue(payload, txid_param_name_cfg.getValue() );
@@ -190,7 +185,18 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 			msisdn =  incomingparams.get(msisdn_param_name_cfg.getValue());
 			shortcode =  incomingparams.get(shortcode_param_name_cfg.getValue());
+			if(shortcode==null || shortcode.isEmpty()){//TODO remove after PK fixes
+				for (Map.Entry<String, String> entry : incomingparams.entrySet()){
+					if(entry.getKey().toLowerCase().equalsIgnoreCase(shortcode_param_name_cfg.getValue())){
+						shortcode = entry.getValue();
+						break;
+					}
+				}
+			}
+				
 			sms  =  incomingparams.get(sms_param_name_cfg.getValue());
+			if(sms==null || sms.isEmpty())
+				sms = incomingparams.get("message");//TODO remove after PK fixes param names
 			if(txid_param_name_cfg!=null && txid_param_name_cfg.getValue()!=null || 
 					!txid_param_name_cfg.getValue().isEmpty()){
 				opcotxid = incomingparams.get(txid_param_name_cfg.getValue());
@@ -202,6 +208,9 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(shortcode==null || shortcode.isEmpty())
 			throw new  ConfigurationException("shortcode not provided in request. Please provide this");
 		
+		opcotxid = stripStrippables(opcotxid,strippable_string);
+		msisdn = stripStrippables(msisdn,strippable_string);
+		shortcode = stripStrippables(shortcode,strippable_string);
 		
 		dndEJB.removeFromDNDList(msisdn);
 		
@@ -217,7 +226,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		if(incomingsms.getMoprocessor()==null)
 			throw new ConfigurationException("Couldn't find processor for shortcode =\""+incomingsms.getShortcode()+"\", opcoid=\""+incomingsms.getOpco().getId()+"\"");
 		
-		incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+		incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 		
 		incomingsms.setIsSubscription(Boolean.FALSE);
 		
@@ -272,13 +281,14 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	@SuppressWarnings("unchecked")
 	@Override
 	public IncomingSMS populateProcessorDetails(IncomingSMS incomingsms) {
+		String keyword = incomingsms.getSms();
 		
-		String keyword = (incomingsms.getSms()!=null && !incomingsms.getSms().isEmpty()) 
-				? replaceAllIllegalCharacters(incomingsms.getSms().split("[\\s]")[0].toUpperCase()) : "DEFAULT";
+		keyword = (keyword!=null && !keyword.isEmpty()) 
+				? replaceAllIllegalCharacters(keyword.split("[\\s]")[0].toUpperCase()) : "DEFAULT";
 				
 		Query qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
-					+ "osms.smsservice.price, "//1
+					+ "osms.price, "//1
 					+ "osms.smsservice.id, "//2
 					+ "osms.smsservice.split_mt, "//3
 					+ "osms.smsservice.event_type, "//4
@@ -296,13 +306,11 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 		
 		List<Object[]> rows = qry.getResultList();
 		
-		System.out.println("\n\n\n 1. rows.size()  :::::   "+rows.size());
-		
 		if(rows.size()<1){
 			
 			qry = em.createQuery("SELECT "
 					+ "osms.moprocessor.id, "//0
-					+ "osms.smsservice.price, "//1
+					+ "osms.price, "//1
 					+ "osms.smsservice.id, "//2
 					+ "osms.smsservice.split_mt, "//3
 					+ "osms.smsservice.event_type, "//4
@@ -321,7 +329,6 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 			keyword = "DEFAULT";
 			
 			rows = qry.getResultList();
-			System.out.println("\n\n\n 2. rows.size()  :::::   "+rows.size());
 			
 		}
 			
@@ -354,7 +361,7 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	public IncomingSMS processMo(IncomingSMS incomingsms) {
 		try {
 			if(incomingsms.getCmp_tx_id()==null || incomingsms.getCmp_tx_id().isEmpty())
-				incomingsms.setCmp_tx_id(String.valueOf(timeStampEJB.getNextTimeStampNano()));
+				incomingsms.setCmp_tx_id( UUID.randomUUID().toString() );
 			return incomingSMSDAO.save(incomingsms);
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -380,11 +387,30 @@ public class ProcessorResolverEJBImpl implements ProcessorResolverEJBI {
 	 * @return
 	 */
 	private String getValue(String xml,String tagname) {
+		if(xml==null || xml.isEmpty() || tagname==null || tagname.isEmpty())
+			return "";
+		xml = xml.toLowerCase();
+		tagname = tagname.toLowerCase();
 		String startTag = "<"+tagname+">";
 		String endTag = "</"+tagname+">";
 		int start = xml.indexOf(startTag)+startTag.length();
 		int end  = xml.indexOf(endTag);
+		if(start<0 || end<0)
+			return "";
 		return xml.substring(start, end);
+	}
+	
+	
+	private String stripStrippables(String originalStr, ProfileConfigs strippable_string){
+		if((originalStr==null || originalStr.isEmpty()))
+			return  originalStr;
+		if(strippable_string!=null && strippable_string.getValue()!=null && !strippable_string.getValue().isEmpty()){
+			String[] strippables = strippable_string.getValue().split(",");
+			for(String strippable : strippables){
+				originalStr = originalStr.replaceAll(  Matcher.quoteReplacement(strippable), Matcher.quoteReplacement("") )   ;
+			}
+		}
+		return originalStr.trim();
 	}
 	
 	

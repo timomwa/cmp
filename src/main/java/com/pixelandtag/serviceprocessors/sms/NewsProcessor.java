@@ -3,22 +3,14 @@ package com.pixelandtag.serviceprocessors.sms;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Properties;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
 
 import snaq.db.DBPoolDataSource;
 
 import com.pixelandtag.api.GenericServiceProcessor;
-import com.pixelandtag.cmp.ejb.BaseEntityI;
-import com.pixelandtag.cmp.ejb.CMPResourceBeanRemote;
 import com.pixelandtag.cmp.entities.IncomingSMS;
 import com.pixelandtag.cmp.entities.OutgoingSMS;
-import com.pixelandtag.connections.DriverUtilities;
 import com.pixelandtag.util.UtilCelcom;
 import com.pixelandtag.web.beans.RequestObject;
 
@@ -26,32 +18,11 @@ public class NewsProcessor extends GenericServiceProcessor{
 
 	private final Logger logger = Logger.getLogger(NewsProcessor.class);
 	private DBPoolDataSource ds;
-	private InitialContext context;
-	private CMPResourceBeanRemote cmpbean;
-    
-    public void initEJB() throws NamingException{
-    	String JBOSS_CONTEXT="org.jboss.naming.remote.client.InitialContextFactory";;
-		 Properties props = new Properties();
-		 props.put(Context.INITIAL_CONTEXT_FACTORY, JBOSS_CONTEXT);
-		 props.put(Context.PROVIDER_URL, "remote://"+mtsenderprop.getProperty("ejbhost")+":"+mtsenderprop.getProperty("ejbhostport"));
-		 props.put(Context.SECURITY_PRINCIPAL, mtsenderprop.getProperty("SECURITY_PRINCIPAL"));
-		 props.put(Context.SECURITY_CREDENTIALS, mtsenderprop.getProperty("SECURITY_CREDENTIALS"));
-		 props.put("jboss.naming.client.ejb.context", true);
-		 context = new InitialContext(props);
-		 cmpbean =  (CMPResourceBeanRemote) 
-       		context.lookup("cmp/CMPResourceBean!com.pixelandtag.cmp.ejb.CMPResourceBeanRemote");
-		 
-		 logger.info("Successfully initialized EJB CMPResourceBeanRemote !!");
-    }
+   
 	public NewsProcessor() throws Exception{
-		init_datasource();
-		initEJB();
+		
 	}
 	
-	private void init_datasource(){
-		
-		
-	}
 	
 	public OutgoingSMS process(IncomingSMS incomingsms) {
 		
@@ -85,7 +56,6 @@ public class NewsProcessor extends GenericServiceProcessor{
 					
 					String news = rs.getString("Text").trim();
 					outgoingsms.setSms(news);
-					//int newsID = rs.getInt("ID");
 				}
 				
 			}else{
@@ -143,38 +113,17 @@ public class NewsProcessor extends GenericServiceProcessor{
 		
 		}
 	}
-
-	@Override
-	public void finalizeMe() {
-		
-
-		try{
-			
-			context.close();
-		
-		}catch(Exception e){
-			
-			logger.error(e.getMessage(),e);
-		
-		}
-		
-		try {
-			
-			ds.releaseConnectionPool();
-			
-		
-		} catch (Exception e) {
-			
-			logger.error(e.getMessage(),e);
-			
-		}
-		
-	}
-
+	
 	
 	@Override
-	public BaseEntityI getEJB() {
-		return this.cmpbean;
+	public void finalizeMe() {
+		try {
+			if(context!=null)
+				context.close();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
+
 
 }

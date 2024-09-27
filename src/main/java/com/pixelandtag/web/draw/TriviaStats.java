@@ -35,7 +35,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
  * @web.servlet-init-param name="A parameter" value="A value"
  */
 public class TriviaStats extends HttpServlet {
-	final String DB = "pixeland_content360";
+	final String DB = "cmp";
 	com.pixelandtag.util.POI poi = new com.pixelandtag.util.POI();
 	int message_input_size = 300;
 	static final long serialVersionUID = 0;

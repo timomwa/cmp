@@ -19,6 +19,7 @@ import com.pixelandtag.cmp.dao.opco.MOProcessorDAOI;
 import com.pixelandtag.cmp.dao.opco.OpcoSenderProfileDAOI;
 import com.pixelandtag.cmp.entities.MOProcessor;
 import com.pixelandtag.cmp.entities.customer.OperatorCountry;
+import com.pixelandtag.cmp.entities.customer.configs.ConfigurationException;
 import com.pixelandtag.cmp.entities.customer.configs.OpcoSenderReceiverProfile;
 
 
@@ -54,9 +55,14 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 	}
 	
 	@Override
-	public OpcoSenderReceiverProfile getActiveProfileForOpco(String opcocode){
+	public List<OpcoSenderReceiverProfile> getAllActiveSenderOrTranceiverProfiles() throws Exception{ 
+		return opcosenderprofDAO.getAllActiveSenderOrTranceiverProfiles();
+	}
+	
+	@Override
+	public OpcoSenderReceiverProfile getActiveProfileForOpco(String opcocode) throws ConfigurationException{
 		OperatorCountry opco = opcoEJB.findOpcoByCode(opcocode);
-		return opcosenderprofDAO.findBy("opco", opco);
+		return opcosenderprofDAO.findActiveProfile(opco);
 	}
 	
 	@Override
@@ -79,7 +85,8 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 					+ "osms.smsservice.id, "//2
 					+ "osms.smsservice.split_mt, "//3
 					+ "osms.smsservice.event_type, "//4
-					+ "osms.smsservice.price_point_keyword  "//5
+					+ "osms.smsservice.price_point_keyword,  "//5
+					+ "osms.serviceid "//5
 				+ "FROM OpcoSMSService osms"
 				+ " WHERE osms.moprocessor.shortcode=:shortcode "
 				+ " AND osms.moprocessor.enable=1 "
@@ -103,7 +110,8 @@ public class OpcoSenderProfileEJBImpl implements OpcoSenderProfileEJBI {
 					+ "osms.smsservice.id, "//2
 					+ "osms.smsservice.split_mt, "//3
 					+ "osms.smsservice.event_type, "//4
-					+ "osms.smsservice.price_point_keyword  "//5
+					+ "osms.smsservice.price_point_keyword,  "//5
+					+ "osms.serviceid "//5
 				+ "FROM OpcoSMSService osms"
 				+ " WHERE osms.moprocessor.shortcode=:shortcode "
 				+ " AND osms.moprocessor.enable=1 "

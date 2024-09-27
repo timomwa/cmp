@@ -2,14 +2,13 @@ package com.pixelandtag.billing;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.inject.Inject;
 import javax.ws.rs.HttpMethod;
@@ -25,28 +24,38 @@ import com.pixelandtag.sms.mt.workerthreads.GenericHTTPClient;
 import com.pixelandtag.sms.mt.workerthreads.GenericHTTPParam;
 import com.pixelandtag.sms.mt.workerthreads.GenericHttpResp;
 import com.pixelandtag.sms.producerthreads.Billable;
+import com.pixelandtag.sms.producerthreads.PricePointException;
 import com.pixelandtag.smssenders.Encryptor;
 import com.pixelandtag.smssenders.EncryptorImpl;
 import com.pixelandtag.smssenders.JsonUtilI;
+import com.pixelandtag.smssenders.JsonUtilImpl;
+import com.pixelandtag.smssenders.MessageSenderException;
 import com.pixelandtag.smssenders.SenderResp;
 
 public class HttpBiller extends GenericBiller {
 	
+
+
 	private GenericHTTPClient httpclient;
 	
 	
 	@Inject
 	private Encryptor encryptor = new EncryptorImpl();
 	
-	@Inject
-	private static JsonUtilI jsonutil;
+	//private static JsonUtilI jsonutil = new JsonUtilImpl();
 	
-	
-	private Map<String,BillerProfilerConfig> configuration;
+	private static final String TEST_MSIDN = "254775252504";
+	private Map<String,BillerProfileConfig> configuration;
 	
 	public HttpBiller(BillingConfigSet billingconfig) throws Exception {
 		super(billingconfig);
-		httpclient = new GenericHTTPClient(billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
+		try{
+			logger.info(" >>>>>>>>> HTTP_BILLER_PROTOCOL ::: "+billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
+			httpclient = new GenericHTTPClient(billingconfig.getOpcoconfigs().get(HTTP_BILLER_PROTOCOL).getValue());
+		}catch(Exception exp){
+			logger.error(exp.getMessage(), exp);
+			throw exp;
+		}
 	}
 
 	private Logger logger = Logger.getLogger(getClass());
@@ -62,17 +71,51 @@ public class HttpBiller extends GenericBiller {
 		GenericHTTPParam generic_HTTP_BILLER_parameters = new GenericHTTPParam();
 		generic_HTTP_BILLER_parameters.setId(billable.getId());
 		
+		boolean testing = billable.getMsisdn().trim().equalsIgnoreCase(TEST_MSIDN);
+			
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		if(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME)!=null)
-			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME).getValue(), billable.getCp_tx_id()));//"cptxid"
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_TRANSACTION_ID_PARAM_NAME).getValue(), String.valueOf( billable.getId() ) ));//"cptxid"
 		
-		qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME).getValue(),billable.getMsisdn()));//"msisdn"
+		if(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_MSISDN_PARAM_NAME).getValue(),billable.getMsisdn()));//"msisdn"
+		
+		if(this.configuration.get(HTTP_BILLER_PRICE_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_PRICE_PARAM_NAME).getValue(),billable.getPrice().toString()));//"price"
+		
+		if(this.configuration.get(HTTP_BILLER_SHORTCODE_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_SHORTCODE_PARAM_NAME).getValue(),billable.getShortcode()));//"shortcode"
+		
+		if(this.configuration.get(HTTP_BILLER_KEYWORD_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_KEYWORD_PARAM_NAME).getValue(),billable.getKeyword()));//"keyword" 
+		
+		if(this.configuration.get(HTTP_BILLER_EVENT_TYPE_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_EVENT_TYPE_PARAM_NAME).getValue(),billable.getEvent_type().getName()));//"event_type" 
+		
+		if(this.configuration.get(HTTP_BILLER_CP_ID_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_CP_ID_PARAM_NAME).getValue(),billable.getCp_id()));//"cp_id" 
+		
+		if(this.configuration.get(HTTP_BILLER_OPERATION_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_OPERATION_PARAM_NAME).getValue(),billable.getOperation()));//"operation" 
+		
+		if(this.configuration.get(HTTP_BILLER_SERVICE_ID_PARAM_NAME)!=null)
+			qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_SERVICE_ID_PARAM_NAME).getValue(),billable.getService_id()));//"serviceid" 
+		
+		if(this.configuration.get(HTTP_BILLER_PRICE_POINT_PARAM_NAME)!=null)
+			try {
+				qparams.add(new BasicNameValuePair(this.configuration.get(HTTP_BILLER_PRICE_POINT_PARAM_NAME).getValue(),billable.getPricePointKeyword()));
+			} catch (PricePointException e1) {
+				logger.error(e1.getMessage(), e1);
+				throw new BillerConfigException(e1.getMessage(), e1);
+			}
+		
+		
 		
 		if(this.configuration.get(HTTP_BILLER_USE_HTTP_HEADER).getValue().equalsIgnoreCase("yes")){
 			
 			Map<String,String> headerParams = new HashMap<String,String>();
 			
-			BillerProfilerConfig headerhasunameandpwd = this.configuration.get(HTTP_BILLER_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD);
+			BillerProfileConfig headerhasunameandpwd = this.configuration.get(HTTP_BILLER_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD);
 			
 			if(headerhasunameandpwd==null || headerhasunameandpwd.getValue()==null || headerhasunameandpwd.getValue().isEmpty()){
 				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADER_AUTH_HAS_USERNAME_AND_PASSWORD+"\" for this opco");
@@ -80,15 +123,15 @@ public class HttpBiller extends GenericBiller {
 			
 			if(headerhasunameandpwd.getValue().equalsIgnoreCase("yes")){
 				
-				BillerProfilerConfig headerauthusernameparam = this.configuration.get(HTTP_BILLER_HEADER_AUTH_USERNAME_PARAM_NAME);
+				BillerProfileConfig headerauthusernameparam = this.configuration.get(HTTP_BILLER_HEADER_AUTH_USERNAME_PARAM_NAME);
 				if(headerauthusernameparam==null || headerauthusernameparam.getValue()==null || headerauthusernameparam.getValue().isEmpty()){
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADER_AUTH_USERNAME_PARAM_NAME+"\" for this opco");
 				}
-				BillerProfilerConfig headerauthpasswordparam = this.configuration.get(HTTP_BILLER_HEADER_AUTH_PASSWORD_PARAM_NAME);
+				BillerProfileConfig headerauthpasswordparam = this.configuration.get(HTTP_BILLER_HEADER_AUTH_PASSWORD_PARAM_NAME);
 				if(headerauthpasswordparam==null || headerauthpasswordparam.getValue()==null || headerauthpasswordparam.getValue().isEmpty()){
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADER_AUTH_PASSWORD_PARAM_NAME+"\" for this opco");
 				}
-				BillerProfilerConfig encryptionmode = this.configuration.get(HTTP_BILLER_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE);
+				BillerProfileConfig encryptionmode = this.configuration.get(HTTP_BILLER_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE);
 				if(encryptionmode==null || encryptionmode.getValue()==null || encryptionmode.getValue().isEmpty()){
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADER_AUTH_PASSWORD_ENCRYPTION_MODE+"\" for this opco");
 				}
@@ -97,11 +140,11 @@ public class HttpBiller extends GenericBiller {
 				String password_param_name = headerauthpasswordparam.getValue();
 				String encryptionmethod = encryptionmode.getValue();
 				
-				BillerProfilerConfig usernamevalue = this.configuration.get(username_param_name);
+				BillerProfileConfig usernamevalue = this.configuration.get(username_param_name);
 				if(usernamevalue==null)
 					throw new BillerConfigException("You''ve not set the value for\""+username_param_name+"\" as the username param");
 				
-				BillerProfilerConfig passwordvalue = this.configuration.get(password_param_name);
+				BillerProfileConfig passwordvalue = this.configuration.get(password_param_name);
 				if(passwordvalue==null)
 					throw new BillerConfigException("You''ve not set value for \""+password_param_name+"\" as the password param");
 				
@@ -109,31 +152,72 @@ public class HttpBiller extends GenericBiller {
 				String username = usernamevalue.getValue();
 				String password = passwordvalue.getValue();
 				
+				BillerProfileConfig timestampFormat = this.configuration.get(HTTP_BILLER_TIMESTAMP_FORMAT);
+				
+				String httpBillertimeformat = timestampFormat!=null ? timestampFormat.getValue() : DEFAULT_TIMESTAMP_FORMAT;
+				
+				
+				BillerProfileConfig pre_encode_tpl = this.configuration.get(HTTP_BILLER_PRE_ENCODE_TEMPLATE);
+				
 				String digest = "";
 				try {
-					digest = encryptor.encrypt(username,password, encryptionmethod);
+					if(pre_encode_tpl==null){
+						digest = encryptor.encode(username,password, encryptionmethod);
+					}else{
+						String template = pre_encode_tpl.getValue();
+						
+						template = template.replaceAll("\\$\\{PASSWORD\\}", Matcher.quoteReplacement(password));
+						template = template.replaceAll("\\$\\{USERNAME\\}", Matcher.quoteReplacement(username));
+						template = template.replaceAll("\\$\\{TIMESTAMP\\}", Matcher.quoteReplacement(  dateToString( ( billable.getTimeStamp()==null ? new Date() : billable.getTimeStamp()) ,httpBillertimeformat) ));
+						
+						
+						digest = encryptor.encode(template, encryptionmethod);
+						
+						
+						
+					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(),e);
 					throw new BillerConfigException("Could not encrypt header params",e);
 				}
 				
-				BillerProfilerConfig authmethodparamname = this.configuration.get(HTTP_BILLER_HEADER_AUTH_METHOD_PARAM_NAME);
-				if(authmethodparamname==null || authmethodparamname.getValue()==null || authmethodparamname.getValue().isEmpty()){
+				BillerProfileConfig authmethodparamname = this.configuration.get(HTTP_BILLER_HEADER_AUTH_METHOD_PARAM_NAME);
+				if(authmethodparamname==null || authmethodparamname.getValue()==null ){
 					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADER_AUTH_METHOD_PARAM_NAME+"\" for this opco");
 				}
-				String authmethod = authmethodparamname.getValue();//e.g Basic
+				
+				String authmethod =  authmethodparamname.getValue();//e.g Basic				
+				
+				BillerProfileConfig httpheaderauthparam = this.configuration.get(HTTP_BILLER_HEADERAUTH_PARAM_NAME);
+				if(httpheaderauthparam==null || httpheaderauthparam.getValue()==null || httpheaderauthparam.getValue().isEmpty()){
+					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADERAUTH_PARAM_NAME+"\" for this opco");
+				}
 				
 				
 				
 				if(this.configuration.get(HTTP_BILLER_HEADER_AUTH_HAS_MULTIPLE_KV_PAIRS).getValue().equalsIgnoreCase("yes")){
 					
-					for(Map.Entry<String,BillerProfilerConfig> config : this.configuration.entrySet()){
+					for(Map.Entry<String,BillerProfileConfig> config : this.configuration.entrySet()){
 						
 						String key = config.getKey();
 						
 						if(key.trim().toLowerCase().startsWith(HTTP_BILLER_HEADER_AUTH_PARAM_PREFIX)){//All other authentication header params MUST have this prefix
 							String param_name = key.split(HTTP_BILLER_HEADER_AUTH_PARAM_PREFIX)[1];
-							auth_header_value += " "+param_name+"=\""+config.getValue().getValue()+"\"";
+							
+							if(config.getValue().getValue().contains("${TIMESTAMP}")){
+								try {
+									auth_header_value += " "+param_name+": \""+config.getValue().getValue().replace("${TIMESTAMP}", dateToString( (billable.getTimeStamp()==null ? new Date() : billable.getTimeStamp()),httpBillertimeformat))+"\"";
+								} catch (ParseException e) {
+									logger.error(e.getMessage(),e);
+									throw new BillerConfigException("Couldn't format timestamp",e);
+								}
+							}else{
+								auth_header_value += " "+param_name+": \""+config.getValue().getValue()+"\"";
+							}
+							
+							
+							
+							headerParams.put(param_name, config.getValue().getValue());
 						}
 						
 					}
@@ -142,11 +226,12 @@ public class HttpBiller extends GenericBiller {
 					
 				}else{
 					
-					auth_header_value =  authmethod+" "+digest;
+					auth_header_value =  ""+(authmethod+" "+digest).trim()+"";
 					
 				}
 				
-				for(Map.Entry<String,BillerProfilerConfig> config : this.configuration.entrySet()){//Any other header param must start with the value HTTP_BILLER_HEADER_PREFIX
+				
+				for(Map.Entry<String,BillerProfileConfig> config : this.configuration.entrySet()){//Any other header param must start with the value HTTP_BILLER_HEADER_PREFIX
 					
 					String key = config.getKey();
 					if(key.trim().toLowerCase().startsWith(HTTP_BILLER_HEADER_PREFIX)){
@@ -155,23 +240,23 @@ public class HttpBiller extends GenericBiller {
 					}
 				}
 				
-				BillerProfilerConfig httpheaderauthparam = this.configuration.get(HTTP_BILLER_HEADERAUTH_PARAM_NAME);
-				if(httpheaderauthparam==null || httpheaderauthparam.getValue()==null || httpheaderauthparam.getValue().isEmpty()){
-					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_HEADERAUTH_PARAM_NAME+"\" for this opco");
-				}
 				headerParams.put(httpheaderauthparam.getValue(), auth_header_value.trim());
+				
+				
 				
 			}
 			
 			generic_HTTP_BILLER_parameters.setHeaderParams(headerParams);
 			
 		}
+		
+		
 			
 		
 		
 		if(this.configuration.get(HTTP_BILLER_HAS_PAYLOAD).getValue().equalsIgnoreCase("yes")){
 			
-			BillerProfilerConfig httppayloadtemplate = this.configuration.get(HTTP_BILLER_PAYLOAD_TEMPLATE);
+			BillerProfileConfig httppayloadtemplate = this.configuration.get(HTTP_BILLER_PAYLOAD_TEMPLATE);
 			if(httppayloadtemplate==null || httppayloadtemplate.getValue()==null || httppayloadtemplate.getValue().isEmpty()){
 				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_PAYLOAD_TEMPLATE+"\" for this opco");
 			}
@@ -187,7 +272,7 @@ public class HttpBiller extends GenericBiller {
 			
 			
 			
-			for(Map.Entry<String,BillerProfilerConfig> config : this.configuration.entrySet()){//Any other header param
+			for(Map.Entry<String,BillerProfileConfig> config : this.configuration.entrySet()){//Any other header param
 				
 				String key = config.getKey();
 				if(key.trim().toLowerCase().startsWith(HTTP_BILLER_PAYLOAD_PARAM_PREFIX)){
@@ -210,7 +295,7 @@ public class HttpBiller extends GenericBiller {
 		String url = this.configuration.get(HTTP_BILLER_BASE_URL).getValue();
 		
 		if(this.configuration.get(HTTP_BILLER_IS_RESTFUL).getValue().equalsIgnoreCase("yes")){
-			for(Map.Entry<String,BillerProfilerConfig> config : this.configuration.entrySet()){
+			for(Map.Entry<String,BillerProfileConfig> config : this.configuration.entrySet()){
 				
 				String key = config.getKey();
 				if(key.trim().toLowerCase().startsWith(HTTP_BILLER_REST_PATH_PARAM_PREFIX)){
@@ -234,82 +319,159 @@ public class HttpBiller extends GenericBiller {
 		
 		generic_HTTP_BILLER_parameters.setUrl(url);
 		
-		BillerProfilerConfig httpmethod = this.configuration.get(HTTP_BILLER_REQUEST_METHOD);
+		BillerProfileConfig httpmethod = this.configuration.get(HTTP_BILLER_REQUEST_METHOD);
 		
 		if(httpmethod!=null)
-			generic_HTTP_BILLER_parameters.setHttpmethod(HttpMethod.POST);
+			generic_HTTP_BILLER_parameters.setHttpmethod(httpmethod.getValue().trim().toUpperCase());
 		else
 			logger.warn("No configuration for \""+HTTP_BILLER_REQUEST_METHOD
 					+"\" has been provided, so we will use "
 					+ "HTTP POST as default. If you wish to override this, "
 					+ "provide this config in db");
-		
+		logger.debug(generic_HTTP_BILLER_parameters.toString() );
 		
 		GenericHttpResp resp = httpclient.call(generic_HTTP_BILLER_parameters);
 		
-		logger.info("\n\n\t\t>>>url>>> : "+url
+		String dbg = "\n\n\t\t>>>url>>> : "+url
 				+"\n\t\tauth_header_value = "+auth_header_value+
 				"\n\t\t>>>payload>>> : "+payload_template+
-				"\n\t\t>>>response>>> : "+resp.getBody()+"\n\n");
+				"\n\n\t\t>>>response>>> : "+resp.getBody()+"\n"
+			  + "\n\t\t>>>response code>>> : "+resp.getResp_code()
+			    + "\n\t\t>>>response contenttype>>> : "+resp.getContenttype()
+						+ "\n\n";
+		if(testing)
+			logger.info(dbg);
+		else
+			logger.debug(dbg);
 		
 		response.setRespcode(String.valueOf(resp.getResp_code()));
-		if(resp.getResp_code()>=200 && resp.getResp_code()<=299 )//All http 200 series are treated as success
+		if(resp.getResp_code()>=200 && resp.getResp_code()<=299)//All http 200 series are treated as success. For Orange
 			response.setSuccess(Boolean.TRUE);
 		
 		
+		BillerProfileConfig expected_contenttype = this.configuration.get(HTTP_BILLER_EXPECTED_CONTENTTYPE);
+		if((expected_contenttype==null || expected_contenttype.getValue()==null || expected_contenttype.getValue().trim().isEmpty()) && (resp.getContenttype()==null || resp.getContenttype().trim().isEmpty() )){
+			throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_EXPECTED_CONTENTTYPE+"\" for this opco. The call didn't return any contenttype either");
+		}
 		
 		//How do we parse the responses and get meaningful data that will match com.pixelandtag.smssenders.PlainHttpSender.sendSMS(MTsms).response?
-		if(resp.getContenttype()!=null && resp.getContenttype().toLowerCase().contains("json")){
+		if((resp.getContenttype()!=null && resp.getContenttype().toLowerCase().trim().contains("json")) || expected_contenttype.getValue().trim().equalsIgnoreCase("json")){
 			try {
 				JSONObject jsonobject = new JSONObject(resp.getBody());
 				
-				BillerProfilerConfig pathtorefval = this.configuration.get(HTTP_BILLER_RESP_JSON_REF_VALUE_KEY);
+				BillerProfileConfig pathtorefval = this.configuration.get(HTTP_BILLER_RESP_REF_VALUE_KEY);
 				if(pathtorefval==null || pathtorefval.getValue()==null || pathtorefval.getValue().isEmpty()){
-					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_JSON_REF_VALUE_KEY+"\" for this opco");
+					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_REF_VALUE_KEY+"\" for this opco");
 				}
 				
-				BillerProfilerConfig respmsgcnf = this.configuration.get(HTTP_BILLER_RESP_JSON_RESP_MSG_KEY);
-				if(respmsgcnf==null || respmsgcnf.getValue()==null || respmsgcnf.getValue().isEmpty()){
-					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_JSON_RESP_MSG_KEY+"\" for this opco");
+				BillerProfileConfig respmsgcnf_failure = this.configuration.get(HTTP_BILLER_RESP_RESP_MSG_KEY_FAILURE);
+				if(respmsgcnf_failure==null || respmsgcnf_failure.getValue()==null || respmsgcnf_failure.getValue().isEmpty()){
+					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_RESP_MSG_KEY_FAILURE+"\" for this opco");
 				}
 				
-				BillerProfilerConfig respcodeconfg = this.configuration.get(HTTP_BILLER_RESP_JSON_RESPCODE_KEY);
-				if(respcodeconfg==null || respcodeconfg.getValue()==null || respcodeconfg.getValue().isEmpty()){
-					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_JSON_RESPCODE_KEY+"\" for this opco");
+				BillerProfileConfig respmsgcnf_success = this.configuration.get(HTTP_BILLER_RESP_RESP_MSG_KEY_SUCCESS);
+				if(respmsgcnf_success==null || respmsgcnf_success.getValue()==null || respmsgcnf_success.getValue().isEmpty()){
+					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_RESP_MSG_KEY_SUCCESS+"\" for this opco");
 				}
 				
+				BillerProfileConfig success_string = this.configuration.get(HTTP_BILLER_RESP_SUCCESS_STRING);
+				if(success_string==null || success_string.getValue()==null || success_string.getValue().isEmpty()){
+					throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_SUCCESS_STRING+"\" for this opco");
+				}
+				
+				StringBuffer sb = new StringBuffer();
+				
+				sb.append("\n\t\t").append("A. resp.getBody() > ").append(resp.getBody());//.append("\n");
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
+				JsonUtilI jsonutil = new JsonUtilImpl();
 				jsonutil.loadJson(jsonobject);
 				response.setRefvalue((String)jsonutil.getValue(pathtorefval.getValue()));
-				response.setResponseMsg((String)jsonutil.getValue(respmsgcnf.getValue()));
-				response.setRespcode((String)jsonutil.getValue(respcodeconfg.getValue()));
+				sb.append("\t\t").append("B. response.getrefValue() > ").append(response.getRefvalue());//.append("\n");	
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
+				String respmsg = (String)jsonutil.getValue(respmsgcnf_failure.getValue());
+				logger.info( " A. respmsg ----> "+respmsg );
+				sb.append("\t\t").append("C.  1. respmsg  > ").append( respmsg );//.append("\n");	
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
+				if(respmsg==null || respmsg.trim().isEmpty())
+					respmsg =   (String)jsonutil.getValue(respmsgcnf_success.getValue());
+				logger.info( " B. respmsg ----> "+respmsg );
+				logger.info( " B. respmsgcnf_success.getValue() ----> "+respmsgcnf_success.getValue() );
+				sb.append("\t\t").append("D.  2. respmsg  > ").append( respmsg );//.append("\n");	
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
+				if(respmsg==null || respmsg.trim().isEmpty()){
+					respmsg = resp.getBody();
+				}
+				response.setResponseMsg(respmsg);
+				logger.info( " response ----> "+response );
+				logger.info( " respmsg ----> "+respmsg );
+				logger.info( " success_string ----> "+success_string );
+				logger.info( " success_string.getValue() ----> "+(success_string!=null ? success_string.getValue() : "Bloody null!!!!") );
+				response.setSuccess(  respmsg.contains(  success_string.getValue().trim()  )    );
+				sb.append("\t\t").append("E.  success_string > ").append( success_string.getValue() );//.append("\n");
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
+				sb.append("\t\t").append("F.  response.getSuccess() > ").append( response.getSuccess() );//.append("\n");
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 				jsonutil.reset();
 				
+				if(testing){
+					logger.info(sb.toString());
+					sb.setLength(0);
+				}
 			} catch (JSONException e) {
 				logger.error(e.getMessage(),e);
 				throw new BillerConfigException("Could not parse the json response json -> "+resp.getBody(),e);
+			}catch (Exception e) {
+				logger.error(e.getMessage(),e);
+				throw new BillerConfigException(" Problem reading json response json -> "+resp.getBody(),e);
 			}
 			
-		}else if(resp.getContenttype()!=null &&  resp.getContenttype().toLowerCase().contains("xml")){
+		}else if((resp.getContenttype()!=null &&  resp.getContenttype().toLowerCase().trim().contains("xml")) || expected_contenttype.getValue().trim().equalsIgnoreCase("xml")){
 			
 			
-			BillerProfilerConfig pathtorefval = this.configuration.get(HTTP_BILLER_RESP_XML_REF_VALUE_KEY);
+			BillerProfileConfig pathtorefval = this.configuration.get(HTTP_BILLER_RESP_REF_VALUE_KEY);
 			if(pathtorefval==null || pathtorefval.getValue()==null || pathtorefval.getValue().isEmpty()){
-				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_XML_REF_VALUE_KEY+"\" for this opco");
+				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_REF_VALUE_KEY+"\" for this opco");
 			}
 			
-			BillerProfilerConfig respmsgcnf = this.configuration.get(HTTP_BILLER_RESP_XML_RESP_MSG_KEY);
-			if(respmsgcnf==null || respmsgcnf.getValue()==null || respmsgcnf.getValue().isEmpty()){
-				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_XML_RESP_MSG_KEY+"\" for this opco");
+			BillerProfileConfig respmsgcnf_failure = this.configuration.get(HTTP_BILLER_RESP_RESP_MSG_KEY_FAILURE);
+			if(respmsgcnf_failure==null || respmsgcnf_failure.getValue()==null || respmsgcnf_failure.getValue().isEmpty()){
+				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_RESP_MSG_KEY_FAILURE+"\" for this opco");
 			}
 			
-			BillerProfilerConfig respcodeconfg = this.configuration.get(HTTP_BILLER_RESP_XML_RESPCODE_KEY);
-			if(respcodeconfg==null || respcodeconfg.getValue()==null || respcodeconfg.getValue().isEmpty()){
-				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_XML_RESPCODE_KEY+"\" for this opco");
+			BillerProfileConfig respmsgcnf_success = this.configuration.get(HTTP_BILLER_RESP_RESP_MSG_KEY_SUCCESS);
+			if(respmsgcnf_success==null || respmsgcnf_success.getValue()==null || respmsgcnf_success.getValue().isEmpty()){
+				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_RESP_MSG_KEY_SUCCESS+"\" for this opco");
+			}
+			
+			BillerProfileConfig success_string = this.configuration.get(HTTP_BILLER_RESP_SUCCESS_STRING);
+			if(success_string==null || success_string.getValue()==null || success_string.getValue().isEmpty()){
+				throw new BillerConfigException("No configuration set for \""+HTTP_BILLER_RESP_SUCCESS_STRING+"\" for this opco");
 			}
 			
 			response.setRefvalue(getValue(resp.getBody(),pathtorefval.getValue()));
-			response.setResponseMsg(getValue(resp.getBody(),respmsgcnf.getValue()));
-			response.setRespcode(getValue(resp.getBody(),respcodeconfg.getValue()));
+			String respmsg = getValue(resp.getBody(),respmsgcnf_failure.getValue());
+			if(respmsg==null || respmsg.trim().isEmpty())
+				respmsg =  getValue(resp.getBody(),respmsgcnf_success.getValue());
+			response.setResponseMsg(respmsg);
+			response.setSuccess(  respmsg.contains(  success_string.getValue().trim()  )    );
 			
 		}else{
 			
@@ -331,10 +493,14 @@ public class HttpBiller extends GenericBiller {
 	 * @return
 	 */
 	private String getValue(String xml,String tagname) {
+		if(xml==null || tagname==null || xml.isEmpty() || tagname.isEmpty())
+			return "";
 		String startTag = "<"+tagname+">";
 		String endTag = "</"+tagname+">";
 		int start = xml.indexOf(startTag)+startTag.length();
 		int end  = xml.indexOf(endTag);
+		if(start<0 || end<0)
+			return "";
 		return xml.substring(start, end);
 	}
 	
@@ -362,11 +528,11 @@ public class HttpBiller extends GenericBiller {
 				throw new BillerConfigException("No billing configuration set for \""+param+"\" for this opco");
 	}
 
-	public Map<String, BillerProfilerConfig> getConfiguration() {
+	public Map<String, BillerProfileConfig> getConfiguration() {
 		return configuration;
 	}
 
-	public void setConfiguration(Map<String, BillerProfilerConfig> configuration) {
+	public void setConfiguration(Map<String, BillerProfileConfig> configuration) {
 		this.configuration = configuration;
 	}
 

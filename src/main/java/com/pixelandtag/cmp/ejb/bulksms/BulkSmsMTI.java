@@ -35,4 +35,11 @@ public interface BulkSmsMTI {
 	 * @return
 	 */
 	public List<BulkSMSQueue> getUnprocessed(Long size);
+
+	/**
+	 * 
+	 * @param bulktext
+	 * @return
+	 */
+	public BulkSMSQueue saveOrUpdate(BulkSMSQueue bulktext)  throws Exception;
 }

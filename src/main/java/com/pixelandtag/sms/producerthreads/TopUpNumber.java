@@ -26,7 +26,7 @@ public class TopUpNumber implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	
-	@Column(name = "number", unique=true)
+	@Column(name = "number", unique=true,length=20)
 	@Index(name="numberIdx")
 	private String number;
 	

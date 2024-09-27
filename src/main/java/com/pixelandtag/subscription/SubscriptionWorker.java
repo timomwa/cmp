@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -28,7 +29,7 @@ public class SubscriptionWorker extends Thread{
 	
 	private int serviceid;
 	private String name;
-	private String connstr;// = "jdbc:mysql://db/pixeland_content360?user=root&password=";
+	private String connstr;
 	private int subs = 0;
 	private boolean busy;
 	public static final int PROCESSING = 1;
@@ -138,7 +139,7 @@ public class SubscriptionWorker extends Thread{
 					
 					IncomingSMS incomingsms = new IncomingSMS();
 					
-					incomingsms.setCmp_tx_id(cmpbean.generateNextTxId());
+					incomingsms.setCmp_tx_id( UUID.randomUUID().toString()  );
 					incomingsms.setMsisdn(sub.getMsisdn());
 					incomingsms.setShortcode(dto.getShortcode());
 					incomingsms.setPrice(BigDecimal.valueOf(dto.getPrice()));
@@ -159,7 +160,7 @@ public class SubscriptionWorker extends Thread{
 						slog.setSubscription_id(sub.getId());
 						slog.setTimeStamp(new Date());
 						try{
-							cmpbean.saveOrUpdate(slog);
+							subscriptionbean.saveOrUpdate(slog);
 						}catch(Exception e){
 							logger.error(e.getMessage(),e);
 						}

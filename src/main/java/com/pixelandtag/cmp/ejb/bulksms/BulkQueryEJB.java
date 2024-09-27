@@ -26,7 +26,6 @@ import com.pixelandtag.cmp.ejb.bulksms.PlanException;
 
 @Stateless
 @Remote
-@TransactionManagement(TransactionManagementType.BEAN)
 public class BulkQueryEJB implements BulkQueryI {
 	
 	private Logger logger = Logger.getLogger(getClass());

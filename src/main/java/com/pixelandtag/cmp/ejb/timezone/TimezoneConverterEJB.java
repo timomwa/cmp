@@ -10,9 +10,13 @@ import java.util.regex.Pattern;
 
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+
+import com.pixelandtag.cmp.dao.core.TimeZoneConfigDAOI;
+import com.pixelandtag.cmp.entities.TimeZoneConfig;
 
 @Stateless
 @Remote
@@ -20,6 +24,8 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	
 	
 	//private Logger logger = Logger.getLogger(getClass());
+	@Inject
+	private TimeZoneConfigDAOI timezoneConfigDao;
 	
 	SimpleDateFormat formatDayOfMonth  = new SimpleDateFormat("d");
 	
@@ -45,6 +51,10 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	    default:
 	        return "th";
 	    }
+	}
+	
+	public TimeZoneConfig getLatestTimeZoneConfig(){
+		return timezoneConfigDao.getLatest();
 	}
 	
 	/* (non-Javadoc)
@@ -158,12 +168,12 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	 */
 	@Override
 	public Date convertToHostTimezone(String time, String sourcetimeZone) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(sourcetimeZone));
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:mm:ss",TimeZone.getTimeZone(sourcetimeZone));
 	}
 	
 	@Override
 	public Date convertToHostTimezone(Date time, String sourcetimeZone) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getTimeZone(sourcetimeZone));
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:mm:ss",TimeZone.getTimeZone(sourcetimeZone));
 	}
 	
 	/* (non-Javadoc)
@@ -171,7 +181,7 @@ public class TimezoneConverterEJB implements TimezoneConverterI {
 	 */
 	@Override
 	public Date convertToThisTimezone(String time) throws ParseException {
-		return convertToThisTimezone(time,"yyyy-MM-dd HH:m:ss",TimeZone.getDefault());
+		return convertToThisTimezone(time,"yyyy-MM-dd HH:mm:ss",TimeZone.getDefault());
 	}
 	
 	public boolean isDateInThePast(Date date){
